@@ -31,8 +31,6 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		CE1588FA2FAA9946001B61AA /* SnoreGuard */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = SnoreGuard;
 			sourceTree = "<group>";
 		};
@@ -139,15 +137,15 @@
 			mainGroup = CE1588EF2FAA9946001B61AA;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				8BD2D33DB910A0A051BC520A /* XCLocalSwiftPackageReference "Models" */,
-				B60A113FA21CBEABFEEEF7A6 /* XCLocalSwiftPackageReference "AudioEngine" */,
-				4E4892DFD05149B34F929826 /* XCLocalSwiftPackageReference "Env" */,
-				C1ABFA1084CFC1B1142A5354 /* XCLocalSwiftPackageReference "DesignSystem" */,
-				AE5AF359D280CFA7C94A7CF4 /* XCLocalSwiftPackageReference "Onboarding" */,
-				07BF115E5F61CCEB06BE0BF6 /* XCLocalSwiftPackageReference "SleepSession" */,
-				7C63EEECC2537B5342FF4A75 /* XCLocalSwiftPackageReference "Statistics" */,
-				916ADDCB5CD8689275B837E3 /* XCLocalSwiftPackageReference "Recordings" */,
-				4A855F6D6797671D082B748B /* XCLocalSwiftPackageReference "Settings" */,
+				8BD2D33DB910A0A051BC520A /* XCLocalSwiftPackageReference "Packages/Models" */,
+				B60A113FA21CBEABFEEEF7A6 /* XCLocalSwiftPackageReference "Packages/AudioEngine" */,
+				4E4892DFD05149B34F929826 /* XCLocalSwiftPackageReference "Packages/Env" */,
+				C1ABFA1084CFC1B1142A5354 /* XCLocalSwiftPackageReference "Packages/DesignSystem" */,
+				AE5AF359D280CFA7C94A7CF4 /* XCLocalSwiftPackageReference "Packages/Onboarding" */,
+				07BF115E5F61CCEB06BE0BF6 /* XCLocalSwiftPackageReference "Packages/SleepSession" */,
+				7C63EEECC2537B5342FF4A75 /* XCLocalSwiftPackageReference "Packages/Statistics" */,
+				916ADDCB5CD8689275B837E3 /* XCLocalSwiftPackageReference "Packages/Recordings" */,
+				4A855F6D6797671D082B748B /* XCLocalSwiftPackageReference "Packages/Settings" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = CE1588F92FAA9946001B61AA /* Products */;
@@ -391,55 +389,55 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		07BF115E5F61CCEB06BE0BF6 /* XCLocalSwiftPackageReference "SleepSession" */ = {
+		07BF115E5F61CCEB06BE0BF6 /* XCLocalSwiftPackageReference "Packages/SleepSession" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/SleepSession;
 		};
-		4A855F6D6797671D082B748B /* XCLocalSwiftPackageReference "Settings" */ = {
+		4A855F6D6797671D082B748B /* XCLocalSwiftPackageReference "Packages/Settings" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/Settings;
 		};
-		4E4892DFD05149B34F929826 /* XCLocalSwiftPackageReference "Env" */ = {
+		4E4892DFD05149B34F929826 /* XCLocalSwiftPackageReference "Packages/Env" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/Env;
 		};
-		51E6E59F2770CB9DE800DDD6 /* XCLocalSwiftPackageReference "Recordings" */ = {
+		51E6E59F2770CB9DE800DDD6 /* XCLocalSwiftPackageReference "Packages/Recordings" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/Recordings;
 		};
-		7A886DCB087D86E4AC2E7336 /* XCLocalSwiftPackageReference "DesignSystem" */ = {
+		7A886DCB087D86E4AC2E7336 /* XCLocalSwiftPackageReference "Packages/DesignSystem" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/DesignSystem;
 		};
-		7C63EEECC2537B5342FF4A75 /* XCLocalSwiftPackageReference "Statistics" */ = {
+		7C63EEECC2537B5342FF4A75 /* XCLocalSwiftPackageReference "Packages/Statistics" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/Statistics;
 		};
-		8834F6B3542FA19E44D45DF3 /* XCLocalSwiftPackageReference "AudioEngine" */ = {
+		8834F6B3542FA19E44D45DF3 /* XCLocalSwiftPackageReference "Packages/AudioEngine" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/AudioEngine;
 		};
-		8BD2D33DB910A0A051BC520A /* XCLocalSwiftPackageReference "Models" */ = {
+		8BD2D33DB910A0A051BC520A /* XCLocalSwiftPackageReference "Packages/Models" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/Models;
 		};
-		8ED29C891D3F9823A0E8C460 /* XCLocalSwiftPackageReference "SleepSession" */ = {
+		8ED29C891D3F9823A0E8C460 /* XCLocalSwiftPackageReference "Packages/SleepSession" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/SleepSession;
 		};
-		916ADDCB5CD8689275B837E3 /* XCLocalSwiftPackageReference "Recordings" */ = {
+		916ADDCB5CD8689275B837E3 /* XCLocalSwiftPackageReference "Packages/Recordings" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/Recordings;
 		};
-		AE5AF359D280CFA7C94A7CF4 /* XCLocalSwiftPackageReference "Onboarding" */ = {
+		AE5AF359D280CFA7C94A7CF4 /* XCLocalSwiftPackageReference "Packages/Onboarding" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/Onboarding;
 		};
-		B60A113FA21CBEABFEEEF7A6 /* XCLocalSwiftPackageReference "AudioEngine" */ = {
+		B60A113FA21CBEABFEEEF7A6 /* XCLocalSwiftPackageReference "Packages/AudioEngine" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/AudioEngine;
 		};
-		C1ABFA1084CFC1B1142A5354 /* XCLocalSwiftPackageReference "DesignSystem" */ = {
+		C1ABFA1084CFC1B1142A5354 /* XCLocalSwiftPackageReference "Packages/DesignSystem" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/DesignSystem;
 		};
@@ -467,7 +465,7 @@
 /* Begin XCSwiftPackageProductDependency section */
 		167C10ECFE58FBF4929EF997 /* Settings */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 4A855F6D6797671D082B748B /* XCLocalSwiftPackageReference "Settings" */;
+			package = 4A855F6D6797671D082B748B /* XCLocalSwiftPackageReference "Packages/Settings" */;
 			productName = Settings;
 		};
 		1C4F985595ED007BA103E405 /* Recordings */ = {
@@ -477,42 +475,42 @@
 		};
 		38CD50332392049638D060DF /* AudioEngine */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 8834F6B3542FA19E44D45DF3 /* XCLocalSwiftPackageReference "AudioEngine" */;
+			package = 8834F6B3542FA19E44D45DF3 /* XCLocalSwiftPackageReference "Packages/AudioEngine" */;
 			productName = AudioEngine;
 		};
 		3E369988AA3966E99F3F6D29 /* AudioEngine */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = B60A113FA21CBEABFEEEF7A6 /* XCLocalSwiftPackageReference "AudioEngine" */;
+			package = B60A113FA21CBEABFEEEF7A6 /* XCLocalSwiftPackageReference "Packages/AudioEngine" */;
 			productName = AudioEngine;
 		};
 		47C01997BFA64842BA01B54E /* Models */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 8BD2D33DB910A0A051BC520A /* XCLocalSwiftPackageReference "Models" */;
+			package = 8BD2D33DB910A0A051BC520A /* XCLocalSwiftPackageReference "Packages/Models" */;
 			productName = Models;
 		};
 		613CAAD887F993446993F409 /* Recordings */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 51E6E59F2770CB9DE800DDD6 /* XCLocalSwiftPackageReference "Recordings" */;
+			package = 51E6E59F2770CB9DE800DDD6 /* XCLocalSwiftPackageReference "Packages/Recordings" */;
 			productName = Recordings;
 		};
 		62657171C5FF70E51F817515 /* Statistics */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 7C63EEECC2537B5342FF4A75 /* XCLocalSwiftPackageReference "Statistics" */;
+			package = 7C63EEECC2537B5342FF4A75 /* XCLocalSwiftPackageReference "Packages/Statistics" */;
 			productName = Statistics;
 		};
 		758274DA39008BD85A853386 /* Onboarding */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = AE5AF359D280CFA7C94A7CF4 /* XCLocalSwiftPackageReference "Onboarding" */;
+			package = AE5AF359D280CFA7C94A7CF4 /* XCLocalSwiftPackageReference "Packages/Onboarding" */;
 			productName = Onboarding;
 		};
 		7AA654EA1F14D9C6F15AB82A /* Recordings */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 916ADDCB5CD8689275B837E3 /* XCLocalSwiftPackageReference "Recordings" */;
+			package = 916ADDCB5CD8689275B837E3 /* XCLocalSwiftPackageReference "Packages/Recordings" */;
 			productName = Recordings;
 		};
 		938D66BD06A743B2F8B279C6 /* DesignSystem */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = C1ABFA1084CFC1B1142A5354 /* XCLocalSwiftPackageReference "DesignSystem" */;
+			package = C1ABFA1084CFC1B1142A5354 /* XCLocalSwiftPackageReference "Packages/DesignSystem" */;
 			productName = DesignSystem;
 		};
 		A50DD8EF59A6D6A1BBB7A244 /* DesignSystem */ = {
@@ -522,22 +520,22 @@
 		};
 		A6305AFA32B7A77ECFB0A19F /* SleepSession */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 8ED29C891D3F9823A0E8C460 /* XCLocalSwiftPackageReference "SleepSession" */;
+			package = 8ED29C891D3F9823A0E8C460 /* XCLocalSwiftPackageReference "Packages/SleepSession" */;
 			productName = SleepSession;
 		};
 		AD548900091A83E69035BB78 /* SleepSession */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 07BF115E5F61CCEB06BE0BF6 /* XCLocalSwiftPackageReference "SleepSession" */;
+			package = 07BF115E5F61CCEB06BE0BF6 /* XCLocalSwiftPackageReference "Packages/SleepSession" */;
 			productName = SleepSession;
 		};
 		D7A35E7D5BA7E75CF647C509 /* Env */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 4E4892DFD05149B34F929826 /* XCLocalSwiftPackageReference "Env" */;
+			package = 4E4892DFD05149B34F929826 /* XCLocalSwiftPackageReference "Packages/Env" */;
 			productName = Env;
 		};
 		E553575F91A447F10F3BDF08 /* DesignSystem */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 7A886DCB087D86E4AC2E7336 /* XCLocalSwiftPackageReference "DesignSystem" */;
+			package = 7A886DCB087D86E4AC2E7336 /* XCLocalSwiftPackageReference "Packages/DesignSystem" */;
 			productName = DesignSystem;
 		};
 /* End XCSwiftPackageProductDependency section */

@@ -34,6 +34,11 @@ public final class UserPreferences {
     set { defaults.set(newValue.rawValue, forKey: "appearance") }
   }
 
+  public var presentRecordingAfterOnboarding: Bool {
+    get { defaults.bool(forKey: "presentRecordingAfterOnboarding") }
+    set { defaults.set(newValue, forKey: "presentRecordingAfterOnboarding") }
+  }
+
   public enum DetectionSensitivity: String, CaseIterable, Sendable {
     case low
     case medium

@@ -1,5 +1,6 @@
 import SwiftUI
 import Env
+import SleepSession
 import Statistics
 import Recordings
 import Settings
@@ -27,6 +28,7 @@ struct MainTabView: View {
 
 struct StatisticsTab: View {
   @Environment(RouterPath.self) private var routerPath
+  @Environment(UserPreferences.self) private var userPreferences
 
   var body: some View {
     NavigationStack(path: Binding(
@@ -35,6 +37,25 @@ struct StatisticsTab: View {
     )) {
       StatisticsDashboardView()
         .withAppRouter()
+    }
+    .sheet(item: Binding(
+      get: { routerPath.presentedSheet },
+      set: { routerPath.presentedSheet = $0 }
+    )) { destination in
+      switch destination {
+      case .sessionSummary:
+        Text("Session Summary")
+          .withEnvironments()
+      case .liveSession:
+        SleepSessionView()
+          .withEnvironments()
+      }
+    }
+    .onAppear {
+      if userPreferences.presentRecordingAfterOnboarding {
+        userPreferences.presentRecordingAfterOnboarding = false
+        routerPath.presentedSheet = .liveSession
+      }
     }
   }
 }
