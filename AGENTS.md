@@ -165,6 +165,74 @@ End every task with:
 - **What changed:** [one line per file]
 - **Follow-up needed:** [anything requiring a decision]
 
+## Session End Requirements
+
+At the end of every coding session — even if mid-feature — you MUST produce detailed documentation. This is non-negotiable. The user reviews this to understand what was built and why.
+
+### 1. Update `docs/SESSION_SUMMARY.md`
+
+Append a new session entry with this structure:
+
+```markdown
+## [Date] — Session [N]: [Feature/Topic]
+
+### Completed
+- [Task ID]: [What was built, in technical detail]
+- [Task ID]: [What was built, in technical detail]
+
+### Technical Details
+- [Specific implementation detail: e.g., "TabView uses .page(indexDisplayMode: .never)"]
+- [Specific implementation detail: e.g., "Permission flow handles .granted/.denied/.undetermined"]
+- [Algorithm or formula: e.g., "Sleep score = max(0, 100 - min(snoring% * 0.5, 30) - min(events/hour * 2, 30))"]
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `path/to/file.swift` | +X/-Y | [Detailed description of the change] |
+
+### Architecture Decisions
+- **[Decision name]**: [Why this approach was chosen over alternatives]
+- **[Decision name]**: [Tradeoffs considered]
+
+### Build Status
+- **BUILD SUCCEEDED / FAILED** — [if failed, what errors and how they were resolved]
+
+### Next Session
+- [Task ID]: [What to start next and why]
+
+### Open Questions
+- [Question that needs user input or future decision]
+```
+
+### 2. Create Feature Doc When Feature Ships
+
+When ALL tasks in a feature are Done, create `docs/features/f[#]-[name].md` with:
+- **Files table**: every file created/modified, with purpose
+- **Routes table**: push and sheet destinations added
+- **State table**: what state, where stored, scope
+- **Edge cases**: how they're handled
+- **Tasks Completed**: list all task IDs
+
+See `docs/VIBE_CODING_WORKFLOW.md` Phase 3 Step 4 for the full template.
+
+### 3. Update Trackers
+
+After every task (not just session end):
+- `docs/trackers/f#-name.md` — check acceptance criteria, fill "Prompt Used" and "Notes"
+- `docs/FeatureTracker.md` — dashboard counts, activity log, currently active, up next
+
+### Why This Matters
+
+The user cannot read your mind. They need to know:
+- What code was written and where it lives
+- Why architectural decisions were made
+- What tradeoffs exist
+- What's ready to test
+- What comes next
+- What decisions are blocked on them
+
+**Never end a session with just "Done."** That's a conversation ender, not a handoff.
+
 ## These Guidelines Are Working If
 
 - Diffs are small and traceable to the request.
