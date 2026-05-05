@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx -y @steipete/peekaboo --help)",
+      "Bash(timeout 10 npx -y @steipete/peekaboo mcp)",
+      "Bash(npx -y @steipete/peekaboo tools)",
+      "mcp__*"
+    ]
+  }
+}

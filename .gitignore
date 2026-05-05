@@ -47,9 +47,9 @@ xcuserdata/
 # Swift Package Manager
 # ========================
 .build/
-Packages/
 Package.resolved
 *.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
+.swiftpm/xcode/xcuserdata/
 
 # ========================
 # CocoaPods
