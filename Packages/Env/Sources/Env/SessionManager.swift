@@ -42,9 +42,11 @@ public final class SessionManager {
     resetTrackingState()
 
     let session = SleepSession(startDate: Date())
+    let audioURL = audioFileURL(for: session.id)
+    session.audioFileURL = audioURL.absoluteString
     currentSession = session
 
-    try audioRecorder.startRecording()
+    try audioRecorder.startRecording(audioFileURL: audioURL)
     isRecording = true
     currentDB = -160.0
     currentSnoringState = .none
@@ -78,6 +80,14 @@ public final class SessionManager {
     currentSession = nil
     resetTrackingState()
     return result
+  }
+
+  public func discardCompletedSession() {
+    if let urlString = completedSession?.audioFileURL,
+       let url = URL(string: urlString) {
+      try? FileManager.default.removeItem(at: url)
+    }
+    completedSession = nil
   }
 
   // MARK: - Real-time audio processing
@@ -192,6 +202,12 @@ public final class SessionManager {
     activeEventDBSum = 0
     activeEventDBCount = 0
     activeEventPeakDB = 0
+  }
+
+  private func audioFileURL(for sessionID: UUID) -> URL {
+    FileManager.default
+      .urls(for: .documentDirectory, in: .userDomainMask)[0]
+      .appendingPathComponent("session_\(sessionID.uuidString).caf")
   }
 
   private func intensity(from state: SnoringState) -> SnoreIntensity {

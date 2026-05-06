@@ -11,6 +11,7 @@ public final class AudioRecorder {
   public var hasPermission = false
 
   private var audioEngine: AVAudioEngine?
+  private var audioFile: AVAudioFile?
 
   private init() {
     checkPermission()
@@ -51,7 +52,7 @@ public final class AudioRecorder {
     #endif
   }
 
-  public func startRecording() throws {
+  public func startRecording(audioFileURL: URL? = nil) throws {
     guard hasPermission else { return }
 
     let session = AVAudioSession.sharedInstance()
@@ -62,9 +63,16 @@ public final class AudioRecorder {
     let input = engine.inputNode
     let format = input.outputFormat(forBus: 0)
 
+    if let audioFileURL = audioFileURL {
+      audioFile = try AVAudioFile(forWriting: audioFileURL, settings: format.settings)
+    }
+
     input.installTap(onBus: 0, bufferSize: 1024, format: format) { [weak self] buffer, _ in
       guard let self else { return }
       let db = self.calculateDB(from: buffer)
+      if let audioFile = self.audioFile {
+        try? audioFile.write(from: buffer)
+      }
       Task { @MainActor in
         self.currentDB = db
       }
@@ -79,6 +87,7 @@ public final class AudioRecorder {
     audioEngine?.stop()
     audioEngine?.inputNode.removeTap(onBus: 0)
     audioEngine = nil
+    audioFile = nil
     isRecording = false
     currentDB = -160.0
 

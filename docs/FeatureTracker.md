@@ -11,18 +11,18 @@ Last updated: 2026-05-06
 | Metric | Count |
 |--------|-------|
 | Features (V1) | 6 |
-| Done | 3 |
+| Done | 4 |
 | In Progress | 0 |
-| Backlog | 3 |
+| Backlog | 2 |
 | Blocked | 0 |
 | — | — |
 | Total Tasks | 24 |
-| Tasks Done | 15 |
+| Tasks Done | 18 |
 | Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
-| Tasks Backlog | 8 |
+| Tasks Backlog | 5 |
 | — | — |
-| **Progress** | **67%** |
+| **Progress** | **75%** |
 
 ## Features
 
@@ -31,7 +31,7 @@ Last updated: 2026-05-06
 | F1 | Onboarding | P0 | Done | 5/5 | ██████████ 100% | [tracker](trackers/f1-onboarding.md) |
 | F2 | Live Session | P0 | Done | 6/6 | ██████████ 100% | [tracker](trackers/f2-live-session.md) |
 | F3 | Statistics Dashboard | P1 | Done | 3/3 | ██████████ 100% | [tracker](trackers/f3-statistics.md) |
-| F4 | Recordings | P1 | In Progress | 2/5 | ████░░░░░░ 40% | [tracker](trackers/f4-recordings.md) |
+| F4 | Recordings | P1 | Done | 5/5 | ██████████ 100% | [tracker](trackers/f4-recordings.md) |
 | F5 | Trends | P1 | Backlog | 0/2 | ░░░░░░░░░░ 0% | [tracker](trackers/f5-trends.md) |
 | F6 | Settings | P2 | Backlog | 0/3 | ░░░░░░░░░░ 0% | [tracker](trackers/f6-settings.md) |
 
@@ -41,6 +41,9 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-05-06 | F4-T4 | Completed | Audio file saving (full session .caf), mini player with play/pause/scrub/event markers, event row playback |
+| 2026-05-06 | F4-T5 | Completed | Fixed .recordingDetail(id:) route in AppRegistry → SessionDetailView; navigation now works end-to-end |
+| 2026-05-06 | F4-T3 | Completed | SessionDetailView with score gauge, stats grid, SnoringTimelineView, event list; FetchDescriptor by UUID |
 | 2026-05-06 | F4-T2 | Completed | RecordingRowView extracted with score badge, event count, tap navigation to .recordingDetail |
 | 2026-05-06 | F4-T1 | Completed | RecordingsListView with ViewState, empty/loaded/error, month-grouped sections, pull-to-refresh |
 | 2026-05-06 | F3-T3 | Completed | Converted .liveSession to RouterDestination; Start Recording CTA now uses routerPath.navigate(to:) |
@@ -62,6 +65,14 @@ _Most recent first. The AI appends here after every task._
 |------|---------|---------|----------|
 | (none) | — | — | — |
 
+## Up Next
+
+_Unblocked tasks in priority order. The AI updates this after every task._
+
+| Task | Feature | Priority | Why Ready |
+|------|---------|----------|-----------|
+| F4-T4 | F4 | P1 | F4-T3, F4-T5 done. **Blocked by missing audio file saving infrastructure** — see tracker notes |
+
 ## Blocked
 
 | Task | Feature | Blocker | Since |
@@ -74,13 +85,15 @@ _Unblocked tasks in priority order. The AI updates this after every task._
 
 | Task | Feature | Priority | Why Ready |
 |------|---------|----------|-----------|
-| F4-T3 | F4 | P1 | F4-T2 done |
-| F5-T1 | F5 | P1 | F2, F3 done |
+| F5-T1 | F5 | P1 | F2, F3, F4 done |
 
 ## Completed (last 10)
 
 | Task | Feature | Completed | Duration |
 |------|---------|-----------|----------|
+| F4-T4 | F4 | 2026-05-06 | — |
+| F4-T5 | F4 | 2026-05-06 | — |
+| F4-T3 | F4 | 2026-05-06 | — |
 | F4-T2 | F4 | 2026-05-06 | — |
 | F4-T1 | F4 | 2026-05-06 | — |
 | F3-T3 | F3 | 2026-05-06 | — |

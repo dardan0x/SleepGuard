@@ -150,6 +150,7 @@ public struct SessionSummaryView: View {
   }
 
   private func discardSession() {
+    sessionManager.discardCompletedSession()
     dismiss()
   }
 }

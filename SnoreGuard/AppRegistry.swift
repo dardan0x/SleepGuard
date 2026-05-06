@@ -40,7 +40,7 @@ extension View {
       .navigationDestination(for: RouterDestination.self) { destination in
         switch destination {
         case .recordingDetail(let id):
-          Text("Recording Detail: \(id.uuidString)")
+          SessionDetailView(sessionID: id)
         case .sessionDetail(let id):
           SessionDetailView(sessionID: id)
         case .liveSession:
