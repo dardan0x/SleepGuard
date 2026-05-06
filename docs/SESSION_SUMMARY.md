@@ -204,5 +204,68 @@
 ### Next Session
 - **F2-T6**: Route registration + wiring (pre-start, bedside clock, summary sheet routes; Statistics CTA; onboarding routing)
 
+## 2026-05-06 — Session 7: F2-T6 Route Registration + Wiring
+
+### Completed
+- **F2-T6**: Route registration + wiring for live session flow
+
+### Technical Details
+- `StatisticsDashboardView` now features a "Start Recording" card with moon icon, description, and CTA button that presents `.liveSession` sheet via `routerPath.presentedSheet`
+- `StatisticsTab` sheet adds `onDismiss` closure that clears `sessionManager.completedSession`, preventing `SleepSessionView` from being stuck on `Color.clear` after a previous session
+- Onboarding "Start Recording" flow verified unchanged: `OnboardingPage5View` sets `presentRecordingAfterOnboarding = true`, `StatisticsTab.onAppear` presents `.liveSession` after onboarding completes
+- Pre-start (`RecordingPrestartView`) and bedside clock (`BedsideClockView`) are both routed through the single `.liveSession` sheet destination; summary through `.sessionSummary`
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Statistics/Sources/Statistics/StatisticsDashboardView.swift` | +62/-2 | New dashboard layout with header and "Start Recording" CTA card |
+| `SnoreGuard/MainTabView.swift` | +6/-1 | Added `onDismiss` to `.sheet` that clears `completedSession` |
+
+### Architecture Decisions
+- **Sheet `onDismiss` for state cleanup**: Rather than adding a dedicated `clearCompletedSession()` method, `StatisticsTab` handles cleanup when the sheet is dismissed. This keeps `SessionManager` simple and avoids exposing extra API surface.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors across all 9 packages + app target
+
+### Next Session
+- **F3-T1**: StatisticsDashboardView empty + loaded states (SwiftData query, ViewState enum)
+
 ### Open Questions
 - None
+
+---
+
+## 2026-05-06 — Session 8: F3-T1 Statistics Dashboard (Empty + Loaded)
+
+### Completed
+- **F3-T1**: `StatisticsDashboardView` with `ViewState` enum and presentational child views
+
+### Technical Details
+- `ViewState` enum: `.loading`, `.empty`, `.loaded(session:)`, `.error`
+- Container loads data via `@Query(sort: \SleepSession.startDate, order: .reverse)`
+- `.onChange(of: sessions)` reloads state when SwiftData updates (e.g., after saving a new session)
+- `StatisticsEmptyView`: moon icon, "Ready to Sleep?" copy, "Start Recording" CTA — presentational, receives `theme` and `onStartRecording` closure
+- `StatisticsLoadedView`: last-night card with sleep score (color-coded), date, duration, snoring %, events count, avg dB — minimal layout; detailed gauge/sparkline deferred to F3-T2
+- `StatisticsErrorView`: generic retry state
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Statistics/Sources/Statistics/StatisticsDashboardView.swift` | +202/-62 | Complete rewrite. Added ViewState enum, @Query, StatisticsEmptyView, StatisticsLoadedView, StatisticsErrorView |
+
+### Architecture Decisions
+- **Container/presentational split**: `StatisticsDashboardView` manages state and data loading; child views are pure UI. This matches the feature-template pattern and makes F3-T2 (gauge + sparkline components) a pure presentational addition.
+- **@Query over manual fetch**: Using SwiftData's `@Query` property wrapper keeps the view reactive — new sessions appear automatically without explicit refresh logic.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors across all 9 packages + app target
+
+### Next Session
+- **F3-T2**: Score gauge + stat cards components (circular gauge, sparkline, presentational refinements)
+
+### Open Questions
+- None
+
+---

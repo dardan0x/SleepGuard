@@ -152,12 +152,28 @@ After every task: build the project. Zero errors before moving on.
 
 Use XcodeBuildMCP for builds:
 
+**First, set session defaults once per session (deterministic simulator):**
+```
+mcp__XcodeBuildMCP__session_set_defaults simulatorId: "BD630AD5-5A05-4663-8F1B-A17283EBCBF5" simulatorPlatform: "iOS Simulator"
+```
+
+**Then build/test:**
 ```
 # Build
-mcp__XcodeBuildMCP__build_sim_name_proj projectPath: "[path]" scheme: "[scheme]" simulatorName: "iPhone 16e"
+mcp__XcodeBuildMCP__build_sim
+
+# Or build + run
+mcp__XcodeBuildMCP__build_run_sim
 
 # Test
-mcp__XcodeBuildMCP__test_sim scheme: "[TestScheme]"
+mcp__XcodeBuildMCP__test_sim
+```
+
+**Why `simulatorId`:** `iPhone 16e` is ambiguous (exists on iOS 18.3, 26.0, and 26.2). Using the UDID pins the iOS 26.2 simulator and eliminates flakiness.
+
+**Fallback (Shell):**
+```bash
+xcodebuild -project SnoreGuard.xcodeproj -scheme SnoreGuard -destination 'platform=iOS Simulator,name=iPhone 16e,OS=26.2' build
 ```
 
 End every task with:
