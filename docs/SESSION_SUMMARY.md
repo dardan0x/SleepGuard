@@ -641,3 +641,54 @@ Or delete and reinstall the app on the simulator.
 
 ### Open Questions
 - F5-T2 acceptance criteria (avg score, best/worst night, total events) is already satisfied by F5-T1. Should F5-T2 be merged into F5-T1 or marked as Done with no additional work?
+
+---
+
+## 2026-05-06 — Session 16: F6 Settings (T1-T3) — V1 Complete
+
+### Completed
+- **F6-T1**: Extended `UserPreferences` with `minSnoreDuration` (default 2s) and `maxClipLength` (default 30s)
+- **F6-T2**: Built `SettingsView` form UI matching designs/SnoreGuard.pen
+- **F6-T3**: Data management (delete all recordings) + About section
+
+### Technical Details
+- `UserPreferences` already had `detectionSensitivity`, `saveAudioClips`, `appearance` from Phase 0 scaffold. Added two new properties with manual `access(keyPath:)` / `withMutation(keyPath:)` pattern for `@Observable` compatibility.
+- `SettingsView` built in `Packages/Settings/Sources/Settings/SettingsView.swift`:
+  - Title row with "Settings" text + gear icon in accent circle
+  - Detection card: sensitivity slider (3-position, Low/Medium/High), min snore duration stepper with +/- buttons
+  - Recording card: save audio clips toggle, max clip length picker (confirmationDialog with 15s/30s/60s)
+  - Appearance card: theme picker (confirmationDialog with Light/Dark/System)
+  - Data card: "Delete All Recordings" destructive button with confirmation alert
+  - About card: version string from Bundle, "Rate on App Store" link
+- Delete all data uses `@Environment(\.modelContext)` + `FetchDescriptor<SleepSession>`; cascade delete handles `SnoreEvent` children via SwiftData relationship
+- `SnoreGuardApp.swift` applies `.preferredColorScheme(colorScheme(for:))` based on `userPreferences.appearance`
+- `Color(hex:)` extension in DesignSystem made `public` so Settings package can use it
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Env/Sources/Env/UserPreferences.swift` | +28 | Added `minSnoreDuration` and `maxClipLength` computed properties with UserDefaults backing |
+| `Packages/Settings/Sources/Settings/SettingsView.swift` | +281 | Complete rewrite. Full settings form UI with all design sections |
+| `SnoreGuard/SnoreGuardApp.swift` | +8 | Added `.preferredColorScheme` based on `UserPreferences.appearance` |
+| `Packages/DesignSystem/Sources/DesignSystem/Theme.swift` | +1/-1 | Made `Color(hex:)` extension `public` |
+| `docs/trackers/f6-settings.md` | +81/-40 | All tasks marked Done with notes |
+| `docs/FeatureTracker.md` | +12/-12 | F6 marked Done (3/3), Dashboard: 6/6 features done, 23/23 tasks done, 100% progress |
+
+### Architecture Decisions
+- **Confirmation dialogs instead of push routes**: For theme and max clip length pickers, `.confirmationDialog` is used instead of adding `RouterDestination` cases. This keeps Settings self-contained and avoids route proliferation for simple 3-option choices.
+- **Manual stepper instead of SwiftUI Stepper**: The design shows custom +/- buttons in circular `bgElevated` frames. Implemented as two `Button`s with `ZStack` + `RoundedRectangle` to match the design exactly.
+- **Sensitivity as custom slider**: Used `GeometryReader` with a track + knob instead of `Picker` or `Slider` to match the design's visual style (colored track, white knob, Low/High labels).
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors across all 9 packages + app target
+
+### Next Session
+- V1 is complete. Next work would be V1.1 or V2 features per docs/Roadmap.md.
+
+### Git Handoff
+- **Suggested branch**: `feature/f6/t1-t3-settings`
+- **Suggested commit**: `F6-T1..T3 — SettingsView with detection, recording, appearance, data, and about sections`
+
+### Open Questions
+- None
