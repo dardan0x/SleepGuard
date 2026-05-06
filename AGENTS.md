@@ -213,6 +213,10 @@ Append a new session entry with this structure:
 ### Build Status
 - **BUILD SUCCEEDED / FAILED** — [if failed, what errors and how they were resolved]
 
+### Git Handoff
+- **Suggested branch**: `feature/[f#]/[t#]-short-description`
+- **Suggested commit**: `[Task ID] — [Short description]` with bullet list of changes
+
 ### Next Session
 - [Task ID]: [What to start next and why]
 

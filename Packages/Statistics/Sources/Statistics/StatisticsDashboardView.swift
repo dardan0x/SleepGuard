@@ -27,8 +27,12 @@ public struct StatisticsDashboardView: View {
         StatisticsEmptyView(theme: theme) {
           routerPath.presentedSheet = .liveSession
         }
-      case .loaded(let session):
-        StatisticsLoadedView(session: session, theme: theme) {
+      case .loaded(let session, let recentSessions):
+        StatisticsLoadedView(
+          session: session,
+          recentSessions: recentSessions,
+          theme: theme
+        ) {
           routerPath.presentedSheet = .liveSession
         }
       case .error:
@@ -45,7 +49,8 @@ public struct StatisticsDashboardView: View {
 
   private func loadState() {
     if let latest = sessions.first {
-      viewState = .loaded(session: latest)
+      let recent = Array(sessions.prefix(7))
+      viewState = .loaded(session: latest, recentSessions: recent)
     } else {
       viewState = .empty
     }
@@ -54,7 +59,7 @@ public struct StatisticsDashboardView: View {
   public enum ViewState {
     case loading
     case empty
-    case loaded(session: SleepSession)
+    case loaded(session: SleepSession, recentSessions: [SleepSession])
     case error
   }
 }
@@ -133,6 +138,7 @@ struct StatisticsEmptyView: View {
 @MainActor
 struct StatisticsLoadedView: View {
   let session: SleepSession
+  let recentSessions: [SleepSession]
   let theme: Theme
   let onStartRecording: () -> Void
 
@@ -141,7 +147,13 @@ struct StatisticsLoadedView: View {
       VStack(spacing: 20) {
         headerSection
 
-        lastNightCard
+        scoreCard
+
+        statsGrid
+
+        if !recentSessions.isEmpty {
+          sparklineCard
+        }
 
         Button {
           onStartRecording()
@@ -172,10 +184,12 @@ struct StatisticsLoadedView: View {
     .frame(maxWidth: .infinity, alignment: .leading)
   }
 
-  private var lastNightCard: some View {
+  private var scoreCard: some View {
     VStack(spacing: 16) {
-      HStack {
-        VStack(alignment: .leading, spacing: 4) {
+      HStack(spacing: 16) {
+        SleepScoreGauge(score: session.sleepScore, theme: theme, size: 110)
+
+        VStack(alignment: .leading, spacing: 6) {
           Text("Last Night")
             .font(.system(size: 13, weight: .medium))
             .foregroundStyle(theme.secondaryLabelColor)
@@ -184,24 +198,81 @@ struct StatisticsLoadedView: View {
           Text(dateString)
             .font(.system(size: 15))
             .foregroundStyle(theme.labelColor)
+
+          Text(scoreLabel)
+            .font(.system(size: 14, weight: .medium))
+            .foregroundStyle(scoreColor)
         }
 
         Spacer()
+      }
+    }
+    .padding(20)
+    .background(theme.surfaceColor)
+    .cornerRadius(16)
+  }
 
-        Text("\(session.sleepScore)")
-          .font(.system(size: 28, weight: .bold, design: .rounded))
-          .foregroundStyle(scoreColor)
+  private var statsGrid: some View {
+    let columns = [GridItem(.flexible()), GridItem(.flexible())]
+
+    return LazyVGrid(columns: columns, spacing: 12) {
+      StatCard(
+        icon: "clock.fill",
+        title: "Duration",
+        value: durationString,
+        theme: theme,
+        iconColor: theme.primaryColor
+      )
+      StatCard(
+        icon: "waveform.path",
+        title: "Snoring",
+        value: String(format: "%.1f%%", session.snoringPercentage),
+        theme: theme,
+        iconColor: Color.orange
+      )
+      StatCard(
+        icon: "exclamationmark.triangle.fill",
+        title: "Events",
+        value: "\(session.eventsCount)",
+        theme: theme,
+        iconColor: Color.red
+      )
+      StatCard(
+        icon: "number",
+        title: "Events / Hour",
+        value: String(format: "%.1f", session.eventsPerHour),
+        theme: theme,
+        iconColor: theme.primaryColor
+      )
+      StatCard(
+        icon: "speaker.wave.2.fill",
+        title: "Avg dB",
+        value: String(format: "%.1f dB", session.averageDB),
+        theme: theme,
+        iconColor: theme.primaryColor
+      )
+      StatCard(
+        icon: "speaker.wave.3.fill",
+        title: "Peak dB",
+        value: String(format: "%.1f dB", session.peakDB),
+        theme: theme,
+        iconColor: Color.red
+      )
+    }
+  }
+
+  private var sparklineCard: some View {
+    VStack(alignment: .leading, spacing: 12) {
+      Text("Last 7 Nights")
+        .font(.system(size: 13, weight: .medium))
+        .foregroundStyle(theme.secondaryLabelColor)
+        .textCase(.uppercase)
+
+      let data = recentSessions.map {
+        SleepSparkline.DataPoint(date: $0.startDate, score: $0.sleepScore)
       }
 
-      Divider()
-        .background(theme.secondaryLabelColor.opacity(0.2))
-
-      LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-        StatRow(title: "Duration", value: durationString)
-        StatRow(title: "Snoring", value: String(format: "%.1f%%", session.snoringPercentage))
-        StatRow(title: "Events", value: "\(session.eventsCount)")
-        StatRow(title: "Avg dB", value: String(format: "%.1f dB", session.averageDB))
-      }
+      SleepSparkline(data: data, theme: theme)
     }
     .padding(20)
     .background(theme.surfaceColor)
@@ -226,28 +297,23 @@ struct StatisticsLoadedView: View {
 
   private var scoreColor: Color {
     switch session.sleepScore {
-    case 80...100: return theme.secondaryColor
-    case 50..<80: return Color.orange
-    default: return Color.red
+    case 80...100:
+      theme.secondaryColor
+    case 50 ..< 80:
+      Color.orange
+    default:
+      Color.red
     }
   }
 
-  @MainActor
-  private struct StatRow: View {
-    let title: String
-    let value: String
-    @Environment(Theme.self) private var theme
-
-    var body: some View {
-      VStack(alignment: .leading, spacing: 4) {
-        Text(title)
-          .font(.caption)
-          .foregroundStyle(theme.secondaryLabelColor)
-
-        Text(value)
-          .font(.system(size: 17, weight: .semibold, design: .rounded))
-          .foregroundStyle(theme.labelColor)
-      }
+  private var scoreLabel: String {
+    switch session.sleepScore {
+    case 80...100:
+      "Great sleep"
+    case 50 ..< 80:
+      "Moderate snoring"
+    default:
+      "Heavy snoring"
     }
   }
 }

@@ -236,6 +236,44 @@
 
 ---
 
+## 2026-05-06 — Session 9: F3-T2 Score Gauge + Stat Cards + Sparkline
+
+### Completed
+- **F3-T2**: Score gauge + stat cards components + last-7-nights sparkline
+
+### Technical Details
+- `SleepScoreGauge`: Circular ring using `Circle().trim(from:to:)`, animated with `.animation(.easeOut(duration: 0.8), value: score)`, color-coded (green ≥80, orange 50-79, red <50), configurable size
+- `StatCard`: Icon (SF Symbol) + bold value + label, `theme.surfaceColor` background, corner radius 12, 2-column grid layout in loaded state
+- `SleepSparkline`: Swift Charts `LineMark` + `AreaMark` with gradient fill, 0-100 Y scale, weekday-narrow X labels, hidden Y axis except top gridline, handles single-data-point case with `PointMark`
+- `ViewState.loaded` expanded to `.loaded(session: SleepSession, recentSessions: [SleepSession])` so sparkline gets last 7 nights without additional queries
+- Statistics package `Package.swift` gains `linkerSettings: [.linkedFramework("Charts")]`
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Statistics/Sources/Statistics/Components/SleepScoreGauge.swift` | +42 | New. Presentational circular score gauge |
+| `Packages/Statistics/Sources/Statistics/Components/StatCard.swift` | +40 | New. Presentational stat card with icon, value, label |
+| `Packages/Statistics/Sources/Statistics/Components/SleepSparkline.swift` | +65 | New. Presentational mini sparkline using Swift Charts |
+| `Packages/Statistics/Sources/Statistics/StatisticsDashboardView.swift` | +120/-80 | Rewrote loaded state: score gauge card, 6 stat cards, sparkline card, removed old StatRow |
+| `Packages/Statistics/Package.swift` | +3 | Added Charts framework linker setting |
+
+### Architecture Decisions
+- **All components presentational**: `SleepScoreGauge`, `StatCard`, `SleepSparkline` receive all data via init, no `@Query` or state management inside them
+- **Sparkline in Statistics package, not DesignSystem**: Although architecture says "chart components" in DesignSystem, keeping sleep-specific sparkline in Statistics avoids adding Models dependency to DesignSystem and keeps V1 simple
+- **ViewState carries recentSessions**: Instead of a separate `@Query` in the sparkline component, the container view passes the last 7 sessions down. This preserves the container/presentational split.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors across all 9 packages + app target
+
+### Next Session
+- **F3-T3**: "Start Recording" CTA + routing (verify existing CTA already uses `routerPath.presentedSheet = .liveSession`, may need refinement per acceptance criteria)
+
+### Open Questions
+- None
+
+---
+
 ## 2026-05-06 — Session 8: F3-T1 Statistics Dashboard (Empty + Loaded)
 
 ### Completed
