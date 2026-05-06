@@ -4,18 +4,16 @@ import SwiftUI
 public enum RouterDestination: Hashable, Sendable {
   case recordingDetail(id: UUID)
   case sessionDetail(id: UUID)
+  case liveSession
 }
 
 public enum SheetDestination: Identifiable, Hashable, Sendable {
   case sessionSummary
-  case liveSession
 
   public var id: String {
     switch self {
     case .sessionSummary:
       return "sessionSummary"
-    case .liveSession:
-      return "liveSession"
     }
   }
 }

@@ -19,5 +19,6 @@ public struct SleepSessionView: View {
         RecordingPrestartView()
       }
     }
+    .toolbar(.hidden, for: .navigationBar)
   }
 }

@@ -43,6 +43,8 @@ extension View {
           Text("Recording Detail: \(id.uuidString)")
         case .sessionDetail(let id):
           Text("Session Detail: \(id.uuidString)")
+        case .liveSession:
+          SleepSessionView()
         }
       }
   }

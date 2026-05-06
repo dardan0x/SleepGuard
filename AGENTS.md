@@ -180,6 +180,8 @@ End every task with:
 - **Files changed:** [list every file touched]
 - **What changed:** [one line per file]
 - **Follow-up needed:** [anything requiring a decision]
+- **Suggested branch**: `feature/[f#]/[t#]-short-description`
+- **Suggested commit**: `[Task ID] — [Short description]` with bullet list of changes
 
 ## Session End Requirements
 

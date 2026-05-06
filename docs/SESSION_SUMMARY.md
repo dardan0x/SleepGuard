@@ -48,6 +48,12 @@
 
 ### Next Session
 - Start F2 (Live Session) — F2-T1: AudioRecorder + SnoreDetector (already scaffolded, verify and enhance)
+### Git Handoff
+- **Suggested branch**: `feature/f1/t1-t5-onboarding-flow`
+- **Suggested commit**: `F1-T1..T5 — Onboarding flow with 5 pages, permission, and app gate`
+
+### Open Questions
+- None
 
 ---
 
@@ -86,6 +92,10 @@
 - **F2-T3**: Pre-start recording screen (idle state with "Start Recording" CTA, mic status indicator, instructions)
 - Then F2-T4: Bedside clock active recording UI
 
+### Git Handoff
+- **Suggested branch**: `feature/f2/t1-t2-recorder-and-manager`
+- **Suggested commit**: `F2-T1..T2 — AudioRecorder verification and SessionManager event tracking`
+
 ### Open Questions
 - Should `AudioRecorder` emit a Combine publisher or callback for `currentDB` changes instead of relying on SwiftUI observation? (Current approach works but requires view polling via `.onChange` or `.task`)
 - Should we add haptic feedback on snoring state transitions for the bedside clock? (Nice-to-have, not in V1 tracker)
@@ -123,6 +133,10 @@
 
 ### Next Session
 - **F2-T4**: Bedside clock active recording UI (full-screen clock, real-time dB indicator, snoring intensity colors, duration timer, stop button, dimmed nighttime UI)
+
+### Git Handoff
+- **Suggested branch**: `feature/f2/t3-prestart-screen`
+- **Suggested commit**: `F2-T3 — Pre-start recording screen with mic status and tips`
 
 ### Open Questions
 - Should `AudioRecorder` emit a Combine publisher or callback for `currentDB` changes instead of relying on SwiftUI observation? (Current approach works but requires view polling via `.onChange` or `.task`)
@@ -165,6 +179,10 @@
 ### Next Session
 - **F2-T5**: Session summary sheet (sleep score, duration, snoring %, events count, avg/peak dB, Save/Discard buttons)
 
+### Git Handoff
+- **Suggested branch**: `feature/f2/t4-bedside-clock`
+- **Suggested commit**: `F2-T4 — Bedside clock UI with dB bar, snoring glow, and timer`
+
 ### Open Questions
 - Stop button currently drops user back to `RecordingPrestartView` because `isRecording` becomes false. F2-T5 needs to present a summary sheet instead — will likely require changing the sheet destination from `.liveSession` to `.sessionSummary(sessionID:)` when stopping.
 
@@ -204,6 +222,13 @@
 ### Next Session
 - **F2-T6**: Route registration + wiring (pre-start, bedside clock, summary sheet routes; Statistics CTA; onboarding routing)
 
+### Git Handoff
+- **Suggested branch**: `feature/f2/t5-session-summary`
+- **Suggested commit**: `F2-T5 — Session summary sheet with score ring and Save/Discard`
+
+### Open Questions
+- None
+
 ## 2026-05-06 — Session 7: F2-T6 Route Registration + Wiring
 
 ### Completed
@@ -230,6 +255,10 @@
 
 ### Next Session
 - **F3-T1**: StatisticsDashboardView empty + loaded states (SwiftData query, ViewState enum)
+
+### Git Handoff
+- **Suggested branch**: `feature/f2/t6-route-wiring`
+- **Suggested commit**: `F2-T6 — Route registration and tab wiring for live session flow`
 
 ### Open Questions
 - None
@@ -269,6 +298,52 @@
 ### Next Session
 - **F3-T3**: "Start Recording" CTA + routing (verify existing CTA already uses `routerPath.presentedSheet = .liveSession`, may need refinement per acceptance criteria)
 
+### Git Handoff
+- **Suggested branch**: `feature/f3/t2-gauge-and-sparkline`
+- **Suggested commit**: `F3-T2 — SleepScoreGauge, StatCard, SleepSparkline components`
+
+### Open Questions
+- None
+
+---
+
+## 2026-05-06 — Session 10: F3-T3 Start Recording CTA + Routing
+
+### Completed
+- **F3-T3**: Converted `.liveSession` from `SheetDestination` to `RouterDestination`; Start Recording CTA now uses `routerPath.navigate(to:)`
+
+### Technical Details
+- `.liveSession` moved from `SheetDestination` to `RouterDestination` in `Router.swift`
+- `AppRegistry.withAppRouter()` maps `.liveSession` → `SleepSessionView()`
+- `SleepSessionView` hides navigation bar via `.toolbar(.hidden, for: .navigationBar)` for full-screen recording experience
+- `MainTabView.onChange(of: sessionManager.completedSession)` now calls `routerPath.navigateToRoot()` before presenting `.sessionSummary` sheet, ensuring the pushed live session is popped
+- Onboarding routing updated: `StatisticsTab.onAppear` now uses `routerPath.navigate(to: .liveSession)` instead of `routerPath.presentedSheet = .liveSession`
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Env/Sources/Env/Router.swift` | +1/-8 | Moved `.liveSession` from `SheetDestination` to `RouterDestination` |
+| `SnoreGuard/AppRegistry.swift` | +2 | Added `.liveSession` → `SleepSessionView()` mapping in `withAppRouter()` |
+| `SnoreGuard/MainTabView.swift` | +1/-6 | Removed `.liveSession` from sheet switch; updated onboarding + completedSession handling |
+| `Packages/Statistics/Sources/Statistics/StatisticsDashboardView.swift` | +2/-2 | Empty + loaded CTAs now use `routerPath.navigate(to: .liveSession)` |
+| `Packages/SleepSession/Sources/SleepSession/SleepSessionView.swift` | +1 | Added `.toolbar(.hidden, for: .navigationBar)` |
+| `docs/ProjectArchitecture.md` | +2/-1 | Added `.liveSession` to Routes table; updated recording screen description |
+
+### Architecture Decisions
+- **Push over sheet for live session**: Acceptance criteria explicitly required `routerPath.navigate(to:)`. This keeps the live session in the Statistics tab's NavigationStack, which is semantically correct since recording is an extension of the statistics flow.
+- **Auto-pop before summary sheet**: When recording stops, `navigateToRoot()` ensures the live session is dismissed before the summary sheet appears, preventing a sheet-over-push visual stack.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors across all 9 packages + app target
+
+### Git Handoff
+- **Suggested branch**: `feature/f3/t3-start-recording-routing`
+- **Suggested commit**: `F3-T3 — Convert liveSession to RouterDestination with navigate(to:)`
+
+### Next Session
+- **F4-T1**: RecordingsListView (empty + grouped list) — F2 is done so F4 is unblocked
+
 ### Open Questions
 - None
 
@@ -302,6 +377,10 @@
 
 ### Next Session
 - **F3-T2**: Score gauge + stat cards components (circular gauge, sparkline, presentational refinements)
+
+### Git Handoff
+- **Suggested branch**: `feature/f3/t1-statistics-dashboard`
+- **Suggested commit**: `F3-T1 — StatisticsDashboardView with ViewState, empty/loaded/error states`
 
 ### Open Questions
 - None
