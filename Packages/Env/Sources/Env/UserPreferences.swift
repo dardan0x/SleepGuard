@@ -1,6 +1,11 @@
 import Foundation
 import Observation
 
+// NOTE: These properties use manual access/withMutation because @Observable only
+// auto-instruments stored properties. Computed properties backed by UserDefaults
+// silently fail to emit change notifications without explicit registrar calls.
+// This was surfaced during iOS Simulator testing but applies to all targets.
+
 @MainActor
 @Observable
 public final class UserPreferences {
@@ -9,34 +14,65 @@ public final class UserPreferences {
   private let defaults = UserDefaults.standard
 
   public var hasCompletedOnboarding: Bool {
-    get { defaults.bool(forKey: "hasCompletedOnboarding") }
-    set { defaults.set(newValue, forKey: "hasCompletedOnboarding") }
+    get {
+      access(keyPath: \.hasCompletedOnboarding)
+      return defaults.bool(forKey: "hasCompletedOnboarding")
+    }
+    set {
+      withMutation(keyPath: \.hasCompletedOnboarding) {
+        defaults.set(newValue, forKey: "hasCompletedOnboarding")
+      }
+    }
   }
 
   public var detectionSensitivity: DetectionSensitivity {
     get {
+      access(keyPath: \.detectionSensitivity)
       let raw = defaults.string(forKey: "detectionSensitivity") ?? "medium"
       return DetectionSensitivity(rawValue: raw) ?? .medium
     }
-    set { defaults.set(newValue.rawValue, forKey: "detectionSensitivity") }
+    set {
+      withMutation(keyPath: \.detectionSensitivity) {
+        defaults.set(newValue.rawValue, forKey: "detectionSensitivity")
+      }
+    }
   }
 
   public var saveAudioClips: Bool {
-    get { defaults.bool(forKey: "saveAudioClips") }
-    set { defaults.set(newValue, forKey: "saveAudioClips") }
+    get {
+      access(keyPath: \.saveAudioClips)
+      return defaults.bool(forKey: "saveAudioClips")
+    }
+    set {
+      withMutation(keyPath: \.saveAudioClips) {
+        defaults.set(newValue, forKey: "saveAudioClips")
+      }
+    }
   }
 
   public var appearance: AppearanceSetting {
     get {
+      access(keyPath: \.appearance)
       let raw = defaults.string(forKey: "appearance") ?? "system"
       return AppearanceSetting(rawValue: raw) ?? .system
     }
-    set { defaults.set(newValue.rawValue, forKey: "appearance") }
+    set {
+      withMutation(keyPath: \.appearance) {
+        defaults.set(newValue.rawValue, forKey: "appearance")
+      }
+    }
   }
 
   public var presentRecordingAfterOnboarding: Bool {
-    get { defaults.bool(forKey: "presentRecordingAfterOnboarding") }
-    set { defaults.set(newValue, forKey: "presentRecordingAfterOnboarding") }
+    get {
+      access(keyPath: \.presentRecordingAfterOnboarding)
+      return defaults.bool(forKey: "presentRecordingAfterOnboarding")
+    }
+    set {
+      withMutation(keyPath: \.presentRecordingAfterOnboarding) {
+        defaults.set(newValue, forKey: "presentRecordingAfterOnboarding")
+      }
+    }
   }
 
   public enum DetectionSensitivity: String, CaseIterable, Sendable {

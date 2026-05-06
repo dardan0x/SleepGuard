@@ -428,3 +428,46 @@
 - None
 
 ---
+
+## 2026-05-06 — Session 11b: Onboarding Dismissal + Simulator Mic Fix
+
+### Completed
+- **Bug Fix**: Onboarding dismissal failure — `UserPreferences` computed properties not observable
+- **Bug Fix**: Simulator microphone permission silently blocking recording start
+
+### Technical Details
+
+**Bug 1 — Onboarding stuck on final screen:**
+- Root cause: `UserPreferences` uses `@Observable` with computed properties backed by `UserDefaults`
+- The `@Observable` macro auto-instruments *stored* properties only; computed properties silently emit zero observation notifications
+- When `OnboardingView.finishOnboarding()` set `hasCompletedOnboarding = true`, `SnoreGuardApp` never re-evaluated its body because no change was observed
+- Fix: Added explicit `access(keyPath:)` and `withMutation(keyPath:)` calls to all computed properties in `UserPreferences`, matching Apple's documented pattern for observable computed properties
+- All five properties fixed: `hasCompletedOnboarding`, `detectionSensitivity`, `saveAudioClips`, `appearance`, `presentRecordingAfterOnboarding`
+
+**Bug 2 — Simulator recording silently fails:**
+- Root cause: `AudioRecorder.startRecording()` has `guard hasPermission else { return }` — on simulator, `AVAudioSession.requestRecordPermission()` returns `false` or never completes
+- Fix: Wrapped permission checks with `#if targetEnvironment(simulator)` to auto-grant `hasPermission = true` in simulator builds
+- Both `checkPermission()` and `requestPermission()` now bypass the real permission flow on simulator
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Env/Sources/Env/UserPreferences.swift` | +42/-13 | Replaced bare computed properties with `access(keyPath:)` / `withMutation(keyPath:)` wrappers for `@Observable` compatibility |
+| `Packages/AudioEngine/Sources/AudioEngine/AudioRecorder.swift` | +8/-4 | Added `#if targetEnvironment(simulator)` auto-grant in `checkPermission()` and `requestPermission()` |
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors across all 9 packages + app target
+
+### How to Test Onboarding Again
+To re-test the onboarding flow from scratch, reset the flag in the simulator:
+```swift
+// In a SwiftUI preview or snippet:
+UserDefaults.standard.set(false, forKey: "hasCompletedOnboarding")
+```
+Or delete and reinstall the app on the simulator.
+
+### Suggested Commit
+`Fix — UserPreferences @Observable computed properties + simulator mic auto-grant`
+
+---

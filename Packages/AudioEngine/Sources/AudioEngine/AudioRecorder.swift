@@ -17,6 +17,12 @@ public final class AudioRecorder {
   }
 
   public func checkPermission() {
+    // TECH DEBT: Auto-grant on simulator because AVAudioSession permission
+    // requests behave unreliably in the iOS Simulator (no mic hardware).
+    // Remove this #if block when testing on physical devices becomes routine.
+    #if targetEnvironment(simulator)
+    hasPermission = true
+    #else
     switch AVAudioSession.sharedInstance().recordPermission {
     case .granted:
       hasPermission = true
@@ -25,9 +31,16 @@ public final class AudioRecorder {
     @unknown default:
       hasPermission = false
     }
+    #endif
   }
 
   public func requestPermission() async -> Bool {
+    // TECH DEBT: Same simulator bypass as checkPermission().
+    // Revert to real permission flow once off simulator.
+    #if targetEnvironment(simulator)
+    hasPermission = true
+    return true
+    #else
     let granted = await withCheckedContinuation { continuation in
       AVAudioSession.sharedInstance().requestRecordPermission { granted in
         continuation.resume(returning: granted)
@@ -35,6 +48,7 @@ public final class AudioRecorder {
     }
     hasPermission = granted
     return granted
+    #endif
   }
 
   public func startRecording() throws {
