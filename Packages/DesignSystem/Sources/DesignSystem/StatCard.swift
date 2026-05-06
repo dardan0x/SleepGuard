@@ -1,5 +1,4 @@
 import SwiftUI
-import DesignSystem
 
 @MainActor
 public struct StatCard: View {
@@ -20,7 +19,7 @@ public struct StatCard: View {
     self.title = title
     self.value = value
     self.theme = theme
-    self.iconColor = iconColor ?? theme.primaryColor
+    self.iconColor = iconColor ?? theme.accent
   }
 
   public var body: some View {
@@ -31,18 +30,19 @@ public struct StatCard: View {
 
       VStack(alignment: .leading, spacing: 2) {
         Text(value)
-          .font(.system(size: 18, weight: .bold, design: .rounded))
-          .foregroundStyle(theme.labelColor)
+          .font(.system(size: 20, weight: .bold, design: .rounded))
+          .foregroundStyle(theme.textPrimary)
           .lineLimit(1)
 
         Text(title)
           .font(.system(size: 12, weight: .medium))
-          .foregroundStyle(theme.secondaryLabelColor)
+          .foregroundStyle(theme.textTertiary)
+          .textCase(.uppercase)
       }
     }
     .padding(14)
     .frame(maxWidth: .infinity, alignment: .leading)
-    .background(theme.surfaceColor)
-    .cornerRadius(12)
+    .background(theme.bgCard)
+    .cornerRadius(theme.radiusCard)
   }
 }

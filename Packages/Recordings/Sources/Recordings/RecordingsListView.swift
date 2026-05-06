@@ -20,25 +20,57 @@ public struct RecordingsListView: View {
       switch viewState {
       case .loading:
         Color.clear
-          .task {
-            loadState()
-          }
+          .task { loadState() }
       case .empty:
         RecordingsEmptyView(theme: theme)
       case .loaded(let sections):
-        RecordingsLoadedView(
-          sections: sections,
-          theme: theme
-        )
+        loadedBody(sections: sections)
       case .error:
         RecordingsErrorView(theme: theme) {
           loadState()
         }
       }
     }
-    .background(theme.backgroundColor.ignoresSafeArea())
+    .background(theme.bgSecondary.ignoresSafeArea())
     .onChange(of: sessions) { _, _ in
       loadState()
+    }
+  }
+
+  private func loadedBody(sections: [MonthSection]) -> some View {
+    List {
+      ForEach(sections) { section in
+        Section {
+          ForEach(section.sessions) { session in
+            let color = intensityColor(for: session)
+            SessionRow(
+              dayNumber: dayString(from: session.startDate),
+              weekday: weekdayString(from: session.startDate),
+              duration: durationString(session.totalDuration),
+              events: "\(session.eventsCount) events",
+              intensityColor: color,
+              theme: theme
+            )
+            .contentShape(Rectangle())
+            .onTapGesture {
+              routerPath.navigate(to: .sessionDetail(id: session.id))
+            }
+          }
+        } header: {
+          Text(section.title)
+            .font(.system(size: 13, weight: .semibold))
+            .foregroundStyle(theme.textTertiary)
+            .textCase(.uppercase)
+        }
+        .listRowSeparator(.hidden)
+        .listRowBackground(Color.clear)
+      }
+    }
+    .listStyle(.plain)
+    .scrollContentBackground(.hidden)
+    .background(theme.bgSecondary)
+    .refreshable {
+      // SwiftData @Query auto-updates; refreshable provides UX feedback
     }
   }
 
@@ -68,13 +100,47 @@ public struct RecordingsListView: View {
 
     return sorted.map { components, sessions in
       let date = calendar.date(from: components)!
-      let title = formatter.string(from: date)
+      let title = formatter.string(from: date).uppercased()
       return MonthSection(
         id: title,
         title: title,
         sessions: sessions.sorted { $0.startDate > $1.startDate }
       )
     }
+  }
+
+  private func dayString(from date: Date) -> String {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "dd"
+    return formatter.string(from: date)
+  }
+
+  private func weekdayString(from date: Date) -> String {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "EEE"
+    return formatter.string(from: date).uppercased()
+  }
+
+  private func durationString(_ total: TimeInterval) -> String {
+    let seconds = Int(total)
+    let hours = seconds / 3600
+    let minutes = (seconds % 3600) / 60
+    return String(format: "%dh %02dm", hours, minutes)
+  }
+
+  private func intensityColor(for session: SleepSession) -> Color {
+    guard let events = session.events, !events.isEmpty else {
+      return theme.snoreQuiet
+    }
+    let loud = events.filter { $0.intensity == .loud }.count
+    let light = events.filter { $0.intensity == .light }.count
+    if loud >= light {
+      return theme.snoreLoud
+    }
+    if light > 0 {
+      return theme.snoreLight
+    }
+    return theme.snoreQuiet
   }
 
   public enum ViewState {
@@ -103,54 +169,20 @@ struct RecordingsEmptyView: View {
     VStack(spacing: 16) {
       Image(systemName: "waveform.slash")
         .font(.system(size: 48))
-        .foregroundStyle(theme.secondaryLabelColor)
+        .foregroundStyle(theme.textTertiary)
 
       Text("No recordings yet")
         .font(.system(size: 20, weight: .semibold))
-        .foregroundStyle(theme.labelColor)
+        .foregroundStyle(theme.textPrimary)
 
       Text("Your sleep sessions will appear here after you start recording.")
         .font(.system(size: 15))
-        .foregroundStyle(theme.secondaryLabelColor)
+        .foregroundStyle(theme.textSecondary)
         .multilineTextAlignment(.center)
     }
     .padding(32)
   }
 }
-
-// MARK: - Loaded State
-
-@MainActor
-struct RecordingsLoadedView: View {
-  let sections: [MonthSection]
-  let theme: Theme
-
-  var body: some View {
-    List {
-      ForEach(sections) { section in
-        Section {
-          ForEach(section.sessions) { session in
-            RecordingRowView(session: session, theme: theme)
-          }
-        } header: {
-          Text(section.title)
-            .font(.system(size: 13, weight: .semibold))
-            .foregroundStyle(theme.secondaryLabelColor)
-            .textCase(.uppercase)
-        }
-      }
-    }
-    .listStyle(.plain)
-    .scrollContentBackground(.hidden)
-    .background(theme.backgroundColor)
-    .refreshable {
-      // SwiftData @Query auto-updates; refreshable provides UX feedback
-    }
-  }
-}
-
-// MARK: - Row View
-// Extracted to RecordingRowView.swift in F4-T2
 
 // MARK: - Error State
 
@@ -163,17 +195,17 @@ struct RecordingsErrorView: View {
     VStack(spacing: 16) {
       Image(systemName: "exclamationmark.triangle")
         .font(.system(size: 48))
-        .foregroundStyle(theme.secondaryLabelColor)
+        .foregroundStyle(theme.textTertiary)
 
       Text("Something went wrong")
         .font(.headline)
-        .foregroundStyle(theme.labelColor)
+        .foregroundStyle(theme.textPrimary)
 
       Button("Try Again") {
         onRetry()
       }
       .font(.system(size: 17, weight: .semibold))
-      .foregroundStyle(theme.primaryColor)
+      .foregroundStyle(theme.accent)
     }
   }
 }

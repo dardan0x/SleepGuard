@@ -3,6 +3,7 @@ import DesignSystem
 
 struct OnboardingPage3View: View {
   let onContinue: () -> Void
+  @Environment(Theme.self) private var theme
   @State private var pulseScale: CGFloat = 1.0
 
   var body: some View {
@@ -11,13 +12,13 @@ struct OnboardingPage3View: View {
 
       ZStack {
         Circle()
-          .fill(Theme.shared.secondaryColor.opacity(0.15))
+          .fill(theme.scoreGreen.opacity(0.15))
           .frame(width: 160, height: 160)
           .scaleEffect(pulseScale)
 
         Image(systemName: "checkmark.shield.fill")
           .font(.system(size: 72))
-          .foregroundStyle(Theme.shared.secondaryColor)
+          .foregroundStyle(theme.scoreGreen)
           .symbolRenderingMode(.multicolor)
       }
       .onAppear {
@@ -29,29 +30,29 @@ struct OnboardingPage3View: View {
       VStack(spacing: 12) {
         Text("We're not that\nkind of app")
           .font(.system(size: 28, weight: .bold))
-          .foregroundStyle(Theme.shared.labelColor)
+          .foregroundStyle(theme.textPrimary)
           .multilineTextAlignment(.center)
 
         Text("Everything is processed on your device.\nNo uploads. No weird cloud stuff.\nNo selling your snore drama.")
           .font(.system(size: 15))
-          .foregroundStyle(Theme.shared.secondaryLabelColor)
+          .foregroundStyle(theme.textSecondary)
           .multilineTextAlignment(.center)
       }
 
       HStack(spacing: 8) {
         Image(systemName: "lock.shield")
           .font(.system(size: 14))
-          .foregroundStyle(Theme.shared.secondaryColor)
+          .foregroundStyle(theme.scoreGreen)
 
         Text("Your secrets stay between you and your pillow")
           .font(.system(size: 13, weight: .medium))
-          .foregroundStyle(Theme.shared.secondaryColor)
+          .foregroundStyle(theme.scoreGreen)
       }
       .padding(.horizontal, 16)
       .padding(.vertical, 10)
       .background(
         Capsule()
-          .stroke(Theme.shared.secondaryColor.opacity(0.4), lineWidth: 1)
+          .stroke(theme.scoreGreen.opacity(0.4), lineWidth: 1)
       )
 
       Spacer()
@@ -63,7 +64,7 @@ struct OnboardingPage3View: View {
       .foregroundStyle(.white)
       .frame(maxWidth: .infinity)
       .frame(height: 56)
-      .background(Theme.shared.primaryColor)
+      .background(theme.accent)
       .clipShape(Capsule())
       .padding(.horizontal, 24)
     }

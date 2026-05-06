@@ -20,9 +20,7 @@ public struct StatisticsDashboardView: View {
       switch viewState {
       case .loading:
         Color.clear
-          .task {
-            loadState()
-          }
+          .task { loadState() }
       case .empty:
         StatisticsEmptyView(theme: theme) {
           routerPath.navigate(to: .liveSession)
@@ -41,7 +39,7 @@ public struct StatisticsDashboardView: View {
         }
       }
     }
-    .background(theme.backgroundColor.ignoresSafeArea())
+    .background(theme.bgSecondary.ignoresSafeArea())
     .onChange(of: sessions) { _, _ in
       loadState()
     }
@@ -79,22 +77,22 @@ struct StatisticsEmptyView: View {
         VStack(spacing: 16) {
           ZStack {
             Circle()
-              .fill(theme.primaryColor.opacity(0.15))
+              .fill(theme.accent.opacity(0.15))
               .frame(width: 80, height: 80)
 
             Image(systemName: "moon.fill")
               .font(.system(size: 32))
-              .foregroundStyle(theme.primaryColor)
+              .foregroundStyle(theme.accent)
           }
 
           VStack(spacing: 4) {
             Text("Ready to Sleep?")
               .font(.system(size: 20, weight: .semibold))
-              .foregroundStyle(theme.labelColor)
+              .foregroundStyle(theme.textPrimary)
 
             Text("Start a recording to analyze your snoring")
               .font(.system(size: 15))
-              .foregroundStyle(theme.secondaryLabelColor)
+              .foregroundStyle(theme.textSecondary)
               .multilineTextAlignment(.center)
           }
 
@@ -106,30 +104,42 @@ struct StatisticsEmptyView: View {
               .foregroundStyle(.white)
               .frame(maxWidth: .infinity)
               .frame(height: 56)
-              .background(theme.primaryColor)
+              .background(theme.accent)
               .clipShape(Capsule())
           }
         }
         .frame(maxWidth: .infinity)
         .padding(24)
-        .background(theme.surfaceColor)
-        .cornerRadius(16)
+        .background(theme.bgCard)
+        .cornerRadius(theme.radiusCard)
       }
       .padding(20)
     }
   }
 
   private var headerSection: some View {
-    VStack(alignment: .leading, spacing: 4) {
-      Text("Sleep Statistics")
-        .font(.system(size: 28, weight: .bold))
-        .foregroundStyle(theme.labelColor)
+    HStack {
+      Text("Statistics")
+        .font(.system(size: 32, weight: .bold))
+        .foregroundStyle(theme.textPrimary)
 
-      Text("Track and improve your sleep quality")
-        .font(.system(size: 15))
-        .foregroundStyle(theme.secondaryLabelColor)
+      Spacer()
+
+      Button {
+        // Calendar action
+      } label: {
+        HStack(spacing: 4) {
+          Image(systemName: "calendar")
+          Text("Calendar")
+        }
+        .font(.system(size: 14, weight: .semibold))
+        .foregroundStyle(.white)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(theme.accent)
+        .clipShape(Capsule())
+      }
     }
-    .frame(maxWidth: .infinity, alignment: .leading)
   }
 }
 
@@ -144,27 +154,45 @@ struct StatisticsLoadedView: View {
 
   var body: some View {
     ScrollView {
-      VStack(spacing: 20) {
+      VStack(spacing: 24) {
         headerSection
 
-        scoreCard
+        weekSelector
+
+        SleepScoreGauge(score: session.sleepScore, theme: theme, size: 180)
+
+        VStack(spacing: 4) {
+          Text("LAST NIGHT")
+            .font(.system(size: 12, weight: .semibold))
+            .foregroundStyle(theme.textTertiary)
+            .tracking(1)
+
+          Text("\(dateString) · \(timeRangeString)")
+            .font(.system(size: 15))
+            .foregroundStyle(theme.textSecondary)
+        }
 
         statsGrid
 
         if !recentSessions.isEmpty {
-          sparklineCard
+          chartSection
         }
 
         Button {
           onStartRecording()
         } label: {
-          Text("Start Recording")
-            .font(.system(size: 17, weight: .semibold))
-            .foregroundStyle(.white)
-            .frame(maxWidth: .infinity)
-            .frame(height: 56)
-            .background(theme.primaryColor)
-            .clipShape(Capsule())
+          HStack(spacing: 8) {
+            Circle()
+              .fill(Color.green)
+              .frame(width: 8, height: 8)
+            Text("Start Recording")
+          }
+          .font(.system(size: 17, weight: .semibold))
+          .foregroundStyle(.white)
+          .frame(maxWidth: .infinity)
+          .frame(height: 56)
+          .background(theme.accent)
+          .clipShape(Capsule())
         }
       }
       .padding(20)
@@ -172,44 +200,67 @@ struct StatisticsLoadedView: View {
   }
 
   private var headerSection: some View {
-    VStack(alignment: .leading, spacing: 4) {
-      Text("Sleep Statistics")
-        .font(.system(size: 28, weight: .bold))
-        .foregroundStyle(theme.labelColor)
+    HStack {
+      Text("Statistics")
+        .font(.system(size: 32, weight: .bold))
+        .foregroundStyle(theme.textPrimary)
 
-      Text("Track and improve your sleep quality")
-        .font(.system(size: 15))
-        .foregroundStyle(theme.secondaryLabelColor)
-    }
-    .frame(maxWidth: .infinity, alignment: .leading)
-  }
+      Spacer()
 
-  private var scoreCard: some View {
-    VStack(spacing: 16) {
-      HStack(spacing: 16) {
-        SleepScoreGauge(score: session.sleepScore, theme: theme, size: 110)
-
-        VStack(alignment: .leading, spacing: 6) {
-          Text("Last Night")
-            .font(.system(size: 13, weight: .medium))
-            .foregroundStyle(theme.secondaryLabelColor)
-            .textCase(.uppercase)
-
-          Text(dateString)
-            .font(.system(size: 15))
-            .foregroundStyle(theme.labelColor)
-
-          Text(scoreLabel)
-            .font(.system(size: 14, weight: .medium))
-            .foregroundStyle(scoreColor)
+      Button {
+        // Calendar action
+      } label: {
+        HStack(spacing: 4) {
+          Image(systemName: "calendar")
+          Text("Calendar")
         }
-
-        Spacer()
+        .font(.system(size: 14, weight: .semibold))
+        .foregroundStyle(.white)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(theme.accent)
+        .clipShape(Capsule())
       }
     }
-    .padding(20)
-    .background(theme.surfaceColor)
-    .cornerRadius(16)
+  }
+
+  private var weekSelector: some View {
+    VStack(spacing: 8) {
+      HStack {
+        Text("THIS WEEK")
+          .font(.system(size: 12, weight: .semibold))
+          .foregroundStyle(theme.textTertiary)
+          .tracking(1)
+
+        Spacer()
+
+        Button {
+          // View month
+        } label: {
+          Text("View month >")
+            .font(.system(size: 14, weight: .medium))
+            .foregroundStyle(theme.accent)
+        }
+      }
+
+      HStack(spacing: 0) {
+        ForEach(weekDays, id: \.label) { day in
+          VStack(spacing: 4) {
+            Text(day.label)
+              .font(.system(size: 11, weight: .medium))
+              .foregroundStyle(day.isToday ? theme.accent : theme.textTertiary)
+
+            Text(day.number)
+              .font(.system(size: 16, weight: .semibold))
+              .foregroundStyle(day.isToday ? .white : theme.textPrimary)
+              .frame(width: 36, height: 36)
+              .background(day.isToday ? theme.accent : Color.clear)
+              .clipShape(Circle())
+          }
+          .frame(maxWidth: .infinity)
+        }
+      }
+    }
   }
 
   private var statsGrid: some View {
@@ -217,103 +268,115 @@ struct StatisticsLoadedView: View {
 
     return LazyVGrid(columns: columns, spacing: 12) {
       StatCard(
-        icon: "clock.fill",
+        icon: "clock",
         title: "Duration",
         value: durationString,
         theme: theme,
-        iconColor: theme.primaryColor
+        iconColor: theme.accent
       )
       StatCard(
-        icon: "waveform.path",
+        icon: "percent",
         title: "Snoring",
-        value: String(format: "%.1f%%", session.snoringPercentage),
+        value: String(format: "%.0f%%", session.snoringPercentage),
         theme: theme,
-        iconColor: Color.orange
+        iconColor: theme.scoreAmber
       )
       StatCard(
-        icon: "exclamationmark.triangle.fill",
+        icon: "bolt.fill",
         title: "Events",
         value: "\(session.eventsCount)",
         theme: theme,
-        iconColor: Color.red
-      )
-      StatCard(
-        icon: "number",
-        title: "Events / Hour",
-        value: String(format: "%.1f", session.eventsPerHour),
-        theme: theme,
-        iconColor: theme.primaryColor
+        iconColor: theme.scoreAmber
       )
       StatCard(
         icon: "speaker.wave.2.fill",
         title: "Avg dB",
-        value: String(format: "%.1f dB", session.averageDB),
+        value: String(format: "%.0f dB", session.averageDB),
         theme: theme,
-        iconColor: theme.primaryColor
-      )
-      StatCard(
-        icon: "speaker.wave.3.fill",
-        title: "Peak dB",
-        value: String(format: "%.1f dB", session.peakDB),
-        theme: theme,
-        iconColor: Color.red
+        iconColor: theme.accent
       )
     }
   }
 
-  private var sparklineCard: some View {
-    VStack(alignment: .leading, spacing: 12) {
-      Text("Last 7 Nights")
-        .font(.system(size: 13, weight: .medium))
-        .foregroundStyle(theme.secondaryLabelColor)
-        .textCase(.uppercase)
+  private var chartSection: some View {
+    VStack(alignment: .leading, spacing: 16) {
+      HStack {
+        Text("Last 7 Nights")
+          .font(.system(size: 20, weight: .bold))
+          .foregroundStyle(theme.textPrimary)
 
-      let data = recentSessions.map {
-        SleepSparkline.DataPoint(date: $0.startDate, score: $0.sleepScore)
+        Spacer()
+
+        Button {
+          // See all
+        } label: {
+          Text("See all")
+            .font(.system(size: 14, weight: .medium))
+            .foregroundStyle(theme.accent)
+        }
       }
 
-      SleepSparkline(data: data, theme: theme)
+      let data = recentSessions.reversed().enumerated().map { index, session in
+        let formatter = DateFormatter()
+        formatter.dateFormat = "E"
+        let label = formatter.string(from: session.startDate).prefix(1).uppercased()
+        return MiniBarChart.DataPoint(
+          label: String(label),
+          value: Double(session.sleepScore),
+          color: theme.scoreColor(session.sleepScore)
+        )
+      }
+
+      MiniBarChart(data: data, theme: theme)
     }
-    .padding(20)
-    .background(theme.surfaceColor)
-    .cornerRadius(16)
+    .padding(16)
+    .background(theme.bgCard)
+    .cornerRadius(theme.radiusCard)
   }
 
   private var dateString: String {
     let formatter = DateFormatter()
-    formatter.dateStyle = .medium
+    formatter.dateFormat = "MMM d"
     return formatter.string(from: session.startDate)
+  }
+
+  private var timeRangeString: String {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "h:mm a"
+    let start = formatter.string(from: session.startDate)
+    if let endDate = session.endDate {
+      let end = formatter.string(from: endDate)
+      return "\(start) – \(end)"
+    }
+    return start
   }
 
   private var durationString: String {
     let total = Int(session.totalDuration)
     let hours = total / 3600
     let minutes = (total % 3600) / 60
-    if hours > 0 {
-      return String(format: "%d h %d min", hours, minutes)
-    }
-    return String(format: "%d min", minutes)
+    return String(format: "%d:%02d", hours, minutes)
   }
 
-  private var scoreColor: Color {
-    switch session.sleepScore {
-    case 80...100:
-      theme.secondaryColor
-    case 50 ..< 80:
-      Color.orange
-    default:
-      Color.red
-    }
+  private struct WeekDay: Identifiable {
+    let id = UUID()
+    let label: String
+    let number: String
+    let isToday: Bool
   }
 
-  private var scoreLabel: String {
-    switch session.sleepScore {
-    case 80...100:
-      "Great sleep"
-    case 50 ..< 80:
-      "Moderate snoring"
-    default:
-      "Heavy snoring"
+  private var weekDays: [WeekDay] {
+    let calendar = Calendar.current
+    let today = calendar.startOfDay(for: Date())
+    let weekdaySymbols = calendar.shortWeekdaySymbols
+
+    return (0..<7).map { offset in
+      let date = calendar.date(byAdding: .day, value: offset - 6, to: today)!
+      let isToday = calendar.isDate(date, inSameDayAs: today)
+      let weekdayIndex = calendar.component(.weekday, from: date) - 1
+      let label = weekdaySymbols[weekdayIndex].uppercased().prefix(3)
+      let number = String(calendar.component(.day, from: date))
+      return WeekDay(label: String(label), number: number, isToday: isToday)
     }
   }
 }
@@ -329,17 +392,17 @@ struct StatisticsErrorView: View {
     VStack(spacing: 16) {
       Image(systemName: "exclamationmark.triangle")
         .font(.system(size: 48))
-        .foregroundStyle(theme.secondaryLabelColor)
+        .foregroundStyle(theme.textTertiary)
 
       Text("Something went wrong")
         .font(.headline)
-        .foregroundStyle(theme.labelColor)
+        .foregroundStyle(theme.textPrimary)
 
       Button("Try Again") {
         onRetry()
       }
       .font(.system(size: 17, weight: .semibold))
-      .foregroundStyle(theme.primaryColor)
+      .foregroundStyle(theme.accent)
     }
   }
 }

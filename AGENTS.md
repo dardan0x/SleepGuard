@@ -33,6 +33,38 @@ When editing existing code:
 
 When your changes create orphans: remove what YOUR changes made unused. Don't remove pre-existing dead code unless asked. The test: every changed line traces directly to the request.
 
+## Design Compliance
+
+**The design file at `designs/SnoreGuard.pen` is the single source of truth for all UI.**
+
+Before implementing or modifying ANY view:
+1. Read the relevant screen(s) from `designs/SnoreGuard.pen` using Pencil MCP tools.
+2. Extract screenshots of the design for visual reference.
+3. Match colors, typography, spacing, corner radius, and component structure exactly.
+4. Use the design tokens (variables) defined in the .pen file — never hardcode values that differ.
+
+**Design tokens (from `designs/SnoreGuard.pen`):**
+- `bg-primary`: `#000000`
+- `bg-secondary`: `#1C1C1E`
+- `bg-card`: `#2C2C2E`
+- `bg-elevated`: `#3A3A3C`
+- `accent`: `#5E9CFF`
+- `text-primary`: `#FFFFFF`
+- `text-secondary`: `#ABABAB`
+- `text-tertiary`: `#8E8E93`
+- `text-dim`: `#FFFFFF66`
+- `score-green`: `#30D158`
+- `score-amber`: `#FF9F0A`
+- `score-red`: `#FF453A`
+- `snore-quiet`: `#8E8E93`
+- `snore-light`: `#FF9F0A`
+- `snore-loud`: `#FF453A`
+- `radius-card`: `16`
+- `radius-small`: `12`
+- `font-body`: `Inter`
+
+If a design token is missing for a property, derive it from the screenshot or ask. Never guess a color or radius that contradicts the design.
+
 ## Working Style
 
 - Enter plan mode for any non-trivial task (3+ steps or architectural decisions). Think before building.

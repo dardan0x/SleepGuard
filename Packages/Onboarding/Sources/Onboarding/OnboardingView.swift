@@ -4,6 +4,7 @@ import DesignSystem
 
 public struct OnboardingView: View {
   @Environment(UserPreferences.self) private var userPreferences
+  @Environment(Theme.self) private var theme
   @State private var currentPage = 0
   private let totalPages = 5
 
@@ -11,8 +12,7 @@ public struct OnboardingView: View {
 
   public var body: some View {
     ZStack {
-      Theme.shared.backgroundColor
-        .ignoresSafeArea()
+      theme.bgPrimary.ignoresSafeArea()
 
       VStack(spacing: 0) {
         topBar
@@ -56,7 +56,7 @@ public struct OnboardingView: View {
           }
         }
         .font(.system(size: 15, weight: .medium))
-        .foregroundStyle(Theme.shared.secondaryLabelColor)
+        .foregroundStyle(theme.textSecondary)
         .padding(.trailing, 20)
       }
     }
@@ -74,7 +74,7 @@ public struct OnboardingView: View {
           }
         }
         .font(.system(size: 15, weight: .medium))
-        .foregroundStyle(Theme.shared.secondaryLabelColor)
+        .foregroundStyle(theme.textSecondary)
       }
     }
     .padding(.bottom, 32)
@@ -84,7 +84,7 @@ public struct OnboardingView: View {
     HStack(spacing: 8) {
       ForEach(0..<totalPages, id: \.self) { index in
         RoundedRectangle(cornerRadius: 4)
-          .fill(index == currentPage ? Theme.shared.primaryColor : Theme.shared.surfaceColor)
+          .fill(index == currentPage ? theme.accent : theme.bgCard)
           .frame(width: index == currentPage ? 24 : 8, height: 8)
           .animation(.spring(duration: 0.35), value: currentPage)
       }

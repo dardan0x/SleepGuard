@@ -1,11 +1,14 @@
 import SwiftUI
 import Env
+import DesignSystem
 import SleepSession
 import Statistics
 import Recordings
 import Settings
 
 struct MainTabView: View {
+  @Environment(Theme.self) private var theme
+
   var body: some View {
     TabView {
       StatisticsTab()
@@ -23,6 +26,7 @@ struct MainTabView: View {
           Label("Settings", systemImage: "gearshape")
         }
     }
+    .tint(theme.accent)
   }
 }
 
