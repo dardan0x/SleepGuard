@@ -39,10 +39,17 @@ struct StatisticsTab: View {
       StatisticsDashboardView()
         .withAppRouter()
     }
-    .sheet(item: Binding(
-      get: { routerPath.presentedSheet },
-      set: { routerPath.presentedSheet = $0 }
-    )) { destination in
+    .sheet(
+      item: Binding(
+        get: { routerPath.presentedSheet },
+        set: { routerPath.presentedSheet = $0 }
+      ),
+      onDismiss: {
+        if sessionManager.completedSession != nil {
+          sessionManager.completedSession = nil
+        }
+      }
+    ) { destination in
       switch destination {
       case .sessionSummary:
         if let session = sessionManager.completedSession {
