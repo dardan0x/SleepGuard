@@ -599,3 +599,45 @@ Or delete and reinstall the app on the simulator.
 
 ### Open Questions
 - None
+
+## 2026-05-06 — Session 15: F5-T1 Weekly/Monthly Bar Charts
+
+### Completed
+- **F5-T1**: `TrendsView` with week/month toggle, Swift Charts bar chart, and stat cards
+
+### Technical Details
+- `TrendsView` is a container view in the Statistics package using `@Query` for `SleepSession`
+- Segmented picker (`TimeRange.week / .month`) toggles between last 7 and last 30 days
+- Swift Charts `BarMark` with `cornerRadius(4)` for the bar chart
+- Bar height = snoring duration in minutes; bar color = max snore intensity for that night (quiet/light/loud)
+- Snoring minutes average displayed as "52 min · avg / night"
+- Legend: Quiet/Light/Loud colored dots
+- 4 stat cards (2×2 grid):
+  - Avg Score (scope icon, accent)
+  - Best Night (star.fill icon, score-green)
+  - Worst Night (bolt.fill icon, snore-loud)
+  - Total Events (number icon, text-tertiary)
+- `RouterDestination.trends` added; mapped to `TrendsView()` in `AppRegistry`
+- Statistics dashboard "View month >" button now navigates to `.trends`
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Statistics/Sources/Statistics/TrendsView.swift` | +245 | New. Trends screen with picker, chart, legend, stat cards |
+| `Packages/Env/Sources/Env/Router.swift` | +1 | Added `.trends` to `RouterDestination` |
+| `SnoreGuard/AppRegistry.swift` | +2 | Mapped `.trends` → `TrendsView()` |
+| `Packages/Statistics/Sources/Statistics/StatisticsDashboardView.swift` | +5/-3 | Wired "View month >" to `routerPath.navigate(to: .trends)` via closure |
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors across all 9 packages + app target
+
+### Git Handoff
+- **Suggested branch**: `feature/f5/t1-trends-bar-chart`
+- **Suggested commit**: `F5-T1 — TrendsView with week/month bar charts and stat cards`
+
+### Next Session
+- **F5-T2**: Stat cards (avg, best/worst, total) — wait, F5-T1 already includes these. F5-T2 might need redefinition or can be marked as done since the stat cards are already built.
+
+### Open Questions
+- F5-T2 acceptance criteria (avg score, best/worst night, total events) is already satisfied by F5-T1. Should F5-T2 be merged into F5-T1 or marked as Done with no additional work?
