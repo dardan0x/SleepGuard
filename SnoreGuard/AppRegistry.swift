@@ -47,6 +47,8 @@ extension View {
           SleepSessionView()
         case .trends:
           TrendsView()
+        case .calendar:
+          CalendarView()
         }
       }
   }
