@@ -7,13 +7,13 @@ public enum RouterDestination: Hashable, Sendable {
 }
 
 public enum SheetDestination: Identifiable, Hashable, Sendable {
-  case sessionSummary(sessionID: UUID)
+  case sessionSummary
   case liveSession
 
   public var id: String {
     switch self {
-    case .sessionSummary(let sessionID):
-      return "sessionSummary-\(sessionID.uuidString)"
+    case .sessionSummary:
+      return "sessionSummary"
     case .liveSession:
       return "liveSession"
     }

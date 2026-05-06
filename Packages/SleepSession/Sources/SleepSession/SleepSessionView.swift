@@ -13,6 +13,8 @@ public struct SleepSessionView: View {
     Group {
       if sessionManager.isRecording {
         BedsideClockView()
+      } else if sessionManager.completedSession != nil {
+        Color.clear
       } else {
         RecordingPrestartView()
       }

@@ -167,3 +167,42 @@
 
 ### Open Questions
 - Stop button currently drops user back to `RecordingPrestartView` because `isRecording` becomes false. F2-T5 needs to present a summary sheet instead — will likely require changing the sheet destination from `.liveSession` to `.sessionSummary(sessionID:)` when stopping.
+
+
+## 2026-05-06 — Session 6: F2-T5 Session Summary Sheet
+
+### Completed
+- **F2-T5**: Session summary sheet (`SessionSummaryView`)
+
+### Technical Details
+- `SessionSummaryView` is a presentational view receiving `session: SleepSession` via init
+- Large circular score ring at top using `trim(from:to:)` with colored stroke (green/orange/red by score)
+- Stats grid (2 columns): Duration, Snoring %, Events, Events/Hour, Avg dB, Peak dB
+- "Save Session" inserts `SleepSession` + all `SnoreEvent` children into SwiftData, then dismisses
+- "Discard" dismisses without persisting (session was never inserted into model context)
+- `SheetDestination.sessionSummary` simplified to no payload; session read from `SessionManager.completedSession`
+- `SleepSessionView` shows `Color.clear` when `completedSession != nil` to prevent flash of `RecordingPrestartView` during sheet swap
+- `StatisticsTab` observes `sessionManager.completedSession` via `.onChange` and swaps sheet from `.liveSession` to `.sessionSummary`
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/SleepSession/Sources/SleepSession/SessionSummaryView.swift` | +165 | New. Summary sheet UI with score ring, stats grid, Save/Discard buttons |
+| `Packages/Env/Sources/Env/SessionManager.swift` | +2/-0 | Added `completedSession: SleepSession?`; set in `stopSession()` |
+| `Packages/Env/Sources/Env/Router.swift` | +3/-5 | Simplified `.sessionSummary(sessionID:)` to `.sessionSummary` (no payload) |
+| `SnoreGuard/MainTabView.swift` | +9/-4 | Added `sessionManager` env; `.onChange` swaps sheet; `.sessionSummary` maps to `SessionSummaryView` |
+| `Packages/SleepSession/Sources/SleepSession/SleepSessionView.swift` | +2/-1 | Added `Color.clear` branch when `completedSession != nil` |
+
+### Architecture Decisions
+- **Sheet swap via `SessionManager`**: Instead of passing the tab's `RouterPath` into the sheet, `SessionManager.completedSession` acts as the bridge. The tab observes it and swaps sheets. This avoids threading `RouterPath` through `.withEnvironments()`.
+- **Explicit SwiftData insertion**: Both `SleepSession` and each `SnoreEvent` are explicitly `modelContext.insert()`'ed before save. This ensures persistence even if SwiftData relationship cascade behavior varies.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors across all 9 packages + app target
+
+### Next Session
+- **F2-T6**: Route registration + wiring (pre-start, bedside clock, summary sheet routes; Statistics CTA; onboarding routing)
+
+### Open Questions
+- None

@@ -10,6 +10,7 @@ public final class SessionManager {
 
   public var currentSession: SleepSession?
   public var isRecording = false
+  public var completedSession: SleepSession?
 
   /// Real-time audio level for UI observation
   public var currentDB: Float = -160.0
@@ -72,6 +73,7 @@ public final class SessionManager {
     session.sleepScore = computeSleepScore(session: session)
 
     let result = session
+    completedSession = result
     currentSession = nil
     resetTrackingState()
     return result
