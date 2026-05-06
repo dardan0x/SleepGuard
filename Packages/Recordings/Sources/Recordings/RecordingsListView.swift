@@ -149,68 +149,8 @@ struct RecordingsLoadedView: View {
   }
 }
 
-// MARK: - Row View (minimal — extracted into full component in F4-T2)
-
-@MainActor
-struct RecordingRowView: View {
-  let session: SleepSession
-  let theme: Theme
-
-  var body: some View {
-    HStack(spacing: 12) {
-      VStack(alignment: .leading, spacing: 4) {
-        Text(dateString)
-          .font(.system(size: 15, weight: .medium))
-          .foregroundStyle(theme.labelColor)
-
-        Text(durationString)
-          .font(.system(size: 13))
-          .foregroundStyle(theme.secondaryLabelColor)
-      }
-
-      Spacer()
-
-      HStack(spacing: 4) {
-        Text("\(session.sleepScore)")
-          .font(.system(size: 17, weight: .bold))
-          .foregroundStyle(scoreColor)
-
-        Image(systemName: "chevron.right")
-          .font(.system(size: 13, weight: .semibold))
-          .foregroundStyle(theme.secondaryLabelColor)
-      }
-    }
-    .padding(.vertical, 4)
-    .listRowBackground(theme.surfaceColor)
-  }
-
-  private var dateString: String {
-    let formatter = DateFormatter()
-    formatter.dateStyle = .medium
-    return formatter.string(from: session.startDate)
-  }
-
-  private var durationString: String {
-    let total = Int(session.totalDuration)
-    let hours = total / 3600
-    let minutes = (total % 3600) / 60
-    if hours > 0 {
-      return String(format: "%d h %d min", hours, minutes)
-    }
-    return String(format: "%d min", minutes)
-  }
-
-  private var scoreColor: Color {
-    switch session.sleepScore {
-    case 80...100:
-      theme.secondaryColor
-    case 50 ..< 80:
-      Color.orange
-    default:
-      Color.red
-    }
-  }
-}
+// MARK: - Row View
+// Extracted to RecordingRowView.swift in F4-T2
 
 // MARK: - Error State
 

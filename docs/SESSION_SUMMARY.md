@@ -471,3 +471,40 @@ Or delete and reinstall the app on the simulator.
 `Fix — UserPreferences @Observable computed properties + simulator mic auto-grant`
 
 ---
+
+## 2026-05-06 — Session 12: F4-T2 RecordingRowView Component
+
+### Completed
+- **F4-T2**: `RecordingRowView` presentational component with score badge, event count, and tap navigation
+
+### Technical Details
+- Extracted inline row from `RecordingsListView.swift` into standalone `RecordingRowView.swift`
+- Row layout:
+  - Left: date (medium format) + duration + event count, stacked vertically
+  - Right: 36pt colored circular score badge + chevron
+  - Score badge color: green ≥80, orange 50-79, red <50 (matches `SleepScoreGauge` palette)
+- Full-row tappability via `.contentShape(Rectangle())` + `.onTapGesture`
+- Tap navigates to `.recordingDetail(id: session.id)` via `@Environment(RouterPath.self)`
+- `.recordingDetail(id:)` route already existed in `RouterDestination` with a placeholder `Text` in `AppRegistry`; navigation works end-to-end and will be replaced with real detail view in F4-T3
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Recordings/Sources/Recordings/RecordingRowView.swift` | +77 | New. Standalone presentational row with date, duration, events, score badge, tap navigation |
+| `Packages/Recordings/Sources/Recordings/RecordingsListView.swift` | +1/-54 | Removed inline `RecordingRowView`; list now imports the standalone component |
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors across all 9 packages + app target
+
+### Next Session
+- **F4-T3**: `SessionDetailView` with timeline visualization (snoring events across session duration, colored by intensity)
+
+### Git Handoff
+- **Suggested branch**: `feature/f4/t2-recording-row`
+- **Suggested commit**: `F4-T2 — RecordingRowView with score badge and tap navigation`
+
+### Open Questions
+- None
+
+---
