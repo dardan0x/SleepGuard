@@ -41,6 +41,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-05-06 | Polish | Completed | V1 bug hunt: RecordingRowView wired, Color.green→theme, Trends dup labels, SessionDetail delete+URL fix, Stats design compliance |
 | 2026-05-06 | F6-T3 | Completed | Delete All Data alert + SwiftData cascade delete; About section with version + rate app store link |
 | 2026-05-06 | F6-T2 | Completed | SettingsView with all design sections: Detection, Recording, Appearance, Data, About; confirmationDialogs for pickers |
 | 2026-05-06 | F6-T1 | Completed | Extended UserPreferences with minSnoreDuration (default 2s) and maxClipLength (default 30s); Color(hex:) made public |

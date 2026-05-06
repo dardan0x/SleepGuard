@@ -692,3 +692,60 @@ Or delete and reinstall the app on the simulator.
 
 ### Open Questions
 - None
+
+---
+
+## 2026-05-06 — Session 17: V1 Polish / Bug Hunt Pass
+
+### Completed
+- **Polish pass across F1–F6 V1**: Fixed visual discrepancies and functional bugs found by comparing live screens against `designs/SnoreGuard.pen`.
+
+### Technical Details
+- **RecordingsListView → RecordingRowView**: `RecordingsListView` was using generic `SessionRow` from DesignSystem instead of the custom `RecordingRowView` built in F4-T2. Swapped to `RecordingRowView` which shows date, duration, event count, and a colored score badge. Removed now-unused helpers (`dayString`, `weekdayString`, `durationString`, `intensityColor`).
+- **Hardcoded `Color.green` → theme colors**: Replaced all instances of `Color.green` with `theme.scoreGreen` in:
+  - `StatisticsDashboardView` (Start Recording button dot)
+  - `BedsideClockView` (Recording dot in waveform section)
+  - `RecordingPrestartView` (Start Recording button dot)
+- **BedsideClockView statusLabel fix**: `.quiet` case was incorrectly showing "Light snoring detected · just now" — changed to "Quiet snoring detected · just now" to differentiate from `.light`.
+- **SessionDetailView audio URL parsing**: `URL(string: urlString)` on file paths would return `nil`. Changed to `URL(fileURLWithPath: urlString)` with `FileManager` existence check before conversion.
+- **SessionDetailView toolbar**: Removed non-standard custom `< Back` text button; NavigationStack now shows the native back chevron. Wired delete button to `deleteSession()` which fetches by UUID, deletes from SwiftData context, saves, and dismisses.
+- **TrendsView duplicate X-axis labels**: Removed redundant `HStack` that manually rendered day labels below the chart. `chartXAxis` already renders labels inside the chart area. Also removed custom `< Stats` toolbar item to use native back button.
+- **Statistics design compliance**:
+  - Title font: 32 → 34pt
+  - Week day label: 11 → 10pt
+  - Week day number: 16 → 18pt
+  - Score gauge size: 180 → 150
+  - Start Recording button height: 56 → 52pt
+- **RecordingRowView score colors**: Replaced `Color.orange` and `Color.red` with `theme.scoreAmber` and `theme.scoreRed` for consistency with the design system.
+- **Tab bar background**: Added `.toolbarBackground(theme.bgSecondary, for: .tabBar)` to `MainTabView` so the tab bar matches the app theme instead of default translucent.
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Recordings/Sources/Recordings/RecordingsListView.swift` | -45/+5 | Replaced `SessionRow` with `RecordingRowView`; removed unused helper methods |
+| `Packages/Recordings/Sources/Recordings/RecordingRowView.swift` | +2/-2 | `Color.orange` → `theme.scoreAmber`, `Color.red` → `theme.scoreRed` |
+| `Packages/Recordings/Sources/Recordings/SessionDetailView.swift` | +18/-12 | `URL(fileURLWithPath:)` fix, wired delete button, removed custom back button, added `@Environment(\.dismiss)` |
+| `Packages/Statistics/Sources/Statistics/StatisticsDashboardView.swift` | +8/-8 | Title 34pt, week label 10pt, week number 18pt, gauge 150, button 52pt, `theme.scoreGreen` dot |
+| `Packages/Statistics/Sources/Statistics/TrendsView.swift` | -12/+0 | Removed duplicate X-axis label HStack and custom `< Stats` toolbar item |
+| `Packages/SleepSession/Sources/SleepSession/BedsideClockView.swift` | +2/-2 | `Color.green` → `theme.scoreGreen`, `.quiet` statusLabel wording fix |
+| `Packages/SleepSession/Sources/SleepSession/RecordingPrestartView.swift` | +1/-1 | `Color.green` → `theme.scoreGreen` |
+| `SnoreGuard/MainTabView.swift` | +1/-0 | Added `.toolbarBackground(theme.bgSecondary, for: .tabBar)` |
+| `docs/FeatureTracker.md` | +1/-0 | Activity log entry for polish pass |
+
+### Architecture Decisions
+- **Native back button over custom text**: Removing custom `< Back` / `< Stats` toolbar items in `SessionDetailView` and `TrendsView` lets NavigationStack handle the back affordance correctly, matching iOS conventions and reducing code.
+- **Fail-silent for audio playback and deletion**: Both `setupAudioPlayer` and `deleteSession` catch errors and do nothing. Audio is optional; deletion failure is edge-case and would need a toast system (not in V1 scope).
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors, zero warnings across all 9 packages + app target
+
+### Next Session
+- V1 is fully polished. Next work would be V1.1 or V2 features per docs/Roadmap.md.
+
+### Git Handoff
+- **Suggested branch**: `polish/v1-bug-hunt-pass`
+- **Suggested commit**: `V1 Polish — Fix RecordingRowView wiring, theme color consistency, Trends dup labels, SessionDetail delete+URL, Stats design compliance`
+
+### Open Questions
+- None

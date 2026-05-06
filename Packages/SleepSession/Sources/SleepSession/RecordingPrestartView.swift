@@ -97,7 +97,7 @@ struct RecordingPrestartView: View {
       } label: {
         HStack(spacing: 8) {
           Circle()
-            .fill(Color.green)
+            .fill(theme.scoreGreen)
             .frame(width: 8, height: 8)
           Text("Start Recording")
         }

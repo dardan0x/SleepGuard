@@ -107,7 +107,7 @@ struct StatisticsEmptyView: View {
               .font(.system(size: 17, weight: .semibold))
               .foregroundStyle(.white)
               .frame(maxWidth: .infinity)
-              .frame(height: 56)
+              .frame(height: 52)
               .background(theme.accent)
               .clipShape(Capsule())
           }
@@ -164,7 +164,7 @@ struct StatisticsLoadedView: View {
 
         weekSelector
 
-        SleepScoreGauge(score: session.sleepScore, theme: theme, size: 180)
+        SleepScoreGauge(score: session.sleepScore, theme: theme, size: 150)
 
         VStack(spacing: 4) {
           Text("LAST NIGHT")
@@ -188,14 +188,14 @@ struct StatisticsLoadedView: View {
         } label: {
           HStack(spacing: 8) {
             Circle()
-              .fill(Color.green)
+              .fill(theme.scoreGreen)
               .frame(width: 8, height: 8)
             Text("Start Recording")
           }
           .font(.system(size: 17, weight: .semibold))
           .foregroundStyle(.white)
           .frame(maxWidth: .infinity)
-          .frame(height: 56)
+          .frame(height: 52)
           .background(theme.accent)
           .clipShape(Capsule())
         }
@@ -252,11 +252,11 @@ struct StatisticsLoadedView: View {
         ForEach(weekDays, id: \.label) { day in
           VStack(spacing: 4) {
             Text(day.label)
-              .font(.system(size: 11, weight: .medium))
+              .font(.system(size: 10, weight: .medium))
               .foregroundStyle(day.isToday ? theme.accent : theme.textTertiary)
 
             Text(day.number)
-              .font(.system(size: 16, weight: .semibold))
+              .font(.system(size: 18, weight: .semibold))
               .foregroundStyle(day.isToday ? .white : theme.textPrimary)
               .frame(width: 36, height: 36)
               .background(day.isToday ? theme.accent : Color.clear)

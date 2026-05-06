@@ -27,6 +27,7 @@ struct MainTabView: View {
         }
     }
     .tint(theme.accent)
+    .toolbarBackground(theme.bgSecondary, for: .tabBar)
   }
 }
 

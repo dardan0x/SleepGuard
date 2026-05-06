@@ -42,19 +42,7 @@ public struct RecordingsListView: View {
       ForEach(sections) { section in
         Section {
           ForEach(section.sessions) { session in
-            let color = intensityColor(for: session)
-            SessionRow(
-              dayNumber: dayString(from: session.startDate),
-              weekday: weekdayString(from: session.startDate),
-              duration: durationString(session.totalDuration),
-              events: "\(session.eventsCount) events",
-              intensityColor: color,
-              theme: theme
-            )
-            .contentShape(Rectangle())
-            .onTapGesture {
-              routerPath.navigate(to: .sessionDetail(id: session.id))
-            }
+            RecordingRowView(session: session, theme: theme)
           }
         } header: {
           Text(section.title)
@@ -107,40 +95,6 @@ public struct RecordingsListView: View {
         sessions: sessions.sorted { $0.startDate > $1.startDate }
       )
     }
-  }
-
-  private func dayString(from date: Date) -> String {
-    let formatter = DateFormatter()
-    formatter.dateFormat = "dd"
-    return formatter.string(from: date)
-  }
-
-  private func weekdayString(from date: Date) -> String {
-    let formatter = DateFormatter()
-    formatter.dateFormat = "EEE"
-    return formatter.string(from: date).uppercased()
-  }
-
-  private func durationString(_ total: TimeInterval) -> String {
-    let seconds = Int(total)
-    let hours = seconds / 3600
-    let minutes = (seconds % 3600) / 60
-    return String(format: "%dh %02dm", hours, minutes)
-  }
-
-  private func intensityColor(for session: SleepSession) -> Color {
-    guard let events = session.events, !events.isEmpty else {
-      return theme.snoreQuiet
-    }
-    let loud = events.filter { $0.intensity == .loud }.count
-    let light = events.filter { $0.intensity == .light }.count
-    if loud >= light {
-      return theme.snoreLoud
-    }
-    if light > 0 {
-      return theme.snoreLight
-    }
-    return theme.snoreQuiet
   }
 
   public enum ViewState {

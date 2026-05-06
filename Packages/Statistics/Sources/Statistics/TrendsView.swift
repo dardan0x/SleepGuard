@@ -34,11 +34,6 @@ public struct TrendsView: View {
     .navigationTitle("")
     .navigationBarTitleDisplayMode(.inline)
     .toolbar {
-      ToolbarItem(placement: .topBarLeading) {
-        Text("< Stats")
-          .font(.system(size: 17, weight: .medium))
-          .foregroundStyle(theme.accent)
-      }
       ToolbarItem(placement: .principal) {
         Text("Trends")
           .font(.system(size: 17, weight: .semibold))
@@ -123,14 +118,6 @@ public struct TrendsView: View {
         }
       }
 
-      HStack(spacing: 0) {
-        ForEach(data) { item in
-          Text(item.label)
-            .font(.system(size: 10, weight: .medium))
-            .foregroundStyle(theme.textTertiary)
-            .frame(maxWidth: .infinity)
-        }
-      }
     }
   }
 

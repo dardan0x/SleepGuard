@@ -81,9 +81,9 @@ public struct RecordingRowView: View {
     case 80...100:
       theme.secondaryColor
     case 50 ..< 80:
-      Color.orange
+      theme.scoreAmber
     default:
-      Color.red
+      theme.scoreRed
     }
   }
 }
