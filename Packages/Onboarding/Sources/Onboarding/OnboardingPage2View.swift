@@ -3,6 +3,7 @@ import DesignSystem
 
 struct OnboardingPage2View: View {
   let onContinue: () -> Void
+  @Environment(Theme.self) private var theme
 
   var body: some View {
     VStack(spacing: 24) {
@@ -10,7 +11,7 @@ struct OnboardingPage2View: View {
 
       Text("Here's what we do\nwhile you snooze")
         .font(.system(size: 28, weight: .bold))
-        .foregroundStyle(Theme.shared.labelColor)
+        .foregroundStyle(theme.textPrimary)
         .multilineTextAlignment(.center)
 
       VStack(spacing: 12) {
@@ -40,7 +41,7 @@ struct OnboardingPage2View: View {
       .foregroundStyle(.white)
       .frame(maxWidth: .infinity)
       .frame(height: 56)
-      .background(Theme.shared.primaryColor)
+      .background(theme.accent)
       .clipShape(Capsule())
       .padding(.horizontal, 24)
     }
@@ -52,24 +53,24 @@ struct OnboardingPage2View: View {
       Text(icon)
         .font(.system(size: 28))
         .frame(width: 48, height: 48)
-        .background(Theme.shared.surfaceColor)
+        .background(theme.bgCard)
         .clipShape(RoundedRectangle(cornerRadius: 12))
 
       VStack(alignment: .leading, spacing: 4) {
         Text(title)
           .font(.system(size: 16, weight: .semibold))
-          .foregroundStyle(Theme.shared.labelColor)
+          .foregroundStyle(theme.textPrimary)
 
         Text(description)
           .font(.system(size: 13))
-          .foregroundStyle(Theme.shared.secondaryLabelColor)
+          .foregroundStyle(theme.textSecondary)
           .lineLimit(2)
       }
 
       Spacer()
     }
     .padding(16)
-    .background(Theme.shared.surfaceColor)
+    .background(theme.bgCard)
     .clipShape(RoundedRectangle(cornerRadius: 16))
   }
 }

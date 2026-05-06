@@ -4,6 +4,7 @@ import DesignSystem
 
 struct OnboardingPage5View: View {
   let onContinue: () -> Void
+  @Environment(Theme.self) private var theme
   @Environment(UserPreferences.self) private var userPreferences
 
   var body: some View {
@@ -12,7 +13,7 @@ struct OnboardingPage5View: View {
 
       ZStack {
         Circle()
-          .fill(Theme.shared.primaryColor.opacity(0.15))
+          .fill(theme.accent.opacity(0.15))
           .frame(width: 140, height: 140)
 
         Text("🌙")
@@ -22,12 +23,12 @@ struct OnboardingPage5View: View {
       VStack(spacing: 12) {
         Text("Ready for your\nfirst night?")
           .font(.system(size: 28, weight: .bold))
-          .foregroundStyle(Theme.shared.labelColor)
+          .foregroundStyle(theme.textPrimary)
           .multilineTextAlignment(.center)
 
         Text("Place your phone on the nightstand and\nlet us do the rest.")
           .font(.system(size: 15))
-          .foregroundStyle(Theme.shared.secondaryLabelColor)
+          .foregroundStyle(theme.textSecondary)
           .multilineTextAlignment(.center)
       }
 
@@ -42,14 +43,14 @@ struct OnboardingPage5View: View {
         .foregroundStyle(.white)
         .frame(maxWidth: .infinity)
         .frame(height: 56)
-        .background(Theme.shared.primaryColor)
+        .background(theme.accent)
         .clipShape(Capsule())
 
         Button("Just browsing (for now)") {
           onContinue()
         }
         .font(.system(size: 15, weight: .medium))
-        .foregroundStyle(Theme.shared.secondaryLabelColor)
+        .foregroundStyle(theme.textSecondary)
       }
       .padding(.horizontal, 24)
     }

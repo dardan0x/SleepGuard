@@ -15,6 +15,7 @@ public final class SessionManager {
   /// Real-time audio level for UI observation
   public var currentDB: Float = -160.0
   public var currentSnoringState: SnoringState = .none
+  public var eventsCount: Int { currentSession?.events?.count ?? 0 }
 
   private let audioRecorder = AudioRecorder.shared
   private let snoreDetector = SnoreDetector.shared

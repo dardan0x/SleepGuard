@@ -3,6 +3,7 @@ import DesignSystem
 
 struct OnboardingPage1View: View {
   let onContinue: () -> Void
+  @Environment(Theme.self) private var theme
   @State private var zOffset1: CGFloat = 0
   @State private var zOffset2: CGFloat = 0
   @State private var zOpacity1: Double = 0
@@ -56,23 +57,23 @@ struct OnboardingPage1View: View {
       VStack(spacing: 12) {
         Text("Hey 🖐 Ready to\nspy on your sleep?")
           .font(.system(size: 28, weight: .bold))
-          .foregroundStyle(Theme.shared.labelColor)
+          .foregroundStyle(theme.textPrimary)
           .multilineTextAlignment(.center)
 
         Text("Don't worry — we're only listening for\nsnores, not secrets.")
           .font(.system(size: 15))
-          .foregroundStyle(Theme.shared.secondaryLabelColor)
+          .foregroundStyle(theme.textSecondary)
           .multilineTextAlignment(.center)
       }
 
       Text("Your snoring finally gets the attention it deserves.")
         .font(.system(size: 13, weight: .medium))
-        .foregroundStyle(Color(red: 0.6, green: 0.65, blue: 0.95))
+        .foregroundStyle(theme.accent)
         .padding(.horizontal, 20)
         .padding(.vertical, 10)
         .background(
           Capsule()
-            .fill(Color(red: 0.15, green: 0.15, blue: 0.35))
+            .fill(theme.accent.opacity(0.15))
         )
 
       Spacer()
@@ -84,7 +85,7 @@ struct OnboardingPage1View: View {
       .foregroundStyle(.white)
       .frame(maxWidth: .infinity)
       .frame(height: 56)
-      .background(Theme.shared.primaryColor)
+      .background(theme.accent)
       .clipShape(Capsule())
       .padding(.horizontal, 24)
     }
