@@ -386,3 +386,45 @@
 - None
 
 ---
+
+## 2026-05-06 — Session 11: F4-T1 RecordingsListView
+
+### Completed
+- **F4-T1**: `RecordingsListView` with `ViewState` enum and month-grouped sections
+
+### Technical Details
+- `RecordingsListView` is a container view with `ViewState` enum: `.loading`, `.empty`, `.loaded(sections:)`, `.error`
+- Fetches all `SleepSession` records via `@Query(sort: \SleepSession.startDate, order: .reverse)`
+- `loadState()` transitions view state based on query results; `.onChange(of: sessions)` triggers reload
+- Empty state: `RecordingsEmptyView` with waveform icon, "No recordings yet" title, and descriptive subtitle
+- Loaded state: `RecordingsLoadedView` renders a `List` with `Section` headers grouped by month/year
+- Grouping logic uses `Calendar.dateComponents([.year, .month])`, sorted descending, formatted as "MMMM yyyy"
+- Minimal `RecordingRowView` (inline, to be enhanced in F4-T2) shows date, duration, and color-coded sleep score
+- Pull-to-refresh via `.refreshable` provides UX feedback; `@Query` auto-updates so no manual re-fetch needed
+- Error state: `RecordingsErrorView` with retry button
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Recordings/Sources/Recordings/RecordingsListView.swift` | +188/-9 | Complete rewrite. Added ViewState enum, @Query, month-grouped List with sections, empty/loaded/error states, inline RecordingRowView |
+
+### Architecture Decisions
+- **Container/presentational split**: `RecordingsListView` manages state and data loading; child views (`RecordingsEmptyView`, `RecordingsLoadedView`, `RecordingsErrorView`) are pure UI. Matches F3 pattern.
+- **MonthSection as public struct**: Required because `ViewState.loaded` is a public enum case referencing it.
+- **Inline row for T1**: `RecordingRowView` is intentionally minimal (date, duration, score, chevron). F4-T2 will extract and enhance it with full design and navigation.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors across all 9 packages + app target
+
+### Next Session
+- **F4-T2**: `RecordingRowView` component (presentational, color-coded score, tap navigation)
+
+### Git Handoff
+- **Suggested branch**: `feature/f4/t1-recordings-list`
+- **Suggested commit**: `F4-T1 — RecordingsListView with ViewState and month-grouped sections`
+
+### Open Questions
+- None
+
+---
