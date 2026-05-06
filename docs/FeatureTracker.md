@@ -17,12 +17,12 @@ Last updated: 2026-05-06
 | Blocked | 0 |
 | — | — |
 | Total Tasks | 24 |
-| Tasks Done | 14 |
+| Tasks Done | 15 |
 | Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
-| Tasks Backlog | 9 |
+| Tasks Backlog | 8 |
 | — | — |
-| **Progress** | **62%** |
+| **Progress** | **67%** |
 
 ## Features
 
@@ -31,7 +31,7 @@ Last updated: 2026-05-06
 | F1 | Onboarding | P0 | Done | 5/5 | ██████████ 100% | [tracker](trackers/f1-onboarding.md) |
 | F2 | Live Session | P0 | Done | 6/6 | ██████████ 100% | [tracker](trackers/f2-live-session.md) |
 | F3 | Statistics Dashboard | P1 | Done | 3/3 | ██████████ 100% | [tracker](trackers/f3-statistics.md) |
-| F4 | Recordings | P1 | In Progress | 1/5 | ██░░░░░░░░ 20% | [tracker](trackers/f4-recordings.md) |
+| F4 | Recordings | P1 | In Progress | 2/5 | ████░░░░░░ 40% | [tracker](trackers/f4-recordings.md) |
 | F5 | Trends | P1 | Backlog | 0/2 | ░░░░░░░░░░ 0% | [tracker](trackers/f5-trends.md) |
 | F6 | Settings | P2 | Backlog | 0/3 | ░░░░░░░░░░ 0% | [tracker](trackers/f6-settings.md) |
 
@@ -41,6 +41,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-05-06 | F4-T2 | Completed | RecordingRowView extracted with score badge, event count, tap navigation to .recordingDetail |
 | 2026-05-06 | F4-T1 | Completed | RecordingsListView with ViewState, empty/loaded/error, month-grouped sections, pull-to-refresh |
 | 2026-05-06 | F3-T3 | Completed | Converted .liveSession to RouterDestination; Start Recording CTA now uses routerPath.navigate(to:) |
 | 2026-05-06 | F3-T2 | Completed | SleepScoreGauge, StatCard, SleepSparkline components; loaded view with gauge + 6 stat cards + sparkline |
@@ -73,13 +74,14 @@ _Unblocked tasks in priority order. The AI updates this after every task._
 
 | Task | Feature | Priority | Why Ready |
 |------|---------|----------|-----------|
-| F4-T2 | F4 | P1 | F4-T1 done |
+| F4-T3 | F4 | P1 | F4-T2 done |
 | F5-T1 | F5 | P1 | F2, F3 done |
 
 ## Completed (last 10)
 
 | Task | Feature | Completed | Duration |
 |------|---------|-----------|----------|
+| F4-T2 | F4 | 2026-05-06 | — |
 | F4-T1 | F4 | 2026-05-06 | — |
 | F3-T3 | F3 | 2026-05-06 | — |
 | F3-T2 | F3 | 2026-05-06 | — |
