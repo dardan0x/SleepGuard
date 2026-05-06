@@ -75,6 +75,32 @@ public final class UserPreferences {
     }
   }
 
+  public var minSnoreDuration: TimeInterval {
+    get {
+      access(keyPath: \.minSnoreDuration)
+      let raw = defaults.double(forKey: "minSnoreDuration")
+      return raw > 0 ? raw : 2.0
+    }
+    set {
+      withMutation(keyPath: \.minSnoreDuration) {
+        defaults.set(newValue, forKey: "minSnoreDuration")
+      }
+    }
+  }
+
+  public var maxClipLength: TimeInterval {
+    get {
+      access(keyPath: \.maxClipLength)
+      let raw = defaults.double(forKey: "maxClipLength")
+      return raw > 0 ? raw : 30.0
+    }
+    set {
+      withMutation(keyPath: \.maxClipLength) {
+        defaults.set(newValue, forKey: "maxClipLength")
+      }
+    }
+  }
+
   public enum DetectionSensitivity: String, CaseIterable, Sendable {
     case low
     case medium

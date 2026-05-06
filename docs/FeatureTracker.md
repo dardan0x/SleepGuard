@@ -11,18 +11,18 @@ Last updated: 2026-05-06
 | Metric | Count |
 |--------|-------|
 | Features (V1) | 6 |
-| Done | 5 |
+| Done | 6 |
 | In Progress | 0 |
-| Backlog | 1 |
+| Backlog | 0 |
 | Blocked | 0 |
 | — | — |
 | Total Tasks | 24 |
-| Tasks Done | 20 |
+| Tasks Done | 23 |
 | Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
-| Tasks Backlog | 3 |
+| Tasks Backlog | 0 |
 | — | — |
-| **Progress** | **83%** |
+| **Progress** | **100%** |
 
 ## Features
 
@@ -33,7 +33,7 @@ Last updated: 2026-05-06
 | F3 | Statistics Dashboard | P1 | Done | 3/3 | ██████████ 100% | [tracker](trackers/f3-statistics.md) |
 | F4 | Recordings | P1 | Done | 5/5 | ██████████ 100% | [tracker](trackers/f4-recordings.md) |
 | F5 | Trends | P1 | Done | 2/2 | ██████████ 100% | [tracker](trackers/f5-trends.md) |
-| F6 | Settings | P2 | Backlog | 0/3 | ░░░░░░░░░░ 0% | [tracker](trackers/f6-settings.md) |
+| F6 | Settings | P2 | Done | 3/3 | ██████████ 100% | [tracker](trackers/f6-settings.md) |
 
 ## Activity Log
 
@@ -41,6 +41,9 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-05-06 | F6-T3 | Completed | Delete All Data alert + SwiftData cascade delete; About section with version + rate app store link |
+| 2026-05-06 | F6-T2 | Completed | SettingsView with all design sections: Detection, Recording, Appearance, Data, About; confirmationDialogs for pickers |
+| 2026-05-06 | F6-T1 | Completed | Extended UserPreferences with minSnoreDuration (default 2s) and maxClipLength (default 30s); Color(hex:) made public |
 | 2026-05-06 | F5-T2 | Completed | Stat cards built as part of TrendsView: Avg Score, Best/Worst Night, Total Events |
 | 2026-05-06 | F5-T1 | Completed | TrendsView with week/month toggle, Swift Charts bar chart, intensity-colored bars, 4 stat cards |
 | 2026-05-06 | F4-T4 | Completed | Audio file saving (full session .caf), mini player with play/pause/scrub/event markers, event row playback |
@@ -73,7 +76,7 @@ _Unblocked tasks in priority order. The AI updates this after every task._
 
 | Task | Feature | Priority | Why Ready |
 |------|---------|----------|-----------|
-| F4-T4 | F4 | P1 | F4-T3, F4-T5 done. **Blocked by missing audio file saving infrastructure** — see tracker notes |
+| (none) | — | — | All V1 features complete |
 
 ## Blocked
 
@@ -81,18 +84,13 @@ _Unblocked tasks in priority order. The AI updates this after every task._
 |------|---------|---------|-------|
 | (none) | — | — | — |
 
-## Up Next
-
-_Unblocked tasks in priority order. The AI updates this after every task._
-
-| Task | Feature | Priority | Why Ready |
-|------|---------|----------|-----------|
-| F5-T1 | F5 | P1 | F2, F3, F4 done |
-
 ## Completed (last 10)
 
 | Task | Feature | Completed | Duration |
 |------|---------|-----------|----------|
+| F6-T3 | F6 | 2026-05-06 | — |
+| F6-T2 | F6 | 2026-05-06 | — |
+| F6-T1 | F6 | 2026-05-06 | — |
 | F5-T2 | F5 | 2026-05-06 | — |
 | F5-T1 | F5 | 2026-05-06 | — |
 | F4-T4 | F4 | 2026-05-06 | — |
@@ -100,15 +98,6 @@ _Unblocked tasks in priority order. The AI updates this after every task._
 | F4-T3 | F4 | 2026-05-06 | — |
 | F4-T2 | F4 | 2026-05-06 | — |
 | F4-T1 | F4 | 2026-05-06 | — |
-| F3-T3 | F3 | 2026-05-06 | — |
-| F3-T2 | F3 | 2026-05-06 | — |
-| F3-T1 | F3 | 2026-05-06 | — |
-| F2-T6 | F2 | 2026-05-06 | — |
-| F2-T5 | F2 | 2026-05-06 | — |
-| F2-T4 | F2 | 2026-05-06 | — |
-| F2-T3 | F2 | 2026-05-06 | — |
-| F2-T2 | F2 | 2026-05-06 | — |
-| F2-T1 | F2 | 2026-05-06 | — |
 
 ---
 

@@ -33,6 +33,7 @@ struct SnoreGuardApp: App {
           OnboardingView()
         }
       }
+      .preferredColorScheme(colorScheme(for: userPreferences.appearance))
       .withAppDependencyGraph(
         userPreferences: userPreferences,
         sessionManager: sessionManager,
@@ -43,5 +44,13 @@ struct SnoreGuardApp: App {
       )
     }
     .modelContainer(sharedModelContainer)
+  }
+}
+
+private func colorScheme(for appearance: UserPreferences.AppearanceSetting) -> ColorScheme? {
+  switch appearance {
+  case .light: .light
+  case .dark: .dark
+  case .system: nil
   }
 }
