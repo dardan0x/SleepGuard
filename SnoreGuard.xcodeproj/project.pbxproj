@@ -26,6 +26,7 @@
 
 /* Begin PBXFileReference section */
 		CE1588F82FAA9946001B61AA /* SnoreGuard.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SnoreGuard.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CE158A3C2FAB2EC7001B61AA /* SnoreGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SnoreGuard.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -75,6 +76,11 @@
 			children = (
 				CE1588F82FAA9946001B61AA /* SnoreGuard.app */,
 			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		CE158A3D2FAB2EC7001B61AA /* Products */ = {
+			isa = PBXGroup;
 			name = Products;
 			sourceTree = "<group>";
 		};
@@ -150,6 +156,12 @@
 			preferredProjectObjectVersion = 77;
 			productRefGroup = CE1588F92FAA9946001B61AA /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = CE158A3D2FAB2EC7001B61AA /* Products */;
+					ProjectRef = CE158A3C2FAB2EC7001B61AA /* SnoreGuard.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				CE1588F72FAA9946001B61AA /* SnoreGuard */,

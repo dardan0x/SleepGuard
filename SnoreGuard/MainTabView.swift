@@ -29,6 +29,7 @@ struct MainTabView: View {
 struct StatisticsTab: View {
   @Environment(RouterPath.self) private var routerPath
   @Environment(UserPreferences.self) private var userPreferences
+  @Environment(SessionManager.self) private var sessionManager
 
   var body: some View {
     NavigationStack(path: Binding(
@@ -44,8 +45,10 @@ struct StatisticsTab: View {
     )) { destination in
       switch destination {
       case .sessionSummary:
-        Text("Session Summary")
-          .withEnvironments()
+        if let session = sessionManager.completedSession {
+          SessionSummaryView(session: session)
+            .withEnvironments()
+        }
       case .liveSession:
         SleepSessionView()
           .withEnvironments()
@@ -55,6 +58,11 @@ struct StatisticsTab: View {
       if userPreferences.presentRecordingAfterOnboarding {
         userPreferences.presentRecordingAfterOnboarding = false
         routerPath.presentedSheet = .liveSession
+      }
+    }
+    .onChange(of: sessionManager.completedSession) { _, newValue in
+      if newValue != nil {
+        routerPath.presentedSheet = .sessionSummary
       }
     }
   }
