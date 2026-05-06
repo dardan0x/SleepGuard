@@ -52,6 +52,127 @@
 - **Suggested branch**: `feature/f1/t1-t5-onboarding-flow`
 - **Suggested commit**: `F1-T1..T5 — Onboarding flow with 5 pages, permission, and app gate`
 
+---
+
+## 2026-05-06 — Session 18: Statistics Header Pin
+
+### Completed
+- Pinned "Statistics" title + Calendar button to the top of the Statistics dashboard so it doesn't scroll.
+
+### Technical Details
+- Restructured both `StatisticsEmptyView` and `StatisticsLoadedView`:
+  - Moved `headerSection` outside the `ScrollView` into a parent `VStack(spacing: 0)`.
+  - `ScrollView` now only wraps the scrollable content (week selector, gauge, stats, chart, recording button).
+  - Padding applied separately: header gets `.padding(.horizontal, 20) + .padding(.top, 20)`; scrollable content gets `.padding(.horizontal, 20) + .padding(.bottom, 20)`.
+- Also fixed empty-state title font that was missed in the previous polish pass: 32 → 34pt.
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Statistics/Sources/Statistics/StatisticsDashboardView.swift` | +24/-20 | Pinned header outside ScrollView for empty and loaded states; empty title 32→34pt |
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors
+
+### Git Handoff
+- **Suggested branch**: `polish/v1-statistics-pinned-header`
+- **Suggested commit**: `Pin Statistics header above ScrollView — title + Calendar button no longer scrolls`
+
+---
+
+## 2026-05-06 — Session 20: Compact Statistics Layout
+
+### Completed
+- Shrunk score gauge and stat cards so the full Statistics dashboard fits on one screen.
+- Un-pinned the Start Recording button — it's now back inside the scrollable content.
+
+### Technical Details
+- **SleepScoreGauge**: size reduced 150 → 110 (proportional shrink of ring, score text, and label).
+- **StatCard** (shared component):
+  - Padding: 14 → 10
+  - Icon font: 16 → 14
+  - Value font: 20 → 18
+  - Title font: 12 → 11
+- **MiniBarChart**:
+  - Overall height: 100 → 70
+  - Max bar height: 80 → 55
+  - X-axis label font: 11 → 10
+- **StatisticsDashboardView**:
+  - Section spacing: 24 → 16
+  - Start Recording button moved back inside the `ScrollView` for both empty and loaded states.
+  - Header remains pinned above the ScrollView.
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Statistics/Sources/Statistics/StatisticsDashboardView.swift` | +12/-24 | Button back inside ScrollView, gauge 110, spacing 16 |
+| `Packages/DesignSystem/Sources/DesignSystem/StatCard.swift` | +4/-4 | Padding 10, fonts 14/18/11 |
+| `Packages/DesignSystem/Sources/DesignSystem/MiniBarChart.swift` | +3/-3 | Height 70, bar max 55, label font 10 |
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors
+
+### Git Handoff
+- **Suggested branch**: `polish/v1-statistics-compact`
+- **Suggested commit**: `Compact Statistics layout — shrink gauge, cards, chart to fit one screen`
+
+---
+
+## 2026-05-06 — Session 21: Stat Cards Further Shrink
+
+### Completed
+- Reduced StatCard sizes even further to ensure the full Statistics dashboard fits comfortably on one screen.
+
+### Technical Details
+- **StatCard** (shared component):
+  - Padding: 10 → 8
+  - Icon font: 14 → 12
+  - Value font: 18 → 16
+  - Title font: 11 → 10
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/DesignSystem/Sources/DesignSystem/StatCard.swift` | +4/-4 | Padding 8, fonts 12/16/10 |
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors
+
+### Git Handoff
+- **Suggested branch**: `polish/v1-statistics-compact`
+- **Suggested commit**: `Shrink StatCard padding and fonts further to fit one screen`
+
+### Open Questions
+- None
+
+---
+
+## 2026-05-06 — Session 19: Statistics Start Recording Button Pin
+
+### Completed
+- Pinned "Start Recording" button to the bottom of the Statistics dashboard so it doesn't scroll.
+
+### Technical Details
+- Moved the Start Recording `Button` outside the `ScrollView` in both `StatisticsEmptyView` and `StatisticsLoadedView`.
+- In the empty state, the button was previously inside the card; now the card contains only the icon + text, and the button sits below it, pinned like the loaded state.
+- Layout is now: fixed header → `ScrollView` with body content → fixed Start Recording button.
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Statistics/Sources/Statistics/StatisticsDashboardView.swift` | +24/-24 | Moved Start Recording button outside ScrollView for both empty and loaded states |
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors
+
+### Git Handoff
+- **Suggested branch**: `polish/v1-statistics-pinned-button`
+- **Suggested commit**: `Pin Start Recording button below ScrollView in Statistics dashboard`
+
 ### Open Questions
 - None
 
