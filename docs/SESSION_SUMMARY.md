@@ -89,3 +89,41 @@
 ### Open Questions
 - Should `AudioRecorder` emit a Combine publisher or callback for `currentDB` changes instead of relying on SwiftUI observation? (Current approach works but requires view polling via `.onChange` or `.task`)
 - Should we add haptic feedback on snoring state transitions for the bedside clock? (Nice-to-have, not in V1 tracker)
+
+
+## 2026-05-06 — Session 4: F2-T3 Pre-start Recording Screen
+
+### Completed
+- **F2-T3**: Pre-start recording screen (`RecordingPrestartView` + `SleepSessionView` container)
+
+### Technical Details
+- `SleepSessionView` is now a state-driven container: shows `RecordingPrestartView` when `!sessionManager.isRecording`, and a placeholder for the bedside clock when `isRecording`
+- `RecordingPrestartView` features:
+  - Dark nighttime-friendly background using `theme.backgroundColor`
+  - Header with moon icon, "Ready to Sleep" title, and subtitle
+  - Mic permission status indicator (green checkmark when granted, orange warning when denied/undetermined)
+  - Tips card with 3 instruction rows (placement, charging, keep app open)
+  - Large CTA button: "Grant Access & Start" when permission missing, "Start Recording" when granted
+- Tapping CTA requests permission asynchronously if needed, then calls `sessionManager.startSession()`
+- `AudioRecorder` accessed via `.shared` directly in the view (consistent with `SessionManager` pattern)
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/SleepSession/Sources/SleepSession/RecordingPrestartView.swift` | +103 | New. Pre-start UI with mic status, tips, and Start Recording CTA |
+| `Packages/SleepSession/Sources/SleepSession/SleepSessionView.swift` | +24/-9 | Rewritten as container that switches between pre-start and active-recording placeholder based on `sessionManager.isRecording` |
+
+### Architecture Decisions
+- **No AppRegistry changes**: `AudioRecorder` was not added to `@Environment` injection to avoid cross-cutting dependency graph changes for a single boolean observation. Instead, the view accesses `AudioRecorder.shared` directly, matching the existing pattern in `SessionManager`.
+- **View-driven state transition**: `SleepSessionView` observes `sessionManager.isRecording` and swaps child views. This avoids needing a router push/sheet change when recording starts — the transition happens inside the already-presented `.liveSession` sheet.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors across all 9 packages + app target
+
+### Next Session
+- **F2-T4**: Bedside clock active recording UI (full-screen clock, real-time dB indicator, snoring intensity colors, duration timer, stop button, dimmed nighttime UI)
+
+### Open Questions
+- Should `AudioRecorder` emit a Combine publisher or callback for `currentDB` changes instead of relying on SwiftUI observation? (Current approach works but requires view polling via `.onChange` or `.task`)
+- Should we add haptic feedback on snoring state transitions for the bedside clock? (Nice-to-have, not in V1 tracker)
