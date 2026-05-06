@@ -142,7 +142,7 @@ SESSION END
 
 ## Local Tracker (Auto-Updated)
 
-Kimi auto-updates `docs/FeatureTracker.md` and `docs/trackers/*.md` after every task.
+Claude Code auto-updates `docs/FeatureTracker.md` and `docs/trackers/*.md` after every task.
 Local tracker updates happen FIRST — they survive session loss and are the primary source of truth.
 Templates: `docs/templates/FeatureTracker.md` and `docs/templates/feature-tracker-detail.md`.
 
@@ -212,6 +212,10 @@ Append a new session entry with this structure:
 
 ### Build Status
 - **BUILD SUCCEEDED / FAILED** — [if failed, what errors and how they were resolved]
+
+### Git Handoff
+- **Suggested branch**: `feature/[f#]/[t#]-short-description`
+- **Suggested commit**: `[Task ID] — [Short description]` with bullet list of changes
 
 ### Next Session
 - [Task ID]: [What to start next and why]
