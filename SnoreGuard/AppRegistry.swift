@@ -45,6 +45,8 @@ extension View {
           SessionDetailView(sessionID: id)
         case .liveSession:
           SleepSessionView()
+        case .trends:
+          TrendsView()
         }
       }
   }

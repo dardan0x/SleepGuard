@@ -29,10 +29,14 @@ public struct StatisticsDashboardView: View {
         StatisticsLoadedView(
           session: session,
           recentSessions: recentSessions,
-          theme: theme
-        ) {
-          routerPath.navigate(to: .liveSession)
-        }
+          theme: theme,
+          onStartRecording: {
+            routerPath.navigate(to: .liveSession)
+          },
+          onViewTrends: {
+            routerPath.navigate(to: .trends)
+          }
+        )
       case .error:
         StatisticsErrorView(theme: theme) {
           loadState()
@@ -151,6 +155,7 @@ struct StatisticsLoadedView: View {
   let recentSessions: [SleepSession]
   let theme: Theme
   let onStartRecording: () -> Void
+  let onViewTrends: () -> Void
 
   var body: some View {
     ScrollView {
@@ -235,7 +240,7 @@ struct StatisticsLoadedView: View {
         Spacer()
 
         Button {
-          // View month
+          onViewTrends()
         } label: {
           Text("View month >")
             .font(.system(size: 14, weight: .medium))
