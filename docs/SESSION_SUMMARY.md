@@ -127,3 +127,43 @@
 ### Open Questions
 - Should `AudioRecorder` emit a Combine publisher or callback for `currentDB` changes instead of relying on SwiftUI observation? (Current approach works but requires view polling via `.onChange` or `.task`)
 - Should we add haptic feedback on snoring state transitions for the bedside clock? (Nice-to-have, not in V1 tracker)
+
+
+## 2026-05-06 — Session 5: F2-T4 Bedside Clock Active Recording UI
+
+### Completed
+- **F2-T4**: Bedside clock active recording UI (`BedsideClockView`)
+
+### Technical Details
+- `BedsideClockView` is a presentational view shown by `SleepSessionView` when `sessionManager.isRecording`
+- `.task` runs at 20Hz (50ms intervals) while the view is alive:
+  - Updates `currentTime` only when the wall-clock second changes (avoids unnecessary re-renders)
+  - Calls `sessionManager.processAudioLevel(db: audioRecorder.currentDB)` on every tick
+  - Task auto-cancels when the view is removed from hierarchy (e.g., stop recording)
+- **Clock display**: 88pt thin rounded font, `theme.labelColor` at 80% opacity for nighttime eye comfort
+- **Duration timer**: Monospaced `HH:MM:SS` below the clock, computed from `session.startDate`
+- **Audio level bar**: 8pt rounded bar with `theme.surfaceColor` track; fill width maps dB `-60..-20` → `0..1`; fill color matches snoring state
+- **Snoring indicator**: 
+  - Top: colored dot (10pt) + text label ("Quiet", "Snoring — Quiet/Light/Loud")
+  - Full-screen subtle glow: `snoringColor` at 6% opacity with `0.4s` ease animation
+- **Stop button**: 64pt circle, red fill at 75% opacity, white `stop.fill` icon; calls `sessionManager.stopSession()`
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/SleepSession/Sources/SleepSession/BedsideClockView.swift` | +134 | New. Full bedside clock UI with clock, duration timer, dB bar, snoring glow/indicator, stop button |
+| `Packages/SleepSession/Sources/SleepSession/SleepSessionView.swift` | +6/-5 | Replaced placeholder active-recording view with `BedsideClockView()` |
+
+### Architecture Decisions
+- **Single `.task` for clock + audio**: Instead of separate `TimelineView` + `.onChange` approaches, one `while !Task.isCancelled` loop handles both. This avoids 43 re-renders/second from raw `currentDB` observation and caps updates at 20Hz.
+- **No `@Environment(AudioRecorder)` injection**: Continues the F2-T3 pattern of accessing `AudioRecorder.shared` directly in the view. Keeps `AppRegistry` unchanged.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors across all 9 packages + app target
+
+### Next Session
+- **F2-T5**: Session summary sheet (sleep score, duration, snoring %, events count, avg/peak dB, Save/Discard buttons)
+
+### Open Questions
+- Stop button currently drops user back to `RecordingPrestartView` because `isRecording` becomes false. F2-T5 needs to present a summary sheet instead — will likely require changing the sheet destination from `.liveSession` to `.sessionSummary(sessionID:)` when stopping.
