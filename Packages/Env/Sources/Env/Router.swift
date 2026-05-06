@@ -6,6 +6,7 @@ public enum RouterDestination: Hashable, Sendable {
   case sessionDetail(id: UUID)
   case liveSession
   case trends
+  case calendar
 }
 
 public enum SheetDestination: Identifiable, Hashable, Sendable {

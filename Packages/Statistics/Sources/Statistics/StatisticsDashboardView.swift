@@ -22,9 +22,15 @@ public struct StatisticsDashboardView: View {
         Color.clear
           .task { loadState() }
       case .empty:
-        StatisticsEmptyView(theme: theme) {
-          routerPath.navigate(to: .liveSession)
-        }
+        StatisticsEmptyView(
+          theme: theme,
+          onStartRecording: {
+            routerPath.navigate(to: .liveSession)
+          },
+          onViewCalendar: {
+            routerPath.navigate(to: .calendar)
+          }
+        )
       case .loaded(let session, let recentSessions):
         StatisticsLoadedView(
           session: session,
@@ -35,6 +41,9 @@ public struct StatisticsDashboardView: View {
           },
           onViewTrends: {
             routerPath.navigate(to: .trends)
+          },
+          onViewCalendar: {
+            routerPath.navigate(to: .calendar)
           }
         )
       case .error:
@@ -72,6 +81,7 @@ public struct StatisticsDashboardView: View {
 struct StatisticsEmptyView: View {
   let theme: Theme
   let onStartRecording: () -> Void
+  let onViewCalendar: () -> Void
 
   var body: some View {
     VStack(spacing: 0) {
@@ -135,7 +145,7 @@ struct StatisticsEmptyView: View {
       Spacer()
 
       Button {
-        // Calendar action
+        onViewCalendar()
       } label: {
         HStack(spacing: 4) {
           Image(systemName: "calendar")
@@ -161,6 +171,7 @@ struct StatisticsLoadedView: View {
   let theme: Theme
   let onStartRecording: () -> Void
   let onViewTrends: () -> Void
+  let onViewCalendar: () -> Void
 
   var body: some View {
     VStack(spacing: 0) {
@@ -223,7 +234,7 @@ struct StatisticsLoadedView: View {
       Spacer()
 
       Button {
-        // Calendar action
+        onViewCalendar()
       } label: {
         HStack(spacing: 4) {
           Image(systemName: "calendar")

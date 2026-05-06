@@ -870,3 +870,33 @@ Or delete and reinstall the app on the simulator.
 
 ### Open Questions
 - None
+
+---
+
+## 2026-05-07 — Session 22: CalendarView Build + Fixes
+
+### Completed
+- **CalendarView**: Built and wired month-view calendar screen accessible from Statistics dashboard.
+- **Route wiring**: Added `.calendar` to `RouterDestination`, mapped in `AppRegistry`, and wired Calendar button in `StatisticsDashboardView` (both empty and loaded states).
+- **Bug fixes**:
+  - Fixed weekday header/grid mismatch when locale's `firstWeekday` is Monday (or non-Sunday). `weekdaySymbols` is now a computed property that rotates `shortWeekdaySymbols` to align with `calendar.firstWeekday`.
+  - Fixed double back button by adding `.navigationBarBackButtonHidden(true)` since CalendarView renders its own custom `< Stats` back button.
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Statistics/Sources/Statistics/CalendarView.swift` | +429 | New. Month calendar with day grid, month stats, selected-night card, legend, and navigation |
+| `Packages/Env/Sources/Env/Router.swift` | +1 | Added `.calendar` to `RouterDestination` |
+| `Packages/Statistics/Sources/Statistics/StatisticsDashboardView.swift` | +21/-5 | Wired `onViewCalendar` closure to Calendar button in empty and loaded states |
+| `SnoreGuard/AppRegistry.swift` | +2 | Mapped `.calendar` → `CalendarView()` in `withAppRouter()` |
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors across all packages + app target
+
+### Git Handoff
+- **Suggested branch**: `feature/calendar-view`
+- **Suggested commit**: `CalendarView — Month calendar with session dots, stats, and selected-night card`
+
+### Open Questions
+- Should a Calendar screen be added to `designs/SnoreGuard.pen` for formal design compliance?
