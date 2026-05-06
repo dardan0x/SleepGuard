@@ -48,6 +48,12 @@
 
 ### Next Session
 - Start F2 (Live Session) — F2-T1: AudioRecorder + SnoreDetector (already scaffolded, verify and enhance)
+### Git Handoff
+- **Suggested branch**: `feature/f1/t1-t5-onboarding-flow`
+- **Suggested commit**: `F1-T1..T5 — Onboarding flow with 5 pages, permission, and app gate`
+
+### Open Questions
+- None
 
 ---
 
@@ -86,6 +92,10 @@
 - **F2-T3**: Pre-start recording screen (idle state with "Start Recording" CTA, mic status indicator, instructions)
 - Then F2-T4: Bedside clock active recording UI
 
+### Git Handoff
+- **Suggested branch**: `feature/f2/t1-t2-recorder-and-manager`
+- **Suggested commit**: `F2-T1..T2 — AudioRecorder verification and SessionManager event tracking`
+
 ### Open Questions
 - Should `AudioRecorder` emit a Combine publisher or callback for `currentDB` changes instead of relying on SwiftUI observation? (Current approach works but requires view polling via `.onChange` or `.task`)
 - Should we add haptic feedback on snoring state transitions for the bedside clock? (Nice-to-have, not in V1 tracker)
@@ -123,6 +133,10 @@
 
 ### Next Session
 - **F2-T4**: Bedside clock active recording UI (full-screen clock, real-time dB indicator, snoring intensity colors, duration timer, stop button, dimmed nighttime UI)
+
+### Git Handoff
+- **Suggested branch**: `feature/f2/t3-prestart-screen`
+- **Suggested commit**: `F2-T3 — Pre-start recording screen with mic status and tips`
 
 ### Open Questions
 - Should `AudioRecorder` emit a Combine publisher or callback for `currentDB` changes instead of relying on SwiftUI observation? (Current approach works but requires view polling via `.onChange` or `.task`)
@@ -165,6 +179,10 @@
 ### Next Session
 - **F2-T5**: Session summary sheet (sleep score, duration, snoring %, events count, avg/peak dB, Save/Discard buttons)
 
+### Git Handoff
+- **Suggested branch**: `feature/f2/t4-bedside-clock`
+- **Suggested commit**: `F2-T4 — Bedside clock UI with dB bar, snoring glow, and timer`
+
 ### Open Questions
 - Stop button currently drops user back to `RecordingPrestartView` because `isRecording` becomes false. F2-T5 needs to present a summary sheet instead — will likely require changing the sheet destination from `.liveSession` to `.sessionSummary(sessionID:)` when stopping.
 
@@ -204,6 +222,13 @@
 ### Next Session
 - **F2-T6**: Route registration + wiring (pre-start, bedside clock, summary sheet routes; Statistics CTA; onboarding routing)
 
+### Git Handoff
+- **Suggested branch**: `feature/f2/t5-session-summary`
+- **Suggested commit**: `F2-T5 — Session summary sheet with score ring and Save/Discard`
+
+### Open Questions
+- None
+
 ## 2026-05-06 — Session 7: F2-T6 Route Registration + Wiring
 
 ### Completed
@@ -230,6 +255,10 @@
 
 ### Next Session
 - **F3-T1**: StatisticsDashboardView empty + loaded states (SwiftData query, ViewState enum)
+
+### Git Handoff
+- **Suggested branch**: `feature/f2/t6-route-wiring`
+- **Suggested commit**: `F2-T6 — Route registration and tab wiring for live session flow`
 
 ### Open Questions
 - None
@@ -268,6 +297,10 @@
 
 ### Next Session
 - **F3-T3**: "Start Recording" CTA + routing (verify existing CTA already uses `routerPath.presentedSheet = .liveSession`, may need refinement per acceptance criteria)
+
+### Git Handoff
+- **Suggested branch**: `feature/f3/t2-gauge-and-sparkline`
+- **Suggested commit**: `F3-T2 — SleepScoreGauge, StatCard, SleepSparkline components`
 
 ### Open Questions
 - None
@@ -344,6 +377,10 @@
 
 ### Next Session
 - **F3-T2**: Score gauge + stat cards components (circular gauge, sparkline, presentational refinements)
+
+### Git Handoff
+- **Suggested branch**: `feature/f3/t1-statistics-dashboard`
+- **Suggested commit**: `F3-T1 — StatisticsDashboardView with ViewState, empty/loaded/error states`
 
 ### Open Questions
 - None

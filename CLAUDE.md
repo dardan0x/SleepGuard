@@ -142,7 +142,7 @@ SESSION END
 
 ## Local Tracker (Auto-Updated)
 
-Claude Code auto-updates `docs/FeatureTracker.md` and `docs/trackers/*.md` after every task.
+Kimi auto-updates `docs/FeatureTracker.md` and `docs/trackers/*.md` after every task.
 Local tracker updates happen FIRST — they survive session loss and are the primary source of truth.
 Templates: `docs/templates/FeatureTracker.md` and `docs/templates/feature-tracker-detail.md`.
 
@@ -180,6 +180,8 @@ End every task with:
 - **Files changed:** [list every file touched]
 - **What changed:** [one line per file]
 - **Follow-up needed:** [anything requiring a decision]
+- **Suggested branch**: `feature/[f#]/[t#]-short-description`
+- **Suggested commit**: `[Task ID] — [Short description]` with bullet list of changes
 
 ## Session End Requirements
 
