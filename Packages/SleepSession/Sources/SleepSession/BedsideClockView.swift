@@ -90,7 +90,7 @@ struct BedsideClockView: View {
     VStack(spacing: 16) {
       HStack(spacing: 6) {
         Circle()
-          .fill(Color.green)
+          .fill(theme.scoreGreen)
           .frame(width: 8, height: 8)
         Text("Recording · \(durationString)")
           .font(.system(size: 16, weight: .medium))
@@ -184,7 +184,7 @@ struct BedsideClockView: View {
   private var statusLabel: String {
     switch sessionManager.currentSnoringState {
     case .none: return "Quiet"
-    case .quiet: return "Light snoring detected · just now"
+    case .quiet: return "Quiet snoring detected · just now"
     case .light: return "Light snoring detected · just now"
     case .loud: return "Loud snoring detected · just now"
     }

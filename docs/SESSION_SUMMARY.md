@@ -52,6 +52,127 @@
 - **Suggested branch**: `feature/f1/t1-t5-onboarding-flow`
 - **Suggested commit**: `F1-T1..T5 — Onboarding flow with 5 pages, permission, and app gate`
 
+---
+
+## 2026-05-06 — Session 18: Statistics Header Pin
+
+### Completed
+- Pinned "Statistics" title + Calendar button to the top of the Statistics dashboard so it doesn't scroll.
+
+### Technical Details
+- Restructured both `StatisticsEmptyView` and `StatisticsLoadedView`:
+  - Moved `headerSection` outside the `ScrollView` into a parent `VStack(spacing: 0)`.
+  - `ScrollView` now only wraps the scrollable content (week selector, gauge, stats, chart, recording button).
+  - Padding applied separately: header gets `.padding(.horizontal, 20) + .padding(.top, 20)`; scrollable content gets `.padding(.horizontal, 20) + .padding(.bottom, 20)`.
+- Also fixed empty-state title font that was missed in the previous polish pass: 32 → 34pt.
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Statistics/Sources/Statistics/StatisticsDashboardView.swift` | +24/-20 | Pinned header outside ScrollView for empty and loaded states; empty title 32→34pt |
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors
+
+### Git Handoff
+- **Suggested branch**: `polish/v1-statistics-pinned-header`
+- **Suggested commit**: `Pin Statistics header above ScrollView — title + Calendar button no longer scrolls`
+
+---
+
+## 2026-05-06 — Session 20: Compact Statistics Layout
+
+### Completed
+- Shrunk score gauge and stat cards so the full Statistics dashboard fits on one screen.
+- Un-pinned the Start Recording button — it's now back inside the scrollable content.
+
+### Technical Details
+- **SleepScoreGauge**: size reduced 150 → 110 (proportional shrink of ring, score text, and label).
+- **StatCard** (shared component):
+  - Padding: 14 → 10
+  - Icon font: 16 → 14
+  - Value font: 20 → 18
+  - Title font: 12 → 11
+- **MiniBarChart**:
+  - Overall height: 100 → 70
+  - Max bar height: 80 → 55
+  - X-axis label font: 11 → 10
+- **StatisticsDashboardView**:
+  - Section spacing: 24 → 16
+  - Start Recording button moved back inside the `ScrollView` for both empty and loaded states.
+  - Header remains pinned above the ScrollView.
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Statistics/Sources/Statistics/StatisticsDashboardView.swift` | +12/-24 | Button back inside ScrollView, gauge 110, spacing 16 |
+| `Packages/DesignSystem/Sources/DesignSystem/StatCard.swift` | +4/-4 | Padding 10, fonts 14/18/11 |
+| `Packages/DesignSystem/Sources/DesignSystem/MiniBarChart.swift` | +3/-3 | Height 70, bar max 55, label font 10 |
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors
+
+### Git Handoff
+- **Suggested branch**: `polish/v1-statistics-compact`
+- **Suggested commit**: `Compact Statistics layout — shrink gauge, cards, chart to fit one screen`
+
+---
+
+## 2026-05-06 — Session 21: Stat Cards Further Shrink
+
+### Completed
+- Reduced StatCard sizes even further to ensure the full Statistics dashboard fits comfortably on one screen.
+
+### Technical Details
+- **StatCard** (shared component):
+  - Padding: 10 → 8
+  - Icon font: 14 → 12
+  - Value font: 18 → 16
+  - Title font: 11 → 10
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/DesignSystem/Sources/DesignSystem/StatCard.swift` | +4/-4 | Padding 8, fonts 12/16/10 |
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors
+
+### Git Handoff
+- **Suggested branch**: `polish/v1-statistics-compact`
+- **Suggested commit**: `Shrink StatCard padding and fonts further to fit one screen`
+
+### Open Questions
+- None
+
+---
+
+## 2026-05-06 — Session 19: Statistics Start Recording Button Pin
+
+### Completed
+- Pinned "Start Recording" button to the bottom of the Statistics dashboard so it doesn't scroll.
+
+### Technical Details
+- Moved the Start Recording `Button` outside the `ScrollView` in both `StatisticsEmptyView` and `StatisticsLoadedView`.
+- In the empty state, the button was previously inside the card; now the card contains only the icon + text, and the button sits below it, pinned like the loaded state.
+- Layout is now: fixed header → `ScrollView` with body content → fixed Start Recording button.
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Statistics/Sources/Statistics/StatisticsDashboardView.swift` | +24/-24 | Moved Start Recording button outside ScrollView for both empty and loaded states |
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors
+
+### Git Handoff
+- **Suggested branch**: `polish/v1-statistics-pinned-button`
+- **Suggested commit**: `Pin Start Recording button below ScrollView in Statistics dashboard`
+
 ### Open Questions
 - None
 
@@ -689,6 +810,63 @@ Or delete and reinstall the app on the simulator.
 ### Git Handoff
 - **Suggested branch**: `feature/f6/t1-t3-settings`
 - **Suggested commit**: `F6-T1..T3 — SettingsView with detection, recording, appearance, data, and about sections`
+
+### Open Questions
+- None
+
+---
+
+## 2026-05-06 — Session 17: V1 Polish / Bug Hunt Pass
+
+### Completed
+- **Polish pass across F1–F6 V1**: Fixed visual discrepancies and functional bugs found by comparing live screens against `designs/SnoreGuard.pen`.
+
+### Technical Details
+- **RecordingsListView → RecordingRowView**: `RecordingsListView` was using generic `SessionRow` from DesignSystem instead of the custom `RecordingRowView` built in F4-T2. Swapped to `RecordingRowView` which shows date, duration, event count, and a colored score badge. Removed now-unused helpers (`dayString`, `weekdayString`, `durationString`, `intensityColor`).
+- **Hardcoded `Color.green` → theme colors**: Replaced all instances of `Color.green` with `theme.scoreGreen` in:
+  - `StatisticsDashboardView` (Start Recording button dot)
+  - `BedsideClockView` (Recording dot in waveform section)
+  - `RecordingPrestartView` (Start Recording button dot)
+- **BedsideClockView statusLabel fix**: `.quiet` case was incorrectly showing "Light snoring detected · just now" — changed to "Quiet snoring detected · just now" to differentiate from `.light`.
+- **SessionDetailView audio URL parsing**: `URL(string: urlString)` on file paths would return `nil`. Changed to `URL(fileURLWithPath: urlString)` with `FileManager` existence check before conversion.
+- **SessionDetailView toolbar**: Removed non-standard custom `< Back` text button; NavigationStack now shows the native back chevron. Wired delete button to `deleteSession()` which fetches by UUID, deletes from SwiftData context, saves, and dismisses.
+- **TrendsView duplicate X-axis labels**: Removed redundant `HStack` that manually rendered day labels below the chart. `chartXAxis` already renders labels inside the chart area. Also removed custom `< Stats` toolbar item to use native back button.
+- **Statistics design compliance**:
+  - Title font: 32 → 34pt
+  - Week day label: 11 → 10pt
+  - Week day number: 16 → 18pt
+  - Score gauge size: 180 → 150
+  - Start Recording button height: 56 → 52pt
+- **RecordingRowView score colors**: Replaced `Color.orange` and `Color.red` with `theme.scoreAmber` and `theme.scoreRed` for consistency with the design system.
+- **Tab bar background**: Added `.toolbarBackground(theme.bgSecondary, for: .tabBar)` to `MainTabView` so the tab bar matches the app theme instead of default translucent.
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Recordings/Sources/Recordings/RecordingsListView.swift` | -45/+5 | Replaced `SessionRow` with `RecordingRowView`; removed unused helper methods |
+| `Packages/Recordings/Sources/Recordings/RecordingRowView.swift` | +2/-2 | `Color.orange` → `theme.scoreAmber`, `Color.red` → `theme.scoreRed` |
+| `Packages/Recordings/Sources/Recordings/SessionDetailView.swift` | +18/-12 | `URL(fileURLWithPath:)` fix, wired delete button, removed custom back button, added `@Environment(\.dismiss)` |
+| `Packages/Statistics/Sources/Statistics/StatisticsDashboardView.swift` | +8/-8 | Title 34pt, week label 10pt, week number 18pt, gauge 150, button 52pt, `theme.scoreGreen` dot |
+| `Packages/Statistics/Sources/Statistics/TrendsView.swift` | -12/+0 | Removed duplicate X-axis label HStack and custom `< Stats` toolbar item |
+| `Packages/SleepSession/Sources/SleepSession/BedsideClockView.swift` | +2/-2 | `Color.green` → `theme.scoreGreen`, `.quiet` statusLabel wording fix |
+| `Packages/SleepSession/Sources/SleepSession/RecordingPrestartView.swift` | +1/-1 | `Color.green` → `theme.scoreGreen` |
+| `SnoreGuard/MainTabView.swift` | +1/-0 | Added `.toolbarBackground(theme.bgSecondary, for: .tabBar)` |
+| `docs/FeatureTracker.md` | +1/-0 | Activity log entry for polish pass |
+
+### Architecture Decisions
+- **Native back button over custom text**: Removing custom `< Back` / `< Stats` toolbar items in `SessionDetailView` and `TrendsView` lets NavigationStack handle the back affordance correctly, matching iOS conventions and reducing code.
+- **Fail-silent for audio playback and deletion**: Both `setupAudioPlayer` and `deleteSession` catch errors and do nothing. Audio is optional; deletion failure is edge-case and would need a toast system (not in V1 scope).
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors, zero warnings across all 9 packages + app target
+
+### Next Session
+- V1 is fully polished. Next work would be V1.1 or V2 features per docs/Roadmap.md.
+
+### Git Handoff
+- **Suggested branch**: `polish/v1-bug-hunt-pass`
+- **Suggested commit**: `V1 Polish — Fix RecordingRowView wiring, theme color consistency, Trends dup labels, SessionDetail delete+URL, Stats design compliance`
 
 ### Open Questions
 - None

@@ -74,57 +74,62 @@ struct StatisticsEmptyView: View {
   let onStartRecording: () -> Void
 
   var body: some View {
-    ScrollView {
-      VStack(spacing: 24) {
-        headerSection
+    VStack(spacing: 0) {
+      headerSection
+        .padding(.horizontal, 20)
+        .padding(.top, 20)
 
+      ScrollView {
         VStack(spacing: 16) {
-          ZStack {
-            Circle()
-              .fill(theme.accent.opacity(0.15))
-              .frame(width: 80, height: 80)
+          VStack(spacing: 16) {
+            ZStack {
+              Circle()
+                .fill(theme.accent.opacity(0.15))
+                .frame(width: 80, height: 80)
 
-            Image(systemName: "moon.fill")
-              .font(.system(size: 32))
-              .foregroundStyle(theme.accent)
+              Image(systemName: "moon.fill")
+                .font(.system(size: 32))
+                .foregroundStyle(theme.accent)
+            }
+
+            VStack(spacing: 4) {
+              Text("Ready to Sleep?")
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundStyle(theme.textPrimary)
+
+              Text("Start a recording to analyze your snoring")
+                .font(.system(size: 15))
+                .foregroundStyle(theme.textSecondary)
+                .multilineTextAlignment(.center)
+            }
+
+            Button {
+              onStartRecording()
+            } label: {
+              Text("Start Recording")
+                .font(.system(size: 17, weight: .semibold))
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity)
+                .frame(height: 52)
+                .background(theme.accent)
+                .clipShape(Capsule())
+            }
           }
-
-          VStack(spacing: 4) {
-            Text("Ready to Sleep?")
-              .font(.system(size: 20, weight: .semibold))
-              .foregroundStyle(theme.textPrimary)
-
-            Text("Start a recording to analyze your snoring")
-              .font(.system(size: 15))
-              .foregroundStyle(theme.textSecondary)
-              .multilineTextAlignment(.center)
-          }
-
-          Button {
-            onStartRecording()
-          } label: {
-            Text("Start Recording")
-              .font(.system(size: 17, weight: .semibold))
-              .foregroundStyle(.white)
-              .frame(maxWidth: .infinity)
-              .frame(height: 56)
-              .background(theme.accent)
-              .clipShape(Capsule())
-          }
+          .frame(maxWidth: .infinity)
+          .padding(24)
+          .background(theme.bgCard)
+          .cornerRadius(theme.radiusCard)
         }
-        .frame(maxWidth: .infinity)
-        .padding(24)
-        .background(theme.bgCard)
-        .cornerRadius(theme.radiusCard)
+        .padding(.horizontal, 20)
+        .padding(.bottom, 20)
       }
-      .padding(20)
     }
   }
 
   private var headerSection: some View {
     HStack {
       Text("Statistics")
-        .font(.system(size: 32, weight: .bold))
+        .font(.system(size: 34, weight: .bold))
         .foregroundStyle(theme.textPrimary)
 
       Spacer()
@@ -158,56 +163,61 @@ struct StatisticsLoadedView: View {
   let onViewTrends: () -> Void
 
   var body: some View {
-    ScrollView {
-      VStack(spacing: 24) {
-        headerSection
+    VStack(spacing: 0) {
+      headerSection
+        .padding(.horizontal, 20)
+        .padding(.top, 20)
 
-        weekSelector
+      ScrollView {
+        VStack(spacing: 16) {
+          weekSelector
 
-        SleepScoreGauge(score: session.sleepScore, theme: theme, size: 180)
+          SleepScoreGauge(score: session.sleepScore, theme: theme, size: 110)
 
-        VStack(spacing: 4) {
-          Text("LAST NIGHT")
-            .font(.system(size: 12, weight: .semibold))
-            .foregroundStyle(theme.textTertiary)
-            .tracking(1)
+          VStack(spacing: 4) {
+            Text("LAST NIGHT")
+              .font(.system(size: 12, weight: .semibold))
+              .foregroundStyle(theme.textTertiary)
+              .tracking(1)
 
-          Text("\(dateString) · \(timeRangeString)")
-            .font(.system(size: 15))
-            .foregroundStyle(theme.textSecondary)
-        }
-
-        statsGrid
-
-        if !recentSessions.isEmpty {
-          chartSection
-        }
-
-        Button {
-          onStartRecording()
-        } label: {
-          HStack(spacing: 8) {
-            Circle()
-              .fill(Color.green)
-              .frame(width: 8, height: 8)
-            Text("Start Recording")
+            Text("\(dateString) · \(timeRangeString)")
+              .font(.system(size: 15))
+              .foregroundStyle(theme.textSecondary)
           }
-          .font(.system(size: 17, weight: .semibold))
-          .foregroundStyle(.white)
-          .frame(maxWidth: .infinity)
-          .frame(height: 56)
-          .background(theme.accent)
-          .clipShape(Capsule())
+
+          statsGrid
+
+          if !recentSessions.isEmpty {
+            chartSection
+          }
+
+          Button {
+            onStartRecording()
+          } label: {
+            HStack(spacing: 8) {
+              Circle()
+                .fill(theme.scoreGreen)
+                .frame(width: 8, height: 8)
+              Text("Start Recording")
+            }
+            .font(.system(size: 17, weight: .semibold))
+            .foregroundStyle(.white)
+            .frame(maxWidth: .infinity)
+            .frame(height: 52)
+            .background(theme.accent)
+            .clipShape(Capsule())
+          }
         }
+        .padding(.horizontal, 20)
+        .padding(.bottom, 20)
       }
-      .padding(20)
     }
   }
 
   private var headerSection: some View {
     HStack {
       Text("Statistics")
-        .font(.system(size: 32, weight: .bold))
+        .font(.system(size: 34, weight: .bold))
         .foregroundStyle(theme.textPrimary)
 
       Spacer()
@@ -252,11 +262,11 @@ struct StatisticsLoadedView: View {
         ForEach(weekDays, id: \.label) { day in
           VStack(spacing: 4) {
             Text(day.label)
-              .font(.system(size: 11, weight: .medium))
+              .font(.system(size: 10, weight: .medium))
               .foregroundStyle(day.isToday ? theme.accent : theme.textTertiary)
 
             Text(day.number)
-              .font(.system(size: 16, weight: .semibold))
+              .font(.system(size: 18, weight: .semibold))
               .foregroundStyle(day.isToday ? .white : theme.textPrimary)
               .frame(width: 36, height: 36)
               .background(day.isToday ? theme.accent : Color.clear)

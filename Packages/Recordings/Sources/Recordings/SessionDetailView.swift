@@ -11,6 +11,7 @@ public struct SessionDetailView: View {
 
   @Environment(Theme.self) private var theme
   @Environment(\.modelContext) private var modelContext
+  @Environment(\.dismiss) private var dismiss
 
   @State private var viewState: ViewState = .loading
 
@@ -58,11 +59,6 @@ public struct SessionDetailView: View {
     .navigationTitle("")
     .navigationBarTitleDisplayMode(.inline)
     .toolbar {
-      ToolbarItem(placement: .topBarLeading) {
-        Text("< Back")
-          .font(.system(size: 17, weight: .medium))
-          .foregroundStyle(theme.accent)
-      }
       ToolbarItem(placement: .principal) {
         Text(navigationTitle(for: session.startDate))
           .font(.system(size: 17, weight: .semibold))
@@ -78,7 +74,7 @@ public struct SessionDetailView: View {
               .foregroundStyle(theme.accent)
           }
           Button {
-            // Delete
+            deleteSession()
           } label: {
             Image(systemName: "trash")
               .font(.system(size: 17))
@@ -99,8 +95,8 @@ public struct SessionDetailView: View {
 
   private func setupAudioPlayer(for session: SleepSession) {
     guard let urlString = session.audioFileURL,
-          let url = URL(string: urlString),
-          FileManager.default.fileExists(atPath: url.path) else { return }
+          FileManager.default.fileExists(atPath: urlString) else { return }
+    let url = URL(fileURLWithPath: urlString)
     do {
       let player = try AVAudioPlayer(contentsOf: url)
       player.prepareToPlay()
@@ -367,6 +363,21 @@ public struct SessionDetailView: View {
     let formatter = DateFormatter()
     formatter.dateFormat = "EEE, MMM d"
     return formatter.string(from: date)
+  }
+
+  private func deleteSession() {
+    do {
+      let descriptor = FetchDescriptor<SleepSession>(
+        predicate: #Predicate { $0.id == sessionID }
+      )
+      if let session = try modelContext.fetch(descriptor).first {
+        modelContext.delete(session)
+        try modelContext.save()
+        dismiss()
+      }
+    } catch {
+      // Deletion failed; fail silently
+    }
   }
 
   private enum ViewState {
