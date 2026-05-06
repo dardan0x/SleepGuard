@@ -274,6 +274,48 @@
 
 ---
 
+## 2026-05-06 — Session 10: F3-T3 Start Recording CTA + Routing
+
+### Completed
+- **F3-T3**: Converted `.liveSession` from `SheetDestination` to `RouterDestination`; Start Recording CTA now uses `routerPath.navigate(to:)`
+
+### Technical Details
+- `.liveSession` moved from `SheetDestination` to `RouterDestination` in `Router.swift`
+- `AppRegistry.withAppRouter()` maps `.liveSession` → `SleepSessionView()`
+- `SleepSessionView` hides navigation bar via `.toolbar(.hidden, for: .navigationBar)` for full-screen recording experience
+- `MainTabView.onChange(of: sessionManager.completedSession)` now calls `routerPath.navigateToRoot()` before presenting `.sessionSummary` sheet, ensuring the pushed live session is popped
+- Onboarding routing updated: `StatisticsTab.onAppear` now uses `routerPath.navigate(to: .liveSession)` instead of `routerPath.presentedSheet = .liveSession`
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Env/Sources/Env/Router.swift` | +1/-8 | Moved `.liveSession` from `SheetDestination` to `RouterDestination` |
+| `SnoreGuard/AppRegistry.swift` | +2 | Added `.liveSession` → `SleepSessionView()` mapping in `withAppRouter()` |
+| `SnoreGuard/MainTabView.swift` | +1/-6 | Removed `.liveSession` from sheet switch; updated onboarding + completedSession handling |
+| `Packages/Statistics/Sources/Statistics/StatisticsDashboardView.swift` | +2/-2 | Empty + loaded CTAs now use `routerPath.navigate(to: .liveSession)` |
+| `Packages/SleepSession/Sources/SleepSession/SleepSessionView.swift` | +1 | Added `.toolbar(.hidden, for: .navigationBar)` |
+| `docs/ProjectArchitecture.md` | +2/-1 | Added `.liveSession` to Routes table; updated recording screen description |
+
+### Architecture Decisions
+- **Push over sheet for live session**: Acceptance criteria explicitly required `routerPath.navigate(to:)`. This keeps the live session in the Statistics tab's NavigationStack, which is semantically correct since recording is an extension of the statistics flow.
+- **Auto-pop before summary sheet**: When recording stops, `navigateToRoot()` ensures the live session is dismissed before the summary sheet appears, preventing a sheet-over-push visual stack.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors across all 9 packages + app target
+
+### Git Handoff
+- **Suggested branch**: `feature/f3/t3-start-recording-routing`
+- **Suggested commit**: `F3-T3 — Convert liveSession to RouterDestination with navigate(to:)`
+
+### Next Session
+- **F4-T1**: RecordingsListView (empty + grouped list) — F2 is done so F4 is unblocked
+
+### Open Questions
+- None
+
+---
+
 ## 2026-05-06 — Session 8: F3-T1 Statistics Dashboard (Empty + Loaded)
 
 ### Completed

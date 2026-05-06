@@ -25,7 +25,7 @@ public struct StatisticsDashboardView: View {
           }
       case .empty:
         StatisticsEmptyView(theme: theme) {
-          routerPath.presentedSheet = .liveSession
+          routerPath.navigate(to: .liveSession)
         }
       case .loaded(let session, let recentSessions):
         StatisticsLoadedView(
@@ -33,7 +33,7 @@ public struct StatisticsDashboardView: View {
           recentSessions: recentSessions,
           theme: theme
         ) {
-          routerPath.presentedSheet = .liveSession
+          routerPath.navigate(to: .liveSession)
         }
       case .error:
         StatisticsErrorView(theme: theme) {

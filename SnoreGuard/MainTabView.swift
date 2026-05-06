@@ -56,19 +56,17 @@ struct StatisticsTab: View {
           SessionSummaryView(session: session)
             .withEnvironments()
         }
-      case .liveSession:
-        SleepSessionView()
-          .withEnvironments()
       }
     }
     .onAppear {
       if userPreferences.presentRecordingAfterOnboarding {
         userPreferences.presentRecordingAfterOnboarding = false
-        routerPath.presentedSheet = .liveSession
+        routerPath.navigate(to: .liveSession)
       }
     }
     .onChange(of: sessionManager.completedSession) { _, newValue in
       if newValue != nil {
+        routerPath.navigateToRoot()
         routerPath.presentedSheet = .sessionSummary
       }
     }
