@@ -14,6 +14,7 @@ public final class SleepSession {
   public var eventsCount: Int
   public var eventsPerHour: Double
   public var sleepScore: Int
+  public var audioFileURL: String?
 
   @Relationship(deleteRule: .cascade, inverse: \SnoreEvent.session)
   public var events: [SnoreEvent]?
@@ -29,7 +30,8 @@ public final class SleepSession {
     peakDB: Double = 0,
     eventsCount: Int = 0,
     eventsPerHour: Double = 0,
-    sleepScore: Int = 0
+    sleepScore: Int = 0,
+    audioFileURL: String? = nil
   ) {
     self.id = id
     self.startDate = startDate
@@ -42,5 +44,6 @@ public final class SleepSession {
     self.eventsCount = eventsCount
     self.eventsPerHour = eventsPerHour
     self.sleepScore = sleepScore
+    self.audioFileURL = audioFileURL
   }
 }

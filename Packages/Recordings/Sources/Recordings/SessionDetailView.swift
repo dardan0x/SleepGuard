@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import AVFoundation
 import Models
 import Env
 import DesignSystem
@@ -12,6 +13,11 @@ public struct SessionDetailView: View {
   @Environment(\.modelContext) private var modelContext
 
   @State private var viewState: ViewState = .loading
+
+  // MARK: - Audio Playback
+  @State private var audioPlayer: AVAudioPlayer?
+  @State private var isPlaying = false
+  @State private var currentPlaybackTime: TimeInterval = 0
 
   public init(sessionID: UUID) {
     self.sessionID = sessionID
@@ -39,11 +45,13 @@ public struct SessionDetailView: View {
       VStack(spacing: 24) {
         headerSection(session: session)
 
-        statsSection(session: session)
-
         timelineSection(session: session)
 
         eventsSection(session: session)
+
+        if session.audioFileURL != nil {
+          miniPlayerSection(session: session)
+        }
       }
       .padding(20)
     }
@@ -79,7 +87,71 @@ public struct SessionDetailView: View {
         }
       }
     }
+    .task {
+      setupAudioPlayer(for: session)
+    }
+    .task(id: isPlaying) {
+      await trackPlaybackProgress()
+    }
   }
+
+  // MARK: - Audio Playback Controls
+
+  private func setupAudioPlayer(for session: SleepSession) {
+    guard let urlString = session.audioFileURL,
+          let url = URL(string: urlString),
+          FileManager.default.fileExists(atPath: url.path) else { return }
+    do {
+      let player = try AVAudioPlayer(contentsOf: url)
+      player.prepareToPlay()
+      audioPlayer = player
+    } catch {
+      // Audio playback is optional; fail silently
+    }
+  }
+
+  private func trackPlaybackProgress() async {
+    guard isPlaying else { return }
+    while !Task.isCancelled {
+      try? await Task.sleep(for: .milliseconds(100))
+      if let player = audioPlayer {
+        currentPlaybackTime = player.currentTime
+        if !player.isPlaying {
+          isPlaying = false
+        }
+      }
+    }
+  }
+
+  private func togglePlayback() {
+    guard let player = audioPlayer else { return }
+    if player.isPlaying {
+      player.pause()
+      isPlaying = false
+    } else {
+      player.play()
+      isPlaying = true
+    }
+  }
+
+  private func seekToEvent(_ event: SnoreEvent, in session: SleepSession) {
+    guard let player = audioPlayer else { return }
+    let eventTime = event.timestamp.timeIntervalSince(session.startDate)
+    player.currentTime = max(0, min(eventTime, player.duration))
+    if !player.isPlaying {
+      player.play()
+      isPlaying = true
+    }
+  }
+
+  private func scrubTo(relative: Double, in session: SleepSession) {
+    guard let player = audioPlayer else { return }
+    let time = relative * player.duration
+    player.currentTime = max(0, min(time, player.duration))
+    currentPlaybackTime = player.currentTime
+  }
+
+  // MARK: - Sections
 
   private func headerSection(session: SleepSession) -> some View {
     HStack(spacing: 16) {
@@ -118,10 +190,6 @@ public struct SessionDetailView: View {
     }
   }
 
-  private func statsSection(session: SleepSession) -> some View {
-    EmptyView()
-  }
-
   private func timelineSection(session: SleepSession) -> some View {
     VStack(alignment: .leading, spacing: 12) {
       Text("SNORING TIMELINE")
@@ -158,7 +226,9 @@ public struct SessionDetailView: View {
 
       VStack(spacing: 8) {
         ForEach(events.prefix(4), id: \.id) { event in
-          EventRow(event: event, theme: theme)
+          EventRow(event: event, theme: theme) {
+            seekToEvent(event, in: session)
+          }
         }
       }
 
@@ -175,6 +245,69 @@ public struct SessionDetailView: View {
     }
   }
 
+  private func miniPlayerSection(session: SleepSession) -> some View {
+    let totalDuration = audioPlayer?.duration ?? session.totalDuration
+    let progress = totalDuration > 0 ? currentPlaybackTime / totalDuration : 0
+
+    return VStack(alignment: .leading, spacing: 8) {
+      HStack(spacing: 12) {
+        Button {
+          togglePlayback()
+        } label: {
+          Image(systemName: isPlaying ? "pause.fill" : "play.fill")
+            .font(.system(size: 14, weight: .semibold))
+            .foregroundStyle(.white)
+            .frame(width: 28, height: 28)
+            .background(theme.accent)
+            .clipShape(Circle())
+        }
+
+        GeometryReader { geometry in
+          ZStack(alignment: .leading) {
+            RoundedRectangle(cornerRadius: 2)
+              .fill(theme.bgElevated)
+              .frame(height: 4)
+
+            RoundedRectangle(cornerRadius: 2)
+              .fill(theme.accent)
+              .frame(width: max(CGFloat(progress) * geometry.size.width, 0), height: 4)
+
+            // Event markers
+            if let events = session.events?.sorted(by: { $0.timestamp < $1.timestamp }) {
+              ForEach(events, id: \.id) { event in
+                let eventProgress = session.totalDuration > 0
+                  ? event.timestamp.timeIntervalSince(session.startDate) / session.totalDuration
+                  : 0
+                Circle()
+                  .fill(theme.intensityColor(event.intensity))
+                  .frame(width: 6, height: 6)
+                  .position(
+                    x: CGFloat(eventProgress) * geometry.size.width,
+                    y: 2
+                  )
+              }
+            }
+          }
+          .contentShape(Rectangle())
+          .onTapGesture { location in
+            let relative = Double(location.x / geometry.size.width)
+            scrubTo(relative: relative, in: session)
+          }
+        }
+        .frame(height: 4)
+
+        Text(timeString(totalDuration))
+          .font(.system(size: 11, weight: .medium, design: .monospaced))
+          .foregroundStyle(theme.textTertiary)
+          .monospacedDigit()
+      }
+    }
+    .padding(.horizontal, 12)
+    .padding(.vertical, 12)
+    .background(theme.bgCard)
+    .cornerRadius(theme.radiusSmall)
+  }
+
   private var errorBody: some View {
     VStack(spacing: 16) {
       Image(systemName: "exclamationmark.triangle")
@@ -186,6 +319,8 @@ public struct SessionDetailView: View {
         .foregroundStyle(theme.textPrimary)
     }
   }
+
+  // MARK: - Data Loading
 
   private func loadSession() async {
     do {
@@ -202,6 +337,8 @@ public struct SessionDetailView: View {
     }
   }
 
+  // MARK: - Formatting
+
   private func durationString(_ total: TimeInterval) -> String {
     let seconds = Int(total)
     let hours = seconds / 3600
@@ -213,6 +350,17 @@ public struct SessionDetailView: View {
     let formatter = DateFormatter()
     formatter.dateFormat = "h:mm a"
     return formatter.string(from: date)
+  }
+
+  private func timeString(_ interval: TimeInterval) -> String {
+    let total = Int(interval)
+    let hours = total / 3600
+    let minutes = (total % 3600) / 60
+    let seconds = total % 60
+    if hours > 0 {
+      return String(format: "%d:%02d:%02d", hours, minutes, seconds)
+    }
+    return String(format: "%d:%02d", minutes, seconds)
   }
 
   private func navigationTitle(for date: Date) -> String {
@@ -294,6 +442,7 @@ private struct SnoringTimelineView: View {
 private struct EventRow: View {
   let event: SnoreEvent
   let theme: Theme
+  let onPlay: () -> Void
 
   var body: some View {
     HStack(spacing: 12) {
@@ -314,7 +463,7 @@ private struct EventRow: View {
       Spacer()
 
       Button {
-        // Play event audio (F4-T4)
+        onPlay()
       } label: {
         Image(systemName: "play.fill")
           .font(.system(size: 14))

@@ -508,3 +508,94 @@ Or delete and reinstall the app on the simulator.
 - None
 
 ---
+
+## 2026-05-06 — Session 13: F4-T3 Tracker Sync + F4-T5 Route Registration Fix
+
+### Completed
+- **F4-T3 tracker sync**: Marked as Done in `docs/trackers/f4-recordings.md`. Code was already built in a previous session but tracker was never updated.
+- **F4-T5**: Fixed `.recordingDetail(id:)` route registration in `AppRegistry`
+
+### Technical Details
+- `SessionDetailView` exists in `Packages/Recordings/Sources/Recordings/SessionDetailView.swift` with full implementation: `SleepScoreGauge`, 4× `StatCard` grid, `SnoringTimelineView` with intensity-colored segments, `EventRow` list with play buttons
+- `AppRegistry.withAppRouter()` previously mapped `.recordingDetail(id:)` to placeholder `Text("Recording Detail: ...")`
+- Fix: changed mapping to `SessionDetailView(sessionID: id)`, reusing the same detail view for both `.recordingDetail(id:)` and `.sessionDetail(id:)` routes
+- `RecordingRowView` already navigated to `.recordingDetail(id:)` — no changes needed there
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `SnoreGuard/AppRegistry.swift` | +1/-1 | `.recordingDetail(id:)` now maps to `SessionDetailView(sessionID: id)` instead of placeholder `Text` |
+| `docs/trackers/f4-recordings.md` | +12/-6 | F4-T3 marked Done, F4-T5 marked Done with notes |
+| `docs/FeatureTracker.md` | +6/-5 | Dashboard updated: F4 4/5 (80%), Tasks Done 17, Progress 71% |
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors across all 9 packages + app target
+
+### Git Handoff
+- **Suggested branch**: `feature/f4/t5-route-registration`
+- **Suggested commit**: `F4-T5 — Fix .recordingDetail route to use SessionDetailView`
+
+### Next Session
+- **Decision needed on F4-T4**: Audio playback is blocked because `AudioRecorder` only calculates dB in real-time via `AVAudioEngine.installTap()` — no audio files are saved to disk. `SnoreEvent.audioFileURL` is always `nil`.
+  - **Option B**: Add audio clip saving infrastructure (capture short buffers around each event to disk using `AVAudioFile`), then build playback UI
+  - **Option C**: Build playback UI as visual mock (controls, progress bar, event markers) without actual audio playback
+- **F5-T1** is unblocked and ready to start if F4-T4 is deferred
+
+### Open Questions
+- Should we implement audio clip saving for F4-T4? This requires non-trivial `AudioRecorder` changes to write `AVAudioPCMBuffer` segments to `AVAudioFile` during snore events.
+
+## 2026-05-06 — Session 14: F4-T4 Audio Playback with Event Markers
+
+### Completed
+- **F4-T4**: Audio playback with event markers
+
+### Technical Details
+- **Simplified approach**: Save full session audio as one `.caf` file, seek to event timestamps during playback. Per-event clips deferred to V2.
+- `AudioRecorder` changes:
+  - Added `audioFile: AVAudioFile?` property
+  - `startRecording(audioFileURL:)` creates `AVAudioFile(forWriting:)` with input format settings
+  - Tap callback writes each `AVAudioPCMBuffer` to `audioFile` before dispatching dB to MainActor
+  - `stopRecording()` nils `audioFile` to close it
+- `SleepSession` model changes:
+  - Added `audioFileURL: String?` property
+  - Updated initializer with default `nil`
+- `SessionManager` changes:
+  - `startSession()` generates file URL in Documents directory (`session_<UUID>.caf`), saves to `session.audioFileURL`
+  - `discardCompletedSession()` deletes audio file from disk when user taps "Discard"
+- `SessionDetailView` changes:
+  - Added mini player bar at bottom (only shows when `audioFileURL != nil`)
+  - Mini player: play/pause button (accent circle), progress bar with event marker dots, total duration label
+  - Progress bar supports tap-to-scrub
+  - Event markers are colored by intensity (quiet/light/loud)
+  - `AVAudioPlayer` initialized in `.task` when view loads
+  - `.task(id: isPlaying)` updates `currentPlaybackTime` at 10Hz while playing
+  - Event row play buttons seek to event timestamp and auto-play
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/AudioEngine/Sources/AudioEngine/AudioRecorder.swift` | +8/-3 | Added `audioFile` property, `audioFileURL` parameter to `startRecording()`, buffer writing in tap callback |
+| `Packages/Models/Sources/Models/SleepSession.swift` | +2/-0 | Added `audioFileURL: String?` property |
+| `Packages/Env/Sources/Env/SessionManager.swift` | +14/-1 | File URL generation in `startSession()`, `discardCompletedSession()` for cleanup |
+| `Packages/SleepSession/Sources/SleepSession/SessionSummaryView.swift` | +1/-0 | `discardSession()` now calls `sessionManager.discardCompletedSession()` |
+| `Packages/Recordings/Sources/Recordings/SessionDetailView.swift` | +115/-30 | Added mini player, audio playback controls, event marker dots, tap-to-scrub, event row play buttons |
+
+### Architecture Decisions
+- **Full session file vs per-event clips**: Full session file is dramatically simpler (one `AVAudioFile`, no ring buffer, no file management). UX is equivalent because playback seeks to event timestamps. Per-event clips deferred to V2.
+- **Audio file cleanup on discard**: `SessionManager` handles deletion, not the view. This keeps file I/O logic in the manager layer.
+- **Mini player in ScrollView**: The mini player scrolls with content rather than being a sticky bottom bar. Simpler layout, acceptable for V1.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors across all 9 packages + app target
+
+### Git Handoff
+- **Suggested branch**: `feature/f4/t4-audio-playback`
+- **Suggested commit**: `F4-T4 — Audio playback with event markers (full session file approach)`
+
+### Next Session
+- **F5-T1** (Trends) is next unblocked task. F4 is now complete.
+
+### Open Questions
+- None
