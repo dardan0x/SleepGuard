@@ -974,3 +974,68 @@ Or delete and reinstall the app on the simulator.
 ### Open Questions
 - Should `confidenceThreshold` be wired to `UserPreferences.detectionSensitivity` now, or deferred to V2 polish?
 - Should the CoreML model be trained on real audio data (currently it's a synthetic softmax classifier trained on decibel ranges)? Real training would require labeled audio datasets.
+
+---
+
+## 2026-05-07 — Session 24: V2 Kickoff + F12 HealthKit Complete
+
+### Completed
+- **Roadmap update**: Marked V1.0 (F1–F6) and V1.1 (F7–F9) as complete; added V2.0 feature breakdowns with task counts
+- **V2 tracker creation**: Created `f10-smart-alarm.md`, `f11-apple-watch.md`, `f12-healthkit.md`, `f13-cloudkit-sync.md` with task tables and acceptance criteria
+- **F12-T1**: HealthKit capability + permissions
+  - Created `SnoreGuard/SnoreGuard.entitlements` with `com.apple.developer.healthkit`
+  - Added `CODE_SIGN_ENTITLEMENTS`, `NSHealthShareUsageDescription`, `NSHealthUpdateUsageDescription` to Debug/Release build settings in `project.pbxproj`
+  - Added `HealthKit` framework to Env package via `linkerSettings` in `Package.swift`
+  - Created `HealthKitSync` singleton in `Packages/Env/Sources/Env/HealthKitSync.swift` with `requestAuthorization()` and `checkAuthorizationStatus()`
+- **F12-T2**: Write sleep data to HealthKit
+  - `HealthKitSync.sync(session:)` creates `HKCategorySample` with `HKCategoryValueSleepAnalysis.asleep`
+  - Metadata includes `HKMetadataKeyWasUserEntered`, `snoreEventsCount`, `snoringPercentage`, `averageDB`, `peakDB`
+- **F12-T3**: Settings toggle + trigger on session save
+  - Added `syncToHealthKit` to `UserPreferences` (UserDefaults-backed, `@Observable` compatible)
+  - Added toggle to `SettingsView` Data section with heart icon; toggling on requests authorization
+  - `SessionSummaryView.saveSession()` triggers `HealthKitSync.shared.sync(session:)` after SwiftData save
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Env/Sources/Env/HealthKitSync.swift` | +68 | New. Singleton for HealthKit authorization and sleep data writing |
+| `Packages/Env/Sources/Env/UserPreferences.swift` | +12 | Added `syncToHealthKit` computed property with UserDefaults backing |
+| `Packages/Settings/Sources/Settings/SettingsView.swift` | +16/-1 | Added HealthKit sync toggle in Data section with authorization request on enable |
+| `Packages/SleepSession/Sources/SleepSession/SessionSummaryView.swift` | +6 | Triggers HealthKit sync after session save when toggle is enabled |
+| `Packages/Env/Package.swift` | +1 | Added `linkerSettings: [.linkedFramework("HealthKit")]` |
+| `SnoreGuard/SnoreGuard/SnoreGuard.entitlements` | +8 | New. HealthKit capability entitlement |
+| `SnoreGuard.xcodeproj/project.pbxproj` | +4 | Added `CODE_SIGN_ENTITLEMENTS` and `NSHealth*` Info.plist keys to Debug + Release |
+| `docs/Roadmap.md` | +18/-12 | V1/V1.1 marked complete; V2 features with task breakdowns added |
+| `docs/FeatureTracker.md` | +18/-6 | Added F10–F13 to dashboard; F12 marked In Progress → Done |
+| `docs/trackers/f10-smart-alarm.md` | +96 | New V2 tracker |
+| `docs/trackers/f11-apple-watch.md` | +115 | New V2 tracker |
+| `docs/trackers/f12-healthkit.md` | +132 | New V2 tracker; all tasks marked Done |
+| `docs/trackers/f13-cloudkit-sync.md` | +96 | New V2 tracker |
+| `docs/features/f12-healthkit.md` | +47 | New feature doc for F12 |
+
+### Architecture Decisions
+- **HealthKit in Env package**: Treated as a shared service (like `SessionManager`, `UserPreferences`) rather than a separate feature package. This avoids adding a new package dependency for a single singleton with no UI.
+- **Silent failure for HealthKit writes**: No toast/snackbar infrastructure exists in the app, so errors are silently swallowed. If HealthKit becomes a critical user-facing feature, a toast system should be added.
+- **UserDefaults-backed toggle**: `syncToHealthKit` persists across launches. User enables once, all future sessions auto-sync.
+- **Sync triggered from SessionSummaryView, not SessionManager**: This keeps `SessionManager` decoupled from HealthKit. The view layer handles the "save + sync + dismiss" sequence.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors across all packages + app target
+
+### Git Handoff
+- **Suggested branch**: `feature/f12/t1-t3-healthkit`
+- **Suggested commit**: `F12-T1..T3 — HealthKit sleep data sync with Settings toggle`
+  - F12-T1: HealthKit capability, entitlements, usage descriptions, HealthKitSync singleton
+  - F12-T2: Write HKCategorySample with session timestamps and snore metadata
+  - F12-T3: Settings toggle for sync; auto-trigger on session save
+
+### Next Session
+- **F10 Smart Alarm** is the next highest-priority unblocked V2 feature
+  - F10-T1: Alarm scheduling engine (local notifications, background refresh)
+  - F10-T2: Smart wake window detection (evaluate snoring phase in 30 min window)
+  - F10-T3: Alarm UI in Settings (time picker, enable toggle, window duration)
+
+### Open Questions
+- Should Smart Alarm require a new `SleepSession` package modification (alarm state in SessionManager) or a separate `AlarmManager` in Env?
+- Should alarm sound be a system sound or a bundled custom sound?
