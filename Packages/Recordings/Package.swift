@@ -19,7 +19,8 @@ let package = Package(
         .product(name: "Models", package: "Models"),
         .product(name: "Env", package: "Env"),
         .product(name: "DesignSystem", package: "DesignSystem"),
-      ]
+      ],
+      path: "Sources/Views"
     ),
   ]
 )

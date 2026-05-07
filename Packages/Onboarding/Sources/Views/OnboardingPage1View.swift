@@ -54,7 +54,7 @@ struct OnboardingPage1View: View {
         }
       }
 
-      VStack(spacing: 12) {
+      VStack(spacing: 16) {
         Text("Hey 🖐 Ready to\nspy on your sleep?")
           .font(.system(size: 28, weight: .bold))
           .foregroundStyle(theme.textPrimary)
@@ -64,17 +64,18 @@ struct OnboardingPage1View: View {
           .font(.system(size: 15))
           .foregroundStyle(theme.textSecondary)
           .multilineTextAlignment(.center)
-      }
 
-      Text("Your snoring finally gets the attention it deserves.")
-        .font(.system(size: 13, weight: .medium))
-        .foregroundStyle(theme.accent)
-        .padding(.horizontal, 20)
-        .padding(.vertical, 10)
-        .background(
-          Capsule()
-            .fill(theme.accent.opacity(0.15))
-        )
+        Text("Your snoring finally gets the attention it deserves.")
+          .font(.system(size: 13, weight: .medium))
+          .foregroundStyle(theme.accent)
+          .multilineTextAlignment(.center)
+          .padding(.horizontal, 20)
+          .padding(.vertical, 10)
+          .background(
+            Capsule()
+              .fill(theme.accent.opacity(0.15))
+          )
+      }
 
       Spacer()
 
@@ -89,6 +90,7 @@ struct OnboardingPage1View: View {
       .clipShape(Capsule())
       .padding(.horizontal, 24)
     }
-    .padding(.horizontal, 24)
+    .padding(.horizontal, 32)
+    .padding(.bottom, 48)
   }
 }

@@ -27,7 +27,7 @@ struct OnboardingPage3View: View {
         }
       }
 
-      VStack(spacing: 12) {
+      VStack(spacing: 16) {
         Text("We're not that\nkind of app")
           .font(.system(size: 28, weight: .bold))
           .foregroundStyle(theme.textPrimary)
@@ -37,23 +37,23 @@ struct OnboardingPage3View: View {
           .font(.system(size: 15))
           .foregroundStyle(theme.textSecondary)
           .multilineTextAlignment(.center)
-      }
 
-      HStack(spacing: 8) {
-        Image(systemName: "lock.shield")
-          .font(.system(size: 14))
-          .foregroundStyle(theme.scoreGreen)
+        HStack(spacing: 8) {
+          Image(systemName: "lock.shield")
+            .font(.system(size: 14))
+            .foregroundStyle(theme.scoreGreen)
 
-        Text("Your secrets stay between you and your pillow")
-          .font(.system(size: 13, weight: .medium))
-          .foregroundStyle(theme.scoreGreen)
+          Text("Your secrets stay between you and your pillow")
+            .font(.system(size: 13, weight: .medium))
+            .foregroundStyle(theme.scoreGreen)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .background(
+          Capsule()
+            .stroke(theme.scoreGreen.opacity(0.4), lineWidth: 1)
+        )
       }
-      .padding(.horizontal, 16)
-      .padding(.vertical, 10)
-      .background(
-        Capsule()
-          .stroke(theme.scoreGreen.opacity(0.4), lineWidth: 1)
-      )
 
       Spacer()
 
@@ -68,6 +68,7 @@ struct OnboardingPage3View: View {
       .clipShape(Capsule())
       .padding(.horizontal, 24)
     }
-    .padding(.horizontal, 24)
+    .padding(.horizontal, 32)
+    .padding(.bottom, 40)
   }
 }

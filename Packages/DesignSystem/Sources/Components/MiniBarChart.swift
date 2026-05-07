@@ -38,12 +38,12 @@ public struct MiniBarChart: View {
         .frame(maxWidth: .infinity)
       }
     }
-    .frame(height: 70)
+    .frame(height: 55)
   }
 
   private func barHeight(for value: Double) -> CGFloat {
     let maxValue = data.map(\.value).max() ?? 1
     let ratio = maxValue > 0 ? value / maxValue : 0
-    return CGFloat(ratio) * 55
+    return CGFloat(ratio) * 42
   }
 }

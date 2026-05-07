@@ -48,7 +48,9 @@ struct BedsideClockView: View {
       }
 
       if showAlarmOverlay {
-        alarmOverlay
+        AlarmOverlayView(currentTime: currentTime) {
+          showAlarmOverlay = false
+        }
       }
     }
     .task {
@@ -175,58 +177,6 @@ struct BedsideClockView: View {
       .clipShape(Capsule())
     }
     .padding(.horizontal, 24)
-  }
-
-  private var alarmOverlay: some View {
-    ZStack {
-      theme.bgPrimary.opacity(0.95).ignoresSafeArea()
-
-      VStack(spacing: 32) {
-        Spacer()
-
-        Image(systemName: "alarm.fill")
-          .font(.system(size: 64))
-          .foregroundStyle(theme.accent)
-
-        Text("Time to Wake Up")
-          .font(.system(size: 32, weight: .bold))
-          .foregroundStyle(theme.textPrimary)
-
-        Text(timeString)
-          .font(.system(size: 64, weight: .thin, design: .rounded))
-          .foregroundStyle(theme.accent)
-          .monospacedDigit()
-
-        Spacer()
-
-        VStack(spacing: 16) {
-          Button {
-            AlarmManager.shared.clearAlarm()
-            showAlarmOverlay = false
-            _ = sessionManager.stopSession()
-          } label: {
-            Text("I'm Awake")
-              .font(.system(size: 17, weight: .semibold))
-              .foregroundStyle(.white)
-              .frame(maxWidth: .infinity)
-              .frame(height: 56)
-              .background(theme.accent)
-              .clipShape(Capsule())
-          }
-
-          Button {
-            AlarmManager.shared.snooze(minutes: 10)
-            showAlarmOverlay = false
-          } label: {
-            Text("Snooze 10 min")
-              .font(.system(size: 17, weight: .medium))
-              .foregroundStyle(theme.textSecondary)
-          }
-        }
-        .padding(.horizontal, 24)
-        .padding(.bottom, 32)
-      }
-    }
   }
 
   // MARK: - Helpers

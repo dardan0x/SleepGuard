@@ -23,7 +23,7 @@ public struct StatCard: View {
   }
 
   public var body: some View {
-    VStack(alignment: .leading, spacing: 12) {
+    VStack(alignment: .leading, spacing: 8) {
       Image(systemName: icon)
         .font(.system(size: 12, weight: .semibold))
         .foregroundStyle(iconColor)
@@ -40,7 +40,7 @@ public struct StatCard: View {
           .textCase(.uppercase)
       }
     }
-    .padding(8)
+    .padding(6)
     .frame(maxWidth: .infinity, alignment: .leading)
     .background(theme.bgCard)
     .cornerRadius(theme.radiusCard)

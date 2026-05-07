@@ -46,6 +46,7 @@ struct OnboardingPage2View: View {
       .padding(.horizontal, 24)
     }
     .padding(.horizontal, 24)
+    .padding(.bottom, 40)
   }
 
   private func featureCard(icon: String, title: String, description: String) -> some View {

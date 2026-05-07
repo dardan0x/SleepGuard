@@ -100,6 +100,7 @@ struct OnboardingPage4View: View {
       }
       .padding(.horizontal, 24)
     }
-    .padding(.horizontal, 24)
+    .padding(.horizontal, 32)
+    .padding(.bottom, 40)
   }
 }

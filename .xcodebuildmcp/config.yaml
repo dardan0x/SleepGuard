@@ -1,0 +1,7 @@
+schemaVersion: 1
+sessionDefaults:
+  projectPath: /Users/user/Documents/VibeCodingProjects/SnoreGuard/SnoreGuard.xcodeproj
+  scheme: SnoreGuard
+  simulatorId: BD630AD5-5A05-4663-8F1B-A17283EBCBF5
+  simulatorName: iPhone 16e
+  simulatorPlatform: iOS Simulator
