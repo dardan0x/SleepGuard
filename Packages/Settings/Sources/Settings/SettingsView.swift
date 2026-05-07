@@ -44,7 +44,6 @@ public struct SettingsView: View {
         recordingSection
         appearanceSection
         watchSection
-        syncSection
         dataSection
         aboutSection
       }
@@ -372,65 +371,6 @@ public struct SettingsView: View {
     }
   }
 
-  // MARK: - Sync
-
-  private var syncSection: some View {
-    VStack(alignment: .leading, spacing: 2) {
-      sectionTitle("SYNC")
-      VStack(spacing: 16) {
-        HStack(spacing: 10) {
-          iconBackground("icloud", color: Color(hex: "#5E9CFF"))
-          Text("iCloud Sync")
-            .font(.system(size: 15))
-            .foregroundStyle(theme.textPrimary)
-          Spacer()
-          HStack(spacing: 4) {
-            if CloudKitSync.shared.isSyncing {
-              ProgressView()
-                .scaleEffect(0.8)
-                .tint(theme.accent)
-            } else {
-              Circle()
-                .fill(theme.scoreGreen)
-                .frame(width: 8, height: 8)
-            }
-            Text(CloudKitSync.shared.isSyncing ? "Syncing..." : "Up to date")
-              .font(.system(size: 15))
-              .foregroundStyle(CloudKitSync.shared.isSyncing ? theme.accent : theme.scoreGreen)
-          }
-        }
-
-        if let lastSync = CloudKitSync.shared.lastSyncDate {
-          HStack {
-            Text("Last sync")
-              .font(.system(size: 13))
-              .foregroundStyle(theme.textTertiary)
-            Spacer()
-            Text(relativeTimeString(from: lastSync))
-              .font(.system(size: 13))
-              .foregroundStyle(theme.textTertiary)
-          }
-        }
-
-        Button {
-          CloudKitSync.shared.triggerSync()
-        } label: {
-          HStack(spacing: 10) {
-            iconBackground("arrow.clockwise", color: theme.accent)
-            Text("Sync Now")
-              .font(.system(size: 15))
-              .foregroundStyle(theme.accent)
-            Spacer()
-          }
-        }
-        .buttonStyle(.plain)
-      }
-      .padding(16)
-      .background(theme.bgCard)
-      .cornerRadius(12)
-    }
-  }
-
   // MARK: - Data
 
   private var dataSection: some View {
@@ -556,12 +496,6 @@ public struct SettingsView: View {
   private func rateApp() {
     guard let writeReviewURL = URL(string: "https://apps.apple.com/app/id0?action=write-review") else { return }
     openURL(writeReviewURL)
-  }
-
-  private func relativeTimeString(from date: Date) -> String {
-    let formatter = RelativeDateTimeFormatter()
-    formatter.unitsStyle = .short
-    return formatter.localizedString(for: date, relativeTo: Date())
   }
 }
 

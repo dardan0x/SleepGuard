@@ -16,11 +16,7 @@ struct SnoreGuardApp: App {
 
   var sharedModelContainer: ModelContainer = {
     let schema = Schema([SleepSession.self, SnoreEvent.self])
-    let modelConfiguration = ModelConfiguration(
-      schema: schema,
-      isStoredInMemoryOnly: false,
-      cloudKitDatabase: .private("iCloud.com.daki.exampleProject.SnoreGuard")
-    )
+    let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
     do {
       return try ModelContainer(for: schema, configurations: [modelConfiguration])
     } catch {
