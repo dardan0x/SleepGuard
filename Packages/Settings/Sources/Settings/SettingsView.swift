@@ -14,6 +14,7 @@ public struct SettingsView: View {
   @State private var showDeleteConfirmation = false
   @State private var showThemePicker = false
   @State private var showClipLengthPicker = false
+  @State private var showAlarmWindowPicker = false
 
   private var sensitivityValue: Binding<Double> {
     Binding {
@@ -39,6 +40,7 @@ public struct SettingsView: View {
         titleRow
 
         detectionSection
+        alarmSection
         recordingSection
         appearanceSection
         dataSection
@@ -62,6 +64,13 @@ public struct SettingsView: View {
       ForEach([15.0, 30.0, 60.0], id: \.self) { length in
         Button("\(Int(length))s") {
           userPreferences.maxClipLength = length
+        }
+      }
+    }
+    .confirmationDialog("Smart Window", isPresented: $showAlarmWindowPicker, titleVisibility: .visible) {
+      ForEach([15, 30, 45], id: \.self) { minutes in
+        Button("\(minutes) min") {
+          userPreferences.alarmWindowMinutes = minutes
         }
       }
     }
@@ -174,6 +183,81 @@ public struct SettingsView: View {
               }
             }
           }
+        }
+      }
+      .padding(16)
+      .background(theme.bgCard)
+      .cornerRadius(12)
+    }
+  }
+
+  // MARK: - Alarm
+
+  private var alarmSection: some View {
+    VStack(alignment: .leading, spacing: 2) {
+      sectionTitle("ALARM")
+      VStack(spacing: 16) {
+        HStack(spacing: 10) {
+          iconBackground("alarm.fill", color: Color(hex: "#FF9F0A"))
+          Text("Smart Alarm")
+            .font(.system(size: 15))
+            .foregroundStyle(theme.textPrimary)
+          Spacer()
+          Toggle("", isOn: Binding(
+            get: { userPreferences.alarmEnabled },
+            set: { userPreferences.alarmEnabled = $0 }
+          ))
+          .labelsHidden()
+          .tint(theme.scoreGreen)
+        }
+
+        if userPreferences.alarmEnabled {
+          HStack(spacing: 10) {
+            iconBackground("clock", color: theme.accent)
+            Text("Alarm time")
+              .font(.system(size: 15))
+              .foregroundStyle(theme.textPrimary)
+            Spacer()
+            DatePicker(
+              "",
+              selection: Binding(
+                get: {
+                  var components = DateComponents()
+                  components.hour = userPreferences.alarmHour
+                  components.minute = userPreferences.alarmMinute
+                  return Calendar.current.date(from: components) ?? Date()
+                },
+                set: { newDate in
+                  let components = Calendar.current.dateComponents([.hour, .minute], from: newDate)
+                  userPreferences.alarmHour = components.hour ?? 7
+                  userPreferences.alarmMinute = components.minute ?? 0
+                }
+              ),
+              displayedComponents: .hourAndMinute
+            )
+            .datePickerStyle(.compact)
+            .colorMultiply(theme.textPrimary)
+            .frame(width: 100)
+          }
+
+          Button {
+            showAlarmWindowPicker = true
+          } label: {
+            HStack(spacing: 10) {
+              iconBackground("scope", color: theme.accent)
+              Text("Smart window")
+                .font(.system(size: 15))
+                .foregroundStyle(theme.textPrimary)
+              Spacer()
+              Text("\(userPreferences.alarmWindowMinutes) min")
+                .font(.system(size: 15))
+                .foregroundStyle(theme.textTertiary)
+              Image(systemName: "chevron.right")
+                .font(.system(size: 15))
+                .foregroundStyle(theme.textTertiary)
+            }
+          }
+          .buttonStyle(.plain)
         }
       }
       .padding(16)

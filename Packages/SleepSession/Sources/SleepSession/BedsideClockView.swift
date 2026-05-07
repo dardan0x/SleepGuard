@@ -10,16 +10,24 @@ struct BedsideClockView: View {
   private let audioRecorder = AudioRecorder.shared
 
   @State private var currentTime = Date()
+  @State private var showAlarmOverlay = false
 
   var body: some View {
     ZStack {
       theme.bgPrimary.ignoresSafeArea()
 
       VStack(spacing: 0) {
-        eventBadge
-          .frame(maxWidth: .infinity, alignment: .trailing)
-          .padding(.top, 16)
-          .padding(.horizontal, 24)
+        HStack {
+          if AlarmManager.shared.isAlarmSet {
+            alarmBadge
+          }
+
+          Spacer()
+
+          eventBadge
+        }
+        .padding(.top, 16)
+        .padding(.horizontal, 24)
 
         Spacer()
 
@@ -38,6 +46,10 @@ struct BedsideClockView: View {
         stopButton
           .padding(.bottom, 32)
       }
+
+      if showAlarmOverlay {
+        alarmOverlay
+      }
     }
     .task {
       while !Task.isCancelled {
@@ -48,6 +60,11 @@ struct BedsideClockView: View {
           currentTime = now
         }
         sessionManager.processAudioLevel(db: audioRecorder.currentDB)
+
+        if AlarmManager.shared.evaluate(currentTime: now, snoringState: sessionManager.currentSnoringState) {
+          showAlarmOverlay = true
+        }
+
         try? await Task.sleep(for: .milliseconds(50))
       }
     }
@@ -67,6 +84,23 @@ struct BedsideClockView: View {
     .overlay(
       RoundedRectangle(cornerRadius: 100)
         .stroke(theme.scoreGreen, lineWidth: 1)
+    )
+  }
+
+  private var alarmBadge: some View {
+    HStack(spacing: 6) {
+      Image(systemName: "alarm.fill")
+        .font(.system(size: 12))
+        .foregroundStyle(theme.accent)
+      Text(alarmTimeString)
+        .font(.system(size: 13, weight: .semibold))
+        .foregroundStyle(theme.accent)
+    }
+    .padding(.horizontal, 12)
+    .padding(.vertical, 6)
+    .overlay(
+      RoundedRectangle(cornerRadius: 100)
+        .stroke(theme.accent, lineWidth: 1)
     )
   }
 
@@ -125,6 +159,7 @@ struct BedsideClockView: View {
 
   private var stopButton: some View {
     Button {
+      AlarmManager.shared.clearAlarm()
       _ = sessionManager.stopSession()
     } label: {
       HStack(spacing: 8) {
@@ -140,6 +175,58 @@ struct BedsideClockView: View {
       .clipShape(Capsule())
     }
     .padding(.horizontal, 24)
+  }
+
+  private var alarmOverlay: some View {
+    ZStack {
+      theme.bgPrimary.opacity(0.95).ignoresSafeArea()
+
+      VStack(spacing: 32) {
+        Spacer()
+
+        Image(systemName: "alarm.fill")
+          .font(.system(size: 64))
+          .foregroundStyle(theme.accent)
+
+        Text("Time to Wake Up")
+          .font(.system(size: 32, weight: .bold))
+          .foregroundStyle(theme.textPrimary)
+
+        Text(timeString)
+          .font(.system(size: 64, weight: .thin, design: .rounded))
+          .foregroundStyle(theme.accent)
+          .monospacedDigit()
+
+        Spacer()
+
+        VStack(spacing: 16) {
+          Button {
+            AlarmManager.shared.clearAlarm()
+            showAlarmOverlay = false
+            _ = sessionManager.stopSession()
+          } label: {
+            Text("I'm Awake")
+              .font(.system(size: 17, weight: .semibold))
+              .foregroundStyle(.white)
+              .frame(maxWidth: .infinity)
+              .frame(height: 56)
+              .background(theme.accent)
+              .clipShape(Capsule())
+          }
+
+          Button {
+            AlarmManager.shared.snooze(minutes: 10)
+            showAlarmOverlay = false
+          } label: {
+            Text("Snooze 10 min")
+              .font(.system(size: 17, weight: .medium))
+              .foregroundStyle(theme.textSecondary)
+          }
+        }
+        .padding(.horizontal, 24)
+        .padding(.bottom, 32)
+      }
+    }
   }
 
   // MARK: - Helpers
@@ -162,6 +249,13 @@ struct BedsideClockView: View {
     let hours = Int(duration) / 3600
     let minutes = (Int(duration) % 3600) / 60
     return String(format: "%dh %02dm", hours, minutes)
+  }
+
+  private var alarmTimeString: String {
+    guard let alarmTime = AlarmManager.shared.alarmTime else { return "" }
+    let formatter = DateFormatter()
+    formatter.dateFormat = "h:mm a"
+    return formatter.string(from: alarmTime)
   }
 
   private var simulatedWaveform: [Double] {

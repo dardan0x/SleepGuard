@@ -8,6 +8,7 @@ struct RecordingPrestartView: View {
   @Environment(Theme.self) private var theme
   @Environment(SessionManager.self) private var sessionManager
   @Environment(RouterPath.self) private var routerPath
+  @Environment(UserPreferences.self) private var userPreferences
   private let audioRecorder = AudioRecorder.shared
 
   var body: some View {
@@ -86,11 +87,20 @@ struct RecordingPrestartView: View {
 
   private var actionButtons: some View {
     VStack(spacing: 16) {
+      alarmSection
+
       Button {
         Task {
           if !audioRecorder.hasPermission {
             let granted = await audioRecorder.requestPermission()
             guard granted else { return }
+          }
+          if userPreferences.alarmEnabled {
+            AlarmManager.shared.setAlarm(
+              hour: userPreferences.alarmHour,
+              minute: userPreferences.alarmMinute,
+              windowMinutes: userPreferences.alarmWindowMinutes
+            )
           }
           try? sessionManager.startSession()
         }
@@ -116,6 +126,54 @@ struct RecordingPrestartView: View {
           .font(.system(size: 17, weight: .medium))
           .foregroundStyle(theme.textSecondary)
       }
+    }
+  }
+
+  private var alarmSection: some View {
+    VStack(alignment: .leading, spacing: 12) {
+      HStack {
+        Toggle("Smart Alarm", isOn: Binding(
+          get: { userPreferences.alarmEnabled },
+          set: { userPreferences.alarmEnabled = $0 }
+        ))
+        .font(.system(size: 17, weight: .semibold))
+        .foregroundStyle(theme.textPrimary)
+        .tint(theme.scoreGreen)
+      }
+
+      if userPreferences.alarmEnabled {
+        HStack {
+          DatePicker(
+            "",
+            selection: alarmTimeBinding,
+            displayedComponents: .hourAndMinute
+          )
+          .datePickerStyle(.compact)
+          .colorMultiply(theme.textPrimary)
+
+          Spacer()
+
+          Text("\(userPreferences.alarmWindowMinutes) min window")
+            .font(.system(size: 13))
+            .foregroundStyle(theme.textTertiary)
+        }
+      }
+    }
+    .padding(16)
+    .background(theme.bgCard)
+    .cornerRadius(theme.radiusCard)
+  }
+
+  private var alarmTimeBinding: Binding<Date> {
+    Binding {
+      var components = DateComponents()
+      components.hour = userPreferences.alarmHour
+      components.minute = userPreferences.alarmMinute
+      return Calendar.current.date(from: components) ?? Date()
+    } set: { newDate in
+      let components = Calendar.current.dateComponents([.hour, .minute], from: newDate)
+      userPreferences.alarmHour = components.hour ?? 7
+      userPreferences.alarmMinute = components.minute ?? 0
     }
   }
 }

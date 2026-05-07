@@ -113,6 +113,57 @@ public final class UserPreferences {
     }
   }
 
+  public var alarmEnabled: Bool {
+    get {
+      access(keyPath: \.alarmEnabled)
+      return defaults.bool(forKey: "alarmEnabled")
+    }
+    set {
+      withMutation(keyPath: \.alarmEnabled) {
+        defaults.set(newValue, forKey: "alarmEnabled")
+      }
+    }
+  }
+
+  public var alarmHour: Int {
+    get {
+      access(keyPath: \.alarmHour)
+      let raw = defaults.integer(forKey: "alarmHour")
+      return (raw >= 0 && raw < 24) ? raw : 7
+    }
+    set {
+      withMutation(keyPath: \.alarmHour) {
+        defaults.set(newValue, forKey: "alarmHour")
+      }
+    }
+  }
+
+  public var alarmMinute: Int {
+    get {
+      access(keyPath: \.alarmMinute)
+      let raw = defaults.integer(forKey: "alarmMinute")
+      return (raw >= 0 && raw < 60) ? raw : 0
+    }
+    set {
+      withMutation(keyPath: \.alarmMinute) {
+        defaults.set(newValue, forKey: "alarmMinute")
+      }
+    }
+  }
+
+  public var alarmWindowMinutes: Int {
+    get {
+      access(keyPath: \.alarmWindowMinutes)
+      let raw = defaults.integer(forKey: "alarmWindowMinutes")
+      return [15, 30, 45].contains(raw) ? raw : 30
+    }
+    set {
+      withMutation(keyPath: \.alarmWindowMinutes) {
+        defaults.set(newValue, forKey: "alarmWindowMinutes")
+      }
+    }
+  }
+
   public enum DetectionSensitivity: String, CaseIterable, Sendable {
     case low
     case medium
