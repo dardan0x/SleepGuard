@@ -334,6 +334,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "SnoreGuard reads sleep data to provide a complete picture of your sleep quality.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "SnoreGuard writes sleep session data to Apple Health so you can track sleep quality alongside other health metrics.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "SnoreGuard uses the microphone to detect snoring during sleep sessions. Audio is analyzed locally on your device.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UIBackgroundModes = audio;
@@ -367,6 +368,7 @@
 				DEVELOPMENT_TEAM = ZE4DJ923B5;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "SnoreGuard uses the microphone to detect snoring during sleep sessions. Audio is analyzed locally on your device.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UIBackgroundModes = audio;
