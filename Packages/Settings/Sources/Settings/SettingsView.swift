@@ -43,6 +43,7 @@ public struct SettingsView: View {
         alarmSection
         recordingSection
         appearanceSection
+        watchSection
         dataSection
         aboutSection
       }
@@ -335,6 +336,34 @@ public struct SettingsView: View {
           }
         }
         .buttonStyle(.plain)
+      }
+      .padding(16)
+      .background(theme.bgCard)
+      .cornerRadius(12)
+    }
+  }
+
+  // MARK: - Watch
+
+  private var watchSection: some View {
+    VStack(alignment: .leading, spacing: 2) {
+      sectionTitle("WATCH")
+      VStack(spacing: 16) {
+        HStack(spacing: 10) {
+          iconBackground("watch.fill", color: theme.accent)
+          Text("Apple Watch")
+            .font(.system(size: 15))
+            .foregroundStyle(theme.textPrimary)
+          Spacer()
+          HStack(spacing: 4) {
+            Circle()
+              .fill(WatchConnectivityManager.shared.isWatchReachable ? theme.scoreGreen : theme.textTertiary)
+              .frame(width: 8, height: 8)
+            Text(WatchConnectivityManager.shared.isWatchReachable ? "Connected" : "Not Connected")
+              .font(.system(size: 15))
+              .foregroundStyle(WatchConnectivityManager.shared.isWatchReachable ? theme.scoreGreen : theme.textTertiary)
+          }
+        }
       }
       .padding(16)
       .background(theme.bgCard)
