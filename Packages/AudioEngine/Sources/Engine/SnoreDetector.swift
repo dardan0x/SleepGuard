@@ -17,16 +17,16 @@ public final class SnoreDetector {
   public var currentState: SnoringState = .none
 
   /// Thresholds in dB. Used as fallback when CoreML is unavailable.
-  public var quietThreshold: Float = -40.0
-  public var lightThreshold: Float = -30.0
-  public var loudThreshold: Float = -20.0
+  public var quietThreshold: Float = -35.0
+  public var lightThreshold: Float = -25.0
+  public var loudThreshold: Float = -15.0
 
   /// Confidence threshold derived from detection sensitivity.
   /// Higher sensitivity → lower confidence required (more detections).
   public var confidenceThreshold: Float = 0.6
 
   /// Whether CoreML classification is enabled.
-  public var useCoreML: Bool = true
+  public var useCoreML: Bool = false
 
   private var classifier: SnoreClassifier?
 

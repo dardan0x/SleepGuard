@@ -1,6 +1,22 @@
 import AVFoundation
 import Observation
 
+public enum RecordingError: Error {
+  case noMicrophoneInput
+  case invalidAudioFormat
+}
+
+/// Converts dBFS (negative digital scale) to a 0-100 percentage for UI display.
+/// -60 dB → 0%, -20 dB → 100%.
+public func audioLevelPercentage(from db: Double) -> Int {
+  let normalized = (db + 60.0) / 40.0
+  return Int(max(0.0, min(100.0, normalized * 100.0)))
+}
+
+public func audioLevelPercentage(from db: Float) -> Int {
+  audioLevelPercentage(from: Double(db))
+}
+
 @MainActor
 @Observable
 public final class AudioRecorder {
@@ -59,9 +75,17 @@ public final class AudioRecorder {
     try session.setCategory(.playAndRecord, mode: .measurement, options: [.defaultToSpeaker, .allowBluetooth])
     try session.setActive(true)
 
+    guard !session.currentRoute.inputs.isEmpty else {
+      throw RecordingError.noMicrophoneInput
+    }
+
     let engine = AVAudioEngine()
     let input = engine.inputNode
     let format = input.outputFormat(forBus: 0)
+
+    guard format.channelCount > 0, format.sampleRate > 0 else {
+      throw RecordingError.invalidAudioFormat
+    }
 
     if let audioFileURL = audioFileURL {
       audioFile = try AVAudioFile(forWriting: audioFileURL, settings: format.settings)
@@ -71,7 +95,11 @@ public final class AudioRecorder {
       guard let self else { return }
       let db = self.calculateDB(from: buffer)
       if let audioFile = self.audioFile {
-        try? audioFile.write(from: buffer)
+        do {
+          try audioFile.write(from: buffer)
+        } catch {
+          print("[AudioRecorder] Failed to write audio buffer: \(error)")
+        }
       }
       Task { @MainActor in
         self.currentDB = db

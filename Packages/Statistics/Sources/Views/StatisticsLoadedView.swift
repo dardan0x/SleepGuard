@@ -1,4 +1,5 @@
 import SwiftUI
+import AudioEngine
 import Env
 import Models
 import DesignSystem
@@ -157,8 +158,8 @@ struct StatisticsLoadedView: View {
       )
       StatCard(
         icon: "speaker.wave.2.fill",
-        title: "Avg dB",
-        value: String(format: "%.0f dB", session.averageDB),
+        title: "Avg Level",
+        value: "\(audioLevelPercentage(from: session.averageDB))%",
         theme: theme,
         iconColor: theme.accent
       )

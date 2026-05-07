@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftData
 import AVFoundation
+import AudioEngine
 import Models
 import Env
 import DesignSystem
@@ -111,8 +112,8 @@ public struct SessionDetailView: View {
 
   private func setupAudioPlayer(for session: SleepSession) {
     guard let urlString = session.audioFileURL,
-          FileManager.default.fileExists(atPath: urlString) else { return }
-    let url = URL(fileURLWithPath: urlString)
+          let url = URL(string: urlString),
+          FileManager.default.fileExists(atPath: url.path) else { return }
     do {
       let player = try AVAudioPlayer(contentsOf: url)
       player.prepareToPlay()
@@ -194,7 +195,7 @@ public struct SessionDetailView: View {
         StatCard(
           icon: "speaker.wave.3.fill",
           title: "Peak",
-          value: String(format: "%.0fdB", session.peakDB),
+          value: "\(audioLevelPercentage(from: session.peakDB))%",
           theme: theme,
           iconColor: theme.accent
         )
@@ -401,15 +402,16 @@ public struct SessionDetailView: View {
 
   private func shareFullSession(session: SleepSession) {
     guard let urlString = session.audioFileURL,
-          FileManager.default.fileExists(atPath: urlString) else { return }
-    shareItems = [URL(fileURLWithPath: urlString)]
+          let url = URL(string: urlString),
+          FileManager.default.fileExists(atPath: url.path) else { return }
+    shareItems = [url]
     isSharePresented = true
   }
 
   private func exportAndShare(event: SnoreEvent, in session: SleepSession) async {
     guard let urlString = session.audioFileURL,
-          FileManager.default.fileExists(atPath: urlString) else { return }
-    let sourceURL = URL(fileURLWithPath: urlString)
+          let sourceURL = URL(string: urlString),
+          FileManager.default.fileExists(atPath: sourceURL.path) else { return }
 
     let asset = AVURLAsset(url: sourceURL)
     guard let exportSession = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetAppleM4A) else { return }

@@ -1,4 +1,5 @@
 import UIKit
+import AudioEngine
 import Models
 
 @MainActor
@@ -119,8 +120,8 @@ public struct SleepReportPDFGenerator {
       ("Duration", durationString(session.totalDuration)),
       ("Snoring", String(format: "%.0f%%", session.snoringPercentage)),
       ("Events", "\(session.eventsCount)"),
-      ("Avg dB", String(format: "%.0f dB", session.averageDB)),
-      ("Peak dB", String(format: "%.0f dB", session.peakDB)),
+      ("Avg Level", "\(audioLevelPercentage(from: session.averageDB))%"),
+      ("Peak Level", "\(audioLevelPercentage(from: session.peakDB))%"),
       ("Events/Hour", String(format: "%.1f", session.eventsPerHour)),
     ]
 
@@ -191,7 +192,7 @@ public struct SleepReportPDFGenerator {
       .font: UIFont.monospacedDigitSystemFont(ofSize: 13, weight: .regular),
       .foregroundColor: UIColor.secondaryLabel,
     ]
-    let dbText = String(format: "%.0f dB", event.averageDB)
+    let dbText = "\(audioLevelPercentage(from: event.averageDB))%"
     dbText.draw(at: CGPoint(x: margin + 260, y: y), withAttributes: dbAttributes)
 
     return rowHeight

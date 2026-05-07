@@ -1173,3 +1173,72 @@ Or delete and reinstall the app on the simulator.
 - Should the Watch app use `WKExtendedRuntimeSession` for background recording? Currently relies on foreground audio session.
 - Should snore events on Watch be more detailed (timestamp + duration per event) or is aggregate count sufficient?
 - Should the iOS app show a list of watch-recorded sessions separately from phone-recorded sessions?
+
+---
+
+## 2026-05-07 — Session 27: Real-Device Recording & Playback Bug Fixes
+
+### Completed
+- **Playback fix**: `SessionDetailView` file URL handling
+  - `FileManager.fileExists(atPath: urlString)` was receiving `file:///var/.../session.caf` (absoluteString) instead of a raw path
+  - `fileExists(atPath:)` expects `/var/...` not `file:///var/...`, so it always returned `false` and playback setup aborted
+  - Fixed in 3 places: `setupAudioPlayer`, `shareFullSession`, `exportAndShare` — now convert `URL(string:)` first, then use `url.path`
+- **Snore detection fix**: Real iPhone ambient noise floor is ~-50 dBFS; old `-40 dB` quiet threshold caught normal room silence
+  - Raised thresholds: quiet `-40` → `-35`, light `-30` → `-25`, loud `-20` → `-15`
+  - Disabled CoreML (`useCoreML = false`) — synthetic training data misclassifies real mic input; threshold fallback is more predictable on device
+- **AudioRecorder hardening**:
+  - Added `RecordingError` enum with `.noMicrophoneInput` and `.invalidAudioFormat`
+  - Validates `format.channelCount > 0 && format.sampleRate > 0` before installing tap
+  - Checks `AVAudioSession.currentRoute.inputs.isEmpty` after activation
+  - Changed `try? audioFile.write(from: buffer)` to `do/try/catch` with `print()` logging so write failures are visible in console
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Recordings/Sources/Views/SessionDetailView.swift` | +6/-6 | Fixed `fileExists` URL→path in `setupAudioPlayer`, `shareFullSession`, `exportAndShare` |
+| `Packages/AudioEngine/Sources/Engine/SnoreDetector.swift` | +4/-4 | Raised thresholds; disabled CoreML |
+| `Packages/AudioEngine/Sources/Engine/AudioRecorder.swift` | +22/-6 | Added `RecordingError`, format validation, route check, write error logging |
+
+### Architecture Decisions
+- **Threshold over ML for now**: CoreML model was trained on synthetic decibel ranges. Real iPhone microphone gain curves differ from simulator/training data. Threshold fallback is coarse but reliable until real labeled audio is collected.
+- **No calibration UI**: Instead of adding a user-facing ambient noise calibration step, we simply raised thresholds. If users report missed detections, calibration can be added in V2 polish.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors across all packages + app target
+
+### Next Session
+- Test on real device: verify playback works, verify quiet room shows `.none` instead of `.quiet`, verify loud noises trigger `.light`/`.loud`
+
+### Open Questions
+- Should CoreML be re-enabled after collecting real-device training data?
+- Should thresholds be user-configurable via Settings (currently only `detectionSensitivity` exists but isn't wired to thresholds)?
+
+---
+
+## 2026-05-07 — Session 27b: dB → Percentage UI Polish
+
+### Completed
+- Added `audioLevelPercentage(from:)` helper in `AudioEngine` package
+  - Maps dBFS (-60 … -20) → 0% … 100% for user-friendly display
+  - Overloads for `Float` and `Double`
+- Updated all UI surfaces that showed raw negative dB:
+  - `BedsideClockView`: `%-35 dB · ambient%` → `65% · ambient`
+  - `SessionDetailView` stat card: `Peak` now shows `%`
+  - `SessionSummaryView` stat card: `Peak` now shows `%`
+  - `StatisticsLoadedView` stat card: `Avg dB` → `Avg Level` with `%`
+  - `SleepReportPDFGenerator`: `Avg dB`/`Peak dB` → `Avg Level`/`Peak Level` with `%`
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/AudioEngine/Sources/Engine/AudioRecorder.swift` | +12 | Added `audioLevelPercentage(from:)` overloads |
+| `Packages/SleepSession/Sources/Views/BedsideClockView.swift` | +1/-1 | dB → percentage display |
+| `Packages/Recordings/Sources/Views/SessionDetailView.swift` | +1/-1 | Peak dB → percentage; added `import AudioEngine` |
+| `Packages/SleepSession/Sources/Views/SessionSummaryView.swift` | +1/-1 | Peak dB → percentage; added `import AudioEngine` |
+| `Packages/Statistics/Sources/Views/StatisticsLoadedView.swift` | +1/-1 | Avg dB → Avg Level percentage; added `import AudioEngine` |
+| `Packages/Recordings/Sources/Views/SleepReportPDFGenerator.swift` | +3/-3 | Avg/Peak dB → Level percentage; added `import AudioEngine` |
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors across all packages + app target

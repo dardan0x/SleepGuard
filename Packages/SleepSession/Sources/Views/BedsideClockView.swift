@@ -152,7 +152,7 @@ struct BedsideClockView: View {
           .foregroundStyle(snoringColor)
       }
 
-      Text(String(format: "%.0f dB · ambient", audioRecorder.currentDB))
+      Text("\(audioLevelPercentage(from: audioRecorder.currentDB))% · ambient")
         .font(.system(size: 20, weight: .regular, design: .rounded))
         .foregroundStyle(theme.textTertiary)
         .monospacedDigit()

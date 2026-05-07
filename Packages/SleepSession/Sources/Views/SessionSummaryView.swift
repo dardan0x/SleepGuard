@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import AudioEngine
 import Models
 import Env
 import DesignSystem
@@ -72,7 +73,7 @@ public struct SessionSummaryView: View {
       StatCard(
         icon: "speaker.wave.3.fill",
         title: "Peak",
-        value: String(format: "%.0fdB", session.peakDB),
+        value: "\(audioLevelPercentage(from: session.peakDB))%",
         theme: theme,
         iconColor: theme.accent
       )

@@ -59,6 +59,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-05-07 | Bug Fix: Real-Device Recording | Completed | Fixed playback (`fileExists` URL→path), detection thresholds (-40→-35, CoreML disabled), AudioRecorder format validation + write error logging |
 | 2026-05-07 | Design Polish | Completed | Onboarding: button bottom padding (40–48px) to clear swipe area; horizontal padding matched to design (24–32px); badges moved inside text VStack for consistent positioning; progress dots aligned across all pages via invisible Back button placeholder |
 | 2026-05-07 | F11-T4 | Completed | Watch data sync via WCSession sendMessage + application context fallback |
 | 2026-05-07 | F11-T3 | Completed | WatchAudioRecorder with AVAudioEngine tap and dB threshold detection |
