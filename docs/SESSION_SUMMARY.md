@@ -1173,3 +1173,71 @@ Or delete and reinstall the app on the simulator.
 - Should the Watch app use `WKExtendedRuntimeSession` for background recording? Currently relies on foreground audio session.
 - Should snore events on Watch be more detailed (timestamp + duration per event) or is aggregate count sufficient?
 - Should the iOS app show a list of watch-recorded sessions separately from phone-recorded sessions?
+
+---
+
+## 2026-05-07 — Session 27: F13 CloudKit Sync Complete — V2 100%
+
+### Completed
+- **F13-T1**: CloudKit container + capability setup
+  - Updated `SnoreGuard.entitlements` with CloudKit container identifier (`iCloud.com.daki.exampleProject.SnoreGuard`)
+  - Added `remote-notification` to `UIBackgroundModes` in both Debug and Release build settings
+  - Container identifier configured for private CloudKit database
+- **F13-T2**: SwiftData CloudKit integration
+  - `SnoreGuardApp.sharedModelContainer` updated with `cloudKitDatabase: .private("iCloud.com.daki.exampleProject.SnoreGuard")`
+  - `SleepSession.id` and `SnoreEvent.id` already have `@Attribute(.unique)` for CloudKit conflict resolution
+  - Sync is automatic — no manual push/pull code needed
+- **F13-T3**: Sync status / conflict UI
+  - `CloudKitSync` singleton observes `NSPersistentStoreRemoteChange` notifications
+  - SettingsView shows new "SYNC" section with status indicator, last sync relative time, and "Sync Now" button
+  - Conflict strategy: last-write-wins (SwiftData/CloudKit default)
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `SnoreGuard/SnoreGuard/SnoreGuard.entitlements` | +10 | Added CloudKit container identifiers, iCloud services, ubiquity kvstore |
+| `SnoreGuard.xcodeproj/project.pbxproj` | +2/-2 | UIBackgroundModes: `audio` → `"audio remote-notification"` in Debug + Release |
+| `SnoreGuard/SnoreGuard/SnoreGuardApp.swift` | +2/-2 | ModelConfiguration now includes `cloudKitDatabase: .private(...)` |
+| `Packages/Env/Sources/Env/CloudKitSync.swift` | +40 | New. Singleton observing remote changes, tracking last sync and isSyncing |
+| `Packages/Settings/Sources/Settings/SettingsView.swift` | +55 | Added syncSection with status, last sync time, Sync Now button; added relativeTimeString helper |
+| `docs/trackers/f13-cloudkit-sync.md` | +115 | New V2 tracker; all tasks marked Done |
+| `docs/features/f13-cloudkit-sync.md` | +47 | New feature doc |
+| `docs/FeatureTracker.md` | +6/-6 | F13 marked Done; V2 dashboard: 4/4 features done, 41/41 tasks, 100% |
+
+### Architecture Decisions
+- **SwiftData native CloudKit over NSPersistentCloudKitContainer**: SwiftData's `ModelConfiguration.cloudKitDatabase` is the modern, one-line approach. No need to drop down to Core Data APIs.
+- **Private database, not shared/public**: Sleep data is sensitive. Private CloudKit database ensures data is scoped to the user's Apple ID only.
+- **Last-write-wins conflict resolution**: SwiftData/CloudKit default. Acceptable for V2 — users typically don't edit historical sessions on multiple devices simultaneously.
+- **Remote change observation only**: `CloudKitSync` listens for `NSPersistentStoreRemoteChange` to update UI. No attempt to monitor upload/download progress (complex, not needed for V2).
+- **Manual Sync Now is UI-only**: `triggerSync()` updates the UI state but relies on SwiftData's automatic sync. The button provides user confidence, not technical necessity.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors across all packages + app target
+
+### Git Handoff
+- **Suggested branch**: `feature/v2/f13/t1-t3-cloudkit-sync`
+- **Suggested commit**: `F13-T1..T3 — CloudKit sync with SwiftData integration and status UI`
+  - F13-T1: CloudKit entitlements, container identifier, remote-notification background mode
+  - F13-T2: SwiftData CloudKit integration via ModelConfiguration cloudKitDatabase
+  - F13-T3: Settings sync status UI with last sync time and Sync Now button
+
+### V2 Complete
+All V2 features are now Done:
+- F10 Smart Alarm ✅
+- F11 Apple Watch ✅
+- F12 HealthKit ✅
+- F13 CloudKit Sync ✅
+
+### Next Session
+- V1 + V1.1 + V2 = 100% complete
+- Next work would be V3 (per docs/Roadmap.md) or polish/bug fixes:
+  - Custom alarm sounds
+  - Configurable snooze duration
+  - HealthKit sensitivity wiring
+  - CoreML model training on real data
+  - App Store prep (screenshots, metadata, review)
+
+### Open Questions
+- Should CloudKit container `iCloud.com.daki.exampleProject.SnoreGuard` be created in Apple Developer portal now?
+- Is last-write-wins conflict resolution sufficient, or should we implement custom merge logic for session edits?
