@@ -900,3 +900,77 @@ Or delete and reinstall the app on the simulator.
 
 ### Open Questions
 - Should a Calendar screen be added to `designs/SnoreGuard.pen` for formal design compliance?
+
+---
+
+## 2026-05-07 — Session 23: V1.1 Complete (F7 Audio Export, F8 PDF Report, F9 CoreML Detection)
+
+### Completed
+- **F7-T1**: Share full session audio via native share sheet (`UIActivityViewController`) in `SessionDetailView` toolbar
+- **F7-T2**: Export individual snore event clips via `AVAssetExportSession` (`.caf` → `.m4a`, ±2s trim), shared via `ActivityView`
+- **F8-T1**: `SleepReportPDFGenerator` using `UIGraphicsPDFRenderer` with A4-size formatted report (title, session stats, event list)
+- **F8-T2**: PDF share UI — toolbar button generates sleep report PDF and presents share sheet
+- **F9-T1**: Generated `SnoreClassifier.mlmodel` with coremltools (decibel → none/quiet/light/loud softmax), added to AudioEngine target resources
+- **F9-T2**: Integrated CoreML into `SnoreDetector`: lazy model loading, CPU-only compute, confidence threshold, automatic threshold fallback
+
+### Technical Details
+- **SnoreDetector CoreML integration**:
+  - `loadModel()` called in `init()`: tries `SnoreClassifier(configuration: MLModelConfiguration())` with `.cpuOnly`
+  - On failure: `classifier = nil`, `useCoreML = false`, threshold fallback becomes active
+  - `classify(db:)` → tries CoreML first, falls back to `classifyWithThresholds(db:)`
+  - `classifyWithCoreML`: creates `MLMultiArray(shape: [1], dataType: .double)`, sets value at index 0, runs prediction
+  - `state(from:)` maps 4-element probability vector to `SnoringState`: index 1=quiet, 2=light, 3=loud; requires `confidenceThreshold` (default 0.6)
+  - `confidenceThreshold` can be mapped from `UserPreferences.detectionSensitivity` in future polish: low=0.75, medium=0.6, high=0.45
+- **PDF generation**:
+  - `SleepReportPDFGenerator.generate(session:)` returns `Data` using `UIGraphicsPDFRenderer(bounds: CGRect(x: 0, y: 0, width: 612, height: 792))`
+  - Draws title, sleep score, duration, snoring %, events count, events/hour, avg/peak dB, and a text-based event timeline
+- **Audio export**:
+  - Full session: `ShareLink(item: url)` with `subject` and `message` pre-filled
+  - Event clips: `AVAssetExportSession` with `presetName: .appleM4A`, time range `CMTimeRange(start: max(0, event.time - 2), duration: 4)`, output to temp `.m4a` file
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Recordings/Sources/Recordings/SessionDetailView.swift` | +85/-12 | Added share button (toolbar), delete button, `AudioShareItem` sheet, event clip export with `AVAssetExportSession` |
+| `Packages/Recordings/Sources/Recordings/SleepReportPDFGenerator.swift` | +112 | New. PDF generator with title, stats, and event list |
+| `Packages/AudioEngine/Sources/AudioEngine/SnoreDetector.swift` | +60/-8 | Complete rewrite. Added CoreML integration, lazy loading, confidence threshold, threshold fallback, `classifyWithThresholds` public method |
+| `Packages/AudioEngine/Sources/AudioEngine/SnoreClassifier.mlmodel` | +1 | New. CoreML model generated via coremltools |
+| `docs/trackers/f7-audio-clip-export.md` | +38/-6 | F7-T1/T2 marked Done |
+| `docs/trackers/f8-pdf-sleep-report.md` | +38/-6 | F8-T1/T2 marked Done |
+| `docs/trackers/f9-enhanced-detection.md` | +75/-6 | F9-T1/T2 marked Done with detailed notes |
+| `docs/FeatureTracker.md` | +12/-12 | Dashboard: 28/30 tasks Done, 93% progress; all V1.1 features Done |
+| `docs/features/f7-audio-clip-export.md` | +39 | New feature doc |
+| `docs/features/f8-pdf-sleep-report.md` | +39 | New feature doc |
+| `docs/features/f9-enhanced-detection.md` | +39 | New feature doc |
+
+### Architecture Decisions
+- **CoreML model stays in AudioEngine**: Recordings package does not import AudioEngine directly; ML classification is fully contained within AudioEngine. `SnoreDetector.shared` is already `@MainActor @Observable` and accessible wherever `AudioEngine` is imported.
+- **CPU-only compute**: `.cpuOnly` config avoids GPU/ANE warm-up latency for a tiny single-input neural network. The model is a softmax classifier — inference is trivial and the CPU is more than sufficient.
+- **Confidence threshold instead of raw argmax**: A probability of 0.35 for "loud" might be noise. Requiring 0.6 confidence reduces false positives. Sensitivity setting can adjust this threshold.
+- **Lazy model loading with automatic fallback**: If the `.mlmodelc` bundle is missing or the OS doesn't support CoreML, `SnoreDetector` silently degrades to threshold detection. No crashes, no user-facing errors.
+- **Full session audio for export, not per-event clips**: Per-event clip export uses `AVAssetExportSession` to trim from the full session file. This avoids managing dozens of small clip files.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors across all packages + app target (verified after each V1.1 task)
+
+### Git Handoff
+- **Suggested branch**: `feature/v1.1/export-pdf-ml`
+- **Suggested commit**: `V1.1 — Audio clip export, PDF sleep reports, CoreML snore detection`
+  - F7-T1: Share full session audio via ShareLink
+  - F7-T2: Export individual event clips via AVAssetExportSession
+  - F8-T1: SleepReportPDFGenerator using UIGraphicsPDFRenderer
+  - F8-T2: PDF share UI in SessionDetailView toolbar
+  - F9-T1: SnoreClassifier.mlmodel with coremltools
+  - F9-T2: CoreML integration in SnoreDetector with threshold fallback
+
+### Next Session
+- V1.1 is complete. Next work per docs/Roadmap.md would be V2 features:
+  - Smart alarms / wake-up window
+  - Apple Health integration
+  - Cloud backup / sync
+  - Advanced analytics (snore frequency over time, positional data)
+
+### Open Questions
+- Should `confidenceThreshold` be wired to `UserPreferences.detectionSensitivity` now, or deferred to V2 polish?
+- Should the CoreML model be trained on real audio data (currently it's a synthetic softmax classifier trained on decibel ranges)? Real training would require labeled audio datasets.

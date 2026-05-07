@@ -16,13 +16,18 @@ Last updated: 2026-05-07
 | Backlog | 0 |
 | Blocked | 0 |
 | — | — |
-| Total Tasks | 24 |
-| Tasks Done | 23 |
+| Features (V1.1) | 3 |
+| Done | 3 |
+| In Progress | 0 |
+| Backlog | 0 |
+| — | — |
+| Total Tasks | 30 |
+| Tasks Done | 28 |
 | Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
-| Tasks Backlog | 0 |
+| Tasks Backlog | 2 |
 | — | — |
-| **Progress** | **100%** |
+| **Progress** | **93%** |
 
 ## Features
 
@@ -34,6 +39,9 @@ Last updated: 2026-05-07
 | F4 | Recordings | P1 | Done | 5/5 | ██████████ 100% | [tracker](trackers/f4-recordings.md) |
 | F5 | Trends | P1 | Done | 2/2 | ██████████ 100% | [tracker](trackers/f5-trends.md) |
 | F6 | Settings | P2 | Done | 3/3 | ██████████ 100% | [tracker](trackers/f6-settings.md) |
+| F7 | Audio Clip Export | P1 | Done | 2/2 | ██████████ 100% | [tracker](trackers/f7-audio-clip-export.md) |
+| F8 | PDF Sleep Report | P1 | Done | 2/2 | ██████████ 100% | [tracker](trackers/f8-pdf-sleep-report.md) |
+| F9 | Enhanced Detection | P2 | Done | 2/2 | ██████████ 100% | [tracker](trackers/f9-enhanced-detection.md) |
 
 ## Activity Log
 
@@ -41,6 +49,12 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-05-07 | F9-T2 | Completed | SnoreDetector uses CoreML with confidence threshold; falls back to dB thresholds automatically |
+| 2026-05-07 | F9-T1 | Completed | Generated SnoreClassifier.mlmodel (decibel → none/quiet/light/loud), integrated into AudioEngine |
+| 2026-05-07 | F8-T2 | Completed | PDF share UI — doc.text toolbar button generates sleep report PDF and presents share sheet |
+| 2026-05-07 | F8-T1 | Completed | SleepReportPDFGenerator using UIGraphicsPDFRenderer with stats, score, event list |
+| 2026-05-07 | F7-T2 | Completed | Export individual event clips via AVAssetExportSession (.caf → .m4a, ±2s trim), shared via ActivityView |
+| 2026-05-07 | F7-T1 | Completed | Share full session audio via UIActivityViewController; wired existing toolbar button, conditional on audioFileURL |
 | 2026-05-07 | CalendarView | Completed | Built month calendar with session dots, stats, selected-night card; fixed weekday header locale alignment + double back button |
 | 2026-05-06 | Polish | Completed | V1 bug hunt: RecordingRowView wired, Color.green→theme, Trends dup labels, SessionDetail delete+URL fix, Stats design compliance |
 | 2026-05-06 | F6-T3 | Completed | Delete All Data alert + SwiftData cascade delete; About section with version + rate app store link |
@@ -78,7 +92,7 @@ _Unblocked tasks in priority order. The AI updates this after every task._
 
 | Task | Feature | Priority | Why Ready |
 |------|---------|----------|-----------|
-| (none) | — | — | All V1 features complete |
+| (none) | — | — | V1.1 complete |
 
 ## Blocked
 
@@ -90,16 +104,16 @@ _Unblocked tasks in priority order. The AI updates this after every task._
 
 | Task | Feature | Completed | Duration |
 |------|---------|-----------|----------|
+| F9-T2 | F9 | 2026-05-07 | — |
+| F9-T1 | F9 | 2026-05-07 | — |
+| F8-T2 | F8 | 2026-05-07 | — |
+| F8-T1 | F8 | 2026-05-07 | — |
+| F7-T2 | F7 | 2026-05-07 | — |
+| F7-T1 | F7 | 2026-05-07 | — |
 | F6-T3 | F6 | 2026-05-06 | — |
 | F6-T2 | F6 | 2026-05-06 | — |
 | F6-T1 | F6 | 2026-05-06 | — |
 | F5-T2 | F5 | 2026-05-06 | — |
-| F5-T1 | F5 | 2026-05-06 | — |
-| F4-T4 | F4 | 2026-05-06 | — |
-| F4-T5 | F4 | 2026-05-06 | — |
-| F4-T3 | F4 | 2026-05-06 | — |
-| F4-T2 | F4 | 2026-05-06 | — |
-| F4-T1 | F4 | 2026-05-06 | — |
 
 ---
 
