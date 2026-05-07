@@ -21,13 +21,19 @@ Last updated: 2026-05-07
 | In Progress | 0 |
 | Backlog | 0 |
 | — | — |
-| Total Tasks | 30 |
-| Tasks Done | 28 |
+| Features (V2) | 4 |
+| Done | 1 |
+| In Progress | 0 |
+| Backlog | 3 |
+| Blocked | 0 |
+| — | — |
+| Total Tasks | 40 |
+| Tasks Done | 31 |
 | Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
-| Tasks Backlog | 2 |
+| Tasks Backlog | 9 |
 | — | — |
-| **Progress** | **93%** |
+| **Progress** | **78%** |
 
 ## Features
 
@@ -42,6 +48,10 @@ Last updated: 2026-05-07
 | F7 | Audio Clip Export | P1 | Done | 2/2 | ██████████ 100% | [tracker](trackers/f7-audio-clip-export.md) |
 | F8 | PDF Sleep Report | P1 | Done | 2/2 | ██████████ 100% | [tracker](trackers/f8-pdf-sleep-report.md) |
 | F9 | Enhanced Detection | P2 | Done | 2/2 | ██████████ 100% | [tracker](trackers/f9-enhanced-detection.md) |
+| F10 | Smart Alarm | P1 | Backlog | 0/3 | ░░░░░░░░░░ 0% | [tracker](trackers/f10-smart-alarm.md) |
+| F11 | Apple Watch | P2 | Backlog | 0/4 | ░░░░░░░░░░ 0% | [tracker](trackers/f11-apple-watch.md) |
+| F12 | HealthKit | P1 | Done | 3/3 | ██████████ 100% | [tracker](trackers/f12-healthkit.md) |
+| F13 | CloudKit Sync | P2 | Backlog | 0/3 | ░░░░░░░░░░ 0% | [tracker](trackers/f13-cloudkit-sync.md) |
 
 ## Activity Log
 
@@ -49,6 +59,9 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-05-07 | F12-T3 | Completed | Settings toggle for HealthKit sync; auto-triggers after session save |
+| 2026-05-07 | F12-T2 | Completed | HealthKitSync.writeSleepData creates HKCategorySample with session timestamps and snore metadata |
+| 2026-05-07 | F12-T1 | Completed | HealthKit capability + entitlements added to app target; HealthKitSync singleton created in Env package |
 | 2026-05-07 | F9-T2 | Completed | SnoreDetector uses CoreML with confidence threshold; falls back to dB thresholds automatically |
 | 2026-05-07 | F9-T1 | Completed | Generated SnoreClassifier.mlmodel (decibel → none/quiet/light/loud), integrated into AudioEngine |
 | 2026-05-07 | F8-T2 | Completed | PDF share UI — doc.text toolbar button generates sleep report PDF and presents share sheet |
@@ -92,7 +105,9 @@ _Unblocked tasks in priority order. The AI updates this after every task._
 
 | Task | Feature | Priority | Why Ready |
 |------|---------|----------|-----------|
-| (none) | — | — | V1.1 complete |
+| F10-T1 | Smart Alarm | P1 | No blockers |
+| F10-T2 | Smart Alarm | P1 | Depends on F10-T1 |
+| F10-T3 | Smart Alarm | P1 | Depends on F10-T1 |
 
 ## Blocked
 
@@ -104,6 +119,9 @@ _Unblocked tasks in priority order. The AI updates this after every task._
 
 | Task | Feature | Completed | Duration |
 |------|---------|-----------|----------|
+| F12-T3 | F12 | 2026-05-07 | — |
+| F12-T2 | F12 | 2026-05-07 | — |
+| F12-T1 | F12 | 2026-05-07 | — |
 | F9-T2 | F9 | 2026-05-07 | — |
 | F9-T1 | F9 | 2026-05-07 | — |
 | F8-T2 | F8 | 2026-05-07 | — |
@@ -111,9 +129,6 @@ _Unblocked tasks in priority order. The AI updates this after every task._
 | F7-T2 | F7 | 2026-05-07 | — |
 | F7-T1 | F7 | 2026-05-07 | — |
 | F6-T3 | F6 | 2026-05-06 | — |
-| F6-T2 | F6 | 2026-05-06 | — |
-| F6-T1 | F6 | 2026-05-06 | — |
-| F5-T2 | F5 | 2026-05-06 | — |
 
 ---
 

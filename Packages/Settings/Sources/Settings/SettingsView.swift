@@ -264,6 +264,27 @@ public struct SettingsView: View {
     VStack(alignment: .leading, spacing: 2) {
       sectionTitle("DATA")
       VStack(spacing: 16) {
+        HStack(spacing: 10) {
+          iconBackground("heart.fill", color: Color(hex: "#FF2D55"))
+          Text("Sync to Apple Health")
+            .font(.system(size: 15))
+            .foregroundStyle(theme.textPrimary)
+          Spacer()
+          Toggle("", isOn: Binding(
+            get: { userPreferences.syncToHealthKit },
+            set: { newValue in
+              userPreferences.syncToHealthKit = newValue
+              if newValue {
+                Task {
+                  await HealthKitSync.shared.requestAuthorization()
+                }
+              }
+            }
+          ))
+          .labelsHidden()
+          .tint(theme.scoreGreen)
+        }
+
         Button {
           showDeleteConfirmation = true
         } label: {

@@ -17,7 +17,8 @@ let package = Package(
       dependencies: [
         .product(name: "Models", package: "Models"),
         .product(name: "AudioEngine", package: "AudioEngine"),
-      ]
+      ],
+      linkerSettings: [.linkedFramework("HealthKit")]
     ),
   ]
 )

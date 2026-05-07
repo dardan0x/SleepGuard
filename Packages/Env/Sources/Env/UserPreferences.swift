@@ -101,6 +101,18 @@ public final class UserPreferences {
     }
   }
 
+  public var syncToHealthKit: Bool {
+    get {
+      access(keyPath: \.syncToHealthKit)
+      return defaults.bool(forKey: "syncToHealthKit")
+    }
+    set {
+      withMutation(keyPath: \.syncToHealthKit) {
+        defaults.set(newValue, forKey: "syncToHealthKit")
+      }
+    }
+  }
+
   public enum DetectionSensitivity: String, CaseIterable, Sendable {
     case low
     case medium

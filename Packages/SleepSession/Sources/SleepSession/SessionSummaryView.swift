@@ -146,6 +146,13 @@ public struct SessionSummaryView: View {
       }
     }
     try? modelContext.save()
+
+    if UserPreferences.shared.syncToHealthKit {
+      Task {
+        await HealthKitSync.shared.sync(session: session)
+      }
+    }
+
     dismiss()
   }
 
