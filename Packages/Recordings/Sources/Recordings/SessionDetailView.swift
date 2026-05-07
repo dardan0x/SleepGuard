@@ -20,6 +20,10 @@ public struct SessionDetailView: View {
   @State private var isPlaying = false
   @State private var currentPlaybackTime: TimeInterval = 0
 
+  // MARK: - Share
+  @State private var isSharePresented = false
+  @State private var shareItems: [Any] = []
+
   public init(sessionID: UUID) {
     self.sessionID = sessionID
   }
@@ -67,11 +71,20 @@ public struct SessionDetailView: View {
       ToolbarItem(placement: .topBarTrailing) {
         HStack(spacing: 16) {
           Button {
-            // Share
+            exportReport(session: session)
           } label: {
-            Image(systemName: "square.and.arrow.up")
+            Image(systemName: "doc.text")
               .font(.system(size: 17))
               .foregroundStyle(theme.accent)
+          }
+          if session.audioFileURL != nil {
+            Button {
+              shareFullSession(session: session)
+            } label: {
+              Image(systemName: "square.and.arrow.up")
+                .font(.system(size: 17))
+                .foregroundStyle(theme.accent)
+            }
           }
           Button {
             deleteSession()
@@ -88,6 +101,9 @@ public struct SessionDetailView: View {
     }
     .task(id: isPlaying) {
       await trackPlaybackProgress()
+    }
+    .sheet(isPresented: $isSharePresented) {
+      ActivityView(activityItems: shareItems)
     }
   }
 
@@ -222,9 +238,18 @@ public struct SessionDetailView: View {
 
       VStack(spacing: 8) {
         ForEach(events.prefix(4), id: \.id) { event in
-          EventRow(event: event, theme: theme) {
-            seekToEvent(event, in: session)
-          }
+          EventRow(
+            event: event,
+            theme: theme,
+            onPlay: {
+              seekToEvent(event, in: session)
+            },
+            onShare: {
+              Task {
+                await exportAndShare(event: event, in: session)
+              }
+            }
+          )
         }
       }
 
@@ -365,6 +390,55 @@ public struct SessionDetailView: View {
     return formatter.string(from: date)
   }
 
+  private func exportReport(session: SleepSession) {
+    Task {
+      if let url = SleepReportPDFGenerator().generatePDF(for: session) {
+        shareItems = [url]
+        isSharePresented = true
+      }
+    }
+  }
+
+  private func shareFullSession(session: SleepSession) {
+    guard let urlString = session.audioFileURL,
+          FileManager.default.fileExists(atPath: urlString) else { return }
+    shareItems = [URL(fileURLWithPath: urlString)]
+    isSharePresented = true
+  }
+
+  private func exportAndShare(event: SnoreEvent, in session: SleepSession) async {
+    guard let urlString = session.audioFileURL,
+          FileManager.default.fileExists(atPath: urlString) else { return }
+    let sourceURL = URL(fileURLWithPath: urlString)
+
+    let asset = AVURLAsset(url: sourceURL)
+    guard let exportSession = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetAppleM4A) else { return }
+
+    let eventTime = event.timestamp.timeIntervalSince(session.startDate)
+    let startTime = max(0, eventTime - 2)
+    let endTime = min(asset.duration.seconds, eventTime + event.duration + 2)
+    guard endTime > startTime else { return }
+
+    exportSession.timeRange = CMTimeRange(
+      start: CMTime(seconds: startTime, preferredTimescale: 600),
+      duration: CMTime(seconds: endTime - startTime, preferredTimescale: 600)
+    )
+
+    let tempDir = FileManager.default.temporaryDirectory
+    let clipURL = tempDir.appendingPathComponent("snore_event_\(event.id.uuidString).m4a")
+    if FileManager.default.fileExists(atPath: clipURL.path) {
+      try? FileManager.default.removeItem(at: clipURL)
+    }
+    exportSession.outputURL = clipURL
+    exportSession.outputFileType = .m4a
+
+    await exportSession.export()
+    guard exportSession.status == .completed else { return }
+
+    shareItems = [clipURL]
+    isSharePresented = true
+  }
+
   private func deleteSession() {
     do {
       let descriptor = FetchDescriptor<SleepSession>(
@@ -454,6 +528,7 @@ private struct EventRow: View {
   let event: SnoreEvent
   let theme: Theme
   let onPlay: () -> Void
+  let onShare: () -> Void
 
   var body: some View {
     HStack(spacing: 12) {
@@ -473,12 +548,22 @@ private struct EventRow: View {
 
       Spacer()
 
-      Button {
-        onPlay()
-      } label: {
-        Image(systemName: "play.fill")
-          .font(.system(size: 14))
-          .foregroundStyle(theme.accent)
+      HStack(spacing: 12) {
+        Button {
+          onShare()
+        } label: {
+          Image(systemName: "square.and.arrow.up")
+            .font(.system(size: 14))
+            .foregroundStyle(theme.textTertiary)
+        }
+
+        Button {
+          onPlay()
+        } label: {
+          Image(systemName: "play.fill")
+            .font(.system(size: 14))
+            .foregroundStyle(theme.accent)
+        }
       }
     }
     .padding(.horizontal, 16)
@@ -498,4 +583,18 @@ private struct EventRow: View {
     let seconds = Int(total) % 60
     return String(format: "%d:%02d", minutes, seconds)
   }
+}
+
+// MARK: - Activity View
+
+@MainActor
+struct ActivityView: UIViewControllerRepresentable {
+  let activityItems: [Any]
+  var applicationActivities: [UIActivity]? = nil
+
+  func makeUIViewController(context: Context) -> UIActivityViewController {
+    UIActivityViewController(activityItems: activityItems, applicationActivities: applicationActivities)
+  }
+
+  func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }
