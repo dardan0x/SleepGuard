@@ -22,18 +22,18 @@ Last updated: 2026-05-07
 | Backlog | 0 |
 | — | — |
 | Features (V2) | 4 |
-| Done | 3 |
+| Done | 4 |
 | In Progress | 0 |
-| Backlog | 1 |
+| Backlog | 0 |
 | Blocked | 0 |
 | — | — |
 | Total Tasks | 40 |
-| Tasks Done | 38 |
+| Tasks Done | 41 |
 | Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
-| Tasks Backlog | 2 |
+| Tasks Backlog | 0 |
 | — | — |
-| **Progress** | **95%** |
+| **Progress** | **100%** |
 
 ## Features
 
@@ -51,7 +51,7 @@ Last updated: 2026-05-07
 | F10 | Smart Alarm | P1 | Done | 3/3 | ██████████ 100% | [tracker](trackers/f10-smart-alarm.md) |
 | F11 | Apple Watch | P2 | Done | 4/4 | ██████████ 100% | [tracker](trackers/f11-apple-watch.md) |
 | F12 | HealthKit | P1 | Done | 3/3 | ██████████ 100% | [tracker](trackers/f12-healthkit.md) |
-| F13 | CloudKit Sync | P2 | Backlog | 0/3 | ░░░░░░░░░░ 0% | [tracker](trackers/f13-cloudkit-sync.md) |
+| F13 | CloudKit Sync | P2 | Done | 3/3 | ██████████ 100% | [tracker](trackers/f13-cloudkit-sync.md) |
 
 ## Activity Log
 
@@ -59,6 +59,9 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-05-07 | F13-T3 | Completed | CloudKit sync status UI in Settings with last sync time and Sync Now button |
+| 2026-05-07 | F13-T2 | Completed | SwiftData CloudKit integration via ModelConfiguration cloudKitDatabase |
+| 2026-05-07 | F13-T1 | Completed | CloudKit entitlements, container identifier, remote-notification background mode |
 | 2026-05-07 | F11-T4 | Completed | Watch data sync via WCSession sendMessage + application context fallback |
 | 2026-05-07 | F11-T3 | Completed | WatchAudioRecorder with AVAudioEngine tap and dB threshold detection |
 | 2026-05-07 | F11-T2 | Completed | WatchConnectivityManager iOS + WatchSessionManager with WCSessionDelegate |
@@ -112,9 +115,7 @@ _Unblocked tasks in priority order. The AI updates this after every task._
 
 | Task | Feature | Priority | Why Ready |
 |------|---------|----------|-----------|
-| F13-T1 | CloudKit Sync | P2 | No blockers |
-| F13-T2 | CloudKit Sync | P2 | Depends on F13-T1 |
-| F13-T3 | CloudKit Sync | P2 | Depends on F13-T1 |
+| (none) | — | — | V2 complete |
 
 ## Blocked
 
@@ -126,6 +127,9 @@ _Unblocked tasks in priority order. The AI updates this after every task._
 
 | Task | Feature | Completed | Duration |
 |------|---------|-----------|----------|
+| F13-T3 | F13 | 2026-05-07 | — |
+| F13-T2 | F13 | 2026-05-07 | — |
+| F13-T1 | F13 | 2026-05-07 | — |
 | F11-T4 | F11 | 2026-05-07 | — |
 | F11-T3 | F11 | 2026-05-07 | — |
 | F11-T2 | F11 | 2026-05-07 | — |
@@ -133,9 +137,6 @@ _Unblocked tasks in priority order. The AI updates this after every task._
 | F10-T3 | F10 | 2026-05-07 | — |
 | F10-T2 | F10 | 2026-05-07 | — |
 | F10-T1 | F10 | 2026-05-07 | — |
-| F12-T3 | F12 | 2026-05-07 | — |
-| F12-T2 | F12 | 2026-05-07 | — |
-| F12-T1 | F12 | 2026-05-07 | — |
 
 ---
 
