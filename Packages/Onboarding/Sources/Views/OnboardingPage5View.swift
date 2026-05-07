@@ -20,7 +20,7 @@ struct OnboardingPage5View: View {
           .font(.system(size: 60))
       }
 
-      VStack(spacing: 12) {
+      VStack(spacing: 16) {
         Text("Ready for your\nfirst night?")
           .font(.system(size: 28, weight: .bold))
           .foregroundStyle(theme.textPrimary)
@@ -30,6 +30,17 @@ struct OnboardingPage5View: View {
           .font(.system(size: 15))
           .foregroundStyle(theme.textSecondary)
           .multilineTextAlignment(.center)
+
+        Text("Don't worry — we'll judge your snoring silently.")
+          .font(.system(size: 14, weight: .medium))
+          .foregroundStyle(theme.textSecondary)
+          .multilineTextAlignment(.center)
+          .padding(.horizontal, 18)
+          .padding(.vertical, 10)
+          .background(
+            Capsule()
+              .fill(theme.bgElevated)
+          )
       }
 
       Spacer()
@@ -54,6 +65,7 @@ struct OnboardingPage5View: View {
       }
       .padding(.horizontal, 24)
     }
-    .padding(.horizontal, 24)
+    .padding(.horizontal, 32)
+    .padding(.bottom, 40)
   }
 }

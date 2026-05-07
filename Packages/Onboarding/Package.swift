@@ -21,7 +21,8 @@ let package = Package(
         .product(name: "AudioEngine", package: "AudioEngine"),
         .product(name: "Env", package: "Env"),
         .product(name: "DesignSystem", package: "DesignSystem"),
-      ]
+      ],
+      path: "Sources/Views"
     ),
   ]
 )

@@ -18,6 +18,7 @@ let package = Package(
         .product(name: "Models", package: "Models"),
         .product(name: "AudioEngine", package: "AudioEngine"),
       ],
+      path: "Sources/Services",
       linkerSettings: [
         .linkedFramework("HealthKit"),
         .linkedFramework("WatchConnectivity"),

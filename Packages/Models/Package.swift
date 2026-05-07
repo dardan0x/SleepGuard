@@ -8,6 +8,9 @@ let package = Package(
     .library(name: "Models", targets: ["Models"]),
   ],
   targets: [
-    .target(name: "Models"),
+    .target(
+      name: "Models",
+      path: "Sources/Data"
+    ),
   ]
 )

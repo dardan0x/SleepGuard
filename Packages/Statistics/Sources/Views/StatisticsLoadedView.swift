@@ -1,168 +1,7 @@
 import SwiftUI
-import SwiftData
 import Env
 import Models
 import DesignSystem
-
-@MainActor
-public struct StatisticsDashboardView: View {
-  @Environment(RouterPath.self) private var routerPath
-  @Environment(Theme.self) private var theme
-  @Query(sort: \SleepSession.startDate, order: .reverse)
-  private var sessions: [SleepSession]
-
-  @State private var viewState: ViewState = .loading
-
-  public init() {}
-
-  public var body: some View {
-    Group {
-      switch viewState {
-      case .loading:
-        Color.clear
-          .task { loadState() }
-      case .empty:
-        StatisticsEmptyView(
-          theme: theme,
-          onStartRecording: {
-            routerPath.navigate(to: .liveSession)
-          },
-          onViewCalendar: {
-            routerPath.navigate(to: .calendar)
-          }
-        )
-      case .loaded(let session, let recentSessions):
-        StatisticsLoadedView(
-          session: session,
-          recentSessions: recentSessions,
-          theme: theme,
-          onStartRecording: {
-            routerPath.navigate(to: .liveSession)
-          },
-          onViewTrends: {
-            routerPath.navigate(to: .trends)
-          },
-          onViewCalendar: {
-            routerPath.navigate(to: .calendar)
-          }
-        )
-      case .error:
-        StatisticsErrorView(theme: theme) {
-          loadState()
-        }
-      }
-    }
-    .background(theme.bgSecondary.ignoresSafeArea())
-    .onChange(of: sessions) { _, _ in
-      loadState()
-    }
-  }
-
-  private func loadState() {
-    if let latest = sessions.first {
-      let recent = Array(sessions.prefix(7))
-      viewState = .loaded(session: latest, recentSessions: recent)
-    } else {
-      viewState = .empty
-    }
-  }
-
-  public enum ViewState {
-    case loading
-    case empty
-    case loaded(session: SleepSession, recentSessions: [SleepSession])
-    case error
-  }
-}
-
-// MARK: - Empty State
-
-@MainActor
-struct StatisticsEmptyView: View {
-  let theme: Theme
-  let onStartRecording: () -> Void
-  let onViewCalendar: () -> Void
-
-  var body: some View {
-    VStack(spacing: 0) {
-      headerSection
-        .padding(.horizontal, 20)
-        .padding(.top, 20)
-
-      ScrollView {
-        VStack(spacing: 16) {
-          VStack(spacing: 16) {
-            ZStack {
-              Circle()
-                .fill(theme.accent.opacity(0.15))
-                .frame(width: 80, height: 80)
-
-              Image(systemName: "moon.fill")
-                .font(.system(size: 32))
-                .foregroundStyle(theme.accent)
-            }
-
-            VStack(spacing: 4) {
-              Text("Ready to Sleep?")
-                .font(.system(size: 20, weight: .semibold))
-                .foregroundStyle(theme.textPrimary)
-
-              Text("Start a recording to analyze your snoring")
-                .font(.system(size: 15))
-                .foregroundStyle(theme.textSecondary)
-                .multilineTextAlignment(.center)
-            }
-
-            Button {
-              onStartRecording()
-            } label: {
-              Text("Start Recording")
-                .font(.system(size: 17, weight: .semibold))
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity)
-                .frame(height: 52)
-                .background(theme.accent)
-                .clipShape(Capsule())
-            }
-          }
-          .frame(maxWidth: .infinity)
-          .padding(24)
-          .background(theme.bgCard)
-          .cornerRadius(theme.radiusCard)
-        }
-        .padding(.horizontal, 20)
-        .padding(.bottom, 20)
-      }
-    }
-  }
-
-  private var headerSection: some View {
-    HStack {
-      Text("Statistics")
-        .font(.system(size: 34, weight: .bold))
-        .foregroundStyle(theme.textPrimary)
-
-      Spacer()
-
-      Button {
-        onViewCalendar()
-      } label: {
-        HStack(spacing: 4) {
-          Image(systemName: "calendar")
-          Text("Calendar")
-        }
-        .font(.system(size: 14, weight: .semibold))
-        .foregroundStyle(.white)
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
-        .background(theme.accent)
-        .clipShape(Capsule())
-      }
-    }
-  }
-}
-
-// MARK: - Loaded State
 
 @MainActor
 struct StatisticsLoadedView: View {
@@ -177,13 +16,13 @@ struct StatisticsLoadedView: View {
     VStack(spacing: 0) {
       headerSection
         .padding(.horizontal, 20)
-        .padding(.top, 20)
+        .padding(.top, 10)
 
       ScrollView {
         VStack(spacing: 16) {
           weekSelector
 
-          SleepScoreGauge(score: session.sleepScore, theme: theme, size: 110)
+          SleepScoreGauge(score: session.sleepScore, theme: theme, size: 90)
 
           VStack(spacing: 4) {
             Text("LAST NIGHT")
@@ -220,8 +59,10 @@ struct StatisticsLoadedView: View {
           }
         }
         .padding(.horizontal, 20)
-        .padding(.bottom, 20)
+        .padding(.top, 20)
+        .padding(.bottom, 32)
       }
+      .safeAreaPadding(.bottom, 8)
     }
   }
 
@@ -355,7 +196,7 @@ struct StatisticsLoadedView: View {
 
       MiniBarChart(data: data, theme: theme)
     }
-    .padding(16)
+    .padding(12)
     .background(theme.bgCard)
     .cornerRadius(theme.radiusCard)
   }
@@ -403,32 +244,6 @@ struct StatisticsLoadedView: View {
       let label = weekdaySymbols[weekdayIndex].uppercased().prefix(3)
       let number = String(calendar.component(.day, from: date))
       return WeekDay(label: String(label), number: number, isToday: isToday)
-    }
-  }
-}
-
-// MARK: - Error State
-
-@MainActor
-struct StatisticsErrorView: View {
-  let theme: Theme
-  let onRetry: () -> Void
-
-  var body: some View {
-    VStack(spacing: 16) {
-      Image(systemName: "exclamationmark.triangle")
-        .font(.system(size: 48))
-        .foregroundStyle(theme.textTertiary)
-
-      Text("Something went wrong")
-        .font(.headline)
-        .foregroundStyle(theme.textPrimary)
-
-      Button("Try Again") {
-        onRetry()
-      }
-      .font(.system(size: 17, weight: .semibold))
-      .foregroundStyle(theme.accent)
     }
   }
 }

@@ -121,6 +121,28 @@ These are non-negotiable. They come from production patterns in apps like IceCub
 - Pull-to-refresh fires haptics via `HapticManager`.
 - Platform branching: `#if !os(visionOS)` for custom backgrounds.
 
+### View Componentization (Hard Limits)
+
+These thresholds prevent monolithic views. Enforce them during implementation and code review.
+
+**File size limits:**
+- No view file should exceed **200 lines**. If it does, split it.
+- A container view (with `switch viewState`) should be **≤100 lines**. State views (`.loading`, `.empty`, `.loaded`, `.error`) live in separate files.
+
+**What to extract into separate files:**
+- State-specific views: `[Feature]EmptyView`, `[Feature]ErrorView`, `[Feature]LoadedView`
+- Reusable rows/cards: `[Feature]RowView`, `[Feature]StatCard`, `[Feature]EventRow`
+- Full-screen overlays: `AlarmOverlayView`, `PermissionOverlayView`
+- Shared visualization components used by 2+ packages: move to `DesignSystem`
+
+**What stays inline (fine as private computed properties):**
+- Simple headers, badges, or labels under 10 lines
+- One-off buttons that are not reused
+- Private helper formatting functions
+
+**Duplication rule:**
+- If the same view struct appears in 2+ files, extract it to `DesignSystem` immediately. Do not copy-paste view code.
+
 ### Packages
 
 - Feature packages never import other feature packages. Only: Models, Network, Env, DesignSystem.

@@ -67,15 +67,14 @@ public struct OnboardingView: View {
     VStack(spacing: 16) {
       progressDots
 
-      if currentPage > 0 && currentPage < totalPages - 1 {
-        Button("Back") {
-          withAnimation {
-            currentPage -= 1
-          }
+      Button("Back") {
+        withAnimation {
+          currentPage -= 1
         }
-        .font(.system(size: 15, weight: .medium))
-        .foregroundStyle(theme.textSecondary)
       }
+      .font(.system(size: 15, weight: .medium))
+      .foregroundStyle(theme.textSecondary)
+      .opacity(currentPage > 0 && currentPage < totalPages - 1 ? 1 : 0)
     }
     .padding(.bottom, 32)
   }

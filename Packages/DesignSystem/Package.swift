@@ -17,7 +17,8 @@ let package = Package(
       dependencies: [
         .product(name: "Env", package: "Env"),
         .product(name: "Models", package: "Models"),
-      ]
+      ],
+      path: "Sources/Components"
     ),
   ]
 )

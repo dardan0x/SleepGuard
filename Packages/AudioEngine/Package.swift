@@ -15,7 +15,8 @@ let package = Package(
       name: "AudioEngine",
       dependencies: [
         .product(name: "Models", package: "Models"),
-      ]
+      ],
+      path: "Sources/Engine"
     ),
   ]
 )
