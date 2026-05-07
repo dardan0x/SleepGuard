@@ -1039,3 +1039,67 @@ Or delete and reinstall the app on the simulator.
 ### Open Questions
 - Should Smart Alarm require a new `SleepSession` package modification (alarm state in SessionManager) or a separate `AlarmManager` in Env?
 - Should alarm sound be a system sound or a bundled custom sound?
+
+---
+
+## 2026-05-07 — Session 25: F10 Smart Alarm Complete
+
+### Completed
+- **F10-T1**: Alarm scheduling engine
+  - Created `AlarmManager` singleton in Env package
+  - `UNUserNotificationCenter` integration with `UNTimeIntervalNotificationTrigger`
+  - `setAlarm(hour:minute:windowMinutes:)` schedules fallback notification for exact alarm time
+  - `snooze(minutes:)` reschedules alarm forward
+  - `evaluate(currentTime:snoringState:)` checks smart window + snoring state
+- **F10-T2**: Smart wake window detection
+  - `BedsideClockView` evaluates alarm trigger every 50ms in existing task loop
+  - Full-screen alarm overlay with alarm icon, "Time to Wake Up", current time, "I'm Awake" and "Snooze 10 min" buttons
+  - Alarm badge in top-left shows set alarm time during recording
+  - Stop button clears alarm to prevent stray notifications
+- **F10-T3**: Alarm UI in Settings + Pre-start
+  - SettingsView: new "ALARM" section with toggle, compact time picker, smart window duration picker (15/30/45 min)
+  - RecordingPrestartView: alarm card above Start Recording with toggle + time picker
+  - On Start Recording, if alarm enabled, `AlarmManager.setAlarm()` called with UserPreferences values
+  - UserPreferences extended: `alarmEnabled`, `alarmHour`, `alarmMinute`, `alarmWindowMinutes`
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Env/Sources/Env/AlarmManager.swift` | +126 | New. Singleton for alarm scheduling, smart wake evaluation, snooze |
+| `Packages/Env/Sources/Env/UserPreferences.swift` | +48 | Added alarmEnabled, alarmHour, alarmMinute, alarmWindowMinutes |
+| `Packages/SleepSession/Sources/SleepSession/BedsideClockView.swift` | +85/-10 | Alarm badge, evaluation in task loop, alarm overlay with I'm Awake / Snooze |
+| `Packages/SleepSession/Sources/SleepSession/RecordingPrestartView.swift` | +45/-2 | Alarm toggle + time picker card; wires AlarmManager on session start |
+| `Packages/Settings/Sources/Settings/SettingsView.swift` | +58/-1 | New ALARM section with toggle, time picker, window duration picker |
+| `docs/trackers/f10-smart-alarm.md` | +145 | New V2 tracker; all tasks marked Done |
+| `docs/features/f10-smart-alarm.md` | +51 | New feature doc |
+| `docs/FeatureTracker.md` | +6/-6 | F10 marked Done; V2 dashboard: 2/4 features done, 34/40 tasks, 85% |
+
+### Architecture Decisions
+- **AlarmManager in Env package**: Shared service pattern, consistent with SessionManager and HealthKitSync
+- **Alarm evaluated in BedsideClockView task loop**: Reuses the existing 20Hz loop instead of adding a separate timer; adds ~1 comparison per tick (negligible overhead)
+- **UNTimeIntervalNotificationTrigger instead of UNCalendarNotificationTrigger**: Handles next-day alarm times automatically without calendar math edge cases
+- **Alarm overlay replaces entire BedsideClockView**: Full-screen ZStack overlay ensures the alarm is unmissable; user must tap I'm Awake or Snooze
+- **Alarm settings in UserPreferences**: Default alarm config persists across sessions; pre-start screen allows per-session override
+- **Stop button clears alarm**: Prevents notifications firing after the user manually stopped recording
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors across all packages + app target
+
+### Git Handoff
+- **Suggested branch**: `feature/v2/f10/t1-t3-smart-alarm`
+- **Suggested commit**: `F10-T1..T3 — Smart Alarm with wake window detection and alarm overlay`
+  - F10-T1: AlarmManager with UNUserNotificationCenter scheduling and smart wake evaluation
+  - F10-T2: BedsideClockView alarm badge, evaluation loop, full-screen alarm overlay
+  - F10-T3: SettingsView + RecordingPrestartView alarm UI; UserPreferences alarm settings
+
+### Next Session
+- **F11 Apple Watch** or **F13 CloudKit Sync** are the remaining V2 features
+  - F11 is higher effort (WatchOS target, WatchConnectivity, separate UI)
+  - F13 is moderate effort (CloudKit container, SwiftData sync, sync status UI)
+  - Recommendation: F13 CloudKit Sync — simpler to implement, broad user value
+
+### Open Questions
+- Should alarm sound be customizable? Currently uses system default notification sound.
+- Should snooze duration be configurable (5/10/15 min) instead of fixed 10 min?
+- Should the alarm overlay show additional info (sleep score, duration, events count) when waking?
