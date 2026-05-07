@@ -18,7 +18,10 @@ let package = Package(
         .product(name: "Models", package: "Models"),
         .product(name: "AudioEngine", package: "AudioEngine"),
       ],
-      linkerSettings: [.linkedFramework("HealthKit")]
+      linkerSettings: [
+        .linkedFramework("HealthKit"),
+        .linkedFramework("WatchConnectivity"),
+      ]
     ),
   ]
 )

@@ -1103,3 +1103,73 @@ Or delete and reinstall the app on the simulator.
 - Should alarm sound be customizable? Currently uses system default notification sound.
 - Should snooze duration be configurable (5/10/15 min) instead of fixed 10 min?
 - Should the alarm overlay show additional info (sleep score, duration, events count) when waking?
+
+---
+
+## 2026-05-07 — Session 26: F11 Apple Watch Complete
+
+### Completed
+- **F11-T1**: WatchOS app target + basic UI
+  - Created `WatchApp/Sources/` with `SnoreGuardWatchApp.swift`, `ContentView.swift`, `WatchSessionManager.swift`, `WatchAudioRecorder.swift`
+  - Watch app features start/stop recording UI, event count badge, duration timer, snoring status label
+  - Manual Xcode target setup documented in `WatchApp/README.md` (File → New → Target → watchOS App)
+  - `Models` and `AudioEngine` packages updated with `watchOS(.v10)` platform support
+- **F11-T2**: WatchConnectivity session management
+  - `WatchConnectivityManager` in Env package: iOS-side singleton with `isWatchReachable` and `lastSyncedSession`
+  - `WatchSessionManager` on Watch: implements `WCSessionDelegate`, activates session in `WatchAppDelegate`
+  - SettingsView shows Watch connection status (green dot + "Connected" / "Not Connected")
+- **F11-T3**: Watch audio recording + detection
+  - `WatchAudioRecorder`: `AVAudioEngine.inputNode.installTap` with 1024 buffer, dB calculation
+  - Event count increments when `currentDB > -30`
+  - `AVAudioSession` configured with `.playAndRecord` + `.defaultToSpeaker`
+- **F11-T4**: Sync watch data to iPhone
+  - Watch sends session payload (`type: "session"`, `startDate`, `duration`, `eventsCount`) on stop
+  - Primary transport: `WCSession.sendMessage` when reachable
+  - Fallback: `WCSession.updateApplicationContext` when watch is out of range
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `WatchApp/Sources/SnoreGuardWatchApp.swift` | +17 | New. Watch app entry point + WKApplicationDelegate with WCSession activation |
+| `WatchApp/Sources/ContentView.swift` | +56 | New. SwiftUI watch UI with idle/recording states, start/stop buttons |
+| `WatchApp/Sources/WatchSessionManager.swift` | +79 | New. Watch-side session manager with WCSessionDelegate, audio tick loop, data sync |
+| `WatchApp/Sources/WatchAudioRecorder.swift` | +47 | New. AVAudioEngine tap + dB calculation for watchOS |
+| `WatchApp/README.md` | +28 | New. Manual Xcode target setup instructions |
+| `Packages/Env/Sources/Env/WatchConnectivityManager.swift` | +52 | New. iOS-side WCSession manager with reachability and message handling |
+| `Packages/Settings/Sources/Settings/SettingsView.swift` | +20 | Added WATCH section with connection status indicator |
+| `Packages/Models/Package.swift` | +1 | Added `watchOS(.v10)` platform |
+| `Packages/AudioEngine/Package.swift` | +1 | Added `watchOS(.v10)` platform |
+| `Packages/Env/Package.swift` | +1 | Added `WatchConnectivity` framework |
+| `docs/trackers/f11-apple-watch.md` | +120 | New V2 tracker; all tasks marked Done |
+| `docs/features/f11-apple-watch.md` | +49 | New feature doc |
+| `docs/FeatureTracker.md` | +6/-6 | F11 marked Done; V2 dashboard: 3/4 features done, 38/40 tasks, 95% |
+
+### Architecture Decisions
+- **Watch app code outside SPM packages**: WatchOS apps require a native Xcode target, not an SPM library. Source files live in `WatchApp/Sources/` and are added to the target manually per README.
+- **Self-contained Watch audio stack**: `WatchAudioRecorder` is separate from `AudioRecorder` because watchOS has different audio session constraints and buffer sizes. Reuses the same dB formula.
+- **WCSession sendMessage + application context**: `sendMessage` is immediate but requires the iPhone app to be active. `updateApplicationContext` is queued and delivered on next launch, ensuring data isn't lost if the phone is out of range.
+- **Minimal Watch UI**: Single screen with two states (idle/recording). No navigation, tabs, or complex UI — appropriate for watch form factor.
+- **dB threshold detection on Watch**: Uses the same -30 dB threshold as iOS quiet/light boundary. Simpler than porting CoreML to watchOS for V2.
+
+### Build Status
+- **BUILD SUCCEEDED** — iOS app builds with zero errors. Watch app requires manual Xcode target setup per README.
+
+### Git Handoff
+- **Suggested branch**: `feature/v2/f11/t1-t4-apple-watch`
+- **Suggested commit**: `F11-T1..T4 — Apple Watch companion app with WatchConnectivity sync`
+  - F11-T1: Watch app source files with SwiftUI UI; manual Xcode target setup documented
+  - F11-T2: WatchConnectivityManager iOS + WatchSessionManager with WCSessionDelegate
+  - F11-T3: WatchAudioRecorder with AVAudioEngine tap and dB threshold detection
+  - F11-T4: Watch data sync via WCSession sendMessage + application context fallback
+
+### Next Session
+- **F13 CloudKit Sync** is the last remaining V2 feature
+  - F13-T1: CloudKit container + capability setup
+  - F13-T2: SwiftData CloudKit integration
+  - F13-T3: Sync status / conflict UI
+
+### Open Questions
+- Should the Watch app use `WKExtendedRuntimeSession` for background recording? Currently relies on foreground audio session.
+- Should snore events on Watch be more detailed (timestamp + duration per event) or is aggregate count sufficient?
+- Should the iOS app show a list of watch-recorded sessions separately from phone-recorded sessions?

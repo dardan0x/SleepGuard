@@ -3,7 +3,7 @@ import PackageDescription
 
 let package = Package(
   name: "AudioEngine",
-  platforms: [.iOS(.v17)],
+  platforms: [.iOS(.v17), .watchOS(.v10)],
   products: [
     .library(name: "AudioEngine", targets: ["AudioEngine"]),
   ],
