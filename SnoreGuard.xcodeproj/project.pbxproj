@@ -29,6 +29,7 @@
 		CE158A3C2FAB2EC7001B61AA /* SnoreGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SnoreGuard.xcodeproj; sourceTree = "<group>"; };
 		CE258F042FAC77A5004C0C0D /* SnoreGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SnoreGuard.xcodeproj; sourceTree = "<group>"; };
 		CE2590142FAD1D8E004C0C0D /* SnoreGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SnoreGuard.xcodeproj; sourceTree = "<group>"; };
+		CE2591162FAE9289004C0C0D /* SnoreGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SnoreGuard.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -92,6 +93,11 @@
 			sourceTree = "<group>";
 		};
 		CE2590162FAD1D8E004C0C0D /* Products */ = {
+			isa = PBXGroup;
+			name = Products;
+			sourceTree = "<group>";
+		};
+		CE2591182FAE9289004C0C0D /* Products */ = {
 			isa = PBXGroup;
 			name = Products;
 			sourceTree = "<group>";
@@ -169,6 +175,10 @@
 			productRefGroup = CE1588F92FAA9946001B61AA /* Products */;
 			projectDirPath = "";
 			projectReferences = (
+				{
+					ProductGroup = CE2591182FAE9289004C0C0D /* Products */;
+					ProjectRef = CE2591162FAE9289004C0C0D /* SnoreGuard.xcodeproj */;
+				},
 				{
 					ProductGroup = CE158A3D2FAB2EC7001B61AA /* Products */;
 					ProjectRef = CE158A3C2FAB2EC7001B61AA /* SnoreGuard.xcodeproj */;
