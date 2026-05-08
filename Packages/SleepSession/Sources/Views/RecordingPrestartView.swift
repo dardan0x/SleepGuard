@@ -7,9 +7,10 @@ import DesignSystem
 struct RecordingPrestartView: View {
   @Environment(Theme.self) private var theme
   @Environment(SessionManager.self) private var sessionManager
+  @Environment(AudioRecorder.self) private var audioRecorder
+  @Environment(AlarmManager.self) private var alarmManager
   @Environment(RouterPath.self) private var routerPath
   @Environment(UserPreferences.self) private var userPreferences
-  private let audioRecorder = AudioRecorder.shared
 
   var body: some View {
     ZStack {
@@ -96,7 +97,7 @@ struct RecordingPrestartView: View {
             guard granted else { return }
           }
           if userPreferences.alarmEnabled {
-            AlarmManager.shared.setAlarm(
+            alarmManager.setAlarm(
               hour: userPreferences.alarmHour,
               minute: userPreferences.alarmMinute,
               windowMinutes: userPreferences.alarmWindowMinutes

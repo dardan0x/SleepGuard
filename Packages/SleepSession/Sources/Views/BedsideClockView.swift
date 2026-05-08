@@ -1,13 +1,16 @@
 import SwiftUI
 import AudioEngine
 import Env
+import Models
 import DesignSystem
 
 @MainActor
 struct BedsideClockView: View {
   @Environment(SessionManager.self) private var sessionManager
+  @Environment(AudioRecorder.self) private var audioRecorder
+  @Environment(AlarmManager.self) private var alarmManager
+  @Environment(SoundAnalysisDetector.self) private var soundAnalysisDetector
   @Environment(Theme.self) private var theme
-  private let audioRecorder = AudioRecorder.shared
 
   @State private var currentTime = Date()
   @State private var showAlarmOverlay = false
@@ -17,34 +20,41 @@ struct BedsideClockView: View {
       theme.bgPrimary.ignoresSafeArea()
 
       VStack(spacing: 0) {
-        HStack {
-          if AlarmManager.shared.isAlarmSet {
-            alarmBadge
-          }
+        BedsideClockBadgesView(
+          eventsCount: sessionManager.eventsCount,
+          isAlarmSet: alarmManager.isAlarmSet,
+          alarmTimeString: alarmTimeString
+        )
 
-          Spacer()
+        Spacer()
 
-          eventBadge
+        BedsideClockClockView(
+          timeString: timeString,
+          dateString: dateString
+        )
+
+        Spacer()
+
+        BedsideClockWaveformView(
+          durationString: durationString,
+          levels: simulatedWaveform
+        )
+
+        Spacer()
+
+        BedsideClockStatusView(
+          statusLabel: statusLabel,
+          snoringColor: snoringColor
+        )
+
+        Spacer()
+
+        StopRecordingButton(height: 52) {
+          alarmManager.clearAlarm()
+          _ = sessionManager.stopSession()
         }
-        .padding(.top, 16)
         .padding(.horizontal, 24)
-
-        Spacer()
-
-        clockSection
-
-        Spacer()
-
-        waveformSection
-
-        Spacer()
-
-        statusSection
-
-        Spacer()
-
-        stopButton
-          .padding(.bottom, 32)
+        .padding(.bottom, 32)
       }
 
       if showAlarmOverlay {
@@ -61,7 +71,7 @@ struct BedsideClockView: View {
         if newSecond != oldSecond {
           currentTime = now
         }
-        let saConf = SoundAnalysisDetector.shared.snoreConfidence
+        let saConf = soundAnalysisDetector.snoreConfidence
         #if DEBUG
         if saConf > 0.1 {
           print("[BedsideClockView] passing db=\(String(format: "%.1f", audioRecorder.currentDB)) snoreConf=\(String(format: "%.3f", saConf))")
@@ -73,7 +83,7 @@ struct BedsideClockView: View {
           snoreConfidence: saConf
         )
 
-        if AlarmManager.shared.evaluate(currentTime: now, snoringState: sessionManager.currentSnoringState) {
+        if alarmManager.evaluate(currentTime: now, snoringState: sessionManager.currentSnoringState) {
           showAlarmOverlay = true
         }
 
@@ -82,111 +92,14 @@ struct BedsideClockView: View {
     }
   }
 
-  private var eventBadge: some View {
-    HStack(spacing: 6) {
-      Circle()
-        .fill(theme.scoreGreen)
-        .frame(width: 8, height: 8)
-      Text("\(sessionManager.eventsCount) EVENTS")
-        .font(.system(size: 13, weight: .semibold))
-        .foregroundStyle(theme.scoreGreen)
-    }
-    .padding(.horizontal, 12)
-    .padding(.vertical, 6)
-    .overlay(
-      RoundedRectangle(cornerRadius: 100)
-        .stroke(theme.scoreGreen, lineWidth: 1)
-    )
-  }
-
-  private var alarmBadge: some View {
-    HStack(spacing: 6) {
-      Image(systemName: "alarm.fill")
-        .font(.system(size: 12))
-        .foregroundStyle(theme.accent)
-      Text(alarmTimeString)
-        .font(.system(size: 13, weight: .semibold))
-        .foregroundStyle(theme.accent)
-    }
-    .padding(.horizontal, 12)
-    .padding(.vertical, 6)
-    .overlay(
-      RoundedRectangle(cornerRadius: 100)
-        .stroke(theme.accent, lineWidth: 1)
-    )
-  }
-
-  private var clockSection: some View {
-    VStack(spacing: 8) {
-      Text(timeString)
-        .font(.system(size: 96, weight: .thin, design: .rounded))
-        .foregroundStyle(theme.textTertiary)
-        .minimumScaleFactor(0.5)
-        .monospacedDigit()
-
-      Text(dateString)
-        .font(.system(size: 15, weight: .medium))
-        .foregroundStyle(theme.textSecondary)
-        .tracking(2)
-        .textCase(.uppercase)
-    }
-  }
-
-  private var waveformSection: some View {
-    VStack(spacing: 16) {
-      HStack(spacing: 6) {
-        Circle()
-          .fill(theme.scoreGreen)
-          .frame(width: 8, height: 8)
-        Text("Recording · \(durationString)")
-          .font(.system(size: 16, weight: .medium))
-          .foregroundStyle(theme.accent)
-          .monospacedDigit()
-      }
-
-      AudioLevelMeter(
-        levels: simulatedWaveform,
-        theme: theme
-      )
-    }
-  }
-
-  private var statusSection: some View {
-    VStack(spacing: 12) {
-      HStack(spacing: 6) {
-        Image(systemName: "speaker.wave.2.fill")
-          .font(.system(size: 14))
-          .foregroundStyle(snoringColor)
-        Text(statusLabel)
-          .font(.system(size: 15, weight: .medium))
-          .foregroundStyle(snoringColor)
-      }
-
-      // dB and confidence removed from active recording UI — values are
-      // negative during recording which is confusing to users.
-    }
-  }
-
-  private var stopButton: some View {
-    StopRecordingButton(height: 52) {
-      AlarmManager.shared.clearAlarm()
-      _ = sessionManager.stopSession()
-    }
-    .padding(.horizontal, 24)
-  }
-
   // MARK: - Helpers
 
   private var timeString: String {
-    let formatter = DateFormatter()
-    formatter.dateFormat = "h:mm"
-    return formatter.string(from: currentTime)
+    DateFormatters.time.string(from: currentTime)
   }
 
   private var dateString: String {
-    let formatter = DateFormatter()
-    formatter.dateFormat = "EEE · MMM d"
-    return formatter.string(from: currentTime).uppercased()
+    DateFormatters.weekdayAndMonthDay.string(from: currentTime).uppercased()
   }
 
   private var durationString: String {
@@ -198,10 +111,8 @@ struct BedsideClockView: View {
   }
 
   private var alarmTimeString: String {
-    guard let alarmTime = AlarmManager.shared.alarmTime else { return "" }
-    let formatter = DateFormatter()
-    formatter.dateFormat = "h:mm a"
-    return formatter.string(from: alarmTime)
+    guard let alarmTime = alarmManager.alarmTime else { return "" }
+    return DateFormatters.timeWithPeriod.string(from: alarmTime)
   }
 
   private var simulatedWaveform: [Double] {
@@ -229,5 +140,4 @@ struct BedsideClockView: View {
     case .loud: return "Loud snoring detected · just now"
     }
   }
-
 }

@@ -1,0 +1,45 @@
+import SwiftUI
+import DesignSystem
+
+struct TrendsStatsGrid: View {
+  let averageScore: Int
+  let bestScore: Int
+  let worstScore: Int
+  let totalEvents: Int
+  @Environment(Theme.self) private var theme
+
+  var body: some View {
+    let columns = [GridItem(.flexible()), GridItem(.flexible())]
+
+    LazyVGrid(columns: columns, spacing: 12) {
+      TrendStatCard(
+        icon: "scope",
+        iconColor: theme.accent,
+        label: "AVG SCORE",
+        value: "\(averageScore)",
+        theme: theme
+      )
+      TrendStatCard(
+        icon: "star.fill",
+        iconColor: theme.scoreGreen,
+        label: "BEST NIGHT",
+        value: "\(bestScore)",
+        theme: theme
+      )
+      TrendStatCard(
+        icon: "bolt.fill",
+        iconColor: theme.snoreLoud,
+        label: "WORST NIGHT",
+        value: "\(worstScore)",
+        theme: theme
+      )
+      TrendStatCard(
+        icon: "number",
+        iconColor: theme.textTertiary,
+        label: "TOTAL EVENTS",
+        value: "\(totalEvents)",
+        theme: theme
+      )
+    }
+  }
+}

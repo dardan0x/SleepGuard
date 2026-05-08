@@ -1,0 +1,55 @@
+import SwiftUI
+import Env
+import DesignSystem
+
+@MainActor
+struct SettingsDataSection: View {
+  @Environment(Theme.self) private var theme
+  @Environment(UserPreferences.self) private var userPreferences
+  @Environment(HealthKitSync.self) private var healthKitSync
+  let onShowDeleteConfirmation: () -> Void
+
+  var body: some View {
+    VStack(alignment: .leading, spacing: 2) {
+      SettingsSectionTitle(text: "DATA")
+      VStack(spacing: 16) {
+        HStack(spacing: 10) {
+          SettingsIconBackground(systemName: "heart.fill", color: Color(hex: "#FF2D55"))
+          Text("Sync to Apple Health")
+            .font(.system(size: 15))
+            .foregroundStyle(theme.textPrimary)
+          Spacer()
+          Toggle("", isOn: Binding(
+            get: { userPreferences.syncToHealthKit },
+            set: { newValue in
+              userPreferences.syncToHealthKit = newValue
+              if newValue {
+                Task {
+                  await healthKitSync.requestAuthorization()
+                }
+              }
+            }
+          ))
+          .labelsHidden()
+          .tint(theme.scoreGreen)
+        }
+
+        Button {
+          onShowDeleteConfirmation()
+        } label: {
+          HStack(spacing: 10) {
+            SettingsIconBackground(systemName: "trash", color: theme.destructive)
+            Text("Delete All Recordings")
+              .font(.system(size: 15, weight: .medium))
+              .foregroundStyle(theme.destructive)
+            Spacer()
+          }
+        }
+        .buttonStyle(.plain)
+      }
+      .padding(16)
+      .background(theme.bgCard)
+      .cornerRadius(12)
+    }
+  }
+}

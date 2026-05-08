@@ -22,11 +22,16 @@ public struct TrendsView: View {
 
         snoringMinutesSection
 
-        chartSection
+        TrendsChartSection(data: chartData())
 
-        legendSection
+        SnoringLegendView()
 
-        statsGrid
+        TrendsStatsGrid(
+          averageScore: averageScore(),
+          bestScore: bestScore(),
+          worstScore: worstScore(),
+          totalEvents: totalEvents()
+        )
       }
       .padding(20)
     }
@@ -90,97 +95,6 @@ public struct TrendsView: View {
     .frame(maxWidth: .infinity, alignment: .leading)
   }
 
-  // MARK: - Chart
-
-  private var chartSection: some View {
-    let data = chartData()
-
-    return VStack(spacing: 8) {
-      Chart(data) { item in
-        BarMark(
-          x: .value("Day", item.label),
-          y: .value("Minutes", item.minutes)
-        )
-        .foregroundStyle(item.color)
-        .cornerRadius(4)
-      }
-      .frame(height: 120)
-      .chartYAxis(.hidden)
-      .chartXAxis {
-        AxisMarks(values: .automatic) { value in
-          AxisValueLabel {
-            if let label = value.as(String.self) {
-              Text(label)
-                .font(.system(size: 10, weight: .medium))
-                .foregroundStyle(theme.textTertiary)
-            }
-          }
-        }
-      }
-
-    }
-  }
-
-  // MARK: - Legend
-
-  private var legendSection: some View {
-    HStack(spacing: 16) {
-      legendItem(color: theme.snoreQuiet, label: "Quiet")
-      legendItem(color: theme.snoreLight, label: "Light")
-      legendItem(color: theme.snoreLoud, label: "Loud")
-    }
-    .frame(maxWidth: .infinity)
-  }
-
-  private func legendItem(color: Color, label: String) -> some View {
-    HStack(spacing: 4) {
-      Circle()
-        .fill(color)
-        .frame(width: 6, height: 6)
-
-      Text(label)
-        .font(.system(size: 12))
-        .foregroundStyle(theme.textSecondary)
-    }
-  }
-
-  // MARK: - Stats Grid
-
-  private var statsGrid: some View {
-    let columns = [GridItem(.flexible()), GridItem(.flexible())]
-
-    return LazyVGrid(columns: columns, spacing: 12) {
-      TrendStatCard(
-        icon: "scope",
-        iconColor: theme.accent,
-        label: "AVG SCORE",
-        value: "\(averageScore())",
-        theme: theme
-      )
-      TrendStatCard(
-        icon: "star.fill",
-        iconColor: theme.scoreGreen,
-        label: "BEST NIGHT",
-        value: "\(bestScore())",
-        theme: theme
-      )
-      TrendStatCard(
-        icon: "bolt.fill",
-        iconColor: theme.snoreLoud,
-        label: "WORST NIGHT",
-        value: "\(worstScore())",
-        theme: theme
-      )
-      TrendStatCard(
-        icon: "number",
-        iconColor: theme.textTertiary,
-        label: "TOTAL EVENTS",
-        value: "\(totalEvents())",
-        theme: theme
-      )
-    }
-  }
-
   // MARK: - Data Helpers
 
   private func filteredSessions() -> [SleepSession] {
@@ -194,8 +108,7 @@ public struct TrendsView: View {
   }
 
   private func chartData() -> [TrendBarData] {
-    let formatter = DateFormatter()
-    formatter.dateFormat = timeRange == .week ? "EEE" : "d"
+    let formatter = timeRange == .week ? DateFormatters.dayOfWeekShort : DateFormatters.monthDay
 
     return filteredSessions().map { session in
       let label = formatter.string(from: session.startDate)
@@ -247,20 +160,9 @@ public struct TrendsView: View {
   }
 }
 
-// MARK: - Time Range
-
 private enum TimeRange: String, CaseIterable, Identifiable {
   case week = "Week"
   case month = "Month"
 
   var id: String { rawValue }
-}
-
-// MARK: - Trend Bar Data
-
-private struct TrendBarData: Identifiable {
-  let id: UUID
-  let label: String
-  let minutes: Int
-  let color: Color
 }

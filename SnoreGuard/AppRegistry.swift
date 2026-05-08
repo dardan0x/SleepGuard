@@ -16,7 +16,12 @@ extension View {
     theme: Theme,
     statisticsRouterPath: RouterPath,
     recordingsRouterPath: RouterPath,
-    settingsRouterPath: RouterPath
+    settingsRouterPath: RouterPath,
+    audioRecorder: AudioRecorder,
+    alarmManager: AlarmManager,
+    healthKitSync: HealthKitSync,
+    watchConnectivityManager: WatchConnectivityManager,
+    soundAnalysisDetector: SoundAnalysisDetector
   ) -> some View {
     self
       .environment(userPreferences)
@@ -25,6 +30,11 @@ extension View {
       .environment(statisticsRouterPath)
       .environment(recordingsRouterPath)
       .environment(settingsRouterPath)
+      .environment(audioRecorder)
+      .environment(alarmManager)
+      .environment(healthKitSync)
+      .environment(watchConnectivityManager)
+      .environment(soundAnalysisDetector)
   }
 
   func withEnvironments() -> some View {
@@ -32,6 +42,11 @@ extension View {
       .environment(UserPreferences.shared)
       .environment(SessionManager.shared)
       .environment(Theme.shared)
+      .environment(AudioRecorder.shared)
+      .environment(AlarmManager.shared)
+      .environment(HealthKitSync.shared)
+      .environment(WatchConnectivityManager.shared)
+      .environment(SoundAnalysisDetector.shared)
       .environment(RouterPath())
   }
 
