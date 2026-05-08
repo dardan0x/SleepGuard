@@ -1582,3 +1582,52 @@ append
 
 ### Open Questions
 - Should simulator mic permission bypasses be restored in `AudioRecorder.swift`?
+
+
+## 2026-05-08 — Session 31: Delayed Recording Start (replaces Smart Alarm)
+
+### Completed
+- **Replaced Smart Alarm with Delayed Recording Start**: Removed the entire Smart Alarm feature (alarm scheduling, smart wake window, overlay, Settings section) and replaced it with a countdown-based delayed recording start.
+- **RecordingDelayManager**: New `@Observable` singleton in `Env` with a `Timer` (1s interval on `RunLoop.main` `.common` mode) that tracks `targetDate` for background resilience. Schedules a local notification fallback. Posts `.recordingDelayDidComplete` on completion.
+- **RecordingPrestartView Redesign**: Removed alarm toggle/time picker. Added horizontal delay picker: Off / 15m / 30m / 45m / 1h with accent-selected state and helper text below. Non-scrollable layout with explicit per-element spacing (15px to button, 10px to Cancel).
+- **RecordingCountdownView**: New full-screen countdown with moon icon, large "Recording starts in XX:XX" timer (72pt thin rounded), Cancel (dark pill), and Start Now (accent pill). Auto-starts recording via notification observer when timer hits zero.
+- **SleepSessionView**: Added `RecordingDelayManager.shared.isActive` branch to show countdown view between pre-start and bedside clock.
+- **BedsideClockView Cleanup**: Removed alarm badge, alarm overlay, and `AlarmManager.clearAlarm()` call.
+- **SettingsView Cleanup**: Removed Smart Alarm section. Added "Start delay" row in Recording section with confirmation dialog (Off / 15m / 30m / 45m / 1h).
+- **UserPreferences**: Replaced `alarmEnabled`, `alarmHour`, `alarmMinute`, `alarmWindowMinutes` with `recordingDelayMinutes` (0/15/30/45/60).
+
+### Technical Details
+- `RecordingDelayManager` uses `Timer(timeInterval:repeats:block:)` + `RunLoop.main.add(timer, forMode: .common)` to survive app backgrounding with audio session active
+- `RecordingPrestartView` uses explicit `.padding(.top)` per element instead of global `VStack(spacing:)` to achieve precise 15px/10px spacing
+- Delay buttons use `bgElevated` when unselected and `accent` fill when selected, with spring animation
+- Countdown view observes `.recordingDelayDidComplete` via `.onReceive` to auto-start `sessionManager.startSession()`
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Env/Sources/Services/UserPreferences.swift` | +8/-55 | Removed alarm properties; added `recordingDelayMinutes` |
+| `Packages/Env/Sources/Services/RecordingDelayManager.swift` | +93/-0 | New singleton: Timer-based countdown, notification scheduling, background resilience |
+| `Packages/SleepSession/Sources/Views/SleepSessionView.swift` | +2/-0 | Added `RecordingDelayManager.isActive` branch |
+| `Packages/SleepSession/Sources/Views/RecordingPrestartView.swift` | +90/-80 | Delay picker replaces alarm UI; explicit layout spacing; non-scrollable |
+| `Packages/SleepSession/Sources/Views/RecordingCountdownView.swift` | +50/-0 | New countdown screen with timer, Cancel, Start Now |
+| `Packages/SleepSession/Sources/Views/BedsideClockView.swift` | +12/-45 | Removed alarm badge, overlay, and alarm clear on stop |
+| `Packages/Settings/Sources/Views/SettingsView.swift` | +20/-65 | Removed alarm section; added Start delay row in Recording section |
+
+### Architecture Decisions
+- **Timer over `.task`**: SwiftUI `.task` suspends in background; `Timer` on `.common` run loop mode keeps evaluating with background audio active
+- **Notification fallback**: Local notification scheduled for exact delay time so recording can start even if app is backgrounded and timer throttles
+- **Single preference replaces four**: `recordingDelayMinutes` encodes "off" as 0, eliminating the need for a separate enabled flag
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors across all packages + app target
+
+### Next Session
+- F13-T1: CloudKit Sync (only remaining backlog task)
+
+### Open Questions
+- Should unused `AlarmManager.swift` and `AlarmOverlayView.swift` be deleted?
+- Should simulator mic permission bypasses be restored in `AudioRecorder.swift`?
+
+### Git Handoff
+- **Suggested branch**: `feature/f2/t7-delayed-recording-start`
+- **Suggested commit**: `F2-T7 — Replace Smart Alarm with Delayed Recording Start`

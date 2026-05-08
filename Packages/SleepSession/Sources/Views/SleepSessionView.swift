@@ -15,6 +15,8 @@ public struct SleepSessionView: View {
         BedsideClockView()
       } else if sessionManager.completedSession != nil {
         Color.clear
+      } else if RecordingDelayManager.shared.isActive {
+        RecordingCountdownView()
       } else {
         RecordingPrestartView()
       }

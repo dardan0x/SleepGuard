@@ -1,169 +1,169 @@
-import SwiftUI
 import AudioEngine
-import Env
 import DesignSystem
+import Env
+import SwiftUI
 
 @MainActor
 struct RecordingPrestartView: View {
-  @Environment(Theme.self) private var theme
-  @Environment(SessionManager.self) private var sessionManager
-  @Environment(AudioRecorder.self) private var audioRecorder
-  @Environment(AlarmManager.self) private var alarmManager
-  @Environment(RouterPath.self) private var routerPath
-  @Environment(UserPreferences.self) private var userPreferences
+    @Environment(Theme.self) private var theme
+    @Environment(SessionManager.self) private var sessionManager
+    @Environment(RouterPath.self) private var routerPath
+    @Environment(UserPreferences.self) private var userPreferences
+    private let audioRecorder = AudioRecorder.shared
 
-  var body: some View {
-    ZStack {
-      theme.bgPrimary.ignoresSafeArea()
+    private let delayOptions = [0, 15, 30, 45, 60]
 
-      VStack(spacing: 32) {
-        Spacer()
+    var body: some View {
+        ZStack {
+            theme.bgPrimary.ignoresSafeArea()
 
-        iconSection
+            VStack(spacing: 0) {
+                iconSection
+                    .padding(.top, 24)
+                
+                headlineSection
+                    .padding(.top, 24)
 
-        headlineSection
+                tipsSection
+                    .padding(.top, 24)
 
-        tipsSection
+                VStack(spacing: 12) {
+                    delaySection
 
-        Spacer()
+                    helperText
+                }
+                .padding(.top, 24)
 
-        actionButtons
-      }
-      .padding(.horizontal, 24)
-      .padding(.bottom, 32)
+                StartRecordingButton(height: 56) {
+                    Task {
+                        if !audioRecorder.hasPermission {
+                            let granted = await audioRecorder.requestPermission()
+                            guard granted else { return }
+                        }
+                        let delay = userPreferences.recordingDelayMinutes
+                        if delay > 0 {
+                            RecordingDelayManager.shared.startDelay(minutes: delay)
+                        } else {
+                            try? sessionManager.startSession()
+                        }
+                    }
+                }
+                .padding(.top, 15)
+
+                Button {
+                    routerPath.navigateBack()
+                } label: {
+                    Text("Cancel")
+                        .font(.system(size: 17, weight: .medium))
+                        .foregroundStyle(theme.textSecondary)
+                }
+                .padding(.top, 10)
+
+                Spacer()
+            }
+            .padding(.horizontal, 24)
+            .padding(.bottom, 32)
+        }
     }
-  }
 
-  private var iconSection: some View {
-    RoundedRectangle(cornerRadius: 24)
-      .fill(theme.bgCard)
-      .frame(width: 100, height: 100)
-      .overlay(
-        Image(systemName: "moon.fill")
-          .font(.system(size: 44))
-          .foregroundStyle(theme.accent)
-      )
-  }
-
-  private var headlineSection: some View {
-    VStack(spacing: 8) {
-      Text("Ready to track your sleep?")
-        .font(.system(size: 28, weight: .bold))
-        .foregroundStyle(theme.textPrimary)
-        .multilineTextAlignment(.center)
-
-      Text("We'll listen for snoring through the night. Audio stays on your device.")
-        .font(.system(size: 16))
-        .foregroundStyle(theme.textSecondary)
-        .multilineTextAlignment(.center)
-    }
-  }
-
-  private var tipsSection: some View {
-    VStack(spacing: 10) {
-      tipRow(icon: "iphone", text: "Place your phone on the nightstand")
-      tipRow(icon: "bolt.fill", text: "Keep it plugged in")
-      tipRow(icon: "bell.slash.fill", text: "Silence notifications")
-    }
-  }
-
-  private func tipRow(icon: String, text: String) -> some View {
-    HStack(spacing: 12) {
-      Image(systemName: icon)
-        .font(.system(size: 18))
-        .foregroundStyle(theme.accent)
-        .frame(width: 24)
-
-      Text(text)
-        .font(.system(size: 16))
-        .foregroundStyle(theme.textSecondary)
-
-      Spacer()
-    }
-    .padding(.horizontal, 16)
-    .padding(.vertical, 14)
-    .background(theme.bgCard)
-    .cornerRadius(theme.radiusCard)
-  }
-
-  private var actionButtons: some View {
-    VStack(spacing: 16) {
-      alarmSection
-
-      StartRecordingButton(height: 56) {
-        Task {
-          if !audioRecorder.hasPermission {
-            let granted = await audioRecorder.requestPermission()
-            guard granted else { return }
-          }
-          if userPreferences.alarmEnabled {
-            alarmManager.setAlarm(
-              hour: userPreferences.alarmHour,
-              minute: userPreferences.alarmMinute,
-              windowMinutes: userPreferences.alarmWindowMinutes
+    private var iconSection: some View {
+        RoundedRectangle(cornerRadius: 24)
+            .fill(theme.bgCard)
+            .frame(width: 100, height: 100)
+            .overlay(
+                Image(systemName: "moon.fill")
+                    .font(.system(size: 44))
+                    .foregroundStyle(theme.accent)
             )
-          }
-          try? sessionManager.startSession()
-        }
-      }
-
-      Button {
-        routerPath.navigateBack()
-      } label: {
-        Text("Cancel")
-          .font(.system(size: 17, weight: .medium))
-          .foregroundStyle(theme.textSecondary)
-      }
     }
-    .frame(maxWidth: .infinity)
-  }
 
-  private var alarmSection: some View {
-    VStack(alignment: .leading, spacing: 12) {
-      HStack {
-        Toggle("Smart Alarm", isOn: Binding(
-          get: { userPreferences.alarmEnabled },
-          set: { userPreferences.alarmEnabled = $0 }
-        ))
-        .font(.system(size: 17, weight: .semibold))
-        .foregroundStyle(theme.textPrimary)
-        .tint(theme.scoreGreen)
-      }
+    private var headlineSection: some View {
+        VStack(spacing: 8) {
+            Text("Ready to track your sleep?")
+                .font(.system(size: 28, weight: .bold))
+                .foregroundStyle(theme.textPrimary)
+                .multilineTextAlignment(.center)
 
-      if userPreferences.alarmEnabled {
-        HStack {
-          DatePicker(
-            "",
-            selection: alarmTimeBinding,
-            displayedComponents: .hourAndMinute
-          )
-          .datePickerStyle(.compact)
-          .colorMultiply(theme.textPrimary)
+            Text("We'll listen for snoring through the night. Audio stays on your device.")
+                .font(.system(size: 16))
+                .foregroundStyle(theme.textSecondary)
+                .multilineTextAlignment(.center)
+                .lineLimit(nil)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
 
-          Spacer()
+    private var tipsSection: some View {
+        VStack(spacing: 10) {
+            tipRow(icon: "iphone", text: "Place your phone on the nightstand")
+            tipRow(icon: "bolt.fill", text: "Keep it plugged in")
+            tipRow(icon: "bell.slash.fill", text: "Silence notifications")
+        }
+    }
 
-          Text("\(userPreferences.alarmWindowMinutes) min window")
-            .font(.system(size: 13))
+    private func tipRow(icon: String, text: String) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .font(.system(size: 18))
+                .foregroundStyle(theme.accent)
+                .frame(width: 24)
+
+            Text(text)
+                .font(.system(size: 16))
+                .foregroundStyle(theme.textSecondary)
+
+            Spacer()
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
+        .background(theme.bgCard)
+        .cornerRadius(theme.radiusCard)
+    }
+
+    private var delaySection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Start recording after")
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(theme.textPrimary)
+
+            HStack(spacing: 8) {
+                ForEach(delayOptions, id: \.self) { minutes in
+                    delayButton(minutes: minutes)
+                }
+            }
+        }
+        .padding(16)
+        .background(theme.bgCard)
+        .cornerRadius(theme.radiusCard)
+    }
+
+    private func delayButton(minutes: Int) -> some View {
+        let isSelected = userPreferences.recordingDelayMinutes == minutes
+        let label = minutes == 0 ? "Off" : (minutes == 60 ? "1h" : "\(minutes)m")
+
+        return Button {
+            withAnimation(.spring(duration: 0.25)) {
+                userPreferences.recordingDelayMinutes = minutes
+            }
+        } label: {
+            Text(label)
+                .font(.system(size: 15, weight: isSelected ? .semibold : .medium))
+                .foregroundStyle(isSelected ? theme.textPrimary : theme.textSecondary)
+                .frame(maxWidth: .infinity)
+                .frame(height: 44)
+                .background(isSelected ? theme.accent : theme.bgElevated)
+                .cornerRadius(12)
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var helperText: some View {
+        Text("Use this if you need time to fall asleep before recording begins.")
+            .font(.system(size: 14))
             .foregroundStyle(theme.textTertiary)
-        }
-      }
+            .multilineTextAlignment(.center)
+            .lineLimit(nil)
+            .fixedSize(horizontal: false, vertical: true)
+            .frame(maxWidth: .infinity)
     }
-    .padding(16)
-    .background(theme.bgCard)
-    .cornerRadius(theme.radiusCard)
-  }
-
-  private var alarmTimeBinding: Binding<Date> {
-    Binding {
-      var components = DateComponents()
-      components.hour = userPreferences.alarmHour
-      components.minute = userPreferences.alarmMinute
-      return Calendar.current.date(from: components) ?? Date()
-    } set: { newDate in
-      let components = Calendar.current.dateComponents([.hour, .minute], from: newDate)
-      userPreferences.alarmHour = components.hour ?? 7
-      userPreferences.alarmMinute = components.minute ?? 0
-    }
-  }
 }
-

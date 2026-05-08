@@ -8,12 +8,10 @@ import DesignSystem
 struct BedsideClockView: View {
   @Environment(SessionManager.self) private var sessionManager
   @Environment(AudioRecorder.self) private var audioRecorder
-  @Environment(AlarmManager.self) private var alarmManager
   @Environment(SoundAnalysisDetector.self) private var soundAnalysisDetector
   @Environment(Theme.self) private var theme
 
   @State private var currentTime = Date()
-  @State private var showAlarmOverlay = false
 
   var body: some View {
     ZStack {
@@ -21,9 +19,7 @@ struct BedsideClockView: View {
 
       VStack(spacing: 0) {
         BedsideClockBadgesView(
-          eventsCount: sessionManager.eventsCount,
-          isAlarmSet: alarmManager.isAlarmSet,
-          alarmTimeString: alarmTimeString
+          eventsCount: sessionManager.eventsCount
         )
 
         Spacer()
@@ -50,18 +46,12 @@ struct BedsideClockView: View {
         Spacer()
 
         StopRecordingButton(height: 52) {
-          alarmManager.clearAlarm()
           _ = sessionManager.stopSession()
         }
         .padding(.horizontal, 24)
         .padding(.bottom, 32)
       }
 
-      if showAlarmOverlay {
-        AlarmOverlayView(currentTime: currentTime) {
-          showAlarmOverlay = false
-        }
-      }
     }
     .task {
       while !Task.isCancelled {
@@ -82,10 +72,6 @@ struct BedsideClockView: View {
           spectralScore: audioRecorder.spectralScore,
           snoreConfidence: saConf
         )
-
-        if alarmManager.evaluate(currentTime: now, snoringState: sessionManager.currentSnoringState) {
-          showAlarmOverlay = true
-        }
 
         try? await Task.sleep(for: .milliseconds(50))
       }
@@ -108,11 +94,6 @@ struct BedsideClockView: View {
     let hours = Int(duration) / 3600
     let minutes = (Int(duration) % 3600) / 60
     return String(format: "%dh %02dm", hours, minutes)
-  }
-
-  private var alarmTimeString: String {
-    guard let alarmTime = alarmManager.alarmTime else { return "" }
-    return DateFormatters.timeWithPeriod.string(from: alarmTime)
   }
 
   private var simulatedWaveform: [Double] {

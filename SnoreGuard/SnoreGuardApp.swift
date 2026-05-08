@@ -43,7 +43,6 @@ struct SnoreGuardApp: App {
         recordingsRouterPath: recordingsRouterPath,
         settingsRouterPath: settingsRouterPath,
         audioRecorder: AudioRecorder.shared,
-        alarmManager: AlarmManager.shared,
         healthKitSync: HealthKitSync.shared,
         watchConnectivityManager: WatchConnectivityManager.shared,
         soundAnalysisDetector: SoundAnalysisDetector.shared

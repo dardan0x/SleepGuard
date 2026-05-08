@@ -18,7 +18,6 @@ extension View {
     recordingsRouterPath: RouterPath,
     settingsRouterPath: RouterPath,
     audioRecorder: AudioRecorder,
-    alarmManager: AlarmManager,
     healthKitSync: HealthKitSync,
     watchConnectivityManager: WatchConnectivityManager,
     soundAnalysisDetector: SoundAnalysisDetector
@@ -31,7 +30,6 @@ extension View {
       .environment(recordingsRouterPath)
       .environment(settingsRouterPath)
       .environment(audioRecorder)
-      .environment(alarmManager)
       .environment(healthKitSync)
       .environment(watchConnectivityManager)
       .environment(soundAnalysisDetector)
@@ -43,7 +41,6 @@ extension View {
       .environment(SessionManager.shared)
       .environment(Theme.shared)
       .environment(AudioRecorder.shared)
-      .environment(AlarmManager.shared)
       .environment(HealthKitSync.shared)
       .environment(WatchConnectivityManager.shared)
       .environment(SoundAnalysisDetector.shared)
