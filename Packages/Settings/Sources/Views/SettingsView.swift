@@ -16,7 +16,6 @@ public struct SettingsView: View {
   @State private var showDeleteConfirmation = false
   @State private var showThemePicker = false
   @State private var showClipLengthPicker = false
-  @State private var showAlarmWindowPicker = false
 
   public init() {}
 
@@ -29,7 +28,6 @@ public struct SettingsView: View {
       ScrollView {
         VStack(spacing: 24) {
           SettingsDetectionSection()
-          SettingsAlarmSection(onShowWindowPicker: { showAlarmWindowPicker = true })
           SettingsRecordingSection(onShowClipLengthPicker: { showClipLengthPicker = true })
           SettingsAppearanceSection(onShowThemePicker: { showThemePicker = true })
           SettingsWatchSection()
@@ -57,13 +55,6 @@ public struct SettingsView: View {
       ForEach([15.0, 30.0, 60.0], id: \.self) { length in
         Button("\(Int(length))s") {
           userPreferences.maxClipLength = length
-        }
-      }
-    }
-    .confirmationDialog("Smart Window", isPresented: $showAlarmWindowPicker, titleVisibility: .visible) {
-      ForEach([15, 30, 45], id: \.self) { minutes in
-        Button("\(minutes) min") {
-          userPreferences.alarmWindowMinutes = minutes
         }
       }
     }
