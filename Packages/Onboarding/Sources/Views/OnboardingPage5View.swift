@@ -46,16 +46,10 @@ struct OnboardingPage5View: View {
       Spacer()
 
       VStack(spacing: 12) {
-        Button("Start Recording") {
+        StartRecordingButton(height: 56) {
           userPreferences.presentRecordingAfterOnboarding = true
           onContinue()
         }
-        .font(.system(size: 17, weight: .semibold))
-        .foregroundStyle(.white)
-        .frame(maxWidth: .infinity)
-        .frame(height: 56)
-        .background(theme.accent)
-        .clipShape(Capsule())
 
         Button("Just browsing (for now)") {
           onContinue()

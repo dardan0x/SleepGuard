@@ -2,7 +2,7 @@
 
 > Auto-updated by the AI after every task. This is the local source of truth.
 
-Last updated: 2026-05-07 (Session 28)
+Last updated: 2026-05-08 (Session 29)
 
 ---
 
@@ -22,18 +22,18 @@ Last updated: 2026-05-07 (Session 28)
 | Backlog | 0 |
 | — | — |
 | Features (V2) | 4 |
-| Done | 3 |
+| Done | 4 |
 | In Progress | 0 |
-| Backlog | 1 |
+| Backlog | 0 |
 | Blocked | 0 |
 | — | — |
 | Total Tasks | 40 |
-| Tasks Done | 38 |
+| Tasks Done | 40 |
 | Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
-| Tasks Backlog | 2 |
+| Tasks Backlog | 0 |
 | — | — |
-| **Progress** | **95%** |
+| **Progress** | **100%** |
 
 ## Features
 
@@ -59,6 +59,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-05-08 | Session 29: Button Redesign + Calendar Polish + Bulk Delete | Completed | RecordingActionButton generic component with glow; CalendarView nav title + day cell backgrounds + today highlight; surface2 theme token; Recordings swipe + long-press bulk delete |
 | 2026-05-07 | Session 28: Detection Pipeline Hardening + UI Polish + Recordings Grouping | Completed | Actor-isolation race fix; bandpass filter on recordings; eventsCount stored property fix; dB/snoreConf removed from UI; stats day-averaging; recordings grouped by night with expandable cards |
 | 2026-05-07 | F9 Enhancement: SoundAnalysis Snore Detection | Completed | Apple's built-in 300-class sound classifier via SNAudioStreamAnalyzer; zero app size; auto-fallback to FFT if snoring not in built-in classes; runtime diagnostic prints all known classifications |
 | 2026-05-07 | Bug Fix: Real-Device Recording | Completed | Fixed playback (`fileExists` URL→path), detection thresholds (-40→-35, CoreML disabled), AudioRecorder format validation + write error logging |
@@ -130,6 +131,7 @@ _Unblocked tasks in priority order. The AI updates this after every task._
 
 | Task | Feature | Completed | Duration |
 |------|---------|-----------|----------|
+| Session 29 | V2 Polish | 2026-05-08 | — |
 | F11-T4 | F11 | 2026-05-07 | — |
 | F11-T3 | F11 | 2026-05-07 | — |
 | F11-T2 | F11 | 2026-05-07 | — |
@@ -139,7 +141,6 @@ _Unblocked tasks in priority order. The AI updates this after every task._
 | F10-T1 | F10 | 2026-05-07 | — |
 | F12-T3 | F12 | 2026-05-07 | — |
 | F12-T2 | F12 | 2026-05-07 | — |
-| F12-T1 | F12 | 2026-05-07 | — |
 
 ---
 

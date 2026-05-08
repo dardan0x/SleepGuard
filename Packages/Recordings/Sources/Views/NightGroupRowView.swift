@@ -9,12 +9,18 @@ public struct NightGroupRowView: View {
 
   let group: NightGroup
   let theme: Theme
+  let onDeleteRequest: (() -> Void)?
 
   @State private var isExpanded = false
 
-  public init(group: NightGroup, theme: Theme) {
+  public init(
+    group: NightGroup,
+    theme: Theme,
+    onDeleteRequest: (() -> Void)? = nil
+  ) {
     self.group = group
     self.theme = theme
+    self.onDeleteRequest = onDeleteRequest
   }
 
   public var body: some View {
@@ -33,6 +39,9 @@ public struct NightGroupRowView: View {
         withAnimation(.easeInOut(duration: 0.2)) {
           isExpanded.toggle()
         }
+      }
+      .onLongPressGesture(minimumDuration: 0.5) {
+        onDeleteRequest?()
       }
 
       if isExpanded {

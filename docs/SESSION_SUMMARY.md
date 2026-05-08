@@ -1440,3 +1440,51 @@ Or delete and reinstall the app on the simulator.
 ### Follow-up Needed
 - Test on physical device: SoundAnalysis detection accuracy with real snoring audio
 - Evaluate if bandpass filtering affects SoundAnalysis classification quality (trained on full-spectrum audio)
+append
+## 2026-05-08 — Session 29: Recording Button Redesign + Calendar Polish + Recordings Bulk Delete
+
+### Completed
+- **Start/Stop Recording Button Redesign**: Extracted reusable `RecordingActionButton<Label>` generic component in DesignSystem with exact screenshot color `#1E1D1E`, red gradient stroke, and double-layer red glow (outer soft halo + inner concentrated glow). Created `StartRecordingButton` and `StopRecordingButton` wrappers. Replaced all 4 inline instances across app.
+- **CalendarView Nav Title**: Replaced plain text with dark pill (`surface2` background + `accent` foreground) containing calendar icon + "Calendar" text, matching design screenshot.
+- **Statistics Header Calendar Buttons**: Updated both `StatisticsLoadedView` and `StatisticsEmptyView` header Calendar buttons to match same dark pill style (was blue accent pill).
+- **Calendar Day Cell Backgrounds**: Added `surface2` rounded background only to dates with recorded events; transparent for empty dates. Grid spacing increased to 8pt.
+- **Calendar Today/Selected Highlight**: Full cell `accent` background with white text and white dot when `isToday || isSelected`; removed old green circle indicator.
+- **Calendar Intensity Dots**: 4→5pt dot size; white dot when cell is highlighted (today/selected), otherwise uses snoring intensity color (gray/amber/red).
+- **SleepScoreGauge Size**: Statistics gauge increased from 90→120.
+- **Theme Token `surface2`**: Added `surface2: Color = Color(hex: "#2C2C2E")`; `bgCard` changed from stored to computed property returning `surface2`.
+- **Recordings Bulk Delete**: Swipe-to-delete + long-press alert on `NightGroupRowView` cards. Alert asks "Remove X recordings from this night?" with "Remove" (destructive) and "Discard" (cancel). Deletes all `SleepSession` objects in the group via `modelContext.delete`.
+
+### Technical Details
+- `RecordingActionButton` uses `ZStack` with two glow layers: outer `blur(20)`, `opacity(0.12)`, `height+40` + inner `blur(10)`, gradient `0.45→0`, `height+20`
+- `StartRecordingButton` height defaults to 56; `StopRecordingButton` uses red square icon instead of pulsing dot
+- Calendar `dayCell` background logic: `isHighlighted ? accent : hasEvents ? surface2 : clear`
+- `NightGroupRowView` accepts `onDeleteRequest` closure; long press `minimumDuration: 0.5` on header HStack alongside existing tap gesture
+- `RecordingsListView` adds `.swipeActions(edge: .trailing)` with destructive Delete button + `.alert` modifier for confirmation
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/DesignSystem/Sources/Components/StartRecordingButton.swift` | +120/-50 | New generic `RecordingActionButton`; `StartRecordingButton` + `StopRecordingButton` wrappers; two-layer glow |
+| `Packages/SleepSession/Sources/Views/RecordingPrestartView.swift` | +5/-35 | Replaced inline button with `StartRecordingButton`; removed duplicated `PulsingDot` |
+| `Packages/Statistics/Sources/Views/StatisticsEmptyView.swift` | +5/-25 | Replaced inline button with `StartRecordingButton`; removed duplicated `PulsingDot` |
+| `Packages/Statistics/Sources/Views/StatisticsLoadedView.swift` | +8/-30 | Replaced inline button with `StartRecordingButton`; removed duplicated `PulsingDot`; gauge size 90→120; Calendar button style |
+| `Packages/Onboarding/Sources/Views/OnboardingPage5View.swift` | +5/-10 | Replaced accent button with `StartRecordingButton` |
+| `Packages/SleepSession/Sources/Views/BedsideClockView.swift` | +5/-20 | Replaced inline stop button with `StopRecordingButton` |
+| `Packages/DesignSystem/Sources/Components/Theme.swift` | +2/-1 | Added `surface2` token; `bgCard` computed from `surface2` |
+| `Packages/Statistics/Sources/Views/CalendarView.swift` | +35/-20 | Nav title pill; day cell backgrounds; today/selected highlight; white dots on highlight; grid spacing |
+| `Packages/Recordings/Sources/Views/RecordingsListView.swift` | +25/-2 | Swipe delete + long-press alert + `deleteGroup` + `modelContext` |
+| `Packages/Recordings/Sources/Views/NightGroupRowView.swift` | +10/-2 | `onDeleteRequest` param + `.onLongPressGesture` |
+
+### Architecture Decisions
+- **Generic `RecordingActionButton`**: Single reusable component with `@ViewBuilder` label slot avoids duplicating glow/stroke/background logic across start/stop variants
+- **Two-layer glow**: Single faint layer disappeared against pure black; concentrated inner layer (blur 10, opacity 0.45) ensures visibility on all backgrounds
+- **Bulk delete over per-recording**: Night group card represents one logical sleep night; deleting all recordings in that night matches user mental model
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors across all packages + app target
+
+### Next Session
+- F13-T1: CloudKit Sync (only remaining backlog task)
+
+### Open Questions
+- Should simulator mic permission bypasses be restored in `AudioRecorder.swift`?

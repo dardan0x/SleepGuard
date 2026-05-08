@@ -8,10 +8,13 @@ import DesignSystem
 public struct RecordingsListView: View {
   @Environment(RouterPath.self) private var routerPath
   @Environment(Theme.self) private var theme
+  @Environment(\.modelContext) private var modelContext
   @Query(sort: \SleepSession.startDate, order: .reverse)
   private var sessions: [SleepSession]
 
   @State private var viewState: ViewState = .loading
+  @State private var showDeleteAlert = false
+  @State private var groupToDelete: NightGroup?
 
   public init() {}
 
@@ -42,7 +45,22 @@ public struct RecordingsListView: View {
       ForEach(sections) { section in
         Section {
           ForEach(section.groups) { group in
-            NightGroupRowView(group: group, theme: theme)
+            NightGroupRowView(
+              group: group,
+              theme: theme,
+              onDeleteRequest: {
+                groupToDelete = group
+                showDeleteAlert = true
+              }
+            )
+            .swipeActions(edge: .trailing) {
+              Button(role: .destructive) {
+                groupToDelete = group
+                showDeleteAlert = true
+              } label: {
+                Label("Delete", systemImage: "trash")
+              }
+            }
           }
         } header: {
           Text(section.title)
@@ -57,6 +75,14 @@ public struct RecordingsListView: View {
     .listStyle(.plain)
     .scrollContentBackground(.hidden)
     .background(theme.bgSecondary)
+    .alert("Remove Recordings", isPresented: $showDeleteAlert, presenting: groupToDelete) { group in
+      Button("Remove", role: .destructive) {
+        deleteGroup(group)
+      }
+      Button("Discard", role: .cancel) {}
+    } message: { group in
+      Text("Remove \(group.recordingCount) recording\(group.recordingCount == 1 ? "" : "s") from this night?")
+    }
     .refreshable {
       // SwiftData @Query auto-updates; refreshable provides UX feedback
     }
@@ -111,6 +137,13 @@ public struct RecordingsListView: View {
         groups: groups
       )
     }
+  }
+
+  private func deleteGroup(_ group: NightGroup) {
+    for session in group.sessions {
+      modelContext.delete(session)
+    }
+    groupToDelete = nil
   }
 
   public enum ViewState {

@@ -168,21 +168,9 @@ struct BedsideClockView: View {
   }
 
   private var stopButton: some View {
-    Button {
+    StopRecordingButton(height: 52) {
       AlarmManager.shared.clearAlarm()
       _ = sessionManager.stopSession()
-    } label: {
-      HStack(spacing: 8) {
-        Image(systemName: "stop.fill")
-          .font(.system(size: 18, weight: .semibold))
-        Text("Stop Recording")
-          .font(.system(size: 17, weight: .semibold))
-      }
-      .foregroundStyle(.white)
-      .frame(maxWidth: .infinity)
-      .frame(height: 56)
-      .background(theme.destructive)
-      .clipShape(Capsule())
     }
     .padding(.horizontal, 24)
   }
