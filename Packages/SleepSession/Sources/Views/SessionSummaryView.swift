@@ -15,6 +15,8 @@ public struct SessionSummaryView: View {
 
   @Environment(Theme.self) private var theme
   @Environment(SessionManager.self) private var sessionManager
+  @Environment(HealthKitSync.self) private var healthKitSync
+  @Environment(UserPreferences.self) private var userPreferences
   @Environment(\.dismiss) private var dismiss
   @Environment(\.modelContext) private var modelContext
 
@@ -127,9 +129,7 @@ public struct SessionSummaryView: View {
   }
 
   private func timeString(_ date: Date) -> String {
-    let formatter = DateFormatter()
-    formatter.dateFormat = "h:mm a"
-    return formatter.string(from: date)
+    DateFormatters.timeWithPeriod.string(from: date)
   }
 
   private func saveSession() {
@@ -141,9 +141,9 @@ public struct SessionSummaryView: View {
     }
     try? modelContext.save()
 
-    if UserPreferences.shared.syncToHealthKit {
+    if userPreferences.syncToHealthKit {
       Task {
-        await HealthKitSync.shared.sync(session: session)
+        await healthKitSync.sync(session: session)
       }
     }
 

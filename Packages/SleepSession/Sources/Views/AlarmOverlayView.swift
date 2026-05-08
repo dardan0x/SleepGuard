@@ -2,10 +2,12 @@ import SwiftUI
 import Env
 import DesignSystem
 import AudioEngine
+import Models
 
 @MainActor
 struct AlarmOverlayView: View {
   @Environment(SessionManager.self) private var sessionManager
+  @Environment(AlarmManager.self) private var alarmManager
   @Environment(Theme.self) private var theme
 
   let currentTime: Date
@@ -35,7 +37,7 @@ struct AlarmOverlayView: View {
 
         VStack(spacing: 16) {
           Button {
-            AlarmManager.shared.clearAlarm()
+            alarmManager.clearAlarm()
             _ = sessionManager.stopSession()
             onDismiss()
           } label: {
@@ -49,7 +51,7 @@ struct AlarmOverlayView: View {
           }
 
           Button {
-            AlarmManager.shared.snooze(minutes: 10)
+            alarmManager.snooze(minutes: 10)
             onDismiss()
           } label: {
             Text("Snooze 10 min")
@@ -64,8 +66,6 @@ struct AlarmOverlayView: View {
   }
 
   private var timeString: String {
-    let formatter = DateFormatter()
-    formatter.dateFormat = "h:mm"
-    return formatter.string(from: currentTime)
+    DateFormatters.time.string(from: currentTime)
   }
 }

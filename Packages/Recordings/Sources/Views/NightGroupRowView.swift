@@ -109,9 +109,7 @@ public struct NightGroupRowView: View {
   }
 
   private var dateString: String {
-    let formatter = DateFormatter()
-    formatter.dateStyle = .medium
-    return formatter.string(from: group.date)
+    DateFormatters.mediumDate.string(from: group.date)
   }
 
   private var totalDurationString: String {
@@ -162,11 +160,9 @@ public struct NightGroupRowView: View {
   }
 
   private func sessionTimeString(_ session: SleepSession) -> String {
-    let formatter = DateFormatter()
-    formatter.dateFormat = "h:mm a"
-    let start = formatter.string(from: session.startDate)
+    let start = DateFormatters.timeWithPeriod.string(from: session.startDate)
     if let endDate = session.endDate {
-      let end = formatter.string(from: endDate)
+      let end = DateFormatters.timeWithPeriod.string(from: endDate)
       return "\(start) – \(end)"
     }
     return start

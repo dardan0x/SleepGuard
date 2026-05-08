@@ -26,8 +26,6 @@ public struct SessionDetailView: View {
   @State private var shareItems: [Any] = []
   @State private var showAllEvents = false
 
-
-
   public init(sessionID: UUID) {
     self.sessionID = sessionID
   }
@@ -52,14 +50,31 @@ public struct SessionDetailView: View {
   private func loadedBody(session: SleepSession) -> some View {
     ScrollView {
       VStack(spacing: 24) {
-        headerSection(session: session)
+        SessionDetailHeaderView(session: session)
 
-        timelineSection(session: session)
+        SessionDetailTimelineView(session: session)
 
-        eventsSection(session: session)
+        SessionDetailEventsView(
+          session: session,
+          showAllEvents: showAllEvents,
+          onToggleShowAll: { showAllEvents.toggle() },
+          onPlayEvent: { event in seekToEvent(event, in: session) },
+          onShareEvent: { event in
+            Task {
+              await exportAndShare(event: event, in: session)
+            }
+          }
+        )
 
         if session.audioFileURL != nil {
-          miniPlayerSection(session: session)
+          SessionDetailMiniPlayerView(
+            session: session,
+            isPlaying: isPlaying,
+            progress: audioProgress,
+            totalDuration: audioPlayer?.duration ?? session.totalDuration,
+            onTogglePlayback: togglePlayback,
+            onScrub: { relative in scrubTo(relative: relative, in: session) }
+          )
         }
       }
       .padding(20)
@@ -112,6 +127,11 @@ public struct SessionDetailView: View {
   }
 
   // MARK: - Audio Playback Controls
+
+  private var audioProgress: Double {
+    let total = audioPlayer?.duration ?? 0
+    return total > 0 ? currentPlaybackTime / total : 0
+  }
 
   private func setupAudioPlayer(for session: SleepSession) {
     guard let urlString = session.audioFileURL,
@@ -167,167 +187,6 @@ public struct SessionDetailView: View {
     currentPlaybackTime = player.currentTime
   }
 
-  // MARK: - Sections
-
-  private func headerSection(session: SleepSession) -> some View {
-    HStack(spacing: 16) {
-      SleepScoreGauge(score: session.sleepScore, theme: theme, size: 120)
-
-      LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-        StatCard(
-          icon: "clock",
-          title: "Duration",
-          value: durationString(session.totalDuration),
-          theme: theme,
-          iconColor: theme.accent
-        )
-        StatCard(
-          icon: "percent",
-          title: "Snoring",
-          value: String(format: "%.0f%%", session.snoringPercentage),
-          theme: theme,
-          iconColor: theme.scoreAmber
-        )
-        StatCard(
-          icon: "bolt.fill",
-          title: "Events",
-          value: "\(session.eventsCount)",
-          theme: theme,
-          iconColor: theme.scoreAmber
-        )
-      }
-    }
-  }
-
-  private func timelineSection(session: SleepSession) -> some View {
-    VStack(alignment: .leading, spacing: 12) {
-      Text("SNORING TIMELINE")
-        .font(.system(size: 12, weight: .semibold))
-        .foregroundStyle(theme.textTertiary)
-        .tracking(1)
-
-      SnoringTimelineView(session: session, theme: theme)
-
-      HStack {
-        Text(timeString(session.startDate))
-          .font(.caption2)
-          .foregroundStyle(theme.textTertiary)
-
-        Spacer()
-
-        if let endDate = session.endDate {
-          Text(timeString(endDate))
-            .font(.caption2)
-            .foregroundStyle(theme.textTertiary)
-        }
-      }
-    }
-  }
-
-  private func eventsSection(session: SleepSession) -> some View {
-    let events = session.events?.sorted { $0.timestamp < $1.timestamp } ?? []
-
-    return VStack(alignment: .leading, spacing: 16) {
-      Text("EVENTS · \(events.count)")
-        .font(.system(size: 12, weight: .semibold))
-        .foregroundStyle(theme.textTertiary)
-        .tracking(1)
-
-      VStack(spacing: 8) {
-        ForEach(showAllEvents ? events : Array(events.prefix(4)), id: \.id) { event in
-          EventRow(
-            event: event,
-            theme: theme,
-            onPlay: {
-              seekToEvent(event, in: session)
-            },
-            onShare: {
-              Task {
-                await exportAndShare(event: event, in: session)
-              }
-            }
-          )
-        }
-      }
-
-      if events.count > 4 {
-        Button {
-          withAnimation(.easeInOut(duration: 0.2)) {
-            showAllEvents.toggle()
-          }
-        } label: {
-          Text(showAllEvents ? "Show less" : "Show all \(events.count)")
-            .font(.system(size: 15, weight: .medium))
-            .foregroundStyle(theme.accent)
-        }
-        .frame(maxWidth: .infinity, alignment: .center)
-      }
-    }
-  }
-
-  private func miniPlayerSection(session: SleepSession) -> some View {
-    let totalDuration = audioPlayer?.duration ?? session.totalDuration
-    let progress = totalDuration > 0 ? currentPlaybackTime / totalDuration : 0
-
-    return VStack(alignment: .leading, spacing: 8) {
-      HStack(spacing: 12) {
-        Button {
-          togglePlayback()
-        } label: {
-          Image(systemName: isPlaying ? "pause.fill" : "play.fill")
-            .font(.system(size: 14, weight: .semibold))
-            .foregroundStyle(.white)
-            .frame(width: 28, height: 28)
-            .background(theme.accent)
-            .clipShape(Circle())
-        }
-
-        GeometryReader { geometry in
-          ZStack(alignment: .leading) {
-            RoundedRectangle(cornerRadius: 2)
-              .fill(theme.bgElevated)
-              .frame(height: 4)
-
-            RoundedRectangle(cornerRadius: 2)
-              .fill(theme.accent)
-              .frame(width: max(CGFloat(progress) * geometry.size.width, 0), height: 4)
-
-            // Event markers
-            if let events = session.events?.sorted(by: { $0.timestamp < $1.timestamp }) {
-              ForEach(events, id: \.id) { event in
-                let eventProgress = session.totalDuration > 0
-                  ? event.timestamp.timeIntervalSince(session.startDate) / session.totalDuration
-                  : 0
-                Circle()
-                  .fill(theme.intensityColor(event.intensity))
-                  .frame(width: 6, height: 6)
-                  .position(
-                    x: CGFloat(eventProgress) * geometry.size.width,
-                    y: 2
-                  )
-              }
-            }
-          }
-          .contentShape(Rectangle())
-          .onTapGesture { location in
-            let relative = Double(location.x / geometry.size.width)
-            scrubTo(relative: relative, in: session)
-          }
-        }
-        .frame(height: 4)
-
-        Text(timeString(totalDuration))
-          .font(.system(size: 11, weight: .medium, design: .monospaced))
-          .foregroundStyle(theme.textTertiary)
-          .monospacedDigit()
-      }
-    }
-    .padding(.horizontal, 12)
-    .padding(.vertical, 12)
-    .background(theme.bgCard)
-    .cornerRadius(theme.radiusSmall)
-  }
-
   private var errorBody: some View {
     VStack(spacing: 16) {
       Image(systemName: "exclamationmark.triangle")
@@ -359,34 +218,8 @@ public struct SessionDetailView: View {
 
   // MARK: - Formatting
 
-  private func durationString(_ total: TimeInterval) -> String {
-    let seconds = Int(total)
-    let hours = seconds / 3600
-    let minutes = (seconds % 3600) / 60
-    return String(format: "%d:%02d", hours, minutes)
-  }
-
-  private func timeString(_ date: Date) -> String {
-    let formatter = DateFormatter()
-    formatter.dateFormat = "h:mm a"
-    return formatter.string(from: date)
-  }
-
-  private func timeString(_ interval: TimeInterval) -> String {
-    let total = Int(interval)
-    let hours = total / 3600
-    let minutes = (total % 3600) / 60
-    let seconds = total % 60
-    if hours > 0 {
-      return String(format: "%d:%02d:%02d", hours, minutes, seconds)
-    }
-    return String(format: "%d:%02d", minutes, seconds)
-  }
-
   private func navigationTitle(for date: Date) -> String {
-    let formatter = DateFormatter()
-    formatter.dateFormat = "EEE, MMM d"
-    return formatter.string(from: date)
+    DateFormatters.dayOfWeekAndDate.string(from: date)
   }
 
   private func exportReport(session: SleepSession) {

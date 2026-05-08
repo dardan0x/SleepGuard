@@ -9,8 +9,7 @@ let package = Package(
   ],
   targets: [
     .target(
-      name: "Models",
-      path: "Sources/Data"
+      name: "Models"
     ),
   ]
 )

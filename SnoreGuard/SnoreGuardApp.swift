@@ -2,6 +2,7 @@ import SwiftUI
 import SwiftData
 import Env
 import Models
+import AudioEngine
 import DesignSystem
 import Onboarding
 
@@ -40,7 +41,12 @@ struct SnoreGuardApp: App {
         theme: theme,
         statisticsRouterPath: statisticsRouterPath,
         recordingsRouterPath: recordingsRouterPath,
-        settingsRouterPath: settingsRouterPath
+        settingsRouterPath: settingsRouterPath,
+        audioRecorder: AudioRecorder.shared,
+        alarmManager: AlarmManager.shared,
+        healthKitSync: HealthKitSync.shared,
+        watchConnectivityManager: WatchConnectivityManager.shared,
+        soundAnalysisDetector: SoundAnalysisDetector.shared
       )
     }
     .modelContainer(sharedModelContainer)

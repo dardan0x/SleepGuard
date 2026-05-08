@@ -4,6 +4,7 @@ import DesignSystem
 
 struct OnboardingPage4View: View {
   let onContinue: () -> Void
+  @Environment(AudioRecorder.self) private var audioRecorder
   @Environment(Theme.self) private var theme
   @State private var ringScale1: CGFloat = 1.0
   @State private var ringScale2: CGFloat = 1.0
@@ -45,7 +46,7 @@ struct OnboardingPage4View: View {
           ringOpacity2 = 0
         }
 
-        if AudioRecorder.shared.hasPermission {
+        if audioRecorder.hasPermission {
           showGranted = true
         }
       }
@@ -68,7 +69,7 @@ struct OnboardingPage4View: View {
         Button {
           Task {
             isRequesting = true
-            let granted = await AudioRecorder.shared.requestPermission()
+            let granted = await audioRecorder.requestPermission()
             isRequesting = false
             if granted {
               showGranted = true

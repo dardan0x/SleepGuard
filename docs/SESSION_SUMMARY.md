@@ -1488,3 +1488,62 @@ append
 
 ### Open Questions
 - Should simulator mic permission bypasses be restored in `AudioRecorder.swift`?
+
+## 2026-05-08 — Session: Architecture Compliance Audit & Refactoring
+
+### Completed
+- Architecture compliance audit across all view files
+- Fixed @Environment violations (6 services wired through dependency graph)
+- Extracted shared DateFormatters (eliminated 20 inline DateFormatter creations)
+- Split 6 oversized views into 28 separate files
+- Extracted reusable SnoringLegendView to DesignSystem
+- Extracted SessionGrouper helper for recordings list logic
+- All builds pass with zero errors
+
+### Technical Details
+- **No ViewModels introduced** — codebase already follows documented "No ViewModels" architecture; refactored using `@State` + ViewState enum pattern + presentational component extraction
+- `withAppDependencyGraph()` now wires: AudioRecorder, AlarmManager, HealthKitSync, WatchConnectivityManager, SoundAnalysisDetector
+- `withEnvironments()` (sheet fallback) also wires all shared services
+- SettingsView split from 534 lines → 148 lines (+ 7 section components + 2 shared helpers)
+- SessionDetailView split from 462 lines → 295 lines (+ 4 presentational subviews)
+- CalendarView split from 392 lines → 169 lines (+ 5 subviews)
+- TrendsView split from 266 lines → 168 lines (+ 2 subviews)
+- BedsideClockView split from 233 lines → 143 lines (+ 4 subviews)
+- StatisticsLoadedView split from 247 lines → gone (+ 4 subviews)
+- RecordingsListView grouping logic extracted to SessionGrouper (40 lines → 1 line call)
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `SnoreGuard/AppRegistry.swift` | +8/-4 | Added 5 new services to environment graph |
+| `SnoreGuard/SnoreGuardApp.swift` | +5/-1 | Passed new services to dependency graph; added AudioEngine import |
+| `Models/Package.swift` | +1/-3 | Changed target path from `Sources/Data` to `Sources` to include Helpers |
+| `Recordings/Package.swift` | +1/-1 | Changed target path from `Sources/Views` to `Sources` to include Helpers |
+| `Models/Sources/Helpers/DateFormatters.swift` | +74 | New shared DateFormatter instances |
+| `Settings/Sources/Views/SettingsView.swift` | +148/-534 | Slimmed to container; sections extracted |
+| `Settings/Sources/Views/Settings*Section.swift` | 7 new files | 7 section components + 2 helpers |
+| `Recordings/Sources/Views/SessionDetailView.swift` | +295/-462 | Slimmed; 4 subviews extracted |
+| `Recordings/Sources/Views/SessionDetail*View.swift` | 4 new files | Header, Timeline, Events, MiniPlayer |
+| `Statistics/Sources/Views/CalendarView.swift` | +169/-392 | Slimmed; 5 subviews extracted |
+| `Statistics/Sources/Views/Calendar*View.swift` | 5 new files | MonthSelector, DayHeaders, Grid, MonthStats, SelectedNight |
+| `Statistics/Sources/Views/TrendsView.swift` | +168/-266 | Slimmed; chart + stats grid extracted |
+| `Statistics/Sources/Views/Trends*View.swift` | 2 new files | ChartSection, StatsGrid |
+| `SleepSession/Sources/Views/BedsideClockView.swift` | +143/-233 | Slimmed; 4 subviews extracted |
+| `SleepSession/Sources/Views/BedsideClock*View.swift` | 4 new files | Badges, Clock, Waveform, Status |
+| `Statistics/Sources/Views/StatisticsLoadedView.swift` | +95/-241 | Slimmed; 4 subviews extracted |
+| `Statistics/Sources/Views/Statistics*View.swift` | 4 new files | Header, WeekSelector, StatsGrid, MiniChart |
+| `Recordings/Sources/Helpers/SessionGrouper.swift` | +40 | New helper for session grouping logic |
+| `DesignSystem/Sources/Components/SnoringLegendView.swift` | +22 | Reusable legend extracted from Calendar+Trends |
+| 15+ other view files | ~30 lines each | Replaced inline DateFormatters with shared instances |
+
+### Architecture Decisions
+- **No ViewModels added**: The documented architecture explicitly prohibits ViewModels ("The view IS the view model"). Instead, we extracted presentational components and helper types, which achieves the same separation of concerns without violating the architecture.
+- **Environment graph expansion**: All 5 previously-direct `.shared` accesses now flow through `@Environment`, making dependencies explicit and testable.
+- **Shared DateFormatters**: Eliminated the anti-pattern of creating `DateFormatter()` inside computed properties (which reconstructs on every body evaluation).
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors, zero warnings
+
+### Next Session
+- SessionDetailView is still 295 lines (down from 462). The remaining bulk is audio playback + export logic. Consider extracting `SessionDetailAudioController` and `SessionDetailShareController` helper types if further slimming is needed.
+- NightGroupRowView (179 lines) could be split further if needed.
