@@ -1488,3 +1488,43 @@ append
 
 ### Open Questions
 - Should simulator mic permission bypasses be restored in `AudioRecorder.swift`?
+
+
+## 2026-05-08 — Session 30: Session Summary Polish + Tab Bar Fix + Background Recording
+
+### Completed
+- **SessionSummaryView Save Button Redesign**: Replaced blue accent `Capsule()` button with dark pill (`#1E1D1E` fill + white gradient stroke) and two-layer behind-glow effect matching `RecordingActionButton` pattern.
+- **10-Minute Minimum Session Validation**: `saveSession()` now checks `session.totalDuration < 600` and shows an alert with title "Session Too Short" / message "To generate meaningful sleep analysis, recordings must be at least 10 minutes long." instead of saving.
+- **Custom Tab Bar for iOS < 26**: Replaced system `TabView` on older iOS with a design-compliant floating pill tab bar (`bgCard` fill, `border` stroke, `cornerRadius: 36`, accent selected state).
+- **Hide Tab Bar During Recording**: Custom tab bar conditionally removed from view hierarchy when `sessionManager.isRecording` is true. iOS 26+ system `TabView` uses `.toolbar(.hidden, for: .tabBar)` on each tab content.
+- **Background Recording (Lock Screen)**: Added audio interruption handling with auto-resume; added `AVAudioEngineConfigurationChange` route-change observer that restarts the engine if stopped; `setActive(false)` now uses `notifyOthersOnDeactivation`.
+
+### Technical Details
+- `RecordingActionButton` glow pattern ported to Save Session: outer `blur(20)` halo (`accent` 0.12) + inner gradient glow (`accent` 0.35→0)
+- `.alert("Session Too Short", isPresented:)` on `SessionSummaryView` with OK button (cancel role)
+- Custom tab bar uses `ZStack(alignment: .bottom)` + opacity-based tab switching to preserve `NavigationStack` state across tabs
+- Tab bar iOS branching: `#available(iOS 26.0, *)` uses system `TabView`; else uses custom floating pill
+- `AudioRecorder` now registers for `AVAudioSession.interruptionNotification` and `.AVAudioEngineConfigurationChange`
+- Interruption `.began` → engine stops but `isRecording` stays true; `.ended` with `.shouldResume` → reactivates session and restarts engine
+- Route change handler checks `engine.isRunning` and restarts if needed while `isRecording`
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/SleepSession/Sources/Views/SessionSummaryView.swift` | +45/-10 | Dark pill Save button with glow; 10-min duration check; `.alert` for short sessions |
+| `SnoreGuard/MainTabView.swift` | +90/-15 | iOS 26+ system TabView branch; custom floating pill tab bar for iOS < 26; hide during recording |
+| `Packages/AudioEngine/Sources/Engine/AudioRecorder.swift` | +45/-2 | Interruption + route change notification handlers; auto-resume logic; `notifyOthersOnDeactivation` |
+
+### Architecture Decisions
+- **Opacity-based tab preservation**: All three `NavigationStack` tabs render simultaneously with `.opacity` + `.allowsHitTesting` so back-stack state survives tab switches
+- **Per-tab `.toolbar(.hidden)` on iOS 26+**: Modifier must be on tab content (inside `TabView`) rather than on `TabView` itself for SwiftUI to pick it up
+- **Notification-based background resilience**: `AVAudioEngine` can stop on route changes (lock/unlock, headphones); observing `.AVAudioEngineConfigurationChange` and restarting ensures continuous recording
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors across all packages + app target
+
+### Next Session
+- F13-T1: CloudKit Sync (only remaining backlog task)
+
+### Open Questions
+- Should simulator mic permission bypasses be restored in `AudioRecorder.swift`?

@@ -36,6 +36,51 @@ public final class AudioRecorder {
 
   private init() {
     checkPermission()
+    setupNotifications()
+  }
+
+  private func setupNotifications() {
+    NotificationCenter.default.addObserver(
+      self,
+      selector: #selector(handleInterruption),
+      name: AVAudioSession.interruptionNotification,
+      object: nil
+    )
+    NotificationCenter.default.addObserver(
+      self,
+      selector: #selector(handleRouteChange),
+      name: .AVAudioEngineConfigurationChange,
+      object: nil
+    )
+  }
+
+  @objc private func handleInterruption(_ notification: Notification) {
+    guard let userInfo = notification.userInfo,
+          let typeValue = userInfo[AVAudioSessionInterruptionTypeKey] as? UInt,
+          let type = AVAudioSession.InterruptionType(rawValue: typeValue) else { return }
+
+    switch type {
+    case .began:
+      // Interruption started — stop engine but keep isRecording flag
+      audioEngine?.stop()
+    case .ended:
+      guard let optionsValue = userInfo[AVAudioSessionInterruptionOptionKey] as? UInt else { return }
+      let options = AVAudioSession.InterruptionOptions(rawValue: optionsValue)
+      if options.contains(.shouldResume), isRecording {
+        try? AVAudioSession.sharedInstance().setActive(true)
+        try? audioEngine?.start()
+      }
+    @unknown default:
+      break
+    }
+  }
+
+  @objc private func handleRouteChange(_ notification: Notification) {
+    guard isRecording, let engine = audioEngine else { return }
+    if !engine.isRunning {
+      try? AVAudioSession.sharedInstance().setActive(true)
+      try? engine.start()
+    }
   }
 
   public func checkPermission() {
@@ -137,7 +182,7 @@ public final class AudioRecorder {
     currentDB = -160.0
     spectralScore = 0
 
-    try? AVAudioSession.sharedInstance().setActive(false)
+    try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
   }
 
   private func calculateDB(from buffer: AVAudioPCMBuffer) -> Float {

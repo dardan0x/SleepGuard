@@ -2,7 +2,7 @@
 
 > Auto-updated by the AI after every task. This is the local source of truth.
 
-Last updated: 2026-05-08 (Session 29)
+Last updated: 2026-05-08 (Session 30)
 
 ---
 
@@ -59,6 +59,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-05-08 | Session 30: Summary Polish + Tab Bar Fix + Background Recording | Completed | Save Session button dark pill + glow; 10-min minimum validation alert; custom floating tab bar for iOS < 26; hide tab bar during recording; background recording interruption + route change handling |
 | 2026-05-08 | Session 29: Button Redesign + Calendar Polish + Bulk Delete | Completed | RecordingActionButton generic component with glow; CalendarView nav title + day cell backgrounds + today highlight; surface2 theme token; Recordings swipe + long-press bulk delete |
 | 2026-05-07 | Session 28: Detection Pipeline Hardening + UI Polish + Recordings Grouping | Completed | Actor-isolation race fix; bandpass filter on recordings; eventsCount stored property fix; dB/snoreConf removed from UI; stats day-averaging; recordings grouped by night with expandable cards |
 | 2026-05-07 | F9 Enhancement: SoundAnalysis Snore Detection | Completed | Apple's built-in 300-class sound classifier via SNAudioStreamAnalyzer; zero app size; auto-fallback to FFT if snoring not in built-in classes; runtime diagnostic prints all known classifications |
@@ -110,6 +111,13 @@ _Most recent first. The AI appends here after every task._
 | Task | Feature | Started | Assignee |
 |------|---------|---------|----------|
 | (none) | — | — | — |
+
+## Completed (last 10)
+
+| Task | Feature | Completed | Duration |
+|------|---------|-----------|----------|
+| Session 30 | V2 Polish | 2026-05-08 | — |
+| Session 29 | V2 Polish | 2026-05-08 | — |
 
 ## Up Next
 
