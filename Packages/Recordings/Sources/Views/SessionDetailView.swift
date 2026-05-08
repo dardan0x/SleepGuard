@@ -24,6 +24,7 @@ public struct SessionDetailView: View {
   // MARK: - Share
   @State private var isSharePresented = false
   @State private var shareItems: [Any] = []
+  @State private var showAllEvents = false
 
 
 
@@ -233,7 +234,7 @@ public struct SessionDetailView: View {
         .tracking(1)
 
       VStack(spacing: 8) {
-        ForEach(events.prefix(4), id: \.id) { event in
+        ForEach(showAllEvents ? events : Array(events.prefix(4)), id: \.id) { event in
           EventRow(
             event: event,
             theme: theme,
@@ -251,9 +252,11 @@ public struct SessionDetailView: View {
 
       if events.count > 4 {
         Button {
-          // Show all events
+          withAnimation(.easeInOut(duration: 0.2)) {
+            showAllEvents.toggle()
+          }
         } label: {
-          Text("Show all \(events.count)")
+          Text(showAllEvents ? "Show less" : "Show all \(events.count)")
             .font(.system(size: 15, weight: .medium))
             .foregroundStyle(theme.accent)
         }
