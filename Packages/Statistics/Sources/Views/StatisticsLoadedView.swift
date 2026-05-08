@@ -25,7 +25,7 @@ struct StatisticsLoadedView: View {
         VStack(spacing: 16) {
           weekSelector
 
-          SleepScoreGauge(score: dayScore, theme: theme, size: 90)
+          SleepScoreGauge(score: dayScore, theme: theme, size: 120)
 
           VStack(spacing: 4) {
             Text(daySessionCount > 1 ? "\(daySessionCount) RECORDINGS" : "LAST NIGHT")
@@ -44,29 +44,16 @@ struct StatisticsLoadedView: View {
             chartSection
           }
 
-          Button {
+          StartRecordingButton(height: 52) {
             onStartRecording()
-          } label: {
-            HStack(spacing: 8) {
-              Circle()
-                .fill(theme.scoreGreen)
-                .frame(width: 8, height: 8)
-              Text("Start Recording")
-            }
-            .font(.system(size: 17, weight: .semibold))
-            .foregroundStyle(.white)
-            .frame(maxWidth: .infinity)
-            .frame(height: 52)
-            .background(theme.accent)
-            .clipShape(Capsule())
           }
         }
         .padding(.horizontal, 20)
-        .padding(.top, 20)
+        .padding(.top, 10)
         .padding(.bottom, 32)
       }
-      .safeAreaPadding(.bottom, 8)
     }
+    .toolbar(.hidden, for: .navigationBar)
   }
 
   private var headerSection: some View {
@@ -82,14 +69,17 @@ struct StatisticsLoadedView: View {
       } label: {
         HStack(spacing: 4) {
           Image(systemName: "calendar")
+            .font(.system(size: 14, weight: .medium))
           Text("Calendar")
+            .font(.system(size: 14, weight: .semibold))
         }
-        .font(.system(size: 14, weight: .semibold))
-        .foregroundStyle(.white)
+        .foregroundStyle(theme.accent)
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
-        .background(theme.accent)
-        .clipShape(Capsule())
+        .background(
+          Capsule()
+            .fill(theme.surface2)
+        )
       }
     }
   }
@@ -254,3 +244,4 @@ struct StatisticsLoadedView: View {
     }
   }
 }
+

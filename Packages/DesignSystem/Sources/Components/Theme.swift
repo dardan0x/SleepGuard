@@ -10,7 +10,8 @@ public final class Theme {
   // MARK: - Background
   public var bgPrimary: Color = Color(hex: "#000000")
   public var bgSecondary: Color = Color(hex: "#1C1C1E")
-  public var bgCard: Color = Color(hex: "#2C2C2E")
+  public var surface2: Color = Color(hex: "#2C2C2E")
+  public var bgCard: Color { surface2 }
   public var bgElevated: Color = Color(hex: "#3A3A3C")
 
   // MARK: - Accent & Semantic

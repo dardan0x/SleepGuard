@@ -38,16 +38,8 @@ struct StatisticsEmptyView: View {
                 .multilineTextAlignment(.center)
             }
 
-            Button {
+            StartRecordingButton(height: 52) {
               onStartRecording()
-            } label: {
-              Text("Start Recording")
-                .font(.system(size: 17, weight: .semibold))
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity)
-                .frame(height: 52)
-                .background(theme.accent)
-                .clipShape(Capsule())
             }
           }
           .frame(maxWidth: .infinity)
@@ -75,15 +67,19 @@ struct StatisticsEmptyView: View {
       } label: {
         HStack(spacing: 4) {
           Image(systemName: "calendar")
+            .font(.system(size: 14, weight: .medium))
           Text("Calendar")
+            .font(.system(size: 14, weight: .semibold))
         }
-        .font(.system(size: 14, weight: .semibold))
-        .foregroundStyle(.white)
+        .foregroundStyle(theme.accent)
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
-        .background(theme.accent)
-        .clipShape(Capsule())
+        .background(
+          Capsule()
+            .fill(theme.surface2)
+        )
       }
     }
   }
 }
+

@@ -35,25 +35,31 @@ public struct SettingsView: View {
   public init() {}
 
   public var body: some View {
-    ScrollView {
-      VStack(spacing: 24) {
-        titleRow
+    VStack(spacing: 0) {
+      titleRow
+        .padding(.horizontal, 20)
+        .padding(.top, 10)
 
-        detectionSection
-        alarmSection
-        recordingSection
-        appearanceSection
-        watchSection
-        dataSection
-        aboutSection
+      ScrollView {
+        VStack(spacing: 24) {
+          detectionSection
+          alarmSection
+          recordingSection
+          appearanceSection
+          watchSection
+          dataSection
+          aboutSection
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 20)
+        .padding(.bottom, 24)
       }
-      .padding(.horizontal, 20)
-      .padding(.bottom, 24)
     }
     .background(theme.bgSecondary)
     #if !os(visionOS)
     .scrollContentBackground(.hidden)
     #endif
+    .toolbar(.hidden, for: .navigationBar)
     .confirmationDialog("Choose Theme", isPresented: $showThemePicker, titleVisibility: .visible) {
       ForEach(UserPreferences.AppearanceSetting.allCases, id: \.self) { option in
         Button(option.displayName) {

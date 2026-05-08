@@ -24,76 +24,61 @@ public struct CalendarView: View {
   public init() {}
 
   public var body: some View {
-    VStack(spacing: 0) {
-      navBar
+    ScrollView {
+      VStack(spacing: 16) {
+        monthSelector
 
-      ScrollView {
-        VStack(spacing: 16) {
-          monthSelector
+        dayHeaders
 
-          dayHeaders
+        calendarGrid
 
-          calendarGrid
+        monthStats
 
-          monthStats
-
-          if let selected = selectedDate, let session = sessionFor(date: selected) {
-            selectedNightSection(session: session)
-          }
-
-          legend
+        if let selected = selectedDate, let session = sessionFor(date: selected) {
+          selectedNightSection(session: session)
         }
-        .padding(.horizontal, 20)
-        .padding(.bottom, 20)
+
+        legend
       }
+      .padding(.horizontal, 20)
+      .padding(.bottom, 20)
     }
     .background(theme.bgSecondary.ignoresSafeArea())
     .navigationTitle("")
     .navigationBarTitleDisplayMode(.inline)
-    .navigationBarBackButtonHidden(true)
     .toolbar {
       ToolbarItem(placement: .principal) {
-        Text("Calendar")
-          .font(.system(size: 17, weight: .semibold))
-          .foregroundStyle(theme.textPrimary)
+        HStack(spacing: 6) {
+          Image(systemName: "calendar")
+            .font(.system(size: 14, weight: .medium))
+            .foregroundStyle(theme.accent)
+          Text("Calendar")
+            .font(.system(size: 17, weight: .semibold))
+            .foregroundStyle(theme.accent)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 6)
+        .background(
+          Capsule()
+            .fill(theme.surface2)
+        )
+      }
+      ToolbarItem(placement: .topBarTrailing) {
+        Button {
+          withAnimation(.easeInOut(duration: 0.2)) {
+            selectedMonth = Date()
+            selectedDate = calendar.startOfDay(for: Date())
+          }
+        } label: {
+          Text("Today")
+            .font(.system(size: 17, weight: .medium))
+            .foregroundStyle(theme.accent)
+        }
       }
     }
     .onAppear {
       selectedDate = calendar.startOfDay(for: Date())
     }
-  }
-
-  // MARK: - Nav Bar
-
-  private var navBar: some View {
-    HStack {
-      Button {
-        routerPath.navigateBack()
-      } label: {
-        HStack(spacing: 4) {
-          Image(systemName: "chevron.left")
-            .font(.system(size: 15, weight: .semibold))
-          Text("Stats")
-        }
-        .font(.system(size: 17, weight: .medium))
-        .foregroundStyle(theme.accent)
-      }
-
-      Spacer()
-
-      Button {
-        withAnimation(.easeInOut(duration: 0.2)) {
-          selectedMonth = Date()
-          selectedDate = calendar.startOfDay(for: Date())
-        }
-      } label: {
-        Text("Today")
-          .font(.system(size: 17, weight: .medium))
-          .foregroundStyle(theme.accent)
-      }
-    }
-    .padding(.horizontal, 20)
-    .padding(.top, 8)
   }
 
   // MARK: - Month Selector
@@ -150,7 +135,7 @@ public struct CalendarView: View {
 
     return VStack(spacing: 8) {
       ForEach(0..<6, id: \.self) { row in
-        HStack(spacing: 0) {
+        HStack(spacing: 8) {
           ForEach(0..<7, id: \.self) { col in
             let index = row * 7 + col
             if index < days.count {
@@ -168,28 +153,37 @@ public struct CalendarView: View {
     let isCurrentMonth = calendar.isDate(day.date, equalTo: selectedMonth, toGranularity: .month)
     let session = sessionFor(date: day.date)
     let dotColor = intensityColor(for: session)
+    let hasEvents = dotColor != Color.clear
+    let isHighlighted = isToday || isSelected
 
-    return VStack(spacing: 2) {
+    let cellBackground: Color = {
+      if isHighlighted { return theme.accent }
+      if hasEvents { return theme.surface2 }
+      return Color.clear
+    }()
+
+    let numberColor: Color = {
+      if isHighlighted { return .white }
+      if isCurrentMonth { return theme.textPrimary }
+      return theme.textTertiary.opacity(0.5)
+    }()
+
+    return VStack(spacing: 4) {
       Text("\(calendar.component(.day, from: day.date))")
         .font(.system(size: 15, weight: .medium))
-        .foregroundStyle(
-          isSelected ? .white :
-            isToday ? theme.scoreGreen :
-            isCurrentMonth ? theme.textPrimary : theme.textTertiary.opacity(0.5)
-        )
+        .foregroundStyle(numberColor)
         .frame(width: 36, height: 36)
-        .background(
-          isSelected ? theme.accent :
-            isToday ? theme.scoreGreen.opacity(0.2) : Color.clear
-        )
-        .clipShape(Circle())
 
       Circle()
-        .fill(dotColor)
-        .frame(width: 4, height: 4)
-        .opacity(dotColor == Color.clear ? 0 : 1)
+        .fill(isHighlighted ? .white : dotColor)
+        .frame(width: 5, height: 5)
+        .opacity(hasEvents ? 1 : 0)
     }
-    .frame(maxWidth: .infinity, minHeight: 44)
+    .frame(maxWidth: .infinity, minHeight: 52)
+    .background(
+      RoundedRectangle(cornerRadius: theme.radiusSmall)
+        .fill(cellBackground)
+    )
     .contentShape(Rectangle())
     .onTapGesture {
       withAnimation(.easeInOut(duration: 0.15)) {

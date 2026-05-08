@@ -89,7 +89,7 @@ struct RecordingPrestartView: View {
     VStack(spacing: 16) {
       alarmSection
 
-      Button {
+      StartRecordingButton(height: 56) {
         Task {
           if !audioRecorder.hasPermission {
             let granted = await audioRecorder.requestPermission()
@@ -104,19 +104,6 @@ struct RecordingPrestartView: View {
           }
           try? sessionManager.startSession()
         }
-      } label: {
-        HStack(spacing: 8) {
-          Circle()
-            .fill(theme.scoreGreen)
-            .frame(width: 8, height: 8)
-          Text("Start Recording")
-        }
-        .font(.system(size: 17, weight: .semibold))
-        .foregroundStyle(.white)
-        .frame(maxWidth: .infinity)
-        .frame(height: 56)
-        .background(theme.accent)
-        .clipShape(Capsule())
       }
 
       Button {
@@ -127,6 +114,7 @@ struct RecordingPrestartView: View {
           .foregroundStyle(theme.textSecondary)
       }
     }
+    .frame(maxWidth: .infinity)
   }
 
   private var alarmSection: some View {
@@ -177,3 +165,4 @@ struct RecordingPrestartView: View {
     }
   }
 }
+
