@@ -2,7 +2,7 @@
 
 > Auto-updated by the AI after every task. This is the local source of truth.
 
-Last updated: 2026-05-07
+Last updated: 2026-05-07 (Session 28)
 
 ---
 
@@ -42,7 +42,7 @@ Last updated: 2026-05-07
 | F1 | Onboarding | P0 | Done | 5/5 | ██████████ 100% | [tracker](trackers/f1-onboarding.md) |
 | F2 | Live Session | P0 | Done | 6/6 | ██████████ 100% | [tracker](trackers/f2-live-session.md) |
 | F3 | Statistics Dashboard | P1 | Done | 3/3 | ██████████ 100% | [tracker](trackers/f3-statistics.md) |
-| F4 | Recordings | P1 | Done | 5/5 | ██████████ 100% | [tracker](trackers/f4-recordings.md) |
+| F4 | Recordings | P1 | Done | 5/5 + polish | ██████████ 100% | [tracker](trackers/f4-recordings.md) |
 | F5 | Trends | P1 | Done | 2/2 | ██████████ 100% | [tracker](trackers/f5-trends.md) |
 | F6 | Settings | P2 | Done | 3/3 | ██████████ 100% | [tracker](trackers/f6-settings.md) |
 | F7 | Audio Clip Export | P1 | Done | 2/2 | ██████████ 100% | [tracker](trackers/f7-audio-clip-export.md) |
@@ -59,6 +59,8 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-05-07 | Session 28: Detection Pipeline Hardening + UI Polish + Recordings Grouping | Completed | Actor-isolation race fix; bandpass filter on recordings; eventsCount stored property fix; dB/snoreConf removed from UI; stats day-averaging; recordings grouped by night with expandable cards |
+| 2026-05-07 | F9 Enhancement: SoundAnalysis Snore Detection | Completed | Apple's built-in 300-class sound classifier via SNAudioStreamAnalyzer; zero app size; auto-fallback to FFT if snoring not in built-in classes; runtime diagnostic prints all known classifications |
 | 2026-05-07 | Bug Fix: Real-Device Recording | Completed | Fixed playback (`fileExists` URL→path), detection thresholds (-40→-35, CoreML disabled), AudioRecorder format validation + write error logging |
 | 2026-05-07 | Design Polish | Completed | Onboarding: button bottom padding (40–48px) to clear swipe area; horizontal padding matched to design (24–32px); badges moved inside text VStack for consistent positioning; progress dots aligned across all pages via invisible Back button placeholder |
 | 2026-05-07 | F11-T4 | Completed | Watch data sync via WCSession sendMessage + application context fallback |

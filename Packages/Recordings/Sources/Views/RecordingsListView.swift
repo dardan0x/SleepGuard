@@ -41,8 +41,8 @@ public struct RecordingsListView: View {
     List {
       ForEach(sections) { section in
         Section {
-          ForEach(section.sessions) { session in
-            RecordingRowView(session: session, theme: theme)
+          ForEach(section.groups) { group in
+            NightGroupRowView(group: group, theme: theme)
           }
         } header: {
           Text(section.title)
@@ -72,11 +72,13 @@ public struct RecordingsListView: View {
 
   private func groupSessions(_ sessions: [SleepSession]) -> [MonthSection] {
     let calendar = Calendar.current
-    let grouped = Dictionary(grouping: sessions) { session in
+
+    // Group by month
+    let monthGrouped = Dictionary(grouping: sessions) { session in
       calendar.dateComponents([.year, .month], from: session.startDate)
     }
 
-    let sorted = grouped.sorted { a, b in
+    let sortedMonths = monthGrouped.sorted { a, b in
       if a.key.year != b.key.year {
         return a.key.year! > b.key.year!
       }
@@ -86,13 +88,27 @@ public struct RecordingsListView: View {
     let formatter = DateFormatter()
     formatter.dateFormat = "MMMM yyyy"
 
-    return sorted.map { components, sessions in
-      let date = calendar.date(from: components)!
-      let title = formatter.string(from: date).uppercased()
+    return sortedMonths.map { components, monthSessions in
+      let monthDate = calendar.date(from: components)!
+      let title = formatter.string(from: monthDate).uppercased()
+
+      // Within each month, group by day
+      let dayGrouped = Dictionary(grouping: monthSessions) { session in
+        calendar.startOfDay(for: session.startDate)
+      }
+
+      let groups = dayGrouped.map { dayDate, daySessions in
+        NightGroup(
+          id: ISO8601DateFormatter.string(from: dayDate, timeZone: calendar.timeZone, formatOptions: [.withFullDate]),
+          date: dayDate,
+          sessions: daySessions.sorted { $0.startDate > $1.startDate }
+        )
+      }.sorted { $0.date > $1.date }
+
       return MonthSection(
         id: title,
         title: title,
-        sessions: sessions.sorted { $0.startDate > $1.startDate }
+        groups: groups
       )
     }
   }

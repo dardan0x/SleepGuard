@@ -16,7 +16,11 @@ let package = Package(
       dependencies: [
         .product(name: "Models", package: "Models"),
       ],
-      path: "Sources/Engine"
+      path: "Sources/Engine",
+      linkerSettings: [
+        .linkedFramework("Accelerate"),
+        .linkedFramework("SoundAnalysis"),
+      ]
     ),
   ]
 )

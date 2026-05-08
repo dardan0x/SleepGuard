@@ -1,5 +1,4 @@
 import AVFoundation
-import CoreML
 import Observation
 
 public enum SnoringState: Sendable {
@@ -16,47 +15,29 @@ public final class SnoreDetector {
 
   public var currentState: SnoringState = .none
 
-  /// Thresholds in dB. Used as fallback when CoreML is unavailable.
+  /// Thresholds in dB. Used together with spectral analysis.
   public var quietThreshold: Float = -35.0
   public var lightThreshold: Float = -25.0
   public var loudThreshold: Float = -15.0
 
-  /// Confidence threshold derived from detection sensitivity.
-  /// Higher sensitivity → lower confidence required (more detections).
-  public var confidenceThreshold: Float = 0.6
-
-  /// Whether CoreML classification is enabled.
-  public var useCoreML: Bool = false
-
-  private var classifier: SnoreClassifier?
-
-  private init() {
-    loadModel()
-  }
-
-  private func loadModel() {
-    do {
-      let configuration = MLModelConfiguration()
-      configuration.computeUnits = .cpuOnly
-      classifier = try SnoreClassifier(configuration: configuration)
-    } catch {
-      // Model failed to load; fall back to threshold-based detection.
-      classifier = nil
-      useCoreML = false
-    }
-  }
+  private init() {}
 
   // MARK: - Public Classification
 
-  public func classify(db: Float) -> SnoringState {
-    if useCoreML, let classifier {
-      return classifyWithCoreML(db: db, classifier: classifier)
+  /// Classifies snoring using Apple's SoundAnalysis confidence when available,
+  /// falling back to FFT spectral features if snoring is not a built-in class.
+  public func classify(db: Float, spectralScore: Float = 0, snoreConfidence: Float = 0) -> SnoringState {
+    if snoreConfidence > 0 {
+      return classifyWithSoundAnalysis(db: db, snoreConfidence: snoreConfidence)
+    }
+    if spectralScore > 0 {
+      return classifyWithSpectral(db: db, spectralScore: spectralScore)
     }
     return classifyWithThresholds(db: db)
   }
 
-  public func update(db: Float) {
-    currentState = classify(db: db)
+  public func update(db: Float, spectralScore: Float = 0, snoreConfidence: Float = 0) {
+    currentState = classify(db: db, spectralScore: spectralScore, snoreConfidence: snoreConfidence)
   }
 
   // MARK: - Threshold Fallback
@@ -72,51 +53,56 @@ public final class SnoreDetector {
     return .none
   }
 
-  // MARK: - CoreML Classification
+  // MARK: - SoundAnalysis Classification
 
-  private func classifyWithCoreML(db: Float, classifier: SnoreClassifier) -> SnoringState {
-    do {
-      let array = try MLMultiArray(shape: [1], dataType: .double)
-      array[0] = NSNumber(value: db)
-      let input = SnoreClassifierInput(decibel: array)
-      let output = try classifier.prediction(input: input)
-      return state(from: output.intensityProbs)
-    } catch {
-      // Prediction failed; fall back to thresholds.
-      return classifyWithThresholds(db: db)
+  /// Uses Apple's built-in sound classifier confidence.
+  /// `snoreConfidence` is 0–1 from the 300-class pre-trained model.
+  ///
+  /// When SoundAnalysis is confident (≥0.5), we trust it over raw dB thresholds
+  /// because the classifier distinguishes snoring from other loud sounds.
+  /// dB is used only for intensity, with very low floors so quiet snoring
+  /// (or low mic gain) is still captured.
+  public func classifyWithSoundAnalysis(db: Float, snoreConfidence: Float) -> SnoringState {
+    guard snoreConfidence >= 0.5 else {
+      return .none
     }
+
+    // Use much lower dB floors since SoundAnalysis already confirmed snoring.
+    let floorLoud: Float = -25.0
+    let floorLight: Float = -40.0
+    let floorQuiet: Float = -60.0
+
+    if db >= floorLoud && snoreConfidence >= 0.7 {
+      return .loud
+    } else if db >= floorLight && snoreConfidence >= 0.5 {
+      return .light
+    } else if db >= floorQuiet {
+      return .quiet
+    }
+    // Even if dB is extremely low, if SoundAnalysis is ≥0.6 confident, count as quiet.
+    return snoreConfidence >= 0.6 ? .quiet : .none
   }
 
-  /// Maps the 4-element probability vector to the most likely state
-  /// that also meets the confidence threshold.
-  ///
-  /// Output indices: [none, quiet, light, loud]
-  private func state(from probs: MLMultiArray) -> SnoringState {
-    guard probs.count == 4 else {
+  // MARK: - Spectral Classification
+
+  /// Uses FFT spectral features to distinguish snoring from other loud sounds.
+  /// Rejects sounds that are loud but don't have snore-like spectral structure.
+  public func classifyWithSpectral(db: Float, spectralScore: Float) -> SnoringState {
+    guard spectralScore >= 0.3 else {
       return .none
     }
 
-    // Find the index with the highest probability.
-    var maxIndex = 0
-    var maxValue: Double = probs[0].doubleValue
-    for i in 1..<4 {
-      let val = probs[i].doubleValue
-      if val > maxValue {
-        maxValue = val
-        maxIndex = i
-      }
-    }
+    let adjustedQuiet = quietThreshold + (1.0 - spectralScore) * 10
+    let adjustedLight = lightThreshold + (1.0 - spectralScore) * 8
+    let adjustedLoud = loudThreshold + (1.0 - spectralScore) * 5
 
-    // Require minimum confidence.
-    guard Float(maxValue) >= confidenceThreshold else {
-      return .none
+    if db >= adjustedLoud {
+      return .loud
+    } else if db >= adjustedLight {
+      return .light
+    } else if db >= adjustedQuiet {
+      return .quiet
     }
-
-    switch maxIndex {
-    case 1: return .quiet
-    case 2: return .light
-    case 3: return .loud
-    default: return .none
-    }
+    return .none
   }
 }

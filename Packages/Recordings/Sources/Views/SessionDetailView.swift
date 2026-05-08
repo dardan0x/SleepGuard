@@ -25,6 +25,8 @@ public struct SessionDetailView: View {
   @State private var isSharePresented = false
   @State private var shareItems: [Any] = []
 
+
+
   public init(sessionID: UUID) {
     self.sessionID = sessionID
   }
@@ -191,13 +193,6 @@ public struct SessionDetailView: View {
           value: "\(session.eventsCount)",
           theme: theme,
           iconColor: theme.scoreAmber
-        )
-        StatCard(
-          icon: "speaker.wave.3.fill",
-          title: "Peak",
-          value: "\(audioLevelPercentage(from: session.peakDB))%",
-          theme: theme,
-          iconColor: theme.accent
         )
       }
     }

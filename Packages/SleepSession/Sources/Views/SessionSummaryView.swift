@@ -70,13 +70,6 @@ public struct SessionSummaryView: View {
         theme: theme,
         iconColor: theme.scoreAmber
       )
-      StatCard(
-        icon: "speaker.wave.3.fill",
-        title: "Peak",
-        value: "\(audioLevelPercentage(from: session.peakDB))%",
-        theme: theme,
-        iconColor: theme.accent
-      )
     }
   }
 

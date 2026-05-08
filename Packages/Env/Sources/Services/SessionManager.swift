@@ -15,7 +15,7 @@ public final class SessionManager {
   /// Real-time audio level for UI observation
   public var currentDB: Float = -160.0
   public var currentSnoringState: SnoringState = .none
-  public var eventsCount: Int { currentSession?.events?.count ?? 0 }
+  public var eventsCount: Int = 0
 
   private let audioRecorder = AudioRecorder.shared
   private let snoreDetector = SnoreDetector.shared
@@ -50,6 +50,7 @@ public final class SessionManager {
     isRecording = true
     currentDB = -160.0
     currentSnoringState = .none
+    eventsCount = 0
   }
 
   public func stopSession() -> SleepSession? {
@@ -74,6 +75,7 @@ public final class SessionManager {
     session.eventsPerHour = totalDuration > 0 ? Double(session.eventsCount) / (totalDuration / 3600) : 0
     session.averageDB = totalDBCount > 0 ? totalDBSum / Double(totalDBCount) : 0
     session.sleepScore = computeSleepScore(session: session)
+    eventsCount = session.eventsCount
 
     let result = session
     completedSession = result
@@ -94,6 +96,11 @@ public final class SessionManager {
 
   /// Call this from the view when `audioRecorder.currentDB` changes.
   public func processAudioLevel(db: Float) {
+    processAudioLevel(db: db, spectralScore: 0, snoreConfidence: 0)
+  }
+
+  /// Call this from the view when audio features are available.
+  public func processAudioLevel(db: Float, spectralScore: Float = 0, snoreConfidence: Float = 0) {
     guard isRecording, let session = currentSession else { return }
 
     let now = Date()
@@ -109,8 +116,13 @@ public final class SessionManager {
       session.peakDB = Double(db)
     }
 
-    // Classify snoring state
-    let state = snoreDetector.classify(db: db)
+    // Classify snoring state (SoundAnalysis → FFT → thresholds)
+    let state = snoreDetector.classify(db: db, spectralScore: spectralScore, snoreConfidence: snoreConfidence)
+    #if DEBUG
+    if snoreConfidence > 0.1 || spectralScore > 0.1 {
+      print("[SessionManager] classify db=\(String(format: "%.1f", db)) spectral=\(String(format: "%.2f", spectralScore)) snoreConf=\(String(format: "%.2f", snoreConfidence)) → \(state)")
+    }
+    #endif
 
     // Accumulate snoring duration
     if state != .none {
@@ -197,6 +209,7 @@ public final class SessionManager {
       session.events = []
     }
     session.events?.append(event)
+    eventsCount = session.events?.count ?? 0
 
     activeEventStart = nil
     activeEventDBSum = 0

@@ -31,9 +31,11 @@ public struct StatisticsDashboardView: View {
             routerPath.navigate(to: .calendar)
           }
         )
-      case .loaded(let session, let recentSessions):
+      case .loaded(let session, let dayScore, let daySessionCount, let recentSessions):
         StatisticsLoadedView(
           session: session,
+          dayScore: dayScore,
+          daySessionCount: daySessionCount,
           recentSessions: recentSessions,
           theme: theme,
           onStartRecording: {
@@ -60,8 +62,14 @@ public struct StatisticsDashboardView: View {
 
   private func loadState() {
     if let latest = sessions.first {
+      let calendar = Calendar.current
+      let latestDay = calendar.startOfDay(for: latest.startDate)
+      let daySessions = sessions.filter {
+        calendar.isDate($0.startDate, inSameDayAs: latestDay)
+      }
+      let dayScore = daySessions.isEmpty ? latest.sleepScore : daySessions.map(\.sleepScore).reduce(0, +) / daySessions.count
       let recent = Array(sessions.prefix(7))
-      viewState = .loaded(session: latest, recentSessions: recent)
+      viewState = .loaded(session: latest, dayScore: dayScore, daySessionCount: daySessions.count, recentSessions: recent)
     } else {
       viewState = .empty
     }
@@ -70,7 +78,7 @@ public struct StatisticsDashboardView: View {
   public enum ViewState {
     case loading
     case empty
-    case loaded(session: SleepSession, recentSessions: [SleepSession])
+    case loaded(session: SleepSession, dayScore: Int, daySessionCount: Int, recentSessions: [SleepSession])
     case error
   }
 }
