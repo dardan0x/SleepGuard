@@ -20,6 +20,8 @@ public struct SessionSummaryView: View {
   @Environment(\.dismiss) private var dismiss
   @Environment(\.modelContext) private var modelContext
 
+  @State private var showShortSessionAlert = false
+
   public var body: some View {
     ScrollView {
       VStack(spacing: 32) {
@@ -36,6 +38,11 @@ public struct SessionSummaryView: View {
       .padding(24)
     }
     .background(theme.bgSecondary.ignoresSafeArea())
+    .alert("Session Too Short", isPresented: $showShortSessionAlert) {
+      Button("OK", role: .cancel) { }
+    } message: {
+      Text("To generate meaningful sleep analysis, recordings must be at least 10 minutes long.")
+    }
   }
 
   private var completionHeader: some View {
@@ -97,16 +104,53 @@ public struct SessionSummaryView: View {
 
   private var actionButtons: some View {
     VStack(spacing: 12) {
-      Button {
-        saveSession()
-      } label: {
-        Text("Save Session")
-          .font(.system(size: 17, weight: .semibold))
-          .foregroundStyle(.white)
+      ZStack {
+        // Outer soft halo
+        Capsule()
+          .fill(theme.accent.opacity(0.12))
           .frame(maxWidth: .infinity)
-          .frame(height: 56)
-          .background(theme.accent)
-          .clipShape(Capsule())
+          .frame(height: 96)
+          .blur(radius: 20)
+          .offset(y: 6)
+
+        // Inner concentrated glow
+        Capsule()
+          .fill(
+            LinearGradient(
+              colors: [theme.accent.opacity(0.35), theme.accent.opacity(0.0)],
+              startPoint: .top,
+              endPoint: .bottom
+            )
+          )
+          .frame(maxWidth: .infinity)
+          .frame(height: 76)
+          .blur(radius: 10)
+          .offset(y: 8)
+
+        Button {
+          saveSession()
+        } label: {
+          Text("Save Session")
+            .font(.system(size: 17, weight: .semibold))
+            .foregroundStyle(.white)
+            .frame(maxWidth: .infinity)
+            .frame(height: 56)
+            .background(
+              ZStack {
+                Color(hex: "#1E1D1E")
+                Capsule()
+                  .stroke(
+                    LinearGradient(
+                      colors: [Color.white.opacity(0.25), Color.white.opacity(0.05)],
+                      startPoint: .leading,
+                      endPoint: .trailing
+                    ),
+                    lineWidth: 1
+                  )
+              }
+            )
+            .clipShape(Capsule())
+        }
       }
 
       Button {
@@ -133,6 +177,11 @@ public struct SessionSummaryView: View {
   }
 
   private func saveSession() {
+    if session.totalDuration < 600 {
+      showShortSessionAlert = true
+      return
+    }
+
     modelContext.insert(session)
     if let events = session.events {
       for event in events {
