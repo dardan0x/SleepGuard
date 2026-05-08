@@ -1173,3 +1173,270 @@ Or delete and reinstall the app on the simulator.
 - Should the Watch app use `WKExtendedRuntimeSession` for background recording? Currently relies on foreground audio session.
 - Should snore events on Watch be more detailed (timestamp + duration per event) or is aggregate count sufficient?
 - Should the iOS app show a list of watch-recorded sessions separately from phone-recorded sessions?
+
+---
+
+## 2026-05-07 — Session 27: Real-Device Recording & Playback Bug Fixes
+
+### Completed
+- **Playback fix**: `SessionDetailView` file URL handling
+  - `FileManager.fileExists(atPath: urlString)` was receiving `file:///var/.../session.caf` (absoluteString) instead of a raw path
+  - `fileExists(atPath:)` expects `/var/...` not `file:///var/...`, so it always returned `false` and playback setup aborted
+  - Fixed in 3 places: `setupAudioPlayer`, `shareFullSession`, `exportAndShare` — now convert `URL(string:)` first, then use `url.path`
+- **Snore detection fix**: Real iPhone ambient noise floor is ~-50 dBFS; old `-40 dB` quiet threshold caught normal room silence
+  - Raised thresholds: quiet `-40` → `-35`, light `-30` → `-25`, loud `-20` → `-15`
+  - Disabled CoreML (`useCoreML = false`) — synthetic training data misclassifies real mic input; threshold fallback is more predictable on device
+- **AudioRecorder hardening**:
+  - Added `RecordingError` enum with `.noMicrophoneInput` and `.invalidAudioFormat`
+  - Validates `format.channelCount > 0 && format.sampleRate > 0` before installing tap
+  - Checks `AVAudioSession.currentRoute.inputs.isEmpty` after activation
+  - Changed `try? audioFile.write(from: buffer)` to `do/try/catch` with `print()` logging so write failures are visible in console
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Recordings/Sources/Views/SessionDetailView.swift` | +6/-6 | Fixed `fileExists` URL→path in `setupAudioPlayer`, `shareFullSession`, `exportAndShare` |
+| `Packages/AudioEngine/Sources/Engine/SnoreDetector.swift` | +4/-4 | Raised thresholds; disabled CoreML |
+| `Packages/AudioEngine/Sources/Engine/AudioRecorder.swift` | +22/-6 | Added `RecordingError`, format validation, route check, write error logging |
+
+### Architecture Decisions
+- **Threshold over ML for now**: CoreML model was trained on synthetic decibel ranges. Real iPhone microphone gain curves differ from simulator/training data. Threshold fallback is coarse but reliable until real labeled audio is collected.
+- **No calibration UI**: Instead of adding a user-facing ambient noise calibration step, we simply raised thresholds. If users report missed detections, calibration can be added in V2 polish.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors across all packages + app target
+
+### Next Session
+- Test on real device: verify playback works, verify quiet room shows `.none` instead of `.quiet`, verify loud noises trigger `.light`/`.loud`
+
+### Open Questions
+- Should CoreML be re-enabled after collecting real-device training data?
+- Should thresholds be user-configurable via Settings (currently only `detectionSensitivity` exists but isn't wired to thresholds)?
+
+---
+
+## 2026-05-07 — Session 28: FFT-Based Snore Detection + CoreML Pipeline
+
+### Completed
+- **FFTAnalyzer**: Real-time spectral analysis using `Accelerate` (`vDSP_DFT_Execute`)
+  - Computes magnitude spectrum from `AVAudioPCMBuffer`
+  - Calculates `lowFreqRatio` (100–500 Hz energy / total energy)
+  - Calculates `spectralCentroid` (weighted average frequency)
+  - Combined `spectralScore` (0–1) = low-freq dominance + centroid position
+- **SnoreDetector spectral classification**:
+  - `classifyWithSpectral(db:spectralScore:)` rejects sounds that don't match snore spectral profile
+  - Spectral score < 0.3 → `.none` regardless of loudness
+  - Spectral score 0.3–1.0 → adjusts dB thresholds dynamically (higher confidence = lower threshold)
+- **AudioRecorder integration**:
+  - Tap callback runs FFT on every buffer alongside dB calculation
+  - Publishes `spectralScore` on MainActor alongside `currentDB`
+- **Cross-package wiring**:
+  - `BedsideClockView` passes `audioRecorder.spectralScore` to `sessionManager.processAudioLevel(db:spectralScore:)`
+  - `SessionManager` forwards to `snoreDetector.classify(db:spectralScore:)`
+- **CoreML training pipeline** (future use):
+  - `AudioFeatureExtractor`: extracts 6 ML features (RMS, ZCR, peak, spectral score, low-freq ratio, centroid) from any audio file
+  - `scripts/train_snore_model.py`: trains logistic regression classifier from labeled JSON feature files, exports to CoreML
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/AudioEngine/Package.swift` | +1 | Added `Accelerate` framework linker setting |
+| `Packages/AudioEngine/Sources/Engine/FFTAnalyzer.swift` | +78 | New. FFT + spectral feature extraction |
+| `Packages/AudioEngine/Sources/Engine/SnoreDetector.swift` | +32 | Added `classify(db:spectralScore:)` and `classifyWithSpectral` |
+| `Packages/AudioEngine/Sources/Engine/AudioRecorder.swift` | +10 | Added `spectralScore` property, FFT analysis in tap callback |
+| `Packages/AudioEngine/Sources/Engine/AudioFeatureExtractor.swift` | +75 | New. ML feature extraction + JSON export for training data |
+| `Packages/Env/Sources/Services/SessionManager.swift` | +5 | `processAudioLevel(db:spectralScore:)` overload |
+| `Packages/SleepSession/Sources/Views/BedsideClockView.swift` | +1/-1 | Pass `spectralScore` to session manager |
+| `scripts/train_snore_model.py` | +82 | New. Python script to train CoreML model from labeled features |
+
+### Architecture Decisions
+- **FFT in tap callback, not MainActor**: FFT runs on the real-time audio thread to avoid blocking UI. Only the scalar `spectralScore` is dispatched to MainActor.
+- **Spectral score threshold at 0.3**: Below this, any sound is rejected as non-snore. This catches talking, traffic, and phone notifications that are loud but spectrally different from snoring.
+- **Dynamic dB thresholds**: When spectral confidence is moderate (0.3–0.7), dB thresholds are raised by up to 10 dB. This reduces false positives while still catching genuine snores.
+- **Logistic regression for CoreML**: Chosen over neural nets because the feature space is tiny (6 features) and interpretable. Can be upgraded to a small CNN later if needed.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors across all packages + app target
+
+### How to Test on Device
+1. Start recording in a quiet room → should show `.none` (silence has flat spectrum)
+2. Talk loudly near the phone → should show `.none` (speech has higher spectral centroid)
+3. Make a low rumbling sound (simulate snoring) → should show `.quiet`/`.light`
+4. Check Xcode console for `[AudioRecorder]` logs if writes fail
+
+### Next Session
+- Test SoundAnalysis detection on real device
+- Check Xcode console for `[SoundAnalysis] Found snoring-related class: ...` or `Snoring NOT in built-in classes`
+- If snoring is not in Apple's classifier, FFT fallback will activate automatically
+
+### Open Questions
+- Is the 100–500 Hz band optimal for all snore types? Some people snore at higher frequencies.
+- Does Apple's built-in classifier include "snoring"? Need to verify on device.
+
+---
+
+## 2026-05-07 — Session 29: Apple SoundAnalysis Integration
+
+### Completed
+- **SoundAnalysisDetector**: Wraps `SNAudioStreamAnalyzer` + `SNClassifySoundRequest`
+  - Uses Apple's built-in 300-class sound classifier (`SNClassifierIdentifier.version1`)
+  - On init, prints all `knownClassifications` to console for diagnostics
+  - Checks for "snore", "snoring", or "breathing" in the classification list
+  - If found, sets `isSnoringClassAvailable = true` and uses confidence scores
+  - If not found, auto-fallback message is logged
+  - Implements `SNResultsObserving` to receive real-time classification results
+- **AudioRecorder integration**:
+  - `startRecording()` calls `soundAnalyzer.startAnalyzing(format:)`
+  - Tap callback feeds every buffer to `soundAnalyzer.analyze(buffer:at:)`
+  - Publishes `snoreConfidence` on MainActor alongside `currentDB`
+  - `stopRecording()` calls `soundAnalyzer.stopAnalyzing()`
+- **SnoreDetector**:
+  - `classify(db:spectralScore:snoreConfidence:)` tries SoundAnalysis first, then FFT, then thresholds
+  - `classifyWithSoundAnalysis`: requires `snoreConfidence >= 0.5` + dB threshold
+  - Intensity: loud (≥0.7 confidence + loud dB), light (≥0.6 + light dB), quiet (quiet dB)
+- **Cross-package wiring**:
+  - `BedsideClockView` passes `audioRecorder.snoreConfidence` to `sessionManager.processAudioLevel()`
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/AudioEngine/Package.swift` | +1 | Added `SoundAnalysis` framework |
+| `Packages/AudioEngine/Sources/Engine/SoundAnalysisDetector.swift` | +90 | New. SNAudioStreamAnalyzer wrapper with SNResultsObserving |
+| `Packages/AudioEngine/Sources/Engine/AudioRecorder.swift` | +8/-2 | Integrated SoundAnalysisDetector; publish snoreConfidence |
+| `Packages/AudioEngine/Sources/Engine/SnoreDetector.swift` | +16/-4 | Added `classifyWithSoundAnalysis`; priority: SoundAnalysis → FFT → thresholds |
+| `Packages/Env/Sources/Services/SessionManager.swift` | +2 | `processAudioLevel` accepts `snoreConfidence` |
+| `Packages/SleepSession/Sources/Views/BedsideClockView.swift` | +4/-1 | Pass `snoreConfidence` to session manager |
+
+### Architecture Decisions
+- **SoundAnalysis priority over FFT**: Apple's model is trained on far more data than our hand-tuned spectral heuristic. If snoring is in the built-in classes, this should be significantly more accurate.
+- **Three-tier fallback**: SoundAnalysis → FFT spectral → dB thresholds. Ensures the app always has some detection method active.
+- **Non-isolated SNResultsObserving methods**: Apple's delegate methods are called on internal queues, not MainActor. We dispatch `snoreConfidence` updates to MainActor via `Task { @MainActor in }`.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors across all packages + app target
+
+### How to Test on Device
+1. Start recording
+2. Open Xcode console
+3. Look for: `[SoundAnalysis] Found snoring-related class: 'snoring'` (or similar)
+   - If found: SoundAnalysis is active. Snore near the phone and check if detection works.
+   - If NOT found: Look for `[SoundAnalysis] Snoring NOT in built-in classes. FFT fallback will be used.`
+
+### Open Questions
+- Does Apple's built-in classifier actually include "snoring"? The documentation says 300+ sounds but doesn't list them all. Need real-device verification.
+
+---
+
+## 2026-05-07 — Session 27b: dB → Percentage UI Polish
+
+### Completed
+- Added `audioLevelPercentage(from:)` helper in `AudioEngine` package
+  - Maps dBFS (-60 … -20) → 0% … 100% for user-friendly display
+  - Overloads for `Float` and `Double`
+- Updated all UI surfaces that showed raw negative dB:
+  - `BedsideClockView`: `%-35 dB · ambient%` → `65% · ambient`
+  - `SessionDetailView` stat card: `Peak` now shows `%`
+  - `SessionSummaryView` stat card: `Peak` now shows `%`
+  - `StatisticsLoadedView` stat card: `Avg dB` → `Avg Level` with `%`
+  - `SleepReportPDFGenerator`: `Avg dB`/`Peak dB` → `Avg Level`/`Peak Level` with `%`
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/AudioEngine/Sources/Engine/AudioRecorder.swift` | +12 | Added `audioLevelPercentage(from:)` overloads |
+| `Packages/SleepSession/Sources/Views/BedsideClockView.swift` | +1/-1 | dB → percentage display |
+| `Packages/Recordings/Sources/Views/SessionDetailView.swift` | +1/-1 | Peak dB → percentage; added `import AudioEngine` |
+| `Packages/SleepSession/Sources/Views/SessionSummaryView.swift` | +1/-1 | Peak dB → percentage; added `import AudioEngine` |
+| `Packages/Statistics/Sources/Views/StatisticsLoadedView.swift` | +1/-1 | Avg dB → Avg Level percentage; added `import AudioEngine` |
+| `Packages/Recordings/Sources/Views/SleepReportPDFGenerator.swift` | +3/-3 | Avg/Peak dB → Level percentage; added `import AudioEngine` |
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors across all packages + app target
+
+
+---
+
+## 2026-05-07 — Session 28: Detection Pipeline Hardening + UI Polish + Recordings Grouping
+
+### Completed
+
+**Snore Detection Pipeline Fixes (F9 refinement)**
+- Fixed actor-isolation race condition: `AudioRecorder` tap callback ran on background audio queue but accessed `@MainActor`-isolated `SoundAnalysisDetector.snoreConfidence`, always reading stale `0`
+- Removed `snoreConfidence` property from `AudioRecorder` (stale copy); `BedsideClockView` now reads `SoundAnalysisDetector.shared.snoreConfidence` directly on `@MainActor`
+- Fixed `SnoreDetector.classifyWithSoundAnalysis` dB thresholds: lowered floors to `-25`/`-40`/`-60` dB so low-mic-gain or brief snores aren't filtered out when SoundAnalysis is ≥0.5 confident
+- Added `AVAudioUnitEQ` bandpass filter (100–500 Hz, center 300 Hz, 2.5 octaves) to recording pipeline; saved audio now contains only snoring frequencies
+- Added debug logging in `SoundAnalysisDetector`, `BedsideClockView`, and `SessionManager` to trace classification pipeline end-to-end
+- Temporarily removed `#if targetEnvironment(simulator)` permission bypasses to allow macOS microphone permission dialog for Simulator; confirmed detection works end-to-end
+
+**Events Not Updating (F2 bug fix)**
+- Root cause: `SessionManager.eventsCount` was a computed property `{ currentSession?.events?.count ?? 0 }`; SwiftUI `@Observable` does not reliably propagate deep mutations on SwiftData `@Model` relationships
+- Changed `eventsCount` to a stored `Int = 0` that gets explicitly updated in `finalizeActiveEvent`, `processAudioLevel`, `startSession`, and `stopSession`
+- Events badge in `BedsideClockView` now updates in real time as snore events are created/finalized
+
+**UI Cleanup**
+- Removed percentage-based audio level display; replaced with raw dBFS, then removed dB entirely from active recording UI (negative values are confusing to users)
+- Removed snore confidence display from release builds (now `#if DEBUG` only), then removed entirely from UI surfaces
+- Removed dB stat cards from `SessionDetailView`, `SessionSummaryView`, `StatisticsLoadedView`, and `SleepReportPDFGenerator`
+- Remaining stats: sleep score, duration, snoring percentage, events count, events/hour
+
+**Statistics Dashboard — Multi-Recording Night Support (F3 refinement)**
+- Main score gauge now shows **average score** across all recordings on the same day (instead of latest only)
+- Label shows `"3 RECORDINGS"` when multiple sessions exist, `"LAST NIGHT"` when single
+- `StatisticsDashboardView.ViewState` expanded to carry `dayScore: Int` and `daySessionCount: Int`
+- "Last 7 Nights" chart now groups by calendar day, averages scores per day, and renders one bar per night (previously showed one bar per recording)
+
+**Recordings Tab — Night Grouping (F4 refinement)**
+- Replaced per-recording rows with **expandable night cards**
+- Each card shows: date, recording count pill (only if >1), total duration, total events, **average score** badge
+- Tap card header to expand with animated reveal of individual recording sub-rows
+- Each sub-row shows: time range, duration, events, individual score badge; tap navigates to that recording's detail
+- Deleted `RecordingRowView.swift` (replaced by `NightGroupRowView`)
+- Created `NightGroup.swift` (model) and `NightGroupRowView.swift` (UI)
+- Updated `MonthSection` to hold `[NightGroup]` instead of raw `[SleepSession]`
+
+### Technical Details
+- `AudioRecorder` audio engine: `inputNode → AVAudioUnitEQ (bandpass) → mainMixerNode (volume 0)`; tap installed on EQ output captures filtered audio for both analysis and file write
+- `AVAudioUnitEQFilterParameters.bandwidth` (not `bandWidth`) is the correct property name
+- `NightGroupRowView` uses `withAnimation(.easeInOut(duration: 0.2))` for expand/collapse
+- `ISO8601DateFormatter` used for stable `NightGroup.id` based on calendar day
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/AudioEngine/Sources/Engine/AudioRecorder.swift` | +25/-15 | Added AVAudioUnitEQ bandpass filter; removed `snoreConfidence` property; tap moved from inputNode to EQ output; removed simulator permission bypasses |
+| `Packages/AudioEngine/Sources/Engine/SnoreDetector.swift` | +12/-6 | Lowered dB floors for SoundAnalysis path; always returns snoring state when confidence ≥0.6 |
+| `Packages/AudioEngine/Sources/Engine/SoundAnalysisDetector.swift` | +5/-1 | Added debug print when confidence updates |
+| `Packages/Env/Sources/Services/SessionManager.swift` | +8/-3 | `eventsCount` changed from computed to stored property; explicit updates on event creation |
+| `Packages/SleepSession/Sources/Views/BedsideClockView.swift` | +8/-12 | Reads `SoundAnalysisDetector.shared.snoreConfidence` directly; removed dB/status text from UI; debug logging |
+| `Packages/Statistics/Sources/Views/StatisticsDashboardView.swift` | +10/-4 | Computes `dayScore` and `daySessionCount`; passes to loaded view |
+| `Packages/Statistics/Sources/Views/StatisticsLoadedView.swift` | +18/-8 | Uses `dayScore` for gauge; groups chart by day with averaged scores; removed dB stat card |
+| `Packages/Recordings/Sources/Views/RecordingsListView.swift` | +18/-8 | Groups sessions by day within month; renders `NightGroupRowView` |
+| `Packages/Recordings/Sources/Views/NightGroup.swift` | +24 | New. Day-group model with computed averageScore, totalDuration, totalEvents |
+| `Packages/Recordings/Sources/Views/NightGroupRowView.swift` | +97 | New. Expandable night card with sub-rows for individual recordings |
+| `Packages/Recordings/Sources/Views/MonthSection.swift` | +2/-2 | `sessions` → `groups` |
+| `Packages/Recordings/Sources/Views/RecordingRowView.swift` | — | **Deleted** — replaced by NightGroupRowView |
+| `Packages/Recordings/Sources/Views/SessionDetailView.swift` | +1/-5 | Removed Peak dB stat card |
+| `Packages/SleepSession/Sources/Views/SessionSummaryView.swift` | +1/-5 | Removed Peak dB stat card |
+| `Packages/Recordings/Sources/Views/SleepReportPDFGenerator.swift` | +2/-6 | Removed Avg/Peak Level stats and event dB column from PDF |
+
+### Architecture Decisions
+- **Bandpass filter on recording path**: Apple's SoundAnalysis classifier already focuses on 100–500 Hz; filtering the recording removes non-snore noise and reduces file size indirectly (quieter filtered audio)
+- **Stored `eventsCount` over computed**: `@Observable` + `@Model` deep mutation observation is unreliable for SwiftData relationship arrays; explicit stored property guarantees UI updates
+- **Night grouping over flat list**: Users make multiple recordings per night (e.g., testing, interrupted sleep); grouping by night reduces visual clutter and surfaces nightly averages
+- **Expandable cards over drill-down**: Keeping recordings accessible in-context (expand in place) is faster than navigating to a separate "night detail" screen
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors across all packages + app target
+
+### Open Questions
+- Should simulator permission bypasses be restored now that macOS permission is confirmed working? (Temporarily removed in `AudioRecorder.swift`)
+- Should `audioLevelPercentage(from:)` helper be kept or removed? No longer used in UI but might be useful for future features
+
+### Follow-up Needed
+- Test on physical device: SoundAnalysis detection accuracy with real snoring audio
+- Evaluate if bandpass filtering affects SoundAnalysis classification quality (trained on full-spectrum audio)

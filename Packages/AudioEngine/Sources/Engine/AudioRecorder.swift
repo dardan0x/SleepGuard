@@ -1,6 +1,22 @@
 import AVFoundation
 import Observation
 
+public enum RecordingError: Error {
+  case noMicrophoneInput
+  case invalidAudioFormat
+}
+
+/// Converts dBFS (negative digital scale) to a 0-100 percentage for UI display.
+/// -60 dB → 0%, -20 dB → 100%.
+public func audioLevelPercentage(from db: Double) -> Int {
+  let normalized = (db + 60.0) / 40.0
+  return Int(max(0.0, min(100.0, normalized * 100.0)))
+}
+
+public func audioLevelPercentage(from db: Float) -> Int {
+  audioLevelPercentage(from: Double(db))
+}
+
 @MainActor
 @Observable
 public final class AudioRecorder {
@@ -8,22 +24,23 @@ public final class AudioRecorder {
 
   public var isRecording = false
   public var currentDB: Float = -160.0
+  /// Spectral snore-likelihood score (0–1). Updated in real-time from FFT analysis.
+  public var spectralScore: Float = 0
   public var hasPermission = false
 
   private var audioEngine: AVAudioEngine?
   private var audioFile: AVAudioFile?
+  private let fftAnalyzer = FFTAnalyzer(bufferSize: 1024)
+  private let soundAnalyzer = SoundAnalysisDetector.shared
+  private var cumulativeFramePosition: AVAudioFramePosition = 0
 
   private init() {
     checkPermission()
   }
 
   public func checkPermission() {
-    // TECH DEBT: Auto-grant on simulator because AVAudioSession permission
-    // requests behave unreliably in the iOS Simulator (no mic hardware).
-    // Remove this #if block when testing on physical devices becomes routine.
-    #if targetEnvironment(simulator)
-    hasPermission = true
-    #else
+    // NOTE: Simulator bypass temporarily removed to trigger macOS microphone
+    // permission dialog. Restore #if targetEnvironment(simulator) block after.
     switch AVAudioSession.sharedInstance().recordPermission {
     case .granted:
       hasPermission = true
@@ -32,16 +49,11 @@ public final class AudioRecorder {
     @unknown default:
       hasPermission = false
     }
-    #endif
   }
 
   public func requestPermission() async -> Bool {
-    // TECH DEBT: Same simulator bypass as checkPermission().
-    // Revert to real permission flow once off simulator.
-    #if targetEnvironment(simulator)
-    hasPermission = true
-    return true
-    #else
+    // NOTE: Simulator bypass temporarily removed to trigger macOS microphone
+    // permission dialog. Restore #if targetEnvironment(simulator) block after.
     let granted = await withCheckedContinuation { continuation in
       AVAudioSession.sharedInstance().requestRecordPermission { granted in
         continuation.resume(returning: granted)
@@ -49,7 +61,6 @@ public final class AudioRecorder {
     }
     hasPermission = granted
     return granted
-    #endif
   }
 
   public func startRecording(audioFileURL: URL? = nil) throws {
@@ -59,37 +70,72 @@ public final class AudioRecorder {
     try session.setCategory(.playAndRecord, mode: .measurement, options: [.defaultToSpeaker, .allowBluetooth])
     try session.setActive(true)
 
+    guard !session.currentRoute.inputs.isEmpty else {
+      throw RecordingError.noMicrophoneInput
+    }
+
     let engine = AVAudioEngine()
     let input = engine.inputNode
     let format = input.outputFormat(forBus: 0)
+
+    guard format.channelCount > 0, format.sampleRate > 0 else {
+      throw RecordingError.invalidAudioFormat
+    }
+
+    // Bandpass filter for snoring frequencies (100–500 Hz).
+    // Apple's built-in classifier already focuses on this band;
+    // filtering the recording removes non-snore noise.
+    let eq = AVAudioUnitEQ(numberOfBands: 1)
+    let band = eq.bands[0]
+    band.filterType = .bandPass
+    band.frequency = 300
+    band.bandwidth = 2.5
+    band.gain = 0
+    band.bypass = false
+    engine.attach(eq)
+    engine.connect(input, to: eq, format: format)
+    engine.connect(eq, to: engine.mainMixerNode, format: format)
+    engine.mainMixerNode.volume = 0
 
     if let audioFileURL = audioFileURL {
       audioFile = try AVAudioFile(forWriting: audioFileURL, settings: format.settings)
     }
 
-    input.installTap(onBus: 0, bufferSize: 1024, format: format) { [weak self] buffer, _ in
+    eq.installTap(onBus: 0, bufferSize: 1024, format: format) { [weak self] buffer, _ in
       guard let self else { return }
       let db = self.calculateDB(from: buffer)
+      let features = self.fftAnalyzer.analyze(buffer: buffer, sampleRate: format.sampleRate)
+      self.soundAnalyzer.analyze(buffer: buffer, at: self.cumulativeFramePosition)
+      self.cumulativeFramePosition += AVAudioFramePosition(buffer.frameLength)
       if let audioFile = self.audioFile {
-        try? audioFile.write(from: buffer)
+        do {
+          try audioFile.write(from: buffer)
+        } catch {
+          print("[AudioRecorder] Failed to write audio buffer: \(error)")
+        }
       }
       Task { @MainActor in
         self.currentDB = db
+        self.spectralScore = features.spectralScore
       }
     }
 
     try engine.start()
     audioEngine = engine
+    soundAnalyzer.startAnalyzing(format: format)
     isRecording = true
   }
 
   public func stopRecording() {
+    soundAnalyzer.stopAnalyzing()
     audioEngine?.stop()
     audioEngine?.inputNode.removeTap(onBus: 0)
     audioEngine = nil
     audioFile = nil
+    cumulativeFramePosition = 0
     isRecording = false
     currentDB = -160.0
+    spectralScore = 0
 
     try? AVAudioSession.sharedInstance().setActive(false)
   }

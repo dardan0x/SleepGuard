@@ -61,7 +61,17 @@ struct BedsideClockView: View {
         if newSecond != oldSecond {
           currentTime = now
         }
-        sessionManager.processAudioLevel(db: audioRecorder.currentDB)
+        let saConf = SoundAnalysisDetector.shared.snoreConfidence
+        #if DEBUG
+        if saConf > 0.1 {
+          print("[BedsideClockView] passing db=\(String(format: "%.1f", audioRecorder.currentDB)) snoreConf=\(String(format: "%.3f", saConf))")
+        }
+        #endif
+        sessionManager.processAudioLevel(
+          db: audioRecorder.currentDB,
+          spectralScore: audioRecorder.spectralScore,
+          snoreConfidence: saConf
+        )
 
         if AlarmManager.shared.evaluate(currentTime: now, snoringState: sessionManager.currentSnoringState) {
           showAlarmOverlay = true
@@ -152,10 +162,8 @@ struct BedsideClockView: View {
           .foregroundStyle(snoringColor)
       }
 
-      Text(String(format: "%.0f dB · ambient", audioRecorder.currentDB))
-        .font(.system(size: 20, weight: .regular, design: .rounded))
-        .foregroundStyle(theme.textTertiary)
-        .monospacedDigit()
+      // dB and confidence removed from active recording UI — values are
+      // negative during recording which is confusing to users.
     }
   }
 
@@ -233,4 +241,5 @@ struct BedsideClockView: View {
     case .loud: return "Loud snoring detected · just now"
     }
   }
+
 }

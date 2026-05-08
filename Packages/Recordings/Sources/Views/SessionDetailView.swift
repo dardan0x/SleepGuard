@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftData
 import AVFoundation
+import AudioEngine
 import Models
 import Env
 import DesignSystem
@@ -23,6 +24,9 @@ public struct SessionDetailView: View {
   // MARK: - Share
   @State private var isSharePresented = false
   @State private var shareItems: [Any] = []
+  @State private var showAllEvents = false
+
+
 
   public init(sessionID: UUID) {
     self.sessionID = sessionID
@@ -111,8 +115,8 @@ public struct SessionDetailView: View {
 
   private func setupAudioPlayer(for session: SleepSession) {
     guard let urlString = session.audioFileURL,
-          FileManager.default.fileExists(atPath: urlString) else { return }
-    let url = URL(fileURLWithPath: urlString)
+          let url = URL(string: urlString),
+          FileManager.default.fileExists(atPath: url.path) else { return }
     do {
       let player = try AVAudioPlayer(contentsOf: url)
       player.prepareToPlay()
@@ -191,13 +195,6 @@ public struct SessionDetailView: View {
           theme: theme,
           iconColor: theme.scoreAmber
         )
-        StatCard(
-          icon: "speaker.wave.3.fill",
-          title: "Peak",
-          value: String(format: "%.0fdB", session.peakDB),
-          theme: theme,
-          iconColor: theme.accent
-        )
       }
     }
   }
@@ -237,7 +234,7 @@ public struct SessionDetailView: View {
         .tracking(1)
 
       VStack(spacing: 8) {
-        ForEach(events.prefix(4), id: \.id) { event in
+        ForEach(showAllEvents ? events : Array(events.prefix(4)), id: \.id) { event in
           EventRow(
             event: event,
             theme: theme,
@@ -255,9 +252,11 @@ public struct SessionDetailView: View {
 
       if events.count > 4 {
         Button {
-          // Show all events
+          withAnimation(.easeInOut(duration: 0.2)) {
+            showAllEvents.toggle()
+          }
         } label: {
-          Text("Show all \(events.count)")
+          Text(showAllEvents ? "Show less" : "Show all \(events.count)")
             .font(.system(size: 15, weight: .medium))
             .foregroundStyle(theme.accent)
         }
@@ -401,15 +400,16 @@ public struct SessionDetailView: View {
 
   private func shareFullSession(session: SleepSession) {
     guard let urlString = session.audioFileURL,
-          FileManager.default.fileExists(atPath: urlString) else { return }
-    shareItems = [URL(fileURLWithPath: urlString)]
+          let url = URL(string: urlString),
+          FileManager.default.fileExists(atPath: url.path) else { return }
+    shareItems = [url]
     isSharePresented = true
   }
 
   private func exportAndShare(event: SnoreEvent, in session: SleepSession) async {
     guard let urlString = session.audioFileURL,
-          FileManager.default.fileExists(atPath: urlString) else { return }
-    let sourceURL = URL(fileURLWithPath: urlString)
+          let sourceURL = URL(string: urlString),
+          FileManager.default.fileExists(atPath: sourceURL.path) else { return }
 
     let asset = AVURLAsset(url: sourceURL)
     guard let exportSession = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetAppleM4A) else { return }

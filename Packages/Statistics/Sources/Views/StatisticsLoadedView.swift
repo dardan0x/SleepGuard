@@ -1,4 +1,5 @@
 import SwiftUI
+import AudioEngine
 import Env
 import Models
 import DesignSystem
@@ -6,6 +7,8 @@ import DesignSystem
 @MainActor
 struct StatisticsLoadedView: View {
   let session: SleepSession
+  let dayScore: Int
+  let daySessionCount: Int
   let recentSessions: [SleepSession]
   let theme: Theme
   let onStartRecording: () -> Void
@@ -22,10 +25,10 @@ struct StatisticsLoadedView: View {
         VStack(spacing: 16) {
           weekSelector
 
-          SleepScoreGauge(score: session.sleepScore, theme: theme, size: 90)
+          SleepScoreGauge(score: dayScore, theme: theme, size: 90)
 
           VStack(spacing: 4) {
-            Text("LAST NIGHT")
+            Text(daySessionCount > 1 ? "\(daySessionCount) RECORDINGS" : "LAST NIGHT")
               .font(.system(size: 12, weight: .semibold))
               .foregroundStyle(theme.textTertiary)
               .tracking(1)
@@ -155,13 +158,6 @@ struct StatisticsLoadedView: View {
         theme: theme,
         iconColor: theme.scoreAmber
       )
-      StatCard(
-        icon: "speaker.wave.2.fill",
-        title: "Avg dB",
-        value: String(format: "%.0f dB", session.averageDB),
-        theme: theme,
-        iconColor: theme.accent
-      )
     }
   }
 
@@ -183,14 +179,25 @@ struct StatisticsLoadedView: View {
         }
       }
 
-      let data = recentSessions.reversed().enumerated().map { index, session in
+      // Group sessions by day and average scores so multiple recordings
+      // on the same night collapse to a single bar.
+      let calendar = Calendar.current
+      let grouped = Dictionary(grouping: recentSessions) {
+        calendar.startOfDay(for: $0.startDate)
+      }
+      let dayAverages = grouped.map { date, sessions in
+        let avg = sessions.map(\.sleepScore).reduce(0, +) / sessions.count
+        return (date: date, score: avg)
+      }.sorted { $0.date < $1.date }
+
+      let data = dayAverages.map { day in
         let formatter = DateFormatter()
         formatter.dateFormat = "E"
-        let label = formatter.string(from: session.startDate).prefix(1).uppercased()
+        let label = formatter.string(from: day.date).prefix(1).uppercased()
         return MiniBarChart.DataPoint(
           label: String(label),
-          value: Double(session.sleepScore),
-          color: theme.scoreColor(session.sleepScore)
+          value: Double(day.score),
+          color: theme.scoreColor(day.score)
         )
       }
 

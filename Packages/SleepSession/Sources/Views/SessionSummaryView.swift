@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import AudioEngine
 import Models
 import Env
 import DesignSystem
@@ -68,13 +69,6 @@ public struct SessionSummaryView: View {
         value: "\(session.eventsCount)",
         theme: theme,
         iconColor: theme.scoreAmber
-      )
-      StatCard(
-        icon: "speaker.wave.3.fill",
-        title: "Peak",
-        value: String(format: "%.0fdB", session.peakDB),
-        theme: theme,
-        iconColor: theme.accent
       )
     }
   }
