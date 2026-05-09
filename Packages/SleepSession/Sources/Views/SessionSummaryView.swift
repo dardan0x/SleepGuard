@@ -39,10 +39,10 @@ public struct SessionSummaryView: View {
       .padding(24)
     }
     .background(theme.bgSecondary.ignoresSafeArea())
-    .alert("Session Too Short", isPresented: $showShortSessionAlert) {
-      Button("OK", role: .cancel) { }
+    .alert(Strings.sessionSummaryTooShortTitle, isPresented: $showShortSessionAlert) {
+      Button(Strings.actionOk, role: .cancel) { }
     } message: {
-      Text("To generate meaningful sleep analysis, recordings must be at least \(Int(SleepSession.minimumSaveDuration / 60)) minutes long.")
+      Text(String(format: Strings.sessionSummaryTooShortInfoFormat, Int(SleepSession.minimumSaveDuration / 60)))
     }
     .alert("Save Failed", isPresented: $showSaveErrorAlert) {
       Button("OK", role: .cancel) { }
@@ -53,12 +53,12 @@ public struct SessionSummaryView: View {
 
   private var completionHeader: some View {
     VStack(spacing: 8) {
-      Text("SESSION COMPLETE")
+      Text(Strings.sessionSummaryTitle)
         .font(.system(size: 13, weight: .semibold))
         .foregroundStyle(theme.scoreGreen)
         .tracking(2)
 
-      Text("You slept \(durationString)")
+      Text(String(format: Strings.sessionSummaryYouSleptFormat, durationString))
         .font(.system(size: 28, weight: .bold))
         .foregroundStyle(theme.textPrimary)
     }
@@ -73,14 +73,14 @@ public struct SessionSummaryView: View {
     HStack(spacing: 12) {
       StatCard(
         icon: "percent",
-        title: "Snoring",
+        title: Strings.sessionSummaryStatSnoring,
         value: String(format: "%.0f%%", session.snoringPercentage),
         theme: theme,
         iconColor: theme.scoreAmber
       )
       StatCard(
         icon: "bolt.fill",
-        title: "Events",
+        title: Strings.recordingsDetailEventsLabel,
         value: "\(session.eventsCount)",
         theme: theme,
         iconColor: theme.scoreAmber
@@ -136,7 +136,7 @@ public struct SessionSummaryView: View {
         Button {
           saveSession()
         } label: {
-          Text("Save Session")
+          Text(Strings.actionSaveSession)
             .font(.system(size: 17, weight: .semibold))
             .foregroundStyle(.white)
             .frame(maxWidth: .infinity)
@@ -162,7 +162,7 @@ public struct SessionSummaryView: View {
       Button {
         discardSession()
       } label: {
-        Text("Discard")
+        Text(Strings.actionDiscard)
           .font(.system(size: 17, weight: .medium))
           .foregroundStyle(theme.textSecondary)
       }

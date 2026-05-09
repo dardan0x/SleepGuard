@@ -51,7 +51,7 @@ struct RecordingPrestartView: View {
                 Button {
                     routerPath.navigateBack()
                 } label: {
-                    Text("Cancel")
+                    Text(Strings.actionCancel)
                         .font(.system(size: 17, weight: .medium))
                         .foregroundStyle(theme.textSecondary)
                 }
@@ -77,12 +77,12 @@ struct RecordingPrestartView: View {
 
     private var headlineSection: some View {
         VStack(spacing: 8) {
-            Text("Ready to track your sleep?")
+            Text(Strings.statsEmptyTitle)
                 .font(.system(size: 28, weight: .bold))
                 .foregroundStyle(theme.textPrimary)
                 .multilineTextAlignment(.center)
 
-            Text("We'll listen for snoring through the night. Audio stays on your device.")
+            Text(Strings.sessionPrestartBody)
                 .font(.system(size: 16))
                 .foregroundStyle(theme.textSecondary)
                 .multilineTextAlignment(.center)
@@ -93,9 +93,9 @@ struct RecordingPrestartView: View {
 
     private var tipsSection: some View {
         VStack(spacing: 10) {
-            tipRow(icon: "iphone", text: "Place your phone on the nightstand")
-            tipRow(icon: "bolt.fill", text: "Keep it plugged in")
-            tipRow(icon: "bell.slash.fill", text: "Silence notifications")
+            tipRow(icon: "iphone", text: Strings.sessionPrestartTipPhone)
+            tipRow(icon: "bolt.fill", text: Strings.sessionPrestartTipPluggedIn)
+            tipRow(icon: "bell.slash.fill", text: Strings.sessionPrestartTipSilence)
         }
     }
 
@@ -120,7 +120,7 @@ struct RecordingPrestartView: View {
 
     private var delaySection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Start recording after")
+            Text(Strings.sessionPrestartDelayLabel)
                 .font(.system(size: 15, weight: .semibold))
                 .foregroundStyle(theme.textPrimary)
 
@@ -137,7 +137,7 @@ struct RecordingPrestartView: View {
 
     private func delayButton(minutes: Int) -> some View {
         let isSelected = userPreferences.recordingDelayMinutes == minutes
-        let label = minutes == 0 ? "Off" : (minutes == 60 ? "1h" : "\(minutes)m")
+        let label = minutes == 0 ? Strings.sessionPrestartDelayOff : (minutes == 60 ? "1h" : "\(minutes)m")
 
         return Button {
             withAnimation(.spring(duration: 0.25)) {
@@ -156,7 +156,7 @@ struct RecordingPrestartView: View {
     }
 
     private var helperText: some View {
-        Text("Use this if you need time to fall asleep before recording begins.")
+        Text(Strings.sessionPrestartDelayHelper)
             .font(.system(size: 14))
             .foregroundStyle(theme.textTertiary)
             .multilineTextAlignment(.center)

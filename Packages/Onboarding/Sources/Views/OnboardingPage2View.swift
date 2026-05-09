@@ -9,7 +9,7 @@ struct OnboardingPage2View: View {
     VStack(spacing: 24) {
       Spacer()
 
-      Text("Here's what we do\nwhile you snooze")
+      Text(Strings.onboardingPage2Title)
         .font(.system(size: 28, weight: .bold))
         .foregroundStyle(theme.textPrimary)
         .multilineTextAlignment(.center)
@@ -34,7 +34,7 @@ struct OnboardingPage2View: View {
 
       Spacer()
 
-      Button("Cool, what else?") {
+      Button(Strings.onboardingPage1Button) {
         onContinue()
       }
       .font(.system(size: 17, weight: .semibold))

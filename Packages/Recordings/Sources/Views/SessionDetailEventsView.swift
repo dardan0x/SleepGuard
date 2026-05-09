@@ -14,7 +14,7 @@ struct SessionDetailEventsView: View {
     let events = session.events?.sorted { $0.timestamp < $1.timestamp } ?? []
 
     VStack(alignment: .leading, spacing: 16) {
-      Text("EVENTS · \(events.count)")
+      Text(String(format: Strings.sessionRecordingEventsFormat, events.count))
         .font(.system(size: 12, weight: .semibold))
         .foregroundStyle(theme.textTertiary)
         .tracking(1)
@@ -36,7 +36,7 @@ struct SessionDetailEventsView: View {
             onToggleShowAll()
           }
         } label: {
-          Text(showAllEvents ? "Show less" : "Show all \(events.count)")
+          Text(showAllEvents ? Strings.recordingsDetailShowLess : String(format: Strings.recordingsDetailShowAllFormat, events.count))
             .font(.system(size: 15, weight: .medium))
             .foregroundStyle(theme.accent)
         }

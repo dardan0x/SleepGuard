@@ -9,7 +9,7 @@ struct StatisticsMiniChartSection: View {
   var body: some View {
     VStack(alignment: .leading, spacing: 16) {
       HStack {
-        Text("Last 7 Nights")
+        Text(Strings.statsTrendsLastSevenNights)
           .font(.system(size: 20, weight: .bold))
           .foregroundStyle(theme.textPrimary)
 
@@ -18,7 +18,7 @@ struct StatisticsMiniChartSection: View {
         Button {
           // See all
         } label: {
-          Text("See all")
+          Text(Strings.statsTrendsSeeAll)
             .font(.system(size: 14, weight: .medium))
             .foregroundStyle(theme.accent)
         }

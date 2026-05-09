@@ -50,7 +50,7 @@ public struct OnboardingView: View {
     HStack {
       Spacer()
       if currentPage < totalPages - 1 {
-        Button("Skip") {
+        Button(Strings.actionSkip) {
           withAnimation {
             currentPage = totalPages - 1
           }
@@ -67,7 +67,7 @@ public struct OnboardingView: View {
     VStack(spacing: 16) {
       progressDots
 
-      Button("Back") {
+      Button(Strings.actionBack) {
         withAnimation {
           currentPage -= 1
         }

@@ -66,7 +66,7 @@ public struct CalendarView: View {
           Image(systemName: "calendar")
             .font(.system(size: 14, weight: .medium))
             .foregroundStyle(theme.accent)
-          Text("Calendar")
+          Text(Strings.watchCalendar)
             .font(.system(size: 17, weight: .semibold))
             .foregroundStyle(theme.accent)
         }
@@ -84,7 +84,7 @@ public struct CalendarView: View {
             selectedDate = calendar.startOfDay(for: Date())
           }
         } label: {
-          Text("Today")
+          Text(Strings.statsMiniChartToday)
             .font(.system(size: 17, weight: .medium))
             .foregroundStyle(theme.accent)
         }

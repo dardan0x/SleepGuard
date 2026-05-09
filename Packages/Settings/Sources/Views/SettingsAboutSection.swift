@@ -13,11 +13,11 @@ struct SettingsAboutSection: View {
 
   var body: some View {
     VStack(alignment: .leading, spacing: 2) {
-      SettingsSectionTitle(text: "ABOUT")
+      SettingsSectionTitle(text: Strings.settingsSectionAbout)
       VStack(spacing: 16) {
         HStack(spacing: 10) {
           SettingsIconBackground(systemName: "info.circle.fill", color: Color(hex: "#7C7CFF"))
-          Text("Version")
+          Text(Strings.settingsVersion)
             .font(.system(size: 15))
             .foregroundStyle(theme.textPrimary)
           Spacer()
@@ -31,7 +31,7 @@ struct SettingsAboutSection: View {
         } label: {
           HStack(spacing: 10) {
             SettingsIconBackground(systemName: "star.fill", color: Color(hex: "#FF9F0A"))
-            Text("Rate on App Store")
+            Text(Strings.settingsRateApp)
               .font(.system(size: 15))
               .foregroundStyle(theme.accent)
             Spacer()

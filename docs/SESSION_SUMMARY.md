@@ -1773,3 +1773,51 @@ append
 ### Open Questions
 - Should spectrum bars animate in real-time during playback?
 - Should `PlaybackSpectrumAnalyzer` (real-time FFT) replace static pre-computed bars?
+
+## 2026-05-09 — Session 35: Localization Infrastructure — Semantic Key Migration
+
+### Completed
+- Migrated `Localizable.xcstrings` from raw English text keys to semantic dot-notation keys (132 entries)
+- Updated `scripts/generate-strings.py` with camelCase boundary splitting for clean identifier generation
+- Fixed double-`Format` suffix bug when semantic keys already encode format status
+- Regenerated `Strings.swift` — all 132 constants now ≤40 chars (down from 12 previously over 40)
+- Updated 42 source files to use new semantic-based `Strings.*` constants
+- Verified zero `String(localized:` calls remain outside `Strings.swift`
+
+### Technical Details
+- Semantic key schema: `{feature}.{screen}.{element}` (e.g. `onboarding.page4.buttonPrimary`, `session.bedside.snoreLight`, `stats.trends.avgMinFormat`)
+- Generator now splits on camelCase boundaries via regex `(?<=[a-z])(?=[A-Z])` so `buttonPrimary` → `button` + `Primary` → `buttonPrimary` instead of `buttonprimary`
+- Generator skips auto-appending `Format` suffix if the resulting name already ends with `Format` (prevents `eventsCountUpperFormatFormat`)
+- Disambiguation logic from original generator preserved but no longer triggered since semantic keys are inherently unique
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/DesignSystem/Sources/Resources/Localizable.xcstrings` | +132/-132 | All 132 keys rewritten from raw English to semantic dot-notation |
+| `Packages/DesignSystem/Sources/Strings.swift` | +138/-138 | Regenerated with clean camelCase names from semantic keys |
+| `scripts/generate-strings.py` | +3/-1 | Added camelCase splitting; fixed double-Format suffix |
+| `SnoreGuard/MainTabView.swift` | +3/-3 | `tabMedia`, `tabSettings`, `tabStatistics` |
+| `Packages/Statistics/Sources/Views/*` | +40/-40 | 9 files: stats constants updated |
+| `Packages/Settings/Sources/Views/*` | +35/-35 | 7 files: settings constants updated |
+| `Packages/Recordings/Sources/Views/*` | +55/-55 | 9 files: recordings constants updated |
+| `Packages/SleepSession/Sources/Views/*` | +35/-35 | 6 files: session constants updated |
+| `Packages/Onboarding/Sources/Views/*` | +30/-30 | 6 files: onboarding constants updated |
+| `Packages/DesignSystem/Sources/Components/*` | +15/-15 | 5 files: design system constants updated |
+
+### Architecture Decisions
+- **Semantic keys are the single source of truth**: English copy lives in the `value` field; keys are stable identifiers. Changing copy no longer changes the key or the generated constant name.
+- **Flat `Strings` enum, not nested**: Despite dot-notation keys, the API remains `Strings.onboardingPage4ButtonPrimary` rather than `Strings.onboarding.page4.buttonPrimary`. This avoids deeply nested access while keeping keys organized.
+- **No manual name overrides**: The generator derives all names heuristically from semantic keys. Zero maintenance burden.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors across all packages + app target
+
+### Git Handoff
+- **Suggested branch**: `refactor/semantic-localization-keys`
+- **Suggested commit**: `Refactor — migrate xcstrings to semantic dot-notation keys`
+
+### Next Session
+- F13-T1: CloudKit Sync (only remaining backlog task)
+
+### Open Questions
+- Should we add a second language (e.g. Spanish or German) to validate the localization pipeline end-to-end?

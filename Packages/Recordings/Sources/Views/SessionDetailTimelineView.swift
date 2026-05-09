@@ -8,7 +8,7 @@ struct SessionDetailTimelineView: View {
 
   var body: some View {
     VStack(alignment: .leading, spacing: 12) {
-      Text("SNORING TIMELINE")
+      Text(Strings.recordingsDetailTimelineLabel)
         .font(.system(size: 12, weight: .semibold))
         .foregroundStyle(theme.textTertiary)
         .tracking(1)

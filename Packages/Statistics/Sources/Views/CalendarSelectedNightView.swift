@@ -11,7 +11,7 @@ struct CalendarSelectedNightView: View {
 
   var body: some View {
     VStack(alignment: .leading, spacing: 8) {
-      Text("SELECTED NIGHT")
+      Text(Strings.statsCalendarSelectedNightLabel)
         .font(.system(size: 11, weight: .semibold))
         .foregroundStyle(theme.textTertiary)
         .tracking(1)
@@ -51,9 +51,9 @@ struct CalendarSelectedNightView: View {
     if let events = session.events, !events.isEmpty {
       let loud = events.filter { $0.intensity == .loud }.count
       let light = events.filter { $0.intensity == .light }.count
-      if loud > 0 { intensity = "Loud snoring" }
-      else if light > 0 { intensity = "Light snoring" }
-      else { intensity = "Quiet" }
+      if loud > 0 { intensity = Strings.statsCalendarLegendLoud }
+      else if light > 0 { intensity = Strings.statsCalendarLegendLight }
+      else { intensity = Strings.statsCalendarIntensityQuiet }
     } else {
       intensity = "Quiet"
     }

@@ -52,12 +52,12 @@ struct OnboardingPage4View: View {
       }
 
       VStack(spacing: 12) {
-        Text("We need your\nmicrophone 🎙️")
+        Text(Strings.onboardingPage4Title)
           .font(.system(size: 28, weight: .bold))
           .foregroundStyle(theme.textPrimary)
           .multilineTextAlignment(.center)
 
-        Text("Only to detect snoring — we're not\neavesdropping on your midnight thoughts.")
+        Text(Strings.onboardingPage3Body)
           .font(.system(size: 15))
           .foregroundStyle(theme.textSecondary)
           .multilineTextAlignment(.center)
@@ -82,7 +82,7 @@ struct OnboardingPage4View: View {
               ProgressView()
                 .tint(.white)
             }
-            Text(showGranted ? "Microphone ready" : "Yes, listen to my snoring")
+            Text(showGranted ? Strings.onboardingPage4Badge : Strings.onboardingPage4ButtonPrimary)
               .font(.system(size: 17, weight: .semibold))
           }
           .foregroundStyle(.white)
@@ -93,7 +93,7 @@ struct OnboardingPage4View: View {
         }
         .disabled(isRequesting)
 
-        Button("I snore in private") {
+        Button(Strings.onboardingPage2Button) {
           onContinue()
         }
         .font(.system(size: 15, weight: .medium))

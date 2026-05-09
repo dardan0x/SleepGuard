@@ -11,11 +11,11 @@ struct SettingsDataSection: View {
 
   var body: some View {
     VStack(alignment: .leading, spacing: 2) {
-      SettingsSectionTitle(text: "DATA")
+      SettingsSectionTitle(text: Strings.settingsSectionData)
       VStack(spacing: 16) {
         HStack(spacing: 10) {
           SettingsIconBackground(systemName: "heart.fill", color: Color(hex: "#FF2D55"))
-          Text("Sync to Apple Health")
+          Text(Strings.settingsSyncHealth)
             .font(.system(size: 15))
             .foregroundStyle(theme.textPrimary)
           Spacer()
@@ -39,7 +39,7 @@ struct SettingsDataSection: View {
         } label: {
           HStack(spacing: 10) {
             SettingsIconBackground(systemName: "trash", color: theme.destructive)
-            Text("Delete All Recordings")
+            Text(Strings.settingsDeleteAll)
               .font(.system(size: 15, weight: .medium))
               .foregroundStyle(theme.destructive)
             Spacer()

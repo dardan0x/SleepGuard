@@ -12,7 +12,7 @@ struct BedsideClockWaveformView: View {
         Circle()
           .fill(theme.scoreGreen)
           .frame(width: 8, height: 8)
-        Text("Recording · \(durationString)")
+        Text(String(format: Strings.sessionRecordingStatusFormat, durationString))
           .font(.system(size: 16, weight: .medium))
           .foregroundStyle(theme.accent)
           .monospacedDigit()

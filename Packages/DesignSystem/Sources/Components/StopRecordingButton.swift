@@ -16,7 +16,7 @@ public struct StopRecordingButton: View {
           .fill(Color(hex: "#FF453A"))
           .frame(width: 12, height: 12)
 
-        Text("Stop Recording")
+        Text(Strings.sessionBedsideStopRecording)
           .font(.system(size: 17, weight: .semibold))
           .foregroundStyle(.white)
       }

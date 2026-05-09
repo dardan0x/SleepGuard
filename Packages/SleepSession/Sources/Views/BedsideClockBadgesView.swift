@@ -20,7 +20,7 @@ struct BedsideClockBadgesView: View {
       Circle()
         .fill(theme.scoreGreen)
         .frame(width: 8, height: 8)
-      Text("\(eventsCount) EVENTS")
+      Text(String(format: Strings.sessionRecordingEventsCountUpperFormat, eventsCount))
         .font(.system(size: 13, weight: .semibold))
         .foregroundStyle(theme.scoreGreen)
     }

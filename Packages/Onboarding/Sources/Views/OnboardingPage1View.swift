@@ -55,17 +55,17 @@ struct OnboardingPage1View: View {
       }
 
       VStack(spacing: 16) {
-        Text("Hey 🖐 Ready to\nspy on your sleep?")
+        Text(Strings.onboardingPage1Title)
           .font(.system(size: 28, weight: .bold))
           .foregroundStyle(theme.textPrimary)
           .multilineTextAlignment(.center)
 
-        Text("Don't worry — we're only listening for\nsnores, not secrets.")
+        Text(Strings.onboardingPage4Body)
           .font(.system(size: 15))
           .foregroundStyle(theme.textSecondary)
           .multilineTextAlignment(.center)
 
-        Text("Your snoring finally gets the attention it deserves.")
+        Text(Strings.onboardingPage1Subtitle)
           .font(.system(size: 13, weight: .medium))
           .foregroundStyle(theme.accent)
           .multilineTextAlignment(.center)
@@ -79,7 +79,7 @@ struct OnboardingPage1View: View {
 
       Spacer()
 
-      Button("Let's do this") {
+      Button(Strings.onboardingPage5Button) {
         onContinue()
       }
       .font(.system(size: 17, weight: .semibold))

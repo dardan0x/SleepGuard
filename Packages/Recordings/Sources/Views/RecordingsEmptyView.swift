@@ -12,11 +12,11 @@ struct RecordingsEmptyView: View {
         .font(.system(size: 48))
         .foregroundStyle(theme.textTertiary)
 
-      Text("No recordings yet")
+      Text(Strings.recordingsEmptyTitle)
         .font(.system(size: 20, weight: .semibold))
         .foregroundStyle(theme.textPrimary)
 
-      Text("Your sleep sessions will appear here after you start recording.")
+      Text(Strings.recordingsEmptyMessage)
         .font(.system(size: 15))
         .foregroundStyle(theme.textSecondary)
         .multilineTextAlignment(.center)

@@ -58,7 +58,7 @@ public struct RecordingsListView: View {
                 groupToDelete = group
                 showDeleteAlert = true
               } label: {
-                Label("Delete", systemImage: "trash")
+                Label(Strings.actionDelete, systemImage: "trash")
               }
             }
           }
@@ -75,13 +75,13 @@ public struct RecordingsListView: View {
     .listStyle(.plain)
     .scrollContentBackground(.hidden)
     .background(theme.bgSecondary)
-    .alert("Remove Recordings", isPresented: $showDeleteAlert, presenting: groupToDelete) { group in
-      Button("Remove", role: .destructive) {
+    .alert(Strings.recordingsDetailRemoveTitle, isPresented: $showDeleteAlert, presenting: groupToDelete) { group in
+      Button(Strings.actionRemove, role: .destructive) {
         deleteGroup(group)
       }
-      Button("Discard", role: .cancel) {}
+      Button(Strings.actionDiscard, role: .cancel) {}
     } message: { group in
-      Text("Remove \(group.recordingCount) recording\(group.recordingCount == 1 ? "" : "s") from this night?")
+      Text(String(format: Strings.recordingsDetailRemoveConfirmFormat, group.recordingCount))
     }
     .refreshable {
       // SwiftData @Query auto-updates; refreshable provides UX feedback

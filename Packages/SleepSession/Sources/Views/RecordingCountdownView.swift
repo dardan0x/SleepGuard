@@ -19,7 +19,7 @@ struct RecordingCountdownView: View {
             .font(.system(size: 56))
             .foregroundStyle(theme.accent)
 
-          Text("Recording starts in")
+          Text(Strings.sessionCountdownLabel)
             .font(.system(size: 20, weight: .medium))
             .foregroundStyle(theme.textSecondary)
 
@@ -35,7 +35,7 @@ struct RecordingCountdownView: View {
           Button {
             RecordingDelayManager.shared.cancel()
           } label: {
-            Text("Cancel")
+            Text(Strings.actionCancel)
               .font(.system(size: 17, weight: .semibold))
               .foregroundStyle(theme.textPrimary)
               .frame(maxWidth: .infinity)
@@ -52,7 +52,7 @@ struct RecordingCountdownView: View {
             RecordingDelayManager.shared.cancel()
             try? sessionManager.startSession()
           } label: {
-            Text("Start Now")
+            Text(Strings.actionStartNow)
               .font(.system(size: 17, weight: .semibold))
               .foregroundStyle(.white)
               .frame(maxWidth: .infinity)

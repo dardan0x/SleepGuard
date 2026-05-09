@@ -28,12 +28,12 @@ struct OnboardingPage3View: View {
       }
 
       VStack(spacing: 16) {
-        Text("We're not that\nkind of app")
+        Text(Strings.onboardingPage3Title)
           .font(.system(size: 28, weight: .bold))
           .foregroundStyle(theme.textPrimary)
           .multilineTextAlignment(.center)
 
-        Text("Everything is processed on your device.\nNo uploads. No weird cloud stuff.\nNo selling your snore drama.")
+        Text(Strings.onboardingPage5Body)
           .font(.system(size: 15))
           .foregroundStyle(theme.textSecondary)
           .multilineTextAlignment(.center)
@@ -43,7 +43,7 @@ struct OnboardingPage3View: View {
             .font(.system(size: 14))
             .foregroundStyle(theme.scoreGreen)
 
-          Text("Your secrets stay between you and your pillow")
+          Text(Strings.onboardingPage3Badge)
             .font(.system(size: 13, weight: .medium))
             .foregroundStyle(theme.scoreGreen)
         }
@@ -57,7 +57,7 @@ struct OnboardingPage3View: View {
 
       Spacer()
 
-      Button("I trust you") {
+      Button(Strings.onboardingPage3Button) {
         onContinue()
       }
       .font(.system(size: 17, weight: .semibold))

@@ -10,11 +10,11 @@ struct SettingsRecordingSection: View {
 
   var body: some View {
     VStack(alignment: .leading, spacing: 2) {
-      SettingsSectionTitle(text: "RECORDING")
+      SettingsSectionTitle(text: Strings.settingsSectionRecording)
       VStack(spacing: 16) {
         HStack(spacing: 10) {
           SettingsIconBackground(systemName: "doc.badge.plus", color: Color(hex: "#FF2D55"))
-          Text("Save audio clips")
+          Text(Strings.settingsSaveAudioClips)
             .font(.system(size: 15))
             .foregroundStyle(theme.textPrimary)
           Spacer()
@@ -31,11 +31,11 @@ struct SettingsRecordingSection: View {
         } label: {
           HStack(spacing: 10) {
             SettingsIconBackground(systemName: "scissors", color: theme.accent)
-            Text("Max clip length")
+            Text(Strings.settingsMaxClipLength)
               .font(.system(size: 15))
               .foregroundStyle(theme.textPrimary)
             Spacer()
-            Text("\(Int(userPreferences.maxClipLength))s")
+            Text("\(Int(userPreferences.maxClipLength)) \(Strings.settingsUnitSeconds)")
               .font(.system(size: 15))
               .foregroundStyle(theme.textTertiary)
             Image(systemName: "chevron.right")

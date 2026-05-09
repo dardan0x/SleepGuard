@@ -17,28 +17,28 @@ public struct SessionStatsGrid: View {
     LazyVGrid(columns: columns, spacing: 12) {
       StatCard(
         icon: "clock",
-        title: "Duration",
+        title: Strings.recordingsPlayerStatDuration,
         value: durationString(session.totalDuration),
         theme: theme,
         iconColor: theme.accent
       )
       StatCard(
         icon: "percent",
-        title: "Snoring",
+        title: Strings.sessionSummaryStatSnoring,
         value: String(format: "%.0f%%", session.snoringPercentage),
         theme: theme,
         iconColor: theme.scoreAmber
       )
       StatCard(
         icon: "waveform",
-        title: "Snore Time",
+        title: Strings.sessionSummaryStatSnoreTime,
         value: durationString(session.snoringDuration),
         theme: theme,
         iconColor: theme.scoreRed
       )
       StatCard(
         icon: "bolt.fill",
-        title: "Events",
+        title: Strings.recordingsDetailEventsLabel,
         value: "\(session.eventsCount)",
         theme: theme,
         iconColor: theme.scoreAmber

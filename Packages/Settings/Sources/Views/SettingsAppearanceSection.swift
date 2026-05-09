@@ -10,14 +10,14 @@ struct SettingsAppearanceSection: View {
 
   var body: some View {
     VStack(alignment: .leading, spacing: 2) {
-      SettingsSectionTitle(text: "APPEARANCE")
+      SettingsSectionTitle(text: Strings.settingsSectionAppearance)
       VStack(spacing: 16) {
         Button {
           onShowThemePicker()
         } label: {
           HStack(spacing: 10) {
             SettingsIconBackground(systemName: "paintpalette", color: theme.scoreGreen)
-            Text("Theme")
+            Text(Strings.settingsTheme)
               .font(.system(size: 15))
               .foregroundStyle(theme.textPrimary)
             Spacer()

@@ -37,7 +37,7 @@ struct SessionDetailAdvancedPlayerView: View {
       }
       .frame(height: 80)
 
-      Text("Tap waveform to seek")
+      Text(Strings.recordingsPlayerSeekHint)
         .font(.system(size: 11, weight: .medium))
         .foregroundStyle(theme.textTertiary)
     }
@@ -61,16 +61,16 @@ struct SessionDetailAdvancedPlayerView: View {
       .frame(height: 60)
 
       HStack {
-        Text("0 Hz")
+      Text(Strings.recordingsPlayerFreq0)
         Spacer()
-        Text("500 Hz")
+      Text(Strings.recordingsPlayerFreq500)
         Spacer()
-        Text("1 kHz")
+      Text(Strings.recordingsPlayerFreq1k)
       }
       .font(.system(size: 9, weight: .medium))
       .foregroundStyle(theme.textTertiary)
 
-      Text("Frequency Spectrum")
+      Text(Strings.recordingsPlayerSpectrumLabel)
         .font(.system(size: 11, weight: .medium))
         .foregroundStyle(theme.textTertiary)
     }
@@ -92,13 +92,13 @@ struct SessionDetailAdvancedPlayerView: View {
   private var statsSection: some View {
     VStack(spacing: 12) {
       HStack(spacing: 12) {
-        StatBox(title: "Duration", value: durationString(event.duration))
-        StatBox(title: "Dominant Freq", value: frequencyString(event.dominantFrequency))
+        StatBox(title: Strings.recordingsPlayerStatDuration, value: durationString(event.duration))
+        StatBox(title: Strings.recordingsPlayerStatDominantFreq, value: frequencyString(event.dominantFrequency))
       }
 
       HStack(spacing: 12) {
-        StatBox(title: "Spectral Centroid", value: frequencyString(event.spectralCentroid))
-        StatBox(title: "Low-Freq Ratio", value: String(format: "%.0f%%", event.lowFreqRatio * 100))
+        StatBox(title: Strings.recordingsPlayerStatSpectralCentroid, value: frequencyString(event.spectralCentroid))
+        StatBox(title: Strings.recordingsPlayerStatLowFreqRatio, value: String(format: "%.0f%%", event.lowFreqRatio * 100))
       }
     }
   }

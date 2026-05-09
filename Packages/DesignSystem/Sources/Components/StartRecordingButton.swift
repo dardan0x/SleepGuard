@@ -14,7 +14,7 @@ public struct StartRecordingButton: View {
       HStack(spacing: 12) {
         PulsingDot()
 
-        Text("Start Recording")
+        Text(Strings.actionStartRecording)
           .font(.system(size: 17, weight: .semibold))
           .foregroundStyle(.white)
 
