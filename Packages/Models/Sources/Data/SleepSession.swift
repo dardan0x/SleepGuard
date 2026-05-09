@@ -19,6 +19,8 @@ public final class SleepSession {
   @Relationship(deleteRule: .cascade, inverse: \SnoreEvent.session)
   public var events: [SnoreEvent]?
 
+  public static let minimumSaveDuration: TimeInterval = 600
+
   public init(
     id: UUID = UUID(),
     startDate: Date,

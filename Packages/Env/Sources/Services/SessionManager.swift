@@ -23,9 +23,12 @@ public final class SessionManager {
   // MARK: - Event tracking state
 
   private var activeEventStart: Date?
+  private var activeEventIntensity: SnoreIntensity?
   private var activeEventDBSum: Double = 0
   private var activeEventDBCount: Int = 0
   private var activeEventPeakDB: Double = 0
+  private var lastSnoringSampleTime: Date?
+  private let eventGapThreshold: TimeInterval = 3.0
 
   // MARK: - Session aggregate state
 
@@ -58,8 +61,8 @@ public final class SessionManager {
     isRecording = false
 
     // Finalize any in-progress snore event
-    if currentSnoringState != .none {
-      finalizeActiveEvent(intensity: intensity(from: currentSnoringState))
+    if activeEventStart != nil {
+      finalizeActiveEvent()
     }
 
     guard let session = currentSession else { return nil }
@@ -124,31 +127,45 @@ public final class SessionManager {
     }
     #endif
 
+    // Update display state immediately for UI responsiveness
+    currentSnoringState = state
+
     // Accumulate snoring duration
     if state != .none {
       sessionSnoringDuration += timeDelta
     }
 
-    // Handle state transitions
-    if state != .none && currentSnoringState == .none {
-      // Snoring started
-      activeEventStart = now
-      activeEventDBSum = Double(db)
-      activeEventDBCount = 1
-      activeEventPeakDB = Double(db)
-    } else if state != .none && currentSnoringState != .none {
-      // Snoring continues
-      activeEventDBSum += Double(db)
-      activeEventDBCount += 1
-      if Double(db) > activeEventPeakDB {
+    // Handle event tracking with debounce gap
+    if state != .none {
+      lastSnoringSampleTime = now
+      if activeEventStart == nil {
+        // Snoring started
+        activeEventStart = now
+        activeEventDBSum = Double(db)
+        activeEventDBCount = 1
         activeEventPeakDB = Double(db)
+        activeEventIntensity = intensity(from: state)
+      } else {
+        // Snoring continues
+        activeEventDBSum += Double(db)
+        activeEventDBCount += 1
+        if Double(db) > activeEventPeakDB {
+          activeEventPeakDB = Double(db)
+        }
+        // Upgrade intensity if current sample is louder
+        let currentIntensity = intensity(from: state)
+        if intensityRank(currentIntensity) > intensityRank(activeEventIntensity ?? .quiet) {
+          activeEventIntensity = currentIntensity
+        }
       }
-    } else if state == .none && currentSnoringState != .none {
-      // Snoring ended
-      finalizeActiveEvent(intensity: intensity(from: currentSnoringState))
+    } else {
+      // Only finalize if we've been silent long enough
+      if let lastSnore = lastSnoringSampleTime,
+         activeEventStart != nil,
+         now.timeIntervalSince(lastSnore) >= eventGapThreshold {
+        finalizeActiveEvent()
+      }
     }
-
-    currentSnoringState = state
 
     // Update session in-memory stats for real-time UI
     session.snoringDuration = sessionSnoringDuration
@@ -175,6 +192,7 @@ public final class SessionManager {
 
   private func resetTrackingState() {
     activeEventStart = nil
+    activeEventIntensity = nil
     activeEventDBSum = 0
     activeEventDBCount = 0
     activeEventPeakDB = 0
@@ -182,14 +200,16 @@ public final class SessionManager {
     totalDBCount = 0
     sessionSnoringDuration = 0
     lastUpdateTime = nil
+    lastSnoringSampleTime = nil
   }
 
-  private func finalizeActiveEvent(intensity: SnoreIntensity) {
+  private func finalizeActiveEvent() {
     guard let startTime = activeEventStart, let session = currentSession else { return }
     let duration = Date().timeIntervalSince(startTime)
     guard duration >= 0.5 else {
       // Too brief — discard
       activeEventStart = nil
+      activeEventIntensity = nil
       activeEventDBSum = 0
       activeEventDBCount = 0
       activeEventPeakDB = 0
@@ -199,7 +219,7 @@ public final class SessionManager {
     let event = SnoreEvent(
       timestamp: startTime,
       duration: duration,
-      intensity: intensity,
+      intensity: activeEventIntensity ?? .quiet,
       averageDB: activeEventDBCount > 0 ? activeEventDBSum / Double(activeEventDBCount) : 0,
       peakDB: activeEventPeakDB
     )
@@ -212,6 +232,7 @@ public final class SessionManager {
     eventsCount = session.events?.count ?? 0
 
     activeEventStart = nil
+    activeEventIntensity = nil
     activeEventDBSum = 0
     activeEventDBCount = 0
     activeEventPeakDB = 0
@@ -229,6 +250,14 @@ public final class SessionManager {
     case .light: return .light
     case .loud: return .loud
     case .none: return .quiet
+    }
+  }
+
+  private func intensityRank(_ intensity: SnoreIntensity) -> Int {
+    switch intensity {
+    case .quiet: return 0
+    case .light: return 1
+    case .loud: return 2
     }
   }
 }
