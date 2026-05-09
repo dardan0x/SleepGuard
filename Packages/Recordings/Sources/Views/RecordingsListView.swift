@@ -104,6 +104,11 @@ public struct RecordingsListView: View {
     for session in group.sessions {
       modelContext.delete(session)
     }
+    do {
+      try modelContext.save()
+    } catch {
+      // Deletion failed; UI will revert on next @Query update
+    }
     groupToDelete = nil
   }
 

@@ -100,9 +100,12 @@ public final class SessionManager {
           event.lowFreqRatio = result.lowFreqRatio
         }
       }
-      // Delete full session file after successful extraction
-      try? FileManager.default.removeItem(at: sessionURL)
-      session.audioFileURL = nil
+      // Only delete full session file if at least one clip was extracted;
+      // otherwise keep the original recording as fallback.
+      if !results.isEmpty {
+        try? FileManager.default.removeItem(at: sessionURL)
+        session.audioFileURL = nil
+      }
     }
 
     let result = session

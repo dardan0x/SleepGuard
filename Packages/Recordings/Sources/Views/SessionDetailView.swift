@@ -350,12 +350,28 @@ public struct SessionDetailView: View {
         predicate: #Predicate { $0.id == sessionID }
       )
       if let session = try modelContext.fetch(descriptor).first {
+        diagnoseAudioFiles(for: session)
         viewState = .loaded(session: session)
       } else {
         viewState = .error
       }
     } catch {
       viewState = .error
+    }
+  }
+
+  private func diagnoseAudioFiles(for session: SleepSession) {
+    let eventCount = session.events?.count ?? 0
+    let clipsFound = session.events?.filter {
+      AudioFileURLResolver.resolve($0.audioFileURL) != nil
+    }.count ?? 0
+    let legacyURL = AudioFileURLResolver.resolve(session.audioFileURL)
+    print("[SessionDetailView] Session \(session.id.uuidString.prefix(8)) — Events: \(eventCount), Clips found: \(clipsFound), Legacy audio: \(legacyURL != nil)")
+    if let events = session.events {
+      for event in events {
+        let exists = AudioFileURLResolver.resolve(event.audioFileURL) != nil
+        print("[SessionDetailView]   Event \(event.id.uuidString.prefix(8)) — file: \(event.audioFileURL ?? "nil") — exists: \(exists)")
+      }
     }
   }
 
