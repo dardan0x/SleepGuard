@@ -15,6 +15,9 @@ public final class SnoreEvent {
   public var intensity: SnoreIntensity
   public var averageDB: Double
   public var peakDB: Double
+  public var dominantFrequency: Double
+  public var spectralCentroid: Double
+  public var lowFreqRatio: Double
   public var audioFileURL: String?
 
   public var session: SleepSession?
@@ -26,6 +29,9 @@ public final class SnoreEvent {
     intensity: SnoreIntensity,
     averageDB: Double,
     peakDB: Double,
+    dominantFrequency: Double = 0,
+    spectralCentroid: Double = 0,
+    lowFreqRatio: Double = 0,
     audioFileURL: String? = nil
   ) {
     self.id = id
@@ -34,6 +40,9 @@ public final class SnoreEvent {
     self.intensity = intensity
     self.averageDB = averageDB
     self.peakDB = peakDB
+    self.dominantFrequency = dominantFrequency
+    self.spectralCentroid = spectralCentroid
+    self.lowFreqRatio = lowFreqRatio
     self.audioFileURL = audioFileURL
   }
 }

@@ -51,7 +51,9 @@ struct BedsideClockView: View {
              session.totalDuration < SleepSession.minimumSaveDuration {
             showShortSessionAlert = true
           } else {
-            _ = sessionManager.stopSession()
+            Task {
+              _ = await sessionManager.stopSession()
+            }
           }
         }
         .padding(.horizontal, 24)
@@ -60,7 +62,9 @@ struct BedsideClockView: View {
       .alert("Session Too Short", isPresented: $showShortSessionAlert) {
         Button("Keep Recording", role: .cancel) { }
         Button("Stop Anyway") {
-          _ = sessionManager.stopSession()
+          Task {
+            _ = await sessionManager.stopSession()
+          }
         }
       } message: {
         Text("Recordings under \(Int(SleepSession.minimumSaveDuration / 60)) minutes can't be saved. Are you sure you want to stop?")

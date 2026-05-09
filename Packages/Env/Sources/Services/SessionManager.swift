@@ -46,7 +46,7 @@ public final class SessionManager {
 
     let session = SleepSession(startDate: Date())
     let audioURL = audioFileURL(for: session.id)
-    session.audioFileURL = audioURL.absoluteString
+    session.audioFileURL = AudioFileURLResolver.filename(from: audioURL)
     currentSession = session
 
     try audioRecorder.startRecording(audioFileURL: audioURL)
@@ -56,13 +56,13 @@ public final class SessionManager {
     eventsCount = 0
   }
 
-  public func stopSession() -> SleepSession? {
+  public func stopSession() async -> SleepSession? {
     audioRecorder.stopRecording()
     isRecording = false
 
-    // Finalize any in-progress snore event
+    // Finalize any in-progress snore event (include trailing gap since user stopped mid-session)
     if activeEventStart != nil {
-      finalizeActiveEvent()
+      finalizeActiveEvent(includeGap: true)
     }
 
     guard let session = currentSession else { return nil }
@@ -80,6 +80,31 @@ public final class SessionManager {
     session.sleepScore = computeSleepScore(session: session)
     eventsCount = session.eventsCount
 
+    // Extract per-event clips and spectral features, then delete full session
+    if let events = session.events, !events.isEmpty,
+       let sessionURL = AudioFileURLResolver.resolve(session.audioFileURL) {
+      let docs = FileManager.default
+        .urls(for: .documentDirectory, in: .userDomainMask)[0]
+      let results = await AudioClipExtractor.extractClips(
+        from: sessionURL,
+        events: events,
+        sessionStart: session.startDate,
+        padding: 0.0,
+        outputDirectory: docs
+      )
+      for result in results {
+        if let event = events.first(where: { $0.id == result.eventID }) {
+          event.audioFileURL = AudioFileURLResolver.filename(from: result.clipURL)
+          event.dominantFrequency = result.dominantFrequency
+          event.spectralCentroid = result.spectralCentroid
+          event.lowFreqRatio = result.lowFreqRatio
+        }
+      }
+      // Delete full session file after successful extraction
+      try? FileManager.default.removeItem(at: sessionURL)
+      session.audioFileURL = nil
+    }
+
     let result = session
     completedSession = result
     currentSession = nil
@@ -88,8 +113,16 @@ public final class SessionManager {
   }
 
   public func discardCompletedSession() {
-    if let urlString = completedSession?.audioFileURL,
-       let url = URL(string: urlString) {
+    // Delete event clips
+    if let events = completedSession?.events {
+      for event in events {
+        if let url = AudioFileURLResolver.resolve(event.audioFileURL) {
+          try? FileManager.default.removeItem(at: url)
+        }
+      }
+    }
+    // Delete legacy full session file if present
+    if let url = AudioFileURLResolver.resolve(completedSession?.audioFileURL) {
       try? FileManager.default.removeItem(at: url)
     }
     completedSession = nil
@@ -203,9 +236,10 @@ public final class SessionManager {
     lastSnoringSampleTime = nil
   }
 
-  private func finalizeActiveEvent() {
+  private func finalizeActiveEvent(includeGap: Bool = true) {
     guard let startTime = activeEventStart, let session = currentSession else { return }
-    let duration = Date().timeIntervalSince(startTime)
+    let endTime = includeGap ? Date() : (lastSnoringSampleTime ?? Date())
+    let duration = endTime.timeIntervalSince(startTime)
     guard duration >= 0.5 else {
       // Too brief — discard
       activeEventStart = nil

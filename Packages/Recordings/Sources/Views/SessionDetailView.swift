@@ -16,10 +16,16 @@ public struct SessionDetailView: View {
 
   @State private var viewState: ViewState = .loading
 
-  // MARK: - Audio Playback
+  // MARK: - Legacy Audio Playback (full-session files)
   @State private var audioPlayer: AVAudioPlayer?
   @State private var isPlaying = false
   @State private var currentPlaybackTime: TimeInterval = 0
+
+  // MARK: - Clip Audio Playback (per-event clips)
+  @State private var playbackController = ClipPlaybackController()
+  @State private var isPlayerExpanded = false
+  @State private var waveformSamples: [Float] = []
+  @State private var spectrumBars: [Float] = []
 
   // MARK: - Share
   @State private var isSharePresented = false
@@ -48,7 +54,10 @@ public struct SessionDetailView: View {
   }
 
   private func loadedBody(session: SleepSession) -> some View {
-    ScrollView {
+    let sortedEvents = session.events?.sorted(by: { $0.timestamp < $1.timestamp }) ?? []
+    let isClipSession = sortedEvents.contains(where: { AudioFileURLResolver.resolve($0.audioFileURL) != nil })
+
+    return ScrollView {
       VStack(spacing: 24) {
         SessionDetailHeaderView(session: session)
 
@@ -58,23 +67,28 @@ public struct SessionDetailView: View {
           session: session,
           showAllEvents: showAllEvents,
           onToggleShowAll: { showAllEvents.toggle() },
-          onPlayEvent: { event in seekToEvent(event, in: session) },
+          onPlayEvent: { event in
+            if isClipSession {
+              playClipEvent(event, in: sortedEvents)
+            } else {
+              seekToLegacyEvent(event, in: session)
+            }
+          },
           onShareEvent: { event in
-            Task {
-              await exportAndShare(event: event, in: session)
+            if isClipSession, let url = AudioFileURLResolver.resolve(event.audioFileURL) {
+              shareEventClip(url: url)
+            } else {
+              Task {
+                await exportAndShare(event: event, in: session)
+              }
             }
           }
         )
 
-        if session.audioFileURL != nil {
-          SessionDetailMiniPlayerView(
-            session: session,
-            isPlaying: isPlaying,
-            progress: audioProgress,
-            totalDuration: audioPlayer?.duration ?? session.totalDuration,
-            onTogglePlayback: togglePlayback,
-            onScrub: { relative in scrubTo(relative: relative, in: session) }
-          )
+        if isClipSession {
+          clipPlayerSection(session: session, sortedEvents: sortedEvents)
+        } else if session.audioFileURL != nil {
+          legacyPlayerSection(session: session)
         }
       }
       .padding(20)
@@ -96,7 +110,7 @@ public struct SessionDetailView: View {
               .font(.system(size: 17))
               .foregroundStyle(theme.accent)
           }
-          if session.audioFileURL != nil {
+          if !isClipSession, session.audioFileURL != nil {
             Button {
               shareFullSession(session: session)
             } label: {
@@ -116,17 +130,103 @@ public struct SessionDetailView: View {
       }
     }
     .task {
-      setupAudioPlayer(for: session)
+      if isClipSession {
+        setupClipPlayback(events: sortedEvents)
+      } else {
+        setupAudioPlayer(for: session)
+      }
     }
     .task(id: isPlaying) {
-      await trackPlaybackProgress()
+      if !isClipSession {
+        await trackLegacyPlaybackProgress()
+      }
     }
     .sheet(isPresented: $isSharePresented) {
       ActivityView(activityItems: shareItems)
     }
   }
 
-  // MARK: - Audio Playback Controls
+  // MARK: - Clip Playback Section
+
+  private func clipPlayerSection(session: SleepSession, sortedEvents: [SnoreEvent]) -> some View {
+    VStack(spacing: 12) {
+      SessionDetailMiniPlayerView(
+        session: session,
+        isPlaying: playbackController.isPlaying,
+        progress: clipProgress,
+        totalDuration: playbackController.totalClipsDuration,
+        isExpandable: true,
+        onTogglePlayback: { playbackController.togglePlayback() },
+        onScrub: { relative in playbackController.seek(to: relative) },
+        onExpand: { isPlayerExpanded.toggle() }
+      )
+
+      if isPlayerExpanded, let currentEvent = currentClipEvent(in: sortedEvents) {
+        SessionDetailAdvancedPlayerView(
+          event: currentEvent,
+          waveformSamples: waveformSamples,
+          spectrumBars: spectrumBars,
+          onWaveformTap: { relative in
+            playbackController.seekInCurrentClip(relative: relative)
+          }
+        )
+        .transition(.move(edge: .bottom).combined(with: .opacity))
+      }
+    }
+  }
+
+  private var clipProgress: Double {
+    let total = playbackController.totalClipsDuration
+    return total > 0 ? playbackController.currentTime / total : 0
+  }
+
+  private func currentClipEvent(in events: [SnoreEvent]) -> SnoreEvent? {
+    let index = playbackController.currentEventIndex
+    guard index >= 0, index < events.count else { return nil }
+    return events[index]
+  }
+
+  private func setupClipPlayback(events: [SnoreEvent]) {
+    playbackController.loadEvents(events)
+    loadVisualization(for: events.first)
+  }
+
+  private func playClipEvent(_ event: SnoreEvent, in events: [SnoreEvent]) {
+    guard let index = events.firstIndex(where: { $0.id == event.id }) else { return }
+    playbackController.playEvent(at: index)
+    loadVisualization(for: event)
+  }
+
+  private func loadVisualization(for event: SnoreEvent?) {
+    guard let event, let url = AudioFileURLResolver.resolve(event.audioFileURL) else {
+      waveformSamples = []
+      spectrumBars = []
+      return
+    }
+    Task {
+      let samples = WaveformGenerator.generateSamples(from: url)
+      let bars = WaveformGenerator.spectrumSamples(from: url)
+      await MainActor.run {
+        waveformSamples = samples
+        spectrumBars = bars
+      }
+    }
+  }
+
+  // MARK: - Legacy Playback Section
+
+  private func legacyPlayerSection(session: SleepSession) -> some View {
+    SessionDetailMiniPlayerView(
+      session: session,
+      isPlaying: isPlaying,
+      progress: audioProgress,
+      totalDuration: audioPlayer?.duration ?? session.totalDuration,
+      isExpandable: false,
+      onTogglePlayback: toggleLegacyPlayback,
+      onScrub: { relative in scrubLegacyTo(relative: relative) },
+      onExpand: {}
+    )
+  }
 
   private var audioProgress: Double {
     let total = audioPlayer?.duration ?? 0
@@ -134,9 +234,7 @@ public struct SessionDetailView: View {
   }
 
   private func setupAudioPlayer(for session: SleepSession) {
-    guard let urlString = session.audioFileURL,
-          let url = URL(string: urlString),
-          FileManager.default.fileExists(atPath: url.path) else { return }
+    guard let url = AudioFileURLResolver.resolve(session.audioFileURL) else { return }
     do {
       let player = try AVAudioPlayer(contentsOf: url)
       player.prepareToPlay()
@@ -146,7 +244,7 @@ public struct SessionDetailView: View {
     }
   }
 
-  private func trackPlaybackProgress() async {
+  private func trackLegacyPlaybackProgress() async {
     guard isPlaying else { return }
     while !Task.isCancelled {
       try? await Task.sleep(for: .milliseconds(100))
@@ -159,18 +257,24 @@ public struct SessionDetailView: View {
     }
   }
 
-  private func togglePlayback() {
+  private func toggleLegacyPlayback() {
     guard let player = audioPlayer else { return }
     if player.isPlaying {
       player.pause()
       isPlaying = false
     } else {
+      do {
+        try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
+        try AVAudioSession.sharedInstance().setActive(true)
+      } catch {
+        // Continue anyway; playback may still work
+      }
       player.play()
       isPlaying = true
     }
   }
 
-  private func seekToEvent(_ event: SnoreEvent, in session: SleepSession) {
+  private func seekToLegacyEvent(_ event: SnoreEvent, in session: SleepSession) {
     guard let player = audioPlayer else { return }
     let eventTime = event.timestamp.timeIntervalSince(session.startDate)
     player.currentTime = max(0, min(eventTime, player.duration))
@@ -180,76 +284,30 @@ public struct SessionDetailView: View {
     }
   }
 
-  private func scrubTo(relative: Double, in session: SleepSession) {
+  private func scrubLegacyTo(relative: Double) {
     guard let player = audioPlayer else { return }
     let time = relative * player.duration
     player.currentTime = max(0, min(time, player.duration))
     currentPlaybackTime = player.currentTime
   }
 
-  private var errorBody: some View {
-    VStack(spacing: 16) {
-      Image(systemName: "exclamationmark.triangle")
-        .font(.system(size: 48))
-        .foregroundStyle(theme.textTertiary)
+  // MARK: - Share
 
-      Text("Unable to load session")
-        .font(.headline)
-        .foregroundStyle(theme.textPrimary)
-    }
-  }
-
-  // MARK: - Data Loading
-
-  private func loadSession() async {
-    do {
-      let descriptor = FetchDescriptor<SleepSession>(
-        predicate: #Predicate { $0.id == sessionID }
-      )
-      if let session = try modelContext.fetch(descriptor).first {
-        viewState = .loaded(session: session)
-      } else {
-        viewState = .error
-      }
-    } catch {
-      viewState = .error
-    }
-  }
-
-  // MARK: - Formatting
-
-  private func navigationTitle(for date: Date) -> String {
-    DateFormatters.dayOfWeekAndDate.string(from: date)
-  }
-
-  private func exportReport(session: SleepSession) {
-    Task {
-      if let url = SleepReportPDFGenerator().generatePDF(for: session) {
-        shareItems = [url]
-        isSharePresented = true
-      }
-    }
-  }
-
-  private func shareFullSession(session: SleepSession) {
-    guard let urlString = session.audioFileURL,
-          let url = URL(string: urlString),
-          FileManager.default.fileExists(atPath: url.path) else { return }
+  private func shareEventClip(url: URL) {
+    guard FileManager.default.fileExists(atPath: url.path) else { return }
     shareItems = [url]
     isSharePresented = true
   }
 
   private func exportAndShare(event: SnoreEvent, in session: SleepSession) async {
-    guard let urlString = session.audioFileURL,
-          let sourceURL = URL(string: urlString),
-          FileManager.default.fileExists(atPath: sourceURL.path) else { return }
+    guard let sourceURL = AudioFileURLResolver.resolve(session.audioFileURL) else { return }
 
     let asset = AVURLAsset(url: sourceURL)
     guard let exportSession = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetAppleM4A) else { return }
 
     let eventTime = event.timestamp.timeIntervalSince(session.startDate)
-    let startTime = max(0, eventTime - 2)
-    let endTime = min(asset.duration.seconds, eventTime + event.duration + 2)
+    let startTime = max(0, eventTime)
+    let endTime = min(asset.duration.seconds, eventTime + event.duration)
     guard endTime > startTime else { return }
 
     exportSession.timeRange = CMTimeRange(
@@ -269,6 +327,54 @@ public struct SessionDetailView: View {
     guard exportSession.status == .completed else { return }
 
     shareItems = [clipURL]
+    isSharePresented = true
+  }
+
+  // MARK: - Data & Actions
+
+  private var errorBody: some View {
+    VStack(spacing: 16) {
+      Image(systemName: "exclamationmark.triangle")
+        .font(.system(size: 48))
+        .foregroundStyle(theme.textTertiary)
+
+      Text("Unable to load session")
+        .font(.headline)
+        .foregroundStyle(theme.textPrimary)
+    }
+  }
+
+  private func loadSession() async {
+    do {
+      let descriptor = FetchDescriptor<SleepSession>(
+        predicate: #Predicate { $0.id == sessionID }
+      )
+      if let session = try modelContext.fetch(descriptor).first {
+        viewState = .loaded(session: session)
+      } else {
+        viewState = .error
+      }
+    } catch {
+      viewState = .error
+    }
+  }
+
+  private func navigationTitle(for date: Date) -> String {
+    DateFormatters.dayOfWeekAndDate.string(from: date)
+  }
+
+  private func exportReport(session: SleepSession) {
+    Task {
+      if let url = SleepReportPDFGenerator().generatePDF(for: session) {
+        shareItems = [url]
+        isSharePresented = true
+      }
+    }
+  }
+
+  private func shareFullSession(session: SleepSession) {
+    guard let url = AudioFileURLResolver.resolve(session.audioFileURL) else { return }
+    shareItems = [url]
     isSharePresented = true
   }
 

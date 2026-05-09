@@ -7,8 +7,10 @@ struct SessionDetailMiniPlayerView: View {
   let isPlaying: Bool
   let progress: Double
   let totalDuration: TimeInterval
+  let isExpandable: Bool
   let onTogglePlayback: () -> Void
   let onScrub: (Double) -> Void
+  let onExpand: () -> Void
   @Environment(Theme.self) private var theme
 
   var body: some View {
@@ -63,6 +65,24 @@ struct SessionDetailMiniPlayerView: View {
           .font(.system(size: 11, weight: .medium, design: .monospaced))
           .foregroundStyle(theme.textTertiary)
           .monospacedDigit()
+
+        if isExpandable {
+          Button {
+            onExpand()
+          } label: {
+            HStack(spacing: 4) {
+              Image(systemName: "waveform")
+                .font(.system(size: 12, weight: .semibold))
+              Text("Details")
+                .font(.system(size: 11, weight: .semibold))
+            }
+            .foregroundStyle(theme.accent)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(theme.accent.opacity(0.15))
+            .cornerRadius(theme.radiusSmall)
+          }
+        }
       }
     }
     .padding(.horizontal, 12)
