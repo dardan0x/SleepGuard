@@ -44,27 +44,27 @@ public struct SettingsView: View {
     .scrollContentBackground(.hidden)
     #endif
     .toolbar(.hidden, for: .navigationBar)
-    .confirmationDialog("Choose Theme", isPresented: $showThemePicker, titleVisibility: .visible) {
+    .confirmationDialog(Strings.settingsThemeChoose, isPresented: $showThemePicker, titleVisibility: .visible) {
       ForEach(UserPreferences.AppearanceSetting.allCases, id: \.self) { option in
         Button(option.displayName) {
           userPreferences.appearance = option
         }
       }
     }
-    .confirmationDialog("Max Clip Length", isPresented: $showClipLengthPicker, titleVisibility: .visible) {
+    .confirmationDialog(Strings.settingsMaxClipLengthTitle, isPresented: $showClipLengthPicker, titleVisibility: .visible) {
       ForEach([15.0, 30.0, 60.0], id: \.self) { length in
-        Button("\(Int(length))s") {
+        Button(String(format: "%lld %@", Int(length), Strings.settingsUnitSeconds)) {
           userPreferences.maxClipLength = length
         }
       }
     }
-    .alert("Delete All Recordings?", isPresented: $showDeleteConfirmation) {
-      Button("Cancel", role: .cancel) {}
-      Button("Delete All", role: .destructive) {
+    .alert(Strings.settingsDeleteAll, isPresented: $showDeleteConfirmation) {
+      Button(Strings.actionCancel, role: .cancel) {}
+      Button(Strings.actionDeleteAll, role: .destructive) {
         deleteAllData()
       }
     } message: {
-      Text("This will permanently delete all sleep sessions and snore events. This action cannot be undone.")
+      Text(Strings.settingsDeleteAllConfirmMessage)
     }
   }
 
@@ -72,7 +72,7 @@ public struct SettingsView: View {
 
   private var titleRow: some View {
     HStack {
-      Text("Settings")
+      Text(Strings.tabSettings)
         .font(.system(size: 28, weight: .bold))
         .foregroundStyle(theme.textPrimary)
       Spacer()
@@ -113,9 +113,9 @@ public struct SettingsView: View {
 extension UserPreferences.DetectionSensitivity {
   var displayName: String {
     switch self {
-    case .low: "Low"
-    case .medium: "Medium"
-    case .high: "High"
+    case .low: Strings.settingsSensitivityLow
+    case .medium: Strings.settingsSensitivityMedium
+    case .high: Strings.settingsSensitivityHigh
     }
   }
 }
@@ -123,9 +123,9 @@ extension UserPreferences.DetectionSensitivity {
 extension UserPreferences.AppearanceSetting {
   var displayName: String {
     switch self {
-    case .light: "Light"
-    case .dark: "Dark"
-    case .system: "System"
+    case .light: Strings.settingsThemeLight
+    case .dark: Strings.settingsThemeDark
+    case .system: Strings.settingsThemeSystem
     }
   }
 }

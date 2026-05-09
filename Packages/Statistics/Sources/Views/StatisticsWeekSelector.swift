@@ -16,7 +16,7 @@ struct StatisticsWeekSelector: View {
   var body: some View {
     VStack(spacing: 8) {
       HStack {
-        Text("THIS WEEK")
+        Text(Strings.statsTrendsThisWeekLabel)
           .font(.system(size: 12, weight: .semibold))
           .foregroundStyle(theme.textTertiary)
           .tracking(1)
@@ -26,7 +26,7 @@ struct StatisticsWeekSelector: View {
         Button {
           onViewTrends()
         } label: {
-          Text("View month >")
+          Text(Strings.statsTrendsViewMonth)
             .font(.system(size: 14, weight: .medium))
             .foregroundStyle(theme.accent)
         }

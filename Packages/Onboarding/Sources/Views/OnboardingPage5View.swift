@@ -21,17 +21,17 @@ struct OnboardingPage5View: View {
       }
 
       VStack(spacing: 16) {
-        Text("Ready for your\nfirst night?")
+        Text(Strings.onboardingPage5Title)
           .font(.system(size: 28, weight: .bold))
           .foregroundStyle(theme.textPrimary)
           .multilineTextAlignment(.center)
 
-        Text("Place your phone on the nightstand and\nlet us do the rest.")
+        Text(Strings.onboardingPage2Body)
           .font(.system(size: 15))
           .foregroundStyle(theme.textSecondary)
           .multilineTextAlignment(.center)
 
-        Text("Don't worry — we'll judge your snoring silently.")
+        Text(Strings.onboardingPrivacyJudgeSilently)
           .font(.system(size: 14, weight: .medium))
           .foregroundStyle(theme.textSecondary)
           .multilineTextAlignment(.center)
@@ -51,7 +51,7 @@ struct OnboardingPage5View: View {
           onContinue()
         }
 
-        Button("Just browsing (for now)") {
+        Button(Strings.onboardingPage4ButtonSecondary) {
           onContinue()
         }
         .font(.system(size: 15, weight: .medium))

@@ -18,7 +18,11 @@ let package = Package(
         .product(name: "Env", package: "Env"),
         .product(name: "Models", package: "Models"),
       ],
-      path: "Sources/Components"
+      path: "Sources",
+      exclude: [],
+      resources: [
+        .process("Resources")
+      ]
     ),
   ]
 )

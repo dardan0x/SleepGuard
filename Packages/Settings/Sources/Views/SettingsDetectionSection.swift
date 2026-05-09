@@ -25,10 +25,10 @@ struct SettingsDetectionSection: View {
 
   var body: some View {
     VStack(alignment: .leading, spacing: 2) {
-      SettingsSectionTitle(text: "DETECTION")
+      SettingsSectionTitle(text: Strings.settingsSectionDetection)
       VStack(spacing: 16) {
         HStack {
-          Text("Sensitivity")
+          Text(Strings.settingsSensitivity)
             .font(.system(size: 15))
             .foregroundStyle(theme.textPrimary)
           Spacer()
@@ -38,7 +38,7 @@ struct SettingsDetectionSection: View {
         }
 
         HStack(spacing: 8) {
-          Text("Low")
+          Text(Strings.settingsSensitivityLow)
             .font(.system(size: 12))
             .foregroundStyle(theme.textTertiary)
           GeometryReader { geo in
@@ -57,18 +57,18 @@ struct SettingsDetectionSection: View {
             }
           }
           .frame(height: 20)
-          Text("High")
+          Text(Strings.settingsSensitivityHigh)
             .font(.system(size: 12))
             .foregroundStyle(theme.textTertiary)
         }
 
         HStack(spacing: 10) {
           SettingsIconBackground(systemName: "timer", color: theme.accent)
-          Text("Min snore duration")
+          Text(Strings.settingsMinSnoreDuration)
             .font(.system(size: 15))
             .foregroundStyle(theme.textPrimary)
           Spacer()
-          Text("\(Int(userPreferences.minSnoreDuration)) sec")
+          Text("\(Int(userPreferences.minSnoreDuration)) \(Strings.settingsUnitSecondsShort)")
             .font(.system(size: 15))
             .foregroundStyle(theme.textPrimary)
           HStack(spacing: 8) {

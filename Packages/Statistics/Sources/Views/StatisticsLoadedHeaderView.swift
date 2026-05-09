@@ -7,7 +7,7 @@ struct StatisticsLoadedHeaderView: View {
 
   var body: some View {
     HStack {
-      Text("Statistics")
+      Text(Strings.tabStatistics)
         .font(.system(size: 34, weight: .bold))
         .foregroundStyle(theme.textPrimary)
 
@@ -19,7 +19,7 @@ struct StatisticsLoadedHeaderView: View {
         HStack(spacing: 4) {
           Image(systemName: "calendar")
             .font(.system(size: 14, weight: .medium))
-          Text("Calendar")
+          Text(Strings.watchCalendar)
             .font(.system(size: 14, weight: .semibold))
         }
         .foregroundStyle(theme.accent)

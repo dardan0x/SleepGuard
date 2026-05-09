@@ -73,7 +73,7 @@ public struct NightGroupRowView: View {
 
       HStack(spacing: 6) {
         if group.recordingCount > 1 {
-          Text("\(group.recordingCount) recordings")
+          Text(String(format: Strings.recordingsDetailRecordingsCountFormat, group.recordingCount))
             .font(.system(size: 11, weight: .semibold))
             .foregroundStyle(theme.accent)
             .padding(.horizontal, 8)
@@ -90,7 +90,7 @@ public struct NightGroupRowView: View {
           .font(.system(size: 10))
           .foregroundStyle(theme.textSecondary)
 
-        Text("\(group.totalEvents) events")
+        Text(String(format: Strings.recordingsDetailEventsCountFormat, group.totalEvents))
           .font(.system(size: 13))
           .foregroundStyle(theme.textSecondary)
       }
@@ -137,7 +137,7 @@ public struct NightGroupRowView: View {
           .font(.system(size: 14, weight: .medium))
           .foregroundStyle(theme.textPrimary)
 
-        Text("\(durationString(session.totalDuration)) · \(session.eventsCount) events")
+        Text(String(format: Strings.recordingsDetailDateEventsFormat, durationString(session.totalDuration), session.eventsCount))
           .font(.system(size: 12))
           .foregroundStyle(theme.textSecondary)
       }

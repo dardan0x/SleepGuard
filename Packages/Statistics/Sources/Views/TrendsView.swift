@@ -40,7 +40,7 @@ public struct TrendsView: View {
     .navigationBarTitleDisplayMode(.inline)
     .toolbar {
       ToolbarItem(placement: .principal) {
-        Text("Trends")
+        Text(Strings.statsTrendsTitle)
           .font(.system(size: 17, weight: .semibold))
           .foregroundStyle(theme.textPrimary)
       }
@@ -57,7 +57,7 @@ public struct TrendsView: View {
             timeRange = range
           }
         } label: {
-          Text(range.rawValue)
+          Text(range.localizedName)
             .font(.system(size: 13, weight: .semibold))
             .foregroundStyle(timeRange == range ? .white : theme.textTertiary)
             .frame(maxWidth: .infinity)
@@ -77,7 +77,7 @@ public struct TrendsView: View {
     let avgMinutes = averageSnoringMinutes()
 
     return VStack(alignment: .leading, spacing: 4) {
-      Text("SNORING MINUTES")
+        Text(Strings.statsTrendsSnoringMinutesLabel)
         .font(.system(size: 11, weight: .semibold))
         .foregroundStyle(theme.textTertiary)
         .tracking(1)
@@ -87,7 +87,7 @@ public struct TrendsView: View {
           .font(.system(size: 36, weight: .bold))
           .foregroundStyle(theme.textPrimary)
 
-        Text("min · avg / night")
+        Text(String(format: Strings.statsTrendsAvgMinFormat, avgMinutes))
           .font(.system(size: 14))
           .foregroundStyle(theme.textSecondary)
       }
@@ -163,6 +163,13 @@ public struct TrendsView: View {
 private enum TimeRange: String, CaseIterable, Identifiable {
   case week = "Week"
   case month = "Month"
+
+  var localizedName: String {
+    switch self {
+    case .week: Strings.statsTrendsWeek
+    case .month: Strings.statsTrendsMonth
+    }
+  }
 
   var id: String { rawValue }
 }

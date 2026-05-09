@@ -9,11 +9,11 @@ struct SettingsWatchSection: View {
 
   var body: some View {
     VStack(alignment: .leading, spacing: 2) {
-      SettingsSectionTitle(text: "WATCH")
+      SettingsSectionTitle(text: Strings.settingsSectionWatch)
       VStack(spacing: 16) {
         HStack(spacing: 10) {
           SettingsIconBackground(systemName: "watch.fill", color: theme.accent)
-          Text("Apple Watch")
+          Text(Strings.watchTitle)
             .font(.system(size: 15))
             .foregroundStyle(theme.textPrimary)
           Spacer()
@@ -21,7 +21,7 @@ struct SettingsWatchSection: View {
             Circle()
               .fill(watchConnectivityManager.isWatchReachable ? theme.scoreGreen : theme.textTertiary)
               .frame(width: 8, height: 8)
-            Text(watchConnectivityManager.isWatchReachable ? "Connected" : "Not Connected")
+            Text(watchConnectivityManager.isWatchReachable ? Strings.watchStatusConnected : Strings.watchStatusNotConnected)
               .font(.system(size: 15))
               .foregroundStyle(watchConnectivityManager.isWatchReachable ? theme.scoreGreen : theme.textTertiary)
           }

@@ -338,7 +338,7 @@ public struct SessionDetailView: View {
         .font(.system(size: 48))
         .foregroundStyle(theme.textTertiary)
 
-      Text("Unable to load session")
+      Text(Strings.recordingsErrorMessage)
         .font(.headline)
         .foregroundStyle(theme.textPrimary)
     }

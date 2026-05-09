@@ -40,7 +40,7 @@ public struct SleepScoreGauge: View {
           .font(.system(size: size * 0.35, weight: .bold, design: .rounded))
           .foregroundStyle(theme.scoreColor(score))
 
-        Text("SLEEP SCORE")
+        Text(Strings.statsMiniChartSleepScoreLabel)
           .font(.system(size: size * 0.11, weight: .semibold))
           .foregroundStyle(theme.textTertiary)
           .tracking(1)

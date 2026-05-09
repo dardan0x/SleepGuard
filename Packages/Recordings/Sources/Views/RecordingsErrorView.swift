@@ -13,11 +13,11 @@ struct RecordingsErrorView: View {
         .font(.system(size: 48))
         .foregroundStyle(theme.textTertiary)
 
-      Text("Something went wrong")
+      Text(Strings.recordingsErrorTitle)
         .font(.headline)
         .foregroundStyle(theme.textPrimary)
 
-      Button("Try Again") {
+      Button(Strings.actionTryAgain) {
         onRetry()
       }
       .font(.system(size: 17, weight: .semibold))

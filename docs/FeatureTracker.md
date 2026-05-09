@@ -2,7 +2,7 @@
 
 > Auto-updated by the AI after every task. This is the local source of truth.
 
-Last updated: 2026-05-09 (Session 32)
+Last updated: 2026-05-09 (Session 35)
 
 ---
 
@@ -59,6 +59,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-05-09 | Localization: Semantic key migration | Completed | Migrated 132 xcstrings keys from raw English to dot-notation (e.g. `onboarding.page1.title`, `session.recording.statusFormat`); updated generator with camelCase splitting; all 42 source files updated; zero build errors; max constant name 40 chars |
 | 2026-05-09 | F4-T6 Polish + Playback Fixes + Reusable Stats Grid + Navigation Polish | Completed | Zero-padding clips, AudioFileURLResolver (stale path fix), SessionStatsGrid, NightGroupRowView single-tap nav, waveform seek, expand hint, hide Peak dB |
 | 2026-05-09 | F4-T6: Snore-Only Recordings + Advanced Frequency Player | Completed | Per-event audio clips with spectral analysis; expandable advanced player with waveform, spectrum bars, and stats; legacy full-file fallback |
 | 2026-05-09 | F2-T8: Snore event debounce | Completed | Added 3-second gap threshold in SessionManager to merge snore events separated by brief breaths |

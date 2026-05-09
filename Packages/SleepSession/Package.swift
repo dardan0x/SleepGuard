@@ -22,7 +22,7 @@ let package = Package(
         .product(name: "Env", package: "Env"),
         .product(name: "DesignSystem", package: "DesignSystem"),
       ],
-      path: "Sources/Views"
+      path: "Sources"
     ),
   ]
 )

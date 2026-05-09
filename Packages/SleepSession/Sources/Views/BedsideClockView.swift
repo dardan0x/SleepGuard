@@ -59,15 +59,15 @@ struct BedsideClockView: View {
         .padding(.horizontal, 24)
         .padding(.bottom, 32)
       }
-      .alert("Session Too Short", isPresented: $showShortSessionAlert) {
-        Button("Keep Recording", role: .cancel) { }
-        Button("Stop Anyway") {
+      .alert(Strings.sessionSummaryTooShortTitle, isPresented: $showShortSessionAlert) {
+        Button(Strings.actionKeepRecording, role: .cancel) { }
+        Button(Strings.actionStopAnyway) {
           Task {
             _ = await sessionManager.stopSession()
           }
         }
       } message: {
-        Text("Recordings under \(Int(SleepSession.minimumSaveDuration / 60)) minutes can't be saved. Are you sure you want to stop?")
+        Text(String(format: Strings.sessionSummaryTooShortMessageFormat, Int(SleepSession.minimumSaveDuration / 60)))
       }
 
     }
@@ -133,10 +133,10 @@ struct BedsideClockView: View {
 
   private var statusLabel: String {
     switch sessionManager.currentSnoringState {
-    case .none: return "Quiet"
-    case .quiet: return "Quiet snoring detected · just now"
-    case .light: return "Light snoring detected · just now"
-    case .loud: return "Loud snoring detected · just now"
+    case .none: return Strings.statsCalendarIntensityQuiet
+    case .quiet: return Strings.sessionBedsideSnoreQuiet
+    case .light: return Strings.sessionBedsideSnoreLight
+    case .loud: return Strings.sessionBedsideSnoreLoud
     }
   }
 }

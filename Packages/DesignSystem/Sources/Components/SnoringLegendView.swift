@@ -7,9 +7,9 @@ public struct SnoringLegendView: View {
 
   public var body: some View {
     HStack(spacing: 16) {
-      legendItem(color: theme.snoreQuiet, label: "Quiet")
-      legendItem(color: theme.snoreLight, label: "Light")
-      legendItem(color: theme.snoreLoud, label: "Loud")
+      legendItem(color: theme.snoreQuiet, label: Strings.statsCalendarIntensityQuiet)
+      legendItem(color: theme.snoreLight, label: Strings.settingsThemeLight)
+      legendItem(color: theme.snoreLoud, label: Strings.statsCalendarIntensityLoud)
     }
     .frame(maxWidth: .infinity)
   }

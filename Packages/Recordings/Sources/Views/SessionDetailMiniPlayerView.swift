@@ -73,7 +73,7 @@ struct SessionDetailMiniPlayerView: View {
             HStack(spacing: 4) {
               Image(systemName: "waveform")
                 .font(.system(size: 12, weight: .semibold))
-              Text("Details")
+              Text(Strings.recordingsDetailTitle)
                 .font(.system(size: 11, weight: .semibold))
             }
             .foregroundStyle(theme.accent)

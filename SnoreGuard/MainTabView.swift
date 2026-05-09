@@ -26,19 +26,19 @@ struct MainTabView: View {
       StatisticsTab()
         .toolbar(sessionManager.isRecording ? .hidden : .visible, for: .tabBar)
         .tabItem {
-          Label("Statistics", systemImage: "chart.bar.fill")
+          Label(Strings.tabStatistics, systemImage: "chart.bar.fill")
         }
 
       RecordingsTab()
         .toolbar(sessionManager.isRecording ? .hidden : .visible, for: .tabBar)
         .tabItem {
-          Label("Media", systemImage: "waveform")
+          Label(Strings.tabMedia, systemImage: "waveform")
         }
 
       SettingsTab()
         .toolbar(sessionManager.isRecording ? .hidden : .visible, for: .tabBar)
         .tabItem {
-          Label("Settings", systemImage: "gearshape")
+          Label(Strings.tabSettings, systemImage: "gearshape")
         }
     }
     .tint(theme.accent)
@@ -78,9 +78,9 @@ struct MainTabView: View {
       Spacer()
 
       HStack(spacing: 4) {
-        tabItem(index: 0, icon: "chart.bar.fill", label: "STATISTICS")
-        tabItem(index: 1, icon: "waveform", label: "MEDIA")
-        tabItem(index: 2, icon: "gearshape", label: "SETTINGS")
+        tabItem(index: 0, icon: "chart.bar.fill", label: Strings.tabStatistics)
+        tabItem(index: 1, icon: "waveform", label: Strings.tabMedia)
+        tabItem(index: 2, icon: "gearshape", label: Strings.tabSettings)
       }
       .padding(4)
       .background(theme.bgCard)
@@ -111,6 +111,7 @@ struct MainTabView: View {
         Text(label)
           .font(.system(size: 10, weight: .semibold))
           .tracking(0.5)
+          .textCase(.uppercase)
       }
       .foregroundStyle(isSelected ? theme.textPrimary : theme.tabInactive)
       .frame(maxWidth: .infinity)

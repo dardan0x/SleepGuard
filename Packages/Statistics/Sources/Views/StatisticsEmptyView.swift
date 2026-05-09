@@ -28,11 +28,11 @@ struct StatisticsEmptyView: View {
             }
 
             VStack(spacing: 4) {
-              Text("Ready to Sleep?")
+              Text(Strings.sessionPrestartTitle)
                 .font(.system(size: 20, weight: .semibold))
                 .foregroundStyle(theme.textPrimary)
 
-              Text("Start a recording to analyze your snoring")
+              Text(Strings.statsEmptyMessage)
                 .font(.system(size: 15))
                 .foregroundStyle(theme.textSecondary)
                 .multilineTextAlignment(.center)
@@ -56,7 +56,7 @@ struct StatisticsEmptyView: View {
 
   private var headerSection: some View {
     HStack {
-      Text("Statistics")
+      Text(Strings.tabStatistics)
         .font(.system(size: 34, weight: .bold))
         .foregroundStyle(theme.textPrimary)
 
@@ -68,7 +68,7 @@ struct StatisticsEmptyView: View {
         HStack(spacing: 4) {
           Image(systemName: "calendar")
             .font(.system(size: 14, weight: .medium))
-          Text("Calendar")
+          Text(Strings.watchCalendar)
             .font(.system(size: 14, weight: .semibold))
         }
         .foregroundStyle(theme.accent)
