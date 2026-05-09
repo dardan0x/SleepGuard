@@ -12,6 +12,7 @@ struct BedsideClockView: View {
   @Environment(Theme.self) private var theme
 
   @State private var currentTime = Date()
+  @State private var showShortSessionAlert = false
 
   var body: some View {
     ZStack {
@@ -46,10 +47,23 @@ struct BedsideClockView: View {
         Spacer()
 
         StopRecordingButton(height: 52) {
-          _ = sessionManager.stopSession()
+          if let session = sessionManager.currentSession,
+             session.totalDuration < SleepSession.minimumSaveDuration {
+            showShortSessionAlert = true
+          } else {
+            _ = sessionManager.stopSession()
+          }
         }
         .padding(.horizontal, 24)
         .padding(.bottom, 32)
+      }
+      .alert("Session Too Short", isPresented: $showShortSessionAlert) {
+        Button("Keep Recording", role: .cancel) { }
+        Button("Stop Anyway") {
+          _ = sessionManager.stopSession()
+        }
+      } message: {
+        Text("Recordings under \(Int(SleepSession.minimumSaveDuration / 60)) minutes can't be saved. Are you sure you want to stop?")
       }
 
     }

@@ -1628,6 +1628,42 @@ append
 - Should unused `AlarmManager.swift` and `AlarmOverlayView.swift` be deleted?
 - Should simulator mic permission bypasses be restored in `AudioRecorder.swift`?
 
+---
+
+## 2026-05-09 — Session 32: Snore Event Debounce
+
+### Completed
+- **F2-T8**: Snore event debounce — 3-second gap threshold in `SessionManager`
+
+### Technical Details
+- Added `eventGapThreshold: TimeInterval = 3.0` to `SessionManager`
+- Replaced immediate event finalization on `.none` state with debounced tracking using `lastSnoringSampleTime`
+- When snoring resumes within 3 seconds of last sample, existing event continues with accumulated dB sum/count
+- Event intensity upgrades to peak observed level via `intensityRank` helper (quiet=0, light=1, loud=2)
+- `currentSnoringState` updates immediately for UI responsiveness; only event persistence is debounced
+- `stopSession()` finalizes any in-progress event regardless of gap threshold
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Env/Sources/Services/SessionManager.swift` | +55/-33 | Added `eventGapThreshold`, `lastSnoringSampleTime`, `activeEventIntensity`, `intensityRank`; rewrote event transition logic to debounce gaps; `finalizeActiveEvent()` no longer takes intensity parameter |
+
+### Architecture Decisions
+- **3-second threshold**: Long enough to absorb a normal breath between snore bursts; short enough to still separate truly distinct episodes
+- **Separate display state vs event tracking state**: `currentSnoringState` updates immediately so UI shows real-time snoring status; event tracking uses separate debounced logic to avoid flooding the events list
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors across all packages + app target
+
 ### Git Handoff
-- **Suggested branch**: `feature/f2/t7-delayed-recording-start`
-- **Suggested commit**: `F2-T7 — Replace Smart Alarm with Delayed Recording Start`
+- **Suggested branch**: `feature/f2/t8-snore-event-debounce`
+- **Suggested commit**: `[F2-T8] — Add 3-second debounce gap between snore events`
+
+### Next Session
+- F13-T1: CloudKit Sync (only remaining backlog task)
+
+### Open Questions
+- Should the 3-second threshold be user-configurable in Settings?
+
+

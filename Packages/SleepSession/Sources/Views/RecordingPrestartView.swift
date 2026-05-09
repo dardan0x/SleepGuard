@@ -14,9 +14,7 @@ struct RecordingPrestartView: View {
     private let delayOptions = [0, 15, 30, 45, 60]
 
     var body: some View {
-        ZStack {
-            theme.bgPrimary.ignoresSafeArea()
-
+        ScrollView {
             VStack(spacing: 0) {
                 iconSection
                     .padding(.top, 24)
@@ -48,7 +46,7 @@ struct RecordingPrestartView: View {
                         }
                     }
                 }
-                .padding(.top, 15)
+                .padding(.top, 10)
 
                 Button {
                     routerPath.navigateBack()
@@ -57,13 +55,13 @@ struct RecordingPrestartView: View {
                         .font(.system(size: 17, weight: .medium))
                         .foregroundStyle(theme.textSecondary)
                 }
-                .padding(.top, 10)
+                .padding(.top, -10)
 
-                Spacer()
+                Color.clear.frame(height: 120)
             }
             .padding(.horizontal, 24)
-            .padding(.bottom, 32)
         }
+        .background(theme.bgPrimary.ignoresSafeArea())
     }
 
     private var iconSection: some View {

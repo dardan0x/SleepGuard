@@ -41,7 +41,7 @@ public struct SessionSummaryView: View {
     .alert("Session Too Short", isPresented: $showShortSessionAlert) {
       Button("OK", role: .cancel) { }
     } message: {
-      Text("To generate meaningful sleep analysis, recordings must be at least 10 minutes long.")
+      Text("To generate meaningful sleep analysis, recordings must be at least \(Int(SleepSession.minimumSaveDuration / 60)) minutes long.")
     }
   }
 
@@ -177,7 +177,7 @@ public struct SessionSummaryView: View {
   }
 
   private func saveSession() {
-    if session.totalDuration < 600 {
+    if session.totalDuration < SleepSession.minimumSaveDuration {
       showShortSessionAlert = true
       return
     }
