@@ -97,9 +97,7 @@ public final class ClipPlaybackController {
     currentEventIndex = index
     currentClipTime = 0
     setupPlayerForCurrentEvent()
-    if isPlaying {
-      audioPlayer?.play()
-    }
+    play()
   }
 
   public func nextEvent() {

@@ -21,6 +21,7 @@ public struct SessionSummaryView: View {
   @Environment(\.modelContext) private var modelContext
 
   @State private var showShortSessionAlert = false
+  @State private var showSaveErrorAlert = false
 
   public var body: some View {
     ScrollView {
@@ -42,6 +43,11 @@ public struct SessionSummaryView: View {
       Button("OK", role: .cancel) { }
     } message: {
       Text("To generate meaningful sleep analysis, recordings must be at least \(Int(SleepSession.minimumSaveDuration / 60)) minutes long.")
+    }
+    .alert("Save Failed", isPresented: $showSaveErrorAlert) {
+      Button("OK", role: .cancel) { }
+    } message: {
+      Text("Unable to save the session. Please try again.")
     }
   }
 
@@ -182,13 +188,19 @@ public struct SessionSummaryView: View {
       return
     }
 
-    modelContext.insert(session)
     if let events = session.events {
       for event in events {
         modelContext.insert(event)
       }
     }
-    try? modelContext.save()
+    modelContext.insert(session)
+
+    do {
+      try modelContext.save()
+    } catch {
+      showSaveErrorAlert = true
+      return
+    }
 
     if userPreferences.syncToHealthKit {
       Task {
