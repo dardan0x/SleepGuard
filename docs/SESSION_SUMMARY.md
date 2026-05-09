@@ -1667,3 +1667,109 @@ append
 - Should the 3-second threshold be user-configurable in Settings?
 
 
+
+## 2026-05-09 — Session 33: Snore-Only Recordings + Advanced Frequency Player
+
+### Completed
+- **F4-T6**: Snore-Only Recordings + Advanced Frequency Player — replaces full-session audio with per-event clips + expandable advanced player
+
+### Technical Details
+- `stopSession()` is now `async` and calls `AudioClipExtractor.extractClips()` to create per-event `.m4a` clips (±2s padding)
+- Full session `.caf` file deleted after successful clip extraction; storage savings ~90%+
+- `SnoreEvent` extended with `dominantFrequency`, `spectralCentroid`, `lowFreqRatio` (defaults = 0 for SwiftData migration)
+- `AudioClipExtractor` actor: `AVAssetExportSession` with `.appleM4A` preset → read exported clip → `FFTAnalyzer.analyze()` per buffer → average spectral features → assign to event
+- `ClipPlaybackController`: `@Observable @MainActor` singleton managing sequential clip playback with `AVAudioPlayer`; auto-advances to next clip; `seek(to:)` maps 0–1 across concatenated timeline
+- `WaveformGenerator.generateSamples(from:)` returns ~300 amplitude points via `AVAudioFile` RMS per chunk
+- `WaveformGenerator.spectrumSamples(from:)` returns 32 averaged FFT magnitude bars via `FFTAnalyzer.spectrumBars()`
+- `SessionDetailAdvancedPlayerView`: waveform (custom `Shape`/`Path` filled with intensity color), 32-bar spectrum (green→amber→red gradient by frequency), 5-stat grid (Duration, Peak dB, Dominant Freq, Spectral Centroid, Low-Freq Ratio)
+- `SessionDetailMiniPlayerView`: added `isExpandable` + `onExpand` parameters; `waveform` SF Symbol expand button
+- `SessionDetailView`: dual-mode playback — legacy (`audioFileURL != nil`) uses full-file `AVAudioPlayer`; clip mode uses `ClipPlaybackController` + conditionally shows advanced player
+- Event share: clip sessions use pre-extracted `event.audioFileURL` directly; legacy sessions still use on-demand `AVAssetExportSession`
+- `BedsideClockView`: both stop call-sites (direct + alert "Stop Anyway") wrapped in `Task { await sessionManager.stopSession() }`
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Models/Sources/Data/SnoreEvent.swift` | +4/-0 | Added `dominantFrequency`, `spectralCentroid`, `lowFreqRatio` with `= 0` defaults |
+| `Packages/AudioEngine/Sources/Engine/AudioClipExtractor.swift` | +110/-0 | New actor: per-event clip extraction + spectral analysis via FFTAnalyzer |
+| `Packages/AudioEngine/Sources/Engine/FFTAnalyzer.swift` | +45/-0 | Added `spectrumBars(buffer:sampleRate:barCount:)` for 0–1000 Hz bar visualization |
+| `Packages/Env/Sources/Services/SessionManager.swift` | +18/-2 | `stopSession()` now `async`; calls `AudioClipExtractor.extractClips()`; deletes full session file after extraction |
+| `Packages/Recordings/Sources/Helpers/ClipPlaybackController.swift` | +210/-0 | New `@Observable` controller: sequential clip playback, auto-advance, concatenated timeline seek |
+| `Packages/Recordings/Sources/Helpers/PlaybackSpectrumAnalyzer.swift` | +90/-0 | New `AVAudioEngine`-based real-time spectrum analyzer (prepared for future use) |
+| `Packages/Recordings/Sources/Helpers/WaveformGenerator.swift` | +40/-0 | New `spectrumSamples(from:barCount:)` method using `FFTAnalyzer.spectrumBars()` |
+| `Packages/Recordings/Sources/Views/SessionDetailAdvancedPlayerView.swift` | +140/-0 | New expandable advanced player: waveform, spectrum bars, stats grid |
+| `Packages/Recordings/Sources/Views/SessionDetailMiniPlayerView.swift` | +15/-0 | Added `isExpandable` flag + expand button with `waveform` icon |
+| `Packages/Recordings/Sources/Views/SessionDetailView.swift` | +95/-50 | Dual-mode playback (legacy vs clip); `ClipPlaybackController` integration; advanced player conditional display; event share direct vs export |
+| `Packages/SleepSession/Sources/Views/BedsideClockView.swift` | +4/-1 | Wrapped `stopSession()` call in alert button action with `Task { await ... }` |
+
+### Architecture Decisions
+- **Static spectrum over real-time FFT**: Pre-computed spectrum bars per clip avoids sync complexity between two audio engines (`AVAudioPlayer` for playback + `AVAudioEngine` for analysis). Real-time analyzer (`PlaybackSpectrumAnalyzer`) is present but not wired to active UI.
+- **2-second clip padding**: Matches existing F7 export behavior; provides enough audio context for FFT analysis while keeping clips small
+- **Dual-mode playback in one view**: `SessionDetailView` transparently handles both legacy (full-file) and new (clip-only) sessions, ensuring users don't lose access to old recordings
+- **Async `stopSession()`**: Clip extraction involves file I/O and export; making it `async` prevents UI blocking during the ~1-2s extraction process
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors across all packages + app target
+
+### Git Handoff
+- **Suggested branch**: `feature/f4/t6-snore-only-recordings`
+- **Suggested commit**: `[F4-T6] — Add per-event snore clips + expandable advanced player with waveform and spectrum`
+
+### Next Session
+- F13-T1: CloudKit Sync (only remaining backlog task)
+
+### Open Questions
+- Should `PlaybackSpectrumAnalyzer` be wired for real-time spectrum during playback (replacing static bars)?
+- Should the 32 spectrum bars animate in real-time as the clip plays?
+- Is the 2-second clip padding sufficient, or should it be user-configurable?
+
+## 2026-05-09 — Session 34: F4-T6 Polish + Playback Fixes + Reusable Stats Grid + Navigation Polish
+
+### Completed
+- **F4-T6 continuation**: Waveform tap-to-seek, expand hint pill ("Details"), Peak dB hidden from stats
+- **Playback fix**: `setupClipPlayback` now calls `loadEvents()` (was assigning `.events` directly, breaking progress/seek); `ClipPlaybackController.play()` activates `AVAudioSession`; `tick()` only auto-advances near clip end
+- **Zero-padding clips**: `AudioClipExtractor` padding `2.0` → `0.0`; event duration excludes debounce gap for naturally finalized events (`finalizeActiveEvent(includeGap: false)`); clips contain ONLY snore audio
+- **AudioFileURLResolver**: New helper to prevent stale absolute paths after app relaunch; stores only filenames, resolves against current Documents directory at runtime; backward-compatible with legacy absolute paths
+- **SessionStatsGrid**: Extracted reusable 2×2 stat grid component in `DesignSystem`; used by `StatisticsStatsGrid` and `SessionDetailHeaderView`
+- **Snore Time stat**: Added to `SessionStatsGrid` and `SessionDetailHeaderView` with compact `Xhr Ym` / `Xm` format
+- **NightGroupRowView navigation**: Single-recording groups tap directly to `.recordingDetail` instead of expanding
+
+### Technical Details
+- `AudioFileURLResolver` in `Models` package: `resolve(_:)` extracts `lastPathComponent` from stored string and rebuilds URL against live `documentsDirectory`; `filename(from:)` for write-side; handles both old absolute paths and new filename-only storage
+- `finalizeActiveEvent(includeGap:)` — when debounce gap triggers natural finalization, `lastSnoringSampleTime` becomes the event end (true snore duration); `stopSession()` passes `includeGap: true` for mid-session stops
+- `SessionStatsGrid` uses `hr` suffix for hours (e.g., `4hr 5m`) and plain `m` for under 1 hour; `.lineLimit(1)` on `StatCard.value` prevents card expansion
+- `NightGroupRowView` tap: `group.sessions.count == 1` → `routerPath.navigate(to: .recordingDetail(id:))`; `count > 1` → `isExpanded.toggle()`
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Models/Sources/Helpers/AudioFileURLResolver.swift` | +30/-0 | New: resolves stored audio filenames against current Documents directory; backward-compatible with absolute paths |
+| `Packages/Env/Sources/Services/SessionManager.swift` | +10/-8 | `finalizeActiveEvent(includeGap:)`; zero padding in `extractClips`; stores filenames only via `AudioFileURLResolver` |
+| `Packages/AudioEngine/Sources/Engine/AudioClipExtractor.swift` | +1/-1 | Default padding `2.0` → `0.0` |
+| `Packages/Recordings/Sources/Helpers/ClipPlaybackController.swift` | +10/-3 | Audio session activation before play; `play()` return value check; `tick()` guards against false auto-advance |
+| `Packages/Recordings/Sources/Views/SessionDetailView.swift` | +15/-15 | All `audioFileURL` reads via `AudioFileURLResolver.resolve()`; `setupClipPlayback` uses `loadEvents()`; legacy export zero padding |
+| `Packages/DesignSystem/Sources/Components/SessionStatsGrid.swift` | +55/-0 | New reusable 2×2 stat grid: Duration, Snoring %, Snore Time, Events |
+| `Packages/Statistics/Sources/Views/StatisticsStatsGrid.swift` | +4/-39 | Delegates to `SessionStatsGrid` |
+| `Packages/Recordings/Sources/Views/SessionDetailHeaderView.swift` | +8/-37 | Delegates to `SessionStatsGrid` |
+| `Packages/Recordings/Sources/Views/SessionDetailAdvancedPlayerView.swift` | +10/-3 | Waveform tap-to-seek; "Tap waveform to seek" label; Peak dB removed |
+| `Packages/Recordings/Sources/Views/SessionDetailMiniPlayerView.swift` | +10/-5 | Expand button is now a pill with "Details" text + icon |
+| `Packages/Recordings/Sources/Views/NightGroupRowView.swift` | +5/-2 | Single-recording groups navigate directly; multi-recording groups expand |
+
+### Architecture Decisions
+- **Filename-only storage for audio files**: Absolute paths break across app launches on iOS; storing just the filename and resolving at runtime is the standard pattern for document-scoped files
+- **Zero-padding clips**: Eliminates all non-snore audio from saved clips; event durations also trimmed to true snore time by excluding debounce gap
+- **Reusable `SessionStatsGrid`**: Prevents duplication between Statistics dashboard and Session detail; single source of truth for formatting and card layout
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors across all packages + app target
+
+### Git Handoff
+- **Suggested branch**: `feature/f4/t6-snore-only-recordings`
+- **Suggested commit**: `[F4-T6] — Snore-only clips, advanced player, AudioFileURLResolver, reusable stats grid, playback fixes`
+
+### Next Session
+- F13-T1: CloudKit Sync (only remaining backlog task)
+
+### Open Questions
+- Should spectrum bars animate in real-time during playback?
+- Should `PlaybackSpectrumAnalyzer` (real-time FFT) replace static pre-computed bars?

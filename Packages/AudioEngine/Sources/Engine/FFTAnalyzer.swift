@@ -7,6 +7,8 @@ public struct SpectralFeatures {
   public let lowFreqRatio: Float
   /// Weighted average frequency in Hz.
   public let spectralCentroid: Float
+  /// Frequency of the highest-magnitude bin in Hz.
+  public let dominantFrequency: Float
   /// Combined snore-likelihood score (0–1).
   public let spectralScore: Float
 }
@@ -28,7 +30,7 @@ public struct FFTAnalyzer {
   public func analyze(buffer: AVAudioPCMBuffer, sampleRate: Double) -> SpectralFeatures {
     guard let channelData = buffer.floatChannelData?[0],
           bufferSize >= 64 else {
-      return SpectralFeatures(lowFreqRatio: 0, spectralCentroid: 0, spectralScore: 0)
+      return SpectralFeatures(lowFreqRatio: 0, spectralCentroid: 0, dominantFrequency: 0, spectralScore: 0)
     }
 
     let frameLength = min(Int(buffer.frameLength), bufferSize)
@@ -42,7 +44,7 @@ public struct FFTAnalyzer {
 
     // Perform complex FFT.
     guard let fftSetup else {
-      return SpectralFeatures(lowFreqRatio: 0, spectralCentroid: 0, spectralScore: 0)
+      return SpectralFeatures(lowFreqRatio: 0, spectralCentroid: 0, dominantFrequency: 0, spectralScore: 0)
     }
     vDSP_DFT_Execute(fftSetup, &realInput, &imagInput, &realOutput, &imagOutput)
 
@@ -76,12 +78,19 @@ public struct FFTAnalyzer {
 
     // Spectral centroid (weighted average frequency).
     var weightedSum: Float = 0
+    var maxMag: Float = 0
+    var maxMagIndex: Int = 0
     for i in 1..<halfSize {
       let freq = Float(i) * freqResolution
       let magSq = magnitudes[i] * magnitudes[i]
       weightedSum += freq * magSq
+      if magnitudes[i] > maxMag {
+        maxMag = magnitudes[i]
+        maxMagIndex = i
+      }
     }
     let spectralCentroid = totalEnergy > 1e-10 ? weightedSum / totalEnergy : 0
+    let dominantFrequency = Float(maxMagIndex) * freqResolution
 
     // Combined snore-likelihood score.
     // Ideal snore: lowFreqRatio > 0.6, centroid < 400 Hz.
@@ -92,7 +101,57 @@ public struct FFTAnalyzer {
     return SpectralFeatures(
       lowFreqRatio: lowFreqRatio,
       spectralCentroid: spectralCentroid,
+      dominantFrequency: dominantFrequency,
       spectralScore: spectralScore
     )
+  }
+
+  /// Returns magnitude spectrum grouped into `barCount` frequency bins (0–1000 Hz).
+  public func spectrumBars(buffer: AVAudioPCMBuffer, sampleRate: Double, barCount: Int = 32) -> [Float] {
+    guard let channelData = buffer.floatChannelData?[0],
+          bufferSize >= 64,
+          let fftSetup else {
+      return [Float](repeating: 0, count: barCount)
+    }
+
+    let frameLength = min(Int(buffer.frameLength), bufferSize)
+    let halfSize = frameLength / 2
+
+    var realInput = Array(UnsafeBufferPointer(start: channelData, count: frameLength))
+    var imagInput = [Float](repeating: 0, count: frameLength)
+    var realOutput = [Float](repeating: 0, count: frameLength)
+    var imagOutput = [Float](repeating: 0, count: frameLength)
+
+    vDSP_DFT_Execute(fftSetup, &realInput, &imagInput, &realOutput, &imagOutput)
+
+    var magnitudes = [Float](repeating: 0, count: halfSize)
+    for i in 0..<halfSize {
+      magnitudes[i] = hypot(realOutput[i], imagOutput[i])
+    }
+
+    let freqResolution = Float(sampleRate) / Float(frameLength)
+    let maxFreq: Float = 1000.0
+    let maxBin = min(halfSize, Int(maxFreq / freqResolution))
+    let binsPerBar = max(1, maxBin / barCount)
+
+    var bars = [Float](repeating: 0, count: barCount)
+    for bar in 0..<barCount {
+      let startBin = bar * binsPerBar + 1
+      let endBin = min(startBin + binsPerBar, maxBin)
+      var sum: Float = 0
+      for i in startBin..<endBin {
+        sum += magnitudes[i]
+      }
+      bars[bar] = sum / Float(max(1, endBin - startBin))
+    }
+
+    // Normalize to 0–1 range.
+    if let maxVal = bars.max(), maxVal > 1e-10 {
+      for i in 0..<barCount {
+        bars[i] = bars[i] / maxVal
+      }
+    }
+
+    return bars
   }
 }

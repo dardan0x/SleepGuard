@@ -36,8 +36,12 @@ public struct NightGroupRowView: View {
       .padding(.vertical, 14)
       .contentShape(Rectangle())
       .onTapGesture {
-        withAnimation(.easeInOut(duration: 0.2)) {
-          isExpanded.toggle()
+        if group.sessions.count == 1, let session = group.sessions.first {
+          routerPath.navigate(to: .recordingDetail(id: session.id))
+        } else {
+          withAnimation(.easeInOut(duration: 0.2)) {
+            isExpanded.toggle()
+          }
         }
       }
       .onLongPressGesture(minimumDuration: 0.5) {

@@ -27,8 +27,8 @@ Last updated: 2026-05-09 (Session 32)
 | Backlog | 0 |
 | Blocked | 0 |
 | — | — |
-| Total Tasks | 41 |
-| Tasks Done | 41 |
+| Total Tasks | 42 |
+| Tasks Done | 42 |
 | Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
 | Tasks Backlog | 0 |
@@ -42,7 +42,7 @@ Last updated: 2026-05-09 (Session 32)
 | F1 | Onboarding | P0 | Done | 5/5 | ██████████ 100% | [tracker](trackers/f1-onboarding.md) |
 | F2 | Live Session | P0 | Done | 7/7 | ██████████ 100% | [tracker](trackers/f2-live-session.md) |
 | F3 | Statistics Dashboard | P1 | Done | 3/3 | ██████████ 100% | [tracker](trackers/f3-statistics.md) |
-| F4 | Recordings | P1 | Done | 5/5 + polish | ██████████ 100% | [tracker](trackers/f4-recordings.md) |
+| F4 | Recordings | P1 | Done | 6/6 + polish | ██████████ 100% | [tracker](trackers/f4-recordings.md) |
 | F5 | Trends | P1 | Done | 2/2 | ██████████ 100% | [tracker](trackers/f5-trends.md) |
 | F6 | Settings | P2 | Done | 3/3 | ██████████ 100% | [tracker](trackers/f6-settings.md) |
 | F7 | Audio Clip Export | P1 | Done | 2/2 | ██████████ 100% | [tracker](trackers/f7-audio-clip-export.md) |
@@ -59,6 +59,8 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-05-09 | F4-T6 Polish + Playback Fixes + Reusable Stats Grid + Navigation Polish | Completed | Zero-padding clips, AudioFileURLResolver (stale path fix), SessionStatsGrid, NightGroupRowView single-tap nav, waveform seek, expand hint, hide Peak dB |
+| 2026-05-09 | F4-T6: Snore-Only Recordings + Advanced Frequency Player | Completed | Per-event audio clips with spectral analysis; expandable advanced player with waveform, spectrum bars, and stats; legacy full-file fallback |
 | 2026-05-09 | F2-T8: Snore event debounce | Completed | Added 3-second gap threshold in SessionManager to merge snore events separated by brief breaths |
 | 2026-05-08 | Session 31: Delayed Recording Start (replaces Smart Alarm) | Completed | Replaced Smart Alarm with countdown-based delayed recording; RecordingDelayManager with background timer; RecordingPrestartView delay picker; RecordingCountdownView; SettingsView Start delay; removed alarm badge/overlay |
 | 2026-05-08 | Session 30: Summary Polish + Tab Bar Fix + Background Recording | Completed | Save Session button dark pill + glow; 10-min minimum validation alert; custom floating tab bar for iOS < 26; hide tab bar during recording; background recording interruption + route change handling |
@@ -113,6 +115,13 @@ _Most recent first. The AI appends here after every task._
 | Task | Feature | Started | Assignee |
 |------|---------|---------|----------|
 | (none) | — | — | — |
+
+## Completed (last 10)
+
+| Task | Feature | Completed | Duration |
+|------|---------|-----------|----------|
+| F4-T6 | F4 | 2026-05-09 | — |
+| F2-T8 | F2 | 2026-05-09 | — |
 
 ## Completed (last 10)
 
