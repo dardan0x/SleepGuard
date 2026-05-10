@@ -16,6 +16,17 @@ public final class SleepSession {
   public var sleepScore: Int
   public var audioFileURL: String?
 
+  /// Full session raw audio file preserved for future re-processing.
+  /// When detection thresholds or debounce logic change, old sessions
+  /// can be re-analysed from this file instead of using baked event data.
+  public var rawAudioFileURL: String?
+
+  /// Classification sample log (JSON) recorded at ~20 Hz during the session.
+  /// Contains every sample's dB, spectral score, snore confidence, and state.
+  /// Allows instant re-processing with different debounce or threshold values
+  /// without re-running audio analysis.
+  public var rawLogFileURL: String?
+
   @Relationship(deleteRule: .cascade, inverse: \SnoreEvent.session)
   public var events: [SnoreEvent]?
 
@@ -33,7 +44,9 @@ public final class SleepSession {
     eventsCount: Int = 0,
     eventsPerHour: Double = 0,
     sleepScore: Int = 0,
-    audioFileURL: String? = nil
+    audioFileURL: String? = nil,
+    rawAudioFileURL: String? = nil,
+    rawLogFileURL: String? = nil
   ) {
     self.id = id
     self.startDate = startDate
@@ -47,5 +60,7 @@ public final class SleepSession {
     self.eventsPerHour = eventsPerHour
     self.sleepScore = sleepScore
     self.audioFileURL = audioFileURL
+    self.rawAudioFileURL = rawAudioFileURL
+    self.rawLogFileURL = rawLogFileURL
   }
 }

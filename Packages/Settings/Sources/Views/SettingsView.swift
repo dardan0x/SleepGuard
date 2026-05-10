@@ -94,6 +94,7 @@ public struct SettingsView: View {
       let sessionsDescriptor = FetchDescriptor<SleepSession>()
       let sessions = try modelContext.fetch(sessionsDescriptor)
       for session in sessions {
+        deleteSessionFiles(session)
         modelContext.delete(session)
       }
       try modelContext.save()

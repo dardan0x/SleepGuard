@@ -92,7 +92,7 @@ struct SessionDetailAdvancedPlayerView: View {
   private var statsSection: some View {
     VStack(spacing: 12) {
       HStack(spacing: 12) {
-        StatBox(title: Strings.recordingsPlayerStatDuration, value: durationString(event.duration))
+        StatBox(title: Strings.recordingsPlayerStatDuration, value: durationString(event.snoreDuration))
         StatBox(title: Strings.recordingsPlayerStatDominantFreq, value: frequencyString(event.dominantFrequency))
       }
 

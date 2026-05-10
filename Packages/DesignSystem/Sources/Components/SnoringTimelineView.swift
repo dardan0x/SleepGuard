@@ -43,7 +43,7 @@ public struct SnoringTimelineView: View {
     return events.map { event in
       let eventStart = event.timestamp.timeIntervalSinceReferenceDate
       let relativeStart = (eventStart - sessionStart) / totalDuration
-      let relativeDuration = max(event.duration / totalDuration, 0.002)
+      let relativeDuration = max(event.snoreDuration / totalDuration, 0.002)
       return TimelineSegment(
         id: event.id,
         x: CGFloat(relativeStart) * totalWidth,

@@ -1821,3 +1821,139 @@ append
 
 ### Open Questions
 - Should we add a second language (e.g. Spanish or German) to validate the localization pipeline end-to-end?
+
+---
+
+## 2026-05-10 — Session 36: Raw Audio Preservation for Future Migrations
+
+### Completed
+- Added `rawAudioFileURL: String?` to `SleepSession` model
+- `SessionManager.stopSession()` now preserves the full session `.caf` in `rawAudioFileURL` instead of deleting it after clip extraction
+- `SessionManager.discardCompletedSession()` now deletes the raw audio file alongside clips and legacy full-session files
+- Old sessions remain playable from per-event clips; raw audio is the archive for future re-processing
+
+### Technical Details
+- `SleepSession.rawAudioFileURL` stores only the filename (same pattern as `audioFileURL`); path resolved via `AudioFileURLResolver`
+- When clips extract successfully: `rawAudioFileURL` = old `audioFileURL`, `audioFileURL` = nil
+- When clips fail: `audioFileURL` remains pointing to full session (legacy fallback), `rawAudioFileURL` stays nil
+- SwiftData handles the new optional property gracefully for old sessions (nil by default)
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Models/Sources/Data/SleepSession.swift` | +6 | Added `rawAudioFileURL: String?` property + init parameter |
+| `Packages/Env/Sources/Services/SessionManager.swift` | +8/-5 | `stopSession()`: preserve full session as raw data instead of deleting; `discardCompletedSession()`: delete raw audio file |
+
+### Architecture Decisions
+- **Keep full audio, not a transition log**: Full audio is the ultimate ground truth. It allows changing ANY part of the detection pipeline (thresholds, debounce, algorithms, bandpass). A transition log would only allow debounce changes and would be ~15MB for a 10h session — still significant.
+- **Storage tradeoff**: Each session now keeps both clips (.m4a, small) and full audio (.caf, ~300-500MB for 10h). This is the right tradeoff for a health app where data fidelity matters. A future enhancement could add a retention policy (e.g., auto-delete raw audio after 30 days).
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors
+
+### Next Session
+- (none scheduled — user may want to address orphaned audio files on disk when SwiftData sessions are deleted)
+
+### Open Questions
+- **Audio file cleanup**: `RecordingsListView.deleteGroup()`, `SettingsView.deleteAllData()`, and `SessionDetailView.deleteSession()` all call `modelContext.delete(session)` without cleaning up associated audio files on disk. With `rawAudioFileURL` now present, orphaned files are more likely. Should we add a pre-delete file cleanup step?
+- **Raw audio retention policy**: Should we auto-delete `rawAudioFileURL` files after N days to manage storage? This would require a background cleanup task.
+
+---
+
+## 2026-05-10 — Session 36 (continued): Raw Classification Log + Orphaned File Cleanup
+
+### Completed
+- Added `SessionRawLogWriter` actor that buffers every classification sample at ~20 Hz during recording
+- `SnoringState` now conforms to `Codable` (String raw value)
+- `SnoreSample` struct stores: elapsed time, dB, spectralScore, snoreConfidence, state
+- `SleepSession.rawLogFileURL: String?` references the JSON log file written at session stop
+- `SessionManager` starts the writer at `startSession()`, appends samples in `processAudioLevel()`, and flushes at `stopSession()`
+- Created `deleteSessionFiles(_:)` helper in Env that removes: event clips, legacy full session, raw audio archive, and raw classification log
+- Wired file cleanup into all 3 deletion paths:
+  - `RecordingsListView.deleteGroup()`
+  - `SettingsView.deleteAllData()`
+  - `SessionDetailView.deleteSession()`
+
+### Technical Details
+- Raw log format: JSON array of `SnoreSample` (~20-30MB for a 10h session)
+- Log file naming: `rawlog_<sessionUUID>.json` in Documents directory
+- `SessionRawLogWriter` uses an in-memory buffer flushed atomically to disk at `stop()`
+- If writing fails or session is discarded, `discard()` cleans up the partial file
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/AudioEngine/Sources/Engine/SnoreDetector.swift` | +1 | `SnoringState` → `String, Codable` |
+| `Packages/AudioEngine/Sources/Engine/SnoreSample.swift` | +25 | New struct for classification samples |
+| `Packages/Env/Sources/Services/SessionRawLogWriter.swift` | +62 | New actor: buffers + writes JSON log |
+| `Packages/Env/Sources/Services/SessionFileCleanup.swift` | +32 | New helper: deletes all session files |
+| `Packages/Models/Sources/Data/SleepSession.swift` | +7 | `rawLogFileURL` property + init |
+| `Packages/Env/Sources/Services/SessionManager.swift` | +15 | Start/stop/append raw log writer |
+| `Packages/Recordings/Sources/Views/RecordingsListView.swift` | +1 | `deleteSessionFiles()` before delete |
+| `Packages/Recordings/Sources/Views/SessionDetailView.swift` | +1 | `deleteSessionFiles()` before delete |
+| `Packages/Settings/Sources/Views/SettingsView.swift` | +1 | `deleteSessionFiles()` before delete |
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors
+
+### Open Questions
+- Should we add a background cleanup task that deletes `rawAudioFileURL` / `rawLogFileURL` files older than N days to manage storage?
+
+---
+
+## 2026-05-10 — Session 36 (continued): Per-Burst Tracking for Snore-Only Clips
+
+### Completed
+- Added `SnoreBurst` struct (`startOffset`, `endOffset`, `duration`) to Models
+- Added `bursts: [SnoreBurst]?` to `SnoreEvent`
+- `SessionManager` now tracks burst boundaries during recording:
+  - `activeBurstStart: Date?` marks when current continuous snoring began
+  - `completedBursts: [(start: Date, end: Date)]` stores finished bursts in the active event
+  - When silence arrives, the open burst is closed and added to completedBursts
+- `finalizeActiveEvent()` computes true snoring duration as `sum(burst.duration)` instead of `lastSnore - eventStart` (which included debounce gaps)
+- `AudioClipExtractor` uses `AVMutableComposition` to stitch only burst segments into gap-free clips; legacy events without bursts fall back to single-range export
+- Spectral analysis now runs on gap-free clips, giving more accurate frequency data
+
+### Technical Details
+- Burst offsets are stored relative to event start time for portability
+- `snoreDuration` is now "seconds of actual snoring" rather than "event span"
+- Sleep score recalculates from true snoring duration, so percentages are slightly lower (and scores slightly higher) than before
+- Player total (`ClipPlaybackController`) reads `event.snoreDuration`, so it matches the true audio content
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Models/Sources/Data/SnoreBurst.swift` | +24 | New struct for continuous snoring segments |
+| `Packages/Models/Sources/Data/SnoreEvent.swift` | +4 | `bursts` property + init parameter |
+| `Packages/AudioEngine/Sources/Engine/AudioClipExtractor.swift` | +45/-15 | AVMutableComposition burst stitching; legacy fallback |
+| `Packages/Env/Sources/Services/SessionManager.swift` | +35/-10 | Burst tracking state; burst-aware finalizeActiveEvent |
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors
+
+### Open Questions
+- Old sessions have `bursts = nil`, so they still play with gaps (legacy fallback). Should we offer a "re-process" button for old sessions using the raw audio or raw log?
+
+---
+
+## 2026-05-10 — Session 36 (continued): Mini Player Dot Position Fix
+
+### Completed
+- Fixed mini player event markers so they align with the playback progress bar
+- `SessionDetailMiniPlayerView` now receives `eventMarkers: [Double]` instead of computing dot positions internally
+- For clip sessions: markers are computed on the concatenated clips timeline (`accumulatedClipDuration / totalClipsDuration`)
+- For legacy sessions: markers remain on the full session timeline (`event.timestamp / session.totalDuration`)
+
+### Root Cause
+The mini player progress bar represents `currentTime / totalClipsDuration` (concatenated clips timeline).
+The dots were previously computed as `event.timestamp / session.totalDuration` (full session timeline).
+For a typical 8-hour session with 8 minutes of clips, the dots would be at 0.2% and 0.6% of the track (barely visible at the left edge), but playback of clip 2 would start at 5.4% of the clips timeline — nowhere near the second dot.
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Recordings/Sources/Views/SessionDetailMiniPlayerView.swift` | +5/-10 | Receives `eventMarkers: [Double]`; renders dots from pre-computed positions |
+| `Packages/Recordings/Sources/Views/SessionDetailView.swift` | +25 | `clipEventMarkers()` + `legacyEventMarkers()` helpers; pass markers to mini player |
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors

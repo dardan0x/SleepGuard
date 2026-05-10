@@ -79,18 +79,6 @@ struct BedsideClockView: View {
         if newSecond != oldSecond {
           currentTime = now
         }
-        let saConf = soundAnalysisDetector.snoreConfidence
-        #if DEBUG
-        if saConf > 0.1 {
-          print("[BedsideClockView] passing db=\(String(format: "%.1f", audioRecorder.currentDB)) snoreConf=\(String(format: "%.3f", saConf))")
-        }
-        #endif
-        sessionManager.processAudioLevel(
-          db: audioRecorder.currentDB,
-          spectralScore: audioRecorder.spectralScore,
-          snoreConfidence: saConf
-        )
-
         try? await Task.sleep(for: .milliseconds(50))
       }
     }

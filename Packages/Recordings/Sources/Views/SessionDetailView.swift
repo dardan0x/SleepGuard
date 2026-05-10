@@ -149,12 +149,16 @@ public struct SessionDetailView: View {
   // MARK: - Clip Playback Section
 
   private func clipPlayerSection(session: SleepSession, sortedEvents: [SnoreEvent]) -> some View {
-    VStack(spacing: 12) {
+    let markers = clipEventMarkers()
+    let colors = eventMarkerColors(events: sortedEvents)
+    return VStack(spacing: 12) {
       SessionDetailMiniPlayerView(
         session: session,
         isPlaying: playbackController.isPlaying,
         progress: clipProgress,
         totalDuration: playbackController.totalClipsDuration,
+        eventMarkers: markers,
+        eventMarkerColors: colors,
         isExpandable: true,
         onTogglePlayback: { playbackController.togglePlayback() },
         onScrub: { relative in playbackController.seek(to: relative) },
@@ -178,6 +182,34 @@ public struct SessionDetailView: View {
   private var clipProgress: Double {
     let total = playbackController.totalClipsDuration
     return total > 0 ? playbackController.currentTime / total : 0
+  }
+
+  /// Marker positions (0–1) on the concatenated clips timeline.
+  private func clipEventMarkers() -> [Double] {
+    let durations = playbackController.events.map { $0.snoreDuration }
+    let total = durations.reduce(0, +)
+    guard total > 0 else { return [] }
+    var accumulated: TimeInterval = 0
+    var markers: [Double] = []
+    for duration in durations {
+      markers.append(accumulated / total)
+      accumulated += duration
+    }
+    return markers
+  }
+
+  /// Marker positions (0–1) on the full session timeline for legacy playback.
+  private func legacyEventMarkers(session: SleepSession) -> [Double] {
+    let total = session.totalDuration
+    guard total > 0 else { return [] }
+    return (session.events ?? [])
+      .sorted { $0.timestamp < $1.timestamp }
+      .map { $0.timestamp.timeIntervalSince(session.startDate) / total }
+  }
+
+  private func eventMarkerColors(events: [SnoreEvent]) -> [Color] {
+    let theme = Theme.shared
+    return events.map { theme.intensityColor($0.intensity) }
   }
 
   private func currentClipEvent(in events: [SnoreEvent]) -> SnoreEvent? {
@@ -216,11 +248,15 @@ public struct SessionDetailView: View {
   // MARK: - Legacy Playback Section
 
   private func legacyPlayerSection(session: SleepSession) -> some View {
-    SessionDetailMiniPlayerView(
+    let markers = legacyEventMarkers(session: session)
+    let colors = eventMarkerColors(events: (session.events ?? []).sorted { $0.timestamp < $1.timestamp })
+    return SessionDetailMiniPlayerView(
       session: session,
       isPlaying: isPlaying,
       progress: audioProgress,
       totalDuration: audioPlayer?.duration ?? session.totalDuration,
+      eventMarkers: markers,
+      eventMarkerColors: colors,
       isExpandable: false,
       onTogglePlayback: toggleLegacyPlayback,
       onScrub: { relative in scrubLegacyTo(relative: relative) },
@@ -307,7 +343,7 @@ public struct SessionDetailView: View {
 
     let eventTime = event.timestamp.timeIntervalSince(session.startDate)
     let startTime = max(0, eventTime)
-    let endTime = min(asset.duration.seconds, eventTime + event.duration)
+    let endTime = min(asset.duration.seconds, eventTime + event.snoreDuration)
     guard endTime > startTime else { return }
 
     exportSession.timeRange = CMTimeRange(
@@ -400,6 +436,7 @@ public struct SessionDetailView: View {
         predicate: #Predicate { $0.id == sessionID }
       )
       if let session = try modelContext.fetch(descriptor).first {
+        deleteSessionFiles(session)
         modelContext.delete(session)
         try modelContext.save()
         dismiss()

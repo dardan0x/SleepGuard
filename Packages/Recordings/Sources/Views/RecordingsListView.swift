@@ -102,6 +102,7 @@ public struct RecordingsListView: View {
 
   private func deleteGroup(_ group: NightGroup) {
     for session in group.sessions {
+      deleteSessionFiles(session)
       modelContext.delete(session)
     }
     do {

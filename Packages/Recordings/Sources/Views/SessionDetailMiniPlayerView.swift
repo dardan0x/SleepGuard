@@ -7,6 +7,8 @@ struct SessionDetailMiniPlayerView: View {
   let isPlaying: Bool
   let progress: Double
   let totalDuration: TimeInterval
+  let eventMarkers: [Double]
+  let eventMarkerColors: [Color]
   let isExpandable: Bool
   let onTogglePlayback: () -> Void
   let onScrub: (Double) -> Void
@@ -37,20 +39,17 @@ struct SessionDetailMiniPlayerView: View {
               .fill(theme.accent)
               .frame(width: max(CGFloat(progress) * geometry.size.width, 0), height: 4)
 
-            // Event markers
-            if let events = session.events?.sorted(by: { $0.timestamp < $1.timestamp }) {
-              ForEach(events, id: \.id) { event in
-                let eventProgress = session.totalDuration > 0
-                  ? event.timestamp.timeIntervalSince(session.startDate) / session.totalDuration
-                  : 0
-                Circle()
-                  .fill(theme.intensityColor(event.intensity))
-                  .frame(width: 6, height: 6)
-                  .position(
-                    x: CGFloat(eventProgress) * geometry.size.width,
-                    y: 2
-                  )
-              }
+            // Event markers — positions are pre-computed to match the same timeline
+            // as the progress bar (clips timeline for clip sessions, session timeline
+            // for legacy full-session playback).
+            ForEach(eventMarkers.indices, id: \.self) { index in
+              Circle()
+                .fill(eventMarkerColors.indices.contains(index) ? eventMarkerColors[index] : theme.accent)
+                .frame(width: 6, height: 6)
+                .position(
+                  x: CGFloat(eventMarkers[index]) * geometry.size.width,
+                  y: 2
+                )
             }
           }
           .contentShape(Rectangle())

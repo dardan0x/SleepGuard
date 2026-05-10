@@ -160,7 +160,7 @@ public struct SleepReportPDFGenerator {
     let formatter = DateFormatter()
     formatter.dateFormat = "hh:mm a"
     let timeText = formatter.string(from: event.timestamp)
-    let durationText = durationString(event.duration)
+    let durationText = durationString(event.snoreDuration)
     let intensityText = event.intensity.rawValue.capitalized
 
     let rowHeight: CGFloat = 28
