@@ -49,10 +49,11 @@ public final class ClipPlaybackController {
 
   public func loadEvents(_ events: [SnoreEvent]) {
     self.events = events.sorted { $0.timestamp < $1.timestamp }
+    // Use event.duration as the single source of truth so the player's total
+    // matches session.snoringDuration and the stats grid.
     clipDurations = self.events.map { event in
-      guard let url = AudioFileURLResolver.resolve(event.audioFileURL) else { return 0 }
-      guard let player = try? AVAudioPlayer(contentsOf: url) else { return 0 }
-      return player.duration
+      guard AudioFileURLResolver.resolve(event.audioFileURL) != nil else { return 0 }
+      return event.snoreDuration
     }
     totalClipsDuration = clipDurations.reduce(0, +)
     currentEventIndex = 0

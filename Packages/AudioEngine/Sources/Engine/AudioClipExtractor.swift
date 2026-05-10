@@ -4,6 +4,8 @@ import Models
 
 /// Extracts individual snore-event audio clips from a full session recording
 /// and computes spectral features for each clip.
+/// When an event contains burst data, the clip is composed from only the
+/// snoring segments (gaps between bursts are removed).
 public enum AudioClipExtractor {
   public struct ClipResult {
     public let eventID: UUID
@@ -28,17 +30,13 @@ public enum AudioClipExtractor {
     padding: TimeInterval = 0.0,
     outputDirectory: URL
   ) async -> [ClipResult] {
-    let asset = AVURLAsset(url: sessionURL)
-    let totalDuration = await asset.duration.seconds
+    let sourceAsset = AVURLAsset(url: sessionURL)
+    let totalDuration = await sourceAsset.duration.seconds
 
     var results: [ClipResult] = []
 
     for event in events {
       let eventTime = event.timestamp.timeIntervalSince(sessionStart)
-      let startTime = max(0, eventTime - padding)
-      let endTime = min(totalDuration, eventTime + event.duration + padding)
-      guard endTime > startTime else { continue }
-
       let clipURL = outputDirectory
         .appendingPathComponent("event_\(event.id.uuidString).m4a")
 
@@ -47,22 +45,72 @@ public enum AudioClipExtractor {
         try? FileManager.default.removeItem(at: clipURL)
       }
 
+      let exportAsset: AVAsset
+      let exportTimeRange: CMTimeRange?
+
+      if let bursts = event.bursts, !bursts.isEmpty {
+        // Compose gap-free clip from burst segments
+        let composition = AVMutableComposition()
+        guard let compositionTrack = composition.addMutableTrack(
+          withMediaType: .audio,
+          preferredTrackID: kCMPersistentTrackID_Invalid
+        ),
+        let sourceTrack = try? await sourceAsset.loadTracks(withMediaType: .audio).first else {
+          continue
+        }
+
+        var compositionTime = CMTime.zero
+        for burst in bursts {
+          let burstStart = CMTime(
+            seconds: max(0, eventTime + burst.startOffset - padding),
+            preferredTimescale: 600
+          )
+          let burstDuration = CMTime(
+            seconds: min(
+              totalDuration - burstStart.seconds,
+              burst.duration + (padding * 2)
+            ),
+            preferredTimescale: 600
+          )
+          guard burstDuration.seconds > 0 else { continue }
+          try? compositionTrack.insertTimeRange(
+            CMTimeRange(start: burstStart, duration: burstDuration),
+            of: sourceTrack,
+            at: compositionTime
+          )
+          compositionTime = CMTimeAdd(compositionTime, burstDuration)
+        }
+
+        guard compositionTime.seconds > 0 else { continue }
+        exportAsset = composition
+        exportTimeRange = nil // Export the entire composition
+      } else {
+        // Legacy: single range export
+        let startTime = max(0, eventTime - padding)
+        let endTime = min(totalDuration, eventTime + event.snoreDuration + padding)
+        guard endTime > startTime else { continue }
+        exportAsset = sourceAsset
+        exportTimeRange = CMTimeRange(
+          start: CMTime(seconds: startTime, preferredTimescale: 600),
+          duration: CMTime(seconds: endTime - startTime, preferredTimescale: 600)
+        )
+      }
+
       guard let exportSession = AVAssetExportSession(
-        asset: asset,
+        asset: exportAsset,
         presetName: AVAssetExportPresetAppleM4A
       ) else { continue }
 
-      exportSession.timeRange = CMTimeRange(
-        start: CMTime(seconds: startTime, preferredTimescale: 600),
-        duration: CMTime(seconds: endTime - startTime, preferredTimescale: 600)
-      )
+      if let timeRange = exportTimeRange {
+        exportSession.timeRange = timeRange
+      }
       exportSession.outputURL = clipURL
       exportSession.outputFileType = .m4a
 
       await exportSession.export()
       guard exportSession.status == .completed else { continue }
 
-      // Analyze spectral features
+      // Analyze spectral features on the (now gap-free) clip
       let spectral = await analyzeSpectralFeatures(of: clipURL)
 
       results.append(ClipResult(
@@ -119,5 +167,3 @@ public enum AudioClipExtractor {
     )
   }
 }
-
-

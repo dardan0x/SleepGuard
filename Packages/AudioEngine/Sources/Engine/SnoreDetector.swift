@@ -1,7 +1,7 @@
 import AVFoundation
 import Observation
 
-public enum SnoringState: Sendable {
+public enum SnoringState: String, Sendable, Codable {
   case none
   case quiet
   case light

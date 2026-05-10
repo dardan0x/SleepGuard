@@ -11,7 +11,7 @@ public enum SnoreIntensity: String, Codable, Sendable {
 public final class SnoreEvent {
   @Attribute(.unique) public var id: UUID
   public var timestamp: Date
-  public var duration: TimeInterval
+  public var snoreDuration: TimeInterval
   public var intensity: SnoreIntensity
   public var averageDB: Double
   public var peakDB: Double
@@ -20,23 +20,28 @@ public final class SnoreEvent {
   public var lowFreqRatio: Double
   public var audioFileURL: String?
 
+  /// Continuous snoring segments within this event. Used to create gap-free clips
+  /// and compute true snoring duration (sum of burst lengths).
+  public var bursts: [SnoreBurst]?
+
   public var session: SleepSession?
 
   public init(
     id: UUID = UUID(),
     timestamp: Date,
-    duration: TimeInterval,
+    snoreDuration: TimeInterval,
     intensity: SnoreIntensity,
     averageDB: Double,
     peakDB: Double,
     dominantFrequency: Double = 0,
     spectralCentroid: Double = 0,
     lowFreqRatio: Double = 0,
-    audioFileURL: String? = nil
+    audioFileURL: String? = nil,
+    bursts: [SnoreBurst]? = nil
   ) {
     self.id = id
     self.timestamp = timestamp
-    self.duration = duration
+    self.snoreDuration = snoreDuration
     self.intensity = intensity
     self.averageDB = averageDB
     self.peakDB = peakDB
@@ -44,5 +49,6 @@ public final class SnoreEvent {
     self.spectralCentroid = spectralCentroid
     self.lowFreqRatio = lowFreqRatio
     self.audioFileURL = audioFileURL
+    self.bursts = bursts
   }
 }

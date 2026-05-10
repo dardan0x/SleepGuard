@@ -21,7 +21,7 @@ struct EventRow: View {
         .foregroundStyle(theme.textPrimary)
         .monospacedDigit()
 
-      Text(durationString(event.duration))
+      Text(durationString(event.snoreDuration))
         .font(.system(size: 14, weight: .medium))
         .foregroundStyle(theme.textSecondary)
         .monospacedDigit()

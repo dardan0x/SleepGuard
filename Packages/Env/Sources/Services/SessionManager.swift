@@ -30,12 +30,17 @@ public final class SessionManager {
   private var lastSnoringSampleTime: Date?
   private let eventGapThreshold: TimeInterval = 3.0
 
+  // Burst tracking: continuous snoring segments within the active event
+  private var activeBurstStart: Date?
+  private var completedBursts: [(start: Date, end: Date)] = []
+
   // MARK: - Session aggregate state
 
   private var totalDBSum: Double = 0
   private var totalDBCount: Int = 0
   private var sessionSnoringDuration: TimeInterval = 0
   private var lastUpdateTime: Date?
+  private var processingTask: Task<Void, Never>?
 
   private init() {}
 
@@ -43,6 +48,7 @@ public final class SessionManager {
 
   public func startSession() throws {
     resetTrackingState()
+    processingTask?.cancel()
 
     let session = SleepSession(startDate: Date())
     let audioURL = audioFileURL(for: session.id)
@@ -54,15 +60,34 @@ public final class SessionManager {
     currentDB = -160.0
     currentSnoringState = .none
     eventsCount = 0
+
+    Task {
+      await SessionRawLogWriter.shared.start(sessionID: session.id)
+    }
+
+    // Drive processAudioLevel from SessionManager so it survives background.
+    processingTask = Task { @MainActor in
+      while !Task.isCancelled {
+        let saConf = SoundAnalysisDetector.shared.snoreConfidence
+        processAudioLevel(
+          db: audioRecorder.currentDB,
+          spectralScore: audioRecorder.spectralScore,
+          snoreConfidence: saConf
+        )
+        try? await Task.sleep(for: .milliseconds(50))
+      }
+    }
   }
 
   public func stopSession() async -> SleepSession? {
+    processingTask?.cancel()
+    processingTask = nil
     audioRecorder.stopRecording()
     isRecording = false
 
     // Finalize any in-progress snore event (include trailing gap since user stopped mid-session)
     if activeEventStart != nil {
-      finalizeActiveEvent(includeGap: true)
+      finalizeActiveEvent()
     }
 
     guard let session = currentSession else { return nil }
@@ -70,17 +95,21 @@ public final class SessionManager {
     let now = Date()
     let totalDuration = now.timeIntervalSince(session.startDate)
 
+    // Derive snoring duration from event durations (ground truth) rather than
+    // the real-time accumulator, which misses time during stalls/background.
+    let computedSnoringDuration = session.events?.reduce(0) { $0 + $1.snoreDuration } ?? 0
+
     session.endDate = now
     session.totalDuration = totalDuration
-    session.snoringDuration = sessionSnoringDuration
-    session.snoringPercentage = totalDuration > 0 ? (sessionSnoringDuration / totalDuration) * 100 : 0
+    session.snoringDuration = computedSnoringDuration
+    session.snoringPercentage = totalDuration > 0 ? (computedSnoringDuration / totalDuration) * 100 : 0
     session.eventsCount = session.events?.count ?? 0
     session.eventsPerHour = totalDuration > 0 ? Double(session.eventsCount) / (totalDuration / 3600) : 0
     session.averageDB = totalDBCount > 0 ? totalDBSum / Double(totalDBCount) : 0
     session.sleepScore = computeSleepScore(session: session)
     eventsCount = session.eventsCount
 
-    // Extract per-event clips and spectral features, then delete full session
+    // Extract per-event clips and spectral features; preserve full session as raw data
     if let events = session.events, !events.isEmpty,
        let sessionURL = AudioFileURLResolver.resolve(session.audioFileURL) {
       let docs = FileManager.default
@@ -100,13 +129,19 @@ public final class SessionManager {
           event.lowFreqRatio = result.lowFreqRatio
         }
       }
-      // Only delete full session file if at least one clip was extracted;
-      // otherwise keep the original recording as fallback.
+      // Preserve full session audio for future re-processing (threshold changes, migrations).
+      // Clips become the primary playback source; raw file is the ground-truth archive.
       if !results.isEmpty {
-        try? FileManager.default.removeItem(at: sessionURL)
+        session.rawAudioFileURL = session.audioFileURL
         session.audioFileURL = nil
       }
+      // If clips failed to extract, leave audioFileURL pointing to the full session
+      // so playback and raw data both remain available.
     }
+
+    // Save raw classification log
+    let logFilename = await SessionRawLogWriter.shared.stop()
+    session.rawLogFileURL = logFilename
 
     let result = session
     completedSession = result
@@ -124,8 +159,16 @@ public final class SessionManager {
         }
       }
     }
-    // Delete legacy full session file if present
+    // Delete legacy full session file if present (pre-raw-audio sessions)
     if let url = AudioFileURLResolver.resolve(completedSession?.audioFileURL) {
+      try? FileManager.default.removeItem(at: url)
+    }
+    // Delete raw full session archive
+    if let url = AudioFileURLResolver.resolve(completedSession?.rawAudioFileURL) {
+      try? FileManager.default.removeItem(at: url)
+    }
+    // Delete raw classification log
+    if let url = AudioFileURLResolver.resolve(completedSession?.rawLogFileURL) {
       try? FileManager.default.removeItem(at: url)
     }
     completedSession = nil
@@ -143,7 +186,8 @@ public final class SessionManager {
     guard isRecording, let session = currentSession else { return }
 
     let now = Date()
-    let timeDelta = lastUpdateTime.map { now.timeIntervalSince($0) } ?? 0
+    let rawDelta = lastUpdateTime.map { now.timeIntervalSince($0) } ?? 0
+    let timeDelta = min(rawDelta, 0.5) // Cap to avoid spikes after background/resume
     lastUpdateTime = now
 
     currentDB = db
@@ -166,36 +210,55 @@ public final class SessionManager {
     // Update display state immediately for UI responsiveness
     currentSnoringState = state
 
+    // Append to raw classification log for future re-processing
+    Task {
+      await SessionRawLogWriter.shared.append(
+        db: db,
+        spectralScore: spectralScore,
+        snoreConfidence: snoreConfidence,
+        state: state
+      )
+    }
+
     // Accumulate snoring duration
     if state != .none {
       sessionSnoringDuration += timeDelta
     }
 
-    // Handle event tracking with debounce gap
+    // Handle event tracking with debounce gap + per-burst tracking
     if state != .none {
       lastSnoringSampleTime = now
       if activeEventStart == nil {
-        // Snoring started
+        // New event starts
         activeEventStart = now
         activeEventDBSum = Double(db)
         activeEventDBCount = 1
         activeEventPeakDB = Double(db)
         activeEventIntensity = intensity(from: state)
+        activeBurstStart = now
       } else {
-        // Snoring continues
+        // Event already active
         activeEventDBSum += Double(db)
         activeEventDBCount += 1
         if Double(db) > activeEventPeakDB {
           activeEventPeakDB = Double(db)
         }
-        // Upgrade intensity if current sample is louder
         let currentIntensity = intensity(from: state)
         if intensityRank(currentIntensity) > intensityRank(activeEventIntensity ?? .quiet) {
           activeEventIntensity = currentIntensity
         }
+        // Start a new burst if we resumed after a brief gap
+        if activeBurstStart == nil {
+          activeBurstStart = now
+        }
       }
     } else {
-      // Only finalize if we've been silent long enough
+      // Silence — close current burst if open
+      if let burstStart = activeBurstStart {
+        completedBursts.append((start: burstStart, end: now))
+        activeBurstStart = nil
+      }
+      // Finalize event if silence exceeded debounce threshold
       if let lastSnore = lastSnoringSampleTime,
          activeEventStart != nil,
          now.timeIntervalSince(lastSnore) >= eventGapThreshold {
@@ -237,28 +300,48 @@ public final class SessionManager {
     sessionSnoringDuration = 0
     lastUpdateTime = nil
     lastSnoringSampleTime = nil
+    activeBurstStart = nil
+    completedBursts.removeAll(keepingCapacity: false)
   }
 
-  private func finalizeActiveEvent(includeGap: Bool = true) {
+  private func finalizeActiveEvent() {
     guard let startTime = activeEventStart, let session = currentSession else { return }
-    let endTime = includeGap ? Date() : (lastSnoringSampleTime ?? Date())
-    let duration = endTime.timeIntervalSince(startTime)
-    guard duration >= 0.5 else {
-      // Too brief — discard
+
+    // Close any open burst
+    if let burstStart = activeBurstStart {
+      completedBursts.append((start: burstStart, end: lastSnoringSampleTime ?? Date()))
+      activeBurstStart = nil
+    }
+
+    // Build burst models with offsets relative to event start
+    let bursts = completedBursts.map { SnoreBurst(
+      startOffset: $0.start.timeIntervalSince(startTime),
+      endOffset: $0.end.timeIntervalSince(startTime)
+    )}
+
+    // True snoring duration = sum of burst lengths (excludes debounce gaps)
+    let trueSnoreDuration = bursts.reduce(0) { $0 + $1.duration }
+    let eventSpan = (lastSnoringSampleTime ?? Date()).timeIntervalSince(startTime)
+
+    // Use event span for minimum-duration check so brief multi-burst events still count,
+    // but store true snoring duration for stats.
+    guard eventSpan >= 0.5 else {
       activeEventStart = nil
       activeEventIntensity = nil
       activeEventDBSum = 0
       activeEventDBCount = 0
       activeEventPeakDB = 0
+      completedBursts.removeAll()
       return
     }
 
     let event = SnoreEvent(
       timestamp: startTime,
-      duration: duration,
+      snoreDuration: trueSnoreDuration,
       intensity: activeEventIntensity ?? .quiet,
       averageDB: activeEventDBCount > 0 ? activeEventDBSum / Double(activeEventDBCount) : 0,
-      peakDB: activeEventPeakDB
+      peakDB: activeEventPeakDB,
+      bursts: bursts.isEmpty ? nil : bursts
     )
     event.session = session
 
@@ -273,6 +356,7 @@ public final class SessionManager {
     activeEventDBSum = 0
     activeEventDBCount = 0
     activeEventPeakDB = 0
+    completedBursts.removeAll(keepingCapacity: false)
   }
 
   private func audioFileURL(for sessionID: UUID) -> URL {
