@@ -1957,3 +1957,40 @@ For a typical 8-hour session with 8 minutes of clips, the dots would be at 0.2% 
 
 ### Build Status
 - **BUILD SUCCEEDED** — zero errors
+
+## 2026-05-11 — Session 37: PDF Visual Polish + Dark Mode Color Preservation
+
+### Completed
+- Redesigned PDF header gradient from bright red `#FF453A` to blue gradient (`#7FD9F2` → `#1A73C0` → `#0D2666`)
+- Changed card backgrounds from near-white `#F5F5F7` to icy blue `#F0F7FF` that complements the blue header
+- Added explicit white page background fill to prevent dark mode PDF viewers from showing dark backgrounds through transparent areas
+- Replaced all semantic `UIColor.white` with explicit `UIColor(red: 1, green: 1, blue: 1, alpha: ...)` to prevent dark mode color shifting
+- Forced `UITraitCollection(userInterfaceStyle: .light)` during PDF generation with restore-on-exit pattern
+- Removed unused `blabla1/2/3` dark red color constants leftover from earlier experiments
+
+### Technical Details
+- `UIRectFill(pageRect)` fills the entire 612×792 PDF canvas with white before any content is drawn
+- `UITraitCollection.current = lightTraits` is set before `renderer.writePDF()` and restored via `defer` to ensure all color resolution happens in light mode context
+- Event row background uses slightly lighter icy blue `#F5FAFF` for subtle differentiation from cards
+- Secondary text color shifted from warm gray to cool blue-gray `#737B94` for harmony with blue theme
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Recordings/Sources/Views/SleepReportPDFGenerator.swift` | +25/-20 | Blue gradient header; icy blue card/row backgrounds; explicit RGB white; white page fill; light mode trait forcing; cleaned unused constants |
+
+### Architecture Decisions
+- **Explicit colors over semantic**: PDFs are documents, not UI — they must render identically regardless of viewer dark mode. Every color is now explicit RGBA.
+- **Page background fill**: Without it, PDF viewers (iOS Files app in dark mode) show their own dark background through transparent areas, making light cards appear black.
+- **Trait collection forcing**: Even explicit `UIColor` values can shift if resolved through a dark mode trait collection. Setting `UITraitCollection.current` to `.light` eliminates this entirely.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors across all packages + app target
+
+### Next Session
+- (none scheduled — user may want to test PDF on device in both light and dark mode to verify colors are preserved)
+
+### Open Questions
+- Should the PDF footer or event table headers also get a subtle blue tint for full thematic consistency?
+
+---

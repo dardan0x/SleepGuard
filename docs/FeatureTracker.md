@@ -2,7 +2,7 @@
 
 > Auto-updated by the AI after every task. This is the local source of truth.
 
-Last updated: 2026-05-10 (Session 36)
+Last updated: 2026-05-11 (Session 37)
 
 ---
 
@@ -59,6 +59,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-05-11 | PDF visual polish + dark mode color preservation | Completed | Blue gradient header (`#7FD9F2` → `#1A73C0` → `#0D2666`); icy blue card backgrounds (`#F0F7FF`); explicit white page background fill; replaced all `UIColor.white` with explicit RGB; forced `UITraitCollection(userInterfaceStyle: .light)` during generation; removed unused dark red color constants |
 | 2026-05-10 | Raw data preservation + per-burst tracking + orphaned file cleanup + mini player dot fix | Completed | Added `SleepSession.rawAudioFileURL` + `rawLogFileURL`; `SessionRawLogWriter` buffers every 50ms classification sample as JSON; `SnoreBurst` tracks continuous snoring segments within events; `snoreDuration` now = sum of burst durations (true snoring time, excludes gaps); `AudioClipExtractor` composes gap-free clips via `AVMutableComposition`; `deleteSessionFiles()` cleans up all files on deletion; Mini player dots now positioned on clips timeline so they align with playback progress |
 | 2026-05-09 | Localization: Semantic key migration | Completed | Migrated 132 xcstrings keys from raw English to dot-notation (e.g. `onboarding.page1.title`, `session.recording.statusFormat`); updated generator with camelCase splitting; all 42 source files updated; zero build errors; max constant name 40 chars |
 | 2026-05-09 | F4-T6 Polish + Playback Fixes + Reusable Stats Grid + Navigation Polish | Completed | Zero-padding clips, AudioFileURLResolver (stale path fix), SessionStatsGrid, NightGroupRowView single-tap nav, waveform seek, expand hint, hide Peak dB |
