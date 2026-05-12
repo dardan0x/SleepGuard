@@ -2,7 +2,7 @@
 
 > Auto-updated by the AI after every task. This is the local source of truth.
 
-Last updated: 2026-05-11 (Session 37)
+Last updated: 2026-05-12 (Session 37)
 
 ---
 
@@ -107,6 +107,9 @@ _Most recent first. The AI appends here after every task._
 | 2026-05-06 | F2-T5 | Completed | Session summary sheet with sleep score ring, stats grid, Save/Discard |
 | 2026-05-06 | F2-T4 | Completed | Bedside clock active recording UI with dB bar, snoring glow, timer |
 | 2026-05-06 | F2-T3 | Completed | Pre-start recording screen with mic status + tips + CTA |
+| 2026-05-12 | F2-T2 | Fix | Sleep score formula revised (snoring cap 70, events cap 20, intensity penalty added); moved from SwiftData stored to computed property |
+| 2026-05-12 | F2-T2 | Refactor | Converted `totalDuration`, `snoringDuration`, `snoringPercentage`, `eventsCount`, `eventsPerHour` from stored to computed on `SleepSession` |
+| 2026-05-12 | F2-T2 | Refactor | Converted `SnoreEvent.snoreDuration` from stored to computed (derived from `bursts`) |
 | 2026-05-06 | F2-T2 | Completed | SessionManager real-time event tracking + sleep score |
 | 2026-05-06 | F2-T1 | Completed | AudioRecorder + SnoreDetector verified from scaffold |
 | 2026-05-06 | F1-T2 | Completed | Onboarding screens 1-3 UI with animations |

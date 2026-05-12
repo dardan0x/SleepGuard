@@ -11,6 +11,7 @@ public final class SessionManager {
   public var currentSession: SleepSession?
   public var isRecording = false
   public var completedSession: SleepSession?
+  public var isProcessingSession = false
 
   /// Real-time audio level for UI observation
   public var currentDB: Float = -160.0
@@ -80,6 +81,9 @@ public final class SessionManager {
   }
 
   public func stopSession() async -> SleepSession? {
+    isProcessingSession = true
+    defer { isProcessingSession = false }
+
     processingTask?.cancel()
     processingTask = nil
     audioRecorder.stopRecording()
@@ -93,20 +97,9 @@ public final class SessionManager {
     guard let session = currentSession else { return nil }
 
     let now = Date()
-    let totalDuration = now.timeIntervalSince(session.startDate)
-
-    // Derive snoring duration from event durations (ground truth) rather than
-    // the real-time accumulator, which misses time during stalls/background.
-    let computedSnoringDuration = session.events?.reduce(0) { $0 + $1.snoreDuration } ?? 0
 
     session.endDate = now
-    session.totalDuration = totalDuration
-    session.snoringDuration = computedSnoringDuration
-    session.snoringPercentage = totalDuration > 0 ? (computedSnoringDuration / totalDuration) * 100 : 0
-    session.eventsCount = session.events?.count ?? 0
-    session.eventsPerHour = totalDuration > 0 ? Double(session.eventsCount) / (totalDuration / 3600) : 0
     session.averageDB = totalDBCount > 0 ? totalDBSum / Double(totalDBCount) : 0
-    session.sleepScore = computeSleepScore(session: session)
     eventsCount = session.eventsCount
 
     // Extract per-event clips and spectral features; preserve full session as raw data
@@ -266,25 +259,10 @@ public final class SessionManager {
       }
     }
 
-    // Update session in-memory stats for real-time UI
-    session.snoringDuration = sessionSnoringDuration
-    session.totalDuration = now.timeIntervalSince(session.startDate)
+    // Update stored aggregate (averageDB only; others are computed on demand)
     if totalDBCount > 0 {
       session.averageDB = totalDBSum / Double(totalDBCount)
     }
-    session.eventsCount = session.events?.count ?? 0
-    if session.totalDuration > 0 {
-      session.snoringPercentage = (sessionSnoringDuration / session.totalDuration) * 100
-    }
-  }
-
-  // MARK: - Sleep score
-
-  public func computeSleepScore(session: SleepSession) -> Int {
-    let snoringPenalty = min(Int(session.snoringPercentage * 0.5), 30)
-    let eventsPenalty = min(Int(session.eventsPerHour * 2), 30)
-    let score = max(0, 100 - snoringPenalty - eventsPenalty)
-    return score
   }
 
   // MARK: - Private helpers
@@ -319,12 +297,9 @@ public final class SessionManager {
       endOffset: $0.end.timeIntervalSince(startTime)
     )}
 
-    // True snoring duration = sum of burst lengths (excludes debounce gaps)
-    let trueSnoreDuration = bursts.reduce(0) { $0 + $1.duration }
     let eventSpan = (lastSnoringSampleTime ?? Date()).timeIntervalSince(startTime)
 
-    // Use event span for minimum-duration check so brief multi-burst events still count,
-    // but store true snoring duration for stats.
+    // Use event span for minimum-duration check so brief multi-burst events still count.
     guard eventSpan >= 0.5 else {
       activeEventStart = nil
       activeEventIntensity = nil
@@ -337,7 +312,6 @@ public final class SessionManager {
 
     let event = SnoreEvent(
       timestamp: startTime,
-      snoreDuration: trueSnoreDuration,
       intensity: activeEventIntensity ?? .quiet,
       averageDB: activeEventDBCount > 0 ? activeEventDBSum / Double(activeEventDBCount) : 0,
       peakDB: activeEventPeakDB,

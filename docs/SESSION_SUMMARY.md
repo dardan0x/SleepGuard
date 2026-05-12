@@ -1994,3 +1994,158 @@ For a typical 8-hour session with 8 minutes of clips, the dots would be at 0.2% 
 - Should the PDF footer or event table headers also get a subtle blue tint for full thematic consistency?
 
 ---
+
+## 2026-05-12 — Session 37: Sleep Score Formula Fix
+
+### Completed
+- Sleep score formula revised to penalize high snoring percentages more aggressively.
+- `sleepScore` moved from SwiftData stored property to computed property on `SleepSession`.
+
+### Technical Details
+- Old formula: `max(0, 100 - min(snoring% × 0.5, 30) - min(events/hour × 2, 30))` — minimum score 40, intensity ignored.
+- New formula: `max(0, 100 - min(snoring% × 0.7, 70) - min(events/hour × 2, 20) - min(lightRatio × 10 + loudRatio × 20, 20))` — minimum score 0, intensity weighted by event duration.
+- Example: 29:39 session with 27:43 snoring (93.5%) now scores ~31 instead of 66.
+- Computed property means all historical sessions retroactively use the new formula without Core Data / SwiftData migration.
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Models/Sources/Data/SleepSession.swift` | +21/-5 | Removed `sleepScore` stored property and init parameter; added computed `sleepScore` with new formula including intensity penalty |
+| `Packages/Env/Sources/Services/SessionManager.swift` | -10 | Removed `computeSleepScore(session:)` function and `session.sleepScore = ...` assignment in `stopSession()` |
+
+### Architecture Decisions
+- **Computed over stored**: Product logic (scoring formulas) changes frequently in health apps. Storing derived values couples data to logic version. Computing on read lets us iterate formulas without migration scripts or stale historical scores.
+- **Intensity from event durations**: `SnoreEvent.intensity` is the peak observed during the event, but we weight by `snoreDuration` so a 10-minute loud event counts more than a 2-second loud spike.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors across all packages + app target
+
+### Next Session
+- (none scheduled)
+
+### Open Questions
+- Should the snoring penalty weight (0.7) or cap (70) be tuned further based on real-world testing?
+
+---
+
+## 2026-05-12 — Session 37 (continued): Derived Session Stats → Computed
+
+### Completed
+- Converted 5 derived `SleepSession` properties from SwiftData stored to computed.
+
+### Technical Details
+- **Stored before:** `totalDuration`, `snoringDuration`, `snoringPercentage`, `eventsCount`, `eventsPerHour`, `sleepScore`
+- **Computed now:** All except `averageDB` and `peakDB` (which derive from per-sample audio data not stored in SwiftData)
+- **Source of truth:**
+  - `totalDuration` → `endDate.timeIntervalSince(startDate)`
+  - `snoringDuration` → `events.reduce(0) { $0 + $1.snoreDuration }`
+  - `snoringPercentage` → `snoringDuration / totalDuration * 100`
+  - `eventsCount` → `events?.count ?? 0`
+  - `eventsPerHour` → `eventsCount / (totalDuration / 3600)`
+  - `sleepScore` → formula (see earlier session entry)
+- Removed all write sites in `SessionManager.processAudioLevel()` and `SessionManager.stopSession()`.
+- `SessionManager.eventsCount` (stored `Int` for `@Observable` UI propagation) still updates from computed `session.eventsCount`.
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Models/Sources/Data/SleepSession.swift` | +25/-9 | Removed 5 stored properties and init parameters; added computed properties deriving from `startDate`/`endDate`/`events` |
+| `Packages/Env/Sources/Services/SessionManager.swift` | -12 | Removed assignments to computed properties in `stopSession()` and `processAudioLevel()`; kept `averageDB` and `sessionManager.eventsCount` updates |
+
+### Architecture Decisions
+- **Raw data only in SwiftData:** Time-series aggregates (duration, counts, percentages) are derived values. Persisting them creates stale data risk and requires migrations when formulas change. Computing on read keeps the model layer thin.
+- **`averageDB` / `peakDB` stay stored:** They aggregate ~50ms audio samples across the entire session. The raw sample log exists in `rawLogFileURL`, but re-parsing a JSON log for every UI read is too expensive. These are analysis results, not simple arithmetic.
+- **Query limitation accepted:** SwiftData can't sort/filter by computed properties. All current queries sort by `startDate`, so this is not a constraint today.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors across all packages + app target
+
+### Next Session
+- (none scheduled)
+
+---
+
+## 2026-05-12 — Session 37 (continued): SnoreEvent.snoreDuration → Computed
+
+### Completed
+- Converted `SnoreEvent.snoreDuration` from SwiftData stored to computed.
+
+### Technical Details
+- `snoreDuration` is now `bursts?.reduce(0) { $0 + $1.duration } ?? 0`
+- Removed `snoreDuration` parameter from `SnoreEvent` init
+- Removed `trueSnoreDuration` local variable from `SessionManager.finalizeActiveEvent()`
+- If burst-detection logic changes in the future (gap threshold, minimum burst length), historical event durations auto-update
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Models/Sources/Data/SnoreEvent.swift` | +6/-4 | Removed `snoreDuration` stored property and init parameter; added computed property deriving from `bursts` |
+| `Packages/Env/Sources/Services/SessionManager.swift` | -3 | Removed `snoreDuration` argument from `SnoreEvent` init; removed `trueSnoreDuration` local variable |
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors across all packages + app target
+
+---
+
+## 2026-05-12 — Session 37: Sleep Score Fix + SwiftData Schema Audit (Final)
+
+### Completed
+- Fixed sleep score formula that was producing 66 for a 93.5% snoring session
+- Converted 6 derived `SleepSession` properties from stored to computed
+- Converted `SnoreEvent.snoreDuration` from stored to computed
+- Full audit of SwiftData schema to minimize future migrations
+
+### Technical Details
+
+**Old sleep score formula:**
+```
+score = max(0, 100 - min(snoring% × 0.5, 30) - min(events/hour × 2, 30))
+// Minimum possible score: 40. Intensity ignored.
+```
+
+**New sleep score formula:**
+```
+score = max(0, 100
+  - min(snoring% × 0.7, 70)
+  - min(events/hour × 2, 20)
+  - min(lightRatio × 10 + loudRatio × 20, 20))
+// Minimum possible score: 0. Intensity weighted by event duration.
+```
+
+**Example impact:** 29:39 session with 27:43 snoring (93.5%) — score went from **66 → ~31**.
+
+**SwiftData schema changes:**
+| Model | Removed from stored | Still stored |
+|-------|---------------------|--------------|
+| `SleepSession` | `totalDuration`, `snoringDuration`, `snoringPercentage`, `eventsCount`, `eventsPerHour`, `sleepScore` | `id`, `startDate`, `endDate`, `averageDB`, `peakDB`, `audioFileURL`, `rawAudioFileURL`, `rawLogFileURL`, `events` |
+| `SnoreEvent` | `snoreDuration` | `id`, `timestamp`, `intensity`, `averageDB`, `peakDB`, `dominantFrequency`, `spectralCentroid`, `lowFreqRatio`, `audioFileURL`, `bursts`, `session` |
+
+**Why `averageDB`/`peakDB` and event FFT features stay stored:**
+They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). Recomputing on every UI read would require parsing 500K+ JSON entries or running FFT per event. These are cached analysis results, not simple arithmetic.
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Models/Sources/Data/SleepSession.swift` | +51/-15 | Removed 6 stored properties and init parameters; added computed `totalDuration`, `snoringDuration`, `snoringPercentage`, `eventsCount`, `eventsPerHour`, `sleepScore` |
+| `Packages/Models/Sources/Data/SnoreEvent.swift` | +6/-4 | Removed `snoreDuration` stored property and init parameter; added computed property deriving from `bursts` |
+| `Packages/Env/Sources/Services/SessionManager.swift` | -28 | Removed `computeSleepScore(session:)`, removed assignments to all computed properties in `stopSession()` and `processAudioLevel()`, removed `trueSnoreDuration` local variable |
+| `docs/trackers/f2-live-session.md` | +6 | Added Session 37 refinement notes |
+| `docs/FeatureTracker.md` | +3 | Added activity log entries for formula fix and both refactor tasks |
+
+### Architecture Decisions
+- **Computed for simple derivations:** Any property that is pure arithmetic over small in-memory arrays (events, bursts, dates) should be computed. Formula changes apply retroactively; no migrations needed.
+- **Stored for expensive analysis results:** Audio features (dB averages, peaks, FFT coefficients) require re-processing raw audio or parsing large JSON logs. These stay stored as caches.
+- **Query limitation accepted:** SwiftData cannot sort/filter by computed properties. All current queries sort by `startDate`, so this is not a constraint today.
+- **Schema stability:** The remaining stored properties represent raw data or expensive-to-recompute caches. Their meanings are unlikely to change, minimizing future migration needs.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors across all packages + app target
+
+### Next Session
+- (none scheduled)
+
+### Open Questions
+- Should snoring penalty weight (0.7) or cap (70) be tuned based on real-world testing?
+- Should we add `analysisPipelineVersion: Int` to `SleepSession` for background reprocessing when detection algorithms change?
+
+---

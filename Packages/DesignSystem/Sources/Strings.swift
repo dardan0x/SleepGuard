@@ -3,6 +3,7 @@ import Foundation
 /// Auto-generated from Localizable.xcstrings — do not edit manually.
 /// Run: python3 scripts/generate-strings.py
 public enum Strings {
+  public static var processingSession: String { String(localized: "Processing session...", bundle: .module) }
   public static var actionBack: String { String(localized: "action.back", bundle: .module) }
   public static var actionCancel: String { String(localized: "action.cancel", bundle: .module) }
   public static var actionDelete: String { String(localized: "action.delete", bundle: .module) }
