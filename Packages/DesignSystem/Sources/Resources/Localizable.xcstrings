@@ -341,7 +341,7 @@
         }
       }
     },
-    "Processing session..." : {
+    "processing.session" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -578,6 +578,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Spectral Centroid"
+          }
+        }
+      }
+    },
+    "save.failed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save Failed"
           }
         }
       }
@@ -1288,6 +1299,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Statistics"
+          }
+        }
+      }
+    },
+    "unable.to.save.the.session" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unable to save the session. Please try again."
           }
         }
       }

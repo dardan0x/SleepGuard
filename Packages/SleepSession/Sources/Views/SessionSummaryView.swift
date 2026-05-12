@@ -44,10 +44,10 @@ public struct SessionSummaryView: View {
     } message: {
       Text(String(format: Strings.sessionSummaryTooShortInfoFormat, Int(SleepSession.minimumSaveDuration / 60)))
     }
-    .alert("Save Failed", isPresented: $showSaveErrorAlert) {
-      Button("OK", role: .cancel) { }
+    .alert(Strings.saveFailed, isPresented: $showSaveErrorAlert) {
+      Button(Strings.actionOk, role: .cancel) { }
     } message: {
-      Text("Unable to save the session. Please try again.")
+      Text(Strings.unableToSaveTheSessionPleaseTryAgain)
     }
   }
 

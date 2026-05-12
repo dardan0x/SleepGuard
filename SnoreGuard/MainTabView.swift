@@ -110,7 +110,7 @@ struct MainTabView: View {
             .progressViewStyle(CircularProgressViewStyle(tint: theme.textPrimary))
             .scaleEffect(1.2)
 
-          Text("Processing session...")
+          Text(Strings.processingSession)
             .font(.system(size: 17, weight: .semibold))
             .foregroundStyle(theme.textPrimary)
         }
