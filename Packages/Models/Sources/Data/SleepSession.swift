@@ -6,14 +6,8 @@ public final class SleepSession {
   @Attribute(.unique) public var id: UUID
   public var startDate: Date
   public var endDate: Date?
-  public var totalDuration: TimeInterval
-  public var snoringDuration: TimeInterval
-  public var snoringPercentage: Double
   public var averageDB: Double
   public var peakDB: Double
-  public var eventsCount: Int
-  public var eventsPerHour: Double
-  public var sleepScore: Int
   public var audioFileURL: String?
 
   /// Full session raw audio file preserved for future re-processing.
@@ -36,14 +30,8 @@ public final class SleepSession {
     id: UUID = UUID(),
     startDate: Date,
     endDate: Date? = nil,
-    totalDuration: TimeInterval = 0,
-    snoringDuration: TimeInterval = 0,
-    snoringPercentage: Double = 0,
     averageDB: Double = 0,
     peakDB: Double = 0,
-    eventsCount: Int = 0,
-    eventsPerHour: Double = 0,
-    sleepScore: Int = 0,
     audioFileURL: String? = nil,
     rawAudioFileURL: String? = nil,
     rawLogFileURL: String? = nil
@@ -51,16 +39,56 @@ public final class SleepSession {
     self.id = id
     self.startDate = startDate
     self.endDate = endDate
-    self.totalDuration = totalDuration
-    self.snoringDuration = snoringDuration
-    self.snoringPercentage = snoringPercentage
     self.averageDB = averageDB
     self.peakDB = peakDB
-    self.eventsCount = eventsCount
-    self.eventsPerHour = eventsPerHour
-    self.sleepScore = sleepScore
     self.audioFileURL = audioFileURL
     self.rawAudioFileURL = rawAudioFileURL
     self.rawLogFileURL = rawLogFileURL
+  }
+
+  /// Derived from raw data. Computed on demand so formula changes retroactively affect all sessions.
+  public var totalDuration: TimeInterval {
+    endDate?.timeIntervalSince(startDate) ?? 0
+  }
+
+  public var snoringDuration: TimeInterval {
+    events?.reduce(0) { $0 + $1.snoreDuration } ?? 0
+  }
+
+  public var snoringPercentage: Double {
+    totalDuration > 0 ? (snoringDuration / totalDuration) * 100 : 0
+  }
+
+  public var eventsCount: Int {
+    events?.count ?? 0
+  }
+
+  public var eventsPerHour: Double {
+    totalDuration > 0 ? Double(eventsCount) / (totalDuration / 3600) : 0
+  }
+
+  public var sleepScore: Int {
+    let snoringPenalty = min(Int(snoringPercentage * 0.7), 70)
+    let eventsPenalty = min(Int(eventsPerHour * 2), 20)
+
+    var lightDuration: TimeInterval = 0
+    var loudDuration: TimeInterval = 0
+    for event in events ?? [] {
+      switch event.intensity {
+      case .light:
+        lightDuration += event.snoreDuration
+      case .loud:
+        loudDuration += event.snoreDuration
+      case .quiet:
+        break
+      }
+    }
+
+    let totalSnore = snoringDuration
+    let lightRatio = totalSnore > 0 ? lightDuration / totalSnore : 0
+    let loudRatio = totalSnore > 0 ? loudDuration / totalSnore : 0
+    let intensityPenalty = min(Int(lightRatio * 10 + loudRatio * 20), 20)
+
+    return max(0, 100 - snoringPenalty - eventsPenalty - intensityPenalty)
   }
 }

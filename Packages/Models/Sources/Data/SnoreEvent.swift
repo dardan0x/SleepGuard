@@ -11,7 +11,6 @@ public enum SnoreIntensity: String, Codable, Sendable {
 public final class SnoreEvent {
   @Attribute(.unique) public var id: UUID
   public var timestamp: Date
-  public var snoreDuration: TimeInterval
   public var intensity: SnoreIntensity
   public var averageDB: Double
   public var peakDB: Double
@@ -29,7 +28,6 @@ public final class SnoreEvent {
   public init(
     id: UUID = UUID(),
     timestamp: Date,
-    snoreDuration: TimeInterval,
     intensity: SnoreIntensity,
     averageDB: Double,
     peakDB: Double,
@@ -41,7 +39,6 @@ public final class SnoreEvent {
   ) {
     self.id = id
     self.timestamp = timestamp
-    self.snoreDuration = snoreDuration
     self.intensity = intensity
     self.averageDB = averageDB
     self.peakDB = peakDB
@@ -50,5 +47,10 @@ public final class SnoreEvent {
     self.lowFreqRatio = lowFreqRatio
     self.audioFileURL = audioFileURL
     self.bursts = bursts
+  }
+
+  /// Computed from bursts so gap-detection logic changes retroactively affect duration.
+  public var snoreDuration: TimeInterval {
+    bursts?.reduce(0) { $0 + $1.duration } ?? 0
   }
 }

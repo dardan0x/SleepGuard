@@ -43,6 +43,7 @@ struct MainTabView: View {
     }
     .tint(theme.accent)
     .toolbarBackground(theme.bgSecondary, for: .tabBar)
+    .overlay(sessionProcessingOverlay)
   }
 
   // MARK: - iOS < 26 (custom floating tab bar)
@@ -54,6 +55,8 @@ struct MainTabView: View {
       if !sessionManager.isRecording {
         customTabBar
       }
+
+      sessionProcessingOverlay
     }
     .ignoresSafeArea(.keyboard)
   }
@@ -93,6 +96,28 @@ struct MainTabView: View {
       .padding(.bottom, 12)
       .padding(.top, 12)
       .background(theme.bgSecondary.ignoresSafeArea(edges: .bottom))
+    }
+  }
+
+  private var sessionProcessingOverlay: some View {
+    ZStack {
+      if sessionManager.isProcessingSession {
+        theme.bgPrimary.opacity(0.6)
+          .ignoresSafeArea()
+
+        VStack(spacing: 16) {
+          ProgressView()
+            .progressViewStyle(CircularProgressViewStyle(tint: theme.textPrimary))
+            .scaleEffect(1.2)
+
+          Text(Strings.processingSession)
+            .font(.system(size: 17, weight: .semibold))
+            .foregroundStyle(theme.textPrimary)
+        }
+        .padding(24)
+        .background(theme.bgCard)
+        .cornerRadius(16)
+      }
     }
   }
 

@@ -37,6 +37,7 @@ public enum Strings {
   public static var onboardingPage5Button: String { String(localized: "onboarding.page5.button", bundle: .module) }
   public static var onboardingPage5Title: String { String(localized: "onboarding.page5.title", bundle: .module) }
   public static var onboardingPrivacyJudgeSilently: String { String(localized: "onboarding.privacy.judgeSilently", bundle: .module) }
+  public static var processingSession: String { String(localized: "processing.session", bundle: .module) }
   public static var recordingsDetailDateEventsFormat: String { String(localized: "recordings.detail.dateEventsFormat", bundle: .module) }
   public static var recordingsDetailEventsCountFormat: String { String(localized: "recordings.detail.eventsCountFormat", bundle: .module) }
   public static var recordingsDetailEventsLabel: String { String(localized: "recordings.detail.eventsLabel", bundle: .module) }
@@ -60,6 +61,7 @@ public enum Strings {
   public static var recordingsPlayerStatDuration: String { String(localized: "recordings.player.statDuration", bundle: .module) }
   public static var recordingsPlayerStatLowFreqRatio: String { String(localized: "recordings.player.statLowFreqRatio", bundle: .module) }
   public static var recordingsPlayerStatSpectralCentroid: String { String(localized: "recordings.player.statSpectralCentroid", bundle: .module) }
+  public static var saveFailed: String { String(localized: "save.failed", bundle: .module) }
   public static var sessionBedsideSnoreLight: String { String(localized: "session.bedside.snoreLight", bundle: .module) }
   public static var sessionBedsideSnoreLoud: String { String(localized: "session.bedside.snoreLoud", bundle: .module) }
   public static var sessionBedsideSnoreQuiet: String { String(localized: "session.bedside.snoreQuiet", bundle: .module) }
@@ -131,6 +133,7 @@ public enum Strings {
   public static var tabMedia: String { String(localized: "tab.media", bundle: .module) }
   public static var tabSettings: String { String(localized: "tab.settings", bundle: .module) }
   public static var tabStatistics: String { String(localized: "tab.statistics", bundle: .module) }
+  public static var unableToSaveTheSession: String { String(localized: "unable.to.save.the.session", bundle: .module) }
   public static var watchCalendar: String { String(localized: "watch.calendar", bundle: .module) }
   public static var watchStatusConnected: String { String(localized: "watch.status.connected", bundle: .module) }
   public static var watchStatusNotConnected: String { String(localized: "watch.status.notConnected", bundle: .module) }
