@@ -47,7 +47,7 @@ public struct SessionSummaryView: View {
     .alert(Strings.saveFailed, isPresented: $showSaveErrorAlert) {
       Button(Strings.actionOk, role: .cancel) { }
     } message: {
-      Text(Strings.unableToSaveTheSessionPleaseTryAgain)
+      Text(Strings.unableToSaveTheSession)
     }
   }
 
