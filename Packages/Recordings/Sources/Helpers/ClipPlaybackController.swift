@@ -48,20 +48,22 @@ public final class ClipPlaybackController {
   }
 
   public func loadEvents(_ events: [SnoreEvent]) {
-    self.events = events.sorted { $0.timestamp < $1.timestamp }
+    // Caller already sorts events; trust the order to avoid redundant work.
+    self.events = events
     // Use event.duration as the single source of truth so the player's total
     // matches session.snoringDuration and the stats grid.
-    clipDurations = self.events.map { event in
-      guard AudioFileURLResolver.resolve(event.audioFileURL) != nil else { return 0 }
-      return event.snoreDuration
-    }
+    // Skip file-existence checks; assume clips exist. Missing clips fail gracefully at play time.
+    clipDurations = events.map { $0.snoreDuration }
     totalClipsDuration = clipDurations.reduce(0, +)
     currentEventIndex = 0
     currentClipTime = 0
-    setupPlayerForCurrentEvent()
+    // Lazy: don't create AVAudioPlayer until user taps play.
   }
 
   public func play() {
+    if audioPlayer == nil {
+      setupPlayerForCurrentEvent()
+    }
     guard let player = audioPlayer else { return }
     do {
       try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)

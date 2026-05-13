@@ -3,16 +3,13 @@ import Models
 import DesignSystem
 
 struct SessionDetailEventsView: View {
-  let session: SleepSession
-  let showAllEvents: Bool
-  let onToggleShowAll: () -> Void
+  let events: [SnoreEvent]
+  let onShowAll: () -> Void
   let onPlayEvent: (SnoreEvent) -> Void
   let onShareEvent: (SnoreEvent) -> Void
   @Environment(Theme.self) private var theme
 
   var body: some View {
-    let events = session.events?.sorted { $0.timestamp < $1.timestamp } ?? []
-
     VStack(alignment: .leading, spacing: 16) {
       Text(String(format: Strings.sessionRecordingEventsFormat, events.count))
         .font(.system(size: 12, weight: .semibold))
@@ -20,7 +17,7 @@ struct SessionDetailEventsView: View {
         .tracking(1)
 
       VStack(spacing: 8) {
-        ForEach(showAllEvents ? events : Array(events.prefix(4)), id: \.id) { event in
+        ForEach(Array(events.prefix(4)), id: \.id) { event in
           EventRow(
             event: event,
             theme: theme,
@@ -32,11 +29,9 @@ struct SessionDetailEventsView: View {
 
       if events.count > 4 {
         Button {
-          withAnimation(.easeInOut(duration: 0.2)) {
-            onToggleShowAll()
-          }
+          onShowAll()
         } label: {
-          Text(showAllEvents ? Strings.recordingsDetailShowLess : String(format: Strings.recordingsDetailShowAllFormat, events.count))
+          Text(String(format: Strings.recordingsDetailShowAllFormat, events.count))
             .font(.system(size: 15, weight: .medium))
             .foregroundStyle(theme.accent)
         }

@@ -10,23 +10,52 @@ struct SessionDetailMiniPlayerView: View {
   let eventMarkers: [Double]
   let eventMarkerColors: [Color]
   let isExpandable: Bool
+  let showsPlaybackButton: Bool
   let onTogglePlayback: () -> Void
   let onScrub: (Double) -> Void
   let onExpand: () -> Void
   @Environment(Theme.self) private var theme
 
+  init(
+    session: SleepSession,
+    isPlaying: Bool,
+    progress: Double,
+    totalDuration: TimeInterval,
+    eventMarkers: [Double],
+    eventMarkerColors: [Color],
+    isExpandable: Bool,
+    showsPlaybackButton: Bool = true,
+    onTogglePlayback: @escaping () -> Void,
+    onScrub: @escaping (Double) -> Void,
+    onExpand: @escaping () -> Void
+  ) {
+    self.session = session
+    self.isPlaying = isPlaying
+    self.progress = progress
+    self.totalDuration = totalDuration
+    self.eventMarkers = eventMarkers
+    self.eventMarkerColors = eventMarkerColors
+    self.isExpandable = isExpandable
+    self.showsPlaybackButton = showsPlaybackButton
+    self.onTogglePlayback = onTogglePlayback
+    self.onScrub = onScrub
+    self.onExpand = onExpand
+  }
+
   var body: some View {
     VStack(alignment: .leading, spacing: 8) {
       HStack(spacing: 12) {
-        Button {
-          onTogglePlayback()
-        } label: {
-          Image(systemName: isPlaying ? "pause.fill" : "play.fill")
-            .font(.system(size: 14, weight: .semibold))
-            .foregroundStyle(.white)
-            .frame(width: 28, height: 28)
-            .background(theme.accent)
-            .clipShape(Circle())
+        if showsPlaybackButton {
+          Button {
+            onTogglePlayback()
+          } label: {
+            Image(systemName: isPlaying ? "pause.fill" : "play.fill")
+              .font(.system(size: 14, weight: .semibold))
+              .foregroundStyle(.white)
+              .frame(width: 28, height: 28)
+              .background(theme.accent)
+              .clipShape(Circle())
+          }
         }
 
         GeometryReader { geometry in

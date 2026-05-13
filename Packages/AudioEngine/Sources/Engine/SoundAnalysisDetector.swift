@@ -17,7 +17,7 @@ public final class SoundAnalysisDetector: NSObject, SNResultsObserving {
 
   private var streamAnalyzer: SNAudioStreamAnalyzer?
   private var analysisRequest: SNClassifySoundRequest?
-  private let snoreIdentifiers = ["snore", "snoring", "breathing"]
+  private let snoreIdentifiers = ["snore", "snoring"]
 
   private override init() {
     super.init()

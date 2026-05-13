@@ -76,6 +76,8 @@ public struct NightGroupRowView: View {
           Text(String(format: Strings.recordingsDetailRecordingsCountFormat, group.recordingCount))
             .font(.system(size: 11, weight: .semibold))
             .foregroundStyle(theme.accent)
+            .lineLimit(1)
+            .fixedSize(horizontal: true, vertical: false)
             .padding(.horizontal, 8)
             .padding(.vertical, 3)
             .background(theme.accent.opacity(0.15))
@@ -85,14 +87,17 @@ public struct NightGroupRowView: View {
         Text("\(totalDurationString)")
           .font(.system(size: 13))
           .foregroundStyle(theme.textSecondary)
+          .fixedSize(horizontal: true, vertical: false)
 
         Text("•")
           .font(.system(size: 10))
           .foregroundStyle(theme.textSecondary)
+          .fixedSize(horizontal: true, vertical: false)
 
         Text(String(format: Strings.recordingsDetailEventsCountFormat, group.totalEvents))
           .font(.system(size: 13))
           .foregroundStyle(theme.textSecondary)
+          .fixedSize(horizontal: true, vertical: false)
       }
     }
   }

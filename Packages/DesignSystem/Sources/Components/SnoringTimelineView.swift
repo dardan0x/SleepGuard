@@ -13,26 +13,36 @@ public struct SnoringTimelineView: View {
   }
 
   public var body: some View {
-    GeometryReader { geometry in
-      ZStack(alignment: .leading) {
-        RoundedRectangle(cornerRadius: 8)
-          .fill(theme.bgCard)
-          .frame(height: 32)
+    Canvas { context, size in
+      let bgRect = CGRect(x: 0, y: 0, width: size.width, height: 32)
+      context.fill(
+        Path(roundedRect: bgRect, cornerRadius: 8),
+        with: .color(theme.bgCard)
+      )
 
-        ForEach(timelineSegments(in: geometry.size.width), id: \.id) { segment in
-          RoundedRectangle(cornerRadius: 2)
-            .fill(segment.color)
-            .frame(width: segment.width, height: 20)
-            .position(x: segment.x + segment.width / 2, y: 16)
-        }
+      let segments = timelineSegments(in: size.width)
+      for segment in segments {
+        let rect = CGRect(x: segment.x, y: 6, width: segment.width, height: 20)
+        context.fill(
+          Path(roundedRect: rect, cornerRadius: 2),
+          with: .color(segment.color)
+        )
       }
-      .frame(height: 32)
     }
     .frame(height: 32)
   }
 
   private var events: [SnoreEvent] {
-    session.events?.sorted { $0.timestamp < $1.timestamp } ?? []
+    let events = session.events ?? []
+    guard events.count > 1 else { return events }
+    var isSorted = true
+    for i in 1..<events.count {
+      if events[i].timestamp < events[i - 1].timestamp {
+        isSorted = false
+        break
+      }
+    }
+    return isSorted ? events : events.sorted { $0.timestamp < $1.timestamp }
   }
 
   private func timelineSegments(in totalWidth: CGFloat) -> [TimelineSegment] {

@@ -1093,6 +1093,17 @@
         }
       }
     },
+    "start.time.event.card" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start time:"
+          }
+        }
+      }
+    },
     "stats.calendar.intensityLoud" : {
       "localizations" : {
         "en" : {

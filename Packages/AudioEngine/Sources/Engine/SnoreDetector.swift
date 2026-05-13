@@ -25,7 +25,9 @@ public final class SnoreDetector {
   // MARK: - Public Classification
 
   /// Classifies snoring using Apple's SoundAnalysis confidence when available,
-  /// falling back to FFT spectral features if snoring is not a built-in class.
+  /// falling back to FFT spectral features. Never falls back to pure dB thresholds
+  /// because they have no frequency discrimination and create massive false positives
+  /// (breathing, bed creaking, traffic, etc.).
   public func classify(db: Float, spectralScore: Float = 0, snoreConfidence: Float = 0) -> SnoringState {
     if snoreConfidence > 0 {
       return classifyWithSoundAnalysis(db: db, snoreConfidence: snoreConfidence)
@@ -33,7 +35,7 @@ public final class SnoreDetector {
     if spectralScore > 0 {
       return classifyWithSpectral(db: db, spectralScore: spectralScore)
     }
-    return classifyWithThresholds(db: db)
+    return .none
   }
 
   public func update(db: Float, spectralScore: Float = 0, snoreConfidence: Float = 0) {
@@ -87,8 +89,16 @@ public final class SnoreDetector {
 
   /// Uses FFT spectral features to distinguish snoring from other loud sounds.
   /// Rejects sounds that are loud but don't have snore-like spectral structure.
+  /// Threshold raised from 0.3 → 0.6 because breathing and other non-snore sounds
+  /// easily score 0.4–0.7 in the 100–500 Hz band.
   public func classifyWithSpectral(db: Float, spectralScore: Float) -> SnoringState {
-    guard spectralScore >= 0.3 else {
+    guard spectralScore >= 0.6 else {
+      return .none
+    }
+
+    // Require minimum dB even with good spectral score. Quiet ambient sounds
+    // (breathing at -40 dB) should not trigger even if spectral looks similar.
+    guard db >= -35 else {
       return .none
     }
 
