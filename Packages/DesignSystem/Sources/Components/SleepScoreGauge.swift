@@ -6,6 +6,8 @@ public struct SleepScoreGauge: View {
   let theme: Theme
   let size: CGFloat
 
+  @State private var animatedProgress: CGFloat = 0
+
   public init(score: Int, theme: Theme, size: CGFloat = 160) {
     self.score = score
     self.theme = theme
@@ -18,7 +20,7 @@ public struct SleepScoreGauge: View {
         .stroke(theme.bgElevated, lineWidth: size * 0.08)
 
       Circle()
-        .trim(from: 0, to: CGFloat(score) / 100.0)
+        .trim(from: 0, to: animatedProgress)
         .stroke(
           AngularGradient(
             gradient: Gradient(colors: [
@@ -33,7 +35,7 @@ public struct SleepScoreGauge: View {
           style: StrokeStyle(lineWidth: size * 0.08, lineCap: .round)
         )
         .rotationEffect(.degrees(-90))
-        .animation(.easeOut(duration: 0.8), value: score)
+        .animation(.easeOut(duration: 0.8), value: animatedProgress)
 
       VStack(spacing: 2) {
         Text("\(score)")
@@ -47,5 +49,11 @@ public struct SleepScoreGauge: View {
       }
     }
     .frame(width: size, height: size)
+    .onAppear {
+      animatedProgress = CGFloat(score) / 100.0
+    }
+    .onChange(of: score) { _, newScore in
+      animatedProgress = CGFloat(newScore) / 100.0
+    }
   }
 }

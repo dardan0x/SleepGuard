@@ -30,99 +30,140 @@ public enum AudioClipExtractor {
     padding: TimeInterval = 0.0,
     outputDirectory: URL
   ) async -> [ClipResult] {
-    let sourceAsset = AVURLAsset(url: sessionURL)
-    let totalDuration = await sourceAsset.duration.seconds
+    let totalDuration = await AVURLAsset(url: sessionURL).duration.seconds
+    let batchSize = 4
 
     var results: [ClipResult] = []
+    var index = events.startIndex
 
-    for event in events {
-      let eventTime = event.timestamp.timeIntervalSince(sessionStart)
-      let clipURL = outputDirectory
-        .appendingPathComponent("event_\(event.id.uuidString).m4a")
+    while index < events.endIndex {
+      let endIndex = events.index(index, offsetBy: batchSize, limitedBy: events.endIndex) ?? events.endIndex
+      let batch = events[index..<endIndex]
 
-      // Remove existing file
-      if FileManager.default.fileExists(atPath: clipURL.path) {
-        try? FileManager.default.removeItem(at: clipURL)
-      }
-
-      let exportAsset: AVAsset
-      let exportTimeRange: CMTimeRange?
-
-      if let bursts = event.bursts, !bursts.isEmpty {
-        // Compose gap-free clip from burst segments
-        let composition = AVMutableComposition()
-        guard let compositionTrack = composition.addMutableTrack(
-          withMediaType: .audio,
-          preferredTrackID: kCMPersistentTrackID_Invalid
-        ),
-        let sourceTrack = try? await sourceAsset.loadTracks(withMediaType: .audio).first else {
-          continue
+      let batchResults = await withTaskGroup(of: ClipResult?.self) { group in
+        for event in batch {
+          group.addTask {
+            return await extractSingleClip(
+              for: event,
+              sessionURL: sessionURL,
+              sessionStart: sessionStart,
+              totalDuration: totalDuration,
+              padding: padding,
+              outputDirectory: outputDirectory
+            )
+          }
         }
 
-        var compositionTime = CMTime.zero
-        for burst in bursts {
-          let burstStart = CMTime(
-            seconds: max(0, eventTime + burst.startOffset - padding),
-            preferredTimescale: 600
-          )
-          let burstDuration = CMTime(
-            seconds: min(
-              totalDuration - burstStart.seconds,
-              burst.duration + (padding * 2)
-            ),
-            preferredTimescale: 600
-          )
-          guard burstDuration.seconds > 0 else { continue }
-          try? compositionTrack.insertTimeRange(
-            CMTimeRange(start: burstStart, duration: burstDuration),
-            of: sourceTrack,
-            at: compositionTime
-          )
-          compositionTime = CMTimeAdd(compositionTime, burstDuration)
+        var batchResults: [ClipResult] = []
+        for await result in group {
+          if let result = result {
+            batchResults.append(result)
+          }
         }
-
-        guard compositionTime.seconds > 0 else { continue }
-        exportAsset = composition
-        exportTimeRange = nil // Export the entire composition
-      } else {
-        // Legacy: single range export
-        let startTime = max(0, eventTime - padding)
-        let endTime = min(totalDuration, eventTime + event.snoreDuration + padding)
-        guard endTime > startTime else { continue }
-        exportAsset = sourceAsset
-        exportTimeRange = CMTimeRange(
-          start: CMTime(seconds: startTime, preferredTimescale: 600),
-          duration: CMTime(seconds: endTime - startTime, preferredTimescale: 600)
-        )
+        return batchResults
       }
 
-      guard let exportSession = AVAssetExportSession(
-        asset: exportAsset,
-        presetName: AVAssetExportPresetAppleM4A
-      ) else { continue }
-
-      if let timeRange = exportTimeRange {
-        exportSession.timeRange = timeRange
-      }
-      exportSession.outputURL = clipURL
-      exportSession.outputFileType = .m4a
-
-      await exportSession.export()
-      guard exportSession.status == .completed else { continue }
-
-      // Analyze spectral features on the (now gap-free) clip
-      let spectral = await analyzeSpectralFeatures(of: clipURL)
-
-      results.append(ClipResult(
-        eventID: event.id,
-        clipURL: clipURL,
-        dominantFrequency: spectral.dominantFrequency,
-        spectralCentroid: spectral.spectralCentroid,
-        lowFreqRatio: spectral.lowFreqRatio
-      ))
+      results.append(contentsOf: batchResults)
+      index = endIndex
     }
 
     return results
+  }
+
+  private static func extractSingleClip(
+    for event: SnoreEvent,
+    sessionURL: URL,
+    sessionStart: Date,
+    totalDuration: TimeInterval,
+    padding: TimeInterval,
+    outputDirectory: URL
+  ) async -> ClipResult? {
+    let eventTime = event.timestamp.timeIntervalSince(sessionStart)
+    let clipURL = outputDirectory
+      .appendingPathComponent("event_\(event.id.uuidString).m4a")
+
+    // Remove existing file
+    if FileManager.default.fileExists(atPath: clipURL.path) {
+      try? FileManager.default.removeItem(at: clipURL)
+    }
+
+    let exportAsset: AVAsset
+    let exportTimeRange: CMTimeRange?
+
+    if let bursts = event.bursts, !bursts.isEmpty {
+      // Compose gap-free clip from burst segments
+      let composition = AVMutableComposition()
+      guard let compositionTrack = composition.addMutableTrack(
+        withMediaType: .audio,
+        preferredTrackID: kCMPersistentTrackID_Invalid
+      ) else { return nil }
+
+      let localAsset = AVURLAsset(url: sessionURL)
+      guard let sourceTrack = try? await localAsset.loadTracks(withMediaType: .audio).first else {
+        return nil
+      }
+
+      var compositionTime = CMTime.zero
+      for burst in bursts {
+        let burstStart = CMTime(
+          seconds: max(0, eventTime + burst.startOffset - padding),
+          preferredTimescale: 600
+        )
+        let burstDuration = CMTime(
+          seconds: min(
+            totalDuration - burstStart.seconds,
+            burst.duration + (padding * 2)
+          ),
+          preferredTimescale: 600
+        )
+        guard burstDuration.seconds > 0 else { continue }
+        try? compositionTrack.insertTimeRange(
+          CMTimeRange(start: burstStart, duration: burstDuration),
+          of: sourceTrack,
+          at: compositionTime
+        )
+        compositionTime = CMTimeAdd(compositionTime, burstDuration)
+      }
+
+      guard compositionTime.seconds > 0 else { return nil }
+      exportAsset = composition
+      exportTimeRange = nil // Export the entire composition
+    } else {
+      // Legacy: single range export
+      let startTime = max(0, eventTime - padding)
+      let endTime = min(totalDuration, eventTime + event.snoreDuration + padding)
+      guard endTime > startTime else { return nil }
+      exportAsset = AVURLAsset(url: sessionURL)
+      exportTimeRange = CMTimeRange(
+        start: CMTime(seconds: startTime, preferredTimescale: 600),
+        duration: CMTime(seconds: endTime - startTime, preferredTimescale: 600)
+      )
+    }
+
+    guard let exportSession = AVAssetExportSession(
+      asset: exportAsset,
+      presetName: AVAssetExportPresetAppleM4A
+    ) else { return nil }
+
+    if let timeRange = exportTimeRange {
+      exportSession.timeRange = timeRange
+    }
+    exportSession.outputURL = clipURL
+    exportSession.outputFileType = .m4a
+
+    await exportSession.export()
+    guard exportSession.status == .completed else { return nil }
+
+    // Analyze spectral features on the (now gap-free) clip
+    let spectral = await analyzeSpectralFeatures(of: clipURL)
+
+    return ClipResult(
+      eventID: event.id,
+      clipURL: clipURL,
+      dominantFrequency: spectral.dominantFrequency,
+      spectralCentroid: spectral.spectralCentroid,
+      lowFreqRatio: spectral.lowFreqRatio
+    )
   }
 
   // MARK: - Private

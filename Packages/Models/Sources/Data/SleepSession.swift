@@ -68,25 +68,37 @@ public final class SleepSession {
   }
 
   public var sleepScore: Int {
-    let snoringPenalty = min(Int(snoringPercentage * 0.7), 70)
-    let eventsPenalty = min(Int(eventsPerHour * 2), 20)
+    let events = self.events ?? []
+    let totalDuration = self.totalDuration
+    let eventCount = events.count
 
+    guard totalDuration > 0, eventCount > 0 else {
+      return 100
+    }
+
+    var snoringDuration: TimeInterval = 0
     var lightDuration: TimeInterval = 0
     var loudDuration: TimeInterval = 0
-    for event in events ?? [] {
+
+    for event in events {
+      let duration = event.snoreDuration
+      snoringDuration += duration
       switch event.intensity {
       case .light:
-        lightDuration += event.snoreDuration
+        lightDuration += duration
       case .loud:
-        loudDuration += event.snoreDuration
+        loudDuration += duration
       case .quiet:
         break
       }
     }
 
-    let totalSnore = snoringDuration
-    let lightRatio = totalSnore > 0 ? lightDuration / totalSnore : 0
-    let loudRatio = totalSnore > 0 ? loudDuration / totalSnore : 0
+    let snoringPercentage = (snoringDuration / totalDuration) * 100
+    let snoringPenalty = min(Int(snoringPercentage * 0.7), 70)
+    let eventsPenalty = min(Int(Double(eventCount) / (totalDuration / 3600) * 2), 20)
+
+    let lightRatio = snoringDuration > 0 ? lightDuration / snoringDuration : 0
+    let loudRatio = snoringDuration > 0 ? loudDuration / snoringDuration : 0
     let intensityPenalty = min(Int(lightRatio * 10 + loudRatio * 20), 20)
 
     return max(0, 100 - snoringPenalty - eventsPenalty - intensityPenalty)

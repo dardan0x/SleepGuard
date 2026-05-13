@@ -48,7 +48,7 @@ struct BedsideClockView: View {
 
         StopRecordingButton(height: 52) {
           if let session = sessionManager.currentSession,
-             session.totalDuration < SleepSession.minimumSaveDuration {
+             currentTime.timeIntervalSince(session.startDate) < SleepSession.minimumSaveDuration {
             showShortSessionAlert = true
           } else {
             Task {
@@ -62,9 +62,7 @@ struct BedsideClockView: View {
       .alert(Strings.sessionSummaryTooShortTitle, isPresented: $showShortSessionAlert) {
         Button(Strings.actionKeepRecording, role: .cancel) { }
         Button(Strings.actionStopAnyway) {
-          Task {
-            _ = await sessionManager.stopSession()
-          }
+          sessionManager.stopAndDiscardSession()
         }
       } message: {
         Text(String(format: Strings.sessionSummaryTooShortMessageFormat, Int(SleepSession.minimumSaveDuration / 60)))

@@ -112,6 +112,7 @@ public enum Strings {
   public static var settingsUnitSeconds: String { String(localized: "settings.unit.seconds", bundle: .module) }
   public static var settingsUnitSecondsShort: String { String(localized: "settings.unit.seconds.short", bundle: .module) }
   public static var settingsVersion: String { String(localized: "settings.version", bundle: .module) }
+  public static var startTimeEventCard: String { String(localized: "start.time.event.card", bundle: .module) }
   public static var statsCalendarIntensityLoud: String { String(localized: "stats.calendar.intensityLoud", bundle: .module) }
   public static var statsCalendarIntensityQuiet: String { String(localized: "stats.calendar.intensityQuiet", bundle: .module) }
   public static var statsCalendarLegendLight: String { String(localized: "stats.calendar.legendLight", bundle: .module) }

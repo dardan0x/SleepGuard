@@ -2,6 +2,7 @@ import Foundation
 import Observation
 import Models
 import AudioEngine
+import Env
 
 @MainActor
 @Observable
@@ -30,6 +31,11 @@ public final class SessionManager {
   private var activeEventPeakDB: Double = 0
   private var lastSnoringSampleTime: Date?
   private let eventGapThreshold: TimeInterval = 3.0
+
+  /// Require 3 consecutive snoring samples (≈150 ms at 20 Hz) before starting an event.
+  /// Filters out brief transient sounds (bed creaks, taps, notifications).
+  private var consecutiveSnoreSamples: Int = 0
+  private let requiredConsecutiveSamples: Int = 3
 
   // Burst tracking: continuous snoring segments within the active event
   private var activeBurstStart: Date?
@@ -167,6 +173,32 @@ public final class SessionManager {
     completedSession = nil
   }
 
+  /// Stops the current recording and discards the session without presenting the summary.
+  /// Used when the user explicitly chooses to stop a session that is below the minimum duration.
+  public func stopAndDiscardSession() {
+    processingTask?.cancel()
+    processingTask = nil
+    audioRecorder.stopRecording()
+    isRecording = false
+
+    if activeEventStart != nil {
+      finalizeActiveEvent()
+    }
+
+    // Delete the session's audio file and clean up
+    if let session = currentSession {
+      if let url = AudioFileURLResolver.resolve(session.audioFileURL) {
+        try? FileManager.default.removeItem(at: url)
+      }
+      if let url = AudioFileURLResolver.resolve(session.rawAudioFileURL) {
+        try? FileManager.default.removeItem(at: url)
+      }
+    }
+
+    currentSession = nil
+    resetTrackingState()
+  }
+
   // MARK: - Real-time audio processing
 
   /// Call this from the view when `audioRecorder.currentDB` changes.
@@ -220,15 +252,21 @@ public final class SessionManager {
 
     // Handle event tracking with debounce gap + per-burst tracking
     if state != .none {
+      consecutiveSnoreSamples += 1
       lastSnoringSampleTime = now
+      guard consecutiveSnoreSamples >= requiredConsecutiveSamples else {
+        // Not yet sustained enough to start/extend an event
+        return
+      }
       if activeEventStart == nil {
-        // New event starts
-        activeEventStart = now
+        // New event starts — backdate to when sustained detection began
+        let backdate = TimeInterval(requiredConsecutiveSamples - 1) * 0.05
+        activeEventStart = now.addingTimeInterval(-backdate)
         activeEventDBSum = Double(db)
         activeEventDBCount = 1
         activeEventPeakDB = Double(db)
         activeEventIntensity = intensity(from: state)
-        activeBurstStart = now
+        activeBurstStart = activeEventStart
       } else {
         // Event already active
         activeEventDBSum += Double(db)
@@ -246,6 +284,7 @@ public final class SessionManager {
         }
       }
     } else {
+      consecutiveSnoreSamples = 0
       // Silence — close current burst if open
       if let burstStart = activeBurstStart {
         completedBursts.append((start: burstStart, end: now))
@@ -279,6 +318,7 @@ public final class SessionManager {
     lastUpdateTime = nil
     lastSnoringSampleTime = nil
     activeBurstStart = nil
+    consecutiveSnoreSamples = 0
     completedBursts.removeAll(keepingCapacity: false)
   }
 
@@ -299,8 +339,10 @@ public final class SessionManager {
 
     let eventSpan = (lastSnoringSampleTime ?? Date()).timeIntervalSince(startTime)
 
-    // Use event span for minimum-duration check so brief multi-burst events still count.
-    guard eventSpan >= 0.5 else {
+    // Respect user's minimum snore duration setting (default 2 s) instead of
+    // hardcoding 0.5 s. This filters out brief breathing waves and transients.
+    let minDuration = UserPreferences.shared.minSnoreDuration
+    guard eventSpan >= minDuration else {
       activeEventStart = nil
       activeEventIntensity = nil
       activeEventDBSum = 0

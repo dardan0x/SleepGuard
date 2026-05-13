@@ -15,22 +15,11 @@ public struct SessionDetailView: View {
   @Environment(\.dismiss) private var dismiss
 
   @State private var viewState: ViewState = .loading
-
-  // MARK: - Legacy Audio Playback (full-session files)
-  @State private var audioPlayer: AVAudioPlayer?
-  @State private var isPlaying = false
-  @State private var currentPlaybackTime: TimeInterval = 0
-
-  // MARK: - Clip Audio Playback (per-event clips)
-  @State private var playbackController = ClipPlaybackController()
-  @State private var isPlayerExpanded = false
-  @State private var waveformSamples: [Float] = []
-  @State private var spectrumBars: [Float] = []
+  @State private var activeSheet: DetailSheet?
 
   // MARK: - Share
   @State private var isSharePresented = false
   @State private var shareItems: [Any] = []
-  @State private var showAllEvents = false
 
   public init(sessionID: UUID) {
     self.sessionID = sessionID
@@ -44,8 +33,8 @@ public struct SessionDetailView: View {
           .task {
             await loadSession()
           }
-      case .loaded(let session):
-        loadedBody(session: session)
+      case .loaded(let session, let sortedEvents, let isClipSession):
+        loadedBody(session: session, sortedEvents: sortedEvents, isClipSession: isClipSession)
       case .error:
         errorBody
       }
@@ -53,26 +42,18 @@ public struct SessionDetailView: View {
     .background(theme.bgSecondary.ignoresSafeArea())
   }
 
-  private func loadedBody(session: SleepSession) -> some View {
-    let sortedEvents = session.events?.sorted(by: { $0.timestamp < $1.timestamp }) ?? []
-    let isClipSession = sortedEvents.contains(where: { AudioFileURLResolver.resolve($0.audioFileURL) != nil })
-
-    return ScrollView {
+  private func loadedBody(session: SleepSession, sortedEvents: [SnoreEvent], isClipSession: Bool) -> some View {
+    ScrollView {
       VStack(spacing: 24) {
-        SessionDetailHeaderView(session: session)
+        SessionDetailHeaderView(session: session, score: session.sleepScore)
 
         SessionDetailTimelineView(session: session)
 
         SessionDetailEventsView(
-          session: session,
-          showAllEvents: showAllEvents,
-          onToggleShowAll: { showAllEvents.toggle() },
+          events: sortedEvents,
+          onShowAll: { activeSheet = .events },
           onPlayEvent: { event in
-            if isClipSession {
-              playClipEvent(event, in: sortedEvents)
-            } else {
-              seekToLegacyEvent(event, in: session)
-            }
+            activeSheet = .player(initialEvent: event)
           },
           onShareEvent: { event in
             if isClipSession, let url = AudioFileURLResolver.resolve(event.audioFileURL) {
@@ -84,12 +65,10 @@ public struct SessionDetailView: View {
             }
           }
         )
-
-        if isClipSession {
-          clipPlayerSection(session: session, sortedEvents: sortedEvents)
-        } else if session.audioFileURL != nil {
-          legacyPlayerSection(session: session)
-        }
+//          //TODO: Add mini player if we want in future
+//          if isClipSession || session.audioFileURL != nil {
+//              fakePlayerSection(session: session, sortedEvents: sortedEvents, isClipSession: isClipSession)
+//          }
       }
       .padding(20)
     }
@@ -129,16 +108,22 @@ public struct SessionDetailView: View {
         }
       }
     }
-    .task {
-      if isClipSession {
-        setupClipPlayback(events: sortedEvents)
-      } else {
-        setupAudioPlayer(for: session)
-      }
-    }
-    .task(id: isPlaying) {
-      if !isClipSession {
-        await trackLegacyPlaybackProgress()
+    .sheet(item: $activeSheet) { sheet in
+      switch sheet {
+      case .player(let initialEvent):
+        PlayerSheetView(
+          session: session,
+          sortedEvents: initialEvent.map { [$0] } ?? sortedEvents,
+          isClipSession: isClipSession,
+          initialEvent: initialEvent
+        )
+      case .events:
+        EventsSheetView(
+          session: session,
+          events: sortedEvents,
+          isClipSession: isClipSession,
+          onPlayEvent: { _ in }
+        )
       }
     }
     .sheet(isPresented: $isSharePresented) {
@@ -146,185 +131,58 @@ public struct SessionDetailView: View {
     }
   }
 
-  // MARK: - Clip Playback Section
+  // MARK: - Fake Player Placeholder
 
-  private func clipPlayerSection(session: SleepSession, sortedEvents: [SnoreEvent]) -> some View {
-    let markers = clipEventMarkers()
+  private func fakePlayerSection(session: SleepSession, sortedEvents: [SnoreEvent], isClipSession: Bool) -> some View {
+    let totalDuration: TimeInterval = isClipSession
+      ? sortedEvents.map { $0.snoreDuration }.reduce(0, +)
+      : session.totalDuration
+    let markers = isClipSession
+      ? clipEventMarkers(events: sortedEvents, totalDuration: totalDuration)
+      : legacyEventMarkers(session: session, sortedEvents: sortedEvents)
     let colors = eventMarkerColors(events: sortedEvents)
-    return VStack(spacing: 12) {
+
+    return VStack(alignment: .leading, spacing: 8) {
+      Text(Strings.recordingsDetailTimelineLabel)
+        .font(.system(size: 12, weight: .semibold))
+        .foregroundStyle(theme.textTertiary)
+        .tracking(1)
+
       SessionDetailMiniPlayerView(
         session: session,
-        isPlaying: playbackController.isPlaying,
-        progress: clipProgress,
-        totalDuration: playbackController.totalClipsDuration,
+        isPlaying: false,
+        progress: 0,
+        totalDuration: totalDuration,
         eventMarkers: markers,
         eventMarkerColors: colors,
-        isExpandable: true,
-        onTogglePlayback: { playbackController.togglePlayback() },
-        onScrub: { relative in playbackController.seek(to: relative) },
-        onExpand: { isPlayerExpanded.toggle() }
+        isExpandable: false,
+        showsPlaybackButton: false,
+        onTogglePlayback: {},
+        onScrub: { _ in },
+        onExpand: {}
       )
-
-      if isPlayerExpanded, let currentEvent = currentClipEvent(in: sortedEvents) {
-        SessionDetailAdvancedPlayerView(
-          event: currentEvent,
-          waveformSamples: waveformSamples,
-          spectrumBars: spectrumBars,
-          onWaveformTap: { relative in
-            playbackController.seekInCurrentClip(relative: relative)
-          }
-        )
-        .transition(.move(edge: .bottom).combined(with: .opacity))
-      }
     }
   }
 
-  private var clipProgress: Double {
-    let total = playbackController.totalClipsDuration
-    return total > 0 ? playbackController.currentTime / total : 0
-  }
-
-  /// Marker positions (0–1) on the concatenated clips timeline.
-  private func clipEventMarkers() -> [Double] {
-    let durations = playbackController.events.map { $0.snoreDuration }
-    let total = durations.reduce(0, +)
-    guard total > 0 else { return [] }
+  private func clipEventMarkers(events: [SnoreEvent], totalDuration: TimeInterval) -> [Double] {
+    guard totalDuration > 0 else { return [] }
     var accumulated: TimeInterval = 0
     var markers: [Double] = []
-    for duration in durations {
-      markers.append(accumulated / total)
-      accumulated += duration
+    for event in events {
+      markers.append(accumulated / totalDuration)
+      accumulated += event.snoreDuration
     }
     return markers
   }
 
-  /// Marker positions (0–1) on the full session timeline for legacy playback.
-  private func legacyEventMarkers(session: SleepSession) -> [Double] {
+  private func legacyEventMarkers(session: SleepSession, sortedEvents: [SnoreEvent]) -> [Double] {
     let total = session.totalDuration
     guard total > 0 else { return [] }
-    return (session.events ?? [])
-      .sorted { $0.timestamp < $1.timestamp }
-      .map { $0.timestamp.timeIntervalSince(session.startDate) / total }
+    return sortedEvents.map { $0.timestamp.timeIntervalSince(session.startDate) / total }
   }
 
   private func eventMarkerColors(events: [SnoreEvent]) -> [Color] {
-    let theme = Theme.shared
-    return events.map { theme.intensityColor($0.intensity) }
-  }
-
-  private func currentClipEvent(in events: [SnoreEvent]) -> SnoreEvent? {
-    let index = playbackController.currentEventIndex
-    guard index >= 0, index < events.count else { return nil }
-    return events[index]
-  }
-
-  private func setupClipPlayback(events: [SnoreEvent]) {
-    playbackController.loadEvents(events)
-    loadVisualization(for: events.first)
-  }
-
-  private func playClipEvent(_ event: SnoreEvent, in events: [SnoreEvent]) {
-    guard let index = events.firstIndex(where: { $0.id == event.id }) else { return }
-    playbackController.playEvent(at: index)
-    loadVisualization(for: event)
-  }
-
-  private func loadVisualization(for event: SnoreEvent?) {
-    guard let event, let url = AudioFileURLResolver.resolve(event.audioFileURL) else {
-      waveformSamples = []
-      spectrumBars = []
-      return
-    }
-    Task {
-      let samples = WaveformGenerator.generateSamples(from: url)
-      let bars = WaveformGenerator.spectrumSamples(from: url)
-      await MainActor.run {
-        waveformSamples = samples
-        spectrumBars = bars
-      }
-    }
-  }
-
-  // MARK: - Legacy Playback Section
-
-  private func legacyPlayerSection(session: SleepSession) -> some View {
-    let markers = legacyEventMarkers(session: session)
-    let colors = eventMarkerColors(events: (session.events ?? []).sorted { $0.timestamp < $1.timestamp })
-    return SessionDetailMiniPlayerView(
-      session: session,
-      isPlaying: isPlaying,
-      progress: audioProgress,
-      totalDuration: audioPlayer?.duration ?? session.totalDuration,
-      eventMarkers: markers,
-      eventMarkerColors: colors,
-      isExpandable: false,
-      onTogglePlayback: toggleLegacyPlayback,
-      onScrub: { relative in scrubLegacyTo(relative: relative) },
-      onExpand: {}
-    )
-  }
-
-  private var audioProgress: Double {
-    let total = audioPlayer?.duration ?? 0
-    return total > 0 ? currentPlaybackTime / total : 0
-  }
-
-  private func setupAudioPlayer(for session: SleepSession) {
-    guard let url = AudioFileURLResolver.resolve(session.audioFileURL) else { return }
-    do {
-      let player = try AVAudioPlayer(contentsOf: url)
-      player.prepareToPlay()
-      audioPlayer = player
-    } catch {
-      // Audio playback is optional; fail silently
-    }
-  }
-
-  private func trackLegacyPlaybackProgress() async {
-    guard isPlaying else { return }
-    while !Task.isCancelled {
-      try? await Task.sleep(for: .milliseconds(100))
-      if let player = audioPlayer {
-        currentPlaybackTime = player.currentTime
-        if !player.isPlaying {
-          isPlaying = false
-        }
-      }
-    }
-  }
-
-  private func toggleLegacyPlayback() {
-    guard let player = audioPlayer else { return }
-    if player.isPlaying {
-      player.pause()
-      isPlaying = false
-    } else {
-      do {
-        try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
-        try AVAudioSession.sharedInstance().setActive(true)
-      } catch {
-        // Continue anyway; playback may still work
-      }
-      player.play()
-      isPlaying = true
-    }
-  }
-
-  private func seekToLegacyEvent(_ event: SnoreEvent, in session: SleepSession) {
-    guard let player = audioPlayer else { return }
-    let eventTime = event.timestamp.timeIntervalSince(session.startDate)
-    player.currentTime = max(0, min(eventTime, player.duration))
-    if !player.isPlaying {
-      player.play()
-      isPlaying = true
-    }
-  }
-
-  private func scrubLegacyTo(relative: Double) {
-    guard let player = audioPlayer else { return }
-    let time = relative * player.duration
-    player.currentTime = max(0, min(time, player.duration))
-    currentPlaybackTime = player.currentTime
+    events.map { theme.intensityColor($0.intensity) }
   }
 
   // MARK: - Share
@@ -386,28 +244,14 @@ public struct SessionDetailView: View {
         predicate: #Predicate { $0.id == sessionID }
       )
       if let session = try modelContext.fetch(descriptor).first {
-        diagnoseAudioFiles(for: session)
-        viewState = .loaded(session: session)
+        let sortedEvents = session.events?.sorted(by: { $0.timestamp < $1.timestamp }) ?? []
+        let isClipSession = sortedEvents.contains(where: { AudioFileURLResolver.resolve($0.audioFileURL) != nil })
+        viewState = .loaded(session: session, sortedEvents: sortedEvents, isClipSession: isClipSession)
       } else {
         viewState = .error
       }
     } catch {
       viewState = .error
-    }
-  }
-
-  private func diagnoseAudioFiles(for session: SleepSession) {
-    let eventCount = session.events?.count ?? 0
-    let clipsFound = session.events?.filter {
-      AudioFileURLResolver.resolve($0.audioFileURL) != nil
-    }.count ?? 0
-    let legacyURL = AudioFileURLResolver.resolve(session.audioFileURL)
-    print("[SessionDetailView] Session \(session.id.uuidString.prefix(8)) — Events: \(eventCount), Clips found: \(clipsFound), Legacy audio: \(legacyURL != nil)")
-    if let events = session.events {
-      for event in events {
-        let exists = AudioFileURLResolver.resolve(event.audioFileURL) != nil
-        print("[SessionDetailView]   Event \(event.id.uuidString.prefix(8)) — file: \(event.audioFileURL ?? "nil") — exists: \(exists)")
-      }
     }
   }
 
@@ -448,7 +292,21 @@ public struct SessionDetailView: View {
 
   private enum ViewState {
     case loading
-    case loaded(session: SleepSession)
+    case loaded(session: SleepSession, sortedEvents: [SnoreEvent], isClipSession: Bool)
     case error
+  }
+
+  private enum DetailSheet: Identifiable {
+    case player(initialEvent: SnoreEvent?)
+    case events
+
+    var id: String {
+      switch self {
+      case .player(let event):
+        return event.map { "player-\($0.id.uuidString)" } ?? "player"
+      case .events:
+        return "events"
+      }
+    }
   }
 }

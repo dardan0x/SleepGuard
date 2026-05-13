@@ -2149,3 +2149,294 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 - Should we add `analysisPipelineVersion: Int` to `SleepSession` for background reprocessing when detection algorithms change?
 
 ---
+
+
+---
+
+## 2026-05-12 — Session 38: Performance Fix — Computed Properties Hang + Stop Button Bug + Gauge Animation
+
+### Completed
+- **BUG**: `BedsideClockView` Stop button always showed "Session Too Short" alert because it checked `session.totalDuration` (computed from `endDate`, which is `nil` during recording → always 0). Fixed to use live elapsed time `currentTime.timeIntervalSince(session.startDate)`.
+- **BUG**: `SessionDetailView` and `RecordingsListView` hung on fresh app open for dates with multiple saved sessions. The schema audit changed `sleepScore`/`snoringDuration` from stored to computed, so every `body` evaluation triggered SwiftData relationship faulting + redundant O(n) passes.
+- **PERF**: `SleepSession.sleepScore` refactored to single-pass over events (was 3+ passes).
+- **PERF**: `AudioClipExtractor.extractClips()` parallelized with `TaskGroup` (batches of 4) instead of sequential `for` loop. Cuts post-recording processing time significantly for long sessions.
+- **PERF**: `NightGroup.averageScore`/`totalDuration`/`totalEvents` moved from computed properties to stored constants computed once at init. Prevents re-computation on every SwiftUI `body` evaluation.
+- **PERF**: `SessionDetailView` pre-computes `sortedEvents` and `isClipSession` during async `loadSession()` instead of sorting/faulting synchronously in `loadedBody`.
+- **PERF**: `SnoringTimelineView` avoids `O(n log n)` sort when events are already chronological.
+- **UX**: `SleepScoreGauge` now animates from 0 → target on first load using `@State animatedProgress` + `.onAppear`.
+
+### Technical Details
+- `NightGroup` is a value type; computed properties were re-evaluated every time `NightGroupRowView.body` rendered. With 3+ sessions per night, each evaluation called `sleepScore` 3×, faulting events each time. Making them stored constants computed at `init` eliminates this.
+- `SessionDetailView` previously did `session.events?.sorted(...)` in `loadedBody` (every layout pass) and again in `SessionDetailEventsView.body`. Now sorted once in `loadSession()` and passed down.
+- `SessionDetailView.diagnoseAudioFiles()` iterated all events synchronously on the main thread during load — removed entirely.
+- `AudioClipExtractor` now uses `withTaskGroup` with batch size 4. Each task creates its own `AVURLAsset` to avoid Sendable issues. Exports and spectral analysis run concurrently within each batch.
+- `SleepScoreGauge` uses `.animation(.easeOut(duration: 0.8), value: animatedProgress)` + `.onAppear { animatedProgress = CGFloat(score) / 100.0 }` + `.onChange(of: score)` for updates. No heavy work on main thread; interpolation runs on render server.
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Models/Sources/Data/SleepSession.swift` | +28/-21 | Single-pass `sleepScore`; removed redundant `snoringPercentage`/`snoringDuration` calls |
+| `Packages/AudioEngine/Sources/Engine/AudioClipExtractor.swift` | +55/-58 | Parallelized extraction with `TaskGroup` (batch size 4); extracted per-event logic into `extractSingleClip()` |
+| `Packages/DesignSystem/Sources/Components/SnoringTimelineView.swift` | +10/-2 | Sort-skip when events already chronological |
+| `Packages/Recordings/Sources/Views/NightGroup.swift` | +8/-7 | `averageScore`, `totalDuration`, `totalEvents` stored at init instead of computed |
+| `Packages/Recordings/Sources/Views/SessionDetailView.swift` | +35/-42 | `ViewState.loaded` carries `sortedEvents` + `isClipSession`; pre-computed in `loadSession()`; removed `diagnoseAudioFiles()`; `legacyPlayerSection` takes sorted events |
+| `Packages/Recordings/Sources/Views/SessionDetailHeaderView.swift` | +2/-1 | Takes `score: Int` directly |
+| `Packages/Recordings/Sources/Views/SessionDetailEventsView.swift` | +1/-3 | Takes `events: [SnoreEvent]` instead of re-sorting `session.events` |
+| `Packages/SleepSession/Sources/Views/BedsideClockView.swift` | +1/-1 | Stop button uses live elapsed time instead of `session.totalDuration` |
+| `Packages/DesignSystem/Sources/Components/SleepScoreGauge.swift` | +10/-3 | `@State animatedProgress` with `.onAppear` animation + `.onChange(of: score)` |
+
+### Architecture Decisions
+- **Pre-compute during async load, never in body:** Any data that requires relationship access or sorting should be computed in `.task { loadState() }` and cached in `ViewState`. `body` must be O(1).
+- **Struct-level caching for group stats:** `NightGroup` stores averaged stats at init because SwiftUI `body` re-evaluates frequently. Value-type computed properties that touch relationships are a performance trap.
+- **Parallel I/O with bounded concurrency:** `TaskGroup` with batch size 4 keeps `AVAssetExportSession` load reasonable while still cutting sequential wait time.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors across all packages + app target
+
+### Next Session
+- Test parallel clip extraction on a real 30+ minute session to verify export stability.
+- Consider adding relationship prefetching (`FetchDescriptor` with `relationshipKeyPathsForPrefetching`) for `RecordingsListView` if cold-start faulting remains noticeable.
+
+### Open Questions
+- Should `NightGroup` also cache `latestSession`? It's O(1) array access, so low priority.
+- Is batch size 4 optimal for `AVAssetExportSession` concurrency, or should it be tuned per device?
+
+---
+
+## 2026-05-12 — Session 39: Fix Main-Thread Audio I/O Hang in SessionDetailView
+
+### Completed
+- **BUG**: `SessionDetailView` hung when opening saved recordings with large legacy audio files. `setupAudioPlayer()` called `AVAudioPlayer(contentsOf:)` synchronously on the main thread; for 30+ minute `.caf` files this blocks the UI for seconds.
+- **BUG**: `SessionDetailView` `.task` could redundantly re-run audio setup on body re-evaluation (e.g., `isPlayerExpanded` toggle). Added `didSetupAudio` guard to ensure one-shot initialization.
+- **PERF**: `ClipPlaybackController.loadEvents()` redundantly sorted already-sorted events (caller `SessionDetailView.loadSession()` pre-sorts). Removed `events.sorted()` to avoid O(n log n) work.
+
+### Technical Details
+- `setupAudioPlayer(for:)` is now `async` and creates `AVAudioPlayer` inside `Task.detached(priority: .userInitiated)`. The synchronous `contentsOf:` decode + `prepareToPlay()` run on a background thread; only the final assignment to `@State audioPlayer` hops back to `@MainActor`.
+- `SessionDetailView` `.task` in `loadedBody` now reads `guard !didSetupAudio else { return }` before branching to clip vs. legacy setup. Prevents double-initializing `AVAudioPlayer` on view re-evaluation.
+- `ClipPlaybackController.loadEvents(_:)` removed `events.sorted { $0.timestamp < $1.timestamp }` because `SessionDetailView` already passes chronologically sorted events from `loadSession()`. This avoids an unnecessary O(n log n) pass every time the detail view appears.
+- `SessionDetailMiniPlayerView` was ruled out as the culprit — it is purely presentational (receives pre-computed `progress`, `eventMarkers`, etc.). Zero audio I/O.
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Recordings/Sources/Views/SessionDetailView.swift` | +12/-5 | `setupAudioPlayer` → `async` with `Task.detached`; added `didSetupAudio` state; `.task` awaits setup |
+| `Packages/Recordings/Sources/Helpers/ClipPlaybackController.swift` | +1/-1 | Removed redundant `events.sorted()` in `loadEvents()`; trusts caller order |
+
+### Architecture Decisions
+- **Never do synchronous file I/O on `@MainActor`:** `AVAudioPlayer(contentsOf:)` reads and decodes the entire audio file. Always wrap in `Task.detached` for large files, even if the API surface is synchronous.
+- **One-shot setup guards prevent redundant work:** SwiftUI `.task` lifetime can restart on identity changes. A `didSetupAudio` boolean prevents re-creating expensive resources.
+- **Trust caller invariants to avoid redundant work:** If the caller guarantees sorted input, don't re-sort. Document the invariant in comments.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors across all packages + app target
+
+### Next Session
+- Monitor for remaining hangs in `SessionDetailView` for sessions with very high event counts (500+ clips). If file-existence checks in `loadEvents` add up, consider lazy resolution.
+- Consider making `ClipPlaybackController.setupPlayerForCurrentEvent()` async too, so clip auto-advance (`tick()`) doesn't block the main thread when loading the next clip.
+
+### Open Questions
+- Should `ClipPlaybackController` skip file-existence checks entirely and assume clips exist? Failed extractions are rare; a missing clip would fail at `AVAudioPlayer` creation anyway.
+
+---
+
+## 2026-05-12 — Session 39 (continued): Lazy Audio + Canvas Timeline
+
+### Completed
+- **Lazy legacy audio player**: `AVAudioPlayer` is no longer created when `SessionDetailView` appears. It is only created when the user taps the play button. This completely removes heavy file decode from the view load path.
+- **Lazy clip audio player**: `ClipPlaybackController.loadEvents()` no longer calls `setupPlayerForCurrentEvent()`. The first `play()` tap creates the `AVAudioPlayer` for the current clip.
+- **Removed file-existence checks**: `ClipPlaybackController.loadEvents()` no longer checks `FileManager.fileExists(atPath:)` for every event. It now just maps `event.snoreDuration`. Missing clips fail gracefully when playback is attempted.
+- **Canvas timeline**: `SnoringTimelineView` reimplemented with `Canvas` instead of `ForEach` over hundreds of `RoundedRectangle` views. A single `Canvas` render pass draws all segments, eliminating SwiftUI view-creation overhead for sessions with many events.
+
+### Technical Details
+- `SessionDetailView.loadedBody` `.task` no longer calls `await setupAudioPlayer(for:)` for legacy sessions. The task only runs `setupClipPlayback` for clip sessions, which is now lightweight (no file I/O, no player creation).
+- `toggleLegacyPlayback()` checks `audioPlayer == nil` and spawns an async task to create the player via `Task.detached`. Once ready, it recursively calls itself to start playback. A `isLegacyPlayerLoading` flag prevents duplicate initializations.
+- `seekToLegacyEvent()` handles the nil-player case by lazy-initing first, then seeking.
+- `ClipPlaybackController.play()` now checks `if audioPlayer == nil { setupPlayerForCurrentEvent() }` before attempting playback. All other entry points (`playEvent(at:)`, `tick()`, `seekToOverall`) rely on `play()` or `setupPlayerForCurrentEvent()` being called on demand.
+- `SnoringTimelineView` draws background + segments in a single `Canvas` closure using `Path(roundedRect:)` and `context.fill(...)`. No `GeometryReader`, no `ForEach`, no view identity management for hundreds of items.
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Recordings/Sources/Views/SessionDetailView.swift` | +35/-15 | Lazy legacy playback (`isLegacyPlayerLoading`, `currentSession`, async `toggleLegacyPlayback`); removed `await setupAudioPlayer` from `.task` |
+| `Packages/Recordings/Sources/Helpers/ClipPlaybackController.swift` | +4/-6 | `loadEvents` skips file checks + player setup; `play()` lazy-inits player |
+| `Packages/DesignSystem/Sources/Components/SnoringTimelineView.swift` | +16/-35 | Replaced `GeometryReader` + `ForEach` with `Canvas` single-pass drawing |
+
+### Architecture Decisions
+- **Lazy over eager for expensive resources:** Audio players are created on user interaction, not view appearance. This guarantees the view loads instantly regardless of file size.
+- **Canvas for high-item-count graphics:** When a view needs hundreds of identical shapes, `Canvas` + `Path` is orders of magnitude faster than `ForEach` with individual SwiftUI views.
+- **Fail-soft for missing clips:** Instead of pre-validating every clip file, assume existence and let `AVAudioPlayer(contentsOf:)` fail at play time. This removes O(n) file system calls from the load path.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors across all packages + app target
+
+### Next Session
+- Monitor user feedback on large-session load times. If hangs persist, investigate SwiftData relationship faulting during `loadSession()` or pre-computing timeline segments in the background.
+- Consider adding a small loading spinner on the mini player play button while lazy audio init is in progress.
+
+### Open Questions
+- Should `SessionDetailView` pre-compute `sleepScore` and timeline segments during `loadSession()` so `body` is truly O(1)?
+
+---
+
+## 2026-05-12 — Session 39 (continued): Fix False-Positive Snore Detection
+
+### Completed
+- **BUG**: Snore detector created massive false positives (breathing, bed creaking, traffic, talking) because the fallback `classifyWithThresholds()` was a pure dB gate at -35 dB with zero frequency discrimination.
+- **BUG**: Spectral threshold of 0.3 was too permissive — breathing easily scores 0.4–0.7 in the 100–500 Hz band. Raised to 0.6 with a -35 dB minimum floor.
+- **BUG**: `SoundAnalysisDetector` included `"breathing"` in `snoreIdentifiers`, so Apple's classifier treating breathing as a class would count it as snoring.
+- **BUG**: `SessionManager.finalizeActiveEvent()` hardcoded 0.5 s minimum duration instead of using `UserPreferences.minSnoreDuration` (default 2.0 s). Brief breathing waves (< 2 s) now get discarded.
+- **BUG**: No sustained-detection requirement — a single sample above threshold could start an event. Added `consecutiveSnoreSamples` counter requiring 3 consecutive detections (≈150 ms at 20 Hz).
+
+### Technical Details
+- `SnoreDetector.classify()` no longer falls back to `classifyWithThresholds()`. If both SoundAnalysis and spectral are inconclusive, it returns `.none`.
+- `classifyWithSpectral()` threshold raised from 0.3 → 0.6. Added `guard db >= -35 else { return .none }` so quiet ambient sounds are rejected even with decent spectral scores.
+- `SoundAnalysisDetector.snoreIdentifiers` changed from `["snore", "snoring", "breathing"]` to `["snore", "snoring"]`.
+- `SessionManager.processAudioLevel()` increments `consecutiveSnoreSamples` when `state != .none`. Only starts/extends an event after 3 consecutive samples (≈150 ms). Brief sounds (bed creaks, taps) are filtered out. The event start time is backdated to when sustained detection began.
+- `SessionManager.finalizeActiveEvent()` now reads `UserPreferences.shared.minSnoreDuration` (default 2.0 s) instead of hardcoded 0.5 s.
+- The UI hang was a *symptom* of false positives, not an audio player issue. With hundreds or thousands of false events per session, `loadSession()`, `SnoringTimelineView`, and `sleepScore` all iterated massive arrays.
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/AudioEngine/Sources/Engine/SnoreDetector.swift` | +12/-10 | Removed dB fallback; spectral threshold 0.3→0.6; added -35 dB floor |
+| `Packages/AudioEngine/Sources/Engine/SoundAnalysisDetector.swift` | +1/-1 | Removed `"breathing"` from snore identifiers |
+| `Packages/Env/Sources/Services/SessionManager.swift` | +18/-6 | Consecutive sample gate (3×); backdated event start; `minSnoreDuration` from prefs |
+
+### Architecture Decisions
+- **Pure dB gates are dangerous for audio classification:** Without frequency or temporal analysis, any sound above a threshold is "snoring." Always require at least one discriminative classifier (spectral or ML) to confirm.
+- **Sustained detection prevents transient false positives:** A single 50 ms sample above threshold is not snoring. Require 150 ms of consistent detection.
+- **User preference for minimum duration should be respected:** Hardcoding 0.5 s ignored the user's setting and allowed brief breathing waves to become events.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors across all packages + app target
+
+### Next Session
+- Monitor real-world detection accuracy. If false positives persist, consider:
+  - Training a custom `MLSoundClassifier` model on snoring vs. breathing/bed creaking
+  - Adding periodicity analysis (snoring is rhythmic; breathing is irregular)
+  - Lowering the bandpass filter center frequency to better capture the snoring fundamental (~80–150 Hz)
+
+### Open Questions
+- Is 0.6 spectral threshold too aggressive? Might miss quiet snoring. May need tuning based on user feedback.
+- Should `requiredConsecutiveSamples` be configurable in settings?
+
+
+---
+
+## 2026-05-12 — Session 39 (continued): Sheet-Based Player + Events UI
+
+### Completed
+- **Restructured `SessionDetailView` into a bottom-sheet audio pattern** to eliminate audio I/O from the detail view load path.
+- **Fake mini player bar**: `SessionDetailMiniPlayerView` is now a static presentational component with no live playback state. It shows session info, a zeroed progress bar, and event marker dots. Tapping anywhere opens the real player sheet.
+- **`PlayerSheetView` (new)**: Self-contained bottom sheet that owns all audio state — `AVAudioPlayer` for legacy sessions, `ClipPlaybackController` for clip sessions, waveform/spectrum visualization, and full playback controls. Initialized only when the user opens the sheet.
+- **`EventsSheetView` (new)**: Bottom sheet showing all snore events as a multi-row grid of compact cards (120×140 pt, 3 per row). Each card shows intensity dot, relative time, duration, and a Play button. Replaces the inline vertical event list for large sessions.
+- **`SessionDetailEventsView`**: Now shows only the first 4 events inline plus a "Show All" button. Eliminates rendering hundreds of `EventRow` views in the main scroll.
+- **Removed `.withEnvironments()`**: Sheets only use `@Environment(Theme.self)` and `@Environment(\.dismiss)`, which are standard SwiftUI environments. No app-specific singleton injection needed.
+
+### Technical Details
+- `SessionDetailView` no longer has any `@State` for audio playback. All audio-related state moved to `PlayerSheetView`.
+- `SessionDetailView.loadedBody` pre-computes `sortedEvents` and `isClipSession` during `loadSession()`; passes them to child views as immutable `let` parameters.
+- `PlayerSheetView` receives `session`, `sortedEvents`, `isClipSession`, and an optional `initialEvent`. On `.task`, it initializes the appropriate player and optionally auto-plays the initial event.
+- Legacy audio setup (`setupAudioPlayer()`) remains async with `Task.detached(priority: .userInitiated)` to avoid blocking sheet presentation.
+- `DetailSheet` enum (`.player(initialEvent: SnoreEvent?)`, `.events`) drives `.sheet(item:)` presentation with stable IDs.
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Recordings/Sources/Views/SessionDetailView.swift` | +120/-280 | Removed all audio state; added `DetailSheet` enum; fake mini player section; `.sheet(item:)` for player + events |
+| `Packages/Recordings/Sources/Views/PlayerSheetView.swift` | +244/-0 | **New** — Self-contained audio player sheet with legacy + clip playback, visualization, controls |
+| `Packages/Recordings/Sources/Views/EventsSheetView.swift` | +116/-0 | **New** — Horizontal scrolling event cards in a bottom sheet |
+| `Packages/Recordings/Sources/Views/SessionDetailEventsView.swift` | +42/-60 | Shows first 4 events + "Show All" button; removed inline play/share row logic (moved to parent) |
+| `Packages/Recordings/Sources/Views/SessionDetailMiniPlayerView.swift` | +103/-120 | Now purely presentational; receives all state via `let` parameters; no `@State` |
+
+### Architecture Decisions
+- **Sheet isolation for heavy I/O**: Audio file I/O and player initialization are expensive and belong in a dedicated sheet, not in the main detail scroll. This prevents the detail view from ever blocking on audio setup.
+- **Horizontal event cards vs. vertical list**: For sessions with thousands of events (legacy polluted data), a vertical `ForEach` over `EventRow` views is expensive. Horizontal cards in a sheet are cheaper and more scannable.
+- **No `.withEnvironments()` in package sheets**: The extension lives in the app target. Since sheets only need `Theme` and `dismiss`, we avoid the cross-target dependency issue entirely.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors across all packages + app target
+
+### Next Session
+- Consider adding a "Delete Legacy Sessions" bulk action in Settings for users with pre-fix polluted data.
+- Consider pre-computing timeline segment arrays in `loadSession()` to make `SnoringTimelineView` truly O(1) in `body`.
+
+### Open Questions
+- Should `PlayerSheetView` support background audio (continue playing after dismiss)? Currently stops when sheet closes.
+- Should event cards in `EventsSheetView` show a waveform thumbnail?
+
+
+---
+
+## 2026-05-12 — Session 39 (continued): Event-Focused Player UI
+
+### Completed
+- **Redesigned `PlayerSheetView` to match the screenshot design** — single-event focused player with bar waveform, centered pause button, and skip controls.
+- **Created `EventPlayerView`** — New presentational component matching the design:
+  - Header: "SNORING EVENT" label, duration + intensity (e.g. "1m 18s · Loud"), Peak/Avg dB
+  - Bar-style waveform (80 thin vertical bars) with blue played / gray unplayed coloring
+  - White vertical line indicating current playback position
+  - Time labels: start, current/total, end
+  - Large white circular pause button centered, with 15s skip back/forward buttons
+  - Legend: colored dots for Light snore / Loud snore
+- **Player auto-opens in expanded mode** — No more mini player + expand toggle. Tapping Play on any event card opens the sheet directly showing the full event player.
+- **Waveform visualization** — `WaveformGenerator` samples rendered as individual `RoundedRectangle` bars. For clip sessions, reads the event's `.m4a` directly. For legacy sessions, exports a temporary clip and generates waveform from it.
+- **Skip controls** — ±15 second skip back/forward for both clip and legacy playback.
+- **`SessionDetailMiniPlayerView`** — Inline fake bar in `SessionDetailView` now hides play button entirely (`showsPlaybackButton: false`). Only shows timeline with duration and event markers.
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Recordings/Sources/Views/EventPlayerView.swift` | +195/-0 | **New** — Design-matching single-event player with bar waveform, pause button, skip controls |
+| `Packages/Recordings/Sources/Views/PlayerSheetView.swift` | +266/-0 | **Rewritten** — Uses `EventPlayerView` directly; removed mini player + expand pattern; auto-plays on open |
+| `Packages/Recordings/Sources/Views/SessionDetailMiniPlayerView.swift` | +25/-5 | Added `showsPlaybackButton` parameter; hides play button when false |
+| `Packages/Recordings/Sources/Views/SessionDetailView.swift` | +12/-8 | Fake player section now has "TIMELINE" label above; passes `showsPlaybackButton: false` |
+
+### Architecture Decisions
+- **Single-event player vs. timeline player**: The design is event-scoped, not session-scoped. Each event gets its own waveform and controls. For clip sessions, sequential playback advances to the next event automatically (handled by `ClipPlaybackController`).
+- **Bar waveform over filled shape**: The design shows discrete vertical bars, not a continuous filled path. Bars are easier to color by play state (blue played vs. gray unplayed) and computationally cheaper.
+- **Auto-play on sheet open**: When user taps Play on an event card, the sheet opens and immediately starts playing that event. The large pause button is the primary control since playback is already active.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors across all packages + app target
+
+### Next Session
+- Add localized strings for new UI labels ("Snoring Event", "Light snore", "Loud snore")
+- Consider adding per-burst marker dots on the waveform (currently shows single dot or burst-position dots)
+
+### Open Questions
+- Should the player auto-advance to the next event when one finishes? Currently `ClipPlaybackController` does this; legacy single-event player stops.
+
+
+## 2026-05-13 — Session 40: Single-Event Playback from Events Sheet + Detail Inline
+
+### Completed
+- **Fixed `EventsSheetView` dismissal on play**: Tapping an event card's Play button now presents `PlayerSheetView` as a nested sheet while keeping `EventsSheetView` open underneath.
+- **Single-event playback from `EventsSheetView`**: `PlayerSheetView` receives `sortedEvents: [event]` instead of all events. This makes the player show only that event's waveform, duration, and time — not the full concatenated clip sequence.
+- **Single-event playback from `SessionDetailEventsView`**: Applied the same fix to the inline event list on `SessionDetailView`. The `.player` sheet case now passes `sortedEvents: initialEvent.map { [$0] } ?? sortedEvents`, so tapping an event row plays only that recording.
+
+### Technical Details
+- `EventsSheetView` uses `.sheet(item: $selectedEvent)` presenting `PlayerSheetView` with `sortedEvents: [event]`. The sheet is nested inside `EventsSheetView`'s `NavigationStack`, so the parent sheet stays open.
+- `ClipPlaybackController.loadEvents([event])` sets `totalClipsDuration = event.snoreDuration`, `events.count = 1`, so `EventPlayerView` shows the event-scoped UI without "Event X of Y" sequence label.
+- `SessionDetailView.DetailSheet.player` case updated to filter `sortedEvents` to just the tapped event. Fallback to all events only if `initialEvent` is nil (defensive).
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Recordings/Sources/Views/EventsSheetView.swift` | +63/-53 | Rewrote to present `PlayerSheetView` as nested sheet with `sortedEvents: [event]`; removed earlier inline mini-player experiment |
+| `Packages/Recordings/Sources/Views/SessionDetailView.swift` | +1/-1 | `.player` sheet: `sortedEvents: sortedEvents` → `sortedEvents: initialEvent.map { [$0] } ?? sortedEvents` |
+
+### Architecture Decisions
+- **Nested sheets over sheet replacement**: Changing `activeSheet` from `.events` to `.player` in the parent dismisses the events sheet. Presenting the player from within `EventsSheetView` preserves the parent.
+- **Single-event array trick**: Passing `[event]` to `PlayerSheetView` reuses all existing clip/legacy playback logic without adding a new "single event mode" flag. `ClipPlaybackController` naturally handles a 1-element array.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors across all packages + app target
+
+### Next Session
+- (none scheduled)
+
+### Open Questions
+- None
+
+---

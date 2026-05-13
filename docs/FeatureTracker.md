@@ -2,7 +2,7 @@
 
 > Auto-updated by the AI after every task. This is the local source of truth.
 
-Last updated: 2026-05-12 (Session 37)
+Last updated: 2026-05-13 (Session 40)
 
 ---
 
@@ -59,6 +59,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-05-12 | Session 38: Performance fixes + stop button bug + gauge animation | Completed | Fixed `BedsideClockView` stop button always showing short-session alert (used `totalDuration` which is 0 during recording); parallelized `AudioClipExtractor` with `TaskGroup` (batch 4); single-pass `sleepScore`; `NightGroup` stats cached at init; `SessionDetailView` pre-computes sortedEvents/isClipSession in async load; `SnoringTimelineView` skips unnecessary sort; `SleepScoreGauge` animates from 0 on first load |
 | 2026-05-11 | PDF visual polish + dark mode color preservation | Completed | Blue gradient header (`#7FD9F2` → `#1A73C0` → `#0D2666`); icy blue card backgrounds (`#F0F7FF`); explicit white page background fill; replaced all `UIColor.white` with explicit RGB; forced `UITraitCollection(userInterfaceStyle: .light)` during generation; removed unused dark red color constants |
 | 2026-05-10 | Raw data preservation + per-burst tracking + orphaned file cleanup + mini player dot fix | Completed | Added `SleepSession.rawAudioFileURL` + `rawLogFileURL`; `SessionRawLogWriter` buffers every 50ms classification sample as JSON; `SnoreBurst` tracks continuous snoring segments within events; `snoreDuration` now = sum of burst durations (true snoring time, excludes gaps); `AudioClipExtractor` composes gap-free clips via `AVMutableComposition`; `deleteSessionFiles()` cleans up all files on deletion; Mini player dots now positioned on clips timeline so they align with playback progress |
 | 2026-05-09 | Localization: Semantic key migration | Completed | Migrated 132 xcstrings keys from raw English to dot-notation (e.g. `onboarding.page1.title`, `session.recording.statusFormat`); updated generator with camelCase splitting; all 42 source files updated; zero build errors; max constant name 40 chars |
@@ -109,6 +110,14 @@ _Most recent first. The AI appends here after every task._
 | 2026-05-06 | F2-T3 | Completed | Pre-start recording screen with mic status + tips + CTA |
 | 2026-05-12 | F2-T2 | Fix | Sleep score formula revised (snoring cap 70, events cap 20, intensity penalty added); moved from SwiftData stored to computed property |
 | 2026-05-12 | F2-T2 | Refactor | Converted `totalDuration`, `snoringDuration`, `snoringPercentage`, `eventsCount`, `eventsPerHour` from stored to computed on `SleepSession` |
+| 2026-05-12 | Session 38 | Bugfix | `BedsideClockView` stop button short-session alert used `session.totalDuration` (always 0 during recording) → fixed to live elapsed time |
+| 2026-05-12 | Session 38 | Perf | `AudioClipExtractor.extractClips()` parallelized with `TaskGroup` (batch size 4) |
+| 2026-05-12 | Session 38 | Perf | `sleepScore` single-pass; `NightGroup` stats cached at init; `SessionDetailView` pre-computes in async load; `SnoringTimelineView` sort-skip |
+| 2026-05-12 | Session 38 | UX | `SleepScoreGauge` animates from 0 → target on first load |
+| 2026-05-12 | Session 39 | Perf | Lazy audio init (legacy + clips); `ClipPlaybackController` skips file checks; `SnoringTimelineView` uses `Canvas` instead of `ForEach` |
+| 2026-05-12 | Session 39 | Bugfix | False-positive snore detection: removed dB fallback, spectral threshold 0.3→0.6, removed "breathing" identifier, consecutive sample gate, wired `minSnoreDuration` preference |
+| 2026-05-12 | Session 39 | UX | Sheet-based player + events UI: `SessionDetailView` restructured with fake mini player bar + `PlayerSheetView` sheet for real audio; `EventsSheetView` with horizontal event cards; audio I/O fully deferred from detail view load path |
+| 2026-05-13 | Session 40 | Polish | Single-event playback from EventsSheetView and SessionDetailEventsView — nested sheet preserves parent, passes `[event]` to PlayerSheetView |
 | 2026-05-12 | F2-T2 | Refactor | Converted `SnoreEvent.snoreDuration` from stored to computed (derived from `bursts`) |
 | 2026-05-06 | F2-T2 | Completed | SessionManager real-time event tracking + sleep score |
 | 2026-05-06 | F2-T1 | Completed | AudioRecorder + SnoreDetector verified from scaffold |
@@ -126,6 +135,8 @@ _Most recent first. The AI appends here after every task._
 
 | Task | Feature | Completed | Duration |
 |------|---------|-----------|----------|
+| Session 39 | F4 | 2026-05-12 | — |
+| Session 38 | F4 | 2026-05-12 | — |
 | F4-T6 | F4 | 2026-05-09 | — |
 | F2-T8 | F2 | 2026-05-09 | — |
 
