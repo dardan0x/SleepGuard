@@ -138,5 +138,51 @@ public final class UserPreferences {
     case system
   }
 
+  public var soothingMelodyMode: SoothingMelodyMode {
+    get {
+      access(keyPath: \.soothingMelodyMode)
+      let raw = defaults.string(forKey: "soothingMelodyMode") ?? "never"
+      return SoothingMelodyMode(rawValue: raw) ?? .never
+    }
+    set {
+      withMutation(keyPath: \.soothingMelodyMode) {
+        defaults.set(newValue.rawValue, forKey: "soothingMelodyMode")
+      }
+    }
+  }
+
+  public var selectedMelodyID: Int {
+    get {
+      access(keyPath: \.selectedMelodyID)
+      let raw = defaults.integer(forKey: "selectedMelodyID")
+      return raw > 0 ? raw : 12
+    }
+    set {
+      withMutation(keyPath: \.selectedMelodyID) {
+        defaults.set(newValue, forKey: "selectedMelodyID")
+      }
+    }
+  }
+
+  public enum SoothingMelodyMode: String, CaseIterable, Sendable {
+    case never
+    case always
+    case fiveSeconds
+    case fifteenSeconds
+    case thirtySeconds
+    case sixtySeconds
+
+    public var displayLabel: String {
+      switch self {
+      case .never: return "Never"
+      case .always: return "Always"
+      case .fiveSeconds: return "5 seconds"
+      case .fifteenSeconds: return "15 seconds"
+      case .thirtySeconds: return "30 seconds"
+      case .sixtySeconds: return "60 seconds"
+      }
+    }
+  }
+
   private init() {}
 }

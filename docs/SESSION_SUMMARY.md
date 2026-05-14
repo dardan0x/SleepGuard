@@ -2500,3 +2500,52 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 - Should the ALL NIGHTS rows in `Last7NightsView` navigate to `sessionDetail` or `recordingDetail`? Currently uses `.sessionDetail`.
 
 ---
+
+---
+
+## 2026-05-14 — Session 42: Soothing Melody Sheet + Picker Sheets
+
+### Completed
+- **RecordingPrestartView actionRow**: Clickable row with trailing value label and chevron that opens `SoothingMelodySheet`
+- **SoothingMelodySheet** (design node `zvwP5`): Native iOS wheel picker for melody duration (Never, Always, 5s, 15s, 30s, 60s), song selection row (RJhGr), status badge, Save/Cancel buttons
+- **MelodyPickerSheet** (design node `p0pnlC`): Scrollable list of melodies (Melody 9–17) with accent highlight, checkmark, and stroke border on selected item
+- **TipsSection gradient**: Applied `RecordingActionButton`-style red glow + gradient stroke to tipsSection container
+
+### Technical Details
+- `Melody` model added to `Models` package with IDs 9–17
+- `UserPreferences` extended with `soothingMelodyMode` (enum: never/always/fiveSeconds/fifteenSeconds/thirtySeconds/sixtySeconds) and `selectedMelodyID` (defaults to 12)
+- Both sheets use draft-state pattern: local `@State` copies of preferences that only commit on Save; Cancel discards changes
+- `SoothingMelodySheet` presents `MelodyPickerSheet` via nested `.sheet`; selected melody bound back via `@Binding`
+- Extracted reusable components: `SheetHandle` (drag bar), `SheetNavHeader` (back button + centered title)
+- Wheel picker uses SwiftUI `Picker` with `.pickerStyle(.wheel)` inside a `bgCard` rounded container
+- `RecordingPrestartView` dynamically displays "Off", "Always", "5 seconds", etc. based on selected mode
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Models/Sources/Data/Melody.swift` | +26 | New `Melody` model with `allMelodies` array |
+| `Packages/Env/Sources/Services/UserPreferences.swift` | +28 | Added `soothingMelodyMode` and `selectedMelodyID` with UserDefaults backing |
+| `Packages/SleepSession/Sources/Views/SoothingMelodySheet.swift` | +240 | New sheet: wheel picker, song row, status badge, Save/Cancel, reusable SheetHandle + SheetNavHeader |
+| `Packages/SleepSession/Sources/Views/MelodyPickerSheet.swift` | +135 | New sheet: melody list with selection highlight, checkmark, accent stroke, Save button |
+| `Packages/SleepSession/Sources/Views/RecordingPrestartView.swift` | +45/-15 | Added actionRow with dynamic value, tipsSection gradient glow + stroke, SoothingMelodySheet presentation |
+
+### Architecture Decisions
+- **Draft-state pattern for sheets**: `SoothingMelodySheet` holds local `@State` copies of mode and melody ID. This lets users explore options without persisting until Save is tapped. Keeps Cancel behavior intuitive.
+- **Nested sheets over RouterPath**: Since these sheets are self-contained and only triggered from `RecordingPrestartView`, local `@State` + `.sheet` is simpler than adding `SheetDestination` cases and handling them at the tab level.
+- **Wheel picker for durations**: Replaced the design's card-with-rows approach with a native `UIPickerView`-style wheel (`Picker` + `.pickerStyle(.wheel)`) because the option count grew from 3 to 6. This is more scrollable and feels native.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors across all packages + app target
+
+### Next Session
+- Polish / design QA of the soothing melody flow if needed
+- Or continue with next V1.1/V2 feature per Roadmap
+
+### Git Handoff
+- **Suggested branch**: `feature/soothing-melody-sheet`
+- **Suggested commit**: `Soothing Melody — Pre-start actionRow, duration wheel picker, melody picker sheet, and tipsSection gradient`
+
+### Open Questions
+- The nav back buttons in both sheets say "Search" per the design file — confirm if this should be "Back" or kept as-designed
+- Should the soothing melody audio actually play during snoring detection? This session built only the UI + settings storage; the playback integration into `SessionManager` / `AudioRecorder` is not yet implemented
