@@ -3,7 +3,7 @@ import Env
 import Recordings
 
 struct RecordingsTab: View {
-  @Environment(RouterPath.self) private var routerPath
+  @State private var routerPath = RouterPath()
 
   var body: some View {
     NavigationStack(path: Binding(
@@ -13,5 +13,6 @@ struct RecordingsTab: View {
       RecordingsListView()
         .withAppRouter()
     }
+    .environment(routerPath)
   }
 }

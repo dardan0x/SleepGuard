@@ -2,7 +2,7 @@
 
 > Auto-updated by the AI after every task. This is the local source of truth.
 
-Last updated: 2026-05-13 (Session 40)
+Last updated: 2026-05-14 (Session 41)
 
 ---
 
@@ -117,6 +117,11 @@ _Most recent first. The AI appends here after every task._
 | 2026-05-12 | Session 39 | Perf | Lazy audio init (legacy + clips); `ClipPlaybackController` skips file checks; `SnoringTimelineView` uses `Canvas` instead of `ForEach` |
 | 2026-05-12 | Session 39 | Bugfix | False-positive snore detection: removed dB fallback, spectral threshold 0.3→0.6, removed "breathing" identifier, consecutive sample gate, wired `minSnoreDuration` preference |
 | 2026-05-12 | Session 39 | UX | Sheet-based player + events UI: `SessionDetailView` restructured with fake mini player bar + `PlayerSheetView` sheet for real audio; `EventsSheetView` with horizontal event cards; audio I/O fully deferred from detail view load path |
+| 2026-05-14 | Session 41 | Feature | Last 7 Nights dedicated screen (`Last7NightsView`) matching design fuq0d — chart, stats grid, ALL NIGHTS list, week-over-week trend |
+| 2026-05-14 | Session 41 | Polish | Unified duration format to `%d h %d min` / `%d min` across `Last7NightsRow`, `SessionSummaryView`, `BedsideClockView`, `WatchSessionManager` |
+| 2026-05-14 | Session 41 | UX | Added event timestamp (`hh:mm am/pm`) to `EventPlayerView` header before "Snoring Event" |
+| 2026-05-14 | Session 41 | Bugfix | Fixed tab navigation: each tab now owns its `@State var routerPath` — previously all tabs shared `settingsRouterPath` due to `.environment()` overwrite |
+| 2026-05-14 | Session 41 | Route | Added `.last7Nights` to `RouterDestination`; wired "See all" button in `StatisticsMiniChartSection` |
 | 2026-05-13 | Session 40 | Polish | Single-event playback from EventsSheetView and SessionDetailEventsView — nested sheet preserves parent, passes `[event]` to PlayerSheetView |
 | 2026-05-12 | F2-T2 | Refactor | Converted `SnoreEvent.snoreDuration` from stored to computed (derived from `bursts`) |
 | 2026-05-06 | F2-T2 | Completed | SessionManager real-time event tracking + sleep score |

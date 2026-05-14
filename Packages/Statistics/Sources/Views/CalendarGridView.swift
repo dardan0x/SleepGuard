@@ -40,7 +40,7 @@ struct CalendarGridView: View {
     let session = sessionForDate(day.date)
     let dotColor = intensityColorForSession(session)
     let hasEvents = dotColor != Color.clear
-    let isHighlighted = isToday || isSelected
+    let isHighlighted = isSelected
 
     let cellBackground: Color = {
       if isHighlighted { return theme.accent }

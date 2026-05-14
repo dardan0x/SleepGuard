@@ -11,9 +11,7 @@ struct SnoreGuardApp: App {
   @State private var userPreferences = UserPreferences.shared
   @State private var sessionManager = SessionManager.shared
   @State private var theme = Theme.shared
-  @State private var statisticsRouterPath = RouterPath()
-  @State private var recordingsRouterPath = RouterPath()
-  @State private var settingsRouterPath = RouterPath()
+
 
   var sharedModelContainer: ModelContainer = {
     let schema = Schema([SleepSession.self, SnoreEvent.self])
@@ -39,9 +37,6 @@ struct SnoreGuardApp: App {
         userPreferences: userPreferences,
         sessionManager: sessionManager,
         theme: theme,
-        statisticsRouterPath: statisticsRouterPath,
-        recordingsRouterPath: recordingsRouterPath,
-        settingsRouterPath: settingsRouterPath,
         audioRecorder: AudioRecorder.shared,
         healthKitSync: HealthKitSync.shared,
         watchConnectivityManager: WatchConnectivityManager.shared,

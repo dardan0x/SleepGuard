@@ -14,9 +14,6 @@ extension View {
     userPreferences: UserPreferences,
     sessionManager: SessionManager,
     theme: Theme,
-    statisticsRouterPath: RouterPath,
-    recordingsRouterPath: RouterPath,
-    settingsRouterPath: RouterPath,
     audioRecorder: AudioRecorder,
     healthKitSync: HealthKitSync,
     watchConnectivityManager: WatchConnectivityManager,
@@ -26,9 +23,6 @@ extension View {
       .environment(userPreferences)
       .environment(sessionManager)
       .environment(theme)
-      .environment(statisticsRouterPath)
-      .environment(recordingsRouterPath)
-      .environment(settingsRouterPath)
       .environment(audioRecorder)
       .environment(healthKitSync)
       .environment(watchConnectivityManager)
@@ -59,6 +53,8 @@ extension View {
           SleepSessionView()
         case .trends:
           TrendsView()
+        case .last7Nights:
+          Last7NightsView()
         case .calendar:
           CalendarView()
         }

@@ -93,11 +93,14 @@ struct BedsideClockView: View {
   }
 
   private var durationString: String {
-    guard let session = sessionManager.currentSession else { return "0h 0m" }
+    guard let session = sessionManager.currentSession else { return "0 min" }
     let duration = currentTime.timeIntervalSince(session.startDate)
     let hours = Int(duration) / 3600
     let minutes = (Int(duration) % 3600) / 60
-    return String(format: "%dh %02dm", hours, minutes)
+    if hours > 0 {
+      return String(format: "%d h %d min", hours, minutes)
+    }
+    return String(format: "%d min", minutes)
   }
 
   private var simulatedWaveform: [Double] {

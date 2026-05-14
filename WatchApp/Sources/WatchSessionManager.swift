@@ -79,7 +79,10 @@ final class WatchSessionManager: NSObject, ObservableObject {
     let total = Int(duration)
     let hours = total / 3600
     let minutes = (total % 3600) / 60
-    return String(format: "%dh %02dm", hours, minutes)
+    if hours > 0 {
+      return String(format: "%d h %d min", hours, minutes)
+    }
+    return String(format: "%d min", minutes)
   }
 
   var statusLabel: String {

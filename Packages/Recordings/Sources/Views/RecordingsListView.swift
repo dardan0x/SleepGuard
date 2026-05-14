@@ -53,6 +53,7 @@ public struct RecordingsListView: View {
                 showDeleteAlert = true
               }
             )
+            .padding(.vertical, 8)
             .swipeActions(edge: .trailing) {
               Button(role: .destructive) {
                 groupToDelete = group
@@ -61,6 +62,7 @@ public struct RecordingsListView: View {
                 Label(Strings.actionDelete, systemImage: "trash")
               }
             }
+            .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
           }
         } header: {
           Text(section.title)
