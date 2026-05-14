@@ -12,6 +12,7 @@ struct RecordingPrestartView: View {
     private let audioRecorder = AudioRecorder.shared
 
     private let delayOptions = [0, 15, 30, 45, 60]
+    @State private var showSoothingMelodySheet = false
 
     var body: some View {
         ScrollView {
@@ -26,8 +27,19 @@ struct RecordingPrestartView: View {
                     .padding(.top, 24)
 
                 VStack(spacing: 12) {
-                    delaySection
-
+                    VStack(alignment: .leading, spacing: 8) {
+                        delaySection
+//                            .padding(.bottom, 8)
+//                            .padding(.top, 12)
+                        actionRow(
+                            icon: "timer",
+                            title: "Soothing melody",
+                            value: soothingMelodyValue
+                        ) {
+                            showSoothingMelodySheet = true
+                        }
+                        .padding(.top, 8)
+                    }
                     helperText
                 }
                 .padding(.top, 24)
@@ -62,6 +74,26 @@ struct RecordingPrestartView: View {
             .padding(.horizontal, 24)
         }
         .background(theme.bgPrimary.ignoresSafeArea())
+        .sheet(isPresented: $showSoothingMelodySheet) {
+            SoothingMelodySheet()
+        }
+    }
+
+    private var soothingMelodyValue: String {
+        switch userPreferences.soothingMelodyMode {
+        case .never:
+            return "Off"
+        case .always:
+            return "Always"
+        case .fiveSeconds:
+            return "5 seconds"
+        case .fifteenSeconds:
+            return "15 seconds"
+        case .thirtySeconds:
+            return "30 seconds"
+        case .sixtySeconds:
+            return "60 seconds"
+        }
     }
 
     private var iconSection: some View {
@@ -92,10 +124,49 @@ struct RecordingPrestartView: View {
     }
 
     private var tipsSection: some View {
-        VStack(spacing: 10) {
-            tipRow(icon: "iphone", text: Strings.sessionPrestartTipPhone)
-            tipRow(icon: "bolt.fill", text: Strings.sessionPrestartTipPluggedIn)
-            tipRow(icon: "bell.slash.fill", text: Strings.sessionPrestartTipSilence)
+        ZStack {
+            // Outer soft glow
+            RoundedRectangle(cornerRadius: theme.radiusCard)
+                .fill(Color(hex: "#FF453A").opacity(0.12))
+                .blur(radius: 12)
+                .offset(y: 4)
+                .padding(.horizontal, -4)
+
+            // Inner concentrated glow
+            RoundedRectangle(cornerRadius: theme.radiusCard)
+                .fill(
+                    LinearGradient(
+                        colors: [Color(hex: "#FF453A").opacity(0.25), Color(hex: "#FF453A").opacity(0.0)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .blur(radius: 8)
+                .offset(y: 6)
+                .padding(.horizontal, -2)
+
+            VStack(spacing: 0) {
+                tipRow(icon: "iphone", text: Strings.sessionPrestartTipPhone)
+                Divider()
+                    .background(theme.border)
+                    .padding(.leading, 52)
+                tipRow(icon: "bolt.fill", text: Strings.sessionPrestartTipPluggedIn)
+            }
+            .background(
+                ZStack {
+                    theme.bgCard
+                    RoundedRectangle(cornerRadius: theme.radiusCard)
+                        .stroke(
+                            LinearGradient(
+                                colors: [Color(hex: "#FF453A").opacity(0.6), Color(hex: "#FF453A").opacity(0.1)],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            ),
+                            lineWidth: 1
+                        )
+                }
+            )
+            .cornerRadius(theme.radiusCard)
         }
     }
 
@@ -114,8 +185,38 @@ struct RecordingPrestartView: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 14)
-        .background(theme.bgCard)
-        .cornerRadius(theme.radiusCard)
+    }
+
+    private func actionRow(icon: String, title: String, value: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            VStack(spacing: 8) {
+                HStack(spacing: 12) {
+                    Image(systemName: icon)
+                        .font(.system(size: 18))
+                        .foregroundStyle(theme.accent)
+                        .frame(width: 24)
+
+                    Text(title)
+                        .font(.system(size: 16))
+                        .foregroundStyle(theme.textPrimary)
+
+                    Spacer()
+
+                    Text(value)
+                        .font(.system(size: 16))
+                        .foregroundStyle(theme.textSecondary)
+
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(theme.textTertiary)
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+            .background(theme.bgCard)
+            .cornerRadius(theme.radiusCard)
+        }
+        .buttonStyle(.plain)
     }
 
     private var delaySection: some View {
@@ -156,7 +257,7 @@ struct RecordingPrestartView: View {
     }
 
     private var helperText: some View {
-        Text(Strings.sessionPrestartDelayHelper)
+        Text("Plays a sound when snoring is detected during your session.")
             .font(.system(size: 14))
             .foregroundStyle(theme.textTertiary)
             .multilineTextAlignment(.center)

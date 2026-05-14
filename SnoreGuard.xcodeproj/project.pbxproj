@@ -21,6 +21,7 @@
 		E6F1CF9BF2DDADE9A5619DB4 /* SleepSession in Frameworks */ = {isa = PBXBuildFile; productRef = AD548900091A83E69035BB78 /* SleepSession */; };
 		E962CD02720B46D347403017 /* Recordings in Frameworks */ = {isa = PBXBuildFile; productRef = 613CAAD887F993446993F409 /* Recordings */; };
 		EA3B0BCFD10182B987547C8B /* AudioEngine in Frameworks */ = {isa = PBXBuildFile; productRef = 38CD50332392049638D060DF /* AudioEngine */; };
+		ED7B3283E6D3573708241C8E /* sounds in Resources */ = {isa = PBXBuildFile; fileRef = CE587D245C122AB22F7BD248 /* sounds */; };
 		FAED5AD98781D85AB7AFA7A5 /* SleepSession in Frameworks */ = {isa = PBXBuildFile; productRef = A6305AFA32B7A77ECFB0A19F /* SleepSession */; };
 /* End PBXBuildFile section */
 
@@ -31,6 +32,7 @@
 		CE2590142FAD1D8E004C0C0D /* SnoreGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SnoreGuard.xcodeproj; sourceTree = "<group>"; };
 		CE2591162FAE9289004C0C0D /* SnoreGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SnoreGuard.xcodeproj; sourceTree = "<group>"; };
 		CE25912E2FAE9E98004C0C0D /* SnoreGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SnoreGuard.xcodeproj; sourceTree = "<group>"; };
+		CE587D245C122AB22F7BD248 /* sounds */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = folder; path = sounds; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -74,6 +76,7 @@
 			children = (
 				CE1588FA2FAA9946001B61AA /* SnoreGuard */,
 				CE1588F92FAA9946001B61AA /* Products */,
+				CE587D245C122AB22F7BD248 /* sounds */,
 			);
 			sourceTree = "<group>";
 		};
@@ -227,6 +230,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ED7B3283E6D3573708241C8E /* sounds in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

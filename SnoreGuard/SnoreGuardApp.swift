@@ -40,7 +40,8 @@ struct SnoreGuardApp: App {
         audioRecorder: AudioRecorder.shared,
         healthKitSync: HealthKitSync.shared,
         watchConnectivityManager: WatchConnectivityManager.shared,
-        soundAnalysisDetector: SoundAnalysisDetector.shared
+        soundAnalysisDetector: SoundAnalysisDetector.shared,
+        soothingMelodyPlayer: SoothingMelodyPlayer.shared
       )
     }
     .modelContainer(sharedModelContainer)
