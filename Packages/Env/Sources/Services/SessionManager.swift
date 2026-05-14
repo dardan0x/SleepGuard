@@ -32,6 +32,7 @@ public final class SessionManager {
   private var activeEventPeakDB: Double = 0
   private var lastSnoringSampleTime: Date?
   private let eventGapThreshold: TimeInterval = 3.0
+  private let melodyAutoStopThreshold: TimeInterval = 4.5
 
   /// Require 3 consecutive snoring samples (≈150 ms at 20 Hz) before starting an event.
   /// Filters out brief transient sounds (bed creaks, taps, notifications).
@@ -302,6 +303,14 @@ public final class SessionManager {
          now.timeIntervalSince(lastSnore) >= eventGapThreshold {
         print("[SessionManager] Silence for \(eventGapThreshold)s — finalizing snore event")
         finalizeActiveEvent()
+      }
+
+      // Auto-stop soothing melody if no snore detected for the threshold duration
+      if let lastSnore = lastSnoringSampleTime,
+         now.timeIntervalSince(lastSnore) >= melodyAutoStopThreshold,
+         soothingMelodyPlayer.isPlaying {
+        print("[SessionManager] No snore for \(melodyAutoStopThreshold)s — auto-stopping melody")
+        soothingMelodyPlayer.stop()
       }
     }
 
