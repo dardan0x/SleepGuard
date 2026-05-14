@@ -73,7 +73,7 @@ public struct NightGroupRowView: View {
 
       HStack(spacing: 6) {
         if group.recordingCount > 1 {
-          Text(String(format: Strings.recordingsDetailRecordingsCountFormat, group.recordingCount))
+          Text(String(format: Strings.sessionsDetailSessionsCountFormat, group.recordingCount))
             .font(.system(size: 11, weight: .semibold))
             .foregroundStyle(theme.accent)
             .lineLimit(1)

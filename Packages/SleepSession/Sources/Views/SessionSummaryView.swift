@@ -175,7 +175,10 @@ public struct SessionSummaryView: View {
     let total = Int(session.totalDuration)
     let hours = total / 3600
     let minutes = (total % 3600) / 60
-    return String(format: "%dh %02dm", hours, minutes)
+    if hours > 0 {
+      return String(format: "%d h %d min", hours, minutes)
+    }
+    return String(format: "%d min", minutes)
   }
 
   private func timeString(_ date: Date) -> String {

@@ -2440,3 +2440,63 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 - None
 
 ---
+
+## 2026-05-14 — Session 41: Last 7 Nights Screen + Duration Format Unification + Tab Navigation Fix
+
+### Completed
+- **Last 7 Nights dedicated screen**: Created `Last7NightsView` matching design node fuq0d from `SnoreGuard.pen`. Includes custom nav bar with "Stats" back button, date range + avg sleep score header with week-over-week trend indicator (`+4 vs prev wk`), snoring minutes bar chart with intensity-based colors (quiet/gray, light/amber, loud/red), 2×2 stat grid (AVG SNORING, TOTAL EVENTS, BEST, WORST), and ALL NIGHTS list with score circles, day/date, duration, and snoring time.
+- **Reusable components extracted**: `Last7NightsChartCard`, `Last7NightsStatGrid`, `Last7NightsRow`, `Last7NightsDaySummary`, `WeekOverWeekTrendCalculator` — all under 200 lines per AGENTS.md rules.
+- **New route `.last7Nights`**: Added to `RouterDestination` and mapped to `Last7NightsView()` in `AppRegistry`.
+- **"See all" button wired**: `StatisticsMiniChartSection` now uses `@Environment(RouterPath.self)` to navigate directly to `.last7Nights` instead of prop-drilling closures.
+- **Duration format unification**: Fixed all user-facing duration strings to use consistent `%d h %d min` / `%d min` format matching `NightGroupRowView`. Updated `Last7NightsRow`, `Last7NightsStatGrid`, `SessionSummaryView`, `BedsideClockView`, `WatchSessionManager`.
+- **Event player timestamp**: Added event start time (`hh:mm am/pm`) to `EventPlayerView.headerSection` before "Snoring Event", matching `EventRow` format.
+- **Tab navigation bugfix**: Root cause was `withAppDependencyGraph` injecting three `RouterPath` instances via `.environment()`, where the last one (`settingsRouterPath`) overwrote the previous two. All tabs shared the same navigation path, so pushing a detail view in Recordings tab polluted Statistics tab's stack. Fixed by giving each tab (`StatisticsTab`, `RecordingsTab`, `SettingsTab`) its own `@State private var routerPath = RouterPath()` injected via `.environment(routerPath)` scoped to the tab's view hierarchy. Removed shared router paths from `SnoreGuardApp` and `withAppDependencyGraph`.
+- **Localization strings**: Added 8 new strings to `Localizable.xcstrings` and regenerated `Strings.swift`.
+
+### Technical Details
+- `Last7NightsView` queries `SleepSession` via SwiftData, groups by day using `Calendar.startOfDay`, takes last 7 days, and computes aggregated stats (avg score, avg snoring minutes, total events, best/worst with weekday labels).
+- `DaySummary` stores `SnoreIntensity` enum and computes `intensityColor` lazily via `Theme.shared` to avoid `@MainActor` isolation issues during init.
+- `WeekOverWeekTrendCalculator` compares current 7-night average score vs previous 7-night average; returns `nil` if fewer than 8 nights of data exist.
+- Bar chart in `Last7NightsChartCard` uses custom `HStack` of `RoundedRectangle` bars (cornerRadius 3) with heights proportional to max snoring minutes within the 80pt container, matching the pencil design exactly.
+- ALL NIGHTS rows show score circles with 3pt stroke colored by `theme.scoreColor(avgScore)` and snoring text colored by max intensity.
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Statistics/Sources/Views/Last7NightsView.swift` | +188/-0 | **New** — Main container view for Last 7 Nights screen |
+| `Packages/Statistics/Sources/Views/Last7NightsChartCard.swift` | +62/-0 | **New** — Chart card with bars, labels, and legend |
+| `Packages/Statistics/Sources/Views/Last7NightsStatGrid.swift` | +86/-0 | **New** — 2×2 stat grid with icon headers |
+| `Packages/Statistics/Sources/Views/Last7NightsRow.swift` | +79/-0 | **New** — Night row with score circle, day/date, duration |
+| `Packages/Statistics/Sources/Views/Last7NightsDaySummary.swift` | +48/-0 | **New** — Day-level data model with intensity logic |
+| `Packages/Statistics/Sources/Views/WeekOverWeekTrendCalculator.swift` | +39/-0 | **New** — Week-over-week trend computation |
+| `Packages/Statistics/Sources/Views/StatisticsMiniChartSection.swift` | +4/-2 | Removed `onSeeAll` closure; uses `@Environment(RouterPath)` + `.last7Nights` |
+| `Packages/Statistics/Sources/Views/StatisticsLoadedView.swift` | +1/-4 | Removed `onSeeAll` parameter passing |
+| `Packages/Env/Sources/Services/Router.swift` | +1/-0 | Added `.last7Nights` case |
+| `SnoreGuard/AppRegistry.swift` | +2/-8 | Mapped `.last7Nights` → `Last7NightsView`; removed shared router paths |
+| `SnoreGuard/StatisticsTab.swift` | +3/-2 | Own `@State var routerPath`; `.environment(routerPath)` |
+| `SnoreGuard/RecordingsTab.swift` | +3/-2 | Own `@State var routerPath`; `.environment(routerPath)` |
+| `SnoreGuard/SettingsTab.swift` | +3/-2 | Own `@State var routerPath`; `.environment(routerPath)` |
+| `SnoreGuard/SnoreGuardApp.swift` | +1/-6 | Removed shared `statisticsRouterPath`, `recordingsRouterPath`, `settingsRouterPath` |
+| `Packages/Recordings/Sources/Views/EventPlayerView.swift` | +13/-0 | Added `eventTimeString` helper + timestamp display in header |
+| `Packages/SleepSession/Sources/Views/SessionSummaryView.swift` | +5/-2 | Duration format: `%dh %02dm` → `%d h %d min` |
+| `Packages/SleepSession/Sources/Views/BedsideClockView.swift` | +7/-3 | Duration format: `%dh %02dm` → `%d h %d min` |
+| `WatchApp/Sources/WatchSessionManager.swift` | +5/-2 | Duration format: `%dh %02dm` → `%d h %d min` |
+| `Packages/DesignSystem/Sources/Resources/Localizable.xcstrings` | +93/-0 | Added 8 new `stats.last7Nights.*` strings |
+| `Packages/DesignSystem/Sources/Strings.swift` | +9/-0 | Auto-generated from xcstrings |
+
+### Architecture Decisions
+- **Per-tab RouterPath isolation**: `.environment()` overwrites same-type values. The previous architecture of injecting three router paths at the app root was fundamentally broken — only the last one survived. Moving router path ownership into each tab using `@State` + scoped `.environment()` is the correct SwiftUI pattern.
+- **Dedicated `.last7Nights` route vs reusing `.trends`**: `.trends` is kept for the generic TrendsView (used by "View Month"). The mini chart "See all" navigates to a dedicated screen because the design (fuq0d) is a specific layout without the Week/Month picker.
+- **Event timestamp in player header**: Uses explicit 12-hour logic (`hour >= 12 ? "pm" : "am"`) instead of locale-dependent `DateFormatter` to guarantee consistent `2:30 pm` / `11:30 am` display.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors across all packages + app target
+
+### Next Session
+- (none scheduled)
+
+### Open Questions
+- Should the share button in `Last7NightsView` toolbar be wired to a share sheet?
+- Should the ALL NIGHTS rows in `Last7NightsView` navigate to `sessionDetail` or `recordingDetail`? Currently uses `.sessionDetail`.
+
+---

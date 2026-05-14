@@ -3,7 +3,7 @@ import Env
 import Settings
 
 struct SettingsTab: View {
-  @Environment(RouterPath.self) private var routerPath
+  @State private var routerPath = RouterPath()
 
   var body: some View {
     NavigationStack(path: Binding(
@@ -13,5 +13,6 @@ struct SettingsTab: View {
       SettingsView()
         .withAppRouter()
     }
+    .environment(routerPath)
   }
 }

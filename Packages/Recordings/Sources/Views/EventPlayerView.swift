@@ -57,6 +57,10 @@ struct EventPlayerView: View {
 
   private var headerSection: some View {
     VStack(alignment: .leading, spacing: 6) {
+      Text(eventTimeString)
+        .font(.system(size: 13, weight: .medium))
+        .foregroundStyle(theme.textSecondary)
+
       Text("Snoring Event".uppercased())
         .font(.system(size: 11, weight: .semibold))
         .foregroundStyle(theme.textTertiary)
@@ -83,6 +87,15 @@ struct EventPlayerView: View {
       }
     }
     .frame(maxWidth: .infinity, alignment: .leading)
+  }
+
+  private var eventTimeString: String {
+    let calendar = Calendar.current
+    let hour = calendar.component(.hour, from: event.timestamp)
+    let minute = calendar.component(.minute, from: event.timestamp)
+    let period = hour >= 12 ? "pm" : "am"
+    let displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour)
+    return String(format: "%d:%02d %@", displayHour, minute, period)
   }
 
   // MARK: - Waveform

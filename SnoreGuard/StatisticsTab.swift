@@ -4,7 +4,7 @@ import SleepSession
 import Statistics
 
 struct StatisticsTab: View {
-  @Environment(RouterPath.self) private var routerPath
+  @State private var routerPath = RouterPath()
   @Environment(UserPreferences.self) private var userPreferences
   @Environment(SessionManager.self) private var sessionManager
 
@@ -47,5 +47,6 @@ struct StatisticsTab: View {
         routerPath.presentedSheet = .sessionSummary
       }
     }
+    .environment(routerPath)
   }
 }

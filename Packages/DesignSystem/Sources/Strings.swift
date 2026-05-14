@@ -85,6 +85,7 @@ public enum Strings {
   public static var sessionSummaryTooShortMessageFormat: String { String(localized: "session.summary.tooShortMessageFormat", bundle: .module) }
   public static var sessionSummaryTooShortTitle: String { String(localized: "session.summary.tooShortTitle", bundle: .module) }
   public static var sessionSummaryYouSleptFormat: String { String(localized: "session.summary.youSleptFormat", bundle: .module) }
+  public static var sessionsDetailSessionsCountFormat: String { String(localized: "sessions.detail.sessionsCountFormat", bundle: .module) }
   public static var settingsDeleteAll: String { String(localized: "settings.deleteAll", bundle: .module) }
   public static var settingsDeleteAllConfirmMessage: String { String(localized: "settings.deleteAll.confirmMessage", bundle: .module) }
   public static var settingsDeleteAllConfirmTitle: String { String(localized: "settings.deleteAll.confirmTitle", bundle: .module) }
@@ -120,6 +121,14 @@ public enum Strings {
   public static var statsCalendarSelectedNightLabel: String { String(localized: "stats.calendar.selectedNightLabel", bundle: .module) }
   public static var statsEmptyMessage: String { String(localized: "stats.empty.message", bundle: .module) }
   public static var statsEmptyTitle: String { String(localized: "stats.empty.title", bundle: .module) }
+  public static var statsLast7nightsAllNights: String { String(localized: "stats.last7Nights.allNights", bundle: .module) }
+  public static var statsLast7nightsAvgSleepScore: String { String(localized: "stats.last7Nights.avgSleepScore", bundle: .module) }
+  public static var statsLast7nightsAvgSnoring: String { String(localized: "stats.last7Nights.avgSnoring", bundle: .module) }
+  public static var statsLast7nightsBest: String { String(localized: "stats.last7Nights.best", bundle: .module) }
+  public static var statsLast7nightsSnoringMin: String { String(localized: "stats.last7Nights.snoringMin", bundle: .module) }
+  public static var statsLast7nightsTapAbar: String { String(localized: "stats.last7Nights.tapABar", bundle: .module) }
+  public static var statsLast7nightsTotalEvents: String { String(localized: "stats.last7Nights.totalEvents", bundle: .module) }
+  public static var statsLast7nightsWorst: String { String(localized: "stats.last7Nights.worst", bundle: .module) }
   public static var statsMiniChartSleepScoreLabel: String { String(localized: "stats.miniChart.sleepScoreLabel", bundle: .module) }
   public static var statsMiniChartToday: String { String(localized: "stats.miniChart.today", bundle: .module) }
   public static var statsTrendsAvgMinFormat: String { String(localized: "stats.trends.avgMinFormat", bundle: .module) }

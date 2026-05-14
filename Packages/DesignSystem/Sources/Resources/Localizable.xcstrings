@@ -823,6 +823,17 @@
         }
       }
     },
+    "sessions.detail.sessionsCountFormat" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld sessions"
+          }
+        }
+      }
+    },
     "settings.deleteAll" : {
       "localizations" : {
         "en" : {
@@ -1099,7 +1110,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Start time:"
+            "value" : "Started at:"
           }
         }
       }
@@ -1170,6 +1181,86 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ready to track your sleep?"
+          }
+        }
+      }
+    },
+    "stats.last7Nights.allNights" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ALL NIGHTS"
+          }
+        }
+      }
+    },
+    "stats.last7Nights.avgSleepScore" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "avg sleep score"
+          }
+        }
+      }
+    },
+    "stats.last7Nights.avgSnoring" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AVG SNORING"
+          }
+        }
+      }
+    },
+    "stats.last7Nights.best" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BEST"
+          }
+        }
+      }
+    },
+    "stats.last7Nights.snoringMin" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SNORING · MIN"
+          }
+        }
+      }
+    },
+    "stats.last7Nights.tapABar" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "tap a bar"
+          }
+        }
+      }
+    },
+    "stats.last7Nights.totalEvents" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TOTAL EVENTS"
+          }
+        }
+      }
+    },
+    "stats.last7Nights.worst" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WORST"
           }
         }
       }

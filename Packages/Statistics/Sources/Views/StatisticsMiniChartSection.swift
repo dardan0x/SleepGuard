@@ -1,10 +1,12 @@
 import SwiftUI
+import Env
 import Models
 import DesignSystem
 
 struct StatisticsMiniChartSection: View {
   let recentSessions: [SleepSession]
   @Environment(Theme.self) private var theme
+  @Environment(RouterPath.self) private var routerPath
 
   var body: some View {
     VStack(alignment: .leading, spacing: 16) {
@@ -16,7 +18,7 @@ struct StatisticsMiniChartSection: View {
         Spacer()
 
         Button {
-          // See all
+          routerPath.navigate(to: .last7Nights)
         } label: {
           Text(Strings.statsTrendsSeeAll)
             .font(.system(size: 14, weight: .medium))

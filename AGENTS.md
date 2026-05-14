@@ -223,11 +223,11 @@ mcp__XcodeBuildMCP__build_run_sim
 mcp__XcodeBuildMCP__test_sim
 ```
 
-**Why `simulatorId`:** `iPhone 16e` is ambiguous (exists on iOS 18.3, 26.0, and 26.2). Using the UDID pins the iOS 26.2 simulator and eliminates flakiness.
+**Why `simulatorId`:** `iPhone 17 Pro` is ambiguous (exists on iOS 18.3, 26.0, and 26.2). Using the UDID pins the iOS 26.2 simulator and eliminates flakiness.
 
 **Fallback (Shell):**
 ```bash
-xcodebuild -project SnoreGuard.xcodeproj -scheme SnoreGuard -destination 'platform=iOS Simulator,name=iPhone 16e,OS=26.2' build
+xcodebuild -project SnoreGuard.xcodeproj -scheme SnoreGuard -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2' build
 ```
 
 End every task with:
