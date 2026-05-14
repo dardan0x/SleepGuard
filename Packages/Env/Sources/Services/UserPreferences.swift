@@ -155,7 +155,7 @@ public final class UserPreferences {
     get {
       access(keyPath: \.selectedMelodyID)
       let raw = defaults.integer(forKey: "selectedMelodyID")
-      return raw > 0 ? raw : 12
+      return raw > 0 ? raw : 6
     }
     set {
       withMutation(keyPath: \.selectedMelodyID) {

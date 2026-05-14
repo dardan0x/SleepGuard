@@ -2549,3 +2549,111 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 ### Open Questions
 - The nav back buttons in both sheets say "Search" per the design file — confirm if this should be "Back" or kept as-designed
 - Should the soothing melody audio actually play during snoring detection? This session built only the UI + settings storage; the playback integration into `SessionManager` / `AudioRecorder` is not yet implemented
+
+
+---
+
+## 2026-05-14 — Session 43: Soothing Melody Audio Playback
+
+### Completed
+- **F2-T10**: Wired the Soothing Melody feature to 11 real MP3 files so playback triggers automatically when snoring is detected during an active recording session.
+
+### Technical Details
+- `sounds/` folder (11 MP3s) added as a folder reference to the main app target via Ruby `xcodeproj` gem; files are copied into the app bundle and accessible via `Bundle.main.url(forResource:withExtension:)`.
+- `Melody` model replaced dummy IDs 9–17 with real filename + displayName mappings for 11 sounds (Funny Alarm, Bird Chittering, Cute Cat Meow, etc.).
+- `SoothingMelodyPlayer` (Env package) is a `@MainActor @Observable` singleton wrapping `AVAudioPlayer`.
+  - `playIfNeeded()` checks `UserPreferences.soothingMelodyMode` and `selectedMelodyID`, loads the matching MP3 from bundle, and starts playback at volume 0.6.
+  - Timed modes (5s/15s/30s/60s) schedule a `Timer` to auto-stop; `.always` loops indefinitely.
+  - Re-trigger guard (`!isPlaying`) prevents audio stuttering when consecutive snore detections fire.
+  - `AVAudioPlayerDelegate` calls `stop()` on natural playback completion.
+- `SessionManager` triggers `soothingMelodyPlayer.playIfNeeded()` at the exact moment a new snore event begins (`activeEventStart == nil` after 3 consecutive samples).
+- `SessionManager.stopSession()` and `stopAndDiscardSession()` both call `soothingMelodyPlayer.stop()` to prevent audio leaking after recording ends.
+- `BedsideClockView` gains a compact overlay card (`.overlay(alignment: .top)`) when `soothingMelodyPlayer.isPlaying`.
+  - Shows pulsing `music.note` icon (`.symbolEffect(.pulse)`), melody name, and a bordered "Stop" button.
+  - Uses `.transition(.move(edge: .top).combined(with: .opacity))` for smooth appearance.
+- `AppRegistry.swift` and `SnoreGuardApp.swift` updated to inject `SoothingMelodyPlayer.shared` into the environment graph.
+- `UserPreferences.selectedMelodyID` default changed from 12 → 6 to match the new valid ID range (1–11).
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `SnoreGuard.xcodeproj/project.pbxproj` | +6 | Added `sounds/` folder reference to main app target resources build phase |
+| `Packages/Models/Sources/Data/Melody.swift` | +11/-10 | Replaced dummy melodies with real filename + displayName mapping for 11 MP3s |
+| `Packages/Env/Sources/Services/SoothingMelodyPlayer.swift` | +65 | New — AVAudioPlayer wrapper with playIfNeeded, stop, auto-stop timer, isPlaying state |
+| `Packages/Env/Sources/Services/SessionManager.swift` | +4 | Triggers `playIfNeeded()` on new snore event; stops on session end |
+| `Packages/Env/Sources/Services/UserPreferences.swift` | +1/-1 | Default `selectedMelodyID` changed 12 → 6 |
+| `Packages/SleepSession/Sources/Views/BedsideClockView.swift` | +35 | Added `melodyOverlay` with pulsing icon, name, Stop button; injected `SoothingMelodyPlayer` |
+| `Packages/SleepSession/Sources/Views/SoothingMelodySheet.swift` | +1/-1 | Default `draftMelodyID` changed 12 → 6 |
+| `SnoreGuard/SnoreGuardApp.swift` | +2 | Injected `soothingMelodyPlayer` into `withAppDependencyGraph` |
+| `SnoreGuard/AppRegistry.swift` | +4 | Added `SoothingMelodyPlayer` parameter to `withAppDependencyGraph` and `withEnvironments` |
+
+### Architecture Decisions
+- **Placement in Env package**: `SoothingMelodyPlayer` lives in `Env` because it needs `UserPreferences` (also in Env) and must be observable by `BedsideClockView` (in SleepSession, which imports Env). This avoids a new package and follows the existing singleton + `@Environment` pattern.
+- **Compact overlay vs full sheet**: Chose a compact top-overlay card instead of a full `.sheet` because a modal would block the bedside clock and stop button during sleep recording.
+- **Volume 0.6**: Fixed at 60% to reduce the chance of playback being picked up by the microphone while still being audible. No recording pause — snore detection must continue uninterrupted per user requirement.
+- **Re-trigger guard**: Ignore new snore detections while already playing. Prevents rapid audio restart/stutter. If the user wants restart-on-every-snore, it's a one-line removal of `guard !isPlaying else { return }`.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors, zero warnings.
+- Verified that MP3 files are present in built app bundle: `SnoreGuard.app/sounds/*.mp3` (11 files).
+
+### Next Session
+- No immediate follow-up for this feature. The soothing melody is fully functional end-to-end.
+
+### Open Questions
+- None.
+
+
+---
+
+## 2026-05-14 — Session 44: Soothing Melody — Playback, Mute, Custom Recording, Previews
+
+### Completed
+- **F2-T10 (follow-up)**: Fixed melody playback not working — `Bundle.main.url(forResource:)` needed `subdirectory: "sounds"` fallback; `.measurement` audio session mode was routing playback to earpiece so `overrideOutputAudioPort(.speaker)` was added. Added extensive debug logging to `SoothingMelodyPlayer` and `SessionManager`.
+- **F2-T10 (follow-up)**: Added "Mute for session" option in `BedsideClockView` overlay. Tapping "Stop" allows re-triggering on future snores; "Mute for session" disables all further melody playback until a new recording session starts.
+- **F2-T11**: Added 3-second audio preview when tapping any melody row in `MelodyPickerSheet`.
+- **F2-T11**: Added custom melody recording — "Record yours" pinned row in `MelodyPickerSheet` opens `RecordCustomMelodySheet` with 10-second `AVAudioRecorder`, playback, re-record, and save.
+- **F2-T11**: `CustomMelodyStorage` (Env) persists custom melody metadata and audio files to `Documents/CustomMelodies/`.
+- **F2-T11**: Fixed `SoothingMelodySheet.songRow` to resolve custom melodies (checks both bundled `Melody` and `CustomMelodyStorage`).
+- **UX polish**: Added helper text under "Soothing melody" actionRow in `RecordingPrestartView`.
+- **Refactor**: Extracted `SheetHandle` and `SheetNavHeader` from `SoothingMelodySheet.swift` into `DesignSystem/SheetHeader.swift` for reuse.
+
+### Technical Details
+- `AVAudioPlayer` playback requires `overrideOutputAudioPort(.speaker)` when the app's `AVAudioSession` uses `.measurement` mode, because iOS routes playback to the receiver (earpiece) at near-zero volume in measurement mode.
+- `Bundle.main.url(forResource:withExtension:subdirectory:)` is more reliable than the parameterless variant when files live inside a folder-reference subdirectory.
+- `AVAudioRecorder` (not `AVAudioEngine`) is the right tool for the custom melody recording feature — much simpler setup for a standalone 10-second voice clip.
+- Custom melody IDs start at 100 to avoid collision with bundled IDs (1–11). `CustomMelodyStorage` persists an array of dictionaries to UserDefaults and stores `.m4a` files in `Documents/CustomMelodies/`.
+- `Melody` model gained `isCustom: Bool`; `Melody.melody(id:)` only searches bundled. All consumers (`SoothingMelodyPlayer`, `SoothingMelodySheet`) now fall back to `CustomMelodyStorage.shared.melody(id:)`.
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `SnoreGuard.xcodeproj/project.pbxproj` | +6 | Added `sounds/` folder reference to app target resources |
+| `Packages/Models/Sources/Data/Melody.swift` | +11/-10 | Added `isCustom` flag; real filename + displayName mapping |
+| `Packages/Env/Sources/Services/SoothingMelodyPlayer.swift` | +45/-30 | Speaker override, subdirectory fallback, debug logging, session mute API |
+| `Packages/Env/Sources/Services/SessionManager.swift` | +6 | Triggers `playIfNeeded()` on new snore event; stops on session end; event logging |
+| `Packages/Env/Sources/Services/UserPreferences.swift` | +1/-1 | Default `selectedMelodyID` 12 → 6 |
+| `Packages/Env/Sources/Services/CustomMelodyStorage.swift` | +65 | **New** — metadata + file I/O for user-recorded melodies |
+| `Packages/SleepSession/Sources/Views/RecordingPrestartView.swift` | +9 | Helper text below soothing melody actionRow |
+| `Packages/SleepSession/Sources/Views/BedsideClockView.swift` | +35 | Melody overlay with "Stop" + "Mute for session" buttons |
+| `Packages/SleepSession/Sources/Views/SoothingMelodySheet.swift` | +1/-1 | Default `draftMelodyID` 12 → 6; removed local SheetHandle/SheetNavHeader |
+| `Packages/SleepSession/Sources/Views/SoothingMelodySheet.swift` | +2/-1 | `selectedMelody` now resolves custom melodies via `CustomMelodyStorage` |
+| `Packages/SleepSession/Sources/Views/MelodyPickerSheet.swift` | +65/-30 | Audio preview on tap (3s), "Record yours" row, custom melody list, delete |
+| `Packages/SleepSession/Sources/Views/RecordCustomMelodySheet.swift` | +165 | **New** — 10s recording sheet with playback, re-record, save |
+| `Packages/DesignSystem/Sources/Components/SheetHeader.swift` | +35 | **New** — Extracted `SheetHandle` and `SheetNavHeader` |
+| `SnoreGuard/SnoreGuardApp.swift` | +2 | Injected `SoothingMelodyPlayer` into environment |
+| `SnoreGuard/AppRegistry.swift` | +4 | Added `SoothingMelodyPlayer` to dependency graph |
+
+### Architecture Decisions
+- **Custom melody storage in Env**: `CustomMelodyStorage` lives in `Env` because it's a runtime singleton service that manages file I/O and UserDefaults. `Models` package stays pure (no file system knowledge).
+- **Two-stop overlay buttons**: "Stop" (allows re-trigger) and "Mute for session" (disables for remainder of session) give users explicit control without needing a settings toggle.
+- **AVAudioRecorder for custom clips**: Chosen over `AVAudioEngine` because we don't need FFT analysis, tap buffers, or real-time classification for a simple voice recording.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors, zero warnings.
+
+### Next Session
+- No immediate follow-up for this feature. Soothing Melody is fully functional end-to-end.
+
+### Open Questions
+- None.

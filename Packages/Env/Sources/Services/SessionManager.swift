@@ -21,6 +21,7 @@ public final class SessionManager {
 
   private let audioRecorder = AudioRecorder.shared
   private let snoreDetector = SnoreDetector.shared
+  private let soothingMelodyPlayer = SoothingMelodyPlayer.shared
 
   // MARK: - Event tracking state
 
@@ -56,6 +57,7 @@ public final class SessionManager {
   public func startSession() throws {
     resetTrackingState()
     processingTask?.cancel()
+    soothingMelodyPlayer.resetSessionMute()
 
     let session = SleepSession(startDate: Date())
     let audioURL = audioFileURL(for: session.id)
@@ -93,6 +95,7 @@ public final class SessionManager {
     processingTask?.cancel()
     processingTask = nil
     audioRecorder.stopRecording()
+    soothingMelodyPlayer.stop()
     isRecording = false
 
     // Finalize any in-progress snore event (include trailing gap since user stopped mid-session)
@@ -179,6 +182,7 @@ public final class SessionManager {
     processingTask?.cancel()
     processingTask = nil
     audioRecorder.stopRecording()
+    soothingMelodyPlayer.stop()
     isRecording = false
 
     if activeEventStart != nil {
@@ -267,6 +271,8 @@ public final class SessionManager {
         activeEventPeakDB = Double(db)
         activeEventIntensity = intensity(from: state)
         activeBurstStart = activeEventStart
+        print("[SessionManager] 🔔 New snore event started, calling playIfNeeded()")
+        soothingMelodyPlayer.playIfNeeded()
       } else {
         // Event already active
         activeEventDBSum += Double(db)
@@ -294,6 +300,7 @@ public final class SessionManager {
       if let lastSnore = lastSnoringSampleTime,
          activeEventStart != nil,
          now.timeIntervalSince(lastSnore) >= eventGapThreshold {
+        print("[SessionManager] Silence for \(eventGapThreshold)s — finalizing snore event")
         finalizeActiveEvent()
       }
     }
@@ -323,7 +330,11 @@ public final class SessionManager {
   }
 
   private func finalizeActiveEvent() {
-    guard let startTime = activeEventStart, let session = currentSession else { return }
+    guard let startTime = activeEventStart, let session = currentSession else {
+      print("[SessionManager] finalizeActiveEvent() — no active event or session")
+      return
+    }
+    print("[SessionManager] Finalizing snore event at \(startTime)")
 
     // Close any open burst
     if let burstStart = activeBurstStart {

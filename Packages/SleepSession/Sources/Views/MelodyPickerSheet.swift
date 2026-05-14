@@ -1,4 +1,6 @@
+import AVFoundation
 import DesignSystem
+import Env
 import Models
 import SwiftUI
 
@@ -9,10 +11,16 @@ struct MelodyPickerSheet: View {
 
   @Binding var selectedMelodyID: Int
 
+  @State private var previewPlayer: AVAudioPlayer?
+  @State private var previewingMelodyID: Int?
+  @State private var previewTask: Task<Void, Never>?
+  @State private var showRecordSheet = false
+
   var body: some View {
     VStack(spacing: 0) {
       HStack {
         Button {
+          stopPreview()
           dismiss()
         } label: {
           HStack(spacing: 4) {
@@ -30,6 +38,14 @@ struct MelodyPickerSheet: View {
 
       ScrollView {
         VStack(spacing: 8) {
+          recordYoursRow
+
+          if !CustomMelodyStorage.shared.customMelodies.isEmpty {
+            ForEach(CustomMelodyStorage.shared.customMelodies) { melody in
+              melodyRow(melody)
+            }
+          }
+
           ForEach(Melody.allMelodies) { melody in
             melodyRow(melody)
           }
@@ -44,17 +60,65 @@ struct MelodyPickerSheet: View {
       bottomArea
     }
     .background(theme.bgSecondary.ignoresSafeArea())
+    .onDisappear {
+      stopPreview()
+    }
+    .sheet(isPresented: $showRecordSheet) {
+      RecordCustomMelodySheet()
+    }
   }
 
-  // MARK: - Rows
+  // MARK: - Record Yours Row
+
+  private var recordYoursRow: some View {
+    Button {
+      stopPreview()
+      showRecordSheet = true
+    } label: {
+      HStack(spacing: 12) {
+        ZStack {
+          Circle()
+            .fill(theme.accent.opacity(0.15))
+            .frame(width: 36, height: 36)
+
+          Image(systemName: "mic.fill")
+            .font(.system(size: 16))
+            .foregroundStyle(theme.accent)
+        }
+
+        Text("Record yours")
+          .font(.system(size: 17, weight: .semibold))
+          .foregroundStyle(theme.accent)
+
+        Spacer()
+
+        Image(systemName: "chevron.right")
+          .font(.system(size: 14, weight: .semibold))
+          .foregroundStyle(theme.textTertiary)
+      }
+      .padding(16)
+      .background(theme.bgCard)
+      .cornerRadius(12)
+      .overlay(
+        RoundedRectangle(cornerRadius: 12)
+          .stroke(theme.accent.opacity(0.3), lineWidth: 1.5)
+          .blendMode(.screen)
+      )
+    }
+    .buttonStyle(.plain)
+  }
+
+  // MARK: - Melody Rows
 
   private func melodyRow(_ melody: Melody) -> some View {
     let isSelected = selectedMelodyID == melody.id
+    let isPreviewing = previewingMelodyID == melody.id
 
     return Button {
       withAnimation(.spring(duration: 0.25)) {
         selectedMelodyID = melody.id
       }
+      previewMelody(melody)
     } label: {
       HStack(spacing: 12) {
         ZStack {
@@ -63,14 +127,29 @@ struct MelodyPickerSheet: View {
               .fill(theme.accent)
               .frame(width: 36, height: 36)
 
-            Image(systemName: "music.note")
-              .font(.system(size: 16))
-              .foregroundStyle(.white)
+            if isPreviewing {
+              Image(systemName: "speaker.wave.2")
+                .font(.system(size: 16))
+                .foregroundStyle(.white)
+                .symbolEffect(.bounce, options: .repeating)
+            } else {
+              Image(systemName: "music.note")
+                .font(.system(size: 16))
+                .foregroundStyle(.white)
+            }
           } else {
-            Image(systemName: "music.note")
-              .font(.system(size: 18))
-              .foregroundStyle(theme.textTertiary)
-              .frame(width: 36, height: 36)
+            if isPreviewing {
+              Image(systemName: "speaker.wave.2")
+                .font(.system(size: 18))
+                .foregroundStyle(theme.accent)
+                .frame(width: 36, height: 36)
+                .symbolEffect(.bounce, options: .repeating)
+            } else {
+              Image(systemName: "music.note")
+                .font(.system(size: 18))
+                .foregroundStyle(theme.textTertiary)
+                .frame(width: 36, height: 36)
+            }
           }
         }
 
@@ -79,6 +158,21 @@ struct MelodyPickerSheet: View {
           .foregroundStyle(theme.textPrimary)
 
         Spacer()
+
+        if melody.isCustom {
+          Button {
+            CustomMelodyStorage.shared.deleteMelody(id: melody.id)
+            if selectedMelodyID == melody.id {
+              selectedMelodyID = 6
+            }
+          } label: {
+            Image(systemName: "trash")
+              .font(.system(size: 14))
+              .foregroundStyle(theme.textTertiary)
+              .padding(8)
+          }
+          .buttonStyle(.plain)
+        }
 
         if isSelected {
           ZStack {
@@ -103,6 +197,60 @@ struct MelodyPickerSheet: View {
     .buttonStyle(.plain)
   }
 
+  // MARK: - Preview
+
+  private func previewMelody(_ melody: Melody) {
+    if previewingMelodyID == melody.id {
+      stopPreview()
+      return
+    }
+
+    stopPreview()
+
+    let url: URL?
+    if melody.isCustom {
+      url = CustomMelodyStorage.shared.fileURL(for: melody)
+    } else {
+      url = Bundle.main.url(forResource: melody.filename, withExtension: "mp3", subdirectory: "sounds")
+        ?? Bundle.main.url(forResource: melody.filename, withExtension: "mp3")
+    }
+
+    guard let fileURL = url else { return }
+
+    do {
+      let player = try AVAudioPlayer(contentsOf: fileURL)
+      player.volume = 0.5
+      previewPlayer = player
+      previewingMelodyID = melody.id
+
+      guard player.prepareToPlay() else { return }
+      let didPlay = player.play()
+      guard didPlay else {
+        previewingMelodyID = nil
+        previewPlayer = nil
+        return
+      }
+
+      previewTask?.cancel()
+      previewTask = Task {
+        try? await Task.sleep(for: .seconds(3))
+        guard !Task.isCancelled else { return }
+        stopPreview()
+      }
+    } catch {
+      previewingMelodyID = nil
+      previewPlayer = nil
+    }
+  }
+
+  private func stopPreview() {
+    previewTask?.cancel()
+    previewTask = nil
+    previewPlayer?.stop()
+    previewPlayer = nil
+    previewingMelodyID = nil
+  }
+
   // MARK: - Bottom Area
 
   private var bottomArea: some View {
@@ -111,6 +259,7 @@ struct MelodyPickerSheet: View {
         .background(theme.border)
 
       Button {
+        stopPreview()
         dismiss()
       } label: {
         Text("SAVE")

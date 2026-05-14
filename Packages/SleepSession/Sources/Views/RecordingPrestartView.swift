@@ -27,16 +27,19 @@ struct RecordingPrestartView: View {
                     .padding(.top, 24)
 
                 VStack(spacing: 12) {
-                    actionRow(
-                        icon: "timer",
-                        title: "Soothing melody",
-                        value: soothingMelodyValue
-                    ) {
-                        showSoothingMelodySheet = true
+                    VStack(alignment: .leading, spacing: 8) {
+                        delaySection
+//                            .padding(.bottom, 8)
+//                            .padding(.top, 12)
+                        actionRow(
+                            icon: "timer",
+                            title: "Soothing melody",
+                            value: soothingMelodyValue
+                        ) {
+                            showSoothingMelodySheet = true
+                        }
+                        .padding(.top, 8)
                     }
-                    
-                    delaySection
-
                     helperText
                 }
                 .padding(.top, 24)
@@ -186,25 +189,27 @@ struct RecordingPrestartView: View {
 
     private func actionRow(icon: String, title: String, value: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            HStack(spacing: 12) {
-                Image(systemName: icon)
-                    .font(.system(size: 18))
-                    .foregroundStyle(theme.accent)
-                    .frame(width: 24)
+            VStack(spacing: 8) {
+                HStack(spacing: 12) {
+                    Image(systemName: icon)
+                        .font(.system(size: 18))
+                        .foregroundStyle(theme.accent)
+                        .frame(width: 24)
 
-                Text(title)
-                    .font(.system(size: 16))
-                    .foregroundStyle(theme.textPrimary)
+                    Text(title)
+                        .font(.system(size: 16))
+                        .foregroundStyle(theme.textPrimary)
 
-                Spacer()
+                    Spacer()
 
-                Text(value)
-                    .font(.system(size: 16))
-                    .foregroundStyle(theme.textSecondary)
+                    Text(value)
+                        .font(.system(size: 16))
+                        .foregroundStyle(theme.textSecondary)
 
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(theme.textTertiary)
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(theme.textTertiary)
+                }
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 14)
@@ -252,7 +257,7 @@ struct RecordingPrestartView: View {
     }
 
     private var helperText: some View {
-        Text(Strings.sessionPrestartDelayHelper)
+        Text("Plays a sound when snoring is detected during your session.")
             .font(.system(size: 14))
             .foregroundStyle(theme.textTertiary)
             .multilineTextAlignment(.center)

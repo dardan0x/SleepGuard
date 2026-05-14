@@ -9,6 +9,7 @@ struct BedsideClockView: View {
   @Environment(SessionManager.self) private var sessionManager
   @Environment(AudioRecorder.self) private var audioRecorder
   @Environment(SoundAnalysisDetector.self) private var soundAnalysisDetector
+  @Environment(SoothingMelodyPlayer.self) private var soothingMelodyPlayer
   @Environment(Theme.self) private var theme
 
   @State private var currentTime = Date()
@@ -58,6 +59,11 @@ struct BedsideClockView: View {
         }
         .padding(.horizontal, 24)
         .padding(.bottom, 32)
+      }
+      .overlay(alignment: .top) {
+        if soothingMelodyPlayer.isPlaying {
+          melodyOverlay
+        }
       }
       .alert(Strings.sessionSummaryTooShortTitle, isPresented: $showShortSessionAlert) {
         Button(Strings.actionKeepRecording, role: .cancel) { }
@@ -127,5 +133,70 @@ struct BedsideClockView: View {
     case .light: return Strings.sessionBedsideSnoreLight
     case .loud: return Strings.sessionBedsideSnoreLoud
     }
+  }
+
+  // MARK: - Melody Overlay
+
+  private var melodyOverlay: some View {
+    VStack(spacing: 10) {
+      HStack(spacing: 12) {
+        Image(systemName: "music.note")
+          .font(.system(size: 14, weight: .semibold))
+          .foregroundStyle(theme.accent)
+          .symbolEffect(.pulse, options: .repeating)
+
+        Text("Playing: \(soothingMelodyPlayer.currentMelodyName ?? "Melody")")
+          .font(.system(size: 14, weight: .medium))
+          .foregroundStyle(theme.textPrimary)
+          .lineLimit(1)
+
+        Spacer()
+      }
+
+      HStack(spacing: 12) {
+        Button {
+          soothingMelodyPlayer.muteForSession()
+        } label: {
+          Text("Mute for session")
+            .font(.system(size: 13, weight: .semibold))
+            .foregroundStyle(theme.textSecondary)
+            .frame(maxWidth: .infinity)
+            .frame(height: 36)
+            .background(
+              RoundedRectangle(cornerRadius: 8)
+                .stroke(theme.border, lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
+
+        Button {
+          soothingMelodyPlayer.stop()
+        } label: {
+          Text("Stop")
+            .font(.system(size: 13, weight: .semibold))
+            .foregroundStyle(theme.accent)
+            .frame(maxWidth: .infinity)
+            .frame(height: 36)
+            .background(
+              RoundedRectangle(cornerRadius: 8)
+                .stroke(theme.accent, lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
+      }
+    }
+    .padding(.horizontal, 16)
+    .padding(.vertical, 12)
+    .background(
+      RoundedRectangle(cornerRadius: 16)
+        .fill(theme.bgCard)
+        .overlay(
+          RoundedRectangle(cornerRadius: 16)
+            .stroke(theme.accent.opacity(0.4), lineWidth: 1)
+        )
+    )
+    .padding(.horizontal, 24)
+    .padding(.top, 16)
+    .transition(.move(edge: .top).combined(with: .opacity))
   }
 }
