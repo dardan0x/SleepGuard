@@ -1999,6 +1999,39 @@
           }
         }
       }
+    },
+    "session.chargingAlert.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iPhone Not Charging"
+          }
+        }
+      }
+    },
+    "session.chargingAlert.message": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "For the best nightstand experience and to avoid battery drain, it's recommended to keep your iPhone plugged in during sleep tracking."
+          }
+        }
+      }
+    },
+    "session.chargingAlert.startAnyway": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start Anyway"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

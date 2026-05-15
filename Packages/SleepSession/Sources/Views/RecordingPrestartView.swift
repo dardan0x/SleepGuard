@@ -2,6 +2,7 @@ import AudioEngine
 import DesignSystem
 import Env
 import SwiftUI
+import UIKit
 
 @MainActor
 struct RecordingPrestartView: View {
@@ -13,6 +14,7 @@ struct RecordingPrestartView: View {
 
     private let delayOptions = [0, 15, 30, 45, 60]
     @State private var showSoothingMelodySheet = false
+    @State private var showChargingAlert = false
 
     var body: some View {
         ScrollView {
@@ -48,12 +50,11 @@ struct RecordingPrestartView: View {
                             let granted = await audioRecorder.requestPermission()
                             guard granted else { return }
                         }
-                        let delay = userPreferences.recordingDelayMinutes
-                        if delay > 0 {
-                            RecordingDelayManager.shared.startDelay(minutes: delay)
-                        } else {
-                            try? sessionManager.startSession()
+                        guard isCharging else {
+                            showChargingAlert = true
+                            return
                         }
+                        beginSession()
                     }
                 }
                 .padding(.top, 10)
@@ -75,6 +76,34 @@ struct RecordingPrestartView: View {
         .sheet(isPresented: $showSoothingMelodySheet) {
             SoothingMelodySheet()
         }
+        .alert(Strings.sessionChargingAlertTitle, isPresented: $showChargingAlert) {
+            Button(Strings.actionCancel, role: .cancel) {}
+            Button(Strings.sessionChargingAlertStartAnyway) {
+                Task { @MainActor in
+                    beginSession()
+                }
+            }
+        } message: {
+            Text(Strings.sessionChargingAlertMessage)
+        }
+    }
+
+    private func beginSession() {
+        let delay = UserPreferences.shared.recordingDelayMinutes
+        if delay > 0 {
+            RecordingDelayManager.shared.startDelay(minutes: delay)
+        } else {
+            do {
+                try SessionManager.shared.startSession()
+            } catch {
+                print("Failed to start session: \(error)")
+            }
+        }
+    }
+
+    private var isCharging: Bool {
+        UIDevice.current.isBatteryMonitoringEnabled = true
+        return UIDevice.current.batteryState == .charging || UIDevice.current.batteryState == .full
     }
 
     private var soothingMelodyValue: String {

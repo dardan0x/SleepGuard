@@ -101,6 +101,9 @@ public enum Strings {
   public static var sessionBedsideSnoreLoud: String { String(localized: "session.bedside.snoreLoud", bundle: .module) }
   public static var sessionBedsideSnoreQuiet: String { String(localized: "session.bedside.snoreQuiet", bundle: .module) }
   public static var sessionBedsideStopRecording: String { String(localized: "session.bedside.stopRecording", bundle: .module) }
+  public static var sessionChargingAlertMessage: String { String(localized: "session.chargingAlert.message", bundle: .module) }
+  public static var sessionChargingAlertStartAnyway: String { String(localized: "session.chargingAlert.startAnyway", bundle: .module) }
+  public static var sessionChargingAlertTitle: String { String(localized: "session.chargingAlert.title", bundle: .module) }
   public static var sessionCountdownLabel: String { String(localized: "session.countdown.label", bundle: .module) }
   public static var sessionPrestartBody: String { String(localized: "session.prestart.body", bundle: .module) }
   public static var sessionPrestartDelayHelper: String { String(localized: "session.prestart.delayHelper", bundle: .module) }

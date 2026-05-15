@@ -8,3 +8,6 @@
 # The script merges entries into Localizable.xcstrings and regenerates Strings.swift.
 
 action.play = Play
+session.chargingAlert.title = iPhone Not Charging
+session.chargingAlert.message = For the best nightstand experience and to avoid battery drain, it's recommended to keep your iPhone plugged in during sleep tracking.
+session.chargingAlert.startAnyway = Start Anyway
