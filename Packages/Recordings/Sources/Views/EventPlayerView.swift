@@ -44,7 +44,7 @@ struct EventPlayerView: View {
       ProgressView()
         .scaleEffect(1.2)
         .tint(theme.accent)
-      Text("Loading audio...")
+        Text(Strings.loadingAudioEventPlayerView)
         .font(.system(size: 14, weight: .medium))
         .foregroundStyle(theme.textSecondary)
     }
@@ -61,7 +61,7 @@ struct EventPlayerView: View {
         .font(.system(size: 13, weight: .medium))
         .foregroundStyle(theme.textSecondary)
 
-      Text("Snoring Event".uppercased())
+        Text(Strings.snoringEventHeaderPlayerView.uppercased())
         .font(.system(size: 11, weight: .semibold))
         .foregroundStyle(theme.textTertiary)
         .tracking(1.5)
@@ -81,7 +81,7 @@ struct EventPlayerView: View {
       }
 
       if totalEvents > 1 {
-        Text("Event \(eventNumber) of \(totalEvents)")
+          Text("\(Strings.eventHeaderSectionTotalEvents) \(eventNumber) of \(totalEvents)")
           .font(.system(size: 12, weight: .medium))
           .foregroundStyle(theme.textTertiary)
       }
@@ -243,7 +243,7 @@ struct EventPlayerView: View {
         Circle()
           .fill(theme.scoreAmber)
           .frame(width: 8, height: 8)
-        Text("Light snore")
+          Text(Strings.lightSnoreEventPlayerView)
           .font(.system(size: 12, weight: .medium))
           .foregroundStyle(theme.textSecondary)
       }
@@ -252,7 +252,7 @@ struct EventPlayerView: View {
         Circle()
           .fill(theme.scoreRed)
           .frame(width: 8, height: 8)
-        Text("Loud snore")
+          Text(Strings.loudSnoreEventPlayerView)
           .font(.system(size: 12, weight: .medium))
           .foregroundStyle(theme.textSecondary)
       }
@@ -267,9 +267,9 @@ struct EventPlayerView: View {
 
   private var intensityLabel: String {
     switch event.intensity {
-    case .quiet: return "Quiet"
-    case .light: return "Light"
-    case .loud: return "Loud"
+    case .quiet: return Strings.quietIntensityLabel
+    case .light: return Strings.lightIntensityLabelEventPlayerView
+    case .loud: return Strings.loudIntensityLabelEventPlayerView
     }
   }
 

@@ -65,6 +65,65 @@ Before implementing or modifying ANY view:
 
 If a design token is missing for a property, derive it from the screenshot or ask. Never guess a color or radius that contradicts the design.
 
+## Localization (Non-Negotiable)
+
+**All user-facing strings must be localized. Never hardcode text in views.**
+
+### Where strings live
+- **Source of truth**: `Packages/DesignSystem/Sources/Resources/Localizable.xcstrings`
+- **Generated accessor**: `Packages/DesignSystem/Sources/Strings.swift` (auto-generated — never edit manually)
+- **Helper file**: `Packages/DesignSystem/Sources/Resources/Strings.txt` (optional staging area)
+
+### Key format
+Use lowercase dot-notation that describes the context:
+```
+feature.subfeature.element.purpose
+```
+Examples: `action.save`, `settings.theme.dark`, `session.summary.title`
+
+### Adding a new string
+
+**Option A — direct edit (preferred for one-off additions):**
+1. Open `Packages/DesignSystem/Sources/Resources/Localizable.xcstrings`
+2. Add the entry following the existing JSON structure with `"extractionState": "manual"`
+3. Run `python3 scripts/generate-strings.py` to regenerate `Strings.swift`
+
+**Option B — via Strings.txt (preferred for batch additions):**
+1. Open `Packages/DesignSystem/Sources/Resources/Strings.txt`
+2. Add entries in one of these formats:
+   ```
+   key
+   key = value
+   "key" = "value"
+   ```
+3. Run `python3 scripts/generate-xcstrings.py`
+   - This merges entries into `Localizable.xcstrings`
+   - Then auto-runs `generate-strings.py` to update `Strings.swift`
+
+### Using strings in code
+Always reference strings through the generated `Strings` enum from `DesignSystem`:
+```swift
+import DesignSystem
+
+Text(Strings.actionSave)
+Text(Strings.settingsThemeDark)
+```
+
+**Forbidden:**
+```swift
+Text("Save")                           // ❌ Hardcoded
+Text("Dark")                           // ❌ Hardcoded
+String(localized: "action.save")       // ❌ Bypassing Strings.swift
+```
+
+**Allowed exceptions:**
+- Non-user-facing strings (debug prints, internal keys)
+- Purely decorative punctuation in layout (`Text("·")`, `Text("|")`)
+- Numeric/format interpolations that have no semantic value
+
+### Verification
+Before marking any UI task complete, grep the changed files for hardcoded string literals inside `Text(...)`, `Button(...)`, or `navigationTitle(...)` calls. Every user-facing literal must trace back to `Strings.`.
+
 ## Working Style
 
 - Enter plan mode for any non-trivial task (3+ steps or architectural decisions). Think before building.
@@ -230,16 +289,16 @@ mcp__XcodeBuildMCP__test_sim
 xcodebuild -project SnoreGuard.xcodeproj -scheme SnoreGuard -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2' build
 ```
 
-End every task with:
+## Session End Requirements
+
+At the end of every coding session — even if mid-feature — you MUST produce detailed documentation. This is non-negotiable. The user reviews this to understand what was built and why.
+
+Include:
 - **Files changed:** [list every file touched]
 - **What changed:** [one line per file]
 - **Follow-up needed:** [anything requiring a decision]
 - **Suggested branch**: `feature/[f#]/[t#]-short-description`
 - **Suggested commit**: `[Task ID] — [Short description]` with bullet list of changes
-
-## Session End Requirements
-
-At the end of every coding session — even if mid-feature — you MUST produce detailed documentation. This is non-negotiable. The user reviews this to understand what was built and why.
 
 ### 1. Update `docs/SESSION_SUMMARY.md`
 

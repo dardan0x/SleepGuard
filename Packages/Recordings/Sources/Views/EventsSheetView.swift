@@ -109,7 +109,7 @@ private struct EventCard: View {
         HStack(spacing: 4) {
           Image(systemName: "play.fill")
             .font(.system(size: 12, weight: .semibold))
-          Text("Play")
+          Text(Strings.actionPlay)
             .font(.system(size: 13, weight: .semibold))
         }
         .foregroundStyle(theme.accent)
