@@ -8,6 +8,7 @@ import Onboarding
 
 @main
 struct SnoreGuardApp: App {
+  @Environment(\.scenePhase) private var scenePhase
   @State private var userPreferences = UserPreferences.shared
   @State private var sessionManager = SessionManager.shared
   @State private var theme = Theme.shared
@@ -43,6 +44,14 @@ struct SnoreGuardApp: App {
         soundAnalysisDetector: SoundAnalysisDetector.shared,
         soothingMelodyPlayer: SoothingMelodyPlayer.shared
       )
+      .onChange(of: sessionManager.isRecording) { _, isRecording in
+        UIApplication.shared.isIdleTimerDisabled = isRecording
+      }
+      .onChange(of: scenePhase) { _, newPhase in
+        if newPhase == .active && sessionManager.isRecording {
+          UIApplication.shared.isIdleTimerDisabled = true
+        }
+      }
     }
     .modelContainer(sharedModelContainer)
   }

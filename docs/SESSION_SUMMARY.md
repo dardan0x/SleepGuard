@@ -2657,3 +2657,38 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 
 ### Open Questions
 - None.
+
+
+---
+
+## 2026-05-15 — Session 45: Nightstand Mode — Auto-lock Prevention + Charging Alert
+
+### Completed
+- **Idle timer disable during sleep sessions**: Added `UIApplication.shared.isIdleTimerDisabled` logic in `SnoreGuardApp.swift` tied to `SessionManager.isRecording`. Also handles `scenePhase` `.active` to re-disable the idle timer when returning from background (iOS auto-re-enables it on background).
+- **Charging alert before recording**: Added an alert when the user taps Start Recording and the iPhone is not charging. Alert shows in both `RecordingPrestartView` (main start button) and `RecordingCountdownView` ("Start Now" button). Auto-start after countdown completion skips the alert since the user isn't present.
+- **Alert actions**: "Cancel" dismisses; "Start Anyway" proceeds with the session. Alert button actions wrapped in `Task { @MainActor in }` for safe actor isolation.
+
+### Technical Details
+- `UIDevice.current.isBatteryMonitoringEnabled = true` must be set before reading `batteryState`. On simulator, `batteryState` returns `.unknown` so the alert always fires — this is expected simulator behavior.
+- Alert closures use shared singletons (`SessionManager.shared`, `UserPreferences.shared`) directly rather than `@Environment` properties to avoid any potential environment access issues from modal alert contexts.
+- Added 3 localized strings: `session.chargingAlert.title`, `session.chargingAlert.message`, `session.chargingAlert.startAnyway` via `Strings.txt` → `generate-xcstrings.py`.
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `SnoreGuard/SnoreGuardApp.swift` | +9 | `scenePhase` env + `.onChange` for `isRecording` and `.active` to toggle idle timer |
+| `Packages/DesignSystem/Sources/Resources/Strings.txt` | +3 | Added charging alert title, message, startAnyway strings |
+| `Packages/DesignSystem/Sources/Resources/Localizable.xcstrings` | — | Regenerated with 3 new entries |
+| `Packages/DesignSystem/Sources/Strings.swift` | — | Regenerated with `sessionChargingAlertTitle`, `Message`, `StartAnyway` |
+| `Packages/SleepSession/Sources/Views/RecordingPrestartView.swift` | +35 | Charging check in start button, alert modifier, `beginSession()` helper, `isCharging` property |
+| `Packages/SleepSession/Sources/Views/RecordingCountdownView.swift` | +28 | Charging check in "Start Now", alert modifier, `startSession()` helper, `isCharging` property |
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors.
+
+### Git Handoff
+- **Suggested branch**: `feature/nightstand-auto-lock-charging-alert`
+- **Suggested commit**: `Nightstand mode — disable idle timer during sessions + charging alert before recording`
+
+### Open Questions
+- On physical devices, verify that `batteryState` returns `.charging` or `.full` when plugged in. If any device returns `.unknown` while charging, the alert logic may need adjustment.

@@ -1,11 +1,13 @@
 import SwiftUI
 import Env
 import DesignSystem
+import UIKit
 
 @MainActor
 struct RecordingCountdownView: View {
   @Environment(SessionManager.self) private var sessionManager
   @Environment(Theme.self) private var theme
+  @State private var showChargingAlert = false
 
   var body: some View {
     ZStack {
@@ -49,8 +51,11 @@ struct RecordingCountdownView: View {
           }
 
           Button {
-            RecordingDelayManager.shared.cancel()
-            try? sessionManager.startSession()
+            guard isCharging else {
+              showChargingAlert = true
+              return
+            }
+            startSession()
           } label: {
             Text(Strings.actionStartNow)
               .font(.system(size: 17, weight: .semibold))
@@ -68,5 +73,29 @@ struct RecordingCountdownView: View {
     .onReceive(NotificationCenter.default.publisher(for: .recordingDelayDidComplete)) { _ in
       try? sessionManager.startSession()
     }
+    .alert(Strings.sessionChargingAlertTitle, isPresented: $showChargingAlert) {
+      Button(Strings.actionCancel, role: .cancel) {}
+      Button(Strings.sessionChargingAlertStartAnyway) {
+        Task { @MainActor in
+          startSession()
+        }
+      }
+    } message: {
+      Text(Strings.sessionChargingAlertMessage)
+    }
+  }
+
+  private func startSession() {
+    RecordingDelayManager.shared.cancel()
+    do {
+      try SessionManager.shared.startSession()
+    } catch {
+      print("Failed to start session: \(error)")
+    }
+  }
+
+  private var isCharging: Bool {
+    UIDevice.current.isBatteryMonitoringEnabled = true
+    return UIDevice.current.batteryState == .charging || UIDevice.current.batteryState == .full
   }
 }
