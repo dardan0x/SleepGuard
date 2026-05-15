@@ -17,18 +17,18 @@ struct OnboardingPage2View: View {
       VStack(spacing: 12) {
         featureCard(
           icon: "😴",
-          title: "Sleep Score",
-          description: "Get a score for how peacefully you slept (or didn't 😴)"
+          title: Strings.onboardingPage2SleepScoreTitle,
+          description: Strings.onboardingPage2SleepScoreDescription
         )
         featureCard(
           icon: "🎤",
-          title: "Snore Detection",
-          description: "We detect your snores so you don't have to argue about them."
+          title: Strings.onboardingPage2SnoreDetectionTitle,
+          description: Strings.onboardingPage2SnoreDetectionDescription
         )
         featureCard(
           icon: "📊",
-          title: "Sleep Trends",
-          description: "See if your snoring improves... or if your pillow is the problem."
+          title: Strings.onboardingPage2SleepTrendsTitle,
+          description: Strings.onboardingPage2SleepTrendsDescription
         )
       }
 

@@ -28,7 +28,7 @@ struct StatisticsLoadedView: View {
           SleepScoreGauge(score: dayScore, theme: theme, size: 120)
 
           VStack(spacing: 4) {
-            Text(daySessionCount > 1 ? "\(daySessionCount) RECORDINGS" : "LAST NIGHT")
+              Text(daySessionCount > 1 ? "\(daySessionCount) \(Strings.recordingsStatisticsLoadedView)" : "\(Strings.lastNightStatisticsLoadedView)")
               .font(.system(size: 12, weight: .semibold))
               .foregroundStyle(theme.textTertiary)
               .tracking(1)

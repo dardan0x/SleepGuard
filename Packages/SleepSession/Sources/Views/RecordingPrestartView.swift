@@ -29,11 +29,9 @@ struct RecordingPrestartView: View {
                 VStack(spacing: 12) {
                     VStack(alignment: .leading, spacing: 8) {
                         delaySection
-//                            .padding(.bottom, 8)
-//                            .padding(.top, 12)
                         actionRow(
                             icon: "timer",
-                            title: "Soothing melody",
+                            title: Strings.soothingMelodyRecordingPrestartViewTitle,
                             value: soothingMelodyValue
                         ) {
                             showSoothingMelodySheet = true
@@ -82,17 +80,17 @@ struct RecordingPrestartView: View {
     private var soothingMelodyValue: String {
         switch userPreferences.soothingMelodyMode {
         case .never:
-            return "Off"
+            return Strings.offSoothingMelodyValueFormat
         case .always:
-            return "Always"
+            return Strings.alwaysSoothingMelodyValueFormat
         case .fiveSeconds:
-            return "5 seconds"
+            return Strings.fiveSecondsSoothingMelodyValueFormat
         case .fifteenSeconds:
-            return "15 seconds"
+            return Strings.fifteenSecondsSoothingMelodyValueFormat
         case .thirtySeconds:
-            return "30 seconds"
+            return Strings.thirtySecondsSoothingMelodyValueFormat
         case .sixtySeconds:
-            return "60 seconds"
+            return Strings.sixtySecondsSoothingMelodyValueFormat
         }
     }
 
@@ -257,7 +255,7 @@ struct RecordingPrestartView: View {
     }
 
     private var helperText: some View {
-        Text("Plays a sound when snoring is detected during your session.")
+        Text(Strings.soothingMelodyRowHelperText)
             .font(.system(size: 14))
             .foregroundStyle(theme.textTertiary)
             .multilineTextAlignment(.center)

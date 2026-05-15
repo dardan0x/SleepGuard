@@ -71,7 +71,7 @@ public struct PlayerSheetView: View {
       .background(theme.bgSecondary.ignoresSafeArea())
       .presentationDetents([.height(420)])
       .presentationDragIndicator(.visible)
-      .navigationTitle("Event Player")
+      .navigationTitle(Strings.eventPlayerNavigationTitle)
       .navigationBarTitleDisplayMode(.inline)
       .toolbar {
         ToolbarItem(placement: .topBarTrailing) {

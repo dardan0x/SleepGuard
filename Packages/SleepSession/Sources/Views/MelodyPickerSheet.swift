@@ -86,7 +86,7 @@ struct MelodyPickerSheet: View {
             .foregroundStyle(theme.accent)
         }
 
-        Text("Record yours")
+          Text(Strings.recordYoursMelodyPickerSheet)
           .font(.system(size: 17, weight: .semibold))
           .foregroundStyle(theme.accent)
 
@@ -262,7 +262,7 @@ struct MelodyPickerSheet: View {
         stopPreview()
         dismiss()
       } label: {
-        Text("SAVE")
+          Text(Strings.saveMelodyPickerSheet)
           .font(.system(size: 15, weight: .bold))
           .tracking(1.5)
           .foregroundStyle(theme.textPrimary)

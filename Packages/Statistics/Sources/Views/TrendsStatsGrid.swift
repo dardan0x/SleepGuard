@@ -15,28 +15,28 @@ struct TrendsStatsGrid: View {
       TrendStatCard(
         icon: "scope",
         iconColor: theme.accent,
-        label: "AVG SCORE",
+        label: Strings.statsTrendsStatCardAvgScore,
         value: "\(averageScore)",
         theme: theme
       )
       TrendStatCard(
         icon: "star.fill",
         iconColor: theme.scoreGreen,
-        label: "BEST NIGHT",
+        label: Strings.statsTrendsStatCardBestNight,
         value: "\(bestScore)",
         theme: theme
       )
       TrendStatCard(
         icon: "bolt.fill",
         iconColor: theme.snoreLoud,
-        label: "WORST NIGHT",
+        label: Strings.statsTrendsStatCardWorstNight,
         value: "\(worstScore)",
         theme: theme
       )
       TrendStatCard(
         icon: "number",
         iconColor: theme.textTertiary,
-        label: "TOTAL EVENTS",
+        label: Strings.statsTrendsStatCardTotalEvents,
         value: "\(totalEvents)",
         theme: theme
       )

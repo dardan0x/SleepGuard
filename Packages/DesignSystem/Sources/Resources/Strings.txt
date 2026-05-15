@@ -6,3 +6,5 @@
 #
 # Run: python3 scripts/generate-xcstrings.py
 # The script merges entries into Localizable.xcstrings and regenerates Strings.swift.
+
+action.play = Play

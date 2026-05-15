@@ -1,6 +1,7 @@
 import UIKit
 import AudioEngine
 import Models
+import DesignSystem
 
 @MainActor
 public struct SleepReportPDFGenerator {
@@ -223,13 +224,13 @@ public struct SleepReportPDFGenerator {
 
   // MARK: - Stats Grid
 
-  private func drawStatsGrid(session: SleepSession, at y: CGFloat) -> CGFloat {
-    let stats: [(label: String, value: String, icon: String)] = [
-      ("Duration", durationString(session.totalDuration), "⏱"),
-      ("Snoring", String(format: "%.0f%%", session.snoringPercentage), "📊"),
-      ("Events", "\(session.eventsCount)", "🔔"),
-      ("Events/Hour", String(format: "%.1f", session.eventsPerHour), "📈"),
-    ]
+    private func drawStatsGrid(session: SleepSession, at y: CGFloat) -> CGFloat {
+        let stats: [(label: String, value: String, icon: String)] = [
+            (Strings.recordingsPlayerStatDuration, durationString(session.totalDuration), "⏱"),
+            (Strings.sessionSummaryStatSnoring, String(format: "%.0f%%", session.snoringPercentage), "📊"),
+            (Strings.recordingsDetailEventsLabel, "\(session.eventsCount)", "🔔"),
+            (Strings.eventsHourPdfGenerator, String(format: "%.1f", session.eventsPerHour), "📈"),
+        ]
 
     let cardWidth = (pageWidth - margin * 2 - 16) / 2
     let cardHeight: CGFloat = 90
