@@ -11,3 +11,10 @@ action.play = Play
 session.chargingAlert.title = iPhone Not Charging
 session.chargingAlert.message = For the best nightstand experience and to avoid battery drain, it's recommended to keep your iPhone plugged in during sleep tracking.
 session.chargingAlert.startAnyway = Start Anyway
+
+settings.section.permissions = PERMISSIONS
+settings.microphoneAccess = Microphone Access
+settings.microphoneStatusGranted = Allowed
+settings.microphoneStatusDenied = Denied
+settings.microphoneStatusNotDetermined = Not Set
+settings.microphoneEnable = Enable

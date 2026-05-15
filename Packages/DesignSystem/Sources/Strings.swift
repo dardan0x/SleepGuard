@@ -130,6 +130,11 @@ public enum Strings {
   public static var settingsDeleteAllConfirmTitle: String { String(localized: "settings.deleteAll.confirmTitle", bundle: .module) }
   public static var settingsMaxClipLength: String { String(localized: "settings.maxClipLength", bundle: .module) }
   public static var settingsMaxClipLengthTitle: String { String(localized: "settings.maxClipLengthTitle", bundle: .module) }
+  public static var settingsMicrophoneAccess: String { String(localized: "settings.microphoneAccess", bundle: .module) }
+  public static var settingsMicrophoneEnable: String { String(localized: "settings.microphoneEnable", bundle: .module) }
+  public static var settingsMicrophoneStatusDenied: String { String(localized: "settings.microphoneStatusDenied", bundle: .module) }
+  public static var settingsMicrophoneStatusGranted: String { String(localized: "settings.microphoneStatusGranted", bundle: .module) }
+  public static var settingsMicrophoneStatusNotDetermined: String { String(localized: "settings.microphoneStatusNotDetermined", bundle: .module) }
   public static var settingsMinSnoreDuration: String { String(localized: "settings.minSnoreDuration", bundle: .module) }
   public static var settingsRateApp: String { String(localized: "settings.rateApp", bundle: .module) }
   public static var settingsSaveAudioClips: String { String(localized: "settings.saveAudioClips", bundle: .module) }
@@ -137,6 +142,7 @@ public enum Strings {
   public static var settingsSectionAppearance: String { String(localized: "settings.section.appearance", bundle: .module) }
   public static var settingsSectionData: String { String(localized: "settings.section.data", bundle: .module) }
   public static var settingsSectionDetection: String { String(localized: "settings.section.detection", bundle: .module) }
+  public static var settingsSectionPermissions: String { String(localized: "settings.section.permissions", bundle: .module) }
   public static var settingsSectionRecording: String { String(localized: "settings.section.recording", bundle: .module) }
   public static var settingsSectionWatch: String { String(localized: "settings.section.watch", bundle: .module) }
   public static var settingsSensitivity: String { String(localized: "settings.sensitivity", bundle: .module) }
