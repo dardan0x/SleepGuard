@@ -29,26 +29,39 @@ public struct PlayerSheetView: View {
 
   // MARK: - Loading
   @State private var isReady = false
+  @State private var isLoadingWaveform = false
+
+  /// Resolves the session's full audio source, preferring the legacy file and
+  /// falling back to the raw archive (used after clip extraction moves it).
+  private var sessionAudioURL: URL? {
+    AudioFileURLResolver.resolve(session.audioFileURL)
+      ?? AudioFileURLResolver.resolve(session.rawAudioFileURL)
+  }
 
   public var body: some View {
     NavigationStack {
       ScrollView {
         VStack(spacing: 24) {
           if isClipSession, let currentEvent = playbackController.currentEvent {
-            EventPlayerView(
-              event: currentEvent,
-              waveformSamples: waveformSamples,
-              isPlaying: playbackController.isPlaying,
-              currentTime: playbackController.currentTime,
-              totalDuration: playbackController.totalClipsDuration,
-              eventNumber: playbackController.currentEventNumber,
-              totalEvents: playbackController.totalEventCount,
-              onTogglePlayback: { playbackController.togglePlayback() },
-              onSkipBack: { skipClipPlayback(by: -15) },
-              onSkipForward: { skipClipPlayback(by: 15) },
-              onScrub: { relative in playbackController.seek(to: relative) },
-              isReady: isReady
-            )
+            if playbackController.hasAudioForCurrentEvent {
+              EventPlayerView(
+                event: currentEvent,
+                waveformSamples: waveformSamples,
+                isPlaying: playbackController.isPlaying,
+                currentTime: playbackController.currentTime,
+                totalDuration: playbackController.totalClipsDuration,
+                eventNumber: playbackController.currentEventNumber,
+                totalEvents: playbackController.totalEventCount,
+                onTogglePlayback: { playbackController.togglePlayback() },
+                onSkipBack: { skipClipPlayback(by: -15) },
+                onSkipForward: { skipClipPlayback(by: 15) },
+                onScrub: { relative in playbackController.seek(to: relative) },
+                isReady: isReady,
+                isLoadingWaveform: isLoadingWaveform
+              )
+            } else {
+              noAudioView(event: currentEvent)
+            }
           } else if let initialEvent, legacyEventDuration > 0 {
             EventPlayerView(
               event: initialEvent,
@@ -62,8 +75,11 @@ public struct PlayerSheetView: View {
               onSkipBack: { skipLegacyPlayback(by: -15) },
               onSkipForward: { skipLegacyPlayback(by: 15) },
               onScrub: { relative in scrubLegacyTo(relative: relative) },
-              isReady: isReady
+              isReady: isReady,
+              isLoadingWaveform: isLoadingWaveform
             )
+          } else if let initialEvent {
+            noAudioView(event: initialEvent)
           }
         }
         .padding(20)
@@ -98,11 +114,15 @@ public struct PlayerSheetView: View {
         playbackController.loadEvents(sortedEvents)
         if let initialEvent,
            let index = sortedEvents.firstIndex(where: { $0.id == initialEvent.id }) {
-          playbackController.playEvent(at: index)
           loadVisualization(for: initialEvent)
+          if playbackController.hasAudioForCurrentEvent {
+            playbackController.playEvent(at: index)
+          }
         } else if let firstEvent = sortedEvents.first {
-          playbackController.playEvent(at: 0)
           loadVisualization(for: firstEvent)
+          if playbackController.hasAudioForCurrentEvent {
+            playbackController.playEvent(at: 0)
+          }
         }
       } else if let initialEvent {
         await setupLegacySingleEvent(event: initialEvent)
@@ -128,27 +148,33 @@ public struct PlayerSheetView: View {
   private func loadVisualization(for event: SnoreEvent?) {
     guard let event else {
       waveformSamples = []
+      isLoadingWaveform = false
       return
     }
-    // Try event clip URL first
+    // Try event clip URL first (run off-main so large files don't block UI)
     if let url = AudioFileURLResolver.resolve(event.audioFileURL) {
-      Task {
+      isLoadingWaveform = true
+      Task.detached(priority: .userInitiated) {
         let samples = WaveformGenerator.generateSamples(from: url)
         await MainActor.run {
           waveformSamples = samples
+          isLoadingWaveform = false
         }
       }
       return
     }
     // Fallback: generate from full session audio if available
-    guard let sourceURL = AudioFileURLResolver.resolve(session.audioFileURL) else {
+    guard let sourceURL = sessionAudioURL else {
       waveformSamples = []
+      isLoadingWaveform = false
       return
     }
-    Task {
+    isLoadingWaveform = true
+    Task(priority: .userInitiated) {
       let samples = await generateWaveformFromSession(sourceURL: sourceURL, event: event)
       await MainActor.run {
         waveformSamples = samples
+        isLoadingWaveform = false
       }
     }
   }
@@ -184,6 +210,42 @@ public struct PlayerSheetView: View {
     return WaveformGenerator.generateSamples(from: clipURL)
   }
 
+  // MARK: - No Audio State
+
+  private func noAudioView(event: SnoreEvent) -> some View {
+    VStack(spacing: 16) {
+      Image(systemName: "waveform.slash")
+        .font(.system(size: 44))
+        .foregroundStyle(theme.textTertiary)
+
+      Text(Strings.eventPlayerNoAudioTitle)
+        .font(.system(size: 18, weight: .semibold))
+        .foregroundStyle(theme.textPrimary)
+
+      Text(Strings.eventPlayerNoAudioDescription)
+        .font(.system(size: 14))
+        .foregroundStyle(theme.textSecondary)
+        .multilineTextAlignment(.center)
+        .lineLimit(nil)
+        .fixedSize(horizontal: false, vertical: true)
+
+      HStack(spacing: 8) {
+        Text(event.timestamp, style: .time)
+          .font(.system(size: 13, weight: .medium))
+          .foregroundStyle(theme.textTertiary)
+        Text("·")
+          .foregroundStyle(theme.textTertiary)
+        Text("\(Int(event.snoreDuration))s · \(event.intensity.rawValue)")
+          .font(.system(size: 13, weight: .medium))
+          .foregroundStyle(theme.textTertiary)
+      }
+    }
+    .padding(24)
+    .frame(maxWidth: .infinity)
+    .background(theme.bgCard)
+    .cornerRadius(theme.radiusCard)
+  }
+
   // MARK: - Clip Playback Helpers
 
   private func skipClipPlayback(by seconds: TimeInterval) {
@@ -196,7 +258,7 @@ public struct PlayerSheetView: View {
   // MARK: - Legacy Single-Event Playback
 
   private func setupLegacySingleEvent(event: SnoreEvent) async {
-    guard let sourceURL = AudioFileURLResolver.resolve(session.audioFileURL) else { return }
+    guard let sourceURL = sessionAudioURL else { return }
 
     let asset = AVURLAsset(url: sourceURL)
     guard let exportSession = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetAppleM4A) else { return }
@@ -229,8 +291,10 @@ public struct PlayerSheetView: View {
       legacyEventDuration = player.duration
       legacyCurrentTime = 0
 
-      try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
-      try AVAudioSession.sharedInstance().setActive(true)
+      let session = AVAudioSession.sharedInstance()
+      try? session.setActive(false)
+      try session.setCategory(.playback, mode: .default)
+      try session.setActive(true)
       player.play()
       legacyIsPlaying = true
     } catch {
@@ -258,8 +322,10 @@ public struct PlayerSheetView: View {
       legacyIsPlaying = false
     } else {
       do {
-        try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
-        try AVAudioSession.sharedInstance().setActive(true)
+        let session = AVAudioSession.sharedInstance()
+        try? session.setActive(false)
+        try session.setCategory(.playback, mode: .default)
+        try session.setActive(true)
       } catch {
         // Continue anyway
       }

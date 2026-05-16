@@ -1,2104 +1,2170 @@
 {
-  "sourceLanguage": "en",
-  "strings": {
-    "5.seconds.soothing.melody.value": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "5 seconds"
+  "sourceLanguage" : "en",
+  "strings" : {
+    "5.seconds.soothing.melody.value" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "5 seconds"
           }
         }
       }
     },
-    "action.back": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Back"
+    "action.back" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Back"
           }
         }
       }
     },
-    "action.cancel": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cancel"
+    "action.cancel" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel"
           }
         }
       }
     },
-    "action.delete": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Delete"
+    "action.delete" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete"
           }
         }
       }
     },
-    "action.deleteAll": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Delete All"
+    "action.deleteAll" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete All"
           }
         }
       }
     },
-    "action.discard": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Discard"
+    "action.discard" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Discard"
           }
         }
       }
     },
-    "action.keepRecording": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Keep Recording"
+    "action.keepRecording" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep Recording"
           }
         }
       }
     },
-    "action.ok": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "OK"
+    "action.ok" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
           }
         }
       }
     },
-    "action.remove": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Remove"
+    "action.play" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Play"
           }
         }
       }
     },
-    "action.save": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Save"
+    "action.remove" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove"
           }
         }
       }
     },
-    "action.saveSession": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Save Session"
+    "action.save" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save"
           }
         }
       }
     },
-    "action.skip": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Skip"
+    "action.saveSession" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save Session"
           }
         }
       }
     },
-    "action.startNow": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Start Now"
+    "action.skip" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skip"
           }
         }
       }
     },
-    "action.startRecording": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Start Recording"
+    "action.startNow" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start Now"
           }
         }
       }
     },
-    "action.stopAnyway": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Stop Anyway"
+    "action.startRecording" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start Recording"
           }
         }
       }
     },
-    "action.tryAgain": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Try Again"
+    "action.stopAnyway" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop Anyway"
           }
         }
       }
     },
-    "always.soothing.melody.value": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Always"
+    "action.tryAgain" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try Again"
           }
         }
       }
     },
-    "avg.score.calendar.stat.card.label": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "AVG SCORE"
+    "always.soothing.melody.value" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Always"
           }
         }
       }
     },
-    "duration.picker.title": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Duration"
+    "avg.score.calendar.stat.card.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AVG SCORE"
           }
         }
       }
     },
-    "event.header.section.totalEvents": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Event"
+    "duration.picker.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Duration"
           }
         }
       }
     },
-    "event.player.navigation.title": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Event Player"
+    "event.header.section.totalEvents" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Event"
           }
         }
       }
     },
-    "events.hour.pdf.generator": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Events/Hour"
+    "event.player.navigation.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Event Player"
           }
         }
       }
     },
-    "fifteen.seconds.soothing.melody.value": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "15 seconds"
+    "event.player.noAudio.description" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This recording was saved without audio. New recordings will include audio."
           }
         }
       }
     },
-    "last.night.statistics.loaded.view": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "LAST NIGHT"
+    "event.player.noAudio.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audio Unavailable"
           }
         }
       }
     },
-    "light.intensity.label.event.player.view": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Light"
+    "events.hour.pdf.generator" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Events/Hour"
           }
         }
       }
     },
-    "light.snore.event.player.view": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Light snore"
+    "fifteen.seconds.soothing.melody.value" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "15 seconds"
           }
         }
       }
     },
-    "loading.audio.event.player.view": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Loading audio..."
+    "last.night.statistics.loaded.view" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LAST NIGHT"
           }
         }
       }
     },
-    "loud.intensity.label.event.player.view": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Load"
+    "light.intensity.label.event.player.view" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Light"
           }
         }
       }
     },
-    "loud.nights.calendar.stat.card.label": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "LOUD NIGHTS"
+    "light.snore.event.player.view" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Light snore"
           }
         }
       }
     },
-    "loud.snore.event.player.view": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Loud snore"
+    "loading.audio.event.player.view" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loading audio..."
           }
         }
       }
     },
-    "melody.disabled.soothing.melody.sheet": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Melody disabled"
+    "loud.intensity.label.event.player.view" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Load"
           }
         }
       }
     },
-    "melody.enabled.soothing.melody.sheet": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Melody enabled"
+    "loud.nights.calendar.stat.card.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LOUD NIGHTS"
           }
         }
       }
     },
-    "mute.for.session": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mute for session"
+    "loud.snore.event.player.view" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loud snore"
           }
         }
       }
     },
-    "off.soothing.melody.value": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Off"
+    "melody.disabled.soothing.melody.sheet" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Melody disabled"
           }
         }
       }
     },
-    "onboarding.page1.button": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cool, what else?"
+    "melody.enabled.soothing.melody.sheet" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Melody enabled"
           }
         }
       }
     },
-    "onboarding.page1.subtitle": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Your snoring finally gets the attention it deserves."
+    "mute.for.session" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mute for session"
           }
         }
       }
     },
-    "onboarding.page1.title": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hey 🖐 Ready to\nspy on your sleep?"
+    "off.soothing.melody.value" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Off"
           }
         }
       }
     },
-    "onboarding.page2.body": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Place your phone on the nightstand and\nlet us do the rest."
+    "onboarding.page1.button" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cool, what else?"
           }
         }
       }
     },
-    "onboarding.page2.button": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "I snore in private"
+    "onboarding.page1.subtitle" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your snoring finally gets the attention it deserves."
           }
         }
       }
     },
-    "onboarding.page2.sleepScore.description": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Get a score for how peacefully you slept (or didn't 😴)"
+    "onboarding.page1.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hey 🖐 Ready to\nspy on your sleep?"
           }
         }
       }
     },
-    "onboarding.page2.sleepScore.title": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sleep Score"
+    "onboarding.page2.body" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Place your phone on the nightstand and\nlet us do the rest."
           }
         }
       }
     },
-    "onboarding.page2.sleepTrends.description": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "See if your snoring improves... or if your pillow is the problem."
+    "onboarding.page2.button" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I snore in private"
           }
         }
       }
     },
-    "onboarding.page2.sleepTrends.title": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sleep Trends"
+    "onboarding.page2.sleepScore.description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Get a score for how peacefully you slept (or didn't 😴)"
           }
         }
       }
     },
-    "onboarding.page2.snoreDetection.description": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "We detect your snores so you don't have to argue about them."
+    "onboarding.page2.sleepScore.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sleep Score"
           }
         }
       }
     },
-    "onboarding.page2.snoreDetection.title": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Snore Detection"
+    "onboarding.page2.sleepTrends.description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "See if your snoring improves... or if your pillow is the problem."
           }
         }
       }
     },
-    "onboarding.page2.title": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Here's what we do\nwhile you snooze"
+    "onboarding.page2.sleepTrends.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sleep Trends"
           }
         }
       }
     },
-    "onboarding.page3.badge": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Your secrets stay between you and your pillow"
+    "onboarding.page2.snoreDetection.description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "We detect your snores so you don't have to argue about them."
           }
         }
       }
     },
-    "onboarding.page3.body": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Only to detect snoring — we're not\neavesdropping on your midnight thoughts."
+    "onboarding.page2.snoreDetection.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snore Detection"
           }
         }
       }
     },
-    "onboarding.page3.button": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "I trust you"
+    "onboarding.page2.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Here's what we do\nwhile you snooze"
           }
         }
       }
     },
-    "onboarding.page3.title": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "We're not that\nkind of app"
+    "onboarding.page3.badge" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your secrets stay between you and your pillow"
           }
         }
       }
     },
-    "onboarding.page4.badge": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Microphone ready"
+    "onboarding.page3.body" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Only to detect snoring — we're not\neavesdropping on your midnight thoughts."
           }
         }
       }
     },
-    "onboarding.page4.body": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Don't worry — we're only listening for\nsnores, not secrets."
+    "onboarding.page3.button" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I trust you"
           }
         }
       }
     },
-    "onboarding.page4.buttonPrimary": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Yes, listen to my snoring"
+    "onboarding.page3.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "We're not that\nkind of app"
           }
         }
       }
     },
-    "onboarding.page4.buttonSecondary": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Just browsing (for now)"
+    "onboarding.page4.badge" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Microphone ready"
           }
         }
       }
     },
-    "onboarding.page4.title": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "We need your\nmicrophone 🎙️"
+    "onboarding.page4.body" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Don't worry — we're only listening for\nsnores, not secrets."
           }
         }
       }
     },
-    "onboarding.page5.body": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Everything is processed on your device.\nNo uploads. No weird cloud stuff.\nNo selling your snore drama."
+    "onboarding.page4.buttonPrimary" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yes, listen to my snoring"
           }
         }
       }
     },
-    "onboarding.page5.button": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Let's do this"
+    "onboarding.page4.buttonSecondary" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Just browsing (for now)"
           }
         }
       }
     },
-    "onboarding.page5.title": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ready for your\nfirst night?"
+    "onboarding.page4.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "We need your\nmicrophone 🎙️"
           }
         }
       }
     },
-    "onboarding.privacy.judgeSilently": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Don't worry — we'll judge your snoring silently."
+    "onboarding.page5.body" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Everything is processed on your device.\nNo uploads. No weird cloud stuff.\nNo selling your snore drama."
           }
         }
       }
     },
-    "play.record.custom.melody.sheet": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Play"
+    "onboarding.page5.button" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Let's do this"
           }
         }
       }
     },
-    "playing.soothing.melody.player": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Playing:"
+    "onboarding.page5.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ready for your\nfirst night?"
           }
         }
       }
     },
-    "processing.session": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Processing session..."
+    "onboarding.privacy.judgeSilently" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Don't worry — we'll judge your snoring silently."
           }
         }
       }
     },
-    "quiet.intensity.label": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Quiet"
+    "play.record.custom.melody.sheet" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Play"
           }
         }
       }
     },
-    "re.record.custom.melody.sheet": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Re-record"
+    "playing.soothing.melody.player" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Playing:"
           }
         }
       }
     },
-    "record.melody.sheet.nav.header": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "RECORD MELODY"
+    "processing.session" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Processing session..."
           }
         }
       }
     },
-    "record.yours.melody.picker.sheet": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Record yours"
+    "quiet.intensity.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quiet"
           }
         }
       }
     },
-    "recordings.detail.dateEventsFormat": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ · %lld events"
+    "re.record.custom.melody.sheet" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Re-record"
           }
         }
       }
     },
-    "recordings.detail.eventsCountFormat": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld events"
+    "record.melody.sheet.nav.header" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RECORD MELODY"
           }
         }
       }
     },
-    "recordings.detail.eventsLabel": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Events"
+    "record.yours.melody.picker.sheet" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Record yours"
           }
         }
       }
     },
-    "recordings.detail.recordingsCountFormat": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld recordings"
+    "recordings.detail.dateEventsFormat" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · %lld events"
           }
         }
       }
     },
-    "recordings.detail.removeConfirmFormat": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Remove %lld recordings from this night?"
+    "recordings.detail.eventsCountFormat" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld events"
           }
         }
       }
     },
-    "recordings.detail.removeTitle": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Remove Recordings"
+    "recordings.detail.eventsLabel" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Events"
           }
         }
       }
     },
-    "recordings.detail.showAllFormat": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Show all %lld"
+    "recordings.detail.recordingsCountFormat" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld recordings"
           }
         }
       }
     },
-    "recordings.detail.showLess": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Show less"
+    "recordings.detail.removeConfirmFormat" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove %lld recordings from this night?"
           }
         }
       }
     },
-    "recordings.detail.timelineLabel": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "SNORING TIMELINE"
+    "recordings.detail.removeTitle" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove Recordings"
           }
         }
       }
     },
-    "recordings.detail.title": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Details"
+    "recordings.detail.showAllFormat" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show all %lld"
           }
         }
       }
     },
-    "recordings.empty.message": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Your sleep sessions will appear here after you start recording."
+    "recordings.detail.showLess" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show less"
           }
         }
       }
     },
-    "recordings.empty.title": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No recordings yet"
+    "recordings.detail.timelineLabel" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SNORING TIMELINE"
           }
         }
       }
     },
-    "recordings.error.message": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Unable to load session"
+    "recordings.detail.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Details"
           }
         }
       }
     },
-    "recordings.error.title": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Something went wrong"
+    "recordings.empty.message" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your sleep sessions will appear here after you start recording."
           }
         }
       }
     },
-    "recordings.player.freq0": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "0 Hz"
+    "recordings.empty.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No recordings yet"
           }
         }
       }
     },
-    "recordings.player.freq1k": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "1 kHz"
+    "recordings.error.message" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unable to load session"
           }
         }
       }
     },
-    "recordings.player.freq500": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "500 Hz"
+    "recordings.error.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Something went wrong"
           }
         }
       }
     },
-    "recordings.player.seekHint": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tap waveform to seek"
+    "recordings.player.freq0" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "0 Hz"
           }
         }
       }
     },
-    "recordings.player.spectrumLabel": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Frequency Spectrum"
+    "recordings.player.freq1k" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 kHz"
           }
         }
       }
     },
-    "recordings.player.statDominantFreq": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dominant Freq"
+    "recordings.player.freq500" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "500 Hz"
           }
         }
       }
     },
-    "recordings.player.statDuration": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Duration"
+    "recordings.player.seekHint" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap waveform to seek"
           }
         }
       }
     },
-    "recordings.player.statLowFreqRatio": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Low-Freq Ratio"
+    "recordings.player.spectrumLabel" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Frequency Spectrum"
           }
         }
       }
     },
-    "recordings.player.statSpectralCentroid": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Spectral Centroid"
+    "recordings.player.statDominantFreq" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dominant Freq"
           }
         }
       }
     },
-    "recordings.statistics.loaded.view": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "RECORDINGS"
+    "recordings.player.statDuration" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Duration"
           }
         }
       }
     },
-    "save.failed": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Save Failed"
+    "recordings.player.statLowFreqRatio" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Low-Freq Ratio"
           }
         }
       }
     },
-    "save.melody.picker.sheet": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "SAVE"
+    "recordings.player.statSpectralCentroid" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spectral Centroid"
           }
         }
       }
     },
-    "save.record.custom.melody.sheet": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "SAVE"
+    "recordings.statistics.loaded.view" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RECORDINGS"
           }
         }
       }
     },
-    "session.bedside.snoreLight": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Light snoring detected · just now"
+    "save.failed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save Failed"
           }
         }
       }
     },
-    "session.bedside.snoreLoud": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Loud snoring detected · just now"
+    "save.melody.picker.sheet" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SAVE"
           }
         }
       }
     },
-    "session.bedside.snoreQuiet": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Quiet snoring detected · just now"
+    "save.record.custom.melody.sheet" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SAVE"
           }
         }
       }
     },
-    "session.bedside.stopRecording": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Stop Recording"
+    "session.bedside.snoreLight" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Light snoring detected · just now"
           }
         }
       }
     },
-    "session.countdown.label": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Recording starts in"
+    "session.bedside.snoreLoud" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loud snoring detected · just now"
           }
         }
       }
     },
-    "session.prestart.body": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "We'll listen for snoring through the night. Audio stays on your device."
+    "session.bedside.snoreQuiet" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quiet snoring detected · just now"
           }
         }
       }
     },
-    "session.prestart.delayHelper": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Use this if you need time to fall asleep before recording begins."
+    "session.bedside.stopRecording" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop Recording"
           }
         }
       }
     },
-    "session.prestart.delayLabel": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Start recording after"
+    "session.chargingAlert.message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "For the best nightstand experience and to avoid battery drain, it's recommended to keep your iPhone plugged in during sleep tracking."
           }
         }
       }
     },
-    "session.prestart.delayOff": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Off"
+    "session.chargingAlert.startAnyway" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start Anyway"
           }
         }
       }
     },
-    "session.prestart.tip.phone": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Place your phone on the nightstand"
+    "session.chargingAlert.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone Not Charging"
           }
         }
       }
     },
-    "session.prestart.tip.pluggedIn": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Keep it plugged in"
+    "session.countdown.label" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recording starts in"
           }
         }
       }
     },
-    "session.prestart.tip.silence": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Silence notifications"
+    "session.microphoneAlert.message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SnoreGuard needs microphone access to detect snoring while you sleep. Please enable it in Settings."
           }
         }
       }
     },
-    "session.prestart.title": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ready to Sleep?"
+    "session.microphoneAlert.openSettings" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Settings"
           }
         }
       }
     },
-    "session.recording.eventsCountUpperFormat": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld EVENTS"
+    "session.microphoneAlert.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Microphone Access Required"
           }
         }
       }
     },
-    "session.recording.eventsFormat": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "EVENTS · %lld"
+    "session.prestart.body" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "We'll listen for snoring through the night. Audio stays on your device."
           }
         }
       }
     },
-    "session.recording.statusFormat": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Recording · %@"
+    "session.prestart.delayHelper" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use this if you need time to fall asleep before recording begins."
           }
         }
       }
     },
-    "session.summary.statSnoreTime": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Snore Time"
+    "session.prestart.delayLabel" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start recording after"
           }
         }
       }
     },
-    "session.summary.statSnoring": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Snoring"
+    "session.prestart.delayOff" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Off"
           }
         }
       }
     },
-    "session.summary.title": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "SESSION COMPLETE"
+    "session.prestart.tip.phone" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep your phone on the nightstand or locked."
           }
         }
       }
     },
-    "session.summary.tooShortInfoFormat": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "To generate meaningful sleep analysis, recordings must be at least %lld minutes long."
+    "session.prestart.tip.pluggedIn" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep it plugged in."
           }
         }
       }
     },
-    "session.summary.tooShortMessageFormat": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Recordings under %lld minutes can't be saved. Are you sure you want to stop?"
+    "session.prestart.tip.silence" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Silence notifications"
           }
         }
       }
     },
-    "session.summary.tooShortTitle": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Session Too Short"
+    "session.prestart.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ready to Sleep?"
           }
         }
       }
     },
-    "session.summary.youSleptFormat": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "You slept %@"
+    "session.recording.eventsCountUpperFormat" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld EVENTS"
           }
         }
       }
     },
-    "sessions.calendar.stat.card.label": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "SESSIONS"
+    "session.recording.eventsFormat" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "EVENTS · %lld"
           }
         }
       }
     },
-    "sessions.detail.sessionsCountFormat": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld sessions"
+    "session.recording.statusFormat" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recording · %@"
           }
         }
       }
     },
-    "settings.deleteAll": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Delete All Recordings"
+    "session.summary.statSnoreTime" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snore Time"
           }
         }
       }
     },
-    "settings.deleteAll.confirmMessage": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "This will permanently delete all sleep sessions and snore events. This action cannot be undone."
+    "session.summary.statSnoring" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snoring"
           }
         }
       }
     },
-    "settings.deleteAll.confirmTitle": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Delete All Recordings?"
+    "session.summary.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SESSION COMPLETE"
           }
         }
       }
     },
-    "settings.maxClipLength": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Max clip length"
+    "session.summary.tooShortInfoFormat" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "To generate meaningful sleep analysis, recordings must be at least %lld minutes long."
           }
         }
       }
     },
-    "settings.maxClipLengthTitle": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Max Clip Length"
+    "session.summary.tooShortMessageFormat" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recordings under %lld minutes can't be saved. Are you sure you want to stop?"
           }
         }
       }
     },
-    "settings.minSnoreDuration": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Min snore duration"
+    "session.summary.tooShortTitle" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session Too Short"
           }
         }
       }
     },
-    "settings.rateApp": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rate on App Store"
+    "session.summary.youSleptFormat" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You slept %@"
           }
         }
       }
     },
-    "settings.saveAudioClips": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Save audio clips"
+    "sessions.calendar.stat.card.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SESSIONS"
           }
         }
       }
     },
-    "settings.section.about": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ABOUT"
+    "sessions.detail.sessionsCountFormat" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld sessions"
           }
         }
       }
     },
-    "settings.section.appearance": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "APPEARANCE"
+    "settings.deleteAll" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete All Recordings"
           }
         }
       }
     },
-    "settings.section.data": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "DATA"
+    "settings.deleteAll.confirmMessage" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This will permanently delete all sleep sessions and snore events. This action cannot be undone."
           }
         }
       }
     },
-    "settings.section.detection": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "DETECTION"
+    "settings.deleteAll.confirmTitle" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete All Recordings?"
           }
         }
       }
     },
-    "settings.section.recording": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "RECORDING"
+    "settings.maxClipLength" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Max clip length"
           }
         }
       }
     },
-    "settings.section.watch": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "WATCH"
+    "settings.maxClipLengthTitle" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Max Clip Length"
           }
         }
       }
     },
-    "settings.sensitivity": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sensitivity"
+    "settings.microphoneAccess" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Microphone Access"
           }
         }
       }
     },
-    "settings.sensitivity.high": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "High"
+    "settings.microphoneEnable" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enable"
           }
         }
       }
     },
-    "settings.sensitivity.low": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Low"
+    "settings.microphoneStatusDenied" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Denied"
           }
         }
       }
     },
-    "settings.sensitivity.medium": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Medium"
+    "settings.microphoneStatusGranted" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allowed"
           }
         }
       }
     },
-    "settings.syncHealth": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sync to Apple Health"
+    "settings.microphoneStatusNotDetermined" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not Set"
           }
         }
       }
     },
-    "settings.theme": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Theme"
+    "settings.minSnoreDuration" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Min snore duration"
           }
         }
       }
     },
-    "settings.theme.choose": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Choose Theme"
+    "settings.rateApp" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rate on App Store"
           }
         }
       }
     },
-    "settings.theme.dark": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dark"
+    "settings.saveAudioClips" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save audio clips"
           }
         }
       }
     },
-    "settings.theme.light": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Light"
+    "settings.section.about" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ABOUT"
           }
         }
       }
     },
-    "settings.theme.system": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "System"
+    "settings.section.appearance" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "APPEARANCE"
           }
         }
       }
     },
-    "settings.unit.seconds": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "s"
+    "settings.section.data" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DATA"
           }
         }
       }
     },
-    "settings.unit.seconds.short": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "sec"
+    "settings.section.detection" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DETECTION"
           }
         }
       }
     },
-    "settings.version": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Version"
+    "settings.section.permissions" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PERMISSIONS"
           }
         }
       }
     },
-    "sixty.seconds.soothing.melody.value": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "60 seconds"
+    "settings.section.recording" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RECORDING"
           }
         }
       }
     },
-    "snoring.event.header.player.view": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Snoring Event"
+    "settings.section.watch" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WATCH"
           }
         }
       }
     },
-    "soothing.melody.recording.prestart.view.title": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Soothing melody"
+    "settings.sensitivity" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sensitivity"
           }
         }
       }
     },
-    "soothing.melody.row.helper.text": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Plays a sound when snoring is detected during your session."
+    "settings.sensitivity.high" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "High"
           }
         }
       }
     },
-    "soothing.melody.sheet.desc.section.subtitle": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Always plays from the start."
+    "settings.sensitivity.low" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Low"
           }
         }
       }
     },
-    "soothing.melody.sheet.desc.section.title": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "We'll play a tune for this duration when snoring is detected."
+    "settings.sensitivity.medium" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Medium"
           }
         }
       }
     },
-    "soothing.tune.melody.sheet": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Soothing tune"
+    "settings.syncHealth" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sync to Apple Health"
           }
         }
       }
     },
-    "start.time.event.card": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Started at:"
+    "settings.theme" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Theme"
           }
         }
       }
     },
-    "stats.calendar.intensityLoud": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Loud"
+    "settings.theme.choose" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose Theme"
           }
         }
       }
     },
-    "stats.calendar.intensityQuiet": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Quiet"
+    "settings.theme.dark" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dark"
           }
         }
       }
     },
-    "stats.calendar.legendLight": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Light snoring"
+    "settings.theme.light" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Light"
           }
         }
       }
     },
-    "stats.calendar.legendLoud": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Loud snoring"
+    "settings.theme.system" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "System"
           }
         }
       }
     },
-    "stats.calendar.selectedNightLabel": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "SELECTED NIGHT"
+    "settings.unit.seconds" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "s"
           }
         }
       }
     },
-    "stats.empty.message": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Start a recording to analyze your snoring"
+    "settings.unit.seconds.short" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "sec"
           }
         }
       }
     },
-    "stats.empty.title": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ready to track your sleep?"
+    "settings.version" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Version"
           }
         }
       }
     },
-    "stats.last7Nights.allNights": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ALL NIGHTS"
+    "sixty.seconds.soothing.melody.value" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "60 seconds"
           }
         }
       }
     },
-    "stats.last7Nights.avgSleepScore": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "avg sleep score"
+    "snoring.event.header.player.view" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snoring Event"
           }
         }
       }
     },
-    "stats.last7Nights.avgSnoring": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "AVG SNORING"
+    "soothing.melody.lockscreen.note" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep the app open and your phone unlocked."
           }
         }
       }
     },
-    "stats.last7Nights.best": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "BEST"
+    "soothing.melody.recording.prestart.view.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Soothing melody"
           }
         }
       }
     },
-    "stats.last7Nights.snoringMin": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "SNORING · MIN"
+    "soothing.melody.row.helper.text" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plays a sound when snoring is detected during your session."
           }
         }
       }
     },
-    "stats.last7Nights.tapABar": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "tap a bar"
+    "soothing.melody.sheet.desc.section.subtitle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Always plays from the start."
           }
         }
       }
     },
-    "stats.last7Nights.totalEvents": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "TOTAL EVENTS"
+    "soothing.melody.sheet.desc.section.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "We'll play a tune for this duration when snoring is detected."
           }
         }
       }
     },
-    "stats.last7Nights.worst": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "WORST"
+    "soothing.tune.melody.sheet" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Soothing tune"
           }
         }
       }
     },
-    "stats.miniChart.sleepScoreLabel": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "SLEEP SCORE"
+    "start.time.event.card" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Started at:"
           }
         }
       }
     },
-    "stats.miniChart.today": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Today"
+    "stats.calendar.intensityLoud" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loud"
           }
         }
       }
     },
-    "stats.trends.avgMinFormat": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld min · avg / night"
+    "stats.calendar.intensityQuiet" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quiet"
           }
         }
       }
     },
-    "stats.trends.lastSevenNights": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Last 7 Nights"
+    "stats.calendar.legendLight" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Light snoring"
           }
         }
       }
     },
-    "stats.trends.month": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Month"
+    "stats.calendar.legendLoud" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loud snoring"
           }
         }
       }
     },
-    "stats.trends.seeAll": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "See all"
+    "stats.calendar.selectedNightLabel" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SELECTED NIGHT"
           }
         }
       }
     },
-    "stats.trends.snoringMinutesLabel": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "SNORING MINUTES"
+    "stats.empty.message" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start a recording to analyze your snoring"
           }
         }
       }
     },
-    "stats.trends.thisWeekLabel": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "THIS WEEK"
+    "stats.empty.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ready to track your sleep?"
           }
         }
       }
     },
-    "stats.trends.title": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Trends"
+    "stats.last7Nights.allNights" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ALL NIGHTS"
           }
         }
       }
     },
-    "stats.trends.viewMonth": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "View month >"
+    "stats.last7Nights.avgSleepScore" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "avg sleep score"
           }
         }
       }
     },
-    "stats.trends.week": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Week"
+    "stats.last7Nights.avgSnoring" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AVG SNORING"
           }
         }
       }
     },
-    "stats.trends.statCard.avgScore": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "AVG SCORE"
+    "stats.last7Nights.best" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BEST"
           }
         }
       }
     },
-    "stats.trends.statCard.bestNight": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "BEST NIGHT"
+    "stats.last7Nights.snoringMin" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SNORING · MIN"
           }
         }
       }
     },
-    "stats.trends.statCard.worstNight": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "WORST NIGHT"
+    "stats.last7Nights.tapABar" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "tap a bar"
           }
         }
       }
     },
-    "stats.trends.statCard.totalEvents": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "TOTAL EVENTS"
+    "stats.last7Nights.totalEvents" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TOTAL EVENTS"
           }
         }
       }
     },
-    "stop.record.custom.melody.sheet": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Stop"
+    "stats.last7Nights.worst" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WORST"
           }
         }
       }
     },
-    "stop.soothing.melody.player": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Stop"
+    "stats.miniChart.sleepScoreLabel" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SLEEP SCORE"
           }
         }
       }
     },
-    "tab.media": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Media"
+    "stats.miniChart.today" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Today"
           }
         }
       }
     },
-    "tab.settings": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Settings"
+    "stats.trends.avgMinFormat" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld min · avg / night"
           }
         }
       }
     },
-    "tab.statistics": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Statistics"
+    "stats.trends.lastSevenNights" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last 7 Nights"
           }
         }
       }
     },
-    "thirty.seconds.soothing.melody.value": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "30 seconds"
+    "stats.trends.month" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Month"
           }
         }
       }
     },
-    "unable.to.save.the.session": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Unable to save the session. Please try again."
+    "stats.trends.seeAll" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "See all"
           }
         }
       }
     },
-    "watch.calendar": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Calendar"
+    "stats.trends.snoringMinutesLabel" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SNORING MINUTES"
           }
         }
       }
     },
-    "watch.status.connected": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Connected"
+    "stats.trends.statCard.avgScore" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AVG SCORE"
           }
         }
       }
     },
-    "watch.status.notConnected": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Not Connected"
+    "stats.trends.statCard.bestNight" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BEST NIGHT"
           }
         }
       }
     },
-    "watch.title": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Apple Watch"
+    "stats.trends.statCard.totalEvents" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TOTAL EVENTS"
           }
         }
       }
     },
-    "action.play": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Play"
+    "stats.trends.statCard.worstNight" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WORST NIGHT"
           }
         }
       }
     },
-    "session.chargingAlert.title": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "iPhone Not Charging"
+    "stats.trends.thisWeekLabel" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "THIS WEEK"
           }
         }
       }
     },
-    "session.chargingAlert.message": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "For the best nightstand experience and to avoid battery drain, it's recommended to keep your iPhone plugged in during sleep tracking."
+    "stats.trends.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trends"
           }
         }
       }
     },
-    "session.chargingAlert.startAnyway": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Start Anyway"
+    "stats.trends.viewMonth" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "View month >"
           }
         }
       }
     },
-    "settings.section.permissions": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "PERMISSIONS"
+    "stats.trends.week" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Week"
           }
         }
       }
     },
-    "settings.microphoneAccess": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Microphone Access"
+    "stop.record.custom.melody.sheet" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop"
           }
         }
       }
     },
-    "settings.microphoneStatusGranted": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Allowed"
+    "stop.soothing.melody.player" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop"
           }
         }
       }
     },
-    "settings.microphoneStatusDenied": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Denied"
+    "tab.media" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Media"
           }
         }
       }
     },
-    "settings.microphoneStatusNotDetermined": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Not Set"
+    "tab.settings" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Settings"
           }
         }
       }
     },
-    "settings.microphoneEnable": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Enable"
+    "tab.statistics" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Statistics"
+          }
+        }
+      }
+    },
+    "thirty.seconds.soothing.melody.value" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "30 seconds"
+          }
+        }
+      }
+    },
+    "unable.to.save.the.session" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unable to save the session. Please try again."
+          }
+        }
+      }
+    },
+    "watch.calendar" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calendar"
+          }
+        }
+      }
+    },
+    "watch.status.connected" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connected"
+          }
+        }
+      }
+    },
+    "watch.status.notConnected" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not Connected"
+          }
+        }
+      }
+    },
+    "watch.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Watch"
           }
         }
       }
     }
   },
-  "version": "1.0"
+  "version" : "1.0"
 }

@@ -16,6 +16,7 @@ public final class SoothingMelodyPlayer: NSObject {
 
   private var audioPlayer: AVAudioPlayer?
   private var stopTimer: Timer?
+  private var nudgeTimer: Timer?
 
   private override init() {
     super.init()
@@ -77,15 +78,16 @@ public final class SoothingMelodyPlayer: NSObject {
 
     print("[SoothingMelodyPlayer] Found sound at \(fileURL.path)")
 
+    NotificationCenter.default.post(name: .soothingMelodyWillPlay, object: nil)
+
     do {
       let session = AVAudioSession.sharedInstance()
+      try session.setCategory(.playback, mode: .default)
       try session.setActive(true)
-      print("[SoothingMelodyPlayer] Audio session activated")
-      try session.overrideOutputAudioPort(.speaker)
-      print("[SoothingMelodyPlayer] Output port overridden to speaker")
+      print("[SoothingMelodyPlayer] Audio session activated with .playback")
 
       let player = try AVAudioPlayer(contentsOf: fileURL)
-      player.volume = 0.6
+      player.volume = 1.0
       player.numberOfLoops = mode == .always ? -1 : 0
       player.delegate = self
       audioPlayer = player
@@ -94,6 +96,7 @@ public final class SoothingMelodyPlayer: NSObject {
 
       guard player.prepareToPlay() else {
         print("[SoothingMelodyPlayer] prepareToPlay() returned false")
+        NotificationCenter.default.post(name: .soothingMelodyDidStop, object: nil)
         return
       }
       print("[SoothingMelodyPlayer] prepareToPlay() succeeded")
@@ -101,11 +104,18 @@ public final class SoothingMelodyPlayer: NSObject {
       let didPlay = player.play()
       print("[SoothingMelodyPlayer] play() returned \(didPlay)")
       guard didPlay else {
+        NotificationCenter.default.post(name: .soothingMelodyDidStop, object: nil)
         return
       }
 
       isPlaying = true
       print("[SoothingMelodyPlayer] ✅ Started playing '\(melody.name)' for \(mode.displayLabel)")
+
+      HapticManager.shared.prepare()
+      HapticManager.shared.nudge()
+      nudgeTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { _ in
+        HapticManager.shared.nudge()
+      }
 
       if mode != .always {
         let duration = mode.duration
@@ -117,6 +127,7 @@ public final class SoothingMelodyPlayer: NSObject {
       }
     } catch {
       print("[SoothingMelodyPlayer] ❌ Failed to play: \(error)")
+      NotificationCenter.default.post(name: .soothingMelodyDidStop, object: nil)
     }
   }
 
@@ -128,9 +139,13 @@ public final class SoothingMelodyPlayer: NSObject {
     audioPlayer = nil
     stopTimer?.invalidate()
     stopTimer = nil
+    nudgeTimer?.invalidate()
+    nudgeTimer = nil
     isPlaying = false
     currentMelodyName = nil
     print("[SoothingMelodyPlayer] ✅ Stopped — isPlaying now \(isPlaying)")
+
+    NotificationCenter.default.post(name: .soothingMelodyDidStop, object: nil)
   }
 
   /// Stops the current melody and prevents any further playback during this recording session.

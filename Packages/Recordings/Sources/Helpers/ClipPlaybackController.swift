@@ -60,19 +60,34 @@ public final class ClipPlaybackController {
     // Lazy: don't create AVAudioPlayer until user taps play.
   }
 
+  public var hasAudioForCurrentEvent: Bool {
+    guard let event = currentEvent else { return false }
+    return AudioFileURLResolver.resolve(event.audioFileURL) != nil
+  }
+
   public func play() {
     if audioPlayer == nil {
       setupPlayerForCurrentEvent()
     }
-    guard let player = audioPlayer else { return }
-    do {
-      try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
-      try AVAudioSession.sharedInstance().setActive(true)
-    } catch {
-      // Continue anyway; playback may still work
+    guard let player = audioPlayer else {
+      print("[ClipPlaybackController] Cannot play: audioPlayer is nil (missing file for event \(currentEvent?.id.uuidString ?? "nil"))")
+      return
     }
-    guard player.play() else { return }
+    do {
+      let session = AVAudioSession.sharedInstance()
+      // Deactivate first to clear any stale simulator session state
+      try? session.setActive(false)
+      try session.setCategory(.playback, mode: .default)
+      try session.setActive(true)
+    } catch {
+      print("[ClipPlaybackController] Audio session setup failed: \(error)")
+    }
+    guard player.play() else {
+      print("[ClipPlaybackController] player.play() returned false")
+      return
+    }
     isPlaying = true
+    print("[ClipPlaybackController] Playback started for event \(currentEvent?.id.uuidString ?? "nil")")
     startProgressTimer()
   }
 
@@ -167,14 +182,32 @@ public final class ClipPlaybackController {
     notificationObserver = nil
     audioPlayer = nil
 
-    guard let event = currentEvent,
-          let url = AudioFileURLResolver.resolve(event.audioFileURL) else { return }
+    guard let event = currentEvent else {
+      print("[ClipPlaybackController] setupPlayer: no current event")
+      return
+    }
+    guard let url = AudioFileURLResolver.resolve(event.audioFileURL) else {
+      print("[ClipPlaybackController] setupPlayer: no audio file for event \(event.id)")
+      return
+    }
+
+    // Configure audio session BEFORE creating AVAudioPlayer.
+    // On Simulator, a stale .playAndRecord session can prevent playback.
+    do {
+      let session = AVAudioSession.sharedInstance()
+      try? session.setActive(false)
+      try session.setCategory(.playback, mode: .default)
+      try session.setActive(true)
+    } catch {
+      print("[ClipPlaybackController] Audio session setup failed: \(error)")
+    }
 
     do {
       let player = try AVAudioPlayer(contentsOf: url)
       player.prepareToPlay()
       audioPlayer = player
       currentClipTime = 0
+      print("[ClipPlaybackController] Player ready for event \(event.id), file: \(url.lastPathComponent), duration: \(player.duration)s")
 
       notificationObserver = NotificationCenter.default.addObserver(
         forName: AVAudioSession.interruptionNotification,
@@ -185,6 +218,7 @@ public final class ClipPlaybackController {
         self?.stopProgressTimer()
       }
     } catch {
+      print("[ClipPlaybackController] Failed to create AVAudioPlayer for \(url.lastPathComponent): \(error)")
       audioPlayer = nil
     }
   }
