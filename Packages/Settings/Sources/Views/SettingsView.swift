@@ -27,6 +27,7 @@ public struct SettingsView: View {
 
       ScrollView {
         VStack(spacing: 24) {
+          SettingsPermissionsSection()
           SettingsDetectionSection()
           SettingsRecordingSection(onShowClipLengthPicker: { showClipLengthPicker = true })
           SettingsAppearanceSection(onShowThemePicker: { showThemePicker = true })
