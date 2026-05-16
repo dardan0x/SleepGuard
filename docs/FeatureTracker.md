@@ -59,6 +59,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-05-16 | Mic permission + charging gates | Completed | RecordingPrestartView and RecordingCountdownView now enforce microphone permission (requests if undetermined, alerts with Settings link if denied) and require iPhone charging (alerts with "Start Anyway" override) before starting a session |
 | 2026-05-16 | Melody polish + Event Player fixes | Completed | Lock-screen note; 4s min melody duration; AVAudioEngine recreation fix for recording resume; simulator setActive(false) before playback; missing audio fallback (noAudioView); waveform skeleton loading + Task.detached generation |
 | 2026-05-14 | Soothing Melody Sheet + Picker Sheets | Completed | RecordingPrestartView actionRow with dynamic value; SoothingMelodySheet with wheel picker (Never/Always/5s/15s/30s/60s), song row, status badge; MelodyPickerSheet with melody 9–17 selection; Melody model + UserPreferences settings; tipsSection gradient glow + stroke; SheetHandle + SheetNavHeader components |
 | 2026-05-14 | Soothing Melody Audio Playback | Completed | Wired 11 real MP3s from `sounds/` bundle; SoothingMelodyPlayer (Env) with AVAudioPlayer, auto-stop timer, re-trigger guard; SessionManager triggers play on new snore event; BedsideClockView overlay with pulsing icon + Stop button; detection continues during playback; builds clean |
