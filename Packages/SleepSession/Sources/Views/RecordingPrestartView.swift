@@ -15,6 +15,7 @@ struct RecordingPrestartView: View {
     private let delayOptions = [0, 15, 30, 45, 60]
     @State private var showSoothingMelodySheet = false
     @State private var showChargingAlert = false
+    @State private var showMicrophoneAlert = false
 
     var body: some View {
         ScrollView {
@@ -23,18 +24,19 @@ struct RecordingPrestartView: View {
                     .padding(.top, 24)
                 
                 headlineSection
-                    .padding(.top, 24)
+                    .padding(.top, 14)
 
                 tipsSection
-                    .padding(.top, 24)
+                    .padding(.top, 12)
 
                 VStack(spacing: 12) {
                     VStack(alignment: .leading, spacing: 8) {
                         delaySection
-                        actionRow(
+                        soothingMelodyRow(
                             icon: "timer",
                             title: Strings.soothingMelodyRecordingPrestartViewTitle,
-                            value: soothingMelodyValue
+                            value: soothingMelodyValue,
+                            subtitle: userPreferences.soothingMelodyMode != .never ? Strings.soothingMelodyLockscreenNote : nil
                         ) {
                             showSoothingMelodySheet = true
                         }
@@ -45,10 +47,13 @@ struct RecordingPrestartView: View {
                 .padding(.top, 24)
 
                 StartRecordingButton(height: 56) {
-                    Task {
+                    Task { @MainActor in
                         if !audioRecorder.hasPermission {
                             let granted = await audioRecorder.requestPermission()
-                            guard granted else { return }
+                            guard granted else {
+                                showMicrophoneAlert = true
+                                return
+                            }
                         }
                         guard isCharging else {
                             showChargingAlert = true
@@ -57,7 +62,7 @@ struct RecordingPrestartView: View {
                         beginSession()
                     }
                 }
-                .padding(.top, 10)
+//                .padding(.top, 10)
 
                 Button {
                     routerPath.navigateBack()
@@ -85,6 +90,16 @@ struct RecordingPrestartView: View {
             }
         } message: {
             Text(Strings.sessionChargingAlertMessage)
+        }
+        .alert(Strings.sessionMicrophoneAlertTitle, isPresented: $showMicrophoneAlert) {
+            Button(Strings.actionCancel, role: .cancel) {}
+            Button(Strings.sessionMicrophoneAlertOpenSettings) {
+                if let url = URL(string: UIApplication.openSettingsURLString) {
+                    UIApplication.shared.open(url)
+                }
+            }
+        } message: {
+            Text(Strings.sessionMicrophoneAlertMessage)
         }
     }
 
@@ -214,9 +229,9 @@ struct RecordingPrestartView: View {
         .padding(.vertical, 14)
     }
 
-    private func actionRow(icon: String, title: String, value: String, action: @escaping () -> Void) -> some View {
+    private func soothingMelodyRow(icon: String, title: String, value: String, subtitle: String? = nil, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            VStack(spacing: 8) {
+            VStack(spacing: 4) {
                 HStack(spacing: 12) {
                     Image(systemName: icon)
                         .font(.system(size: 18))
@@ -237,9 +252,22 @@ struct RecordingPrestartView: View {
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundStyle(theme.textTertiary)
                 }
+
+                if let subtitle {
+                    HStack(spacing: 6) {
+                        Image(systemName: "lock.open.fill")
+                            .font(.system(size: 12))
+                        Text(subtitle)
+                            .font(.system(size: 13))
+                        Spacer()
+                    }
+                    .foregroundStyle(theme.textTertiary)
+                    .padding(.top, 4)
+                    .padding(.leading, 6)
+                }
             }
             .padding(.horizontal, 16)
-            .padding(.vertical, 14)
+            .padding(.vertical, subtitle == nil ? 14 : 12)
             .background(theme.bgCard)
             .cornerRadius(theme.radiusCard)
         }

@@ -1,4 +1,5 @@
 import AVFoundation
+import Models
 import Observation
 
 public enum RecordingError: Error {
@@ -33,6 +34,7 @@ public final class AudioRecorder {
   private let fftAnalyzer = FFTAnalyzer(bufferSize: 1024)
   private let soundAnalyzer = SoundAnalysisDetector.shared
   private var cumulativeFramePosition: AVAudioFramePosition = 0
+  private var recordingFormat: AVAudioFormat?
 
   private init() {
     checkPermission()
@@ -52,6 +54,30 @@ public final class AudioRecorder {
       name: .AVAudioEngineConfigurationChange,
       object: nil
     )
+    NotificationCenter.default.addObserver(
+      self,
+      selector: #selector(handleMelodyWillPlay),
+      name: .soothingMelodyWillPlay,
+      object: nil
+    )
+    NotificationCenter.default.addObserver(
+      self,
+      selector: #selector(handleMelodyDidStop),
+      name: .soothingMelodyDidStop,
+      object: nil
+    )
+  }
+
+  @objc private func handleMelodyWillPlay() {
+    pauseRecording()
+  }
+
+  @objc private func handleMelodyDidStop() {
+    do {
+      try resumeRecording()
+    } catch {
+      print("[AudioRecorder] resumeRecording() failed after melody: \(error)")
+    }
   }
 
   @objc private func handleInterruption(_ notification: Notification) {
@@ -167,8 +193,77 @@ public final class AudioRecorder {
 
     try engine.start()
     audioEngine = engine
+    recordingFormat = format
     soundAnalyzer.startAnalyzing(format: format)
     isRecording = true
+  }
+
+  public func pauseRecording() {
+    guard isRecording, let engine = audioEngine else { return }
+    soundAnalyzer.stopAnalyzing()
+    engine.stop()
+    // Remove tap from the EQ node so the engine can be safely deallocated.
+    // AVAudioEngine cannot be reliably restarted after stop() when a tap is installed.
+    for node in engine.attachedNodes {
+      if let eq = node as? AVAudioUnitEQ {
+        eq.removeTap(onBus: 0)
+        break
+      }
+    }
+    audioEngine = nil
+    // audioFile is intentionally kept alive so resumeRecording() can continue appending.
+  }
+
+  public func resumeRecording() throws {
+    guard isRecording else { return }
+
+    let session = AVAudioSession.sharedInstance()
+    try session.setCategory(.playAndRecord, mode: .measurement, options: [.defaultToSpeaker, .allowBluetooth])
+    try session.setActive(true)
+
+    let engine = AVAudioEngine()
+    let input = engine.inputNode
+    let format = input.outputFormat(forBus: 0)
+
+    guard format.channelCount > 0, format.sampleRate > 0 else {
+      throw RecordingError.invalidAudioFormat
+    }
+
+    let eq = AVAudioUnitEQ(numberOfBands: 1)
+    let band = eq.bands[0]
+    band.filterType = .bandPass
+    band.frequency = 300
+    band.bandwidth = 2.5
+    band.gain = 0
+    band.bypass = false
+    engine.attach(eq)
+    engine.connect(input, to: eq, format: format)
+    engine.connect(eq, to: engine.mainMixerNode, format: format)
+    engine.mainMixerNode.volume = 0
+
+    eq.installTap(onBus: 0, bufferSize: 1024, format: format) { [weak self] buffer, _ in
+      guard let self else { return }
+      let db = self.calculateDB(from: buffer)
+      let features = self.fftAnalyzer.analyze(buffer: buffer, sampleRate: format.sampleRate)
+      self.soundAnalyzer.analyze(buffer: buffer, at: self.cumulativeFramePosition)
+      self.cumulativeFramePosition += AVAudioFramePosition(buffer.frameLength)
+      if let audioFile = self.audioFile {
+        do {
+          try audioFile.write(from: buffer)
+        } catch {
+          print("[AudioRecorder] Failed to write audio buffer: \(error)")
+        }
+      }
+      Task { @MainActor in
+        self.currentDB = db
+        self.spectralScore = features.spectralScore
+      }
+    }
+
+    try engine.start()
+    audioEngine = engine
+    recordingFormat = format
+    soundAnalyzer.startAnalyzing(format: format)
   }
 
   public func stopRecording() {

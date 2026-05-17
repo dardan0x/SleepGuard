@@ -18,8 +18,10 @@ struct EventPlayerView: View {
   let onSkipForward: () -> Void
   let onScrub: (Double) -> Void
   let isReady: Bool
+  let isLoadingWaveform: Bool
 
   @Environment(Theme.self) private var theme
+  @State private var pulsePhase = false
 
   var body: some View {
     ZStack {
@@ -35,6 +37,15 @@ struct EventPlayerView: View {
 
       if !isReady {
         loadingOverlay
+      }
+    }
+    .task(id: isLoadingWaveform) {
+      guard isLoadingWaveform else { return }
+      while !Task.isCancelled {
+        withAnimation(.easeInOut(duration: 0.7)) {
+          pulsePhase.toggle()
+        }
+        try? await Task.sleep(for: .seconds(0.7))
       }
     }
   }
@@ -108,25 +119,30 @@ struct EventPlayerView: View {
       // Bar waveform with progress indicator
       GeometryReader { geometry in
         ZStack(alignment: .leading) {
-          HStack(alignment: .center, spacing: 2) {
-            ForEach(0..<barCount, id: \.self) { index in
-              let isPlayed = Double(index) / Double(barCount) <= progress
-              waveformBar(
-                height: barHeight(at: index, maxHeight: geometry.size.height),
-                isPlayed: isPlayed
-              )
+          if isLoadingWaveform {
+            waveformPlaceholder(maxHeight: geometry.size.height)
+          } else {
+            HStack(alignment: .center, spacing: 2) {
+              ForEach(0..<barCount, id: \.self) { index in
+                let isPlayed = Double(index) / Double(barCount) <= progress
+                waveformBar(
+                  height: barHeight(at: index, maxHeight: geometry.size.height),
+                  isPlayed: isPlayed
+                )
+              }
             }
-          }
-          .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-          // Current time indicator line
-          Rectangle()
-            .fill(Color.white)
-            .frame(width: 2, height: geometry.size.height + 8)
-            .offset(x: CGFloat(progress) * geometry.size.width - 1, y: 0)
+            // Current time indicator line
+            Rectangle()
+              .fill(Color.white)
+              .frame(width: 2, height: geometry.size.height + 8)
+              .offset(x: CGFloat(progress) * geometry.size.width - 1, y: 0)
+          }
         }
         .contentShape(Rectangle())
         .onTapGesture { location in
+          guard !isLoadingWaveform else { return }
           let relative = Double(location.x / geometry.size.width)
           onScrub(relative)
         }
@@ -184,6 +200,19 @@ struct EventPlayerView: View {
     guard waveformSamples.indices.contains(sampleIndex) else { return 2 }
     let sample = waveformSamples[sampleIndex]
     return max(CGFloat(sample) * maxHeight * 0.9, 3)
+  }
+
+  private func waveformPlaceholder(maxHeight: CGFloat) -> some View {
+    HStack(alignment: .center, spacing: 2) {
+      ForEach(0..<barCount, id: \.self) { index in
+        // Use a deterministic pseudo-random height based on index so bars don't flicker
+        let pseudoRandom = CGFloat((index * 7 + 13) % 17) / 16.0
+        let height = max(pseudoRandom * maxHeight * 0.55, 4)
+        waveformBar(height: height, isPlayed: false)
+      }
+    }
+    .frame(maxWidth: .infinity, maxHeight: .infinity)
+    .opacity(pulsePhase ? 0.25 : 0.55)
   }
 
   private func waveformBar(height: CGFloat, isPlayed: Bool) -> some View {

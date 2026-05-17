@@ -1,3 +1,4 @@
+import AudioEngine
 import SwiftUI
 import Env
 import DesignSystem
@@ -8,6 +9,7 @@ struct RecordingCountdownView: View {
   @Environment(SessionManager.self) private var sessionManager
   @Environment(Theme.self) private var theme
   @State private var showChargingAlert = false
+  @State private var showMicrophoneAlert = false
 
   var body: some View {
     ZStack {
@@ -51,11 +53,20 @@ struct RecordingCountdownView: View {
           }
 
           Button {
-            guard isCharging else {
-              showChargingAlert = true
-              return
+            Task {
+              if !AudioRecorder.shared.hasPermission {
+                let granted = await AudioRecorder.shared.requestPermission()
+                guard granted else {
+                  showMicrophoneAlert = true
+                  return
+                }
+              }
+              guard isCharging else {
+                showChargingAlert = true
+                return
+              }
+              startSession()
             }
-            startSession()
           } label: {
             Text(Strings.actionStartNow)
               .font(.system(size: 17, weight: .semibold))
@@ -82,6 +93,16 @@ struct RecordingCountdownView: View {
       }
     } message: {
       Text(Strings.sessionChargingAlertMessage)
+    }
+    .alert(Strings.sessionMicrophoneAlertTitle, isPresented: $showMicrophoneAlert) {
+      Button(Strings.actionCancel, role: .cancel) {}
+      Button(Strings.sessionMicrophoneAlertOpenSettings) {
+        if let url = URL(string: UIApplication.openSettingsURLString) {
+          UIApplication.shared.open(url)
+        }
+      }
+    } message: {
+      Text(Strings.sessionMicrophoneAlertMessage)
     }
   }
 

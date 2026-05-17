@@ -32,12 +32,19 @@ public final class SessionManager {
     private var activeEventPeakDB: Double = 0
     private var lastSnoringSampleTime: Date?
     private let eventGapThreshold: TimeInterval = 3.0
-    private let melodyAutoStopThreshold: TimeInterval = 4.0
-
     /// Require 3 consecutive snoring samples (≈150 ms at 20 Hz) before starting an event.
     /// Filters out brief transient sounds (bed creaks, taps, notifications).
     private var consecutiveSnoreSamples: Int = 0
     private let requiredConsecutiveSamples: Int = 3
+
+    /// Require 3 consecutive non-snoring samples before stopping the melody.
+    /// Keeps melody playing through brief breathing gaps.
+    private var consecutiveNonSnoreSamples: Int = 0
+    private let requiredNonSnoreSamplesToStop: Int = 3
+
+    /// Minimum time the soothing melody must play before it can be stopped by non-snore detection.
+    private let melodyMinPlayDuration: TimeInterval = 4.0
+    private var melodyStartTime: Date?
 
     // Burst tracking: continuous snoring segments within the active event
     private var activeBurstStart: Date?
@@ -259,6 +266,7 @@ public final class SessionManager {
         // Handle event tracking with debounce gap + per-burst tracking
         if state != .none {
             consecutiveSnoreSamples += 1
+            consecutiveNonSnoreSamples = 0
             lastSnoringSampleTime = now
             guard consecutiveSnoreSamples >= requiredConsecutiveSamples else {
                 // Not yet sustained enough to start/extend an event
@@ -274,6 +282,9 @@ public final class SessionManager {
                 activeEventIntensity = intensity(from: state)
                 activeBurstStart = activeEventStart
                 print("[SessionManager] 🔔 New snore event started, calling playIfNeeded()")
+                if !soothingMelodyPlayer.isPlaying {
+                    melodyStartTime = now
+                }
                 soothingMelodyPlayer.playIfNeeded()
             } else {
                 // Event already active
@@ -293,6 +304,7 @@ public final class SessionManager {
             }
         } else {
             consecutiveSnoreSamples = 0
+            consecutiveNonSnoreSamples += 1
             // Silence — close current burst if open
             if let burstStart = activeBurstStart {
                 completedBursts.append((start: burstStart, end: now))
@@ -307,13 +319,19 @@ public final class SessionManager {
                 finalizeActiveEvent()
             }
 
-            // Auto-stop soothing melody if no snore detected for the threshold duration
-            if let lastSnore = lastSnoringSampleTime,
-               now.timeIntervalSince(lastSnore) >= melodyAutoStopThreshold,
+            // Stop melody when sustained non-snore is detected (but respect minimum play duration)
+            if consecutiveNonSnoreSamples >= requiredNonSnoreSamplesToStop,
                soothingMelodyPlayer.isPlaying
             {
-                print("[SessionManager] No snore for \(melodyAutoStopThreshold)s — auto-stopping melody")
+                let minDurationMet = melodyStartTime.map { now.timeIntervalSince($0) >= melodyMinPlayDuration } ?? true
+                guard minDurationMet else {
+                    print("[SessionManager] Sustained non-snore detected but melody still within minimum play duration — keeping playing")
+                    return
+                }
+                print("[SessionManager] Sustained non-snore — stopping melody")
                 soothingMelodyPlayer.stop()
+                consecutiveNonSnoreSamples = 0
+                melodyStartTime = nil
             }
         }
 
@@ -338,6 +356,8 @@ public final class SessionManager {
         lastSnoringSampleTime = nil
         activeBurstStart = nil
         consecutiveSnoreSamples = 0
+        consecutiveNonSnoreSamples = 0
+        melodyStartTime = nil
         completedBursts.removeAll(keepingCapacity: false)
     }
 

@@ -218,8 +218,12 @@ struct MelodyPickerSheet: View {
     guard let fileURL = url else { return }
 
     do {
+      let session = AVAudioSession.sharedInstance()
+      try session.setCategory(.playback, mode: .default)
+      try session.setActive(true)
+
       let player = try AVAudioPlayer(contentsOf: fileURL)
-      player.volume = 0.5
+      player.volume = 0.8
       previewPlayer = player
       previewingMelodyID = melody.id
 

@@ -2692,3 +2692,53 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 
 ### Open Questions
 - On physical devices, verify that `batteryState` returns `.charging` or `.full` when plugged in. If any device returns `.unknown` while charging, the alert logic may need adjustment.
+
+
+---
+
+## 2026-05-16 — Session 46: Soothing Melody Polish + Event Player Fixes
+
+### Completed
+- **Lock-screen note for soothing melody**: Added contextual subtitle inside `soothingMelodyRow` in `RecordingPrestartView` using `lock.open.fill` icon, displayed only when melody mode != `.never`. Clarifies that the lock screen must remain visible for the melody to trigger.
+- **4-second minimum melody play duration**: Added `melodyMinPlayDuration = 4.0` and `melodyStartTime` tracking in `SessionManager`. Melody now continues playing until at least 4 seconds have elapsed since start, even if non-snore is detected immediately. Prevents stuttery on/off behavior for very short snore bursts.
+- **Audio recording resume failure fix**: Root cause was `AVAudioEngine` cannot be reliably restarted after `stop()` with an input tap installed. Fixed by fully recreating the engine in `resumeRecording()` instead of restarting the old one. `pauseRecording()` now removes the tap and nils `audioEngine`. Kept `setCategory(.playback)` in `SoothingMelodyPlayer` for maximum volume.
+- **Event Player simulator playback failure**: iOS Simulator requires `setActive(false)` before switching from `.playAndRecord` to `.playback`. Added deactivation step in `ClipPlaybackController` and `PlayerSheetView` legacy playback paths.
+- **Event Player missing audio handling**: Added `hasAudioForCurrentEvent` to `ClipPlaybackController`, `sessionAudioURL` fallback helper (`audioFileURL` → `rawAudioFileURL`), and `noAudioView` UI with localized strings. Prevents crash when clip extraction hasn't completed or file is missing.
+- **Waveform loading UX**: Added `isWaveformLoading` state, skeleton placeholder bars with pulse animation in `EventPlayerView`, and moved `WaveformGenerator.generateSamples` to `Task.detached` so the main thread isn't blocked on long clips.
+
+### Technical Details
+- `AVAudioEngine` restart bug: Apple docs state `stop()` invalidates the engine's running state but leaves nodes attached; a subsequent `start()` often fails when an input-node tap is present. The robust fix is `engine = nil` → `engine = AVAudioEngine()` → rebuild chain → `start()`.
+- `Task.detached(priority: .userInitiated)` for waveform generation prevents the UI from freezing when generating samples from large `.caf` files.
+- Skeleton placeholder uses deterministic pseudo-random bar heights (`(index * 7 + 13) % 17`) so bars don't flicker during pulse animation. Opacity pulses between 0.25 and 0.55.
+- `pulsePhase` animation runs in a `.task(id: isLoadingWaveform)` loop, auto-cancelled when loading completes.
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/SleepSession/Sources/Views/RecordingPrestartView.swift` | +18 | `soothingMelodyRow` accepts optional `subtitle`; shows lock icon + note when melody enabled |
+| `Packages/Env/Sources/Services/SessionManager.swift` | +8 | `melodyMinPlayDuration`, `melodyStartTime`, min-duration gate before stopping melody |
+| `Packages/AudioEngine/Sources/Engine/AudioRecorder.swift` | +18/-4 | `pauseRecording()` nils engine + removes tap; `resumeRecording()` creates fresh `AVAudioEngine` |
+| `Packages/Env/Sources/Services/SoothingMelodyPlayer.swift` | +1 | `setActive(false)` before category switch (simulator fix) |
+| `Packages/Recordings/Sources/Helpers/ClipPlaybackController.swift` | +6 | `hasAudioForCurrentEvent` computed property; `setActive(false)` before playback |
+| `Packages/Recordings/Sources/Views/PlayerSheetView.swift` | +35/-5 | `isLoadingWaveform` state; `sessionAudioURL` fallback; `noAudioView`; `Task.detached` waveform gen |
+| `Packages/Recordings/Sources/Views/EventPlayerView.swift` | +22/-3 | `isLoadingWaveform` parameter; `waveformPlaceholder` with pulse animation; scrub disabled while loading |
+| `Packages/DesignSystem/Sources/Resources/Localizable.xcstrings` | +12 | `soothing.melody.lockscreen.note`, `event.player.noAudio.title`, `event.player.noAudio.description` |
+| `Packages/DesignSystem/Sources/Strings.swift` | — | Regenerated with new keys |
+
+### Build Status
+- **BUILD NOT VERIFIED** — No Xcode.app installed in build environment (only CommandLineTools). Code reviewed for syntax correctness.
+
+### Git Handoff
+- **Suggested branch**: `feature/melody-polish-event-player-fixes`
+- **Suggested commit**: `Soothing Melody polish + Event Player fixes`
+  - Lock-screen requirement note in RecordingPrestartView
+  - 4s minimum melody duration to prevent stutter
+  - AVAudioEngine recreation fix for recording resume
+  - Simulator audio session deactivation before playback
+  - Missing audio fallback with noAudioView
+  - Waveform skeleton loading + off-main-thread generation
+
+### Open Questions
+- Verify `AVAudioEngine` recreation approach on physical devices — any latency introduced by rebuilding the engine chain?
+- Should the 4s minimum melody duration be user-configurable in Settings?
+

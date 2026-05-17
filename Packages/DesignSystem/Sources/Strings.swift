@@ -25,6 +25,8 @@ public enum Strings {
   public static var durationPickerTitle: String { String(localized: "duration.picker.title", bundle: .module) }
   public static var eventHeaderSectionTotalEvents: String { String(localized: "event.header.section.totalEvents", bundle: .module) }
   public static var eventPlayerNavigationTitle: String { String(localized: "event.player.navigation.title", bundle: .module) }
+  public static var eventPlayerNoAudioDescription: String { String(localized: "event.player.noAudio.description", bundle: .module) }
+  public static var eventPlayerNoAudioTitle: String { String(localized: "event.player.noAudio.title", bundle: .module) }
   public static var eventsHourPdfGenerator: String { String(localized: "events.hour.pdf.generator", bundle: .module) }
   public static var fifteenSecondsSoothingMelodyValueFormat: String { String(localized: "fifteen.seconds.soothing.melody.value", bundle: .module) }
   public static var lastNightStatisticsLoadedView: String { String(localized: "last.night.statistics.loaded.view", bundle: .module) }
@@ -105,6 +107,9 @@ public enum Strings {
   public static var sessionChargingAlertStartAnyway: String { String(localized: "session.chargingAlert.startAnyway", bundle: .module) }
   public static var sessionChargingAlertTitle: String { String(localized: "session.chargingAlert.title", bundle: .module) }
   public static var sessionCountdownLabel: String { String(localized: "session.countdown.label", bundle: .module) }
+  public static var sessionMicrophoneAlertMessage: String { String(localized: "session.microphoneAlert.message", bundle: .module) }
+  public static var sessionMicrophoneAlertOpenSettings: String { String(localized: "session.microphoneAlert.openSettings", bundle: .module) }
+  public static var sessionMicrophoneAlertTitle: String { String(localized: "session.microphoneAlert.title", bundle: .module) }
   public static var sessionPrestartBody: String { String(localized: "session.prestart.body", bundle: .module) }
   public static var sessionPrestartDelayHelper: String { String(localized: "session.prestart.delayHelper", bundle: .module) }
   public static var sessionPrestartDelayLabel: String { String(localized: "session.prestart.delayLabel", bundle: .module) }
@@ -160,6 +165,7 @@ public enum Strings {
   public static var settingsVersion: String { String(localized: "settings.version", bundle: .module) }
   public static var sixtySecondsSoothingMelodyValueFormat: String { String(localized: "sixty.seconds.soothing.melody.value", bundle: .module) }
   public static var snoringEventHeaderPlayerView: String { String(localized: "snoring.event.header.player.view", bundle: .module) }
+  public static var soothingMelodyLockscreenNote: String { String(localized: "soothing.melody.lockscreen.note", bundle: .module) }
   public static var soothingMelodyRecordingPrestartViewTitle: String { String(localized: "soothing.melody.recording.prestart.view.title", bundle: .module) }
   public static var soothingMelodyRowHelperText: String { String(localized: "soothing.melody.row.helper.text", bundle: .module) }
   public static var soothingMelodySheetDescSectionSubtitle: String { String(localized: "soothing.melody.sheet.desc.section.subtitle", bundle: .module) }
