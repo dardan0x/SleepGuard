@@ -15,7 +15,6 @@ public struct SettingsView: View {
 
   @State private var showDeleteConfirmation = false
   @State private var showThemePicker = false
-  @State private var showClipLengthPicker = false
 
   public init() {}
 
@@ -28,9 +27,7 @@ public struct SettingsView: View {
       ScrollView {
         VStack(spacing: 24) {
           SettingsPermissionsSection()
-          SettingsDetectionSection()
-          SettingsRecordingSection(onShowClipLengthPicker: { showClipLengthPicker = true })
-          SettingsAppearanceSection(onShowThemePicker: { showThemePicker = true })
+          SettingsAppearanceSection()
           SettingsWatchSection()
           SettingsDataSection(onShowDeleteConfirmation: { showDeleteConfirmation = true })
           SettingsAboutSection(onRateApp: rateApp)
@@ -45,20 +42,6 @@ public struct SettingsView: View {
     .scrollContentBackground(.hidden)
     #endif
     .toolbar(.hidden, for: .navigationBar)
-    .confirmationDialog(Strings.settingsThemeChoose, isPresented: $showThemePicker, titleVisibility: .visible) {
-      ForEach(UserPreferences.AppearanceSetting.allCases, id: \.self) { option in
-        Button(option.displayName) {
-          userPreferences.appearance = option
-        }
-      }
-    }
-    .confirmationDialog(Strings.settingsMaxClipLengthTitle, isPresented: $showClipLengthPicker, titleVisibility: .visible) {
-      ForEach([15.0, 30.0, 60.0], id: \.self) { length in
-        Button(String(format: "%lld %@", Int(length), Strings.settingsUnitSeconds)) {
-          userPreferences.maxClipLength = length
-        }
-      }
-    }
     .alert(Strings.settingsDeleteAll, isPresented: $showDeleteConfirmation) {
       Button(Strings.actionCancel, role: .cancel) {}
       Button(Strings.actionDeleteAll, role: .destructive) {
@@ -111,16 +94,6 @@ public struct SettingsView: View {
 }
 
 // MARK: - Display Helpers
-
-extension UserPreferences.DetectionSensitivity {
-  var displayName: String {
-    switch self {
-    case .low: Strings.settingsSensitivityLow
-    case .medium: Strings.settingsSensitivityMedium
-    case .high: Strings.settingsSensitivityHigh
-    }
-  }
-}
 
 extension UserPreferences.AppearanceSetting {
   var displayName: String {

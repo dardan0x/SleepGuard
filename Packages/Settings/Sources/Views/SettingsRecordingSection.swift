@@ -2,52 +2,14 @@ import SwiftUI
 import Env
 import DesignSystem
 
+// REMOVED: Save Audio Clips and Max Clip Length were dead settings —
+// not consumed by SessionManager or AudioClipExtractor. Keeping this
+// file as a placeholder in case recording settings are added later.
+// If unused after a few sprints, delete the file.
+
 @MainActor
 struct SettingsRecordingSection: View {
-  @Environment(Theme.self) private var theme
-  @Environment(UserPreferences.self) private var userPreferences
-  let onShowClipLengthPicker: () -> Void
-
   var body: some View {
-    VStack(alignment: .leading, spacing: 2) {
-      SettingsSectionTitle(text: Strings.settingsSectionRecording)
-      VStack(spacing: 16) {
-        HStack(spacing: 10) {
-          SettingsIconBackground(systemName: "doc.badge.plus", color: Color(hex: "#FF2D55"))
-          Text(Strings.settingsSaveAudioClips)
-            .font(.system(size: 15))
-            .foregroundStyle(theme.textPrimary)
-          Spacer()
-          Toggle("", isOn: Binding(
-            get: { userPreferences.saveAudioClips },
-            set: { userPreferences.saveAudioClips = $0 }
-          ))
-          .labelsHidden()
-          .tint(theme.scoreGreen)
-        }
-
-        Button {
-          onShowClipLengthPicker()
-        } label: {
-          HStack(spacing: 10) {
-            SettingsIconBackground(systemName: "scissors", color: theme.accent)
-            Text(Strings.settingsMaxClipLength)
-              .font(.system(size: 15))
-              .foregroundStyle(theme.textPrimary)
-            Spacer()
-            Text("\(Int(userPreferences.maxClipLength)) \(Strings.settingsUnitSeconds)")
-              .font(.system(size: 15))
-              .foregroundStyle(theme.textTertiary)
-            Image(systemName: "chevron.right")
-              .font(.system(size: 15))
-              .foregroundStyle(theme.textTertiary)
-          }
-        }
-        .buttonStyle(.plain)
-      }
-      .padding(16)
-      .background(theme.bgCard)
-      .cornerRadius(12)
-    }
+    EmptyView()
   }
 }

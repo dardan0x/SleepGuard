@@ -53,8 +53,8 @@ public final class UserPreferences {
   public var appearance: AppearanceSetting {
     get {
       access(keyPath: \.appearance)
-      let raw = defaults.string(forKey: "appearance") ?? "system"
-      return AppearanceSetting(rawValue: raw) ?? .system
+      let raw = defaults.string(forKey: "appearance") ?? "dark"
+      return AppearanceSetting(rawValue: raw) ?? .dark
     }
     set {
       withMutation(keyPath: \.appearance) {
@@ -71,19 +71,6 @@ public final class UserPreferences {
     set {
       withMutation(keyPath: \.presentRecordingAfterOnboarding) {
         defaults.set(newValue, forKey: "presentRecordingAfterOnboarding")
-      }
-    }
-  }
-
-  public var minSnoreDuration: TimeInterval {
-    get {
-      access(keyPath: \.minSnoreDuration)
-      let raw = defaults.double(forKey: "minSnoreDuration")
-      return raw > 0 ? raw : 2.0
-    }
-    set {
-      withMutation(keyPath: \.minSnoreDuration) {
-        defaults.set(newValue, forKey: "minSnoreDuration")
       }
     }
   }

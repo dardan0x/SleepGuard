@@ -382,9 +382,9 @@ public final class SessionManager {
 
         let eventSpan = (lastSnoringSampleTime ?? Date()).timeIntervalSince(startTime)
 
-        // Respect user's minimum snore duration setting (default 2 s) instead of
-        // hardcoding 0.5 s. This filters out brief breathing waves and transients.
-        let minDuration = UserPreferences.shared.minSnoreDuration
+        // Discard events shorter than 2 s to filter out brief breathing waves
+        // and transients. This value is intentionally not user-configurable.
+        let minDuration: TimeInterval = 2.0
         guard eventSpan >= minDuration else {
             activeEventStart = nil
             activeEventIntensity = nil
