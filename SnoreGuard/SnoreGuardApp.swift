@@ -44,6 +44,9 @@ struct SnoreGuardApp: App {
         soundAnalysisDetector: SoundAnalysisDetector.shared,
         soothingMelodyPlayer: SoothingMelodyPlayer.shared
       )
+      .onAppear {
+        HealthKitSync.shared.checkAuthorizationStatus()
+      }
       .onChange(of: sessionManager.isRecording) { _, isRecording in
         UIApplication.shared.isIdleTimerDisabled = isRecording
       }

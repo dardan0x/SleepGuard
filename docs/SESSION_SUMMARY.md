@@ -2661,17 +2661,18 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 
 ---
 
-## 2026-05-15 — Session 45: Nightstand Mode — Auto-lock Prevention + Charging Alert
+## 2026-05-15 — Session 45: Nightstand Mode — Auto-lock Prevention + Charging Alert + Mic Permission Gate
 
 ### Completed
 - **Idle timer disable during sleep sessions**: Added `UIApplication.shared.isIdleTimerDisabled` logic in `SnoreGuardApp.swift` tied to `SessionManager.isRecording`. Also handles `scenePhase` `.active` to re-disable the idle timer when returning from background (iOS auto-re-enables it on background).
 - **Charging alert before recording**: Added an alert when the user taps Start Recording and the iPhone is not charging. Alert shows in both `RecordingPrestartView` (main start button) and `RecordingCountdownView` ("Start Now" button). Auto-start after countdown completion skips the alert since the user isn't present.
-- **Alert actions**: "Cancel" dismisses; "Start Anyway" proceeds with the session. Alert button actions wrapped in `Task { @MainActor in }` for safe actor isolation.
+- **Microphone permission gate before recording**: Both `RecordingPrestartView` and `RecordingCountdownView` now check `AudioRecorder.hasPermission` before starting. If undetermined, requests permission asynchronously; if denied, shows an alert with "Open Settings" that links to the app's Settings page. Recording cannot start without microphone access.
+- **Alert actions**: Charging alert: "Cancel" dismisses; "Start Anyway" proceeds. Microphone alert: "Cancel" dismisses; "Open Settings" routes to system Settings. Alert button actions wrapped in `Task { @MainActor in }` for safe actor isolation.
 
 ### Technical Details
 - `UIDevice.current.isBatteryMonitoringEnabled = true` must be set before reading `batteryState`. On simulator, `batteryState` returns `.unknown` so the alert always fires — this is expected simulator behavior.
 - Alert closures use shared singletons (`SessionManager.shared`, `UserPreferences.shared`) directly rather than `@Environment` properties to avoid any potential environment access issues from modal alert contexts.
-- Added 3 localized strings: `session.chargingAlert.title`, `session.chargingAlert.message`, `session.chargingAlert.startAnyway` via `Strings.txt` → `generate-xcstrings.py`.
+- Added 6 localized strings: `session.chargingAlert.title/message/startAnyway` and `session.microphoneAlert.title/message/openSettings` via `Strings.txt` → `generate-xcstrings.py`.
 
 ### Files Changed
 | File | Lines | What Changed |
@@ -2680,8 +2681,8 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 | `Packages/DesignSystem/Sources/Resources/Strings.txt` | +3 | Added charging alert title, message, startAnyway strings |
 | `Packages/DesignSystem/Sources/Resources/Localizable.xcstrings` | — | Regenerated with 3 new entries |
 | `Packages/DesignSystem/Sources/Strings.swift` | — | Regenerated with `sessionChargingAlertTitle`, `Message`, `StartAnyway` |
-| `Packages/SleepSession/Sources/Views/RecordingPrestartView.swift` | +35 | Charging check in start button, alert modifier, `beginSession()` helper, `isCharging` property |
-| `Packages/SleepSession/Sources/Views/RecordingCountdownView.swift` | +28 | Charging check in "Start Now", alert modifier, `startSession()` helper, `isCharging` property |
+| `Packages/SleepSession/Sources/Views/RecordingPrestartView.swift` | +45 | Charging check + microphone permission check in start button, alert modifiers for both, `beginSession()` helper, `isCharging` property |
+| `Packages/SleepSession/Sources/Views/RecordingCountdownView.swift` | +38 | Charging check + microphone permission check in "Start Now", alert modifiers for both, `startSession()` helper, `isCharging` property |
 
 ### Build Status
 - **BUILD SUCCEEDED** — zero errors.
@@ -2742,3 +2743,79 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 - Verify `AVAudioEngine` recreation approach on physical devices — any latency introduced by rebuilding the engine chain?
 - Should the 4s minimum melody duration be user-configurable in Settings?
 
+
+---
+
+## 2026-05-16 — Session 46: Recording Button Pin + iOS 26 Liquid Glass Tab Bar Fix
+
+### Completed
+- **Pinned Start Recording button** in `RecordingPrestartView` so it stays fixed 10px above the tab bar while content scrolls.
+- **Fixed button cut-off on iOS < 26** caused by the custom floating tab bar overlaying content. Added `.padding(.bottom, 86)` to `customContent` in `MainTabView` so the tab bar reserves its own space instead of overlapping child views.
+- **Fixed liquid glass tab bar light/dark glitch** on iOS 26+. The tab bar was inconsistently transitioning between light and dark materials because:
+  - `UserPreferences.appearance` defaulted to `.system`, so `preferredColorScheme` was `nil`. When the device was in light mode, the liquid glass tab bar rendered light against the app's always-dark UI.
+  - `.toolbarBackground(theme.bgSecondary, for: .tabBar)` was forcing a solid color behind the adaptive liquid glass material, causing it to recalculate and flicker during transitions.
+
+### Technical Details
+- **RecordingPrestartView restructuring**: Moved `StartRecordingButton` and Cancel `Button` out of the `ScrollView` into a pinned bottom `VStack` inside a `ZStack(alignment: .bottom)`. Added `.padding(.bottom, 10)` to the button bar. Increased bottom spacer from 120 → 160 so scroll content clears the pinned buttons.
+- **Custom tab bar safe-area fix**: The iOS < 26 custom tab bar is an overlay in a `ZStack` and doesn't contribute to safe area insets. Adding `.padding(.bottom, 86)` to `customContent` makes all tab content end exactly where the tab bar begins, preventing any overlapping views.
+- **Liquid glass fix**: Removed `.toolbarBackground(theme.bgSecondary, for: .tabBar)` from `systemTabView` (iOS 26+). Changed `UserPreferences.appearance` default from `"system"` to `"dark"` (and fallback `?? .system` to `?? .dark`). The app is dark-only (all design tokens are dark), so forcing `.dark` color scheme keeps the liquid glass tab bar consistently dark.
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/SleepSession/Sources/Views/RecordingPrestartView.swift` | +24/-24 | Extracted button + cancel from ScrollView into pinned bottom bar via ZStack; bottom spacer 120→160 |
+| `SnoreGuard/MainTabView.swift` | +2/-2 | Added `.padding(.bottom, 86)` to `customContent` (iOS < 26); removed `.toolbarBackground(theme.bgSecondary, for: .tabBar)` from `systemTabView` (iOS 26+) |
+| `Packages/Env/Sources/Services/UserPreferences.swift` | +2/-2 | Default appearance `"system"` → `"dark"`; fallback `.system` → `.dark` |
+
+### Architecture Decisions
+- **Reserve space instead of overlay**: For the custom tab bar, padding `customContent` is cleaner than trying to calculate bottom insets inside every child view. It fixes the issue globally for all tabs.
+- **Let liquid glass self-manage**: Apple designed iOS 26 liquid glass to adapt its own material. Explicit `.toolbarBackground` colors conflict with this and should be avoided on iOS 26+.
+
+### Build Status
+- **BUILD NOT VERIFIED** — `xcodebuild` unavailable (CommandLineTools selected instead of Xcode). Code changes are SwiftUI-only and syntactically valid.
+
+### Git Handoff
+- **Suggested commit**: `Pin RecordingPrestart button + fix liquid glass tab bar flicker`
+  - Pinned Start Recording button 10px from tab bar in RecordingPrestartView
+  - Added customContent bottom padding to prevent custom tab bar overlap on iOS < 26
+  - Default appearance .dark; removed forced toolbarBackground on iOS 26+ liquid glass
+
+### Open Questions
+- Should `SettingsAppearanceSection` be wired up with a real picker? Currently it shows "Always Dark" as static text with no way to change the theme.
+
+
+---
+
+## 2026-05-16 — Session 47: HealthKit Sync Auth Persistence Fix
+
+### Completed
+- Fixed HealthKit sync silently failing after app restart
+- Fixed Settings toggle staying ON when user denies HealthKit permission
+- Added auth status re-check before every session sync as a safety net
+
+### Technical Details
+**Root cause:** `HealthKitSync.isAuthorized` was a runtime property defaulting to `false`. `checkAuthorizationStatus()` existed but was never invoked, so after any app restart the stored `UserPreferences.syncToHealthKit == true` flag had no effect — `sync(session:)` returned early because `isAuthorized` was still `false`.
+
+**Fixes applied:**
+1. `SnoreGuardApp.swift` — `.onAppear { HealthKitSync.shared.checkAuthorizationStatus() }` restores the real authorization state from `HKHealthStore` on every launch.
+2. `SettingsDataSection.swift` — Toggle binding now requests auth *before* committing the preference. If `requestAuthorization()` returns `false`, the toggle snaps back OFF. This prevents the "toggle ON but nothing happens" UX.
+3. `SessionSummaryView.swift` — Sync Task calls `healthKitSync.checkAuthorizationStatus()` before `await healthKitSync.sync(session:)`, guarding against edge cases like permission revocation mid-session.
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `SnoreGuard/SnoreGuardApp.swift` | +3 | `.onAppear` calls `HealthKitSync.shared.checkAuthorizationStatus()` |
+| `Packages/Settings/Sources/Views/SettingsDataSection.swift` | +5/-3 | Toggle only commits `syncToHealthKit = true` when `requestAuthorization()` returns `granted` |
+| `Packages/SleepSession/Sources/Views/SessionSummaryView.swift` | +1 | `healthKitSync.checkAuthorizationStatus()` before `sync(session:)` |
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors
+
+### Git Handoff
+- **Suggested branch**: `fix/healthkit-auth-persistence`
+- **Suggested commit**: `Fix HealthKit sync auth persistence — check status on launch, honest toggle, save safety net`
+
+### Open Questions
+- None

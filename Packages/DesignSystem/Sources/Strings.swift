@@ -140,13 +140,11 @@ public enum Strings {
   public static var settingsMicrophoneStatusDenied: String { String(localized: "settings.microphoneStatusDenied", bundle: .module) }
   public static var settingsMicrophoneStatusGranted: String { String(localized: "settings.microphoneStatusGranted", bundle: .module) }
   public static var settingsMicrophoneStatusNotDetermined: String { String(localized: "settings.microphoneStatusNotDetermined", bundle: .module) }
-  public static var settingsMinSnoreDuration: String { String(localized: "settings.minSnoreDuration", bundle: .module) }
   public static var settingsRateApp: String { String(localized: "settings.rateApp", bundle: .module) }
   public static var settingsSaveAudioClips: String { String(localized: "settings.saveAudioClips", bundle: .module) }
   public static var settingsSectionAbout: String { String(localized: "settings.section.about", bundle: .module) }
   public static var settingsSectionAppearance: String { String(localized: "settings.section.appearance", bundle: .module) }
   public static var settingsSectionData: String { String(localized: "settings.section.data", bundle: .module) }
-  public static var settingsSectionDetection: String { String(localized: "settings.section.detection", bundle: .module) }
   public static var settingsSectionPermissions: String { String(localized: "settings.section.permissions", bundle: .module) }
   public static var settingsSectionRecording: String { String(localized: "settings.section.recording", bundle: .module) }
   public static var settingsSectionWatch: String { String(localized: "settings.section.watch", bundle: .module) }
@@ -156,12 +154,12 @@ public enum Strings {
   public static var settingsSensitivityMedium: String { String(localized: "settings.sensitivity.medium", bundle: .module) }
   public static var settingsSyncHealth: String { String(localized: "settings.syncHealth", bundle: .module) }
   public static var settingsTheme: String { String(localized: "settings.theme", bundle: .module) }
+  public static var settingsThemeAlwaysDark: String { String(localized: "settings.theme.alwaysDark", bundle: .module) }
   public static var settingsThemeChoose: String { String(localized: "settings.theme.choose", bundle: .module) }
   public static var settingsThemeDark: String { String(localized: "settings.theme.dark", bundle: .module) }
   public static var settingsThemeLight: String { String(localized: "settings.theme.light", bundle: .module) }
   public static var settingsThemeSystem: String { String(localized: "settings.theme.system", bundle: .module) }
   public static var settingsUnitSeconds: String { String(localized: "settings.unit.seconds", bundle: .module) }
-  public static var settingsUnitSecondsShort: String { String(localized: "settings.unit.seconds.short", bundle: .module) }
   public static var settingsVersion: String { String(localized: "settings.version", bundle: .module) }
   public static var sixtySecondsSoothingMelodyValueFormat: String { String(localized: "sixty.seconds.soothing.melody.value", bundle: .module) }
   public static var snoringEventHeaderPlayerView: String { String(localized: "snoring.event.header.player.view", bundle: .module) }

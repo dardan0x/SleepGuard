@@ -22,11 +22,13 @@ struct SettingsDataSection: View {
           Toggle("", isOn: Binding(
             get: { userPreferences.syncToHealthKit },
             set: { newValue in
-              userPreferences.syncToHealthKit = newValue
               if newValue {
                 Task {
-                  await healthKitSync.requestAuthorization()
+                  let granted = await healthKitSync.requestAuthorization()
+                  userPreferences.syncToHealthKit = granted
                 }
+              } else {
+                userPreferences.syncToHealthKit = false
               }
             }
           ))

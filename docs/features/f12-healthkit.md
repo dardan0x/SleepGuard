@@ -32,9 +32,10 @@ No new routes added.
 ## Edge Cases
 
 - HealthKit unavailable on device → `HealthKitSync` silently does nothing
-- User denies HealthKit permission → toggle can be on but writes are no-ops until authorized
+- User denies HealthKit permission → toggle snaps back OFF; they must re-enable in Settings to retry
 - Simulator: HealthKit framework loads but sleep data writing may be limited; code is device-ready
 - Session save and HealthKit write are independent — SwiftData save succeeds even if HealthKit write fails
+- App restart: `checkAuthorizationStatus()` is called on launch, so prior granted permission is respected without re-prompting
 
 ## Tasks Completed
 

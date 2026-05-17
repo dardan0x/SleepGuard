@@ -207,6 +207,7 @@ public struct SessionSummaryView: View {
 
     if userPreferences.syncToHealthKit {
       Task {
+        healthKitSync.checkAuthorizationStatus()
         await healthKitSync.sync(session: session)
       }
     }
