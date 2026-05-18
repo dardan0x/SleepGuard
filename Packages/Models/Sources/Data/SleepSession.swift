@@ -28,7 +28,7 @@ public final class SleepSession {
     /// Used to compute monitoredDuration and surface detection blind spots in the UI.
     public var recordingGaps: [RecordingGap]?
 
-    public static let minimumSaveDuration: TimeInterval = 150
+    public static let minimumSaveDuration: TimeInterval = 600
 
     public init(
         id: UUID = UUID(),
