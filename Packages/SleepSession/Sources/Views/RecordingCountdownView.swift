@@ -81,6 +81,12 @@ struct RecordingCountdownView: View {
         .padding(.bottom, 32)
       }
     }
+    .onAppear {
+      UIApplication.shared.isIdleTimerDisabled = true
+    }
+    .onDisappear {
+      UIApplication.shared.isIdleTimerDisabled = sessionManager.isRecording
+    }
     .onReceive(NotificationCenter.default.publisher(for: .recordingDelayDidComplete)) { _ in
       try? sessionManager.startSession()
     }
