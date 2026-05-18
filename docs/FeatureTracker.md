@@ -2,7 +2,7 @@
 
 > Auto-updated by the AI after every task. This is the local source of truth.
 
-Last updated: 2026-05-16 (Session 46)
+Last updated: 2026-05-18 (Session 49)
 
 ---
 
@@ -59,6 +59,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-05-18 | Gap tracking reliability + model lightness + banner pluralization | Completed | Removed notification-based gap tracking (`.recordingDidPause/.recordingDidResume`); replaced with direct `.soothingMelodyDidStop` observation in SessionManager. Events no longer discarded during mic pause (`!soothingMelodyPlayer.isPlaying` guard on finalize + `lastSnoringSampleTime` extended on resume). `gapsDuration` reverted from stored to computed to keep SleepSession lightweight. Force-finalized events now have 0.5s minimum (was 0s). MelodyGapsBannerView durationString changed to "over X mins" with proper pluralization |
 | 2026-05-16 | Mic permission + charging gates | Completed | RecordingPrestartView and RecordingCountdownView now enforce microphone permission (requests if undetermined, alerts with Settings link if denied) and require iPhone charging (alerts with "Start Anyway" override) before starting a session |
 | 2026-05-16 | Melody polish + Event Player fixes | Completed | Lock-screen note; 4s min melody duration; AVAudioEngine recreation fix for recording resume; simulator setActive(false) before playback; missing audio fallback (noAudioView); waveform skeleton loading + Task.detached generation |
 | 2026-05-16 | Remove minSnoreDuration from Settings | Completed | Removed user-facing minSnoreDuration stepper from SettingsDetectionSection; hardcoded 2.0 s default in SessionManager; removed 3 unused localization keys; SettingsDetectionSection deleted |

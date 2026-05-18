@@ -49,6 +49,8 @@ public struct SessionDetailView: View {
 
         SessionDetailTimelineView(session: session)
 
+        MelodyGapsBannerView(session: session)
+
         SessionDetailEventsView(
           events: sortedEvents,
           onShowAll: { activeSheet = .events },

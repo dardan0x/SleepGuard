@@ -117,8 +117,12 @@ struct RecordingPrestartView: View {
     }
 
     private var isCharging: Bool {
+        #if targetEnvironment(simulator)
+        return true
+        #else
         UIDevice.current.isBatteryMonitoringEnabled = true
         return UIDevice.current.batteryState == .charging || UIDevice.current.batteryState == .full
+        #endif
     }
 
     private var soothingMelodyValue: String {
