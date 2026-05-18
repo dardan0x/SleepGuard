@@ -35,7 +35,7 @@ public struct TrendsView: View {
       }
       .padding(20)
     }
-    .background(theme.bgSecondary.ignoresSafeArea())
+    .background(theme.bgPrimary.ignoresSafeArea())
     .navigationTitle("")
     .navigationBarTitleDisplayMode(.inline)
     .toolbar {

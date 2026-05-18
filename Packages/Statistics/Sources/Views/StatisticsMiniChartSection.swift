@@ -49,7 +49,7 @@ struct StatisticsMiniChartSection: View {
       MiniBarChart(data: data, theme: theme)
     }
     .padding(12)
-    .background(theme.bgCard)
+    .background(Color.clear)
     .cornerRadius(theme.radiusCard)
   }
 }

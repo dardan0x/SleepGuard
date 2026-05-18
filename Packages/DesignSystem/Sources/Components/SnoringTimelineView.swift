@@ -44,7 +44,7 @@ public struct SnoringTimelineView: View {
         )
       }
     }
-    .frame(height: 32)
+    .frame(height: 34)
   }
 
   private var events: [SnoreEvent] {

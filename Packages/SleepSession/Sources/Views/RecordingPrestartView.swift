@@ -18,34 +18,41 @@ struct RecordingPrestartView: View {
     @State private var showMicrophoneAlert = false
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 0) {
-                iconSection
-                    .padding(.top, 24)
-                
-                headlineSection
-                    .padding(.top, 14)
+        ZStack(alignment: .bottom) {
+            ScrollView {
+                VStack(spacing: 0) {
+                    iconSection
+                        .padding(.top, isCompactHeight ? 20 : 24)
+                    
+                    headlineSection
+                        .padding(.top, isCompactHeight ? 20 : 24)
 
-                tipsSection
-                    .padding(.top, 12)
+                    tipsSection
+                        .padding(.top, isCompactHeight ? 20 : 24)
 
-                VStack(spacing: 12) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        delaySection
-                        soothingMelodyRow(
-                            icon: "timer",
-                            title: Strings.soothingMelodyRecordingPrestartViewTitle,
-                            value: soothingMelodyValue,
-                            subtitle: userPreferences.soothingMelodyMode != .never ? Strings.soothingMelodyLockscreenNote : nil
-                        ) {
-                            showSoothingMelodySheet = true
+                    VStack(spacing: 12) {
+                        VStack(alignment: .leading, spacing: 8) {
+                            delaySection
+                            soothingMelodyRow(
+                                icon: "timer",
+                                title: Strings.soothingMelodyRecordingPrestartViewTitle,
+                                value: soothingMelodyValue,
+                                subtitle: Strings.soothingMelodyLockscreenNote
+                            ) {
+                                showSoothingMelodySheet = true
+                            }
+                            .padding(.top, 8)
                         }
-                        .padding(.top, 8)
+                        helperText
                     }
-                    helperText
-                }
-                .padding(.top, 24)
+                    .padding(.top, isCompactHeight ? 20 : 24)
 
+                    Color.clear.frame(height: 160)
+                }
+                .padding(.horizontal, 24)
+            }
+
+            VStack(spacing: 0) {
                 StartRecordingButton(height: 56) {
                     Task { @MainActor in
                         if !audioRecorder.hasPermission {
@@ -62,7 +69,6 @@ struct RecordingPrestartView: View {
                         beginSession()
                     }
                 }
-//                .padding(.top, 10)
 
                 Button {
                     routerPath.navigateBack()
@@ -71,11 +77,12 @@ struct RecordingPrestartView: View {
                         .font(.system(size: 17, weight: .medium))
                         .foregroundStyle(theme.textSecondary)
                 }
-                .padding(.top, -10)
-
-                Color.clear.frame(height: 120)
+                .padding(.bottom, 5)
             }
             .padding(.horizontal, 24)
+            .padding(.top, 10)
+            .padding(.bottom, 10)
+            .background(theme.bgPrimary.ignoresSafeArea(edges: .bottom))
         }
         .background(theme.bgPrimary.ignoresSafeArea())
         .sheet(isPresented: $showSoothingMelodySheet) {
@@ -142,13 +149,17 @@ struct RecordingPrestartView: View {
         }
     }
 
+    private var isCompactHeight: Bool {
+        UIScreen.main.bounds.height <= 874
+    }
+
     private var iconSection: some View {
-        RoundedRectangle(cornerRadius: 24)
+        RoundedRectangle(cornerRadius: isCompactHeight ? 20 : 24)
             .fill(theme.bgCard)
-            .frame(width: 100, height: 100)
+            .frame(width: isCompactHeight ? 80 : 100, height: isCompactHeight ? 80 : 100)
             .overlay(
                 Image(systemName: "moon.fill")
-                    .font(.system(size: 44))
+                    .font(.system(size: isCompactHeight ? 36 : 44))
                     .foregroundStyle(theme.accent)
             )
     }
@@ -156,12 +167,12 @@ struct RecordingPrestartView: View {
     private var headlineSection: some View {
         VStack(spacing: 8) {
             Text(Strings.statsEmptyTitle)
-                .font(.system(size: 28, weight: .bold))
+                .font(.system(size: isCompactHeight ? 22 : 28, weight: .bold))
                 .foregroundStyle(theme.textPrimary)
                 .multilineTextAlignment(.center)
 
             Text(Strings.sessionPrestartBody)
-                .font(.system(size: 16))
+                .font(.system(size: isCompactHeight ? 14 : 16))
                 .foregroundStyle(theme.textSecondary)
                 .multilineTextAlignment(.center)
                 .lineLimit(nil)
@@ -234,49 +245,49 @@ struct RecordingPrestartView: View {
     }
 
     private func soothingMelodyRow(icon: String, title: String, value: String, subtitle: String? = nil, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            VStack(spacing: 4) {
-                HStack(spacing: 12) {
-                    Image(systemName: icon)
-                        .font(.system(size: 18))
-                        .foregroundStyle(theme.accent)
-                        .frame(width: 24)
+            Button(action: action) {
+                VStack(spacing: 4) {
+                    HStack(spacing: 12) {
+                        Image(systemName: icon)
+                            .font(.system(size: 18))
+                            .foregroundStyle(theme.accent)
+                            .frame(width: 24)
 
-                    Text(title)
-                        .font(.system(size: 16))
-                        .foregroundStyle(theme.textPrimary)
+                        Text(title)
+                            .font(.system(size: 16))
+                            .foregroundStyle(theme.textPrimary)
 
-                    Spacer()
-
-                    Text(value)
-                        .font(.system(size: 16))
-                        .foregroundStyle(theme.textSecondary)
-
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(theme.textTertiary)
-                }
-
-                if let subtitle {
-                    HStack(spacing: 6) {
-                        Image(systemName: "lock.open.fill")
-                            .font(.system(size: 12))
-                        Text(subtitle)
-                            .font(.system(size: 13))
                         Spacer()
+
+                        Text(value)
+                            .font(.system(size: 16))
+                            .foregroundStyle(theme.textSecondary)
+
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(theme.textTertiary)
                     }
-                    .foregroundStyle(theme.textTertiary)
-                    .padding(.top, 4)
-                    .padding(.leading, 6)
+
+                    if let subtitle {
+                        HStack(spacing: 6) {
+                            Image(systemName: "lock.open.fill")
+                                .font(.system(size: 12))
+                            Text(subtitle)
+                                .font(.system(size: 13))
+                            Spacer()
+                        }
+                        .foregroundStyle(theme.textTertiary)
+                        .padding(.top, 4)
+                        .padding(.leading, 6)
+                    }
                 }
+                .padding(.horizontal, 16)
+                .padding(.vertical, subtitle == nil ? 14 : 12)
+                .background(theme.bgCard)
+                .cornerRadius(theme.radiusCard)
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, subtitle == nil ? 14 : 12)
-            .background(theme.bgCard)
-            .cornerRadius(theme.radiusCard)
+            .buttonStyle(.plain)
         }
-        .buttonStyle(.plain)
-    }
 
     private var delaySection: some View {
         VStack(alignment: .leading, spacing: 12) {

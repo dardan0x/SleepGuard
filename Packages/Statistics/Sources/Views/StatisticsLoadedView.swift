@@ -11,47 +11,54 @@ struct StatisticsLoadedView: View {
   let daySessionCount: Int
   let recentSessions: [SleepSession]
   let theme: Theme
-  let onStartRecording: () -> Void
+  @MainActor let onStartRecording: () -> Void
   let onViewTrends: () -> Void
   let onViewCalendar: () -> Void
 
   var body: some View {
-    VStack(spacing: 0) {
-      StatisticsLoadedHeaderView(onViewCalendar: onViewCalendar)
-        .padding(.horizontal, 20)
-        .padding(.top, 10)
+    ZStack(alignment: .bottom) {
+      VStack(spacing: 0) {
+        StatisticsLoadedHeaderView(onViewCalendar: onViewCalendar)
+          .padding(.horizontal, 20)
+          .padding(.top, 10)
 
-      ScrollView {
-        VStack(spacing: 16) {
-          StatisticsWeekSelector(weekDays: weekDays, onViewTrends: onViewTrends)
+        ScrollView {
+          VStack(spacing: 16) {
+            StatisticsWeekSelector(weekDays: weekDays, onViewTrends: onViewTrends)
 
-          SleepScoreGauge(score: dayScore, theme: theme, size: 120)
+            SleepScoreGauge(score: dayScore, theme: theme, size: 120)
 
-          VStack(spacing: 4) {
-              Text(daySessionCount > 1 ? "\(daySessionCount) \(Strings.recordingsStatisticsLoadedView)" : "\(Strings.lastNightStatisticsLoadedView)")
-              .font(.system(size: 12, weight: .semibold))
-              .foregroundStyle(theme.textTertiary)
-              .tracking(1)
+            VStack(spacing: 4) {
+                Text(daySessionCount > 1 ? "\(daySessionCount) \(Strings.recordingsStatisticsLoadedView)" : "\(Strings.lastNightStatisticsLoadedView)")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(theme.textTertiary)
+                .tracking(1)
 
-            Text("\(dateString) · \(timeRangeString)")
-              .font(.system(size: 15))
-              .foregroundStyle(theme.textSecondary)
+              Text("\(dateString) · \(timeRangeString)")
+                .font(.system(size: 15))
+                .foregroundStyle(theme.textSecondary)
+            }
+
+            StatisticsStatsGrid(session: session)
+
+            if !recentSessions.isEmpty {
+              StatisticsMiniChartSection(recentSessions: recentSessions)
+            }
+
+            Color.clear.frame(height: 100)
           }
-
-          StatisticsStatsGrid(session: session)
-
-          if !recentSessions.isEmpty {
-            StatisticsMiniChartSection(recentSessions: recentSessions)
-          }
-
-          StartRecordingButton(height: 52) {
-            onStartRecording()
-          }
+          .padding(.horizontal, 20)
+          .padding(.top, 10)
+          .padding(.bottom, 20)
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 10)
-        .padding(.bottom, 32)
       }
+
+      StartRecordingButton(height: 56) {
+        onStartRecording()
+      }
+      .padding(.horizontal, 20)
+      .padding(.bottom, 5)
+      .background(theme.bgPrimary.ignoresSafeArea(edges: .bottom))
     }
     .toolbar(.hidden, for: .navigationBar)
   }

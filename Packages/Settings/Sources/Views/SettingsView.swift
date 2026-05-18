@@ -37,7 +37,7 @@ public struct SettingsView: View {
         .padding(.bottom, 24)
       }
     }
-    .background(theme.bgSecondary)
+    .background(theme.bgPrimary)
     #if !os(visionOS)
     .scrollContentBackground(.hidden)
     #endif

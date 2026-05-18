@@ -25,8 +25,10 @@ struct Last7NightsRow: View {
           .foregroundStyle(theme.textTertiary)
       }
       .padding(16)
-      .background(theme.bgCard)
-      .cornerRadius(theme.radiusSmall)
+      .overlay(
+          RoundedRectangle(cornerRadius: theme.radiusCard)
+            .stroke(theme.bgCard, lineWidth: 1)
+        )
     }
     .buttonStyle(.plain)
   }

@@ -1199,7 +1199,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ready to Sleep?"
+            "value" : "No sessions yet"
           }
         }
       }
@@ -1837,7 +1837,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Start a recording to analyze your snoring"
+            "value" : "Start your first recording to see how you slept and detect snoring patterns."
           }
         }
       }
@@ -4278,6 +4278,7 @@
       "localizations" : {
         "en" : {
           "stringUnit" : {
+            "sourceLanguage" : "en",
             "state" : "translated",
             "value" : "Apple Watch"
           }
@@ -4335,6 +4336,2088 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "min"
+            "strings" : {
+              "5.seconds.soothing.melody.value" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "5 seconds"
+                    }
+                  }
+                }
+              },
+              "action.back" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Back"
+                    }
+                  }
+                }
+              },
+              "action.cancel" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Cancel"
+                    }
+                  }
+                }
+              },
+              "action.delete" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Delete"
+                    }
+                  }
+                }
+              },
+              "action.deleteAll" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Delete All"
+                    }
+                  }
+                }
+              },
+              "action.discard" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Discard"
+                    }
+                  }
+                }
+              },
+              "action.keepRecording" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Keep Recording"
+                    }
+                  }
+                }
+              },
+              "action.ok" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "OK"
+                    }
+                  }
+                }
+              },
+              "action.play" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Play"
+                    }
+                  }
+                }
+              },
+              "action.remove" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Remove"
+                    }
+                  }
+                }
+              },
+              "action.save" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Save"
+                    }
+                  }
+                }
+              },
+              "action.saveSession" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Save Session"
+                    }
+                  }
+                }
+              },
+              "action.skip" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Skip"
+                    }
+                  }
+                }
+              },
+              "action.startNow" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Start Now"
+                    }
+                  }
+                }
+              },
+              "action.startRecording" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Start Recording"
+                    }
+                  }
+                }
+              },
+              "action.stopAnyway" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Stop Anyway"
+                    }
+                  }
+                }
+              },
+              "action.tryAgain" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Try Again"
+                    }
+                  }
+                }
+              },
+              "always.soothing.melody.value" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Always"
+                    }
+                  }
+                }
+              },
+              "avg.score.calendar.stat.card.label" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "AVG SCORE"
+                    }
+                  }
+                }
+              },
+              "duration.picker.title" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Duration"
+                    }
+                  }
+                }
+              },
+              "event.header.section.totalEvents" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Event"
+                    }
+                  }
+                }
+              },
+              "event.player.navigation.title" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Event Player"
+                    }
+                  }
+                }
+              },
+              "events.hour.pdf.generator" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Events/Hour"
+                    }
+                  }
+                }
+              },
+              "fifteen.seconds.soothing.melody.value" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "15 seconds"
+                    }
+                  }
+                }
+              },
+              "last.night.statistics.loaded.view" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "LAST NIGHT"
+                    }
+                  }
+                }
+              },
+              "light.intensity.label.event.player.view" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Light"
+                    }
+                  }
+                }
+              },
+              "light.snore.event.player.view" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Light snore"
+                    }
+                  }
+                }
+              },
+              "loading.audio.event.player.view" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Loading audio..."
+                    }
+                  }
+                }
+              },
+              "loud.intensity.label.event.player.view" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Load"
+                    }
+                  }
+                }
+              },
+              "loud.nights.calendar.stat.card.label" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "LOUD NIGHTS"
+                    }
+                  }
+                }
+              },
+              "loud.snore.event.player.view" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Loud snore"
+                    }
+                  }
+                }
+              },
+              "melody.disabled.soothing.melody.sheet" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Melody disabled"
+                    }
+                  }
+                }
+              },
+              "melody.enabled.soothing.melody.sheet" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Melody enabled"
+                    }
+                  }
+                }
+              },
+              "mute.for.session" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Mute for session"
+                    }
+                  }
+                }
+              },
+              "off.soothing.melody.value" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Off"
+                    }
+                  }
+                }
+              },
+              "onboarding.page1.button" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Cool, what else?"
+                    }
+                  }
+                }
+              },
+              "onboarding.page1.subtitle" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Your snoring finally gets the attention it deserves."
+                    }
+                  }
+                }
+              },
+              "onboarding.page1.title" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Hey 🖐 Ready to\nspy on your sleep?"
+                    }
+                  }
+                }
+              },
+              "onboarding.page2.body" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Place your phone on the nightstand and\nlet us do the rest."
+                    }
+                  }
+                }
+              },
+              "onboarding.page2.button" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "I snore in private"
+                    }
+                  }
+                }
+              },
+              "onboarding.page2.sleepScore.description" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Get a score for how peacefully you slept (or didn't 😴)"
+                    }
+                  }
+                }
+              },
+              "onboarding.page2.sleepScore.title" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Sleep Score"
+                    }
+                  }
+                }
+              },
+              "onboarding.page2.sleepTrends.description" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "See if your snoring improves... or if your pillow is the problem."
+                    }
+                  }
+                }
+              },
+              "onboarding.page2.sleepTrends.title" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Sleep Trends"
+                    }
+                  }
+                }
+              },
+              "onboarding.page2.snoreDetection.description" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "We detect your snores so you don't have to argue about them."
+                    }
+                  }
+                }
+              },
+              "onboarding.page2.snoreDetection.title" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Snore Detection"
+                    }
+                  }
+                }
+              },
+              "onboarding.page2.title" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Here's what we do\nwhile you snooze"
+                    }
+                  }
+                }
+              },
+              "onboarding.page3.badge" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Your secrets stay between you and your pillow"
+                    }
+                  }
+                }
+              },
+              "onboarding.page3.body" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Only to detect snoring — we're not\neavesdropping on your midnight thoughts."
+                    }
+                  }
+                }
+              },
+              "onboarding.page3.button" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "I trust you"
+                    }
+                  }
+                }
+              },
+              "onboarding.page3.title" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "We're not that\nkind of app"
+                    }
+                  }
+                }
+              },
+              "onboarding.page4.badge" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Microphone ready"
+                    }
+                  }
+                }
+              },
+              "onboarding.page4.body" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Don't worry — we're only listening for\nsnores, not secrets."
+                    }
+                  }
+                }
+              },
+              "onboarding.page4.buttonPrimary" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Yes, listen to my snoring"
+                    }
+                  }
+                }
+              },
+              "onboarding.page4.buttonSecondary" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Just browsing (for now)"
+                    }
+                  }
+                }
+              },
+              "onboarding.page4.title" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "We need your\nmicrophone 🎙️"
+                    }
+                  }
+                }
+              },
+              "onboarding.page5.body" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Everything is processed on your device.\nNo uploads. No weird cloud stuff.\nNo selling your snore drama."
+                    }
+                  }
+                }
+              },
+              "onboarding.page5.button" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Let's do this"
+                    }
+                  }
+                }
+              },
+              "onboarding.page5.title" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Ready for your\nfirst night?"
+                    }
+                  }
+                }
+              },
+              "onboarding.privacy.judgeSilently" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Don't worry — we'll judge your snoring silently."
+                    }
+                  }
+                }
+              },
+              "play.record.custom.melody.sheet" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Play"
+                    }
+                  }
+                }
+              },
+              "playing.soothing.melody.player" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Playing:"
+                    }
+                  }
+                }
+              },
+              "processing.session" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Processing session..."
+                    }
+                  }
+                }
+              },
+              "quiet.intensity.label" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Quiet"
+                    }
+                  }
+                }
+              },
+              "re.record.custom.melody.sheet" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Re-record"
+                    }
+                  }
+                }
+              },
+              "record.melody.sheet.nav.header" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "RECORD MELODY"
+                    }
+                  }
+                }
+              },
+              "record.yours.melody.picker.sheet" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Record yours"
+                    }
+                  }
+                }
+              },
+              "recordings.detail.dateEventsFormat" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%@ · %lld events"
+                    }
+                  }
+                }
+              },
+              "recordings.detail.eventsCountFormat" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%lld events"
+                    }
+                  }
+                }
+              },
+              "recordings.detail.eventsLabel" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Events"
+                    }
+                  }
+                }
+              },
+              "recordings.detail.recordingsCountFormat" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%lld recordings"
+                    }
+                  }
+                }
+              },
+              "recordings.detail.removeConfirmFormat" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Remove %lld recordings from this night?"
+                    }
+                  }
+                }
+              },
+              "recordings.detail.removeTitle" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Remove Recordings"
+                    }
+                  }
+                }
+              },
+              "recordings.detail.showAllFormat" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Show all %lld"
+                    }
+                  }
+                }
+              },
+              "recordings.detail.showLess" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Show less"
+                    }
+                  }
+                }
+              },
+              "recordings.detail.timelineLabel" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "SNORING TIMELINE"
+                    }
+                  }
+                }
+              },
+              "recordings.detail.title" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Details"
+                    }
+                  }
+                }
+              },
+              "recordings.empty.message" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Your sleep sessions will appear here after you start recording."
+                    }
+                  }
+                }
+              },
+              "recordings.empty.title" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "No recordings yet"
+                    }
+                  }
+                }
+              },
+              "recordings.error.message" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Unable to load session"
+                    }
+                  }
+                }
+              },
+              "recordings.error.title" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Something went wrong"
+                    }
+                  }
+                }
+              },
+              "recordings.player.freq0" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "0 Hz"
+                    }
+                  }
+                }
+              },
+              "recordings.player.freq1k" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "1 kHz"
+                    }
+                  }
+                }
+              },
+              "recordings.player.freq500" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "500 Hz"
+                    }
+                  }
+                }
+              },
+              "recordings.player.seekHint" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Tap waveform to seek"
+                    }
+                  }
+                }
+              },
+              "recordings.player.spectrumLabel" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Frequency Spectrum"
+                    }
+                  }
+                }
+              },
+              "recordings.player.statDominantFreq" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Dominant Freq"
+                    }
+                  }
+                }
+              },
+              "recordings.player.statDuration" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Duration"
+                    }
+                  }
+                }
+              },
+              "recordings.player.statLowFreqRatio" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Low-Freq Ratio"
+                    }
+                  }
+                }
+              },
+              "recordings.player.statSpectralCentroid" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Spectral Centroid"
+                    }
+                  }
+                }
+              },
+              "recordings.statistics.loaded.view" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "RECORDINGS"
+                    }
+                  }
+                }
+              },
+              "save.failed" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Save Failed"
+                    }
+                  }
+                }
+              },
+              "save.melody.picker.sheet" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "SAVE"
+                    }
+                  }
+                }
+              },
+              "save.record.custom.melody.sheet" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "SAVE"
+                    }
+                  }
+                }
+              },
+              "session.bedside.snoreLight" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Light snoring detected · just now"
+                    }
+                  }
+                }
+              },
+              "session.bedside.snoreLoud" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Loud snoring detected · just now"
+                    }
+                  }
+                }
+              },
+              "session.bedside.snoreQuiet" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Quiet snoring detected · just now"
+                    }
+                  }
+                }
+              },
+              "session.bedside.stopRecording" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Stop Recording"
+                    }
+                  }
+                }
+              },
+              "session.chargingAlert.message" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "For the best nightstand experience and to avoid battery drain, it's recommended to keep your iPhone plugged in during sleep tracking."
+                    }
+                  }
+                }
+              },
+              "session.chargingAlert.startAnyway" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Start Anyway"
+                    }
+                  }
+                }
+              },
+              "session.chargingAlert.title" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "iPhone Not Charging"
+                    }
+                  }
+                }
+              },
+              "session.countdown.label" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Recording starts in"
+                    }
+                  }
+                }
+              },
+              "session.prestart.body" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "We'll listen for snoring through the night. Audio stays on your device."
+                    }
+                  }
+                }
+              },
+              "session.prestart.delayHelper" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Use this if you need time to fall asleep before recording begins."
+                    }
+                  }
+                }
+              },
+              "session.prestart.delayLabel" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Start recording after"
+                    }
+                  }
+                }
+              },
+              "session.prestart.delayOff" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Off"
+                    }
+                  }
+                }
+              },
+              "session.prestart.tip.phone" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Place your phone on the nightstand"
+                    }
+                  }
+                }
+              },
+              "session.prestart.tip.pluggedIn" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Keep it plugged in"
+                    }
+                  }
+                }
+              },
+              "session.prestart.tip.silence" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Silence notifications"
+                    }
+                  }
+                }
+              },
+              "session.prestart.title" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Ready to Sleep?"
+                    }
+                  }
+                }
+              },
+              "session.recording.eventsCountUpperFormat" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%lld EVENTS"
+                    }
+                  }
+                }
+              },
+              "session.recording.eventsFormat" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "EVENTS · %lld"
+                    }
+                  }
+                }
+              },
+              "session.recording.statusFormat" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Recording · %@"
+                    }
+                  }
+                }
+              },
+              "session.summary.statSnoreTime" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Snore Time"
+                    }
+                  }
+                }
+              },
+              "session.summary.statSnoring" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Snoring"
+                    }
+                  }
+                }
+              },
+              "session.summary.title" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "SESSION COMPLETE"
+                    }
+                  }
+                }
+              },
+              "session.summary.tooShortInfoFormat" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "To generate meaningful sleep analysis, recordings must be at least %lld minutes long."
+                    }
+                  }
+                }
+              },
+              "session.summary.tooShortMessageFormat" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Recordings under %lld minutes can't be saved. Are you sure you want to stop?"
+                    }
+                  }
+                }
+              },
+              "session.summary.tooShortTitle" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Session Too Short"
+                    }
+                  }
+                }
+              },
+              "session.summary.youSleptFormat" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "You slept %@"
+                    }
+                  }
+                }
+              },
+              "sessions.calendar.stat.card.label" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "SESSIONS"
+                    }
+                  }
+                }
+              },
+              "sessions.detail.sessionsCountFormat" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%lld sessions"
+                    }
+                  }
+                }
+              },
+              "settings.deleteAll" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Delete All Recordings"
+                    }
+                  }
+                }
+              },
+              "settings.deleteAll.confirmMessage" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "This will permanently delete all sleep sessions and snore events. This action cannot be undone."
+                    }
+                  }
+                }
+              },
+              "settings.deleteAll.confirmTitle" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Delete All Recordings?"
+                    }
+                  }
+                }
+              },
+              "settings.maxClipLength" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Max clip length"
+                    }
+                  }
+                }
+              },
+              "settings.maxClipLengthTitle" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Max Clip Length"
+                    }
+                  }
+                }
+              },
+              "settings.microphoneAccess" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Microphone Access"
+                    }
+                  }
+                }
+              },
+              "settings.microphoneEnable" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Enable"
+                    }
+                  }
+                }
+              },
+              "settings.microphoneStatusDenied" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Denied"
+                    }
+                  }
+                }
+              },
+              "settings.microphoneStatusGranted" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Allowed"
+                    }
+                  }
+                }
+              },
+              "settings.microphoneStatusNotDetermined" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Not Set"
+                    }
+                  }
+                }
+              },
+              "settings.rateApp" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Rate on App Store"
+                    }
+                  }
+                }
+              },
+              "settings.saveAudioClips" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Save audio clips"
+                    }
+                  }
+                }
+              },
+              "settings.section.about" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "ABOUT"
+                    }
+                  }
+                }
+              },
+              "settings.section.appearance" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "APPEARANCE"
+                    }
+                  }
+                }
+              },
+              "settings.section.data" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "DATA"
+                    }
+                  }
+                }
+              },
+              "settings.section.permissions" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "PERMISSIONS"
+                    }
+                  }
+                }
+              },
+              "settings.section.recording" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "RECORDING"
+                    }
+                  }
+                }
+              },
+              "settings.section.watch" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "WATCH"
+                    }
+                  }
+                }
+              },
+              "settings.sensitivity" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Sensitivity"
+                    }
+                  }
+                }
+              },
+              "settings.sensitivity.high" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "High"
+                    }
+                  }
+                }
+              },
+              "settings.sensitivity.low" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Low"
+                    }
+                  }
+                }
+              },
+              "settings.sensitivity.medium" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Medium"
+                    }
+                  }
+                }
+              },
+              "settings.syncHealth" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Sync to Apple Health"
+                    }
+                  }
+                }
+              },
+              "settings.theme" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Theme"
+                    }
+                  }
+                }
+              },
+              "settings.theme.alwaysDark" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Always Dark"
+                    }
+                  }
+                }
+              },
+              "settings.theme.choose" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Choose Theme"
+                    }
+                  }
+                }
+              },
+              "settings.theme.dark" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Dark"
+                    }
+                  }
+                }
+              },
+              "settings.theme.light" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Light"
+                    }
+                  }
+                }
+              },
+              "settings.theme.system" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "System"
+                    }
+                  }
+                }
+              },
+              "settings.unit.seconds" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "s"
+                    }
+                  }
+                }
+              },
+              "settings.version" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Version"
+                    }
+                  }
+                }
+              },
+              "sixty.seconds.soothing.melody.value" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "60 seconds"
+                    }
+                  }
+                }
+              },
+              "snoring.event.header.player.view" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Snoring Event"
+                    }
+                  }
+                }
+              },
+              "soothing.melody.recording.prestart.view.title" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Soothing melody"
+                    }
+                  }
+                }
+              },
+              "soothing.melody.row.helper.text" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Plays a sound when snoring is detected during your session."
+                    }
+                  }
+                }
+              },
+              "soothing.melody.sheet.desc.section.subtitle" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Always plays from the start."
+                    }
+                  }
+                }
+              },
+              "soothing.melody.sheet.desc.section.title" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "We'll play a tune for this duration when snoring is detected."
+                    }
+                  }
+                }
+              },
+              "soothing.tune.melody.sheet" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Soothing tune"
+                    }
+                  }
+                }
+              },
+              "start.time.event.card" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Started at:"
+                    }
+                  }
+                }
+              },
+              "stats.calendar.intensityLoud" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Loud"
+                    }
+                  }
+                }
+              },
+              "stats.calendar.intensityQuiet" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Quiet"
+                    }
+                  }
+                }
+              },
+              "stats.calendar.legendLight" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Light snoring"
+                    }
+                  }
+                }
+              },
+              "stats.calendar.legendLoud" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Loud snoring"
+                    }
+                  }
+                }
+              },
+              "stats.calendar.selectedNightLabel" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "SELECTED NIGHT"
+                    }
+                  }
+                }
+              },
+              "stats.empty.message" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Start a recording to analyze your snoring"
+                    }
+                  }
+                }
+              },
+              "stats.empty.title" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Ready to track your sleep?"
+                    }
+                  }
+                }
+              },
+              "stats.last7Nights.allNights" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "ALL NIGHTS"
+                    }
+                  }
+                }
+              },
+              "stats.last7Nights.avgSleepScore" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "avg sleep score"
+                    }
+                  }
+                }
+              },
+              "stats.last7Nights.avgSnoring" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "AVG SNORING"
+                    }
+                  }
+                }
+              },
+              "stats.last7Nights.best" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "BEST"
+                    }
+                  }
+                }
+              },
+              "stats.last7Nights.snoringMin" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "SNORING · MIN"
+                    }
+                  }
+                }
+              },
+              "stats.last7Nights.tapABar" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "tap a bar"
+                    }
+                  }
+                }
+              },
+              "stats.last7Nights.totalEvents" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "TOTAL EVENTS"
+                    }
+                  }
+                }
+              },
+              "stats.last7Nights.worst" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "WORST"
+                    }
+                  }
+                }
+              },
+              "stats.miniChart.sleepScoreLabel" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "SLEEP SCORE"
+                    }
+                  }
+                }
+              },
+              "stats.miniChart.today" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Today"
+                    }
+                  }
+                }
+              },
+              "stats.trends.avgMinFormat" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%lld min · avg / night"
+                    }
+                  }
+                }
+              },
+              "stats.trends.lastSevenNights" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Last 7 Nights"
+                    }
+                  }
+                }
+              },
+              "stats.trends.month" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Month"
+                    }
+                  }
+                }
+              },
+              "stats.trends.seeAll" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "See all"
+                    }
+                  }
+                }
+              },
+              "stats.trends.snoringMinutesLabel" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "SNORING MINUTES"
+                    }
+                  }
+                }
+              },
+              "stats.trends.statCard.avgScore" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "AVG SCORE"
+                    }
+                  }
+                }
+              },
+              "stats.trends.statCard.bestNight" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "BEST NIGHT"
+                    }
+                  }
+                }
+              },
+              "stats.trends.statCard.totalEvents" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "TOTAL EVENTS"
+                    }
+                  }
+                }
+              },
+              "stats.trends.statCard.worstNight" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "WORST NIGHT"
+                    }
+                  }
+                }
+              },
+              "stats.trends.thisWeekLabel" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "THIS WEEK"
+                    }
+                  }
+                }
+              },
+              "stats.trends.title" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Trends"
+                    }
+                  }
+                }
+              },
+              "stats.trends.viewMonth" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "View month >"
+                    }
+                  }
+                }
+              },
+              "stats.trends.week" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Week"
+                    }
+                  }
+                }
+              },
+              "stop.record.custom.melody.sheet" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Stop"
+                    }
+                  }
+                }
+              },
+              "stop.soothing.melody.player" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Stop"
+                    }
+                  }
+                }
+              },
+              "tab.media" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Media"
+                    }
+                  }
+                }
+              },
+              "tab.settings" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Settings"
+                    }
+                  }
+                }
+              },
+              "tab.statistics" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Statistics"
+                    }
+                  }
+                }
+              },
+              "thirty.seconds.soothing.melody.value" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "30 seconds"
+                    }
+                  }
+                }
+              },
+              "unable.to.save.the.session" : {
+                "extractionState" : "manual",
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Unable to save the session. Please try again."
+                    }
+                  }
+                }
+              },
+              "watch.calendar" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Calendar"
+                    }
+                  }
+                }
+              },
+              "watch.status.connected" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Connected"
+                    }
+                  }
+                }
+              },
+              "watch.status.notConnected" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Not Connected"
+                    }
+                  }
+                }
+              },
+              "watch.title" : {
+                "localizations" : {
+                  "en" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "Apple Watch"
+                    }
+                  }
+                }
+              }
+            },
+            "value" : "Apple Watch",
+            "version" : "1.0"
           }
         }
       }

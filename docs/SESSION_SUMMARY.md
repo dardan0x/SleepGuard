@@ -2920,3 +2920,48 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 ### Open Questions
 - Should gap duration be surfaced in the exported PDF sleep report?
 - Should we add a Settings toggle for ducked melody (continuous detection, lower volume) vs full-volume melody with gaps?
+
+
+---
+
+## 2026-05-17 — Session 48: UI Polish — Tab Bar Liquid Glass + Recording Layout Fixes
+
+### Completed
+- Fixed UI glitch when tapping Start Recording button by making `onStartRecording` closures `@MainActor`
+- Made `RecordingPrestartView` adaptive for compact screens (iPhone 16e, 17 Pro, smaller)
+- Added smooth sliding pill animation to custom tab bar via `matchedGeometryEffect`
+- Mimicked iOS 26 liquid glass effect on custom tab bar for iOS < 26
+
+### Technical Details
+- `@MainActor` on `onStartRecording` ensures navigation state mutations run on the main thread, eliminating the frame-drop glitch when tapping the Statistics tab CTA.
+- `isCompactHeight` uses `UIScreen.main.bounds.height <= 874` to scale down `iconSection` (100 → 80 pts, font 44 → 36 pts) and headline title (28 → 24 pts) on smaller devices without affecting Pro Max screens.
+- `matchedGeometryEffect(id: "activeTab", in: tabAnimation)` with a conditional `RoundedRectangle` creates a ghost view that smoothly slides between tab positions during selection changes.
+- Liquid glass approximation: `.ultraThinMaterial` + `theme.bgCard` tint + subtle white gradient highlights for the floating capsule container; solid `theme.bgCard` active pill with light stroke and top highlight.
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Statistics/Sources/Views/StatisticsEmptyView.swift` | +1/-1 | `@MainActor let onStartRecording: () -> Void` |
+| `Packages/Statistics/Sources/Views/StatisticsLoadedView.swift` | +1/-1 | `@MainActor let onStartRecording: () -> Void` |
+| `Packages/Statistics/Sources/Views/StatisticsDashboardView.swift` | +2/-2 | Inline closures annotated `{ @MainActor in }` |
+| `Packages/SleepSession/Sources/Views/RecordingPrestartView.swift` | +10/-4 | `isCompactHeight` property; adaptive `iconSection` and `headlineSection` sizing |
+| `SnoreGuard/MainTabView.swift` | +25/-15 | `matchedGeometryEffect` sliding active pill; liquid glass materials + gradient highlights |
+
+### Architecture Decisions
+- **MainActor on closures**: Propagating `@MainActor` through the closure type signature is cleaner than wrapping every call site in `Task { @MainActor in }`.
+- **Screen-height threshold**: `UIScreen.main.bounds.height <= 874` covers iPhone 16e (844 pts), 17 Pro (874 pts), and all smaller devices, while leaving Pro Max (932 pts) untouched.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors
+
+### Git Handoff
+- **Suggested branch**: `feature/ui-polish-tab-bar-recording-layout`
+- **Suggested commit**: `UI Polish — @MainActor recording CTA, compact height layout, liquid glass tab bar`
+  - `@MainActor` on `onStartRecording` closures in Statistics package
+  - `RecordingPrestartView` adaptive layout for compact-height devices
+  - Custom tab bar `matchedGeometryEffect` sliding pill animation
+  - Liquid glass mimic for iOS < 26 using materials + gradient highlights
+
+### Open Questions
+- None

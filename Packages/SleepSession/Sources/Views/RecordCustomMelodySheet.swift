@@ -49,7 +49,7 @@ struct RecordCustomMelodySheet: View {
                 actionButtons
             }
         }
-        .background(theme.bgSecondary.ignoresSafeArea())
+        .background(theme.bgPrimary.ignoresSafeArea())
         .onAppear {
             checkPermission()
         }

@@ -246,7 +246,7 @@ struct EventPlayerView: View {
       } label: {
         Image(systemName: isPlaying ? "pause.fill" : "play.fill")
           .font(.system(size: 28, weight: .bold))
-          .foregroundStyle(theme.bgSecondary)
+          .foregroundStyle(theme.bgPrimary)
           .frame(width: 72, height: 72)
           .background(Color.white)
           .clipShape(Circle())

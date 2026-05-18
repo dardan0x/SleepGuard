@@ -34,7 +34,7 @@ public struct RecordingsListView: View {
         }
       }
     }
-    .background(theme.bgSecondary.ignoresSafeArea())
+    .background(theme.bgPrimary.ignoresSafeArea())
     .onChange(of: sessions) { _, _ in
       loadState()
     }
@@ -76,7 +76,7 @@ public struct RecordingsListView: View {
     }
     .listStyle(.plain)
     .scrollContentBackground(.hidden)
-    .background(theme.bgSecondary)
+    .background(theme.bgPrimary)
     .alert(Strings.recordingsDetailRemoveTitle, isPresented: $showDeleteAlert, presenting: groupToDelete) { group in
       Button(Strings.actionRemove, role: .destructive) {
         deleteGroup(group)
