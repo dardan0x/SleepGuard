@@ -110,8 +110,9 @@ public final class AudioRecorder {
   }
 
   public func checkPermission() {
-    // NOTE: Simulator bypass temporarily removed to trigger macOS microphone
-    // permission dialog. Restore #if targetEnvironment(simulator) block after.
+    #if targetEnvironment(simulator)
+    hasPermission = true
+    #else
     switch AVAudioSession.sharedInstance().recordPermission {
     case .granted:
       hasPermission = true
@@ -120,11 +121,14 @@ public final class AudioRecorder {
     @unknown default:
       hasPermission = false
     }
+    #endif
   }
 
   public func requestPermission() async -> Bool {
-    // NOTE: Simulator bypass temporarily removed to trigger macOS microphone
-    // permission dialog. Restore #if targetEnvironment(simulator) block after.
+    #if targetEnvironment(simulator)
+    hasPermission = true
+    return true
+    #else
     let granted = await withCheckedContinuation { continuation in
       AVAudioSession.sharedInstance().requestRecordPermission { granted in
         continuation.resume(returning: granted)
@@ -132,6 +136,7 @@ public final class AudioRecorder {
     }
     hasPermission = granted
     return granted
+    #endif
   }
 
   public func startRecording(audioFileURL: URL? = nil) throws {
@@ -141,9 +146,11 @@ public final class AudioRecorder {
     try session.setCategory(.playAndRecord, mode: .measurement, options: [.defaultToSpeaker, .allowBluetooth])
     try session.setActive(true)
 
+    #if !targetEnvironment(simulator)
     guard !session.currentRoute.inputs.isEmpty else {
       throw RecordingError.noMicrophoneInput
     }
+    #endif
 
     let engine = AVAudioEngine()
     let input = engine.inputNode
@@ -216,7 +223,6 @@ public final class AudioRecorder {
 
   public func resumeRecording() throws {
     guard isRecording else { return }
-
     let session = AVAudioSession.sharedInstance()
     try session.setCategory(.playAndRecord, mode: .measurement, options: [.defaultToSpeaker, .allowBluetooth])
     try session.setActive(true)

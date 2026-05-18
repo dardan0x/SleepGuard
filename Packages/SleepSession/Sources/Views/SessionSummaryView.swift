@@ -32,6 +32,8 @@ public struct SessionSummaryView: View {
 
         statsGrid
 
+        MelodyGapsBannerView(session: session)
+
         timelineSection
 
         actionButtons

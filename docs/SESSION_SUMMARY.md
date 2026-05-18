@@ -2819,3 +2819,104 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 
 ### Open Questions
 - None
+
+---
+
+## 2026-05-18 — Session 48: Transparent Gap Tracking for Soothing Melody
+
+### Completed
+- Implemented recording gap tracking when soothing melody pauses the microphone
+- Adjusted sleep score and snoring percentage to use `monitoredDuration` (excluding gaps)
+- Added visual gap indicators to `SnoringTimelineView`
+- Added info banner in `SessionSummaryView` and `SessionDetailView` explaining missed detection
+- Fixed pre-existing JSON corruption in `Localizable.xcstrings` (duplicate content insertion)
+
+### Technical Details
+**Root cause:** `SoothingMelodyPlayer` switches `AVAudioSession` to `.playback`, which triggers `AudioRecorder.pauseRecording()`. The mic is completely dead during melody playback, so any snoring in those windows is invisible to stats.
+
+**Fixes applied:**
+1. `RecordingGap.swift` — New `Codable, Sendable` model: `startOffset` + `duration` relative to session start.
+2. `SleepSession.swift` — Added `recordingGaps: [RecordingGap]?`, computed `gapsDuration`, `monitoredDuration`. Updated `snoringPercentage` and `sleepScore` to use `monitoredDuration` instead of `totalDuration`.
+3. `AudioNotifications.swift` — Added `.recordingDidPause` and `.recordingDidResume`.
+4. `AudioRecorder.swift` — `pauseRecording()` stores `currentGapStart` and posts `.recordingDidPause`. `resumeRecording()` and `stopRecording()` calculate duration and post `.recordingDidResume`.
+5. `SessionManager.swift` — Observes pause/resume notifications, appends `RecordingGap` to `currentSession.recordingGaps` on resume. Initializes `recordingGaps = []` at session start.
+6. `SnoringTimelineView.swift` — Renders gap segments as `textTertiary.opacity(0.18)` fill with `textTertiary.opacity(0.35)` stroke, making detection blind spots visible on the timeline.
+7. `MelodyGapsBannerView.swift` — New reusable DesignSystem component. Shows: "Soothing melody paused detection for **X min**. Actual snoring may be higher than recorded." Only appears when gaps exist.
+8. `SessionSummaryView.swift` & `SessionDetailView.swift` — Added `MelodyGapsBannerView(session: session)` below stats/timeline.
+9. `Localizable.xcstrings` — Added `session.summary.melodyGapsInfo` key. Also fixed severe pre-existing corruption where the file contained duplicated JSON content starting at line 2164, causing `generate-strings.py` to fail.
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Models/Sources/Data/RecordingGap.swift` | +21 | New model for mic-paused intervals |
+| `Packages/Models/Sources/Data/SleepSession.swift` | +18/-3 | Added `recordingGaps`, `gapsDuration`, `monitoredDuration`; updated `snoringPercentage` & `sleepScore` denominators |
+| `Packages/Models/Sources/Helpers/AudioNotifications.swift` | +2 | Added `.recordingDidPause`, `.recordingDidResume` |
+| `Packages/AudioEngine/Sources/Engine/AudioRecorder.swift` | +15/-1 | Track gap start/end; post pause/resume notifications |
+| `Packages/Env/Sources/Services/SessionManager.swift` | +35/-1 | Observe notifications; append gaps to session; init `recordingGaps` |
+| `Packages/DesignSystem/Sources/Components/SnoringTimelineView.swift` | +32/-1 | Render gap segments on timeline canvas |
+| `Packages/DesignSystem/Sources/Components/MelodyGapsBannerView.swift` | +40 | New reusable info banner for melody gaps |
+| `Packages/SleepSession/Sources/Views/SessionSummaryView.swift` | +2 | Added banner below stats grid |
+| `Packages/Recordings/Sources/Views/SessionDetailView.swift` | +2 | Added banner below timeline |
+| `Packages/DesignSystem/Sources/Resources/Localizable.xcstrings` | +216/-2031 | Added new string; fixed corruption by deduplicating and reformatting |
+| `Packages/DesignSystem/Sources/Strings.swift` | +8/-203 | Regenerated with 216 strings |
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors
+
+### Git Handoff
+- **Suggested branch**: `feature/recording-gap-tracking`
+- **Suggested commit**: `Transparent gap tracking for soothing melody — monitoredDuration stats, timeline gaps, UI banner`
+  - Track mic-paused intervals during melody playback as `RecordingGap`
+  - Sleep score & snoring % now use `monitoredDuration` (total - gaps)
+  - `SnoringTimelineView` renders gaps with semi-transparent overlay
+  - `MelodyGapsBannerView` explains missed detection to users
+  - Fixed `Localizable.xcstrings` JSON corruption
+
+### Open Questions
+- Should gap data be included in the PDF sleep report or HealthKit metadata?
+- Should we add a Settings toggle to let users choose between max-volume melody (with gaps) vs ducked melody (continuous detection)?
+
+
+---
+
+## 2026-05-18 — Session 49: Gap Tracking Hardening + Model Lightness + Banner Pluralization
+
+### Completed
+- Removed notification-based gap tracking; replaced with direct `.soothingMelodyDidStop` observation
+- Fixed event discard during mic pause (`!soothingMelodyPlayer.isPlaying` guard + `lastSnoringSampleTime` extension on resume)
+- Reverted `gapsDuration` from stored to computed to keep `SleepSession` lightweight and migration-free
+- Added 0.5s minimum for force-finalized events (prevents 0-second saved events)
+- MelodyGapsBannerView "over X mins" format with proper pluralization
+
+### Technical Details
+- `AudioRecorder` no longer posts `.recordingDidPause` / `.recordingDidResume`; removed `currentGapStart`
+- `SessionManager` observes `.soothingMelodyDidStop` → `logRecordingGap(start:duration:)` + `melodyStartTime = nil`
+- `processAudioLevel()` event-finalize branch now requires `!soothingMelodyPlayer.isPlaying` to avoid stale-data discards
+- `handleMelodyDidStop()` extends `lastSnoringSampleTime = Date()` when mic resumes so `eventSpan` covers the gap
+- `SleepSession.gapsDuration` is computed from `recordingGaps` again; `SessionManager` only writes to `recordingGaps` via full array reassignment
+- `finalizeActiveEvent(skipMinDuration:)` uses 0.5s floor when `skipMinDuration == true`
+- New localized strings: `common.over`, `time.minute.singular/plural`, `time.hour.singular/plural`
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Models/Sources/Data/SleepSession.swift` | +4/-4 | `gapsDuration` reverted from stored to computed |
+| `Packages/Models/Sources/Helpers/AudioNotifications.swift` | +0/-2 | Removed unused `.recordingDidPause`, `.recordingDidResume` |
+| `Packages/AudioEngine/Sources/Engine/AudioRecorder.swift` | +0/-12 | Removed `currentGapStart`, gap notifications, `isMicPaused` |
+| `Packages/Env/Sources/Services/SessionManager.swift` | +20/-35 | Direct gap tracking via `.soothingMelodyDidStop`; event-finalize guard; `lastSnoringSampleTime` extension |
+| `Packages/DesignSystem/Sources/Components/MelodyGapsBannerView.swift` | +8/-5 | `durationString` now returns "over X mins" with pluralization |
+| `Packages/DesignSystem/Sources/Resources/Localizable.xcstrings` | +72/-0 | Added `common.over`, `time.*` plural keys |
+| `Packages/DesignSystem/Sources/Strings.swift` | +5/-0 | Regenerated with 221 strings |
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors
+
+### Next Session
+- Verify gap tracking end-to-end on a real device with timed and always melody modes
+- Consider adding gap data to PDF sleep report or HealthKit metadata
+
+### Open Questions
+- Should gap duration be surfaced in the exported PDF sleep report?
+- Should we add a Settings toggle for ducked melody (continuous detection, lower volume) vs full-volume melody with gaps?

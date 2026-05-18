@@ -58,7 +58,38 @@ public final class SessionManager {
     private var lastUpdateTime: Date?
     private var processingTask: Task<Void, Never>?
 
-    private init() {}
+    private init() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleMelodyDidStop),
+            name: .soothingMelodyDidStop,
+            object: nil
+        )
+    }
+
+    @objc private func handleMelodyDidStop() {
+        guard let start = melodyStartTime else { return }
+        let duration = Date().timeIntervalSince(start)
+        logRecordingGap(start: start, duration: duration)
+        melodyStartTime = nil
+        // Prevent the active event from being discarded because lastSnoringSampleTime
+        // froze during the mic pause. Extend it to resume time so eventSpan is valid.
+        if activeEventStart != nil {
+            lastSnoringSampleTime = Date()
+        }
+    }
+
+    /// Logs a recording gap directly on the session. Called whenever the soothing melody
+    /// stops (mic resumes), ensuring gaps are counted even if notification delivery fails.
+    private func logRecordingGap(start: Date, duration: TimeInterval) {
+        guard let session = currentSession, duration > 0 else { return }
+        let startOffset = start.timeIntervalSince(session.startDate)
+        guard startOffset >= 0 else { return }
+        var gaps = session.recordingGaps ?? []
+        gaps.append(RecordingGap(startOffset: startOffset, duration: duration))
+        session.recordingGaps = gaps
+        print("[SessionManager] Logged gap: startOffset=\(String(format: "%.1f", startOffset))s duration=\(String(format: "%.1f", duration))s")
+    }
 
     // MARK: - Lifecycle
 
@@ -70,6 +101,7 @@ public final class SessionManager {
         let session = SleepSession(startDate: Date())
         let audioURL = audioFileURL(for: session.id)
         session.audioFileURL = AudioFileURLResolver.filename(from: audioURL)
+        session.recordingGaps = []
         currentSession = session
 
         try audioRecorder.startRecording(audioFileURL: audioURL)
@@ -102,6 +134,7 @@ public final class SessionManager {
 
         processingTask?.cancel()
         processingTask = nil
+
         audioRecorder.stopRecording()
         soothingMelodyPlayer.stop()
         isRecording = false
@@ -190,6 +223,7 @@ public final class SessionManager {
     public func stopAndDiscardSession() {
         processingTask?.cancel()
         processingTask = nil
+
         audioRecorder.stopRecording()
         soothingMelodyPlayer.stop()
         isRecording = false
@@ -282,10 +316,21 @@ public final class SessionManager {
                 activeEventIntensity = intensity(from: state)
                 activeBurstStart = activeEventStart
                 print("[SessionManager] 🔔 New snore event started, calling playIfNeeded()")
-                if !soothingMelodyPlayer.isPlaying {
-                    melodyStartTime = now
-                }
+                let wasPlaying = soothingMelodyPlayer.isPlaying
                 soothingMelodyPlayer.playIfNeeded()
+                // If the melody just started, the mic is about to pause. Force-finalize
+                // the active event so its burst doesn't span the dead-mic interval.
+                if soothingMelodyPlayer.isPlaying && !wasPlaying {
+                    melodyStartTime = now
+                    if activeEventStart != nil {
+                        finalizeActiveEvent(skipMinDuration: true)
+                    }
+                    lastUpdateTime = nil
+                    lastSnoringSampleTime = nil
+                    consecutiveSnoreSamples = 0
+                    consecutiveNonSnoreSamples = 0
+                    activeBurstStart = nil
+                }
             } else {
                 // Event already active
                 activeEventDBSum += Double(db)
@@ -310,10 +355,13 @@ public final class SessionManager {
                 completedBursts.append((start: burstStart, end: now))
                 activeBurstStart = nil
             }
-            // Finalize event if silence exceeded debounce threshold
+            // Finalize event if silence exceeded debounce threshold.
+            // Don't finalize while melody is playing — the mic is paused and
+            // currentDB is stale, so silence detection is not trustworthy.
             if let lastSnore = lastSnoringSampleTime,
                activeEventStart != nil,
-               now.timeIntervalSince(lastSnore) >= eventGapThreshold
+               now.timeIntervalSince(lastSnore) >= eventGapThreshold,
+               !soothingMelodyPlayer.isPlaying
             {
                 print("[SessionManager] Silence for \(eventGapThreshold)s — finalizing snore event")
                 finalizeActiveEvent()
@@ -331,7 +379,6 @@ public final class SessionManager {
                 print("[SessionManager] Sustained non-snore — stopping melody")
                 soothingMelodyPlayer.stop()
                 consecutiveNonSnoreSamples = 0
-                melodyStartTime = nil
             }
         }
 
@@ -361,7 +408,7 @@ public final class SessionManager {
         completedBursts.removeAll(keepingCapacity: false)
     }
 
-    private func finalizeActiveEvent() {
+    private func finalizeActiveEvent(skipMinDuration: Bool = false) {
         guard let startTime = activeEventStart, let session = currentSession else {
             print("[SessionManager] finalizeActiveEvent() — no active event or session")
             return
@@ -384,7 +431,10 @@ public final class SessionManager {
 
         // Discard events shorter than 2 s to filter out brief breathing waves
         // and transients. This value is intentionally not user-configurable.
-        let minDuration: TimeInterval = 2.0
+        // When the mic is paused by soothing melody we lower the threshold to
+        // 0.5 s — enough to ensure the event shows meaningful duration in the UI
+        // while still filtering out genuine transients.
+        let minDuration: TimeInterval = skipMinDuration ? 0.5 : 2.0
         guard eventSpan >= minDuration else {
             activeEventStart = nil
             activeEventIntensity = nil

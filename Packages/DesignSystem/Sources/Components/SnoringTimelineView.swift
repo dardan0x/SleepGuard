@@ -28,6 +28,21 @@ public struct SnoringTimelineView: View {
           with: .color(segment.color)
         )
       }
+
+      // Draw gaps as semi-transparent overlay to indicate detection blind spots
+      let gapSegments = gapTimelineSegments(in: size.width)
+      for gap in gapSegments {
+        let rect = CGRect(x: gap.x, y: 6, width: gap.width, height: 20)
+        context.fill(
+          Path(roundedRect: rect, cornerRadius: 2),
+          with: .color(theme.textTertiary.opacity(0.18))
+        )
+        context.stroke(
+          Path(roundedRect: rect, cornerRadius: 2),
+          with: .color(theme.textTertiary.opacity(0.35)),
+          lineWidth: 1
+        )
+      }
     }
     .frame(height: 32)
   }
@@ -61,6 +76,23 @@ public struct SnoringTimelineView: View {
         color: theme.intensityColor(event.intensity)
       )
     }
+  }
+
+  private func gapTimelineSegments(in totalWidth: CGFloat) -> [TimelineSegment] {
+    let sessionStart = session.startDate.timeIntervalSinceReferenceDate
+    let sessionEnd = session.endDate?.timeIntervalSinceReferenceDate ?? (sessionStart + session.totalDuration)
+    let totalDuration = max(sessionEnd - sessionStart, 1)
+
+    return session.recordingGaps?.map { gap in
+      let relativeStart = gap.startOffset / totalDuration
+      let relativeDuration = max(gap.duration / totalDuration, 0.002)
+      return TimelineSegment(
+        id: UUID(),
+        x: CGFloat(relativeStart) * totalWidth,
+        width: max(CGFloat(relativeDuration) * totalWidth, 2),
+        color: .clear
+      )
+    } ?? []
   }
 
   private struct TimelineSegment: Identifiable {
