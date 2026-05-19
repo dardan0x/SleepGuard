@@ -51,6 +51,8 @@ public struct SessionDetailView: View {
 
         MelodyGapsBannerView(session: session)
 
+        LowBatteryBannerView(session: session)
+
         SessionDetailEventsView(
           events: sortedEvents,
           onShowAll: { activeSheet = .events },

@@ -148,6 +148,54 @@
 ### Open Questions
 - None
 
+## 2026-05-19 — Session 50: Low Battery Force-Save + Banner
+
+### Completed
+- **F2-T12**: Low battery force-save and explanatory banner
+
+### Technical Details
+- `SessionManager.processingTask` increments a counter every 50ms; every 600 iterations (~30s) it calls `checkBatteryLevel()`
+- `UIDevice.current.isBatteryMonitoringEnabled` is enabled in `SessionManager.init()` (skipped in simulator)
+- At `batteryLevel <= 0.02`, `forceSaveDueToLowBattery()` calls `stopSession()` and sets `forceSaveReason = "low_battery"`
+- `StatisticsTab.onChange(of: sessionManager.completedSession)` checks `forceSaveReason`; if set, auto-saves to SwiftData via `modelContext`, syncs to HealthKit if enabled, stores reason in `UserDefaults`, and clears flags without presenting summary sheet
+- `LowBatteryBannerView` (DesignSystem) reads `session_termination_reason_<id>` from `UserDefaults` and renders a `MelodyGapsBannerView`-style info card with `bolt.fill` icon in `scoreAmber`
+- Banner is shown in both `SessionSummaryView` (after manual stop) and `SessionDetailView` (saved session detail)
+- `SessionDetailView.deleteSession()` removes the `UserDefaults` key alongside the session deletion
+- Zero changes to `SleepSession` SwiftData model
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Env/Sources/Services/SessionManager.swift` | +25/-0 | Battery monitoring (`batteryCheckCounter`, `checkBatteryLevel()`), `forceSaveReason`, `forceSaveDueToLowBattery()` |
+| `SnoreGuard/StatisticsTab.swift` | +28/-4 | Auto-save logic for force-saved sessions; `HealthKitSync` and `modelContext` environments; `autoSaveForceSavedSession()` helper |
+| `Packages/DesignSystem/Sources/Components/LowBatteryBannerView.swift` | +32/-0 | New banner component; reads UserDefaults; styled like `MelodyGapsBannerView` |
+| `Packages/SleepSession/Sources/Views/SessionSummaryView.swift` | +2/-0 | Added `LowBatteryBannerView` below `MelodyGapsBannerView` |
+| `Packages/Recordings/Sources/Views/SessionDetailView.swift` | +3/-0 | Added `LowBatteryBannerView` below `MelodyGapsBannerView`; UserDefaults cleanup in `deleteSession()` |
+| `Packages/DesignSystem/Sources/Resources/Strings.txt` | +1/-0 | `session.summary.lowBattery.forceSave.info` localization entry |
+| `Packages/DesignSystem/Sources/Resources/Localizable.xcstrings` | +10/-0 | Added English localization for low battery banner text |
+| `Packages/DesignSystem/Sources/Strings.swift` | +1/-0 | Regenerated; added `sessionSummaryLowBatteryForceSaveInfo` accessor |
+
+### Architecture Decisions
+- **UserDefaults over model changes**: Storing the force-save reason in `UserDefaults` (keyed by session ID) avoids a SwiftData migration and keeps `SleepSession` lightweight. Cleanup is trivial on deletion.
+- **Auto-save in StatisticsTab, not SessionManager**: `SessionManager` has no `ModelContext` access by design. The view layer (`StatisticsTab`) handles the save + sync sequence, matching the existing pattern where `SessionSummaryView.saveSession()` triggers HealthKit sync.
+- **Banner in both summary and detail**: The banner appears in `SessionSummaryView` (for completeness, in case the auto-save path fails and the user sees the summary) and `SessionDetailView` (primary discovery path for already-saved force-saved sessions).
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors
+
+### Git Handoff
+- **Suggested branch**: `feature/f2-t12-low-battery-force-save`
+- **Suggested commit**: `F2-T12 — Low battery force-save and explanatory banner`
+  - `SessionManager` battery monitoring with 30s polling interval
+  - `forceSaveDueToLowBattery()` stops session and sets `forceSaveReason`
+  - `StatisticsTab` auto-saves force-saved sessions to SwiftData + HealthKit
+  - `LowBatteryBannerView` styled like `MelodyGapsBannerView`
+  - UserDefaults-based termination reason; no `SleepSession` model changes
+
+### Open Questions
+- Should we show a local notification when force-saving, or is the in-app banner sufficient?
+- Should `BedsideClockView` show a brief "Saving session…" overlay while the force-save happens?
+
 ---
 
 ## 2026-05-06 — Session 19: Statistics Start Recording Button Pin

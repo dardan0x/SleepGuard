@@ -3,6 +3,7 @@ import Env
 import Foundation
 import Models
 import Observation
+import UIKit
 
 @MainActor
 @Observable
@@ -57,6 +58,7 @@ public final class SessionManager {
     private var sessionSnoringDuration: TimeInterval = 0
     private var lastUpdateTime: Date?
     private var processingTask: Task<Void, Never>?
+    private var batteryCheckCounter = 0
 
     private init() {
         NotificationCenter.default.addObserver(
@@ -65,6 +67,9 @@ public final class SessionManager {
             name: .soothingMelodyDidStop,
             object: nil
         )
+        #if !targetEnvironment(simulator)
+        UIDevice.current.isBatteryMonitoringEnabled = true
+        #endif
     }
 
     @objc private func handleMelodyDidStop() {
@@ -123,8 +128,32 @@ public final class SessionManager {
                     spectralScore: audioRecorder.spectralScore,
                     snoreConfidence: saConf
                 )
+                batteryCheckCounter += 1
+                if batteryCheckCounter >= 600 {
+                    batteryCheckCounter = 0
+                    checkBatteryLevel()
+                }
                 try? await Task.sleep(for: .milliseconds(50))
             }
+        }
+    }
+
+    private func checkBatteryLevel() {
+        #if targetEnvironment(simulator)
+        return
+        #else
+        let level = UIDevice.current.batteryLevel
+        guard level >= 0, level <= 0.02 else { return }
+        print("[SessionManager] Battery level at \(Int(level * 100))% — force saving session")
+        forceSaveDueToLowBattery()
+        #endif
+    }
+
+    public func forceSaveDueToLowBattery() {
+        Task { @MainActor in
+            guard isRecording else { return }
+            currentSession?.terminationReason = "low_battery"
+            _ = await stopSession()
         }
     }
 

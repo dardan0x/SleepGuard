@@ -123,6 +123,7 @@ public enum Strings {
   public static var sessionRecordingEventsCountUpperFormat: String { String(localized: "session.recording.eventsCountUpperFormat", bundle: .module) }
   public static var sessionRecordingEventsFormat: String { String(localized: "session.recording.eventsFormat", bundle: .module) }
   public static var sessionRecordingStatusFormat: String { String(localized: "session.recording.statusFormat", bundle: .module) }
+  public static var sessionSummaryLowBatteryForceSaveInfo: String { String(localized: "session.summary.lowBattery.forceSave.info", bundle: .module) }
   public static var sessionSummaryMelodyGapsInfo: String { String(localized: "session.summary.melodyGapsInfo", bundle: .module) }
   public static var sessionSummaryStatSnoreTime: String { String(localized: "session.summary.statSnoreTime", bundle: .module) }
   public static var sessionSummaryStatSnoring: String { String(localized: "session.summary.statSnoring", bundle: .module) }

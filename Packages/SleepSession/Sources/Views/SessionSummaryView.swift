@@ -34,6 +34,8 @@ public struct SessionSummaryView: View {
 
         MelodyGapsBannerView(session: session)
 
+        LowBatteryBannerView(session: session)
+
         timelineSection
 
         actionButtons
