@@ -22,13 +22,13 @@ struct RecordingPrestartView: View {
             ScrollView {
                 VStack(spacing: 0) {
                     iconSection
-                        .padding(.top, isCompactHeight ? 20 : 24)
-                    
+                        .padding(.top, DeviceSize.isCompactHeight ? 20 : 24)
+
                     headlineSection
-                        .padding(.top, isCompactHeight ? 20 : 24)
+                        .padding(.top, DeviceSize.isCompactHeight ? 20 : 24)
 
                     tipsSection
-                        .padding(.top, isCompactHeight ? 20 : 24)
+                        .padding(.top, DeviceSize.isCompactHeight ? 20 : 24)
 
                     VStack(spacing: 12) {
                         VStack(alignment: .leading, spacing: 8) {
@@ -45,7 +45,7 @@ struct RecordingPrestartView: View {
                         }
                         helperText
                     }
-                    .padding(.top, isCompactHeight ? 20 : 24)
+                    .padding(.top, DeviceSize.isCompactHeight ? 20 : 24)
 
                     Color.clear.frame(height: 160)
                 }
@@ -149,17 +149,13 @@ struct RecordingPrestartView: View {
         }
     }
 
-    private var isCompactHeight: Bool {
-        UIScreen.main.bounds.height <= 874
-    }
-
     private var iconSection: some View {
-        RoundedRectangle(cornerRadius: isCompactHeight ? 20 : 24)
+        RoundedRectangle(cornerRadius: DeviceSize.isCompactHeight ? 20 : 24)
             .fill(theme.bgCard)
-            .frame(width: isCompactHeight ? 80 : 100, height: isCompactHeight ? 80 : 100)
+            .frame(width: DeviceSize.isCompactHeight ? 80 : 100, height: DeviceSize.isCompactHeight ? 80 : 100)
             .overlay(
                 Image(systemName: "moon.fill")
-                    .font(.system(size: isCompactHeight ? 36 : 44))
+                    .font(.system(size: DeviceSize.isCompactHeight ? 36 : 44))
                     .foregroundStyle(theme.accent)
             )
     }
@@ -167,12 +163,12 @@ struct RecordingPrestartView: View {
     private var headlineSection: some View {
         VStack(spacing: 8) {
             Text(Strings.statsEmptyTitle)
-                .font(.system(size: isCompactHeight ? 22 : 28, weight: .bold))
+                .font(.system(size: DeviceSize.isCompactHeight ? 22 : 28, weight: .bold))
                 .foregroundStyle(theme.textPrimary)
                 .multilineTextAlignment(.center)
 
             Text(Strings.sessionPrestartBody)
-                .font(.system(size: isCompactHeight ? 14 : 16))
+                .font(.system(size: DeviceSize.isCompactHeight ? 14 : 16))
                 .foregroundStyle(theme.textSecondary)
                 .multilineTextAlignment(.center)
                 .lineLimit(nil)

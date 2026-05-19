@@ -63,19 +63,37 @@ struct Last7NightsRow: View {
         .font(.system(size: 14, weight: .medium, design: .monospaced))
         .foregroundStyle(theme.textPrimary)
 
-      Text("\(day.totalSnoringMinutes)m snoring")
+      Text(snoringDurationString(day.totalSnoringMinutes))
         .font(.system(size: 12))
         .foregroundStyle(day.intensityColor)
     }
   }
 
   private func durationString(_ interval: TimeInterval) -> String {
-    let total = Int(interval)
-    let hours = total / 3600
-    let minutes = (total % 3600) / 60
+    let totalInt = Int(interval)
+    let hours = totalInt / 3600
+    let minutes = (totalInt % 3600) / 60
     if hours > 0 {
-      return String(format: "%d h %d min", hours, minutes)
+      let hourLabel = hours == 1 ? Strings.timeHourSingular : Strings.timeHourPlural
+      let minLabel = minutes == 1 ? Strings.timeMinuteSingular : Strings.timeMinutePlural
+      return "\(hours) \(hourLabel) \(minutes) \(minLabel)"
     }
-    return String(format: "%d min", minutes)
+    let minLabel = minutes == 1 ? Strings.timeMinuteSingular : Strings.timeMinutePlural
+    return "\(minutes) \(minLabel)"
+  }
+
+  private func snoringDurationString(_ minutes: Int) -> String {
+    let hours = minutes / 60
+    let mins = minutes % 60
+    let duration: String
+    if hours > 0 {
+      let hourLabel = hours == 1 ? Strings.timeHourSingular : Strings.timeHourPlural
+      let minLabel = mins == 1 ? Strings.timeMinuteSingular : Strings.timeMinutePlural
+      duration = "\(hours) \(hourLabel) \(mins) \(minLabel)"
+    } else {
+      let minLabel = mins == 1 ? Strings.timeMinuteSingular : Strings.timeMinutePlural
+      duration = "\(mins) \(minLabel)"
+    }
+    return "\(duration) \(Strings.totalSnoringDurationColumn)"
   }
 }

@@ -31,6 +31,11 @@ struct TrendsChartSection: View {
         }
       }
     }
+    .padding(16)
+    .overlay(
+        RoundedRectangle(cornerRadius: theme.radiusCard)
+            .stroke(theme.bgCard, lineWidth: 1)
+    )
   }
 }
 

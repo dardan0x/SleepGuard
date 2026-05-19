@@ -14,7 +14,7 @@ struct Last7NightsChartCard: View {
 
       SnoringLegendView()
     }
-    .padding(theme.radiusCard)
+    .padding(16)
     .overlay(
         RoundedRectangle(cornerRadius: theme.radiusCard)
           .stroke(theme.bgCard, lineWidth: 1)
