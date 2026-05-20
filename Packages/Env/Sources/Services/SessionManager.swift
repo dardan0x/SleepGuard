@@ -32,7 +32,7 @@ public final class SessionManager {
     private var activeEventDBCount: Int = 0
     private var activeEventPeakDB: Double = 0
     private var lastSnoringSampleTime: Date?
-    private let eventGapThreshold: TimeInterval = 3.0
+    private let eventGapThreshold: TimeInterval = 10.0
     /// Require 3 consecutive snoring samples (≈150 ms at 20 Hz) before starting an event.
     /// Filters out brief transient sounds (bed creaks, taps, notifications).
     private var consecutiveSnoreSamples: Int = 0

@@ -3013,3 +3013,38 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 
 ### Open Questions
 - None
+
+
+---
+
+## 2026-05-19 — Session 51: Increase Snore Event Gap Threshold
+
+### Completed
+- Increased `eventGapThreshold` from 3.0 → 10.0 seconds in `SessionManager`
+
+### Technical Details
+- The existing burst-tracking architecture (`activeBurstStart`, `completedBursts`, `SnoreBurst`) already captures continuous snoring segments and gaps between them, so a longer threshold naturally produces multi-burst events instead of separate events.
+- `AudioClipExtractor` composes gap-free clips from bursts via `AVMutableComposition`, so merged events still produce clean audio clips.
+- The melody play/stop logic is fully decoupled from event finalization (melody stops on sustained non-snore + 4 s minimum play duration), so anti-snore behavior is unaffected.
+- Existing sessions remain split (threshold only applies to new recordings).
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Env/Sources/Services/SessionManager.swift` | +1/-1 | `eventGapThreshold: TimeInterval = 3.0` → `10.0` |
+
+### Architecture Decisions
+- **Single-line threshold change vs. post-session merging**: Post-session merging would touch the data model and require burst offset recalculation. Since the architecture already supports multi-burst events, simply widening the real-time threshold is safer and produces the same outcome for new sessions.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors
+
+### Git Handoff
+- **Suggested branch**: `tweak/event-gap-threshold-10s`
+- **Suggested commit**: `Increase snore event gap threshold from 3s to 10s`
+  - Brief breathing pauses under 10s now merge into a single SnoreEvent
+  - Reduces duplicate "same minute" entries in the events list
+
+### Open Questions
+- None
