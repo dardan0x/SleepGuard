@@ -10,7 +10,7 @@ public struct SleepSessionView: View {
   public init() {}
 
   public var body: some View {
-    Group {
+    ZStack {
       if sessionManager.isRecording {
         BedsideClockView()
       } else if sessionManager.completedSession != nil {
@@ -22,5 +22,7 @@ public struct SleepSessionView: View {
       }
     }
     .toolbar(.hidden, for: .navigationBar)
+    .onAppear { sessionManager.isLiveSessionVisible = true }
+    .onDisappear { sessionManager.isLiveSessionVisible = false }
   }
 }

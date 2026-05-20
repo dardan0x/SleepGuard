@@ -21,7 +21,7 @@ struct StatisticsLoadedView: View {
                 StatisticsLoadedHeaderView(onViewCalendar: onViewCalendar)
                     .padding(.horizontal, 20)
                     .padding(.top, 10)
-
+                
                 ScrollView {
                     VStack(spacing: DeviceSize.isCompactHeight ? 10 : 16) {
                         StatisticsWeekSelector(weekDays: weekDays, onViewTrends: onViewTrends)
@@ -44,12 +44,8 @@ struct StatisticsLoadedView: View {
                         if !recentSessions.isEmpty {
                             StatisticsMiniChartSection(recentSessions: recentSessions)
                         }
-                        
-                        Color.clear.frame(height: 100)
                     }
                     .padding(.horizontal, 20)
-                    .padding(.top, 10)
-                    .padding(.bottom, 20)
                 }
             }
             
@@ -57,8 +53,8 @@ struct StatisticsLoadedView: View {
                 onStartRecording()
             }
             .padding(.horizontal, 20)
-            .padding(.bottom, 5)
             .background(theme.bgPrimary.ignoresSafeArea(edges: .bottom))
+            .padding(.bottom, 20)
         }
         .toolbar(.hidden, for: .navigationBar)
     }

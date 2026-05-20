@@ -14,6 +14,7 @@ public final class SessionManager {
     public var isRecording = false
     public var completedSession: SleepSession?
     public var isProcessingSession = false
+    public var isLiveSessionVisible = false
 
     /// Real-time audio level for UI observation
     public var currentDB: Float = -160.0

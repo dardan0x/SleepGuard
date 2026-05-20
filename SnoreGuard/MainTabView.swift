@@ -25,24 +25,25 @@ struct MainTabView: View {
     private var systemTabView: some View {
         TabView {
             StatisticsTab()
-                .toolbar(sessionManager.isRecording ? .hidden : .visible, for: .tabBar)
+                .toolbar(sessionManager.isRecording || sessionManager.isLiveSessionVisible ? .hidden : .visible, for: .tabBar)
                 .tabItem {
                     Label(Strings.tabStatistics, systemImage: "chart.bar.fill")
                 }
             
             RecordingsTab()
-                .toolbar(sessionManager.isRecording ? .hidden : .visible, for: .tabBar)
+                .toolbar(sessionManager.isRecording || sessionManager.isLiveSessionVisible ? .hidden : .visible, for: .tabBar)
                 .tabItem {
                     Label(Strings.tabMedia, systemImage: "waveform")
                 }
             
             SettingsTab()
-                .toolbar(sessionManager.isRecording ? .hidden : .visible, for: .tabBar)
+                .toolbar(sessionManager.isRecording || sessionManager.isLiveSessionVisible ? .hidden : .visible, for: .tabBar)
                 .tabItem {
                     Label(Strings.tabSettings, systemImage: "gearshape")
                 }
         }
         .tint(theme.accent)
+        .animation(nil, value: sessionManager.isLiveSessionVisible)
         .overlay(sessionProcessingOverlay)
     }
     
@@ -53,7 +54,7 @@ struct MainTabView: View {
             customContent
                 .padding(.bottom, 45)
             
-            if !sessionManager.isRecording {
+            if !sessionManager.isRecording && !sessionManager.isLiveSessionVisible {
                 customTabBar
             }
             
@@ -82,21 +83,17 @@ struct MainTabView: View {
             Spacer()
             
             HStack(spacing: 4) {
-                tabItem(index: 0, icon: "chart.bar.fill", label: Strings.tabStatistics)
-                tabItem(index: 1, icon: "waveform", label: Strings.tabMedia)
-                tabItem(index: 2, icon: "gearshape", label: Strings.tabSettings)
+                tabItem(index: 0, icon: "chart.bar.fill", label: Strings.tabStatistics.capitalized)
+                tabItem(index: 1, icon: "waveform", label: Strings.tabMedia.capitalized)
+                tabItem(index: 2, icon: "gearshape", label: Strings.tabSettings.capitalized)
             }
-            .padding(4)
+            .padding(6)
             .background(
                 ZStack {
                     Capsule()
-                        .fill(.ultraThinMaterial)
-                    Capsule()
-                        .fill(theme.bgSecondary.opacity(0.35))
-                    Capsule()
                         .fill(
                             LinearGradient(
-                                colors: [.white.opacity(0.08), .clear],
+                                colors: [.white.opacity(0.07), .clear],
                                 startPoint: .top,
                                 endPoint: .bottom
                             )
@@ -107,9 +104,7 @@ struct MainTabView: View {
                 Capsule()
                     .stroke(.white.opacity(0.1), lineWidth: 0.5)
             )
-            .padding(.horizontal, 21)
-            .padding(.bottom, -10)
-            .padding(.top, 12)
+            .padding(.horizontal, 30)
             .background(
                 ZStack {
                     Color.clear
@@ -117,6 +112,7 @@ struct MainTabView: View {
                     .ignoresSafeArea(edges: .all)
             )
         }
+        .padding(.horizontal, 30)
     }
     
     private var sessionProcessingOverlay: some View {
@@ -151,12 +147,11 @@ struct MainTabView: View {
         } label: {
             VStack(spacing: 4) {
                 Image(systemName: icon)
-                    .font(.system(size: 18, weight: .semibold))
+                    .font(.system(size: 22, weight: .semibold))
                 
                 Text(label)
-                    .font(.system(size: 10, weight: .semibold))
+                    .font(.system(size: 9, weight: .medium))
                     .tracking(0.5)
-                    .textCase(.uppercase)
             }
             .foregroundStyle(isSelected ? theme.accent : theme.textPrimary)
             .frame(maxWidth: .infinity)

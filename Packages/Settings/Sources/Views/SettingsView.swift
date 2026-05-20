@@ -57,7 +57,7 @@ public struct SettingsView: View {
   private var titleRow: some View {
     HStack {
       Text(Strings.tabSettings)
-        .font(.system(size: 28, weight: .bold))
+         .font(.system(size: 34, weight: .bold))
         .foregroundStyle(theme.textPrimary)
       Spacer()
       ZStack {

@@ -51,6 +51,7 @@ struct StatisticsEmptyView: View {
             }
             .background(theme.bgPrimary.ignoresSafeArea(edges: .bottom))
         }
+        .toolbar(.hidden, for: .navigationBar)
     }
     
     private var headerSection: some View {

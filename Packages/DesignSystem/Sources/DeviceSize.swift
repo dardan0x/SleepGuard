@@ -1,4 +1,4 @@
-import UIKit
+import SwiftUI
 
 public enum DeviceSize {
   public static var isCompactHeight: Bool {

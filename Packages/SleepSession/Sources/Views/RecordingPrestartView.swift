@@ -11,25 +11,25 @@ struct RecordingPrestartView: View {
     @Environment(RouterPath.self) private var routerPath
     @Environment(UserPreferences.self) private var userPreferences
     private let audioRecorder = AudioRecorder.shared
-
+    
     private let delayOptions = [0, 15, 30, 45, 60]
     @State private var showSoothingMelodySheet = false
     @State private var showChargingAlert = false
     @State private var showMicrophoneAlert = false
-
+    
     var body: some View {
         ZStack(alignment: .bottom) {
             ScrollView {
                 VStack(spacing: 0) {
                     iconSection
                         .padding(.top, DeviceSize.isCompactHeight ? 20 : 24)
-
+                    
                     headlineSection
                         .padding(.top, DeviceSize.isCompactHeight ? 20 : 24)
-
+                    
                     tipsSection
                         .padding(.top, DeviceSize.isCompactHeight ? 20 : 24)
-
+                    
                     VStack(spacing: 12) {
                         VStack(alignment: .leading, spacing: 8) {
                             delaySection
@@ -46,12 +46,12 @@ struct RecordingPrestartView: View {
                         helperText
                     }
                     .padding(.top, DeviceSize.isCompactHeight ? 20 : 24)
-
+                    
                     Color.clear.frame(height: 160)
                 }
                 .padding(.horizontal, 24)
             }
-
+            
             VStack(spacing: 0) {
                 StartRecordingButton(height: 56) {
                     Task { @MainActor in
@@ -69,7 +69,7 @@ struct RecordingPrestartView: View {
                         beginSession()
                     }
                 }
-
+                
                 Button {
                     routerPath.navigateBack()
                 } label: {
@@ -77,11 +77,8 @@ struct RecordingPrestartView: View {
                         .font(.system(size: 17, weight: .medium))
                         .foregroundStyle(theme.textSecondary)
                 }
-                .padding(.bottom, 5)
             }
             .padding(.horizontal, 24)
-            .padding(.top, 10)
-            .padding(.bottom, 10)
             .background(theme.bgPrimary.ignoresSafeArea(edges: .bottom))
         }
         .background(theme.bgPrimary.ignoresSafeArea())
@@ -109,7 +106,7 @@ struct RecordingPrestartView: View {
             Text(Strings.sessionMicrophoneAlertMessage)
         }
     }
-
+    
     private func beginSession() {
         let delay = UserPreferences.shared.recordingDelayMinutes
         if delay > 0 {
@@ -122,16 +119,16 @@ struct RecordingPrestartView: View {
             }
         }
     }
-
+    
     private var isCharging: Bool {
-        #if targetEnvironment(simulator)
+#if targetEnvironment(simulator)
         return true
-        #else
+#else
         UIDevice.current.isBatteryMonitoringEnabled = true
         return UIDevice.current.batteryState == .charging || UIDevice.current.batteryState == .full
-        #endif
+#endif
     }
-
+    
     private var soothingMelodyValue: String {
         switch userPreferences.soothingMelodyMode {
         case .never:
@@ -148,7 +145,7 @@ struct RecordingPrestartView: View {
             return Strings.sixtySecondsSoothingMelodyValueFormat
         }
     }
-
+    
     private var iconSection: some View {
         RoundedRectangle(cornerRadius: DeviceSize.isCompactHeight ? 20 : 24)
             .fill(theme.bgCard)
@@ -159,14 +156,14 @@ struct RecordingPrestartView: View {
                     .foregroundStyle(theme.accent)
             )
     }
-
+    
     private var headlineSection: some View {
         VStack(spacing: 8) {
             Text(Strings.statsEmptyTitle)
                 .font(.system(size: DeviceSize.isCompactHeight ? 22 : 28, weight: .bold))
                 .foregroundStyle(theme.textPrimary)
                 .multilineTextAlignment(.center)
-
+            
             Text(Strings.sessionPrestartBody)
                 .font(.system(size: DeviceSize.isCompactHeight ? 14 : 16))
                 .foregroundStyle(theme.textSecondary)
@@ -175,7 +172,7 @@ struct RecordingPrestartView: View {
                 .fixedSize(horizontal: false, vertical: true)
         }
     }
-
+    
     private var tipsSection: some View {
         ZStack {
             // Outer soft glow
@@ -184,7 +181,7 @@ struct RecordingPrestartView: View {
                 .blur(radius: 12)
                 .offset(y: 4)
                 .padding(.horizontal, -4)
-
+            
             // Inner concentrated glow
             RoundedRectangle(cornerRadius: theme.radiusCard)
                 .fill(
@@ -197,7 +194,7 @@ struct RecordingPrestartView: View {
                 .blur(radius: 8)
                 .offset(y: 6)
                 .padding(.horizontal, -2)
-
+            
             VStack(spacing: 0) {
                 tipRow(icon: "iphone", text: Strings.sessionPrestartTipPhone)
                 Divider()
@@ -208,89 +205,80 @@ struct RecordingPrestartView: View {
             .background(
                 ZStack {
                     theme.bgCard
-                    RoundedRectangle(cornerRadius: theme.radiusCard)
-                        .stroke(
-                            LinearGradient(
-                                colors: [Color(hex: "#FF453A").opacity(0.6), Color(hex: "#FF453A").opacity(0.1)],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            ),
-                            lineWidth: 1
-                        )
                 }
             )
             .cornerRadius(theme.radiusCard)
         }
     }
-
+    
     private func tipRow(icon: String, text: String) -> some View {
         HStack(spacing: 12) {
             Image(systemName: icon)
                 .font(.system(size: 18))
                 .foregroundStyle(theme.accent)
                 .frame(width: 24)
-
+            
             Text(text)
                 .font(.system(size: 16))
                 .foregroundStyle(theme.textSecondary)
-
+            
             Spacer()
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 14)
     }
-
+    
     private func soothingMelodyRow(icon: String, title: String, value: String, subtitle: String? = nil, action: @escaping () -> Void) -> some View {
-            Button(action: action) {
-                VStack(spacing: 4) {
-                    HStack(spacing: 12) {
-                        Image(systemName: icon)
-                            .font(.system(size: 18))
-                            .foregroundStyle(theme.accent)
-                            .frame(width: 24)
-
-                        Text(title)
-                            .font(.system(size: 16))
-                            .foregroundStyle(theme.textPrimary)
-
-                        Spacer()
-
-                        Text(value)
-                            .font(.system(size: 16))
-                            .foregroundStyle(theme.textSecondary)
-
-                        Image(systemName: "chevron.right")
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundStyle(theme.textTertiary)
-                    }
-
-                    if let subtitle {
-                        HStack(spacing: 6) {
-                            Image(systemName: "lock.open.fill")
-                                .font(.system(size: 12))
-                            Text(subtitle)
-                                .font(.system(size: 13))
-                            Spacer()
-                        }
+        Button(action: action) {
+            VStack(spacing: 4) {
+                HStack(spacing: 12) {
+                    Image(systemName: icon)
+                        .font(.system(size: 18))
+                        .foregroundStyle(theme.accent)
+                        .frame(width: 24)
+                    
+                    Text(title)
+                        .font(.system(size: 16))
+                        .foregroundStyle(theme.textPrimary)
+                    
+                    Spacer()
+                    
+                    Text(value)
+                        .font(.system(size: 16))
+                        .foregroundStyle(theme.textSecondary)
+                    
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 14, weight: .semibold))
                         .foregroundStyle(theme.textTertiary)
-                        .padding(.top, 4)
-                        .padding(.leading, 6)
-                    }
                 }
-                .padding(.horizontal, 16)
-                .padding(.vertical, subtitle == nil ? 14 : 12)
-                .background(theme.bgCard)
-                .cornerRadius(theme.radiusCard)
+                
+                if let subtitle {
+                    HStack(spacing: 6) {
+                        Image(systemName: "lock.open.fill")
+                            .font(.system(size: 12))
+                        Text(subtitle)
+                            .font(.system(size: 13))
+                        Spacer()
+                    }
+                    .foregroundStyle(theme.textTertiary)
+                    .padding(.top, 4)
+                    .padding(.leading, 6)
+                }
             }
-            .buttonStyle(.plain)
+            .padding(.horizontal, 16)
+            .padding(.vertical, subtitle == nil ? 14 : 12)
+            .background(theme.bgCard)
+            .cornerRadius(theme.radiusCard)
         }
-
+        .buttonStyle(.plain)
+    }
+    
     private var delaySection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(Strings.sessionPrestartDelayLabel)
                 .font(.system(size: 15, weight: .semibold))
                 .foregroundStyle(theme.textPrimary)
-
+            
             HStack(spacing: 8) {
                 ForEach(delayOptions, id: \.self) { minutes in
                     delayButton(minutes: minutes)
@@ -301,11 +289,11 @@ struct RecordingPrestartView: View {
         .background(theme.bgCard)
         .cornerRadius(theme.radiusCard)
     }
-
+    
     private func delayButton(minutes: Int) -> some View {
         let isSelected = userPreferences.recordingDelayMinutes == minutes
         let label = minutes == 0 ? Strings.sessionPrestartDelayOff : (minutes == 60 ? "1h" : "\(minutes)m")
-
+        
         return Button {
             withAnimation(.spring(duration: 0.25)) {
                 userPreferences.recordingDelayMinutes = minutes
@@ -321,7 +309,7 @@ struct RecordingPrestartView: View {
         }
         .buttonStyle(.plain)
     }
-
+    
     private var helperText: some View {
         Text(Strings.soothingMelodyRowHelperText)
             .font(.system(size: 14))
