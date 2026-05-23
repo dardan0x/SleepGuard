@@ -2,7 +2,7 @@
 
 > Auto-updated by the AI after every task. This is the local source of truth.
 
-Last updated: 2026-05-22 (Session 53)
+Last updated: 2026-05-22 (Session 54)
 
 ---
 
@@ -59,6 +59,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-05-22 | Snore detection thresholds + epic tier + sensitivity | Completed | Added 4th `.epic` intensity tier matching SnoreLab. Tightened SoundAnalysis floors (-60→-45, -40→-30, -25→-15) and spectral thresholds (-35→-30, -25→-20, -15→-10, epic=-5). Wired `UserPreferences.detectionSensitivity` to shift thresholds ±5 dB. Updated `sleepScore` for epic penalty. Added `SettingsRecordingSection` with picker. All intensity switches updated. Build succeeds |
 | 2026-05-22 | Background audio recording fix | Completed | `SnoreGuard/Info.plist` now explicitly contains `UIBackgroundModes = [audio]` (was missing from built app despite build setting). `AudioRecorder` added `.mixWithOthers`, `isPaused` flag, `routeChangeNotification` + `didBecomeActiveNotification` observers, and robust `resumeRecordingIfNeeded()` fallback. `SoothingMelodyPlayer` no longer changes `AVAudioSession` category to `.playback` (was dropping mic). Build succeeds |
 | 2026-05-22 | Snoring time calculation refactor | Completed | `SnoreEvent` gained `duration` field storing event-span (first→last snore, including natural breathing pauses). `snoreDuration` returns `duration` for new data, falls back to burst-sum for legacy. `SleepSession.snoringDuration` no longer adds `gapsDuration`. Aligns with SnoreClock/SnoreLab validated epoch-based measurement. Build succeeds |
 | 2026-05-19 | Increase snore event gap threshold | Completed | `eventGapThreshold` in SessionManager changed from 3.0 → 10.0 s. Brief breathing pauses under 10 s now merge into a single SnoreEvent instead of splitting into separate events. Existing burst tracking and gap-free clip extraction already support this. Melody play/stop logic is decoupled and unaffected. Build succeeds |

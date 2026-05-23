@@ -22,6 +22,7 @@ public struct SleepReportPDFGenerator {
   private let quietColor = UIColor(red: 0.55, green: 0.55, blue: 0.55, alpha: 1)
   private let lightColor = UIColor(red: 1, green: 0.624, blue: 0.039, alpha: 1)
   private let loudColor = UIColor(red: 1, green: 0.271, blue: 0.227, alpha: 1)
+  private let epicColor = UIColor(red: 1, green: 0.176, blue: 0.333, alpha: 1)
 
   public func generatePDF(for session: SleepSession) -> URL? {
     let appName = Bundle.main.infoDictionary?["CFBundleDisplayName"] as? String
@@ -427,6 +428,7 @@ public struct SleepReportPDFGenerator {
     case .quiet: return quietColor
     case .light: return lightColor
     case .loud: return loudColor
+    case .epic: return epicColor
     }
   }
 

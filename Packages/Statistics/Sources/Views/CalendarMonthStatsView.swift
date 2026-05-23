@@ -37,7 +37,7 @@ struct CalendarMonthStatsView: View {
     private var loudNights: Int {
         monthSessions.filter { session in
             guard let events = session.events else { return false }
-            return events.contains { $0.intensity == .loud }
+            return events.contains { $0.intensity == .loud || $0.intensity == .epic }
         }.count
     }
 }

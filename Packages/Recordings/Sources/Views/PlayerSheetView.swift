@@ -235,7 +235,7 @@ public struct PlayerSheetView: View {
           .foregroundStyle(theme.textTertiary)
         Text("·")
           .foregroundStyle(theme.textTertiary)
-        Text("\(Int(event.snoreDuration))s · \(event.intensity.rawValue)")
+        Text("\(Int(event.snoreDuration))s · \(event.intensity.rawValue.capitalized)")
           .font(.system(size: 13, weight: .medium))
           .foregroundStyle(theme.textTertiary)
       }

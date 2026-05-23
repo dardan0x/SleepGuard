@@ -27,6 +27,7 @@ public struct SettingsView: View {
       ScrollView {
         VStack(spacing: 24) {
           SettingsPermissionsSection()
+          SettingsRecordingSection()
           SettingsAppearanceSection()
           SettingsWatchSection()
           SettingsDataSection(onShowDeleteConfirmation: { showDeleteConfirmation = true })

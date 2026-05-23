@@ -299,6 +299,7 @@ struct EventPlayerView: View {
     case .quiet: return Strings.quietIntensityLabel
     case .light: return Strings.lightIntensityLabelEventPlayerView
     case .loud: return Strings.loudIntensityLabelEventPlayerView
+    case .epic: return Strings.epicIntensityLabelEventPlayerView
     }
   }
 

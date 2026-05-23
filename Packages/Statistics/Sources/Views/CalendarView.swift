@@ -122,6 +122,7 @@ public struct CalendarView: View {
       return Color.clear
     }
     let intensities = events.map(\.intensity)
+    if intensities.contains(.epic) { return theme.snoreEpic }
     if intensities.contains(.loud) { return theme.snoreLoud }
     if intensities.contains(.light) { return theme.snoreLight }
     return theme.snoreQuiet

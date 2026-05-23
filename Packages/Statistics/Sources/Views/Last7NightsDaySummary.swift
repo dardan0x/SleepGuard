@@ -19,6 +19,7 @@ struct DaySummary: Identifiable {
   var intensityColor: Color {
     let theme = Theme.shared
     switch maxIntensity {
+    case .epic: return theme.snoreEpic
     case .loud: return theme.snoreLoud
     case .light: return theme.snoreLight
     case .quiet: return theme.snoreQuiet
@@ -41,6 +42,7 @@ struct DaySummary: Identifiable {
   private static func maxIntensity(for sessions: [SleepSession]) -> SnoreIntensity {
     let allEvents = sessions.compactMap(\.events).flatMap { $0 }
     let intensities = allEvents.map(\.intensity)
+    if intensities.contains(.epic) { return .epic }
     if intensities.contains(.loud) { return .loud }
     if intensities.contains(.light) { return .light }
     return .quiet

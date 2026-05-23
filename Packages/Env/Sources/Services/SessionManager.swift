@@ -110,6 +110,9 @@ public final class SessionManager {
         session.recordingGaps = []
         currentSession = session
 
+        // Apply detection sensitivity thresholds before starting
+        applyDetectionSensitivity()
+
         try audioRecorder.startRecording(audioFileURL: audioURL)
         isRecording = true
         currentDB = -160.0
@@ -505,11 +508,29 @@ public final class SessionManager {
             .appendingPathComponent("session_\(sessionID.uuidString).caf")
     }
 
+    private func applyDetectionSensitivity() {
+        let sensitivity = UserPreferences.shared.detectionSensitivity
+        let offset: Float
+        switch sensitivity {
+        case .low:
+            offset = 5.0
+        case .medium:
+            offset = 0.0
+        case .high:
+            offset = -5.0
+        }
+        snoreDetector.quietThreshold = -30.0 + offset
+        snoreDetector.lightThreshold = -20.0 + offset
+        snoreDetector.loudThreshold = -10.0 + offset
+        snoreDetector.epicThreshold = -5.0 + offset
+    }
+
     private func intensity(from state: SnoringState) -> SnoreIntensity {
         switch state {
         case .quiet: return .quiet
         case .light: return .light
         case .loud: return .loud
+        case .epic: return .epic
         case .none: return .quiet
         }
     }
@@ -519,6 +540,7 @@ public final class SessionManager {
         case .quiet: return 0
         case .light: return 1
         case .loud: return 2
+        case .epic: return 3
         }
     }
 }

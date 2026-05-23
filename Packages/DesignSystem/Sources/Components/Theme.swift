@@ -29,6 +29,7 @@ public final class Theme {
   public var snoreQuiet: Color = Color(hex: "#8E8E93")
   public var snoreLight: Color = Color(hex: "#FF9F0A")
   public var snoreLoud: Color = Color(hex: "#FF453A")
+  public var snoreEpic: Color = Color(hex: "#FF2D55")
 
   // MARK: - Text
   public var textPrimary: Color = Color(hex: "#FFFFFF")
@@ -72,6 +73,7 @@ public final class Theme {
     case .quiet: return snoreQuiet
     case .light: return snoreLight
     case .loud: return snoreLoud
+    case .epic: return snoreEpic
     }
   }
 
