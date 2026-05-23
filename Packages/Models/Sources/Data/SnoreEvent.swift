@@ -8,10 +8,18 @@ public enum SnoreIntensity: String, Codable, Sendable {
   case epic
 }
 
+public enum SoundCategory: String, Codable, Sendable {
+  case snoring
+  case sleepTalking
+  case noise
+  case other
+}
+
 @Model
 public final class SnoreEvent {
   @Attribute(.unique) public var id: UUID
   public var timestamp: Date
+  public var category: SoundCategory = SoundCategory.snoring
   public var intensity: SnoreIntensity
   /// Relative loudness in dBFS (digital full scale), not calibrated dB-SPL.
   /// Values are relative and vary by microphone sensitivity and device distance.
@@ -37,6 +45,7 @@ public final class SnoreEvent {
   public init(
     id: UUID = UUID(),
     timestamp: Date,
+    category: SoundCategory = .snoring,
     intensity: SnoreIntensity,
     averageDB: Double,
     peakDB: Double,
@@ -49,6 +58,7 @@ public final class SnoreEvent {
   ) {
     self.id = id
     self.timestamp = timestamp
+    self.category = category
     self.intensity = intensity
     self.averageDB = averageDB
     self.peakDB = peakDB

@@ -3177,3 +3177,41 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 - Should `snoringPercentage` denominator be `totalDuration` or `monitoredDuration`? Currently uses `totalDuration`.
 - Should the PDF sleep report show recording gaps as a separate stat?
 - Should we implement adaptive baseline (30-second ambient calibration at session start) for truly calibrated relative thresholds?
+
+
+## 2026-05-22 — Session 55: Future-Proof Data Model for Multi-Sound Detection
+
+### Completed
+- Added `SoundCategory` enum (`snoring`, `sleepTalking`, `noise`, `other`) to Models package
+- Added `category: SoundCategory` property to `SnoreEvent` with default `.snoring` — lightweight SwiftData migration, all existing events auto-categorize as snoring
+- Added `duration(for category:)` computed helper on `SleepSession` for future per-category stats
+- Explicitly passed `category: .snoring` in `SessionManager.finalizeActiveEvent()` for clarity
+- Left all UI unchanged — no dead "Other Sounds: 0" stat cards
+
+### Technical Details
+- `SoundCategory` is `String, Codable, Sendable` — same pattern as `SnoreIntensity` for future extensibility
+- SwiftData `@Model` requires fully qualified default value (`SoundCategory.snoring`, not `.snoring`)
+- `SleepSession.snoringDuration`, `snoringPercentage`, `eventsCount`, `sleepScore` continue working unchanged because they operate on the full event list
+- When multi-sound detection ships, only detection logic and UI need to change — no data migration
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Models/Sources/Data/SnoreEvent.swift` | +10/-1 | Added `SoundCategory` enum; added `category` property with default; updated initializer |
+| `Packages/Models/Sources/Data/SleepSession.swift` | +4/-0 | Added `duration(for category:)` computed helper |
+| `Packages/Env/Sources/Services/SessionManager.swift` | +1/-0 | Explicit `category: .snoring` in `SnoreEvent` init |
+
+### Architecture Decisions
+- **Keep `SnoreEvent` model name**: Renaming a `@Model` class is not a lightweight migration. Adding a property is. The name mismatch is cosmetic and harmless.
+- **No UI changes now**: Adding an "Other Sounds" stat that always shows 0 would look like a bug. UI evolves when the feature ships.
+- **Enum over String**: `SoundCategory` is a closed enum for now. If the user wants open-ended categories (user-defined labels), this can become a `String` later with a migration — but an enum gives type safety and exhaustiveness checking in switches today.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors, zero warnings
+
+### Next Session
+- Continue V2 polish or start F13 (CloudKit Sync)
+
+### Open Questions
+- What specific sound categories are anticipated? (coughing, apnea/gasping, pet sounds, traffic?). This determines if `SoundCategory` should stay an enum or become an open String.
+- Should non-snore sounds affect the sleep score, or should each category have its own score weighting?

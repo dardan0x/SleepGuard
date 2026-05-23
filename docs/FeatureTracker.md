@@ -2,7 +2,7 @@
 
 > Auto-updated by the AI after every task. This is the local source of truth.
 
-Last updated: 2026-05-22 (Session 54)
+Last updated: 2026-05-22 (Session 55)
 
 ---
 
@@ -59,6 +59,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-05-22 | Future-proof data model for multi-sound detection | Completed | Added `SoundCategory` enum (snoring/sleepTalking/noise/other) to `SnoreEvent` with default `.snoring` — lightweight SwiftData migration, zero data loss. Added `SleepSession.duration(for:)` helper. Explicit `.snoring` in `SessionManager`. No UI changes — stats grid unchanged. Build succeeds |
 | 2026-05-22 | Snore detection thresholds + epic tier + sensitivity | Completed | Added 4th `.epic` intensity tier matching SnoreLab. Tightened SoundAnalysis floors (-60→-45, -40→-30, -25→-15) and spectral thresholds (-35→-30, -25→-20, -15→-10, epic=-5). Wired `UserPreferences.detectionSensitivity` to shift thresholds ±5 dB. Updated `sleepScore` for epic penalty. Added `SettingsRecordingSection` with picker. All intensity switches updated. Build succeeds |
 | 2026-05-22 | Background audio recording fix | Completed | `SnoreGuard/Info.plist` now explicitly contains `UIBackgroundModes = [audio]` (was missing from built app despite build setting). `AudioRecorder` added `.mixWithOthers`, `isPaused` flag, `routeChangeNotification` + `didBecomeActiveNotification` observers, and robust `resumeRecordingIfNeeded()` fallback. `SoothingMelodyPlayer` no longer changes `AVAudioSession` category to `.playback` (was dropping mic). Build succeeds |
 | 2026-05-22 | Snoring time calculation refactor | Completed | `SnoreEvent` gained `duration` field storing event-span (first→last snore, including natural breathing pauses). `snoreDuration` returns `duration` for new data, falls back to burst-sum for legacy. `SleepSession.snoringDuration` no longer adds `gapsDuration`. Aligns with SnoreClock/SnoreLab validated epoch-based measurement. Build succeeds |

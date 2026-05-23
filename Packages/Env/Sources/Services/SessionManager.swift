@@ -480,6 +480,7 @@ public final class SessionManager {
 
         let event = SnoreEvent(
             timestamp: startTime,
+            category: .snoring,
             intensity: activeEventIntensity ?? .quiet,
             averageDB: activeEventDBCount > 0 ? activeEventDBSum / Double(activeEventDBCount) : 0,
             peakDB: activeEventPeakDB,

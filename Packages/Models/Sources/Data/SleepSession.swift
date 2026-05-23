@@ -71,6 +71,11 @@ public final class SleepSession {
         events?.reduce(0) { $0 + $1.snoreDuration } ?? 0
     }
 
+    /// Total duration of events matching a specific sound category.
+    public func duration(for category: SoundCategory) -> TimeInterval {
+        events?.filter { $0.category == category }.reduce(0) { $0 + $1.snoreDuration } ?? 0
+    }
+
     /// Duration during which the microphone was actually active and listening.
     public var monitoredDuration: TimeInterval {
         max(0, totalDuration - gapsDuration)
