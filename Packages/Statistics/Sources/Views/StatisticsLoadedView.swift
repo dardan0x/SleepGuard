@@ -47,6 +47,7 @@ struct StatisticsLoadedView: View {
                     }
                     .padding(.horizontal, 20)
                 }
+                .padding(.top, 10)
             }
             
             StartRecordingButton(height: 56) {
