@@ -51,11 +51,12 @@ struct OnboardingPage5View: View {
           onContinue()
         }
 
-        Button(Strings.onboardingPage4ButtonSecondary) {
-          onContinue()
+        Button(action: { onContinue() }) {
+          Text(Strings.onboardingPage4ButtonSecondary)
+            .font(.system(size: 15, weight: .medium))
+            .foregroundStyle(theme.textSecondary)
         }
-        .font(.system(size: 15, weight: .medium))
-        .foregroundStyle(theme.textSecondary)
+        .buttonStyle(ScaleButtonStyle())
       }
       .padding(.horizontal, 24)
     }

@@ -1,4 +1,5 @@
 import SwiftUI
+import Env
 
 public struct RecordingActionButton<Label: View>: View {
   let height: CGFloat
@@ -39,7 +40,10 @@ public struct RecordingActionButton<Label: View>: View {
         .blur(radius: 10)
         .offset(y: 8)
 
-      Button(action: action) {
+      Button(action: {
+        HapticManager.shared.tap()
+        action()
+      }) {
         label
           .frame(maxWidth: .infinity)
           .frame(height: height)
@@ -59,6 +63,7 @@ public struct RecordingActionButton<Label: View>: View {
           )
           .clipShape(Capsule())
       }
+      .buttonStyle(ScaleButtonStyle())
     }
   }
 }

@@ -57,15 +57,16 @@ struct OnboardingPage3View: View {
 
       Spacer()
 
-      Button(Strings.onboardingPage3Button) {
-        onContinue()
+      Button(action: { onContinue() }) {
+        Text(Strings.onboardingPage3Button)
+          .font(.system(size: 17, weight: .semibold))
+          .foregroundStyle(.white)
+          .frame(maxWidth: .infinity)
+          .frame(height: 56)
+          .background(theme.accent)
+          .clipShape(Capsule())
       }
-      .font(.system(size: 17, weight: .semibold))
-      .foregroundStyle(.white)
-      .frame(maxWidth: .infinity)
-      .frame(height: 56)
-      .background(theme.accent)
-      .clipShape(Capsule())
+      .buttonStyle(ScaleButtonStyle())
       .padding(.horizontal, 24)
     }
     .padding(.horizontal, 32)
