@@ -5,6 +5,7 @@ public enum SnoreIntensity: String, Codable, Sendable {
   case quiet
   case light
   case loud
+  case epic
 }
 
 @Model
@@ -12,7 +13,10 @@ public final class SnoreEvent {
   @Attribute(.unique) public var id: UUID
   public var timestamp: Date
   public var intensity: SnoreIntensity
+  /// Relative loudness in dBFS (digital full scale), not calibrated dB-SPL.
+  /// Values are relative and vary by microphone sensitivity and device distance.
   public var averageDB: Double
+  /// Relative loudness in dBFS (digital full scale), not calibrated dB-SPL.
   public var peakDB: Double
   public var dominantFrequency: Double
   public var spectralCentroid: Double

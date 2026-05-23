@@ -6,7 +6,10 @@ public final class SleepSession {
     @Attribute(.unique) public var id: UUID
     public var startDate: Date
     public var endDate: Date?
+    /// Relative loudness in dBFS (digital full scale), not calibrated dB-SPL.
+    /// Values are relative and vary by microphone sensitivity and device distance.
     public var averageDB: Double
+    /// Relative loudness in dBFS (digital full scale), not calibrated dB-SPL.
     public var peakDB: Double
     public var audioFileURL: String?
 
@@ -108,6 +111,7 @@ public final class SleepSession {
         var detectedSnoringDuration: TimeInterval = 0
         var lightDuration: TimeInterval = 0
         var loudDuration: TimeInterval = 0
+        var epicDuration: TimeInterval = 0
 
         for event in events {
             let duration = event.snoreDuration
@@ -117,6 +121,8 @@ public final class SleepSession {
                 lightDuration += duration
             case .loud:
                 loudDuration += duration
+            case .epic:
+                epicDuration += duration
             case .quiet:
                 break
             }
@@ -136,7 +142,8 @@ public final class SleepSession {
         // spectral data during gaps. This conservatively reduces the intensity penalty.
         let lightRatio = detectedSnoringDuration > 0 ? lightDuration / detectedSnoringDuration : 0
         let loudRatio = detectedSnoringDuration > 0 ? loudDuration / detectedSnoringDuration : 0
-        let intensityPenalty = min(Int(lightRatio * 10 + loudRatio * 20), 20)
+        let epicRatio = detectedSnoringDuration > 0 ? epicDuration / detectedSnoringDuration : 0
+        let intensityPenalty = min(Int(lightRatio * 10 + loudRatio * 20 + epicRatio * 30), 30)
 
         return max(0, 100 - snoringPenalty - eventsPenalty - intensityPenalty)
     }

@@ -24,3 +24,9 @@ session.microphoneAlert.message = SnoreGuard needs microphone access to detect s
 session.microphoneAlert.openSettings = Open Settings
 
 session.summary.lowBattery.forceSave.info = This session was automatically saved because your battery was low (2%) to prevent data loss.
+
+epic.intensity.label = Epic
+epic.intensity.label.event.player.view = Epic
+session.bedside.snoreEpic = Epic snoring detected · just now
+stats.calendar.intensityEpic = Epic
+stats.calendar.legendEpic = Epic

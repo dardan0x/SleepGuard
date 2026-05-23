@@ -6,6 +6,7 @@ public enum SnoringState: String, Sendable, Codable {
   case quiet
   case light
   case loud
+  case epic
 }
 
 @MainActor
@@ -15,10 +16,12 @@ public final class SnoreDetector {
 
   public var currentState: SnoringState = .none
 
-  /// Thresholds in dB. Used together with spectral analysis.
-  public var quietThreshold: Float = -35.0
-  public var lightThreshold: Float = -25.0
-  public var loudThreshold: Float = -15.0
+  /// Base thresholds in dBFS (medium sensitivity).
+  /// These are relative to digital full scale, not calibrated dB-SPL.
+  public var quietThreshold: Float = -30.0
+  public var lightThreshold: Float = -20.0
+  public var loudThreshold: Float = -10.0
+  public var epicThreshold: Float = -5.0
 
   private init() {}
 
@@ -45,7 +48,9 @@ public final class SnoreDetector {
   // MARK: - Threshold Fallback
 
   public func classifyWithThresholds(db: Float) -> SnoringState {
-    if db >= loudThreshold {
+    if db >= epicThreshold {
+      return .epic
+    } else if db >= loudThreshold {
       return .loud
     } else if db >= lightThreshold {
       return .light
@@ -62,26 +67,30 @@ public final class SnoreDetector {
   ///
   /// When SoundAnalysis is confident (≥0.5), we trust it over raw dB thresholds
   /// because the classifier distinguishes snoring from other loud sounds.
-  /// dB is used only for intensity, with very low floors so quiet snoring
-  /// (or low mic gain) is still captured.
+  /// dB is used only for intensity, with floors tuned to reduce false positives
+  /// from ambient bedroom noise while still capturing quiet snoring.
   public func classifyWithSoundAnalysis(db: Float, snoreConfidence: Float) -> SnoringState {
     guard snoreConfidence >= 0.5 else {
       return .none
     }
 
-    // Use much lower dB floors since SoundAnalysis already confirmed snoring.
-    let floorLoud: Float = -25.0
-    let floorLight: Float = -40.0
-    let floorQuiet: Float = -60.0
+    // Floors are offset below base thresholds because ML already confirmed
+    // snore-like spectral content. Keeps quiet snoring but rejects noise floor.
+    let floorEpic: Float = epicThreshold
+    let floorLoud: Float = loudThreshold - 5
+    let floorLight: Float = lightThreshold - 10
+    let floorQuiet: Float = quietThreshold - 15
 
-    if db >= floorLoud && snoreConfidence >= 0.7 {
+    if db >= floorEpic && snoreConfidence >= 0.7 {
+      return .epic
+    } else if db >= floorLoud && snoreConfidence >= 0.7 {
       return .loud
     } else if db >= floorLight && snoreConfidence >= 0.5 {
       return .light
     } else if db >= floorQuiet {
       return .quiet
     }
-    // Even if dB is extremely low, if SoundAnalysis is ≥0.6 confident, count as quiet.
+    // Even if dB is below all floors, if SoundAnalysis is ≥0.6 confident, count as quiet.
     return snoreConfidence >= 0.6 ? .quiet : .none
   }
 
@@ -98,15 +107,18 @@ public final class SnoreDetector {
 
     // Require minimum dB even with good spectral score. Quiet ambient sounds
     // (breathing at -40 dB) should not trigger even if spectral looks similar.
-    guard db >= -35 else {
+    guard db >= quietThreshold - 5 else {
       return .none
     }
 
     let adjustedQuiet = quietThreshold + (1.0 - spectralScore) * 10
     let adjustedLight = lightThreshold + (1.0 - spectralScore) * 8
     let adjustedLoud = loudThreshold + (1.0 - spectralScore) * 5
+    let adjustedEpic = epicThreshold + (1.0 - spectralScore) * 3
 
-    if db >= adjustedLoud {
+    if db >= adjustedEpic {
+      return .epic
+    } else if db >= adjustedLoud {
       return .loud
     } else if db >= adjustedLight {
       return .light

@@ -2,14 +2,40 @@ import SwiftUI
 import Env
 import DesignSystem
 
-// REMOVED: Save Audio Clips and Max Clip Length were dead settings —
-// not consumed by SessionManager or AudioClipExtractor. Keeping this
-// file as a placeholder in case recording settings are added later.
-// If unused after a few sprints, delete the file.
-
 @MainActor
 struct SettingsRecordingSection: View {
+  @Environment(Theme.self) private var theme
+  @Environment(UserPreferences.self) private var userPreferences
+
+  private var sensitivityBinding: Binding<UserPreferences.DetectionSensitivity> {
+    Binding(
+      get: { userPreferences.detectionSensitivity },
+      set: { userPreferences.detectionSensitivity = $0 }
+    )
+  }
+
   var body: some View {
-    EmptyView()
+    VStack(alignment: .leading, spacing: 2) {
+      SettingsSectionTitle(text: Strings.settingsSectionDetection)
+      VStack(spacing: 16) {
+        HStack(spacing: 10) {
+          SettingsIconBackground(systemName: "waveform", color: theme.accent)
+          Text(Strings.settingsSensitivity)
+            .font(.system(size: 15))
+            .foregroundStyle(theme.textPrimary)
+          Spacer()
+          Picker("", selection: sensitivityBinding) {
+            Text(Strings.settingsSensitivityLow).tag(UserPreferences.DetectionSensitivity.low)
+            Text(Strings.settingsSensitivityMedium).tag(UserPreferences.DetectionSensitivity.medium)
+            Text(Strings.settingsSensitivityHigh).tag(UserPreferences.DetectionSensitivity.high)
+          }
+          .pickerStyle(.segmented)
+          .frame(width: 180)
+        }
+      }
+      .padding(16)
+      .background(theme.bgCard)
+      .cornerRadius(12)
+    }
   }
 }

@@ -49,9 +49,11 @@ struct CalendarSelectedNightView: View {
     private var sessionDescription: String {
         let intensity: String
         if let events = session.events, !events.isEmpty {
+            let epic = events.filter { $0.intensity == .epic }.count
             let loud = events.filter { $0.intensity == .loud }.count
             let light = events.filter { $0.intensity == .light }.count
-            if loud > 0 { intensity = Strings.statsCalendarLegendLoud }
+            if epic > 0 { intensity = Strings.statsCalendarLegendEpic }
+            else if loud > 0 { intensity = Strings.statsCalendarLegendLoud }
             else if light > 0 { intensity = Strings.statsCalendarLegendLight }
             else { intensity = Strings.statsCalendarIntensityQuiet }
         } else {

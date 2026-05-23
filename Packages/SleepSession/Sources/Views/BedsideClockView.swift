@@ -123,6 +123,7 @@ struct BedsideClockView: View {
         case .quiet: return theme.snoreQuiet
         case .light: return theme.snoreLight
         case .loud: return theme.snoreLoud
+        case .epic: return theme.snoreEpic
         }
     }
     
@@ -132,6 +133,7 @@ struct BedsideClockView: View {
         case .quiet: return Strings.sessionBedsideSnoreQuiet
         case .light: return Strings.sessionBedsideSnoreLight
         case .loud: return Strings.sessionBedsideSnoreLoud
+        case .epic: return Strings.sessionBedsideSnoreEpic
         }
     }
     
