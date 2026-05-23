@@ -32,7 +32,7 @@ public final class SleepSession {
     /// to preserve data before the phone shuts down. nil for normal user-stopped sessions.
     public var terminationReason: String?
 
-    public static let minimumSaveDuration: TimeInterval = 600
+    public static let minimumSaveDuration: TimeInterval = 120
 
     public init(
         id: UUID = UUID(),
@@ -65,8 +65,7 @@ public final class SleepSession {
     }
 
     public var snoringDuration: TimeInterval {
-        let detected = events?.reduce(0) { $0 + $1.snoreDuration } ?? 0
-        return detected + gapsDuration
+        events?.reduce(0) { $0 + $1.snoreDuration } ?? 0
     }
 
     /// Duration during which the microphone was actually active and listening.
@@ -126,7 +125,8 @@ public final class SleepSession {
         let sessionDuration = totalDuration
         guard sessionDuration > 0 else { return 100 }
 
-        // Total snoring duration includes detected bursts + inferred snoring during mic-paused gaps.
+        // Total snoring duration is the sum of detected snoring episode spans.
+        // Recording gaps are excluded — the soothing melody may have stopped the snoring.
         let totalSnoringDuration = snoringDuration
         let snoringPercentage = (totalSnoringDuration / sessionDuration) * 100
         let snoringPenalty = min(Int(snoringPercentage * 0.7), 70)

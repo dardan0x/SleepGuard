@@ -207,6 +207,11 @@ public final class ClipPlaybackController {
       player.prepareToPlay()
       audioPlayer = player
       currentClipTime = 0
+      // Clip may include breathing gaps, so actual duration can exceed snoreDuration.
+      if clipDurations.indices.contains(currentEventIndex) {
+        clipDurations[currentEventIndex] = player.duration
+        totalClipsDuration = clipDurations.reduce(0, +)
+      }
       print("[ClipPlaybackController] Player ready for event \(event.id), file: \(url.lastPathComponent), duration: \(player.duration)s")
 
       notificationObserver = NotificationCenter.default.addObserver(
@@ -242,7 +247,7 @@ public final class ClipPlaybackController {
     currentClipTime = player.currentTime
 
     // Auto-advance to next clip only when we're actually near the end
-    let currentDuration = clipDurations.indices.contains(currentEventIndex) ? clipDurations[currentEventIndex] : 0
+    let currentDuration = audioPlayer?.duration ?? (clipDurations.indices.contains(currentEventIndex) ? clipDurations[currentEventIndex] : 0)
     if !player.isPlaying, isPlaying, currentDuration > 0, currentClipTime >= currentDuration - 0.3 {
       if currentEventIndex + 1 < events.count {
         currentEventIndex += 1

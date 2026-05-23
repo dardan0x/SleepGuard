@@ -1,4 +1,7 @@
 import AVFoundation
+#if canImport(UIKit)
+import UIKit
+#endif
 import Models
 import Observation
 
@@ -24,6 +27,7 @@ public final class AudioRecorder {
   public static let shared = AudioRecorder()
 
   public var isRecording = false
+  public var isPaused = false
   public var currentDB: Float = -160.0
   /// Spectral snore-likelihood score (0–1). Updated in real-time from FFT analysis.
   public var spectralScore: Float = 0
@@ -66,6 +70,20 @@ public final class AudioRecorder {
       name: .soothingMelodyDidStop,
       object: nil
     )
+    NotificationCenter.default.addObserver(
+      self,
+      selector: #selector(handleSessionRouteChange),
+      name: AVAudioSession.routeChangeNotification,
+      object: nil
+    )
+    #if canImport(UIKit)
+    NotificationCenter.default.addObserver(
+      self,
+      selector: #selector(handleAppDidBecomeActive),
+      name: UIApplication.didBecomeActiveNotification,
+      object: nil
+    )
+    #endif
   }
 
   @objc private func handleMelodyWillPlay() {
@@ -92,9 +110,8 @@ public final class AudioRecorder {
     case .ended:
       guard let optionsValue = userInfo[AVAudioSessionInterruptionOptionKey] as? UInt else { return }
       let options = AVAudioSession.InterruptionOptions(rawValue: optionsValue)
-      if options.contains(.shouldResume), isRecording {
-        try? AVAudioSession.sharedInstance().setActive(true)
-        try? audioEngine?.start()
+      if options.contains(.shouldResume) {
+        resumeRecordingIfNeeded()
       }
     @unknown default:
       break
@@ -102,10 +119,35 @@ public final class AudioRecorder {
   }
 
   @objc private func handleRouteChange(_ notification: Notification) {
-    guard isRecording, let engine = audioEngine else { return }
-    if !engine.isRunning {
-      try? AVAudioSession.sharedInstance().setActive(true)
-      try? engine.start()
+    resumeRecordingIfNeeded()
+  }
+
+  @objc private func handleSessionRouteChange(_ notification: Notification) {
+    guard let userInfo = notification.userInfo,
+          let reasonValue = userInfo[AVAudioSessionRouteChangeReasonKey] as? UInt,
+          let reason = AVAudioSession.RouteChangeReason(rawValue: reasonValue) else { return }
+
+    switch reason {
+    case .newDeviceAvailable, .oldDeviceUnavailable:
+      resumeRecordingIfNeeded()
+    default:
+      break
+    }
+  }
+
+  #if canImport(UIKit)
+  @objc private func handleAppDidBecomeActive() {
+    resumeRecordingIfNeeded()
+  }
+  #endif
+
+  private func resumeRecordingIfNeeded() {
+    guard isRecording, !isPaused else { return }
+    if let engine = audioEngine, engine.isRunning { return }
+    do {
+      try resumeRecording()
+    } catch {
+      print("[AudioRecorder] Failed to resume recording: \(error)")
     }
   }
 
@@ -143,7 +185,7 @@ public final class AudioRecorder {
     guard hasPermission else { return }
 
     let session = AVAudioSession.sharedInstance()
-    try session.setCategory(.playAndRecord, mode: .measurement, options: [.defaultToSpeaker, .allowBluetooth])
+    try session.setCategory(.playAndRecord, mode: .measurement, options: [.defaultToSpeaker, .allowBluetooth, .mixWithOthers])
     try session.setActive(true)
 
     #if !targetEnvironment(simulator)
@@ -203,10 +245,12 @@ public final class AudioRecorder {
     recordingFormat = format
     soundAnalyzer.startAnalyzing(format: format)
     isRecording = true
+    isPaused = false
   }
 
   public func pauseRecording() {
     guard isRecording, let engine = audioEngine else { return }
+    isPaused = true
     soundAnalyzer.stopAnalyzing()
     engine.stop()
     // Remove tap from the EQ node so the engine can be safely deallocated.
@@ -224,7 +268,7 @@ public final class AudioRecorder {
   public func resumeRecording() throws {
     guard isRecording else { return }
     let session = AVAudioSession.sharedInstance()
-    try session.setCategory(.playAndRecord, mode: .measurement, options: [.defaultToSpeaker, .allowBluetooth])
+    try session.setCategory(.playAndRecord, mode: .measurement, options: [.defaultToSpeaker, .allowBluetooth, .mixWithOthers])
     try session.setActive(true)
 
     let engine = AVAudioEngine()
@@ -270,6 +314,7 @@ public final class AudioRecorder {
     audioEngine = engine
     recordingFormat = format
     soundAnalyzer.startAnalyzing(format: format)
+    isPaused = false
   }
 
   public func stopRecording() {
@@ -280,6 +325,7 @@ public final class AudioRecorder {
     audioFile = nil
     cumulativeFramePosition = 0
     isRecording = false
+    isPaused = false
     currentDB = -160.0
     spectralScore = 0
 
