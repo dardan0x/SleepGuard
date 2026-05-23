@@ -34,7 +34,7 @@ public struct Last7NightsView: View {
       .padding(.horizontal, 20)
       .padding(.vertical, 10)
     }
-    .background(theme.bgSecondary.ignoresSafeArea())
+    .background(theme.bgPrimary.ignoresSafeArea())
     .navigationTitle("")
     .navigationBarTitleDisplayMode(.inline)
     .toolbar {

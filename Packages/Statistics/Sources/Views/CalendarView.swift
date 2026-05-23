@@ -57,7 +57,7 @@ public struct CalendarView: View {
       .padding(.horizontal, 20)
       .padding(.bottom, 20)
     }
-    .background(theme.bgSecondary.ignoresSafeArea())
+    .background(theme.bgPrimary.ignoresSafeArea())
     .navigationTitle("")
     .navigationBarTitleDisplayMode(.inline)
     .toolbar {

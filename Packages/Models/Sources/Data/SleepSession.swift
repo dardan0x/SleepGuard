@@ -28,6 +28,10 @@ public final class SleepSession {
     /// Used to compute monitoredDuration and surface detection blind spots in the UI.
     public var recordingGaps: [RecordingGap]?
 
+    /// Why the session ended early (e.g. "low_battery"). Set when the app force-saves
+    /// to preserve data before the phone shuts down. nil for normal user-stopped sessions.
+    public var terminationReason: String?
+
     public static let minimumSaveDuration: TimeInterval = 600
 
     public init(

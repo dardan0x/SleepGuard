@@ -3,6 +3,7 @@ import Env
 import Foundation
 import Models
 import Observation
+import UIKit
 
 @MainActor
 @Observable
@@ -13,6 +14,7 @@ public final class SessionManager {
     public var isRecording = false
     public var completedSession: SleepSession?
     public var isProcessingSession = false
+    public var isLiveSessionVisible = false
 
     /// Real-time audio level for UI observation
     public var currentDB: Float = -160.0
@@ -31,7 +33,7 @@ public final class SessionManager {
     private var activeEventDBCount: Int = 0
     private var activeEventPeakDB: Double = 0
     private var lastSnoringSampleTime: Date?
-    private let eventGapThreshold: TimeInterval = 3.0
+    private let eventGapThreshold: TimeInterval = 10.0
     /// Require 3 consecutive snoring samples (≈150 ms at 20 Hz) before starting an event.
     /// Filters out brief transient sounds (bed creaks, taps, notifications).
     private var consecutiveSnoreSamples: Int = 0
@@ -57,6 +59,7 @@ public final class SessionManager {
     private var sessionSnoringDuration: TimeInterval = 0
     private var lastUpdateTime: Date?
     private var processingTask: Task<Void, Never>?
+    private var batteryCheckCounter = 0
 
     private init() {
         NotificationCenter.default.addObserver(
@@ -65,6 +68,9 @@ public final class SessionManager {
             name: .soothingMelodyDidStop,
             object: nil
         )
+        #if !targetEnvironment(simulator)
+        UIDevice.current.isBatteryMonitoringEnabled = true
+        #endif
     }
 
     @objc private func handleMelodyDidStop() {
@@ -123,8 +129,32 @@ public final class SessionManager {
                     spectralScore: audioRecorder.spectralScore,
                     snoreConfidence: saConf
                 )
+                batteryCheckCounter += 1
+                if batteryCheckCounter >= 600 {
+                    batteryCheckCounter = 0
+                    checkBatteryLevel()
+                }
                 try? await Task.sleep(for: .milliseconds(50))
             }
+        }
+    }
+
+    private func checkBatteryLevel() {
+        #if targetEnvironment(simulator)
+        return
+        #else
+        let level = UIDevice.current.batteryLevel
+        guard level >= 0, level <= 0.02 else { return }
+        print("[SessionManager] Battery level at \(Int(level * 100))% — force saving session")
+        forceSaveDueToLowBattery()
+        #endif
+    }
+
+    public func forceSaveDueToLowBattery() {
+        Task { @MainActor in
+            guard isRecording else { return }
+            currentSession?.terminationReason = "low_battery"
+            _ = await stopSession()
         }
     }
 

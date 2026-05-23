@@ -148,6 +148,54 @@
 ### Open Questions
 - None
 
+## 2026-05-19 — Session 50: Low Battery Force-Save + Banner
+
+### Completed
+- **F2-T12**: Low battery force-save and explanatory banner
+
+### Technical Details
+- `SessionManager.processingTask` increments a counter every 50ms; every 600 iterations (~30s) it calls `checkBatteryLevel()`
+- `UIDevice.current.isBatteryMonitoringEnabled` is enabled in `SessionManager.init()` (skipped in simulator)
+- At `batteryLevel <= 0.02`, `forceSaveDueToLowBattery()` calls `stopSession()` and sets `forceSaveReason = "low_battery"`
+- `StatisticsTab.onChange(of: sessionManager.completedSession)` checks `forceSaveReason`; if set, auto-saves to SwiftData via `modelContext`, syncs to HealthKit if enabled, stores reason in `UserDefaults`, and clears flags without presenting summary sheet
+- `LowBatteryBannerView` (DesignSystem) reads `session_termination_reason_<id>` from `UserDefaults` and renders a `MelodyGapsBannerView`-style info card with `bolt.fill` icon in `scoreAmber`
+- Banner is shown in both `SessionSummaryView` (after manual stop) and `SessionDetailView` (saved session detail)
+- `SessionDetailView.deleteSession()` removes the `UserDefaults` key alongside the session deletion
+- Zero changes to `SleepSession` SwiftData model
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Env/Sources/Services/SessionManager.swift` | +25/-0 | Battery monitoring (`batteryCheckCounter`, `checkBatteryLevel()`), `forceSaveReason`, `forceSaveDueToLowBattery()` |
+| `SnoreGuard/StatisticsTab.swift` | +28/-4 | Auto-save logic for force-saved sessions; `HealthKitSync` and `modelContext` environments; `autoSaveForceSavedSession()` helper |
+| `Packages/DesignSystem/Sources/Components/LowBatteryBannerView.swift` | +32/-0 | New banner component; reads UserDefaults; styled like `MelodyGapsBannerView` |
+| `Packages/SleepSession/Sources/Views/SessionSummaryView.swift` | +2/-0 | Added `LowBatteryBannerView` below `MelodyGapsBannerView` |
+| `Packages/Recordings/Sources/Views/SessionDetailView.swift` | +3/-0 | Added `LowBatteryBannerView` below `MelodyGapsBannerView`; UserDefaults cleanup in `deleteSession()` |
+| `Packages/DesignSystem/Sources/Resources/Strings.txt` | +1/-0 | `session.summary.lowBattery.forceSave.info` localization entry |
+| `Packages/DesignSystem/Sources/Resources/Localizable.xcstrings` | +10/-0 | Added English localization for low battery banner text |
+| `Packages/DesignSystem/Sources/Strings.swift` | +1/-0 | Regenerated; added `sessionSummaryLowBatteryForceSaveInfo` accessor |
+
+### Architecture Decisions
+- **UserDefaults over model changes**: Storing the force-save reason in `UserDefaults` (keyed by session ID) avoids a SwiftData migration and keeps `SleepSession` lightweight. Cleanup is trivial on deletion.
+- **Auto-save in StatisticsTab, not SessionManager**: `SessionManager` has no `ModelContext` access by design. The view layer (`StatisticsTab`) handles the save + sync sequence, matching the existing pattern where `SessionSummaryView.saveSession()` triggers HealthKit sync.
+- **Banner in both summary and detail**: The banner appears in `SessionSummaryView` (for completeness, in case the auto-save path fails and the user sees the summary) and `SessionDetailView` (primary discovery path for already-saved force-saved sessions).
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors
+
+### Git Handoff
+- **Suggested branch**: `feature/f2-t12-low-battery-force-save`
+- **Suggested commit**: `F2-T12 — Low battery force-save and explanatory banner`
+  - `SessionManager` battery monitoring with 30s polling interval
+  - `forceSaveDueToLowBattery()` stops session and sets `forceSaveReason`
+  - `StatisticsTab` auto-saves force-saved sessions to SwiftData + HealthKit
+  - `LowBatteryBannerView` styled like `MelodyGapsBannerView`
+  - UserDefaults-based termination reason; no `SleepSession` model changes
+
+### Open Questions
+- Should we show a local notification when force-saving, or is the in-app banner sufficient?
+- Should `BedsideClockView` show a brief "Saving session…" overlay while the force-save happens?
+
 ---
 
 ## 2026-05-06 — Session 19: Statistics Start Recording Button Pin
@@ -2920,3 +2968,83 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 ### Open Questions
 - Should gap duration be surfaced in the exported PDF sleep report?
 - Should we add a Settings toggle for ducked melody (continuous detection, lower volume) vs full-volume melody with gaps?
+
+
+---
+
+## 2026-05-17 — Session 48: UI Polish — Tab Bar Liquid Glass + Recording Layout Fixes
+
+### Completed
+- Fixed UI glitch when tapping Start Recording button by making `onStartRecording` closures `@MainActor`
+- Made `RecordingPrestartView` adaptive for compact screens (iPhone 16e, 17 Pro, smaller)
+- Added smooth sliding pill animation to custom tab bar via `matchedGeometryEffect`
+- Mimicked iOS 26 liquid glass effect on custom tab bar for iOS < 26
+
+### Technical Details
+- `@MainActor` on `onStartRecording` ensures navigation state mutations run on the main thread, eliminating the frame-drop glitch when tapping the Statistics tab CTA.
+- `isCompactHeight` uses `UIScreen.main.bounds.height <= 874` to scale down `iconSection` (100 → 80 pts, font 44 → 36 pts) and headline title (28 → 24 pts) on smaller devices without affecting Pro Max screens.
+- `matchedGeometryEffect(id: "activeTab", in: tabAnimation)` with a conditional `RoundedRectangle` creates a ghost view that smoothly slides between tab positions during selection changes.
+- Liquid glass approximation: `.ultraThinMaterial` + `theme.bgCard` tint + subtle white gradient highlights for the floating capsule container; solid `theme.bgCard` active pill with light stroke and top highlight.
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Statistics/Sources/Views/StatisticsEmptyView.swift` | +1/-1 | `@MainActor let onStartRecording: () -> Void` |
+| `Packages/Statistics/Sources/Views/StatisticsLoadedView.swift` | +1/-1 | `@MainActor let onStartRecording: () -> Void` |
+| `Packages/Statistics/Sources/Views/StatisticsDashboardView.swift` | +2/-2 | Inline closures annotated `{ @MainActor in }` |
+| `Packages/SleepSession/Sources/Views/RecordingPrestartView.swift` | +10/-4 | `isCompactHeight` property; adaptive `iconSection` and `headlineSection` sizing |
+| `SnoreGuard/MainTabView.swift` | +25/-15 | `matchedGeometryEffect` sliding active pill; liquid glass materials + gradient highlights |
+
+### Architecture Decisions
+- **MainActor on closures**: Propagating `@MainActor` through the closure type signature is cleaner than wrapping every call site in `Task { @MainActor in }`.
+- **Screen-height threshold**: `UIScreen.main.bounds.height <= 874` covers iPhone 16e (844 pts), 17 Pro (874 pts), and all smaller devices, while leaving Pro Max (932 pts) untouched.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors
+
+### Git Handoff
+- **Suggested branch**: `feature/ui-polish-tab-bar-recording-layout`
+- **Suggested commit**: `UI Polish — @MainActor recording CTA, compact height layout, liquid glass tab bar`
+  - `@MainActor` on `onStartRecording` closures in Statistics package
+  - `RecordingPrestartView` adaptive layout for compact-height devices
+  - Custom tab bar `matchedGeometryEffect` sliding pill animation
+  - Liquid glass mimic for iOS < 26 using materials + gradient highlights
+
+### Open Questions
+- None
+
+
+---
+
+## 2026-05-19 — Session 51: Increase Snore Event Gap Threshold
+
+### Completed
+- Increased `eventGapThreshold` from 3.0 → 10.0 seconds in `SessionManager`
+
+### Technical Details
+- The existing burst-tracking architecture (`activeBurstStart`, `completedBursts`, `SnoreBurst`) already captures continuous snoring segments and gaps between them, so a longer threshold naturally produces multi-burst events instead of separate events.
+- `AudioClipExtractor` composes gap-free clips from bursts via `AVMutableComposition`, so merged events still produce clean audio clips.
+- The melody play/stop logic is fully decoupled from event finalization (melody stops on sustained non-snore + 4 s minimum play duration), so anti-snore behavior is unaffected.
+- Existing sessions remain split (threshold only applies to new recordings).
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Env/Sources/Services/SessionManager.swift` | +1/-1 | `eventGapThreshold: TimeInterval = 3.0` → `10.0` |
+
+### Architecture Decisions
+- **Single-line threshold change vs. post-session merging**: Post-session merging would touch the data model and require burst offset recalculation. Since the architecture already supports multi-burst events, simply widening the real-time threshold is safer and produces the same outcome for new sessions.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors
+
+### Git Handoff
+- **Suggested branch**: `tweak/event-gap-threshold-10s`
+- **Suggested commit**: `Increase snore event gap threshold from 3s to 10s`
+  - Brief breathing pauses under 10s now merge into a single SnoreEvent
+  - Reduces duplicate "same minute" entries in the events list
+
+### Open Questions
+- None

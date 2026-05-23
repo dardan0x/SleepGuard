@@ -1,5 +1,7 @@
 import SwiftUI
+import SwiftData
 import Env
+import Models
 import SleepSession
 import Statistics
 
@@ -7,6 +9,8 @@ struct StatisticsTab: View {
   @State private var routerPath = RouterPath()
   @Environment(UserPreferences.self) private var userPreferences
   @Environment(SessionManager.self) private var sessionManager
+  @Environment(HealthKitSync.self) private var healthKitSync
+  @Environment(\.modelContext) private var modelContext
 
   var body: some View {
     NavigationStack(path: Binding(
@@ -42,11 +46,41 @@ struct StatisticsTab: View {
       }
     }
     .onChange(of: sessionManager.completedSession) { _, newValue in
-      if newValue != nil {
+      guard newValue != nil else { return }
+      if let session = sessionManager.completedSession,
+         session.terminationReason != nil {
+        autoSaveForceSavedSession(session: session)
+      } else {
         routerPath.navigateToRoot()
         routerPath.presentedSheet = .sessionSummary
       }
     }
     .environment(routerPath)
+  }
+
+  private func autoSaveForceSavedSession(session: SleepSession) {
+    if let events = session.events {
+      for event in events {
+        modelContext.insert(event)
+      }
+    }
+    modelContext.insert(session)
+
+    do {
+      try modelContext.save()
+    } catch {
+      routerPath.navigateToRoot()
+      routerPath.presentedSheet = .sessionSummary
+      return
+    }
+
+    sessionManager.completedSession = nil
+
+    if userPreferences.syncToHealthKit {
+      Task {
+        healthKitSync.checkAuthorizationStatus()
+        await healthKitSync.sync(session: session)
+      }
+    }
   }
 }

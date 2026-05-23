@@ -39,7 +39,7 @@ public struct EventsSheetView: View {
         .padding(.horizontal, 16)
         .padding(.vertical, 20)
       }
-      .background(theme.bgSecondary.ignoresSafeArea())
+      .background(theme.bgPrimary.ignoresSafeArea())
       .navigationTitle(Strings.recordingsDetailEventsLabel)
       .navigationBarTitleDisplayMode(.inline)
       .toolbar {

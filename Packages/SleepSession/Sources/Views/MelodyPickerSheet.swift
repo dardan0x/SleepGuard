@@ -59,7 +59,7 @@ struct MelodyPickerSheet: View {
 
       bottomArea
     }
-    .background(theme.bgSecondary.ignoresSafeArea())
+    .background(theme.bgPrimary.ignoresSafeArea())
     .onDisappear {
       stopPreview()
     }

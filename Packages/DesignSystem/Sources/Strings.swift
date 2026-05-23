@@ -24,7 +24,6 @@ public enum Strings {
   public static var avgScoreCalendarStatCardLabel: String { String(localized: "avg.score.calendar.stat.card.label", bundle: .module) }
   public static var commonOver: String { String(localized: "common.over", bundle: .module) }
   public static var durationPickerTitle: String { String(localized: "duration.picker.title", bundle: .module) }
-  public static var en: String { String(localized: "en", bundle: .module) }
   public static var eventHeaderSectionTotalEvents: String { String(localized: "event.header.section.totalEvents", bundle: .module) }
   public static var eventPlayerNavigationTitle: String { String(localized: "event.player.navigation.title", bundle: .module) }
   public static var eventPlayerNoAudioDescription: String { String(localized: "event.player.noAudio.description", bundle: .module) }
@@ -124,6 +123,7 @@ public enum Strings {
   public static var sessionRecordingEventsCountUpperFormat: String { String(localized: "session.recording.eventsCountUpperFormat", bundle: .module) }
   public static var sessionRecordingEventsFormat: String { String(localized: "session.recording.eventsFormat", bundle: .module) }
   public static var sessionRecordingStatusFormat: String { String(localized: "session.recording.statusFormat", bundle: .module) }
+  public static var sessionSummaryLowBatteryForceSaveInfo: String { String(localized: "session.summary.lowBattery.forceSave.info", bundle: .module) }
   public static var sessionSummaryMelodyGapsInfo: String { String(localized: "session.summary.melodyGapsInfo", bundle: .module) }
   public static var sessionSummaryStatSnoreTime: String { String(localized: "session.summary.statSnoreTime", bundle: .module) }
   public static var sessionSummaryStatSnoring: String { String(localized: "session.summary.statSnoring", bundle: .module) }
@@ -210,7 +210,6 @@ public enum Strings {
   public static var stopRecordCustomMelodySheet: String { String(localized: "stop.record.custom.melody.sheet", bundle: .module) }
   public static var stopSoothingMelodyPlayer: String { String(localized: "stop.soothing.melody.player", bundle: .module) }
   public static var stringUnit: String { String(localized: "stringUnit", bundle: .module) }
-  public static var strings: String { String(localized: "strings", bundle: .module) }
   public static var tabMedia: String { String(localized: "tab.media", bundle: .module) }
   public static var tabSettings: String { String(localized: "tab.settings", bundle: .module) }
   public static var tabStatistics: String { String(localized: "tab.statistics", bundle: .module) }
@@ -219,6 +218,7 @@ public enum Strings {
   public static var timeHourSingular: String { String(localized: "time.hour.singular", bundle: .module) }
   public static var timeMinutePlural: String { String(localized: "time.minute.plural", bundle: .module) }
   public static var timeMinuteSingular: String { String(localized: "time.minute.singular", bundle: .module) }
+  public static var totalSnoringDurationColumn: String { String(localized: "total.snoring.duration.column", bundle: .module) }
   public static var unableToSaveTheSession: String { String(localized: "unable.to.save.the.session", bundle: .module) }
   public static var watchCalendar: String { String(localized: "watch.calendar", bundle: .module) }
   public static var watchStatusConnected: String { String(localized: "watch.status.connected", bundle: .module) }

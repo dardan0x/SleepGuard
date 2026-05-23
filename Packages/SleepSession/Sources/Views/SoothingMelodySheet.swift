@@ -52,7 +52,7 @@ struct SoothingMelodySheet: View {
             
             buttonsArea
         }
-        .background(theme.bgSecondary.ignoresSafeArea())
+        .background(theme.bgPrimary.ignoresSafeArea())
         .onAppear {
             draftMode = userPreferences.soothingMelodyMode
             draftMelodyID = userPreferences.selectedMelodyID

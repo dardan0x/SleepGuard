@@ -84,7 +84,7 @@ public struct PlayerSheetView: View {
         }
         .padding(20)
       }
-      .background(theme.bgSecondary.ignoresSafeArea())
+      .background(theme.bgPrimary.ignoresSafeArea())
       .presentationDetents([.height(420)])
       .presentationDragIndicator(.visible)
       .navigationTitle(Strings.eventPlayerNavigationTitle)

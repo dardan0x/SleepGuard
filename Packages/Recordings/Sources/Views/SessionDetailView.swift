@@ -39,7 +39,7 @@ public struct SessionDetailView: View {
         errorBody
       }
     }
-    .background(theme.bgSecondary.ignoresSafeArea())
+    .background(theme.bgPrimary.ignoresSafeArea())
   }
 
   private func loadedBody(session: SleepSession, sortedEvents: [SnoreEvent], isClipSession: Bool) -> some View {
@@ -50,6 +50,8 @@ public struct SessionDetailView: View {
         SessionDetailTimelineView(session: session)
 
         MelodyGapsBannerView(session: session)
+
+        LowBatteryBannerView(session: session)
 
         SessionDetailEventsView(
           events: sortedEvents,

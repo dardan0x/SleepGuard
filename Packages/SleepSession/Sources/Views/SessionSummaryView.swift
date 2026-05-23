@@ -34,13 +34,15 @@ public struct SessionSummaryView: View {
 
         MelodyGapsBannerView(session: session)
 
+        LowBatteryBannerView(session: session)
+
         timelineSection
 
         actionButtons
       }
       .padding(24)
     }
-    .background(theme.bgSecondary.ignoresSafeArea())
+    .background(theme.bgPrimary.ignoresSafeArea())
     .alert(Strings.sessionSummaryTooShortTitle, isPresented: $showShortSessionAlert) {
       Button(Strings.actionOk, role: .cancel) { }
     } message: {

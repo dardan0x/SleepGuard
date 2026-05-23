@@ -22,3 +22,5 @@ settings.microphoneEnable = Enable
 session.microphoneAlert.title = Microphone Access Required
 session.microphoneAlert.message = SnoreGuard needs microphone access to detect snoring while you sleep. Please enable it in Settings.
 session.microphoneAlert.openSettings = Open Settings
+
+session.summary.lowBattery.forceSave.info = This session was automatically saved because your battery was low (2%) to prevent data loss.

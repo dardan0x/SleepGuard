@@ -24,7 +24,7 @@ public struct StatisticsDashboardView: View {
       case .empty:
         StatisticsEmptyView(
           theme: theme,
-          onStartRecording: {
+          onStartRecording: { @MainActor in
             routerPath.navigate(to: .liveSession)
           },
           onViewCalendar: {
@@ -38,7 +38,7 @@ public struct StatisticsDashboardView: View {
           daySessionCount: daySessionCount,
           recentSessions: recentSessions,
           theme: theme,
-          onStartRecording: {
+          onStartRecording: { @MainActor in
             routerPath.navigate(to: .liveSession)
           },
           onViewTrends: {
@@ -54,7 +54,7 @@ public struct StatisticsDashboardView: View {
         }
       }
     }
-    .background(theme.bgSecondary.ignoresSafeArea())
+    .background(theme.bgPrimary.ignoresSafeArea())
     .onChange(of: sessions) { _, _ in
       loadState()
     }

@@ -23,5 +23,6 @@ struct StatisticsErrorView: View {
       .font(.system(size: 17, weight: .semibold))
       .foregroundStyle(theme.accent)
     }
+    .toolbar(.hidden, for: .navigationBar)
   }
 }

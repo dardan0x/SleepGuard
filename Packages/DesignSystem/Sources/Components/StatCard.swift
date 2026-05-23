@@ -33,6 +33,7 @@ public struct StatCard: View {
           .font(.system(size: 16, weight: .bold, design: .rounded))
           .foregroundStyle(theme.textPrimary)
           .lineLimit(1)
+          .fixedSize(horizontal: true, vertical: false)
 
         Text(title)
           .font(.system(size: 10, weight: .medium))
@@ -40,7 +41,7 @@ public struct StatCard: View {
           .textCase(.uppercase)
       }
     }
-    .padding(6)
+    .padding(12)
     .frame(maxWidth: .infinity, alignment: .leading)
     .background(theme.bgCard)
     .cornerRadius(theme.radiusCard)

@@ -15,8 +15,10 @@ struct Last7NightsChartCard: View {
       SnoringLegendView()
     }
     .padding(16)
-    .background(theme.bgCard)
-    .cornerRadius(theme.radiusCard)
+    .overlay(
+        RoundedRectangle(cornerRadius: theme.radiusCard)
+          .stroke(theme.bgCard, lineWidth: 1)
+      )
   }
 
   private var chartHeader: some View {
