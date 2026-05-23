@@ -192,7 +192,7 @@ public final class SessionManager {
                 from: sessionURL,
                 events: events,
                 sessionStart: session.startDate,
-                padding: 0.0,
+                padding: 0.3,
                 outputDirectory: docs
             )
             for result in results {
@@ -480,7 +480,8 @@ public final class SessionManager {
             intensity: activeEventIntensity ?? .quiet,
             averageDB: activeEventDBCount > 0 ? activeEventDBSum / Double(activeEventDBCount) : 0,
             peakDB: activeEventPeakDB,
-            bursts: bursts.isEmpty ? nil : bursts
+            bursts: bursts.isEmpty ? nil : bursts,
+            duration: eventSpan
         )
         event.session = session
 

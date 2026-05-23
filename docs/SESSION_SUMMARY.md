@@ -3048,3 +3048,69 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 
 ### Open Questions
 - None
+
+
+---
+
+## 2026-05-22 — Session 52–53: Background Audio Fix + Snoring Time Refactor
+
+### Completed
+- **Session 52**: Fixed background audio recording — microphone was stopping when app entered background
+- **Session 53**: Refactored snoring duration calculation to use event-span (validated epoch style) instead of burst-sum
+
+### Technical Details
+
+**Background Audio Fix:**
+- Root cause: `UIBackgroundModes` was declared in build settings (`INFOPLIST_KEY_UIBackgroundModes = audio`) but was NOT being injected into the built `Info.plist` due to array-vs-string syntax mismatch in `project.pbxproj`. The built app had no background audio entitlement, so iOS suspended it on backgrounding.
+- Fixed by explicitly adding `UIBackgroundModes` array with `audio` to `SnoreGuard/Info.plist`, and correcting the pbxproj syntax to `(audio)` array format.
+- `AudioRecorder` improvements:
+  - Added `.mixWithOthers` to `AVAudioSession` category options to prevent interruption by other apps' audio.
+  - Added `isPaused` flag to distinguish intentional mic pauses (soothing melody) from unintended stops.
+  - Added `AVAudioSession.routeChangeNotification` and `UIApplication.didBecomeActiveNotification` observers to restart the engine if it stops due to route changes or background suspension.
+  - Replaced bare `audioEngine?.start()` in interruption handler with `resumeRecordingIfNeeded()`, which does a full engine rebuild if needed.
+- `SoothingMelodyPlayer` no longer switches `AVAudioSession` category to `.playback` — this was dropping the microphone input and breaking background recording resumption. The existing `.playAndRecord` session already supports playback.
+
+**Snoring Time Refactor:**
+- Research showed validated apps (SnoreClock, SnoreLab) define a snoring "epoch" as the full episode span including natural breathing pauses (<10s) within it.
+- `SnoreEvent` gained a new `duration: TimeInterval = 0` property storing `eventSpan` (from `activeEventStart` to `lastSnoringSampleTime`).
+- `SnoreEvent.snoreDuration` now returns `duration` when available, falling back to burst-sum for legacy pre-migration data.
+- `SleepSession.snoringDuration` no longer adds `gapsDuration`. Recording gaps (soothing melody mic pauses) are excluded — we no longer assume snoring continued during intervention.
+- `sleepScore` comment updated to reflect the change.
+- `bursts` array is preserved for clip extraction and fragmentation analysis.
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `SnoreGuard/Info.plist` | +7/-1 | Added `UIBackgroundModes` array with `audio` |
+| `SnoreGuard.xcodeproj/project.pbxproj` | +4/-2 | `INFOPLIST_KEY_UIBackgroundModes` changed from string `audio` to array `(audio)` |
+| `Packages/AudioEngine/Sources/Engine/AudioRecorder.swift` | +46/-10 | `.mixWithOthers`; `isPaused`; route-change + didBecomeActive observers; `resumeRecordingIfNeeded()`; improved interruption handler |
+| `Packages/Env/Sources/Services/SoothingMelodyPlayer.swift` | +3/-4 | Removed `setCategory(.playback)` and `setActive(true)` calls that were dropping the mic |
+| `Packages/Models/Sources/Data/SnoreEvent.swift` | +14/-3 | Added `duration` property; updated init; `snoreDuration` returns event-span with burst-sum fallback |
+| `Packages/Env/Sources/Services/SessionManager.swift` | +1/-1 | `finalizeActiveEvent()` passes `eventSpan` as `duration` to `SnoreEvent` |
+| `Packages/Models/Sources/Data/SleepSession.swift` | +3/-3 | `snoringDuration` no longer adds `gapsDuration`; comment updated |
+
+### Architecture Decisions
+- **Explicit Info.plist over generated-only**: Despite `GENERATE_INFOPLIST_FILE = YES`, the `UIBackgroundModes` key was not being reliably generated. Adding it explicitly to the source `Info.plist` guarantees it is present in all builds.
+- **Event-span over burst-sum**: Burst-sum under-reports snoring time by excluding natural breathing pauses within an episode. Event-span matches how clinically validated apps measure snoring and better represents the user's actual snoring episodes.
+- **Backward compatibility via fallback**: `SnoreEvent.snoreDuration` falls back to burst-sum when `duration == 0`, preserving existing session data without requiring a SwiftData migration.
+- **Gaps excluded from snoring time**: Recording gaps are now treated as "intervention time" rather than inferred snoring. This makes the metric more honest — the soothing melody may have actually stopped the snoring.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors, zero warnings
+
+### Next Session
+- Continue V2 polish or start F13 (CloudKit Sync)
+
+### Git Handoff
+- **Suggested branch**: `fix/background-audio-snoring-duration`
+- **Suggested commit**: `Fix background audio + refactor snoring duration to event-span`
+  - Add `UIBackgroundModes` to Info.plist; fix pbxproj array syntax
+  - AudioRecorder: `.mixWithOthers`, route/foreground observers, robust resume
+  - SoothingMelodyPlayer: stop switching AVAudioSession to `.playback`
+  - SnoreEvent: `duration` field; `snoreDuration` uses event-span
+  - SleepSession: `snoringDuration` excludes gaps
+
+### Open Questions
+- Should `snoringPercentage` denominator be `totalDuration` or `monitoredDuration`? Currently uses `totalDuration`.
+- Should the PDF sleep report show recording gaps as a separate stat?

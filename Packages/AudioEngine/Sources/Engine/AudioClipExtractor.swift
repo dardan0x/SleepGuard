@@ -4,8 +4,9 @@ import Models
 
 /// Extracts individual snore-event audio clips from a full session recording
 /// and computes spectral features for each clip.
-/// When an event contains burst data, the clip is composed from only the
-/// snoring segments (gaps between bursts are removed).
+/// When an event contains burst data, the clip preserves the full event span
+/// (from the first burst start to the last burst end) so breathing gaps
+/// between bursts remain in the playback audio.
 public enum AudioClipExtractor {
   public struct ClipResult {
     public let eventID: UUID
@@ -91,43 +92,17 @@ public enum AudioClipExtractor {
     let exportTimeRange: CMTimeRange?
 
     if let bursts = event.bursts, !bursts.isEmpty {
-      // Compose gap-free clip from burst segments
-      let composition = AVMutableComposition()
-      guard let compositionTrack = composition.addMutableTrack(
-        withMediaType: .audio,
-        preferredTrackID: kCMPersistentTrackID_Invalid
-      ) else { return nil }
-
-      let localAsset = AVURLAsset(url: sessionURL)
-      guard let sourceTrack = try? await localAsset.loadTracks(withMediaType: .audio).first else {
-        return nil
-      }
-
-      var compositionTime = CMTime.zero
-      for burst in bursts {
-        let burstStart = CMTime(
-          seconds: max(0, eventTime + burst.startOffset - padding),
-          preferredTimescale: 600
-        )
-        let burstDuration = CMTime(
-          seconds: min(
-            totalDuration - burstStart.seconds,
-            burst.duration + (padding * 2)
-          ),
-          preferredTimescale: 600
-        )
-        guard burstDuration.seconds > 0 else { continue }
-        try? compositionTrack.insertTimeRange(
-          CMTimeRange(start: burstStart, duration: burstDuration),
-          of: sourceTrack,
-          at: compositionTime
-        )
-        compositionTime = CMTimeAdd(compositionTime, burstDuration)
-      }
-
-      guard compositionTime.seconds > 0 else { return nil }
-      exportAsset = composition
-      exportTimeRange = nil // Export the entire composition
+      // Preserve full event span including breathing gaps between bursts.
+      let firstBurstStart = eventTime + bursts.first!.startOffset
+      let lastBurstEnd = eventTime + bursts.last!.endOffset
+      let startTime = max(0, firstBurstStart - padding)
+      let endTime = min(totalDuration, lastBurstEnd + padding)
+      guard endTime > startTime else { return nil }
+      exportAsset = AVURLAsset(url: sessionURL)
+      exportTimeRange = CMTimeRange(
+        start: CMTime(seconds: startTime, preferredTimescale: 600),
+        duration: CMTime(seconds: endTime - startTime, preferredTimescale: 600)
+      )
     } else {
       // Legacy: single range export
       let startTime = max(0, eventTime - padding)
@@ -154,7 +129,7 @@ public enum AudioClipExtractor {
     await exportSession.export()
     guard exportSession.status == .completed else { return nil }
 
-    // Analyze spectral features on the (now gap-free) clip
+    // Analyze spectral features on the extracted clip
     let spectral = await analyzeSpectralFeatures(of: clipURL)
 
     return ClipResult(

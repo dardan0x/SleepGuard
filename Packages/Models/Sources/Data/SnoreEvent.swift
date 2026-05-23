@@ -19,8 +19,13 @@ public final class SnoreEvent {
   public var lowFreqRatio: Double
   public var audioFileURL: String?
 
+  /// Total span of the snoring episode (from first to last detected snore).
+  /// Includes natural breathing pauses within the episode, matching the
+  /// clinical definition of a snoring epoch used by validated apps.
+  public var duration: TimeInterval = 0
+
   /// Continuous snoring segments within this event. Used to create gap-free clips
-  /// and compute true snoring duration (sum of burst lengths).
+  /// and analyze snoring fragmentation.
   public var bursts: [SnoreBurst]?
 
   public var session: SleepSession?
@@ -35,7 +40,8 @@ public final class SnoreEvent {
     spectralCentroid: Double = 0,
     lowFreqRatio: Double = 0,
     audioFileURL: String? = nil,
-    bursts: [SnoreBurst]? = nil
+    bursts: [SnoreBurst]? = nil,
+    duration: TimeInterval = 0
   ) {
     self.id = id
     self.timestamp = timestamp
@@ -47,10 +53,13 @@ public final class SnoreEvent {
     self.lowFreqRatio = lowFreqRatio
     self.audioFileURL = audioFileURL
     self.bursts = bursts
+    self.duration = duration
   }
 
-  /// Computed from bursts so gap-detection logic changes retroactively affect duration.
+  /// Event-span duration including natural breathing pauses within the episode.
+  /// Falls back to burst sum for legacy data created before the event-span
+  /// duration field was added.
   public var snoreDuration: TimeInterval {
-    bursts?.reduce(0) { $0 + $1.duration } ?? 0
+    duration > 0 ? duration : (bursts?.reduce(0) { $0 + $1.duration } ?? 0)
   }
 }

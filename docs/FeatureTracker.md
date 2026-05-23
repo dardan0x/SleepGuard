@@ -2,7 +2,7 @@
 
 > Auto-updated by the AI after every task. This is the local source of truth.
 
-Last updated: 2026-05-19 (Session 51)
+Last updated: 2026-05-22 (Session 53)
 
 ---
 
@@ -59,6 +59,8 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-05-22 | Background audio recording fix | Completed | `SnoreGuard/Info.plist` now explicitly contains `UIBackgroundModes = [audio]` (was missing from built app despite build setting). `AudioRecorder` added `.mixWithOthers`, `isPaused` flag, `routeChangeNotification` + `didBecomeActiveNotification` observers, and robust `resumeRecordingIfNeeded()` fallback. `SoothingMelodyPlayer` no longer changes `AVAudioSession` category to `.playback` (was dropping mic). Build succeeds |
+| 2026-05-22 | Snoring time calculation refactor | Completed | `SnoreEvent` gained `duration` field storing event-span (first→last snore, including natural breathing pauses). `snoreDuration` returns `duration` for new data, falls back to burst-sum for legacy. `SleepSession.snoringDuration` no longer adds `gapsDuration`. Aligns with SnoreClock/SnoreLab validated epoch-based measurement. Build succeeds |
 | 2026-05-19 | Increase snore event gap threshold | Completed | `eventGapThreshold` in SessionManager changed from 3.0 → 10.0 s. Brief breathing pauses under 10 s now merge into a single SnoreEvent instead of splitting into separate events. Existing burst tracking and gap-free clip extraction already support this. Melody play/stop logic is decoupled and unaffected. Build succeeds |
 | 2026-05-19 | Low battery force-save + banner | Completed | SessionManager polls battery every 30s during recording; at ≤2% calls `forceSaveDueToLowBattery()` which stops session and sets `forceSaveReason`. StatisticsTab auto-saves force-saved sessions to SwiftData + HealthKit without showing summary sheet. UserDefaults stores termination reason keyed by session ID. New `LowBatteryBannerView` (MelodyGapsBannerView-inspired) shown in `SessionSummaryView` and `SessionDetailView` when reason exists. Cleanup on session delete. No SleepSession model changes. Build succeeds |
 | 2026-05-18 | Gap tracking reliability + model lightness + banner pluralization | Completed | Removed notification-based gap tracking (`.recordingDidPause/.recordingDidResume`); replaced with direct `.soothingMelodyDidStop` observation in SessionManager. Events no longer discarded during mic pause (`!sooothingMelodyPlayer.isPlaying` guard on finalize + `lastSnoringSampleTime` extended on resume). `gapsDuration` reverted from stored to computed to keep SleepSession lightweight. Force-finalized events now have 0.5s minimum (was 0s). MelodyGapsBannerView durationString changed to "over X mins" with proper pluralization |
