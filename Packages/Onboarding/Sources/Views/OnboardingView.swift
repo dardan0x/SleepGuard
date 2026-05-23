@@ -37,12 +37,14 @@ public struct OnboardingView: View {
   }
 
   private func advance() {
+    HapticManager.shared.tap()
     withAnimation {
       currentPage = min(currentPage + 1, totalPages - 1)
     }
   }
 
   private func finishOnboarding() {
+    HapticManager.shared.tap()
     userPreferences.hasCompletedOnboarding = true
   }
 
@@ -50,14 +52,18 @@ public struct OnboardingView: View {
     HStack {
       Spacer()
       if currentPage < totalPages - 1 {
-        Button(Strings.actionSkip) {
+        Button(action: {
+          HapticManager.shared.tap()
           withAnimation {
             currentPage = totalPages - 1
           }
+        }) {
+          Text(Strings.actionSkip)
+            .font(.system(size: 15, weight: .medium))
+            .foregroundStyle(theme.textSecondary)
+            .padding(.trailing, 20)
         }
-        .font(.system(size: 15, weight: .medium))
-        .foregroundStyle(theme.textSecondary)
-        .padding(.trailing, 20)
+        .buttonStyle(ScaleButtonStyle())
       }
     }
     .frame(height: 44)
@@ -67,13 +73,17 @@ public struct OnboardingView: View {
     VStack(spacing: 16) {
       progressDots
 
-      Button(Strings.actionBack) {
+      Button(action: {
+        HapticManager.shared.tap()
         withAnimation {
           currentPage -= 1
         }
+      }) {
+        Text(Strings.actionBack)
+          .font(.system(size: 15, weight: .medium))
+          .foregroundStyle(theme.textSecondary)
       }
-      .font(.system(size: 15, weight: .medium))
-      .foregroundStyle(theme.textSecondary)
+      .buttonStyle(ScaleButtonStyle())
       .opacity(currentPage > 0 && currentPage < totalPages - 1 ? 1 : 0)
     }
     .padding(.bottom, 32)

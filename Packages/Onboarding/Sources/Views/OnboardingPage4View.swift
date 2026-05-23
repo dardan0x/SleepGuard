@@ -33,7 +33,7 @@ struct OnboardingPage4View: View {
           .frame(width: 120, height: 120)
 
         Image(systemName: showGranted ? "checkmark.circle.fill" : "mic.fill")
-          .font(.system(size: 40))
+          .font(.system(size: 72))
           .foregroundStyle(theme.accent)
       }
       .onAppear {
@@ -92,12 +92,14 @@ struct OnboardingPage4View: View {
           .clipShape(Capsule())
         }
         .disabled(isRequesting)
+        .buttonStyle(ScaleButtonStyle())
 
-        Button(Strings.onboardingPage2Button) {
-          onContinue()
+        Button(action: { onContinue() }) {
+          Text(Strings.onboardingPage2Button)
+            .font(.system(size: 15, weight: .medium))
+            .foregroundStyle(theme.textSecondary)
         }
-        .font(.system(size: 15, weight: .medium))
-        .foregroundStyle(theme.textSecondary)
+        .buttonStyle(ScaleButtonStyle())
       }
       .padding(.horizontal, 24)
     }

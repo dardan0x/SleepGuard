@@ -34,15 +34,16 @@ struct OnboardingPage2View: View {
 
       Spacer()
 
-      Button(Strings.onboardingPage1Button) {
-        onContinue()
+      Button(action: { onContinue() }) {
+        Text(Strings.onboardingPage1Button)
+          .font(.system(size: 17, weight: .semibold))
+          .foregroundStyle(.white)
+          .frame(maxWidth: .infinity)
+          .frame(height: 56)
+          .background(theme.accent)
+          .clipShape(Capsule())
       }
-      .font(.system(size: 17, weight: .semibold))
-      .foregroundStyle(.white)
-      .frame(maxWidth: .infinity)
-      .frame(height: 56)
-      .background(theme.accent)
-      .clipShape(Capsule())
+      .buttonStyle(ScaleButtonStyle())
       .padding(.horizontal, 24)
     }
     .padding(.horizontal, 24)

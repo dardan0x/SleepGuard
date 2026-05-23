@@ -34,11 +34,25 @@
 		CE25912E2FAE9E98004C0C0D /* SnoreGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SnoreGuard.xcodeproj; sourceTree = "<group>"; };
 		CE4A51A12FB625C6005BC562 /* SnoreGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SnoreGuard.xcodeproj; sourceTree = "<group>"; };
 		CE587D245C122AB22F7BD248 /* sounds */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = folder; path = sounds; sourceTree = "<group>"; };
+		CEA51B4D2FBFA95A0092AF44 /* SnoreGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SnoreGuard.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		CEA51B5A2FBFB8860092AF44 /* Exceptions for "SnoreGuard" folder in "SnoreGuard" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = CE1588F72FAA9946001B61AA /* SnoreGuard */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		CE1588FA2FAA9946001B61AA /* SnoreGuard */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				CEA51B5A2FBFB8860092AF44 /* Exceptions for "SnoreGuard" folder in "SnoreGuard" target */,
+			);
 			path = SnoreGuard;
 			sourceTree = "<group>";
 		};
@@ -123,6 +137,11 @@
 			sourceTree = "<group>";
 		};
 		CE4A51A42FB625C6005BC562 /* Products */ = {
+			isa = PBXGroup;
+			name = Products;
+			sourceTree = "<group>";
+		};
+		CEA51B502FBFA95A0092AF44 /* Products */ = {
 			isa = PBXGroup;
 			name = Products;
 			sourceTree = "<group>";
@@ -220,6 +239,10 @@
 				{
 					ProductGroup = CE4A51A42FB625C6005BC562 /* Products */;
 					ProjectRef = CE4A51A12FB625C6005BC562 /* SnoreGuard.xcodeproj */;
+				},
+				{
+					ProductGroup = CEA51B502FBFA95A0092AF44 /* Products */;
+					ProjectRef = CEA51B4D2FBFA95A0092AF44 /* SnoreGuard.xcodeproj */;
 				},
 				{
 					ProductGroup = CE258F062FAC77A5004C0C0D /* Products */;
@@ -413,15 +436,18 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				GENERATE_STRING_CATALOG_SYMBOLS = YES;
+				INFOPLIST_FILE = SnoreGuard/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "SnoreGuard reads sleep data to provide a complete picture of your sleep quality.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "SnoreGuard writes sleep session data to Apple Health so you can track sleep quality alongside other health metrics.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "SnoreGuard uses the microphone to detect snoring during sleep sessions. Audio is analyzed locally on your device.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UIBackgroundModes = audio;
+				INFOPLIST_KEY_UIBackgroundModes = (
+					audio,
+				);
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -452,13 +478,18 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				GENERATE_STRING_CATALOG_SYMBOLS = YES;
+				INFOPLIST_FILE = SnoreGuard/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "SnoreGuard reads sleep data to provide a complete picture of your sleep quality.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "SnoreGuard writes sleep session data to Apple Health so you can track sleep quality alongside other health metrics.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "SnoreGuard uses the microphone to detect snoring during sleep sessions. Audio is analyzed locally on your device.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UIBackgroundModes = audio;
+				INFOPLIST_KEY_UIBackgroundModes = (
+					audio,
+				);
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
