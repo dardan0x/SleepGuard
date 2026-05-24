@@ -84,7 +84,7 @@ public struct NightGroupRowView: View {
             .clipShape(Capsule())
         }
 
-        Text("\(totalDurationString)")
+        Text(DurationFormatter.hoursAndMinutes(Int(group.totalDuration / 60)))
           .font(.system(size: 13))
           .foregroundStyle(theme.textSecondary)
           .fixedSize(horizontal: true, vertical: false)
@@ -121,16 +121,6 @@ public struct NightGroupRowView: View {
     DateFormatters.mediumDate.string(from: group.date)
   }
 
-  private var totalDurationString: String {
-    let total = Int(group.totalDuration)
-    let hours = total / 3600
-    let minutes = (total % 3600) / 60
-    if hours > 0 {
-      return String(format: "%d h %d min", hours, minutes)
-    }
-    return String(format: "%d min", minutes)
-  }
-
   private var scoreColor: Color {
     theme.scoreColor(group.averageScore)
   }
@@ -142,7 +132,7 @@ public struct NightGroupRowView: View {
           .font(.system(size: 14, weight: .medium))
           .foregroundStyle(theme.textPrimary)
 
-        Text(String(format: Strings.recordingsDetailDateEventsFormat, durationString(session.totalDuration), session.eventsCount))
+        Text(String(format: Strings.recordingsDetailDateEventsFormat, DurationFormatter.hoursAndMinutes(Int(session.totalDuration / 60)), session.eventsCount))
           .font(.system(size: 12))
           .foregroundStyle(theme.textSecondary)
       }
@@ -177,12 +167,5 @@ public struct NightGroupRowView: View {
     return start
   }
 
-  private func durationString(_ total: TimeInterval) -> String {
-    let h = Int(total) / 3600
-    let m = (Int(total) % 3600) / 60
-    if h > 0 {
-      return String(format: "%d h %d min", h, m)
-    }
-    return String(format: "%d min", m)
-  }
+
 }

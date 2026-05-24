@@ -200,6 +200,7 @@ public enum Strings {
   public static var statsMiniChartSleepScoreLabel: String { String(localized: "stats.miniChart.sleepScoreLabel", bundle: .module) }
   public static var statsMiniChartToday: String { String(localized: "stats.miniChart.today", bundle: .module) }
   public static var statsTrendsAvgMinFormat: String { String(localized: "stats.trends.avgMinFormat", bundle: .module) }
+  public static var statsTrendsAvgSnoringLabel: String { String(localized: "stats.trends.avgSnoringLabel", bundle: .module) }
   public static var statsTrendsLastSevenNights: String { String(localized: "stats.trends.lastSevenNights", bundle: .module) }
   public static var statsTrendsMonth: String { String(localized: "stats.trends.month", bundle: .module) }
   public static var statsTrendsSeeAll: String { String(localized: "stats.trends.seeAll", bundle: .module) }

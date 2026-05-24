@@ -2,7 +2,7 @@
 
 > Auto-updated by the AI after every task. This is the local source of truth.
 
-Last updated: 2026-05-23 (Session 56)
+Last updated: 2026-05-24 (Session 57)
 
 ---
 
@@ -59,6 +59,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-05-24 | Unify duration format across app | Completed | Created `DurationFormatter.hoursAndMinutes` in DesignSystem. Updated TrendsView, Last7NightsStatGrid, Last7NightsRow, SessionStatsGrid, NightGroupRowView to use shared formatter. Removed 5 single-use private wrapper functions. TrendsView label changed from "SNORING MINUTES" to "AVG SNORING". Build succeeds |
 | 2026-05-23 | Mock data for App Store screenshots | Completed | Created `MockDataGenerator` generating realistic May 1–23 sleep sessions with trending scores (worse→better), variable events, midnight GMT+2 starts, and multi-session days. Wired `-generateMockData` DEBUG launch argument. Data verified on Statistics dashboard. Build succeeds |
 | 2026-05-22 | Future-proof data model for multi-sound detection | Completed | Added `SoundCategory` enum (snoring/sleepTalking/noise/other) to `SnoreEvent` with default `.snoring` — lightweight SwiftData migration, zero data loss. Added `SleepSession.duration(for:)` helper. Explicit `.snoring` in `SessionManager`. No UI changes — stats grid unchanged. Build succeeds |
 | 2026-05-22 | Snore detection thresholds + epic tier + sensitivity | Completed | Added 4th `.epic` intensity tier matching SnoreLab. Tightened SoundAnalysis floors (-60→-45, -40→-30, -25→-15) and spectral thresholds (-35→-30, -25→-20, -15→-10, epic=-5). Wired `UserPreferences.detectionSensitivity` to shift thresholds ±5 dB. Updated `sleepScore` for epic penalty. Added `SettingsRecordingSection` with picker. All intensity switches updated. Build succeeds |

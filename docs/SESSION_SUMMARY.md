@@ -3259,3 +3259,40 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 ### Open Questions
 - Should the generator support custom date ranges or score curves via additional launch arguments?
 - Should we create a small CLI tool that writes directly to SwiftData sqlite to avoid app launch entirely?
+
+## 2026-05-24 — Session 57: Unify Duration Format Across App
+
+### Completed
+- Created `DurationFormatter.hoursAndMinutes(_:)` in `DesignSystem` — shared helper that outputs `X h Y min` or `X min` when under 60
+- Replaced all ad-hoc duration formatting wrappers with the shared formatter
+
+### Technical Details
+- `DurationFormatter` uses existing localized `Strings.timeHourSingular/Plural` and `Strings.timeMinuteSingular/Plural` — no new English-only strings
+- TrendsView: label changed from "SNORING MINUTES" → "AVG SNORING"; big text now shows formatted duration (e.g., "1 h 30 min") instead of raw integer; subtext reduced to "avg / night"
+- SessionStatsGrid: "Snore Time" stat changed from `H:MM:SS` → `X h Y min` to match other snoring displays
+- Last7NightsStatGrid, Last7NightsRow, NightGroupRowView: inlined formatter calls and removed private `durationString` / `snoringDurationString` / `totalDurationString` wrappers
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/DesignSystem/Sources/Helpers/DurationFormatter.swift` | +16/-0 | New shared formatter |
+| `Packages/Statistics/Sources/Views/TrendsView.swift` | +4/-4 | Uses `DurationFormatter.hoursAndMinutes` for avg snoring; label + subtext updated |
+| `Packages/Statistics/Sources/Views/Last7NightsStatGrid.swift` | +1/-6 | Inlined formatter; removed private `durationString` wrapper |
+| `Packages/Statistics/Sources/Views/Last7NightsRow.swift` | +2/-13 | Inlined formatter for both total duration and snoring; removed private wrappers |
+| `Packages/DesignSystem/Sources/Components/SessionStatsGrid.swift` | +1/-1 | Snore Time uses `DurationFormatter.hoursAndMinutes` instead of `H:MM:SS` |
+| `Packages/Recordings/Sources/Views/NightGroupRowView.swift` | +2/-15 | Inlined formatter for group total and per-session durations; removed private wrappers |
+| `Packages/DesignSystem/Sources/Resources/Localizable.xcstrings` | +15/-2 | Added `stats.trends.avgSnoringLabel`; updated `stats.trends.avgMinFormat` to "avg / night"; updated `stats.trends.snoringMinutesLabel` to "AVG SNORING" |
+| `Packages/DesignSystem/Sources/Strings.swift` | +1/-0 | Regenerated with new key |
+
+### Architecture Decisions
+- **Single formatter enum over view extensions**: `DurationFormatter` is a plain enum with one static method. No view protocol extensions, no format style wrappers — minimum code for the problem.
+- **Removed all single-use private wrappers**: `Last7NightsRow.durationString`, `Last7NightsRow.snoringDurationString`, `Last7NightsStatGrid.durationString`, `NightGroupRowView.totalDurationString`, `NightGroupRowView.durationString` — all deleted. The formatter is the one source of truth.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors, zero warnings
+
+### Next Session
+- Continue V2 polish or start F13 (CloudKit Sync)
+
+### Open Questions
+- None

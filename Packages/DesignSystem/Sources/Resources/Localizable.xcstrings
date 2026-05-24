@@ -1973,7 +1973,18 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%lld min · avg / night"
+            "value": "avg / night"
+          }
+        }
+      }
+    },
+    "stats.trends.avgSnoringLabel": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AVG SNORING"
           }
         }
       }
@@ -2013,7 +2024,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "SNORING MINUTES"
+            "value": "AVG SNORING"
           }
         }
       }
