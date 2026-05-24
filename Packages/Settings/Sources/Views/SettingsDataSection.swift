@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 import Env
 import DesignSystem
 
@@ -7,6 +8,7 @@ struct SettingsDataSection: View {
   @Environment(Theme.self) private var theme
   @Environment(UserPreferences.self) private var userPreferences
   @Environment(HealthKitSync.self) private var healthKitSync
+  @Environment(\.modelContext) private var modelContext
   let onShowDeleteConfirmation: () -> Void
 
   var body: some View {
@@ -48,6 +50,21 @@ struct SettingsDataSection: View {
           }
         }
         .buttonStyle(.plain)
+
+        #if DEBUG
+        Button {
+          MockDataGenerator.generate(modelContext: modelContext)
+        } label: {
+          HStack(spacing: 10) {
+            SettingsIconBackground(systemName: "wand.and.stars", color: theme.accent)
+            Text("Generate Mock Data")
+              .font(.system(size: 15, weight: .medium))
+              .foregroundStyle(theme.accent)
+            Spacer()
+          }
+        }
+        .buttonStyle(.plain)
+        #endif
       }
       .padding(16)
       .background(theme.bgCard)

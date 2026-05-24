@@ -103,11 +103,22 @@ public struct RecordingsListView: View {
   }
 
   private func deleteGroup(_ group: NightGroup) {
-    for session in group.sessions {
-      deleteSessionFiles(session)
-      modelContext.delete(session)
-    }
     do {
+      // Delete events first with intermediate save to avoid SwiftData faulting
+      // crash during cascade delete on faulted relationship objects.
+      for session in group.sessions {
+        if let events = session.events {
+          for event in events {
+            modelContext.delete(event)
+          }
+        }
+      }
+      try modelContext.save()
+
+      for session in group.sessions {
+        deleteSessionFiles(session)
+        modelContext.delete(session)
+      }
       try modelContext.save()
     } catch {
       // Deletion failed; UI will revert on next @Query update

@@ -76,8 +76,19 @@ public struct SettingsView: View {
 
   private func deleteAllData() {
     do {
-      let sessionsDescriptor = FetchDescriptor<SleepSession>()
-      let sessions = try modelContext.fetch(sessionsDescriptor)
+      // Delete all events first with an intermediate save so they are fully
+      // removed from the context before session deletion. This prevents the
+      // SwiftData faulting crash that happens when cascade-delete tries to
+      // resolve lazy attributes on faulted relationship objects.
+      let allEvents = try modelContext.fetch(FetchDescriptor<SnoreEvent>())
+      for event in allEvents {
+        modelContext.delete(event)
+      }
+      if !allEvents.isEmpty {
+        try modelContext.save()
+      }
+
+      let sessions = try modelContext.fetch(FetchDescriptor<SleepSession>())
       for session in sessions {
         deleteSessionFiles(session)
         modelContext.delete(session)

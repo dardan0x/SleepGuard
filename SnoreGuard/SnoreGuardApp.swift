@@ -18,7 +18,14 @@ struct SnoreGuardApp: App {
     let schema = Schema([SleepSession.self, SnoreEvent.self])
     let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
     do {
-      return try ModelContainer(for: schema, configurations: [modelConfiguration])
+      let container = try ModelContainer(for: schema, configurations: [modelConfiguration])
+      #if DEBUG
+      if ProcessInfo.processInfo.arguments.contains("-generateMockData") {
+        let context = ModelContext(container)
+        MockDataGenerator.generate(modelContext: context)
+      }
+      #endif
+      return container
     } catch {
       fatalError("Could not create ModelContainer: \(error)")
     }

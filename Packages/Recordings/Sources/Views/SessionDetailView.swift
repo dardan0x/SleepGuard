@@ -284,6 +284,15 @@ public struct SessionDetailView: View {
         predicate: #Predicate { $0.id == sessionID }
       )
       if let session = try modelContext.fetch(descriptor).first {
+        // Delete events first with intermediate save to avoid SwiftData
+        // faulting crash during cascade delete.
+        if let events = session.events {
+          for event in events {
+            modelContext.delete(event)
+          }
+          try modelContext.save()
+        }
+
         deleteSessionFiles(session)
         modelContext.delete(session)
         try modelContext.save()
