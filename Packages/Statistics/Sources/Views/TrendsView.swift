@@ -77,17 +77,17 @@ public struct TrendsView: View {
         let avgMinutes = averageSnoringMinutes()
         
         return VStack(alignment: .leading, spacing: 4) {
-            Text(Strings.statsTrendsSnoringMinutesLabel)
+            Text(Strings.statsTrendsAvgSnoringLabel)
                 .font(.system(size: 11, weight: .semibold))
                 .foregroundStyle(theme.textTertiary)
                 .tracking(1)
             
             HStack(alignment: .lastTextBaseline, spacing: 6) {
-                Text("\(avgMinutes)")
+                Text(DurationFormatter.hoursAndMinutes(avgMinutes))
                     .font(.system(size: 36, weight: .bold))
                     .foregroundStyle(theme.textPrimary)
                 
-                Text(String(format: Strings.statsTrendsAvgMinFormat, avgMinutes))
+                Text(Strings.statsTrendsAvgMinFormat)
                     .font(.system(size: 14))
                     .foregroundStyle(theme.textSecondary)
             }
@@ -108,7 +108,7 @@ public struct TrendsView: View {
     }
     
     private func chartData() -> [TrendBarData] {
-        let formatter = timeRange == .week ? DateFormatters.dayOfWeekShort : DateFormatters.monthDay
+        let formatter = timeRange == .week ? DateFormatters.dayOfWeekShort : DateFormatters.dayOfMonth
         
         return filteredSessions().map { session in
             let label = formatter.string(from: session.startDate)

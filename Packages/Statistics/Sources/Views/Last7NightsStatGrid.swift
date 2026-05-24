@@ -18,7 +18,7 @@ struct Last7NightsStatGrid: View {
         icon: "percent",
         iconColor: theme.scoreAmber,
         label: Strings.statsLast7nightsAvgSnoring,
-        value: durationString(minutes: avgSnoringMinutes)
+        value: DurationFormatter.hoursAndMinutes(avgSnoringMinutes)
       )
 
       statCard(
@@ -75,12 +75,4 @@ struct Last7NightsStatGrid: View {
     .cornerRadius(theme.radiusSmall)
   }
 
-  private func durationString(minutes: Int) -> String {
-    let hours = minutes / 60
-    let mins = minutes % 60
-    if hours > 0 {
-      return String(format: "%d h %d min", hours, mins)
-    }
-    return String(format: "%d min", minutes)
-  }
 }
