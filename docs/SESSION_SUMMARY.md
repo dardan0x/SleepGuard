@@ -3215,3 +3215,47 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 ### Open Questions
 - What specific sound categories are anticipated? (coughing, apnea/gasping, pet sounds, traffic?). This determines if `SoundCategory` should stay an enum or become an open String.
 - Should non-snore sounds affect the sleep score, or should each category have its own score weighting?
+
+
+## 2026-05-23 — Session 56: Mock Data Generation for App Store Screenshots
+
+### Completed
+- Created `MockDataGenerator` utility in `Packages/Env/Sources/Services/` that generates realistic `SleepSession` + `SnoreEvent` data for May 1–23, 2026
+- Wired `#if DEBUG` auto-generation trigger in `SnoreGuardApp.swift`: launch app with `-generateMockData` argument to populate data on first launch
+- Populated simulator SwiftData store with 20 nights of mock data (3 skipped days for realism)
+- Verified data renders correctly on Statistics dashboard with realistic score trend (worse → better), variable event counts, and midnight GMT+2 start times
+
+### Technical Details
+- Data algorithm: `dayFactor` (0.0 = May 1, 1.0 = May 23) drives all distributions
+  - Event count: lerp(22, 5, dayFactor) ± jitter — early May heavy, late May light
+  - Snoring percentage: lerp(32–50%, 6–18%, dayFactor) of session duration
+  - Intensity distribution: early May favors `.loud`/`.epic`; late May favors `.quiet`/`.light`
+  - Session duration: 6.5–8.5h primary, 1.5–3h secondary (20% of days have 2 sessions)
+  - 3 days skipped (May 6, 15, 20) for realistic gaps
+- Events distributed across session timeline with 1–2 bursts each
+- dB values: avg -54 to -26, peak -10 to -18 — realistic relative dBFS ranges
+- Score computed naturally by existing `SleepSession.sleepScore` formula — no hardcoded scores
+- Generator clears existing data before insertion to avoid duplicates on re-runs
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Env/Sources/Services/MockDataGenerator.swift` | +122/-0 | New file — generates realistic May 2026 sleep data |
+| `SnoreGuard/SnoreGuardApp.swift` | +9/-1 | Added `#if DEBUG` block that calls `MockDataGenerator.generate` when `-generateMockData` launch argument is present |
+| `.xcodebuildmcp/config.yaml` | +1/-1 | Fixed projectPath from `SnoreGuard` to `SleepGuard` to match actual directory |
+
+### Architecture Decisions
+- **Launch argument trigger over UI button**: More reliable for automation; no risk of shipping debug UI. The `-generateMockData` flag is ephemeral and only works in DEBUG builds.
+- **Keep generator in Env package**: Reusable for future screenshot refreshes; depends only on Models and SwiftData.
+- **Remove `@MainActor` from generator**: `ModelContext` operations don't require MainActor; this allows calling from `sharedModelContainer` initializer.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors, zero warnings
+
+### Next Session
+- User will take App Store screenshots using the populated data
+- If data needs tweaking (e.g., more extreme score range, different date range), re-run with `-generateMockData` after deleting existing data in Settings
+
+### Open Questions
+- Should the generator support custom date ranges or score curves via additional launch arguments?
+- Should we create a small CLI tool that writes directly to SwiftData sqlite to avoid app launch entirely?
