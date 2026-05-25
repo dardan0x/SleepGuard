@@ -26,6 +26,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		CE1472B62FC47140009A5425 /* SnoreGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SnoreGuard.xcodeproj; sourceTree = "<group>"; };
 		CE1588F82FAA9946001B61AA /* SnoreGuard.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SnoreGuard.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE158A3C2FAB2EC7001B61AA /* SnoreGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SnoreGuard.xcodeproj; sourceTree = "<group>"; };
 		CE258F042FAC77A5004C0C0D /* SnoreGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SnoreGuard.xcodeproj; sourceTree = "<group>"; };
@@ -84,6 +85,11 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		CE1472B92FC47140009A5425 /* Products */ = {
+			isa = PBXGroup;
+			name = Products;
+			sourceTree = "<group>";
+		};
 		CE1588EF2FAA9946001B61AA = {
 			isa = PBXGroup;
 			children = (
@@ -247,6 +253,10 @@
 				{
 					ProductGroup = CE258F062FAC77A5004C0C0D /* Products */;
 					ProjectRef = CE258F042FAC77A5004C0C0D /* SnoreGuard.xcodeproj */;
+				},
+				{
+					ProductGroup = CE1472B92FC47140009A5425 /* Products */;
+					ProjectRef = CE1472B62FC47140009A5425 /* SnoreGuard.xcodeproj */;
 				},
 			);
 			projectRoot = "";
@@ -443,9 +453,7 @@
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "SnoreGuard uses the microphone to detect snoring during sleep sessions. Audio is analyzed locally on your device.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UIBackgroundModes = (
-					audio,
-				);
+				INFOPLIST_KEY_UIBackgroundModes = audio;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
@@ -454,7 +462,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.daki.exampleProject.SnoreGuard;
+				PRODUCT_BUNDLE_IDENTIFIER = com.daki.exampleProject.SleepGuard;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -485,9 +493,7 @@
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "SnoreGuard uses the microphone to detect snoring during sleep sessions. Audio is analyzed locally on your device.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UIBackgroundModes = (
-					audio,
-				);
+				INFOPLIST_KEY_UIBackgroundModes = audio;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
@@ -496,7 +502,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.daki.exampleProject.SnoreGuard;
+				PRODUCT_BUNDLE_IDENTIFIER = com.daki.exampleProject.SleepGuard;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
