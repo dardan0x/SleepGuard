@@ -300,6 +300,8 @@ Include:
 - **Suggested branch**: `feature/[f#]/[t#]-short-description`
 - **Suggested commit**: `[Task ID] — [Short description]` with bullet list of changes
 
+> ⚠️ **Never omit Suggested branch and Suggested commit.** The user relies on these for git bookkeeping. This is part of the handoff.
+
 ### 1. Update `docs/SESSION_SUMMARY.md`
 
 Append a new session entry with this structure:
@@ -333,6 +335,17 @@ Append a new session entry with this structure:
 
 ### Open Questions
 - [Question that needs user input or future decision]
+
+### Suggested Branch
+`feature/[f#]/[t#]-short-description`
+
+### Suggested Commit
+```
+[Task ID] — [Short description]
+
+- [Change 1]
+- [Change 2]
+```
 ```
 
 ### 2. Create Feature Doc When Feature Ships

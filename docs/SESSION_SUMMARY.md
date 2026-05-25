@@ -3352,3 +3352,58 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 ### Open Questions
 - Should we rename the Xcode project file itself (`SnoreGuard.xcodeproj` → `SleepGuard.xcodeproj`) and all scheme names? This is developer-facing and can be deferred.
 - Should the onboarding screens be redesigned to visually reflect "SleepGuard" (new hero images, colors)? The current onboarding is snore-focused.
+
+
+---
+
+## 2026-05-26 — Session 59: P2-T1 SpeechDetector
+
+### Completed
+- P2-T1: Built `SpeechDetector` classifier in AudioEngine
+- Extended `SoundAnalysisDetector` to extract speech confidence from built-in 300-class classifier
+
+### Technical Details
+- `SpeechDetector` is a `@MainActor @Observable` singleton following the same pattern as `SnoreDetector`
+- Classification requires both `speechConfidence >= 0.5` and `db >= -40.0` to filter out whisper-quiet false positives
+- `SoundAnalysisDetector` now scans for speech-related identifiers (`speech`, `talking`, `conversation`, `narration`, `monologue`) in the same `SNClassificationResult` used for snoring — zero additional ML overhead
+- Speech confidence is published on `@MainActor` alongside snore confidence in a single `Task`
+- Both confidences reset to 0 when `stopAnalyzing()` is called
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/AudioEngine/Sources/Engine/SpeechDetector.swift` | +47 | New classifier: `classify(db:speechConfidence:)`, `update(db:speechConfidence:)`, configurable thresholds |
+| `Packages/AudioEngine/Sources/Engine/SoundAnalysisDetector.swift` | +14/-4 | Added `speechConfidence` property, `speechIdentifiers` array, parallel extraction in result handler, reset on stop |
+| `docs/trackers/f14-sleepguard-rebrand.md` | +1/-1 | P2-T1 marked Done |
+| `docs/FeatureTracker.md` | +5/-5 | Dashboard counts, Activity Log, Currently Active, Completed, Up Next updated |
+
+### Architecture Decisions
+- **Speech detection piggybacks on existing SoundAnalysis stream**: Creating a second `SNAudioStreamAnalyzer` would double CPU/battery cost. The built-in classifier already returns all 300 classes in a single result, so we simply scan for additional identifiers.
+- **Binary speech classification (no intensity levels)**: Sleep talking doesn't need quiet/light/loud/epic tiers like snoring. A simple boolean `isSpeechDetected` is sufficient and keeps the API surface small.
+- **Snoring retains priority**: The `SpeechDetector` API is designed so `SessionManager` (P2-T2) can check snoring first and ignore speech when both are present, matching the documented edge case.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors, zero warnings
+
+### Next Session
+- P2-T2: Parallel detection wiring — integrate `SpeechDetector` into `SessionManager`
+- P2-T3: Event creation for sleep talking — update `finalizeEvent()` category logic
+- P2-T4: Settings toggle for "Detect Sleep Talking"
+
+### Open Questions
+- None
+
+
+### Suggested Branch
+`feature/f14/p2-t1-speech-detector`
+
+### Suggested Commit
+```
+[P2-T1] — Add SpeechDetector for sleep talking classification
+
+- Create SpeechDetector singleton with confidence + dB thresholds
+- Extend SoundAnalysisDetector to extract speechConfidence from built-in classifier
+- Scan speech identifiers: speech, talking, conversation, narration, monologue
+- Reset speechConfidence on stopAnalyzing()
+- Binary classification design (no intensity tiers) to keep API minimal
+```
