@@ -34,8 +34,8 @@ Last updated: 2026-05-25 (Session 58)
 | Blocked | 0 |
 | — | — |
 | Total Tasks | 62 |
-| Tasks Done | 47 |
-| Tasks In Progress | 1 |
+| Tasks Done | 48 |
+| Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
 | Tasks Backlog | 14 |
 | — | — |
@@ -66,7 +66,8 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
-| 2026-05-25 | SleepGuard Rebrand — Phase 1 Foundation | In Progress | Model expansion (SleepStageSegment, SoundCategory.coughing), DetectionState rename, app-wide rebrand (bundle ID, display name, strings), build succeeds |
+| 2026-05-25 | SleepGuard Rebrand — Phase 1 Foundation | Completed | Model expansion (SleepStageSegment, SoundCategory.coughing), DetectionState rename, app-wide rebrand (bundle ID, display name, strings), build succeeds |
+| 2026-05-26 | P2-T1 SpeechDetector | Completed | SpeechDetector singleton with confidence + db thresholds; SoundAnalysisDetector extracts speech confidence from built-in classifier; build succeeds |
 | 2026-05-25 | F14 Feature Doc | Completed | Created `docs/features/f14-sleepguard-rebrand.md` with full template: Files (23 entries), Routes, State, Edge Cases (7), Tasks Completed (5), Remaining Work (Phases 2–4, 15 tasks) |
 | 2026-05-24 | Unify duration format across app | Completed | Created `DurationFormatter.hoursAndMinutes` in DesignSystem. Updated TrendsView, Last7NightsStatGrid, Last7NightsRow, SessionStatsGrid, NightGroupRowView to use shared formatter. Removed 5 single-use private wrapper functions. TrendsView label changed from "SNORING MINUTES" to "AVG SNORING". Build succeeds |
 | 2026-05-23 | Mock data for App Store screenshots | Completed | Created `MockDataGenerator` generating realistic May 1–23 sleep sessions with trending scores (worse→better), variable events, midnight GMT+2 starts, and multi-session days. Wired `-generateMockData` DEBUG launch argument. Data verified on Statistics dashboard. Build succeeds |
@@ -160,12 +161,14 @@ _Most recent first. The AI appends here after every task._
 
 | Task | Feature | Started | Assignee |
 |------|---------|---------|----------|
-| P2-T1 SpeechDetector | F14 | — | AI |
+| (none) | — | — | — |
 
 ## Completed (last 10)
 
 | Task | Feature | Completed | Duration |
 |------|---------|-----------|----------|
+| P2-T1 SpeechDetector | F14 | 2026-05-26 | — |
+| SleepGuard Rebrand — Phase 1 Foundation | F14 | 2026-05-25 | — |
 | Session 39 | F4 | 2026-05-12 | — |
 | Session 38 | F4 | 2026-05-12 | — |
 | F4-T6 | F4 | 2026-05-09 | — |
@@ -184,7 +187,7 @@ _Unblocked tasks in priority order. F13 (CloudKit Sync) is intentionally skipped
 
 | Task | Feature | Priority | Why Ready |
 |------|---------|----------|-----------|
-| P2-T1 SpeechDetector | F14 | P0 | Phase 1 complete, no blockers |
+| P2-T2 Parallel detection wiring | F14 | P0 | SpeechDetector exists, ready for SessionManager integration |
 | P2-T2 Parallel detection wiring | F14 | P0 | Depends on P2-T1 |
 | P2-T3 Event creation for sleep talking | F14 | P0 | Depends on P2-T2 |
 | P2-T4 Settings toggle | F14 | P0 | Depends on P2-T3 |

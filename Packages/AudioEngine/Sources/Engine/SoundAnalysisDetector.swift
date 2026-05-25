@@ -12,12 +12,16 @@ public final class SoundAnalysisDetector: NSObject, SNResultsObserving {
   /// Confidence that the current audio contains snoring (0–1).
   public var snoreConfidence: Float = 0
 
+  /// Confidence that the current audio contains speech (0–1).
+  public var speechConfidence: Float = 0
+
   /// Whether snoring was detected in the built-in classifier.
   public var isSnoringClassAvailable = false
 
   private var streamAnalyzer: SNAudioStreamAnalyzer?
   private var analysisRequest: SNClassifySoundRequest?
   private let snoreIdentifiers = ["snore", "snoring"]
+  private let speechIdentifiers = ["speech", "talking", "conversation", "narration", "monologue"]
 
   private override init() {
     super.init()
@@ -64,6 +68,7 @@ public final class SoundAnalysisDetector: NSObject, SNResultsObserving {
     }
     streamAnalyzer = nil
     snoreConfidence = 0
+    speechConfidence = 0
   }
 
   /// Feeds a buffer to the analyzer.
@@ -90,19 +95,27 @@ public final class SoundAnalysisDetector: NSObject, SNResultsObserving {
     }.joined(separator: ", ")
     print("[SoundAnalysis] Top classifications: \(top3)")
 
-    var maxConfidence: Float = 0
+    var maxSnoreConfidence: Float = 0
+    var maxSpeechConfidence: Float = 0
     for classification in result.classifications {
       let id = classification.identifier.lowercased()
       if snoreIdentifiers.contains(where: { id.contains($0) }) {
-        maxConfidence = max(maxConfidence, Float(classification.confidence))
+        maxSnoreConfidence = max(maxSnoreConfidence, Float(classification.confidence))
+      }
+      if speechIdentifiers.contains(where: { id.contains($0) }) {
+        maxSpeechConfidence = max(maxSpeechConfidence, Float(classification.confidence))
       }
     }
 
     Task { @MainActor in
-      self.snoreConfidence = maxConfidence
+      self.snoreConfidence = maxSnoreConfidence
+      self.speechConfidence = maxSpeechConfidence
       #if DEBUG
-      if maxConfidence > 0 {
-        print("[SoundAnalysis] snoreConfidence updated: \(String(format: "%.3f", maxConfidence))")
+      if maxSnoreConfidence > 0 {
+        print("[SoundAnalysis] snoreConfidence updated: \(String(format: "%.3f", maxSnoreConfidence))")
+      }
+      if maxSpeechConfidence > 0 {
+        print("[SoundAnalysis] speechConfidence updated: \(String(format: "%.3f", maxSpeechConfidence))")
       }
       #endif
     }
