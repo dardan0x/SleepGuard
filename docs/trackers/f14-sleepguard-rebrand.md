@@ -59,4 +59,5 @@ User requested a detailed plan for rebranding SnoreGuard to SleepGuard and expan
 - **Next task to pick up: P2-T1 (SpeechDetector)**
 - When user says "continue" or "work on what's next", start with the 🟡 Next task in this tracker
 - F13 (CloudKit Sync) is intentionally skipped — do NOT work on it unless explicitly asked
+- Feature doc: `docs/features/f14-sleepguard-rebrand.md`
 - See `/Users/user/.kimi/plans/maxima-blue-marvel-moon-knight.md` for full strategic plan
