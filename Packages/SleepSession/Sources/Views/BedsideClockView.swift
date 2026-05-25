@@ -118,7 +118,7 @@ struct BedsideClockView: View {
     }
     
     private var snoringColor: Color {
-        switch sessionManager.currentSnoringState {
+        switch sessionManager.currentDetectionState {
         case .none: return theme.textTertiary
         case .quiet: return theme.snoreQuiet
         case .light: return theme.snoreLight
@@ -128,7 +128,7 @@ struct BedsideClockView: View {
     }
     
     private var statusLabel: String {
-        switch sessionManager.currentSnoringState {
+        switch sessionManager.currentDetectionState {
         case .none: return Strings.statsCalendarIntensityQuiet
         case .quiet: return Strings.sessionBedsideSnoreQuiet
         case .light: return Strings.sessionBedsideSnoreLight

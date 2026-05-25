@@ -3296,3 +3296,59 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 
 ### Open Questions
 - None
+
+## 2026-05-25 — Session 58: SleepGuard Rebrand — Phase 1 Foundation
+
+### Completed
+- Approved Approach B: "SleepGuard — Full Sleep Tracker" (rebrand + multi-sound + Watch sleep stages)
+- Phase 1: Foundation — all tasks complete
+  - P1-T3: Added `SleepStageSegment` + `SleepStage` enum to `SleepSession`; added `.coughing` to `SoundCategory`
+  - P1-T4: Renamed `SnoringState` → `DetectionState` (internal refactor, zero migration, 5 files)
+  - P1-T1: Rebrand app struct `SnoreGuardApp` → `SleepGuardApp`, file renamed, bundle ID updated, `CFBundleDisplayName` added to Info.plist
+  - P1-T2: Updated 6 user-facing strings in `Localizable.xcstrings` (onboarding title/description, microphone alert, delete-all confirmation, privacy copy)
+  - P1-T5: Build verified — zero errors
+
+### Technical Details
+- `SleepStageSegment` is a lightweight `Codable` struct stored as an array on `SleepSession`. `nil` for all existing sessions → no UI disruption.
+- `DetectionState` rename is purely code-level; the enum was never persisted in SwiftData (it's computed in real-time). All references in `SnoreDetector`, `SessionManager`, `BedsideClockView`, `SessionRawLogWriter`, `SnoreSample` updated.
+- Bundle ID changed from `com.daki.exampleProject.SnoreGuard` → `com.daki.exampleProject.SleepGuard` in Debug/Release configs.
+- `CFBundleDisplayName` = "SleepGuard" added to `Info.plist` so the home screen label updates independently of target name.
+- All hardcoded "SnoreGuard" strings eliminated from Swift code (PDF generator, notification manager, watch app, comments).
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Models/Sources/Data/SleepSession.swift` | +21/-0 | Added `SleepStage`, `SleepStageSegment`, and `sleepStageSegments` property |
+| `Packages/Models/Sources/Data/SnoreEvent.swift` | +1/-0 | Added `.coughing` to `SoundCategory` |
+| `Packages/AudioEngine/Sources/Engine/SnoreDetector.swift` | +1/-1 | `SnoringState` → `DetectionState` |
+| `Packages/AudioEngine/Sources/Engine/SnoreSample.swift` | +1/-1 | `SnoringState` → `DetectionState` |
+| `Packages/Env/Sources/Services/SessionManager.swift` | +4/-4 | `currentSnoringState` → `currentDetectionState`, `intensity(from:)` param type |
+| `Packages/Env/Sources/Services/SessionRawLogWriter.swift` | +1/-1 | `SnoringState` → `DetectionState` |
+| `Packages/Env/Sources/Services/RecordingDelayManager.swift` | +2/-2 | Notification title "SnoreGuard" → "SleepGuard", ID updated |
+| `Packages/SleepSession/Sources/Views/BedsideClockView.swift` | +2/-2 | `currentSnoringState` → `currentDetectionState` |
+| `Packages/Recordings/Sources/Views/SleepReportPDFGenerator.swift` | +2/-2 | "SnoreGuard" → "SleepGuard" in PDF header/footer |
+| `Packages/Recordings/Sources/Views/EventPlayerView.swift` | +1/-1 | Comment updated |
+| `WatchApp/Sources/SnoreGuardWatchApp.swift` | +1/-1 | `SnoreGuardWatchApp` → `SleepGuardWatchApp` |
+| `SnoreGuard/SnoreGuardApp.swift` | — | Deleted (renamed to `SleepGuardApp.swift`) |
+| `SnoreGuard/SleepGuardApp.swift` | +76/-0 | New file (renamed from `SnoreGuardApp.swift`) |
+| `SnoreGuard/Info.plist` | +2/-0 | Added `CFBundleDisplayName` = "SleepGuard" |
+| `SnoreGuard.xcodeproj/project.pbxproj` | +2/-2 | Bundle ID updated to `com.daki.exampleProject.SleepGuard` |
+| `Packages/DesignSystem/Sources/Resources/Localizable.xcstrings` | +6/-6 | 6 strings updated to SleepGuard/generic copy |
+
+### Architecture Decisions
+- **Keep `SnoreEvent` model name**: Internal model names don't need to change. The `category` field already provides the generic abstraction.
+- **`SleepStageSegment` as Codable array rather than @Model relationship**: Avoids complex SwiftData relationships for optional data. HealthKit sleep data is read-only and append-only; a simple array is sufficient.
+- **Bundle display name via Info.plist instead of target rename**: Changing Xcode target names breaks schemes, derived data paths, and script references. Info.plist override is safer and reversible.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors, zero warnings
+
+### Next Session
+- Phase 2: Sleep Talking Detection
+  - Create `SpeechDetector` in `AudioEngine`
+  - Wire parallel detection into `SessionManager`
+  - Add "Detect Sleep Talking" toggle in Settings
+
+### Open Questions
+- Should we rename the Xcode project file itself (`SnoreGuard.xcodeproj` → `SleepGuard.xcodeproj`) and all scheme names? This is developer-facing and can be deferred.
+- Should the onboarding screens be redesigned to visually reflect "SleepGuard" (new hero images, colors)? The current onboarding is snore-focused.

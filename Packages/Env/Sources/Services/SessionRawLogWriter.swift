@@ -21,7 +21,7 @@ public actor SessionRawLogWriter {
       .appendingPathComponent("rawlog_\(sessionID.uuidString).json")
   }
 
-  public func append(db: Float, spectralScore: Float, snoreConfidence: Float, state: SnoringState) {
+  public func append(db: Float, spectralScore: Float, snoreConfidence: Float, state: DetectionState) {
     guard let start = sessionStart else { return }
     let sample = SnoreSample(
       elapsed: Date().timeIntervalSince(start),

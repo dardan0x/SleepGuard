@@ -507,7 +507,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "We detect your snores so you don't have to argue about them."
+            "value": "We detect snores, sleep talking, and nighttime noise so you don't have to wonder what happened."
           }
         }
       }
@@ -517,7 +517,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Snore Detection"
+            "value": "Sound Detection"
           }
         }
       }
@@ -587,7 +587,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Don't worry — we're only listening for\nsnores, not secrets."
+            "value": "Don't worry — we're only listening for sounds, not secrets."
           }
         }
       }
@@ -627,7 +627,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Everything is processed on your device.\nNo uploads. No weird cloud stuff.\nNo selling your snore drama."
+            "value": "Everything is processed on your device.\nNo uploads. No weird cloud stuff.\nNo selling your sleep drama."
           }
         }
       }
@@ -1102,7 +1102,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "SnoreGuard needs microphone access to detect snoring while you sleep. Please enable it in Settings."
+            "value": "SleepGuard needs microphone access to detect sounds while you sleep. Please enable it in Settings."
           }
         }
       }
@@ -1368,7 +1368,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "This will permanently delete all sleep sessions and snore events. This action cannot be undone."
+            "value": "This will permanently delete all sleep sessions and sound events. This action cannot be undone."
           }
         }
       }

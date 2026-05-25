@@ -16,7 +16,7 @@ public final class RecordingDelayManager {
   public var currentRemainingSeconds: Int = 0
 
   private var timer: Timer?
-  private let notificationId = "snoreguard-delayed-recording"
+  private let notificationId = "sleepguard-delayed-recording"
 
   private init() {}
 
@@ -86,7 +86,7 @@ public final class RecordingDelayManager {
 
   private func scheduleNotification(minutes: Int) {
     let content = UNMutableNotificationContent()
-    content.title = "SnoreGuard"
+    content.title = "SleepGuard"
     content.body = "Your recording session is starting now"
     content.sound = .default
 

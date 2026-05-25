@@ -2,7 +2,7 @@ import SwiftUI
 import Models
 import DesignSystem
 
-/// Single-event audio player matching the SnoreGuard design.
+/// Single-event audio player matching the SleepGuard design.
 /// Shows event info, bar waveform with progress, and centered playback controls.
 @MainActor
 struct EventPlayerView: View {

@@ -1,7 +1,7 @@
 import AVFoundation
 import Observation
 
-public enum SnoringState: String, Sendable, Codable {
+public enum DetectionState: String, Sendable, Codable {
   case none
   case quiet
   case light
@@ -14,7 +14,7 @@ public enum SnoringState: String, Sendable, Codable {
 public final class SnoreDetector {
   public static let shared = SnoreDetector()
 
-  public var currentState: SnoringState = .none
+  public var currentState: DetectionState = .none
 
   /// Base thresholds in dBFS (medium sensitivity).
   /// These are relative to digital full scale, not calibrated dB-SPL.
@@ -31,7 +31,7 @@ public final class SnoreDetector {
   /// falling back to FFT spectral features. Never falls back to pure dB thresholds
   /// because they have no frequency discrimination and create massive false positives
   /// (breathing, bed creaking, traffic, etc.).
-  public func classify(db: Float, spectralScore: Float = 0, snoreConfidence: Float = 0) -> SnoringState {
+  public func classify(db: Float, spectralScore: Float = 0, snoreConfidence: Float = 0) -> DetectionState {
     if snoreConfidence > 0 {
       return classifyWithSoundAnalysis(db: db, snoreConfidence: snoreConfidence)
     }
@@ -47,7 +47,7 @@ public final class SnoreDetector {
 
   // MARK: - Threshold Fallback
 
-  public func classifyWithThresholds(db: Float) -> SnoringState {
+  public func classifyWithThresholds(db: Float) -> DetectionState {
     if db >= epicThreshold {
       return .epic
     } else if db >= loudThreshold {
@@ -69,7 +69,7 @@ public final class SnoreDetector {
   /// because the classifier distinguishes snoring from other loud sounds.
   /// dB is used only for intensity, with floors tuned to reduce false positives
   /// from ambient bedroom noise while still capturing quiet snoring.
-  public func classifyWithSoundAnalysis(db: Float, snoreConfidence: Float) -> SnoringState {
+  public func classifyWithSoundAnalysis(db: Float, snoreConfidence: Float) -> DetectionState {
     guard snoreConfidence >= 0.5 else {
       return .none
     }
@@ -100,7 +100,7 @@ public final class SnoreDetector {
   /// Rejects sounds that are loud but don't have snore-like spectral structure.
   /// Threshold raised from 0.3 → 0.6 because breathing and other non-snore sounds
   /// easily score 0.4–0.7 in the 100–500 Hz band.
-  public func classifyWithSpectral(db: Float, spectralScore: Float) -> SnoringState {
+  public func classifyWithSpectral(db: Float, spectralScore: Float) -> DetectionState {
     guard spectralScore >= 0.6 else {
       return .none
     }

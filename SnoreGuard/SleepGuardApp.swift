@@ -7,7 +7,7 @@ import DesignSystem
 import Onboarding
 
 @main
-struct SnoreGuardApp: App {
+struct SleepGuardApp: App {
   @Environment(\.scenePhase) private var scenePhase
   @State private var userPreferences = UserPreferences.shared
   @State private var sessionManager = SessionManager.shared

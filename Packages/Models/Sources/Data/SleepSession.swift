@@ -1,6 +1,25 @@
 import Foundation
 import SwiftData
 
+public enum SleepStage: String, Codable, Sendable {
+  case awake
+  case rem
+  case light
+  case deep
+}
+
+public struct SleepStageSegment: Codable, Sendable {
+  public let stage: SleepStage
+  public let startOffset: TimeInterval
+  public let duration: TimeInterval
+
+  public init(stage: SleepStage, startOffset: TimeInterval, duration: TimeInterval) {
+    self.stage = stage
+    self.startOffset = startOffset
+    self.duration = duration
+  }
+}
+
 @Model
 public final class SleepSession {
     @Attribute(.unique) public var id: UUID
@@ -34,6 +53,10 @@ public final class SleepSession {
     /// Why the session ended early (e.g. "low_battery"). Set when the app force-saves
     /// to preserve data before the phone shuts down. nil for normal user-stopped sessions.
     public var terminationReason: String?
+
+    /// Optional sleep stage segments sourced from Apple Health (Apple Watch).
+    /// nil when no Watch data is available for this session.
+    public var sleepStageSegments: [SleepStageSegment]?
 
     public static let minimumSaveDuration: TimeInterval = 120
 

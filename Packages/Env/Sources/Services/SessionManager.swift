@@ -18,7 +18,7 @@ public final class SessionManager {
 
     /// Real-time audio level for UI observation
     public var currentDB: Float = -160.0
-    public var currentSnoringState: SnoringState = .none
+    public var currentDetectionState: DetectionState = .none
     public var eventsCount: Int = 0
 
     private let audioRecorder = AudioRecorder.shared
@@ -116,7 +116,7 @@ public final class SessionManager {
         try audioRecorder.startRecording(audioFileURL: audioURL)
         isRecording = true
         currentDB = -160.0
-        currentSnoringState = .none
+        currentDetectionState = .none
         eventsCount = 0
 
         Task {
@@ -313,7 +313,7 @@ public final class SessionManager {
         #endif
 
         // Update display state immediately for UI responsiveness
-        currentSnoringState = state
+        currentDetectionState = state
 
         // Append to raw classification log for future re-processing
         Task {
@@ -526,7 +526,7 @@ public final class SessionManager {
         snoreDetector.epicThreshold = -5.0 + offset
     }
 
-    private func intensity(from state: SnoringState) -> SnoreIntensity {
+    private func intensity(from state: DetectionState) -> SnoreIntensity {
         switch state {
         case .quiet: return .quiet
         case .light: return .light

@@ -2,7 +2,7 @@
 
 > Auto-updated by the AI after every task. This is the local source of truth.
 
-Last updated: 2026-05-24 (Session 57)
+Last updated: 2026-05-25 (Session 58)
 
 ---
 
@@ -27,13 +27,19 @@ Last updated: 2026-05-24 (Session 57)
 | Backlog | 0 |
 | Blocked | 0 |
 | — | — |
-| Total Tasks | 42 |
-| Tasks Done | 42 |
-| Tasks In Progress | 0 |
-| Tasks Blocked | 0 |
-| Tasks Backlog | 0 |
+| Features (V3) | 1 |
+| Done | 0 |
+| In Progress | 1 |
+| Backlog | 3 |
+| Blocked | 0 |
 | — | — |
-| **Progress** | **100%** |
+| Total Tasks | 62 |
+| Tasks Done | 47 |
+| Tasks In Progress | 1 |
+| Tasks Blocked | 0 |
+| Tasks Backlog | 14 |
+| — | — |
+| **Progress** | **76%** |
 
 ## Features
 
@@ -52,6 +58,7 @@ Last updated: 2026-05-24 (Session 57)
 | F11 | Apple Watch | P2 | Done | 4/4 | ██████████ 100% | [tracker](trackers/f11-apple-watch.md) |
 | F12 | HealthKit | P1 | Done | 3/3 | ██████████ 100% | [tracker](trackers/f12-healthkit.md) |
 | F13 | CloudKit Sync | P2 | Backlog | 0/3 | ░░░░░░░░░░ 0% | [tracker](trackers/f13-cloudkit-sync.md) |
+| F14 | SleepGuard Rebrand & Multi-Sound | P0 | In Progress | 5/20 | ██░░░░░░░░ 25% | [tracker](trackers/f14-sleepguard-rebrand.md) |
 
 ## Activity Log
 
@@ -59,6 +66,8 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-05-25 | SleepGuard Rebrand — Phase 1 Foundation | In Progress | Model expansion (SleepStageSegment, SoundCategory.coughing), DetectionState rename, app-wide rebrand (bundle ID, display name, strings), build succeeds |
+| 2026-05-25 | F14 Feature Doc | Completed | Created `docs/features/f14-sleepguard-rebrand.md` with full template: Files (23 entries), Routes, State, Edge Cases (7), Tasks Completed (5), Remaining Work (Phases 2–4, 15 tasks) |
 | 2026-05-24 | Unify duration format across app | Completed | Created `DurationFormatter.hoursAndMinutes` in DesignSystem. Updated TrendsView, Last7NightsStatGrid, Last7NightsRow, SessionStatsGrid, NightGroupRowView to use shared formatter. Removed 5 single-use private wrapper functions. TrendsView label changed from "SNORING MINUTES" to "AVG SNORING". Build succeeds |
 | 2026-05-23 | Mock data for App Store screenshots | Completed | Created `MockDataGenerator` generating realistic May 1–23 sleep sessions with trending scores (worse→better), variable events, midnight GMT+2 starts, and multi-session days. Wired `-generateMockData` DEBUG launch argument. Data verified on Statistics dashboard. Build succeeds |
 | 2026-05-22 | Future-proof data model for multi-sound detection | Completed | Added `SoundCategory` enum (snoring/sleepTalking/noise/other) to `SnoreEvent` with default `.snoring` — lightweight SwiftData migration, zero data loss. Added `SleepSession.duration(for:)` helper. Explicit `.snoring` in `SessionManager`. No UI changes — stats grid unchanged. Build succeeds |
@@ -151,7 +160,7 @@ _Most recent first. The AI appends here after every task._
 
 | Task | Feature | Started | Assignee |
 |------|---------|---------|----------|
-| (none) | — | — | — |
+| P2-T1 SpeechDetector | F14 | — | AI |
 
 ## Completed (last 10)
 
@@ -171,13 +180,27 @@ _Most recent first. The AI appends here after every task._
 
 ## Up Next
 
-_Unblocked tasks in priority order. The AI updates this after every task._
+_Unblocked tasks in priority order. F13 (CloudKit Sync) is intentionally skipped for now. F14 is the active focus._
 
 | Task | Feature | Priority | Why Ready |
 |------|---------|----------|-----------|
-| F13-T1 | CloudKit Sync | P2 | No blockers |
-| F13-T2 | CloudKit Sync | P2 | Depends on F13-T1 |
-| F13-T3 | CloudKit Sync | P2 | Depends on F13-T1 |
+| P2-T1 SpeechDetector | F14 | P0 | Phase 1 complete, no blockers |
+| P2-T2 Parallel detection wiring | F14 | P0 | Depends on P2-T1 |
+| P2-T3 Event creation for sleep talking | F14 | P0 | Depends on P2-T2 |
+| P2-T4 Settings toggle | F14 | P0 | Depends on P2-T3 |
+| P2-T5 Build & verify | F14 | P0 | Depends on P2-T4 |
+| P3-T1 Category filter | F14 | P1 | Depends on Phase 2 |
+| P3-T2 EventRow icons | F14 | P1 | Depends on P3-T1 |
+| P3-T3 Timeline multi-color | F14 | P1 | Depends on P3-T1 |
+| P3-T4 Stats grid supplement | F14 | P1 | Depends on P3-T1 |
+| P3-T5 Player labels | F14 | P1 | Depends on P3-T1 |
+| P3-T6 Build & verify | F14 | P1 | Depends on P3-T5 |
+| P4-T1 HealthKit read sleep stages | F14 | P2 | Depends on Phase 3 |
+| P4-T2 Stage correlation | F14 | P2 | Depends on P4-T1 |
+| P4-T3 Stage timeline overlay | F14 | P2 | Depends on P4-T2 |
+| P4-T4 Statistics integration | F14 | P2 | Depends on P4-T3 |
+| P4-T5 Settings toggle | F14 | P2 | Depends on P4-T4 |
+| P4-T6 Build & verify | F14 | P2 | Depends on P4-T5 |
 
 ## Blocked
 
