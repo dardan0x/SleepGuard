@@ -3756,3 +3756,44 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 - Snoring retains intensity colors
 - Sleep talking = purple, noise/coughing/other = orange
 ```
+
+
+## 2026-05-26 — Session 59 (continued): P3-T4 Stats Grid Supplement
+
+### Completed
+- P3-T4: Added optional disturbance row below the 2×2 stats grid in `SessionDetailHeaderView`
+
+### Technical Details
+- `SessionDetailHeaderView` restructured from `HStack` to `VStack(spacing: 12)` containing:
+  - `HStack` with `SleepScoreGauge` + `SessionStatsGrid` (unchanged layout)
+  - Conditional `StatCard` showing disturbance count (only when `disturbanceCount > 0`)
+- `disturbanceCount` computed as `session.events?.filter { $0.category != .snoring }.count ?? 0`
+- Disturbance card uses `speaker.wave.2.fill` icon in `theme.noiseColor` (orange)
+- Card hidden for snoring-only sessions, preserving pre-rebrand UI
+- Added localized string `session.disturbances` = "Disturbances"
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/DesignSystem/Sources/Resources/Localizable.xcstrings` | +11 | Added `session.disturbances` entry |
+| `Packages/DesignSystem/Sources/Strings.swift` | +1 | Regenerated (233 strings) |
+| `Packages/Recordings/Sources/Views/SessionDetailHeaderView.swift` | +14/-4 | VStack wrapper, `disturbanceCount` computed property, conditional disturbance `StatCard` |
+| `docs/trackers/f14-sleepguard-rebrand.md` | +2/-2 | P3-T4 marked Done; next task P3-T5 |
+| `docs/FeatureTracker.md` | +5/-5 | Dashboard (56 done, 6 backlog, 90%), Activity Log, Completed, Up Next updated |
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors, zero warnings
+
+### Next Session
+- P3-T5: Player labels — `PlayerSheetView` title based on event category
+- P3-T6: Build & verify — screenshot comparison with design tokens
+
+### Open Questions
+- None
+[P3-T4] — Add optional disturbance row below session stats grid
+
+- SessionDetailHeaderView wraps gauge+grid in VStack
+- Disturbance StatCard shows count of non-snoring events
+- Hidden for snoring-only sessions
+- Localized "Disturbances" string
+```

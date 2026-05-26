@@ -34,12 +34,12 @@ Last updated: 2026-05-26 (Session 59)
 | Blocked | 0 |
 | — | — |
 | Total Tasks | 62 |
-| Tasks Done | 55 |
+| Tasks Done | 56 |
 | Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
-| Tasks Backlog | 7 |
+| Tasks Backlog | 6 |
 | — | — |
-| **Progress** | **89%** |
+| **Progress** | **90%** |
 
 ## Features
 
@@ -58,7 +58,7 @@ Last updated: 2026-05-26 (Session 59)
 | F11 | Apple Watch | P2 | Done | 4/4 | ██████████ 100% | [tracker](trackers/f11-apple-watch.md) |
 | F12 | HealthKit | P1 | Done | 3/3 | ██████████ 100% | [tracker](trackers/f12-healthkit.md) |
 | F13 | CloudKit Sync | P2 | Backlog | 0/3 | ░░░░░░░░░░ 0% | [tracker](trackers/f13-cloudkit-sync.md) |
-| F14 | SleepGuard Rebrand & Multi-Sound | P0 | In Progress | 12/20 | ██████░░░░ 60% | [tracker](trackers/f14-sleepguard-rebrand.md) |
+| F14 | SleepGuard Rebrand & Multi-Sound | P0 | In Progress | 13/20 | ██████░░░░ 65% | [tracker](trackers/f14-sleepguard-rebrand.md) |
 
 ## Activity Log
 
@@ -66,6 +66,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-05-26 | P3-T4 Stats grid supplement | Completed | Optional disturbance row in `SessionDetailHeaderView`: full-width `StatCard` below the 2×2 grid, shows non-snoring event count, hidden for snoring-only sessions; localized `session.disturbances`; build succeeds |
 | 2026-05-26 | P3-T3 Timeline multi-color | Completed | `SnoringTimelineView` renders events by category: snoring retains intensity colors, sleep talking = purple, noise/coughing/other = orange; `eventColor(_:)` helper; build succeeds |
 | 2026-05-26 | P3-T2 EventRow icons | Completed | Category-based icons in `EventRow`: snoring retains intensity dot, sleep talking shows purple `bubble.left.fill`, noise shows orange `waveform`; `Theme` gained `sleepTalkingColor` and `noiseColor` for P3-T3 reuse; build succeeds |
 | 2026-05-26 | P3-T1 Category filter | Completed | Segmented picker (`All | Snoring | Sleep Talking | Noise`) in `SessionDetailView`; dynamic show/hide when session has multiple categories; filter wired to events list, player sheet, and events sheet; localized 4 filter strings; build succeeds |
@@ -174,6 +175,7 @@ _Most recent first. The AI appends here after every task._
 
 | Task | Feature | Completed | Duration |
 |------|---------|-----------|----------|
+| P3-T4 Stats grid supplement | F14 | 2026-05-26 | — |
 | P3-T3 Timeline multi-color | F14 | 2026-05-26 | — |
 | P3-T2 EventRow icons | F14 | 2026-05-26 | — |
 | P3-T1 Category filter | F14 | 2026-05-26 | — |
@@ -201,7 +203,6 @@ _Unblocked tasks in priority order. F13 (CloudKit Sync) is intentionally skipped
 
 | Task | Feature | Priority | Why Ready |
 |------|---------|----------|-----------|
-| P3-T4 Stats grid supplement | F14 | P1 | Depends on P3-T1 |
 | P3-T5 Player labels | F14 | P1 | Depends on P3-T1 |
 | P3-T6 Build & verify | F14 | P1 | Depends on P3-T5 |
 | P4-T1 HealthKit read sleep stages | F14 | P2 | Depends on Phase 3 |

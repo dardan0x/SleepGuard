@@ -316,6 +316,17 @@
         }
       }
     },
+    "session.disturbances": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disturbances"
+          }
+        }
+      }
+    },
     "fifteen.seconds.soothing.melody.value": {
       "extractionState": "manual",
       "localizations": {

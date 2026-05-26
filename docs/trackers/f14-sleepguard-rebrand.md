@@ -39,7 +39,7 @@ Rebrand SnoreGuard to SleepGuard and expand detection from snore-only to multi-s
 | P3-T1 | Category filter | ✅ Done | Segmented picker in SessionDetailView |
 | P3-T2 | EventRow icons | ✅ Done | Category-based icons |
 | P3-T3 | Timeline multi-color | ✅ Done | Sleep talking = purple, noise = orange |
-| P3-T4 | Stats grid supplement | ⬜ Backlog | Optional disturbance row |
+| P3-T4 | Stats grid supplement | ✅ Done | Optional disturbance row |
 | P3-T5 | Player labels | ⬜ Backlog | Title based on event category |
 | P3-T6 | Build & verify | ⬜ Backlog | Screenshot comparison |
 | P4-T1 | HealthKit read sleep stages | ⬜ Backlog | Extend HealthKitSync |
@@ -59,7 +59,7 @@ User requested a detailed plan for rebranding SnoreGuard to SleepGuard and expan
 - P2-T2 completed in Session 59
 - P2-T3 completed in Session 59
 - Phase 2 complete (P2-T1 through P2-T5)
-- **Next task to pick up: P3-T4 (Stats grid supplement)**
+- **Next task to pick up: P3-T5 (Player labels)**
 - When user says "continue" or "work on what's next", start with the 🟡 Next task in this tracker
 - F13 (CloudKit Sync) is intentionally skipped — do NOT work on it unless explicitly asked
 - Feature doc: `docs/features/f14-sleepguard-rebrand.md`
