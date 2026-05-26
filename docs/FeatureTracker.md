@@ -34,12 +34,12 @@ Last updated: 2026-05-26 (Session 59)
 | Blocked | 0 |
 | — | — |
 | Total Tasks | 62 |
-| Tasks Done | 49 |
+| Tasks Done | 50 |
 | Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
-| Tasks Backlog | 13 |
+| Tasks Backlog | 12 |
 | — | — |
-| **Progress** | **79%** |
+| **Progress** | **81%** |
 
 ## Features
 
@@ -58,7 +58,7 @@ Last updated: 2026-05-26 (Session 59)
 | F11 | Apple Watch | P2 | Done | 4/4 | ██████████ 100% | [tracker](trackers/f11-apple-watch.md) |
 | F12 | HealthKit | P1 | Done | 3/3 | ██████████ 100% | [tracker](trackers/f12-healthkit.md) |
 | F13 | CloudKit Sync | P2 | Backlog | 0/3 | ░░░░░░░░░░ 0% | [tracker](trackers/f13-cloudkit-sync.md) |
-| F14 | SleepGuard Rebrand & Multi-Sound | P0 | In Progress | 6/20 | ███░░░░░░░ 30% | [tracker](trackers/f14-sleepguard-rebrand.md) |
+| F14 | SleepGuard Rebrand & Multi-Sound | P0 | In Progress | 7/20 | ███░░░░░░░ 35% | [tracker](trackers/f14-sleepguard-rebrand.md) |
 
 ## Activity Log
 
@@ -66,6 +66,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-05-26 | P2-T3 Event creation for sleep talking | Completed | Parallel speech event tracking in SessionManager; `finalizeActiveSpeechEvent()` creates `.sleepTalking` events; 3-sample consecutive gate; snoring priority finalizes speech immediately; `detectSleepTalking` pref (default false); build succeeds |
 | 2026-05-26 | P2-T2 Parallel detection wiring | Completed | SpeechDetector wired into SessionManager processing loop; `currentSpeechDetected` exposed; snoring priority preserved; debug prints include speechConfidence; build succeeds |
 | 2026-05-25 | SleepGuard Rebrand — Phase 1 Foundation | Completed | Model expansion (SleepStageSegment, SoundCategory.coughing), DetectionState rename, app-wide rebrand (bundle ID, display name, strings), build succeeds |
 | 2026-05-26 | P2-T1 SpeechDetector | Completed | SpeechDetector singleton with confidence + db thresholds; SoundAnalysisDetector extracts speech confidence from built-in classifier; build succeeds |
@@ -168,6 +169,7 @@ _Most recent first. The AI appends here after every task._
 
 | Task | Feature | Completed | Duration |
 |------|---------|-----------|----------|
+| P2-T3 Event creation for sleep talking | F14 | 2026-05-26 | — |
 | P2-T2 Parallel detection wiring | F14 | 2026-05-26 | — |
 | P2-T1 SpeechDetector | F14 | 2026-05-26 | — |
 | SleepGuard Rebrand — Phase 1 Foundation | F14 | 2026-05-25 | — |
@@ -189,7 +191,6 @@ _Unblocked tasks in priority order. F13 (CloudKit Sync) is intentionally skipped
 
 | Task | Feature | Priority | Why Ready |
 |------|---------|----------|-----------|
-| P2-T3 Event creation for sleep talking | F14 | P0 | Depends on P2-T2 |
 | P2-T4 Settings toggle | F14 | P0 | Depends on P2-T3 |
 | P2-T5 Build & verify | F14 | P0 | Depends on P2-T4 |
 | P3-T1 Category filter | F14 | P1 | Depends on Phase 2 |
