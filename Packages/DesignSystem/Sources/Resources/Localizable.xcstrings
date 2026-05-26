@@ -173,6 +173,26 @@
         }
       }
     },
+    "action.collapse": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Collapse"
+          }
+        }
+      }
+    },
+    "action.expand": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Expand"
+          }
+        }
+      }
+    },
     "always.soothing.melody.value": {
       "extractionState": "manual",
       "localizations": {
@@ -2426,6 +2446,94 @@
           "stringUnit": {
             "state": "translated",
             "value": "Epic"
+          }
+        }
+      }
+    },
+    "recordings.detail.sleepStagesLabel": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SLEEP STAGES"
+          }
+        }
+      }
+    },
+    "sleepStage.awake": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Awake"
+          }
+        }
+      }
+    },
+    "sleepStage.deep": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deep"
+          }
+        }
+      }
+    },
+    "sleepStage.light": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Light"
+          }
+        }
+      }
+    },
+    "sleepStage.rem": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "REM"
+          }
+        }
+      }
+    },
+    "statistics.sleepStagesLabel": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SLEEP STAGES"
+          }
+        }
+      }
+    },
+    "sleepStage.deepSleep": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deep Sleep"
+          }
+        }
+      }
+    },
+    "sleepStage.lightSleep": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Light Sleep"
           }
         }
       }

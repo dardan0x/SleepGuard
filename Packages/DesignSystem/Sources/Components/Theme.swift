@@ -35,6 +35,12 @@ public final class Theme {
   public var sleepTalkingColor: Color = Color(hex: "#BF5AF2")
   public var noiseColor: Color = Color(hex: "#FF9F0A")
 
+  // MARK: - Sleep Stage
+  public var stageDeepColor: Color = Color(hex: "#5E5CE6")
+  public var stageLightColor: Color = Color(hex: "#0A84FF")
+  public var stageREMColor: Color = Color(hex: "#64D2FF")
+  public var stageAwakeColor: Color = Color(hex: "#FFD60A")
+
   // MARK: - Text
   public var textPrimary: Color = Color(hex: "#FFFFFF")
   public var textSecondary: Color = Color(hex: "#ABABAB")
@@ -83,6 +89,15 @@ public final class Theme {
 
   public func scoreGradient(for score: Int) -> Color {
     scoreColor(score)
+  }
+
+  public func stageColor(_ stage: SleepStage) -> Color {
+    switch stage {
+    case .deep: return stageDeepColor
+    case .light: return stageLightColor
+    case .rem: return stageREMColor
+    case .awake: return stageAwakeColor
+    }
   }
 }
 

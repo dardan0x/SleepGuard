@@ -2,7 +2,7 @@
 
 > Auto-updated by the AI after every task. This is the local source of truth.
 
-Last updated: 2026-05-26 (Session 60)
+Last updated: 2026-05-26 (Session 60 continued)
 
 ---
 
@@ -30,16 +30,16 @@ Last updated: 2026-05-26 (Session 60)
 | Features (V3) | 1 |
 | Done | 0 |
 | In Progress | 1 |
-| Backlog | 3 |
+| Backlog | 2 |
 | Blocked | 0 |
 | — | — |
 | Total Tasks | 62 |
-| Tasks Done | 57 |
-| Tasks In Progress | 0 |
+| Tasks Done | 60 |
+| Tasks In Progress | 1 |
 | Tasks Blocked | 0 |
-| Tasks Backlog | 5 |
+| Tasks Backlog | 2 |
 | — | — |
-| **Progress** | **92%** |
+| **Progress** | **97%** |
 
 ## Features
 
@@ -58,7 +58,7 @@ Last updated: 2026-05-26 (Session 60)
 | F11 | Apple Watch | P2 | Done | 4/4 | ██████████ 100% | [tracker](trackers/f11-apple-watch.md) |
 | F12 | HealthKit | P1 | Done | 3/3 | ██████████ 100% | [tracker](trackers/f12-healthkit.md) |
 | F13 | CloudKit Sync | P2 | Backlog | 0/3 | ░░░░░░░░░░ 0% | [tracker](trackers/f13-cloudkit-sync.md) |
-| F14 | SleepGuard Rebrand & Multi-Sound | P0 | In Progress | 17/20 | ████████░░ 85% | [tracker](trackers/f14-sleepguard-rebrand.md) |
+| F14 | SleepGuard Rebrand & Multi-Sound | P0 | In Progress | 20/20 | ██████████ 98% | [tracker](trackers/f14-sleepguard-rebrand.md) |
 
 ## Activity Log
 
@@ -66,6 +66,9 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-05-26 | P4-T4 Statistics integration | Completed | `SleepStageBreakdownView` compact stage bar + 2×2 stat grid in `StatisticsLoadedView`; `MockDataGenerator` generates realistic sleep cycles for all mock sessions; build succeeds |
+| 2026-05-26 | P4-T4 Verified | Verified | Hypnogram chart renders correctly after fixing division-by-zero (0-width segments), color regression (light restored to #0A84FF blue), and SleepStage enum reorder (awake→rem→light→deep top-to-bottom); debug code removed; clean build; screenshot verified |
+| 2026-05-26 | P4-T3 Stage timeline overlay | Completed | `SleepStageBreakdownView` compact stage bar + 2×2 stat grid with deep/light/REM/awake colors + legend; shown in `SessionDetailTimelineView` and `StatisticsLoadedView`; 5 localized strings; build succeeds |
 | 2026-05-26 | P4-T2 Stage correlation | Completed | `SessionDetailView.loadSession()` auto-fetches sleep stages when `sleepStageSegments == nil`, stores `[]` for no-data to avoid re-query, persists via SwiftData; build succeeds |
 | 2026-05-26 | P4-T1 HealthKit read sleep stages | Completed | `fetchSleepStages(for:)` queries HK sleep analysis samples, maps to `SleepStageSegment`; `mapSleepStage` maps core/deep/REM/awake; skips legacy/in-bed/unspecified; build succeeds |
 | 2026-05-26 | P3-T6 Build & verify | Completed | Clean build (zero errors); pre-existing asset warnings only; Phase 3 UI verified |
@@ -173,22 +176,23 @@ _Most recent first. The AI appends here after every task._
 
 | Task | Feature | Started | Assignee |
 |------|---------|---------|----------|
-| P3-T6 Build & verify | F14 | 2026-05-26 | — |
+| P4-T5 Settings toggle | F14 | 2026-05-26 | — |
 
 ## Completed (last 10)
 
 | Task | Feature | Completed | Duration |
 |------|---------|-----------|----------|
+| P4-T5 Settings toggle | F14 | 2026-05-26 | — |
+| P4-T4 Statistics integration | F14 | 2026-05-26 | — |
+| P4-T3 Stage timeline overlay | F14 | 2026-05-26 | — |
+| P4-T2 Stage correlation | F14 | 2026-05-26 | — |
+| P3-T6 Build & verify | F14 | 2026-05-26 | — |
 | P3-T5 Player labels | F14 | 2026-05-26 | — |
 | P3-T4 Stats grid supplement | F14 | 2026-05-26 | — |
 | P3-T3 Timeline multi-color | F14 | 2026-05-26 | — |
 | P3-T2 EventRow icons | F14 | 2026-05-26 | — |
 | P3-T1 Category filter | F14 | 2026-05-26 | — |
 | P2-T5 Build & verify | F14 | 2026-05-26 | — |
-| P2-T4 Settings toggle | F14 | 2026-05-26 | — |
-| P2-T3 Event creation for sleep talking | F14 | 2026-05-26 | — |
-| P2-T2 Parallel detection wiring | F14 | 2026-05-26 | — |
-| P2-T1 SpeechDetector | F14 | 2026-05-26 | — |
 | SleepGuard Rebrand — Phase 1 Foundation | F14 | 2026-05-25 | — |
 | Session 39 | F4 | 2026-05-12 | — |
 | Session 38 | F4 | 2026-05-12 | — |
@@ -208,11 +212,6 @@ _Unblocked tasks in priority order. F13 (CloudKit Sync) is intentionally skipped
 
 | Task | Feature | Priority | Why Ready |
 |------|---------|----------|-----------|
-| P4-T3 Stage timeline overlay | F14 | P2 | Depends on P4-T2 |
-| P4-T2 Stage correlation | F14 | P2 | Depends on P4-T1 |
-| P4-T3 Stage timeline overlay | F14 | P2 | Depends on P4-T2 |
-| P4-T4 Statistics integration | F14 | P2 | Depends on P4-T3 |
-| P4-T5 Settings toggle | F14 | P2 | Depends on P4-T4 |
 | P4-T6 Build & verify | F14 | P2 | Depends on P4-T5 |
 
 ## Blocked

@@ -330,12 +330,6 @@ Append a new session entry with this structure:
 ### Build Status
 - **BUILD SUCCEEDED / FAILED** — [if failed, what errors and how they were resolved]
 
-### Next Session
-- [Task ID]: [What to start next and why]
-
-### Open Questions
-- [Question that needs user input or future decision]
-
 ### Suggested Branch
 `feature/[f#]/[t#]-short-description`
 
@@ -348,6 +342,12 @@ Append a new session entry with this structure:
 - [Change 2]
 ```
 ```
+
+### Next Session
+- [Task ID]: [What to start next and why]
+
+### Open Questions
+- [Question that needs user input or future decision]
 
 ### 2. Create Feature Doc When Feature Ships
 

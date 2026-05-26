@@ -6,9 +6,11 @@ public enum Strings {
   public static var fiveSecondsSoothingMelodyValueFormat: String { String(localized: "5.seconds.soothing.melody.value", bundle: .module) }
   public static var actionBack: String { String(localized: "action.back", bundle: .module) }
   public static var actionCancel: String { String(localized: "action.cancel", bundle: .module) }
+  public static var actionCollapse: String { String(localized: "action.collapse", bundle: .module) }
   public static var actionDelete: String { String(localized: "action.delete", bundle: .module) }
   public static var actionDeleteAll: String { String(localized: "action.deleteAll", bundle: .module) }
   public static var actionDiscard: String { String(localized: "action.discard", bundle: .module) }
+  public static var actionExpand: String { String(localized: "action.expand", bundle: .module) }
   public static var actionKeepRecording: String { String(localized: "action.keepRecording", bundle: .module) }
   public static var actionOk: String { String(localized: "action.ok", bundle: .module) }
   public static var actionPlay: String { String(localized: "action.play", bundle: .module) }
@@ -90,6 +92,7 @@ public enum Strings {
   public static var recordingsDetailRemoveTitle: String { String(localized: "recordings.detail.removeTitle", bundle: .module) }
   public static var recordingsDetailShowAllFormat: String { String(localized: "recordings.detail.showAllFormat", bundle: .module) }
   public static var recordingsDetailShowLess: String { String(localized: "recordings.detail.showLess", bundle: .module) }
+  public static var recordingsDetailSleepStagesLabel: String { String(localized: "recordings.detail.sleepStagesLabel", bundle: .module) }
   public static var recordingsDetailTimelineLabel: String { String(localized: "recordings.detail.timelineLabel", bundle: .module) }
   public static var recordingsDetailTitle: String { String(localized: "recordings.detail.title", bundle: .module) }
   public static var recordingsEmptyMessage: String { String(localized: "recordings.empty.message", bundle: .module) }
@@ -180,6 +183,12 @@ public enum Strings {
   public static var settingsUnitSecondsShort: String { String(localized: "settings.unit.seconds.short", bundle: .module) }
   public static var settingsVersion: String { String(localized: "settings.version", bundle: .module) }
   public static var sixtySecondsSoothingMelodyValueFormat: String { String(localized: "sixty.seconds.soothing.melody.value", bundle: .module) }
+  public static var sleepStageAwake: String { String(localized: "sleepStage.awake", bundle: .module) }
+  public static var sleepStageDeep: String { String(localized: "sleepStage.deep", bundle: .module) }
+  public static var sleepStageDeepSleep: String { String(localized: "sleepStage.deepSleep", bundle: .module) }
+  public static var sleepStageLight: String { String(localized: "sleepStage.light", bundle: .module) }
+  public static var sleepStageLightSleep: String { String(localized: "sleepStage.lightSleep", bundle: .module) }
+  public static var sleepStageRem: String { String(localized: "sleepStage.rem", bundle: .module) }
   public static var snoringEventHeaderPlayerView: String { String(localized: "snoring.event.header.player.view", bundle: .module) }
   public static var soothingMelodyLockscreenNote: String { String(localized: "soothing.melody.lockscreen.note", bundle: .module) }
   public static var soothingMelodyRecordingPrestartViewTitle: String { String(localized: "soothing.melody.recording.prestart.view.title", bundle: .module) }
@@ -188,6 +197,7 @@ public enum Strings {
   public static var soothingMelodySheetDescSectionTitle: String { String(localized: "soothing.melody.sheet.desc.section.title", bundle: .module) }
   public static var soothingTuneMelodySheet: String { String(localized: "soothing.tune.melody.sheet", bundle: .module) }
   public static var startTimeEventCard: String { String(localized: "start.time.event.card", bundle: .module) }
+  public static var statisticsSleepStagesLabel: String { String(localized: "statistics.sleepStagesLabel", bundle: .module) }
   public static var statsCalendarIntensityEpic: String { String(localized: "stats.calendar.intensityEpic", bundle: .module) }
   public static var statsCalendarIntensityLoud: String { String(localized: "stats.calendar.intensityLoud", bundle: .module) }
   public static var statsCalendarIntensityQuiet: String { String(localized: "stats.calendar.intensityQuiet", bundle: .module) }

@@ -36,6 +36,7 @@ struct SessionDetailEventsView: View {
             .foregroundStyle(theme.accent)
         }
         .frame(maxWidth: .infinity, alignment: .center)
+        .padding(.bottom, 10)
       }
     }
   }
