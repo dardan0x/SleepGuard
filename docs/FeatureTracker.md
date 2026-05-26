@@ -2,7 +2,7 @@
 
 > Auto-updated by the AI after every task. This is the local source of truth.
 
-Last updated: 2026-05-26 (Session 59)
+Last updated: 2026-05-26 (Session 60)
 
 ---
 
@@ -58,7 +58,7 @@ Last updated: 2026-05-26 (Session 59)
 | F11 | Apple Watch | P2 | Done | 4/4 | ██████████ 100% | [tracker](trackers/f11-apple-watch.md) |
 | F12 | HealthKit | P1 | Done | 3/3 | ██████████ 100% | [tracker](trackers/f12-healthkit.md) |
 | F13 | CloudKit Sync | P2 | Backlog | 0/3 | ░░░░░░░░░░ 0% | [tracker](trackers/f13-cloudkit-sync.md) |
-| F14 | SleepGuard Rebrand & Multi-Sound | P0 | In Progress | 14/20 | ███████░░░ 70% | [tracker](trackers/f14-sleepguard-rebrand.md) |
+| F14 | SleepGuard Rebrand & Multi-Sound | P0 | In Progress | 16/20 | ████████░░ 80% | [tracker](trackers/f14-sleepguard-rebrand.md) |
 
 ## Activity Log
 
@@ -66,6 +66,8 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-05-26 | P4-T1 HealthKit read sleep stages | Completed | `fetchSleepStages(for:)` queries HK sleep analysis samples, maps to `SleepStageSegment`; `mapSleepStage` maps core/deep/REM/awake; skips legacy/in-bed/unspecified; build succeeds |
+| 2026-05-26 | P3-T6 Build & verify | Completed | Clean build (zero errors); pre-existing asset warnings only; Phase 3 UI verified |
 | 2026-05-26 | P3-T5 Player labels | Completed | `PlayerSheetView` navigation title changes based on event category: snoring = "Snoring Player", sleep talking = "Sleep Talking Player", noise = "Noise Player"; localized 2 new title strings; build succeeds |
 | 2026-05-26 | P3-T4 Stats grid supplement | Completed | Optional disturbance row in `SessionDetailHeaderView`: full-width `StatCard` below the 2×2 grid, shows non-snoring event count, hidden for snoring-only sessions; localized `session.disturbances`; build succeeds |
 | 2026-05-26 | P3-T3 Timeline multi-color | Completed | `SnoringTimelineView` renders events by category: snoring retains intensity colors, sleep talking = purple, noise/coughing/other = orange; `eventColor(_:)` helper; build succeeds |
@@ -170,7 +172,7 @@ _Most recent first. The AI appends here after every task._
 
 | Task | Feature | Started | Assignee |
 |------|---------|---------|----------|
-| (none) | — | — | — |
+| P3-T6 Build & verify | F14 | 2026-05-26 | — |
 
 ## Completed (last 10)
 
@@ -205,8 +207,7 @@ _Unblocked tasks in priority order. F13 (CloudKit Sync) is intentionally skipped
 
 | Task | Feature | Priority | Why Ready |
 |------|---------|----------|-----------|
-| P3-T6 Build & verify | F14 | P1 | Depends on P3-T5 |
-| P4-T1 HealthKit read sleep stages | F14 | P2 | Depends on Phase 3 |
+| P4-T2 Stage correlation | F14 | P2 | Depends on P4-T1 |
 | P4-T2 Stage correlation | F14 | P2 | Depends on P4-T1 |
 | P4-T3 Stage timeline overlay | F14 | P2 | Depends on P4-T2 |
 | P4-T4 Statistics integration | F14 | P2 | Depends on P4-T3 |

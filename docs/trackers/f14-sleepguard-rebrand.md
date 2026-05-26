@@ -41,8 +41,8 @@ Rebrand SnoreGuard to SleepGuard and expand detection from snore-only to multi-s
 | P3-T3 | Timeline multi-color | ✅ Done | Sleep talking = purple, noise = orange |
 | P3-T4 | Stats grid supplement | ✅ Done | Optional disturbance row |
 | P3-T5 | Player labels | ✅ Done | Title based on event category |
-| P3-T6 | Build & verify | ⬜ Backlog | Screenshot comparison |
-| P4-T1 | HealthKit read sleep stages | ⬜ Backlog | Extend HealthKitSync |
+| P3-T6 | Build & verify | ✅ Done | Clean build (zero errors); pre-existing asset warnings only; Phase 3 UI verified |
+| P4-T1 | HealthKit read sleep stages | ✅ Done | `fetchSleepStages(for:)` queries HK sleep analysis samples, maps to `SleepStageSegment`; `mapSleepStage` maps core/deep/REM/awake; skips legacy/in-bed/unspecified |
 | P4-T2 | Stage correlation | ⬜ Backlog | Map to SleepStageSegment |
 | P4-T3 | Stage timeline overlay | ⬜ Backlog | New SleepStageTimelineView |
 | P4-T4 | Statistics integration | ⬜ Backlog | Show stage breakdown |
@@ -59,7 +59,7 @@ User requested a detailed plan for rebranding SnoreGuard to SleepGuard and expan
 - P2-T2 completed in Session 59
 - P2-T3 completed in Session 59
 - Phase 2 complete (P2-T1 through P2-T5)
-- **Next task to pick up: P3-T6 (Build & verify)**
+- **Next task to pick up: P4-T2 (Stage correlation)**
 - When user says "continue" or "work on what's next", start with the 🟡 Next task in this tracker
 - F13 (CloudKit Sync) is intentionally skipped — do NOT work on it unless explicitly asked
 - Feature doc: `docs/features/f14-sleepguard-rebrand.md`
