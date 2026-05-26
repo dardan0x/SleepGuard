@@ -3797,3 +3797,45 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 - Hidden for snoring-only sessions
 - Localized "Disturbances" string
 ```
+
+
+## 2026-05-26 — Session 59 (continued): P3-T5 Player Labels
+
+### Completed
+- P3-T5: `PlayerSheetView` navigation title now reflects event category
+
+### Technical Details
+- Added localized title strings:
+  - `event.player.navigation.title` = "Snoring Player" (existing)
+  - `event.player.sleepTalking.title` = "Sleep Talking Player"
+  - `event.player.noise.title` = "Noise Player"
+- `PlayerSheetView.playerNavigationTitle` computed property:
+  - Resolves current event from `playbackController.currentEvent ?? initialEvent`
+  - Maps category to title: snoring → "Snoring Player", sleep talking → "Sleep Talking Player", noise/coughing/other → "Noise Player"
+- Title updates dynamically as the user navigates between events in clip playback
+- Falls back to "Snoring Player" if no event is resolved
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/DesignSystem/Sources/Resources/Localizable.xcstrings` | +22 | Added `event.player.sleepTalking.title` and `event.player.noise.title` |
+| `Packages/DesignSystem/Sources/Strings.swift` | +2 | Regenerated (235 strings) |
+| `Packages/Recordings/Sources/Views/PlayerSheetView.swift` | +12/-1 | `playerNavigationTitle` computed property; `.navigationTitle` uses dynamic title |
+| `docs/trackers/f14-sleepguard-rebrand.md` | +2/-2 | P3-T5 marked Done; next task P3-T6 |
+| `docs/FeatureTracker.md` | +5/-5 | Dashboard (57 done, 5 backlog, 92%), Activity Log, Completed, Up Next updated |
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors, zero warnings
+
+### Next Session
+- P3-T6: Build & verify — end-to-end test with audio samples; screenshot comparison with design tokens
+
+### Open Questions
+- None
+[P3-T5] — Dynamic PlayerSheetView title based on event category
+
+- Add event.player.sleepTalking.title and event.player.noise.title strings
+- PlayerSheetView.playerNavigationTitle resolves current event category
+- Snoring → "Snoring Player", sleep talking → "Sleep Talking Player", noise → "Noise Player"
+- Title updates dynamically during clip playback navigation
+```

@@ -239,6 +239,28 @@
         }
       }
     },
+    "event.player.noise.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noise Player"
+          }
+        }
+      }
+    },
+    "event.player.sleepTalking.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sleep Talking Player"
+          }
+        }
+      }
+    },
     "event.player.noAudio.description": {
       "extractionState": "manual",
       "localizations": {

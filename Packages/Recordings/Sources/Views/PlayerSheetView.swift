@@ -33,6 +33,19 @@ public struct PlayerSheetView: View {
 
   /// Resolves the session's full audio source, preferring the legacy file and
   /// falling back to the raw archive (used after clip extraction moves it).
+  private var playerNavigationTitle: String {
+    let event = playbackController.currentEvent ?? initialEvent
+    guard let event else { return Strings.eventPlayerNavigationTitle }
+    switch event.category {
+    case .snoring:
+      return Strings.eventPlayerNavigationTitle
+    case .sleepTalking:
+      return Strings.eventPlayerSleepTalkingTitle
+    case .noise, .coughing, .other:
+      return Strings.eventPlayerNoiseTitle
+    }
+  }
+
   private var sessionAudioURL: URL? {
     AudioFileURLResolver.resolve(session.audioFileURL)
       ?? AudioFileURLResolver.resolve(session.rawAudioFileURL)
@@ -87,7 +100,7 @@ public struct PlayerSheetView: View {
       .background(theme.bgPrimary.ignoresSafeArea())
       .presentationDetents([.height(420)])
       .presentationDragIndicator(.visible)
-      .navigationTitle(Strings.eventPlayerNavigationTitle)
+      .navigationTitle(playerNavigationTitle)
       .navigationBarTitleDisplayMode(.inline)
       .toolbar {
         ToolbarItem(placement: .topBarTrailing) {
