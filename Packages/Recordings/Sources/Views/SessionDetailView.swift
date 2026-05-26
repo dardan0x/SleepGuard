@@ -258,6 +258,12 @@ public struct SessionDetailView: View {
         predicate: #Predicate { $0.id == sessionID }
       )
       if let session = try modelContext.fetch(descriptor).first {
+        if session.sleepStageSegments == nil {
+          let stages = await HealthKitSync.shared.fetchSleepStages(for: session)
+          session.sleepStageSegments = stages.isEmpty ? [] : stages
+          try modelContext.save()
+        }
+
         let sortedEvents = session.events?.sorted(by: { $0.timestamp < $1.timestamp }) ?? []
         let isClipSession = sortedEvents.contains(where: { AudioFileURLResolver.resolve($0.audioFileURL) != nil })
         viewState = .loaded(session: session, sortedEvents: sortedEvents, isClipSession: isClipSession)

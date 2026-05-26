@@ -58,7 +58,7 @@ Last updated: 2026-05-26 (Session 60)
 | F11 | Apple Watch | P2 | Done | 4/4 | ██████████ 100% | [tracker](trackers/f11-apple-watch.md) |
 | F12 | HealthKit | P1 | Done | 3/3 | ██████████ 100% | [tracker](trackers/f12-healthkit.md) |
 | F13 | CloudKit Sync | P2 | Backlog | 0/3 | ░░░░░░░░░░ 0% | [tracker](trackers/f13-cloudkit-sync.md) |
-| F14 | SleepGuard Rebrand & Multi-Sound | P0 | In Progress | 16/20 | ████████░░ 80% | [tracker](trackers/f14-sleepguard-rebrand.md) |
+| F14 | SleepGuard Rebrand & Multi-Sound | P0 | In Progress | 17/20 | ████████░░ 85% | [tracker](trackers/f14-sleepguard-rebrand.md) |
 
 ## Activity Log
 
@@ -66,6 +66,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-05-26 | P4-T2 Stage correlation | Completed | `SessionDetailView.loadSession()` auto-fetches sleep stages when `sleepStageSegments == nil`, stores `[]` for no-data to avoid re-query, persists via SwiftData; build succeeds |
 | 2026-05-26 | P4-T1 HealthKit read sleep stages | Completed | `fetchSleepStages(for:)` queries HK sleep analysis samples, maps to `SleepStageSegment`; `mapSleepStage` maps core/deep/REM/awake; skips legacy/in-bed/unspecified; build succeeds |
 | 2026-05-26 | P3-T6 Build & verify | Completed | Clean build (zero errors); pre-existing asset warnings only; Phase 3 UI verified |
 | 2026-05-26 | P3-T5 Player labels | Completed | `PlayerSheetView` navigation title changes based on event category: snoring = "Snoring Player", sleep talking = "Sleep Talking Player", noise = "Noise Player"; localized 2 new title strings; build succeeds |
@@ -207,7 +208,7 @@ _Unblocked tasks in priority order. F13 (CloudKit Sync) is intentionally skipped
 
 | Task | Feature | Priority | Why Ready |
 |------|---------|----------|-----------|
-| P4-T2 Stage correlation | F14 | P2 | Depends on P4-T1 |
+| P4-T3 Stage timeline overlay | F14 | P2 | Depends on P4-T2 |
 | P4-T2 Stage correlation | F14 | P2 | Depends on P4-T1 |
 | P4-T3 Stage timeline overlay | F14 | P2 | Depends on P4-T2 |
 | P4-T4 Statistics integration | F14 | P2 | Depends on P4-T3 |

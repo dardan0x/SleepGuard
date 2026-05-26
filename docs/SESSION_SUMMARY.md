@@ -3880,3 +3880,33 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 ### Open Questions
 - Should stage fetching happen automatically when opening `SessionDetailView` (lazy load), or should it be cached at session-save time?
 - If the user has no Apple Watch sleep data, the query returns `[]` — should the UI show a "No sleep stage data" placeholder or simply hide the timeline section?
+
+
+## 2026-05-26 — Session 60 (continued): P4-T2 Stage correlation
+
+### Completed
+- **P4-T2**: Wired HealthKit sleep stage read into `SessionDetailView` — auto-populates `SleepSession.sleepStageSegments` on first view
+
+### Technical Details
+- `SessionDetailView.loadSession()` now checks `session.sleepStageSegments == nil` before transitioning to `.loaded` state
+- If nil, calls `HealthKitSync.shared.fetchSleepStages(for: session)` asynchronously
+- Stores returned stages directly on the model; if HealthKit returns empty, stores `[]` to prevent repeated queries on subsequent views
+- `try modelContext.save()` persists the result to SwiftData so the fetch is a one-time operation per session
+- Non-blocking: HealthKit is local storage so the query completes in milliseconds; UI remains in `.loading` briefly
+- No UI changes in this task — `SleepStageTimelineView` (P4-T3) will consume the populated data
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Recordings/Sources/Views/SessionDetailView.swift` | +6/-0 | Sleep stage fetch block inside `loadSession()`: nil-check, fetch, save, then proceed to `.loaded` |
+| `docs/trackers/f14-sleepguard-rebrand.md` | +2/-2 | P4-T2 → Done; next task updated to P4-T3 |
+| `docs/FeatureTracker.md` | +4/-3 | Dashboard (59 done, 3 backlog, 95%), Activity Log, Up Next updated |
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors; pre-existing asset warnings only
+
+### Next Session
+- **P4-T3**: SleepStageTimelineView — visual overlay of sleep stages (awake/REM/light/deep) alongside snoring timeline in SessionDetailView
+
+### Open Questions
+- None
