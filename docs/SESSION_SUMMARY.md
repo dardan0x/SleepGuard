@@ -3839,3 +3839,44 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 - Snoring → "Snoring Player", sleep talking → "Sleep Talking Player", noise → "Noise Player"
 - Title updates dynamically during clip playback navigation
 ```
+
+
+## 2026-05-26 — Session 60: P3-T6 Build & verify + P4-T1 HealthKit read sleep stages
+
+### Completed
+- **P3-T6**: Build & verify after Phase 3 UI changes — clean build with zero errors; only pre-existing asset catalog warnings (no regressions)
+- **P4-T1**: Extended `HealthKitSync` with `fetchSleepStages(for:)` to read Apple Watch sleep stage data from HealthKit
+
+### Technical Details
+- `fetchSleepStages(for:)` uses `HKSampleQuery` wrapped in `withCheckedContinuation` for async/await compatibility
+- Query predicate spans the session's `startDate` → `endDate` (or start + `totalDuration` if nil)
+- Results sorted by `HKSampleSortIdentifierStartDate` ascending
+- `mapSleepStage(_:)` converts HK sleep analysis values to `SleepStage`:
+  - `asleepCore` → `.light`
+  - `asleepDeep` → `.deep`
+  - `asleepREM` → `.rem`
+  - `awake` → `.awake`
+  - Legacy `asleep`, `inBed`, `asleepUnspecified` → `nil` (filtered out)
+- Each returned `SleepStageSegment` carries:
+  - `stage`: mapped sleep stage
+  - `startOffset`: seconds from session start
+  - `duration`: sample end − start
+- The existing `SleepSession.sleepStageSegments` model property (added in P1-T3) remains the target for P4-T2 population
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Env/Sources/Services/HealthKitSync.swift` | +37/-0 | Added `fetchSleepStages(for:)` and private `mapSleepStage(_:)` |
+| `docs/trackers/f14-sleepguard-rebrand.md` | +3/-3 | P3-T6 → Done; P4-T1 → Done; next task updated to P4-T2 |
+| `docs/FeatureTracker.md` | +6/-4 | Dashboard (58 done, 4 backlog, 93%), Activity Log, Currently Active, Up Next updated |
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors; pre-existing asset catalog warnings only
+
+### Next Session
+- **P4-T2**: Stage correlation — wire `fetchSleepStages` into `SessionDetailView` (or `SessionManager` / save flow) to populate `SleepSession.sleepStageSegments`
+- **P4-T3**: SleepStageTimelineView — visual overlay of sleep stages alongside snoring timeline
+
+### Open Questions
+- Should stage fetching happen automatically when opening `SessionDetailView` (lazy load), or should it be cached at session-save time?
+- If the user has no Apple Watch sleep data, the query returns `[]` — should the UI show a "No sleep stage data" placeholder or simply hide the timeline section?

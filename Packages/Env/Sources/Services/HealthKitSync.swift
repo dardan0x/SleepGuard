@@ -44,6 +44,51 @@ public final class HealthKitSync {
     isAuthorized = healthStore.authorizationStatus(for: sleepType) == .sharingAuthorized
   }
 
+  // MARK: - Read Sleep Stages
+
+  public func fetchSleepStages(for session: SleepSession) async -> [SleepStageSegment] {
+    guard HKHealthStore.isHealthDataAvailable(), isAuthorized else { return [] }
+    guard let sleepType = HKObjectType.categoryType(forIdentifier: .sleepAnalysis) else { return [] }
+
+    let startDate = session.startDate
+    let endDate = session.endDate ?? startDate.addingTimeInterval(session.totalDuration)
+    let predicate = HKQuery.predicateForSamples(withStart: startDate, end: endDate, options: .strictStartDate)
+    let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)
+
+    return await withCheckedContinuation { continuation in
+      let query = HKSampleQuery(
+        sampleType: sleepType,
+        predicate: predicate,
+        limit: HKObjectQueryNoLimit,
+        sortDescriptors: [sortDescriptor]
+      ) { [weak self] _, samples, error in
+        guard let self, let samples = samples as? [HKCategorySample], error == nil else {
+          continuation.resume(returning: [])
+          return
+        }
+
+        let segments = samples.compactMap { sample -> SleepStageSegment? in
+          guard let stage = self.mapSleepStage(sample.value) else { return nil }
+          let startOffset = sample.startDate.timeIntervalSince(startDate)
+          let duration = sample.endDate.timeIntervalSince(sample.startDate)
+          return SleepStageSegment(stage: stage, startOffset: startOffset, duration: duration)
+        }
+        continuation.resume(returning: segments)
+      }
+      self.healthStore.execute(query)
+    }
+  }
+
+  private func mapSleepStage(_ value: Int) -> SleepStage? {
+    switch value {
+    case HKCategoryValueSleepAnalysis.asleepCore.rawValue: return .light
+    case HKCategoryValueSleepAnalysis.asleepDeep.rawValue: return .deep
+    case HKCategoryValueSleepAnalysis.asleepREM.rawValue: return .rem
+    case HKCategoryValueSleepAnalysis.awake.rawValue: return .awake
+    default: return nil
+    }
+  }
+
   // MARK: - Write Sleep Data
 
   public func sync(session: SleepSession) async {
