@@ -16,6 +16,7 @@ public struct SessionDetailView: View {
 
   @State private var viewState: ViewState = .loading
   @State private var activeSheet: DetailSheet?
+  @State private var selectedFilter: EventCategoryFilter = .all
 
   // MARK: - Share
   @State private var isSharePresented = false
@@ -33,8 +34,8 @@ public struct SessionDetailView: View {
           .task {
             await loadSession()
           }
-      case .loaded(let session, let sortedEvents, let isClipSession):
-        loadedBody(session: session, sortedEvents: sortedEvents, isClipSession: isClipSession)
+      case .loaded(let session, _, let isClipSession):
+        loadedBody(session: session, isClipSession: isClipSession)
       case .error:
         errorBody
       }
@@ -42,7 +43,7 @@ public struct SessionDetailView: View {
     .background(theme.bgPrimary.ignoresSafeArea())
   }
 
-  private func loadedBody(session: SleepSession, sortedEvents: [SnoreEvent], isClipSession: Bool) -> some View {
+  private func loadedBody(session: SleepSession, isClipSession: Bool) -> some View {
     ScrollView {
       VStack(spacing: 24) {
         SessionDetailHeaderView(session: session, score: session.sleepScore)
@@ -53,8 +54,17 @@ public struct SessionDetailView: View {
 
         LowBatteryBannerView(session: session)
 
+        if shouldShowFilter {
+          Picker("", selection: $selectedFilter) {
+            ForEach(EventCategoryFilter.allCases, id: \.self) { filter in
+              Text(filter.displayName).tag(filter)
+            }
+          }
+          .pickerStyle(.segmented)
+        }
+
         SessionDetailEventsView(
-          events: sortedEvents,
+          events: filteredEvents,
           onShowAll: { activeSheet = .events },
           onPlayEvent: { event in
             activeSheet = .player(initialEvent: event)
@@ -117,14 +127,14 @@ public struct SessionDetailView: View {
       case .player(let initialEvent):
         PlayerSheetView(
           session: session,
-          sortedEvents: initialEvent.map { [$0] } ?? sortedEvents,
+          sortedEvents: initialEvent.map { [$0] } ?? filteredEvents,
           isClipSession: isClipSession,
           initialEvent: initialEvent
         )
       case .events:
         EventsSheetView(
           session: session,
-          events: sortedEvents,
+          events: filteredEvents,
           isClipSession: isClipSession,
           onPlayEvent: { _ in }
         )
@@ -300,6 +310,41 @@ public struct SessionDetailView: View {
       }
     } catch {
       // Deletion failed; fail silently
+    }
+  }
+
+  private var shouldShowFilter: Bool {
+    guard case .loaded(_, let sortedEvents, _) = viewState else { return false }
+    return Set(sortedEvents.map(\.category)).count > 1
+  }
+
+  private var filteredEvents: [SnoreEvent] {
+    guard case .loaded(_, let sortedEvents, _) = viewState else { return [] }
+    return sortedEvents.filter { selectedFilter.includes(event: $0) }
+  }
+
+  private enum EventCategoryFilter: String, CaseIterable {
+    case all
+    case snoring
+    case sleepTalking
+    case noise
+
+    var displayName: String {
+      switch self {
+      case .all: return Strings.filterAll
+      case .snoring: return Strings.filterSnoring
+      case .sleepTalking: return Strings.filterSleepTalking
+      case .noise: return Strings.filterNoise
+      }
+    }
+
+    func includes(event: SnoreEvent) -> Bool {
+      switch self {
+      case .all: return true
+      case .snoring: return event.category == .snoring
+      case .sleepTalking: return event.category == .sleepTalking
+      case .noise: return event.category == .noise || event.category == .coughing || event.category == .other
+      }
     }
   }
 

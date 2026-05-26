@@ -32,6 +32,10 @@ public enum Strings {
   public static var eventPlayerNoAudioTitle: String { String(localized: "event.player.noAudio.title", bundle: .module) }
   public static var eventsHourPdfGenerator: String { String(localized: "events.hour.pdf.generator", bundle: .module) }
   public static var fifteenSecondsSoothingMelodyValueFormat: String { String(localized: "fifteen.seconds.soothing.melody.value", bundle: .module) }
+  public static var filterAll: String { String(localized: "filter.all", bundle: .module) }
+  public static var filterNoise: String { String(localized: "filter.noise", bundle: .module) }
+  public static var filterSleepTalking: String { String(localized: "filter.sleepTalking", bundle: .module) }
+  public static var filterSnoring: String { String(localized: "filter.snoring", bundle: .module) }
   public static var lastNightStatisticsLoadedView: String { String(localized: "last.night.statistics.loaded.view", bundle: .module) }
   public static var lightIntensityLabelEventPlayerView: String { String(localized: "light.intensity.label.event.player.view", bundle: .module) }
   public static var lightSnoreEventPlayerView: String { String(localized: "light.snore.event.player.view", bundle: .module) }

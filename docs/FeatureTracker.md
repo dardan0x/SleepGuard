@@ -34,12 +34,12 @@ Last updated: 2026-05-26 (Session 59)
 | Blocked | 0 |
 | — | — |
 | Total Tasks | 62 |
-| Tasks Done | 52 |
+| Tasks Done | 53 |
 | Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
-| Tasks Backlog | 10 |
+| Tasks Backlog | 9 |
 | — | — |
-| **Progress** | **84%** |
+| **Progress** | **85%** |
 
 ## Features
 
@@ -58,7 +58,7 @@ Last updated: 2026-05-26 (Session 59)
 | F11 | Apple Watch | P2 | Done | 4/4 | ██████████ 100% | [tracker](trackers/f11-apple-watch.md) |
 | F12 | HealthKit | P1 | Done | 3/3 | ██████████ 100% | [tracker](trackers/f12-healthkit.md) |
 | F13 | CloudKit Sync | P2 | Backlog | 0/3 | ░░░░░░░░░░ 0% | [tracker](trackers/f13-cloudkit-sync.md) |
-| F14 | SleepGuard Rebrand & Multi-Sound | P0 | In Progress | 9/20 | ████░░░░░░ 45% | [tracker](trackers/f14-sleepguard-rebrand.md) |
+| F14 | SleepGuard Rebrand & Multi-Sound | P0 | In Progress | 10/20 | █████░░░░░ 50% | [tracker](trackers/f14-sleepguard-rebrand.md) |
 
 ## Activity Log
 
@@ -66,6 +66,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-05-26 | P3-T1 Category filter | Completed | Segmented picker (`All | Snoring | Sleep Talking | Noise`) in `SessionDetailView`; dynamic show/hide when session has multiple categories; filter wired to events list, player sheet, and events sheet; localized 4 filter strings; build succeeds |
 | 2026-05-26 | P2-T5 Build & verify | Completed | Clean build (zero errors); code review confirms snoring behavior unchanged when toggle off; speech priority finalization correct; no regressions; pre-existing asset warnings only |
 | 2026-05-26 | P2-T4 Settings toggle | Completed | "Detect Sleep Talking" toggle in SettingsRecordingSection; localized `settings.detectSleepTalking` string; `Strings.swift` regenerated; toggle wired to `UserPreferences.detectSleepTalking`; build succeeds |
 | 2026-05-26 | P2-T3 Event creation for sleep talking | Completed | Parallel speech event tracking in SessionManager; `finalizeActiveSpeechEvent()` creates `.sleepTalking` events; 3-sample consecutive gate; snoring priority finalizes speech immediately; `detectSleepTalking` pref (default false); build succeeds |
@@ -171,6 +172,7 @@ _Most recent first. The AI appends here after every task._
 
 | Task | Feature | Completed | Duration |
 |------|---------|-----------|----------|
+| P3-T1 Category filter | F14 | 2026-05-26 | — |
 | P2-T5 Build & verify | F14 | 2026-05-26 | — |
 | P2-T4 Settings toggle | F14 | 2026-05-26 | — |
 | P2-T3 Event creation for sleep talking | F14 | 2026-05-26 | — |
@@ -195,7 +197,6 @@ _Unblocked tasks in priority order. F13 (CloudKit Sync) is intentionally skipped
 
 | Task | Feature | Priority | Why Ready |
 |------|---------|----------|-----------|
-| P3-T1 Category filter | F14 | P1 | Depends on Phase 2 |
 | P3-T2 EventRow icons | F14 | P1 | Depends on P3-T1 |
 | P3-T3 Timeline multi-color | F14 | P1 | Depends on P3-T1 |
 | P3-T4 Stats grid supplement | F14 | P1 | Depends on P3-T1 |
