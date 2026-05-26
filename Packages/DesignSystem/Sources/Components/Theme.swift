@@ -31,6 +31,10 @@ public final class Theme {
   public var snoreLoud: Color = Color(hex: "#FF453A")
   public var snoreEpic: Color = Color(hex: "#FF2D55")
 
+  // MARK: - Sound Category
+  public var sleepTalkingColor: Color = Color(hex: "#BF5AF2")
+  public var noiseColor: Color = Color(hex: "#FF9F0A")
+
   // MARK: - Text
   public var textPrimary: Color = Color(hex: "#FFFFFF")
   public var textSecondary: Color = Color(hex: "#ABABAB")

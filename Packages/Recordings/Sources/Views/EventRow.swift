@@ -12,9 +12,7 @@ struct EventRow: View {
 
   var body: some View {
     HStack(spacing: 12) {
-      Circle()
-        .fill(theme.intensityColor(event.intensity))
-        .frame(width: 10, height: 10)
+      categoryIndicator
 
       Text(timeString(event.timestamp))
         .font(.system(size: 16, weight: .semibold, design: .rounded))
@@ -50,6 +48,26 @@ struct EventRow: View {
     .padding(.vertical, 14)
     .background(theme.bgCard)
     .cornerRadius(theme.radiusCard)
+  }
+
+  @ViewBuilder
+  private var categoryIndicator: some View {
+    switch event.category {
+    case .snoring:
+      Circle()
+        .fill(theme.intensityColor(event.intensity))
+        .frame(width: 10, height: 10)
+    case .sleepTalking:
+      Image(systemName: "bubble.left.fill")
+        .font(.system(size: 11, weight: .semibold))
+        .foregroundStyle(theme.sleepTalkingColor)
+        .frame(width: 12, height: 12)
+    case .noise, .coughing, .other:
+      Image(systemName: "waveform")
+        .font(.system(size: 11, weight: .semibold))
+        .foregroundStyle(theme.noiseColor)
+        .frame(width: 12, height: 12)
+    }
   }
 
   private func timeString(_ date: Date) -> String {

@@ -3673,3 +3673,49 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 - Timeline view remains unfiltered
 - Localize 4 filter strings
 ```
+
+
+## 2026-05-26 — Session 59 (continued): P3-T2 EventRow Icons
+
+### Completed
+- P3-T2: Added category-based icons to `EventRow` for non-snoring events
+
+### Technical Details
+- `EventRow.categoryIndicator` is a `@ViewBuilder` that switches on `event.category`:
+  - `.snoring` → intensity-colored circle (unchanged existing behavior)
+  - `.sleepTalking` → `bubble.left.fill` icon in purple (`theme.sleepTalkingColor`)
+  - `.noise`, `.coughing`, `.other` → `waveform` icon in orange (`theme.noiseColor`)
+- Added `sleepTalkingColor` and `noiseColor` to `Theme` so P3-T3 (timeline multi-color) can reuse them
+- Icon sizing: 11pt font, 12×12 frame — visually balanced with the 10×10 intensity dot
+- No localization needed — icons are universal symbols
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/DesignSystem/Sources/Components/Theme.swift` | +4 | Added `sleepTalkingColor` (purple `#BF5AF2`) and `noiseColor` (orange `#FF9F0A`) |
+| `Packages/Recordings/Sources/Views/EventRow.swift` | +18/-2 | `categoryIndicator` view builder; snoring retains dot, non-snoring gets category icons |
+| `docs/trackers/f14-sleepguard-rebrand.md` | +2/-2 | P3-T2 marked Done; next task P3-T3 |
+| `docs/FeatureTracker.md` | +5/-5 | Dashboard (54 done, 8 backlog, 87%), Activity Log, Completed, Up Next updated |
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors, zero warnings
+
+### Next Session
+- P3-T3: Timeline multi-color — `SnoringTimelineView` renders sleep talking in purple, noise in orange
+- P3-T4: Stats grid supplement — optional disturbance row below the 2×2 grid
+
+### Open Questions
+- None
+
+### Suggested Branch
+`feature/f14/p3-t2-eventrow-icons`
+
+### Suggested Commit
+```
+[P3-T2] — Add category-based icons to EventRow
+
+- EventRow.categoryIndicator shows intensity dot for snoring
+- Sleep talking events show purple bubble.left.fill icon
+- Noise/coughing/other events show orange waveform icon
+- Theme gains sleepTalkingColor and noiseColor for reuse
+```
