@@ -19,10 +19,12 @@ public final class SessionManager {
     /// Real-time audio level for UI observation
     public var currentDB: Float = -160.0
     public var currentDetectionState: DetectionState = .none
+    public var currentSpeechDetected = false
     public var eventsCount: Int = 0
 
     private let audioRecorder = AudioRecorder.shared
     private let snoreDetector = SnoreDetector.shared
+    private let speechDetector = SpeechDetector.shared
     private let soothingMelodyPlayer = SoothingMelodyPlayer.shared
 
     // MARK: - Event tracking state
@@ -117,6 +119,7 @@ public final class SessionManager {
         isRecording = true
         currentDB = -160.0
         currentDetectionState = .none
+        currentSpeechDetected = false
         eventsCount = 0
 
         Task {
@@ -127,10 +130,12 @@ public final class SessionManager {
         processingTask = Task { @MainActor in
             while !Task.isCancelled {
                 let saConf = SoundAnalysisDetector.shared.snoreConfidence
+                let saSpeechConf = SoundAnalysisDetector.shared.speechConfidence
                 processAudioLevel(
                     db: audioRecorder.currentDB,
                     spectralScore: audioRecorder.spectralScore,
-                    snoreConfidence: saConf
+                    snoreConfidence: saConf,
+                    speechConfidence: saSpeechConf
                 )
                 batteryCheckCounter += 1
                 if batteryCheckCounter >= 600 {
@@ -283,11 +288,11 @@ public final class SessionManager {
 
     /// Call this from the view when `audioRecorder.currentDB` changes.
     public func processAudioLevel(db: Float) {
-        processAudioLevel(db: db, spectralScore: 0, snoreConfidence: 0)
+        processAudioLevel(db: db, spectralScore: 0, snoreConfidence: 0, speechConfidence: 0)
     }
 
     /// Call this from the view when audio features are available.
-    public func processAudioLevel(db: Float, spectralScore: Float = 0, snoreConfidence: Float = 0) {
+    public func processAudioLevel(db: Float, spectralScore: Float = 0, snoreConfidence: Float = 0, speechConfidence: Float = 0) {
         guard isRecording, let session = currentSession else { return }
 
         let now = Date()
@@ -307,13 +312,17 @@ public final class SessionManager {
         // Classify snoring state (SoundAnalysis → FFT → thresholds)
         let state = snoreDetector.classify(db: db, spectralScore: spectralScore, snoreConfidence: snoreConfidence)
         #if DEBUG
-        if snoreConfidence > 0.1 || spectralScore > 0.1 {
-            print("[SessionManager] classify db=\(String(format: "%.1f", db)) spectral=\(String(format: "%.2f", spectralScore)) snoreConf=\(String(format: "%.2f", snoreConfidence)) → \(state)")
+        if snoreConfidence > 0.1 || spectralScore > 0.1 || speechConfidence > 0.1 {
+            print("[SessionManager] classify db=\(String(format: "%.1f", db)) spectral=\(String(format: "%.2f", spectralScore)) snoreConf=\(String(format: "%.2f", snoreConfidence)) speechConf=\(String(format: "%.2f", speechConfidence)) → snore=\(state) speech=\(speechDetector.isSpeechDetected)")
         }
         #endif
 
         // Update display state immediately for UI responsiveness
         currentDetectionState = state
+
+        // Update parallel speech detection
+        speechDetector.update(db: db, speechConfidence: speechConfidence)
+        currentSpeechDetected = speechDetector.isSpeechDetected
 
         // Append to raw classification log for future re-processing
         Task {
@@ -438,6 +447,7 @@ public final class SessionManager {
         consecutiveSnoreSamples = 0
         consecutiveNonSnoreSamples = 0
         melodyStartTime = nil
+        currentSpeechDetected = false
         completedBursts.removeAll(keepingCapacity: false)
     }
 

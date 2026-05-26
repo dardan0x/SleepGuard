@@ -32,7 +32,7 @@ Rebrand SnoreGuard to SleepGuard and expand detection from snore-only to multi-s
 | P1-T4 | DetectionState rename | ✅ Done | `SnoringState` → `DetectionState`, 5 files |
 | P1-T5 | Build & verify | ✅ Done | BUILD SUCCEEDED |
 | P2-T1 | SpeechDetector | ✅ Done | New classifier in AudioEngine — SpeechDetector singleton + SoundAnalysisDetector speech confidence extraction |
-| P2-T2 | Parallel detection wiring | ⬜ Backlog | SessionManager integration |
+| P2-T2 | Parallel detection wiring | ✅ Done | SessionManager integration |
 | P2-T3 | Event creation for sleep talking | ⬜ Backlog | `finalizeEvent()` category logic |
 | P2-T4 | Settings toggle | ⬜ Backlog | "Detect Sleep Talking" on/off |
 | P2-T5 | Build & verify | ⬜ Backlog | Test with audio samples |
@@ -56,7 +56,8 @@ User requested a detailed plan for rebranding SnoreGuard to SleepGuard and expan
 ## Notes
 
 - Phase 1 completed in Session 58
-- **Next task to pick up: P2-T1 (SpeechDetector)**
+- P2-T2 completed in Session 59
+- **Next task to pick up: P2-T3 (Event creation for sleep talking)**
 - When user says "continue" or "work on what's next", start with the 🟡 Next task in this tracker
 - F13 (CloudKit Sync) is intentionally skipped — do NOT work on it unless explicitly asked
 - Feature doc: `docs/features/f14-sleepguard-rebrand.md`
