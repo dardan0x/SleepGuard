@@ -35,7 +35,7 @@ Rebrand SnoreGuard to SleepGuard and expand detection from snore-only to multi-s
 | P2-T2 | Parallel detection wiring | ✅ Done | SessionManager integration |
 | P2-T3 | Event creation for sleep talking | ✅ Done | `finalizeEvent()` category logic |
 | P2-T4 | Settings toggle | ✅ Done | "Detect Sleep Talking" on/off |
-| P2-T5 | Build & verify | ⬜ Backlog | Test with audio samples |
+| P2-T5 | Build & verify | ✅ Done | Clean build (zero errors); code review confirms snoring behavior unchanged when toggle off; priority finalization correct; no regressions |
 | P3-T1 | Category filter | ⬜ Backlog | Segmented picker in SessionDetailView |
 | P3-T2 | EventRow icons | ⬜ Backlog | Category-based icons |
 | P3-T3 | Timeline multi-color | ⬜ Backlog | Sleep talking = purple, noise = orange |
@@ -58,7 +58,8 @@ User requested a detailed plan for rebranding SnoreGuard to SleepGuard and expan
 - Phase 1 completed in Session 58
 - P2-T2 completed in Session 59
 - P2-T3 completed in Session 59
-- **Next task to pick up: P2-T5 (Build & verify)**
+- Phase 2 complete (P2-T1 through P2-T5)
+- **Next task to pick up: P3-T1 (Category filter)**
 - When user says "continue" or "work on what's next", start with the 🟡 Next task in this tracker
 - F13 (CloudKit Sync) is intentionally skipped — do NOT work on it unless explicitly asked
 - Feature doc: `docs/features/f14-sleepguard-rebrand.md`

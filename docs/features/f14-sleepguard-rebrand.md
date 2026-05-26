@@ -2,6 +2,7 @@
 
 ## Status: In Progress
 ## Phase 1 Completed: 2026-05-25
+## Phase 2 Completed: 2026-05-26
 
 ## Summary
 
@@ -73,15 +74,13 @@ _Planned for Phase 3–4: Potential sleep stage detail or correlation views (def
 | P1-T3 | Model expansion (`SleepStageSegment`, `SoundCategory.coughing`) | 1 |
 | P1-T4 | `DetectionState` rename (`SnoringState` → `DetectionState`) | 1 |
 | P1-T5 | Build & verify | 1 |
+| P2-T1 | `SpeechDetector`: New classifier in `AudioEngine` | 2 |
+| P2-T2 | Parallel detection wiring in `SessionManager` | 2 |
+| P2-T3 | Event creation for `.sleepTalking` | 2 |
+| P2-T4 | Settings toggle "Detect Sleep Talking" | 2 |
+| P2-T5 | Build & verify — zero errors, no regressions | 2 |
 
 ## Remaining Work
-
-### Phase 2: Sleep Talking Detection
-- **P2-T1** — `SpeechDetector`: New classifier in `AudioEngine` using VAD + SoundAnalysis speech class
-- **P2-T2** — Parallel detection wiring: `SessionManager` runs `SpeechDetector` alongside `SnoreDetector`
-- **P2-T3** — Event creation: `finalizeEvent()` sets `category = .sleepTalking` when speech is detected
-- **P2-T4** — Settings toggle: "Detect Sleep Talking" on/off in `SettingsView`
-- **P2-T5** — Build & verify: Test with audio samples; ensure snoring accuracy unchanged
 
 ### Phase 3: UI Adaptation
 - **P3-T1** — Category filter: Segmented picker (`All | Snoring | Sleep Talking | Noise`) in `SessionDetailView`
