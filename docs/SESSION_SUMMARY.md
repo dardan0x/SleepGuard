@@ -3407,3 +3407,54 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 - Reset speechConfidence on stopAnalyzing()
 - Binary classification design (no intensity tiers) to keep API minimal
 ```
+
+
+## 2026-05-26 — Session 59: P2-T2 Parallel Detection Wiring
+
+### Completed
+- P2-T2: Wired `SpeechDetector` into `SessionManager` processing loop
+
+### Technical Details
+- `SessionManager` now owns a `speechDetector = SpeechDetector.shared` reference alongside `snoreDetector`
+- The 20 Hz processing task polls `SoundAnalysisDetector.shared.speechConfidence` and feeds it into `SpeechDetector.update(db:speechConfidence:)`
+- `SessionManager` exposes `currentSpeechDetected: Bool` for future UI observation
+- Snoring priority is preserved: speech detection runs in parallel but does not yet affect event creation (that is P2-T3)
+- Debug prints now include `speechConf` and speech detection state alongside snore classification
+- `resetTrackingState()` clears `currentSpeechDetected` to avoid stale state across sessions
+- Backward-compatible overload chain: `processAudioLevel(db:)` → `processAudioLevel(db:spectralScore:snoreConfidence:speechConfidence:)` with defaults
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Env/Sources/Services/SessionManager.swift` | +12/-5 | Added `speechDetector`, `currentSpeechDetected`; wired speech confidence into processing loop; updated debug prints; reset state |
+| `docs/trackers/f14-sleepguard-rebrand.md` | +3/-3 | P2-T2 marked Done; updated next task note |
+| `docs/FeatureTracker.md` | +5/-5 | Dashboard counts (49 done, 13 backlog, 79%), Activity Log, Completed, Up Next updated |
+
+### Architecture Decisions
+- **SpeechDetector remains a separate singleton**: Rather than folding speech logic into `SnoreDetector`, we keep them decoupled. This lets each evolve independently (different thresholds, different confidence sources) and makes unit testing easier.
+- **No raw log changes yet**: `SnoreSample` and `SessionRawLogWriter` were left untouched. Adding `speechConfidence` to the raw log is deferred until P2-T3 when the full speech event pipeline is validated.
+- **No view changes yet**: `currentSpeechDetected` is published but not consumed by any view. UI integration (BedsideClockView indicator) is deferred to Phase 3.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors, zero warnings
+
+### Next Session
+- P2-T3: Event creation for sleep talking — update `finalizeEvent()` to create `.sleepTalking` events when snoring is absent but speech is sustained
+- P2-T4: Settings toggle for "Detect Sleep Talking" in `UserPreferences` + `SettingsView`
+
+### Open Questions
+- None
+
+### Suggested Branch
+`feature/f14/p2-t2-parallel-detection`
+
+### Suggested Commit
+```
+[P2-T2] — Wire SpeechDetector into SessionManager parallel detection loop
+
+- Add SpeechDetector reference and currentSpeechDetected to SessionManager
+- Poll speechConfidence from SoundAnalysisDetector at 20Hz
+- Feed db + speechConfidence into SpeechDetector.update()
+- Reset speech state on session start/stop
+- Preserve snoring priority; speech does not yet create events
+```
