@@ -3619,3 +3619,57 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 - Speech priority finalization verified correct
 - No regressions in melody play/stop or gap tracking
 ```
+
+
+## 2026-05-26 — Session 59 (continued): P3-T1 Category Filter
+
+### Completed
+- P3-T1: Added segmented category filter to `SessionDetailView`
+
+### Technical Details
+- Added 4 localized filter strings: `filter.all`, `filter.snoring`, `filter.sleepTalking`, `filter.noise`
+- `EventCategoryFilter` enum with `includes(event:)` method:
+  - `.all` → includes all events
+  - `.snoring` → `.snoring` category only
+  - `.sleepTalking` → `.sleepTalking` category only
+  - `.noise` → `.noise`, `.coughing`, and `.other` categories
+- Filter picker shown only when `shouldShowFilter` is true (session has >1 distinct category)
+- Filter is hidden for single-category sessions (snoring-only nights), preserving pre-rebrand UI
+- Filter state (`@State selectedFilter`) wired to:
+  - `SessionDetailEventsView` — shows first 4 filtered events + "Show All" count
+  - `EventsSheetView` — shows all filtered events in grid
+  - `PlayerSheetView` — plays only filtered events when opened from "Show All"
+- Timeline view (`SessionDetailTimelineView`) remains unfiltered — shows all events as a visual overview
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/DesignSystem/Sources/Resources/Localizable.xcstrings` | +44 | Added `filter.all`, `filter.snoring`, `filter.sleepTalking`, `filter.noise` |
+| `Packages/DesignSystem/Sources/Strings.swift` | +4 | Regenerated (232 strings) |
+| `Packages/Recordings/Sources/Views/SessionDetailView.swift` | +40/-5 | `EventCategoryFilter` enum, `selectedFilter` state, `shouldShowFilter`/`filteredEvents` computed properties, picker in `loadedBody`, filtered events passed to sheets |
+| `docs/trackers/f14-sleepguard-rebrand.md` | +2/-2 | P3-T1 marked Done; next task P3-T2 |
+| `docs/FeatureTracker.md` | +5/-5 | Dashboard (53 done, 9 backlog, 85%), Activity Log, Completed, Up Next updated |
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors, zero warnings
+
+### Next Session
+- P3-T2: EventRow icons — category-based icons replacing intensity dot for non-snoring events
+- P3-T3: Timeline multi-color — sleep talking = purple, noise = orange
+
+### Open Questions
+- None
+
+### Suggested Branch
+`feature/f14/p3-t1-category-filter`
+
+### Suggested Commit
+```
+[P3-T1] — Add category filter to SessionDetailView
+
+- Add EventCategoryFilter enum with All/Snoring/Sleep Talking/Noise
+- Segmented picker shown only when session has multiple categories
+- Filter wired to events list, events sheet, and player sheet
+- Timeline view remains unfiltered
+- Localize 4 filter strings
+```
