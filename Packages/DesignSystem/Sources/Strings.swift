@@ -116,6 +116,7 @@ public enum Strings {
   public static var sessionChargingAlertStartAnyway: String { String(localized: "session.chargingAlert.startAnyway", bundle: .module) }
   public static var sessionChargingAlertTitle: String { String(localized: "session.chargingAlert.title", bundle: .module) }
   public static var sessionCountdownLabel: String { String(localized: "session.countdown.label", bundle: .module) }
+  public static var sessionDisturbances: String { String(localized: "session.disturbances", bundle: .module) }
   public static var sessionMicrophoneAlertMessage: String { String(localized: "session.microphoneAlert.message", bundle: .module) }
   public static var sessionMicrophoneAlertOpenSettings: String { String(localized: "session.microphoneAlert.openSettings", bundle: .module) }
   public static var sessionMicrophoneAlertTitle: String { String(localized: "session.microphoneAlert.title", bundle: .module) }
