@@ -30,6 +30,8 @@ public enum Strings {
   public static var eventPlayerNavigationTitle: String { String(localized: "event.player.navigation.title", bundle: .module) }
   public static var eventPlayerNoAudioDescription: String { String(localized: "event.player.noAudio.description", bundle: .module) }
   public static var eventPlayerNoAudioTitle: String { String(localized: "event.player.noAudio.title", bundle: .module) }
+  public static var eventPlayerNoiseTitle: String { String(localized: "event.player.noise.title", bundle: .module) }
+  public static var eventPlayerSleepTalkingTitle: String { String(localized: "event.player.sleepTalking.title", bundle: .module) }
   public static var eventsHourPdfGenerator: String { String(localized: "events.hour.pdf.generator", bundle: .module) }
   public static var fifteenSecondsSoothingMelodyValueFormat: String { String(localized: "fifteen.seconds.soothing.melody.value", bundle: .module) }
   public static var filterAll: String { String(localized: "filter.all", bundle: .module) }
