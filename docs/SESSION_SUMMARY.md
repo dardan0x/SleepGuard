@@ -3719,3 +3719,40 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 - Noise/coughing/other events show orange waveform icon
 - Theme gains sleepTalkingColor and noiseColor for reuse
 ```
+
+
+## 2026-05-26 — Session 59 (continued): P3-T3 Timeline Multi-Color
+
+### Completed
+- P3-T3: Updated `SnoringTimelineView` to render events by category color
+
+### Technical Details
+- Added `eventColor(_:)` helper to `SnoringTimelineView`:
+  - `.snoring` → `theme.intensityColor(event.intensity)` (existing behavior)
+  - `.sleepTalking` → `theme.sleepTalkingColor` (purple `#BF5AF2`)
+  - `.noise`, `.coughing`, `.other` → `theme.noiseColor` (orange `#FF9F0A`)
+- `Canvas` rendering loop now calls `eventColor(event)` instead of `theme.intensityColor(event.intensity)`
+- Snoring-only sessions render identically to pre-rebrand (intensity colors unchanged)
+- Multi-category sessions show purple/orange segments alongside intensity-colored segments
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/DesignSystem/Sources/Components/SnoringTimelineView.swift` | +11/-1 | `eventColor(_:)` helper; timeline segments use category-based color |
+| `docs/trackers/f14-sleepguard-rebrand.md` | +2/-2 | P3-T3 marked Done; next task P3-T4 |
+| `docs/FeatureTracker.md` | +5/-5 | Dashboard (55 done, 7 backlog, 89%), Activity Log, Completed, Up Next updated |
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors, zero warnings
+
+### Next Session
+- P3-T4: Stats grid supplement — optional disturbance row below the 2×2 grid in `SessionDetailView`
+- P3-T5: Player labels — `PlayerSheetView` title based on event category
+
+### Open Questions
+- None
+
+- SnoringTimelineView.eventColor(_:) maps category to color
+- Snoring retains intensity colors
+- Sleep talking = purple, noise/coughing/other = orange
+```

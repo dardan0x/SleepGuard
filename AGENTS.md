@@ -336,17 +336,18 @@ Append a new session entry with this structure:
 ### Open Questions
 - [Question that needs user input or future decision]
 
-### Suggested Branch
-`feature/[f#]/[t#]-short-description`
-
-### Suggested Commit
+### Changes done
 ```
-[Task ID] — [Short description]
-
 - [Change 1]
 - [Change 2]
 ```
 ```
+
+### Suggested Branch
+`feature/[f#]/[t#]-short-description`
+
+### Suggested Commit
+`[Task ID] — [Short description]`
 
 ### 2. Create Feature Doc When Feature Ships
 

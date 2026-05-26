@@ -73,8 +73,19 @@ public struct SnoringTimelineView: View {
         id: event.id,
         x: CGFloat(relativeStart) * totalWidth,
         width: max(CGFloat(relativeDuration) * totalWidth, 2),
-        color: theme.intensityColor(event.intensity)
+        color: eventColor(event)
       )
+    }
+  }
+
+  private func eventColor(_ event: SnoreEvent) -> Color {
+    switch event.category {
+    case .snoring:
+      return theme.intensityColor(event.intensity)
+    case .sleepTalking:
+      return theme.sleepTalkingColor
+    case .noise, .coughing, .other:
+      return theme.noiseColor
     }
   }
 
