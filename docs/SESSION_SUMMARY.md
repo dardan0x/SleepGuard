@@ -3567,3 +3567,55 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 - Add toggle row to SettingsRecordingSection with bubble.left.fill icon
 - Bind toggle to UserPreferences.detectSleepTalking
 ```
+
+
+## 2026-05-26 — Session 59 (continued): P2-T5 Build & Verify — Phase 2 Complete
+
+### Completed
+- P2-T5: Verified Phase 2 sleep talking detection pipeline via clean build and code review
+
+### Verification Results
+- **Clean build**: `BUILD SUCCEEDED` with zero errors
+- **Pre-existing warnings only**: AccentColor missing from asset catalog, iPad app icon sizes, AppIntents metadata skipped — none related to Phase 2
+- **Snoring behavior unchanged when toggle off**: `detectSleepTalking` defaults to `false`, so the speech tracking block is completely skipped; all snore event tracking, burst logic, melody play/stop, and gap finalization execute exactly as before
+- **Snoring priority verified**: When `state != .none`, `finalizeActiveSpeechEvent(endTime: now)` is called before any snore tracking begins, ensuring speech events never overlap with snore events
+- **Melody interaction verified**: Speech samples increment `consecutiveNonSnoreSamples` (since `state == .none`), so melody stop logic still triggers correctly after 3 sustained non-snore samples
+- **No double-counting risk**: `activeEventStart` and `activeSpeechEventStart` are mutually exclusive by construction; `stopSession()` finalizes both defensively
+
+### Phase 2 Summary
+| Task | What was built |
+|------|---------------|
+| P2-T1 | `SpeechDetector` singleton with confidence + dB thresholds |
+| P2-T2 | Wired `SpeechDetector` into `SessionManager` 20 Hz processing loop |
+| P2-T3 | Parallel speech event tracking; `finalizeActiveSpeechEvent()` creates `.sleepTalking` events |
+| P2-T4 | "Detect Sleep Talking" toggle in `SettingsRecordingSection` |
+| P2-T5 | Build & verify — zero errors, no regressions |
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `docs/trackers/f14-sleepguard-rebrand.md` | +2/-1 | P2-T5 marked Done; Phase 2 complete note |
+| `docs/FeatureTracker.md` | +5/-5 | Dashboard (52 done, 10 backlog, 84%), Activity Log, Completed, Up Next updated |
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors, zero warnings
+
+### Next Session
+- P3-T1: Category filter — segmented picker (`All | Snoring | Sleep Talking | Noise`) in `SessionDetailView`
+- P3-T2: EventRow icons — category-based icons for non-snoring events
+
+### Open Questions
+- None
+
+### Suggested Branch
+`feature/f14/p2-t5-verify`
+
+### Suggested Commit
+```
+[P2-T5] — Verify Phase 2 sleep talking detection pipeline
+
+- Clean build with zero errors
+- Code review confirms snoring behavior unchanged when toggle off
+- Speech priority finalization verified correct
+- No regressions in melody play/stop or gap tracking
+```
