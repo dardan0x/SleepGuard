@@ -100,6 +100,18 @@ public final class UserPreferences {
     }
   }
 
+  public var detectSleepTalking: Bool {
+    get {
+      access(keyPath: \.detectSleepTalking)
+      return defaults.bool(forKey: "detectSleepTalking")
+    }
+    set {
+      withMutation(keyPath: \.detectSleepTalking) {
+        defaults.set(newValue, forKey: "detectSleepTalking")
+      }
+    }
+  }
+
   public var recordingDelayMinutes: Int {
     get {
       access(keyPath: \.recordingDelayMinutes)

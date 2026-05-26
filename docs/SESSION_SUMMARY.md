@@ -3458,3 +3458,64 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 - Reset speech state on session start/stop
 - Preserve snoring priority; speech does not yet create events
 ```
+
+
+## 2026-05-26 — Session 59 (continued): P2-T3 Event Creation for Sleep Talking
+
+### Completed
+- P2-T3: Added parallel speech event tracking and `finalizeActiveSpeechEvent()` in `SessionManager`
+
+### Technical Details
+- Added `detectSleepTalking: Bool` to `UserPreferences` (default `false`) to safely gate speech event creation
+- `SessionManager` gained parallel speech event tracking state mirroring snore event tracking:
+  - `activeSpeechEventStart`, `activeSpeechEventDBSum/Count`, `activeSpeechEventPeakDB`
+  - `lastSpeechSampleTime`, `consecutiveSpeechSamples`, `requiredConsecutiveSpeechSamples = 3`
+- Speech event lifecycle:
+  - **Start**: 3 consecutive speech samples (≈150 ms) with backdated timestamp
+  - **Extend**: accumulate dB sum/count/peak on each sustained sample
+  - **Finalize (gap)**: 10 s of silence triggers `finalizeActiveSpeechEvent()`
+  - **Finalize (priority)**: snoring detection immediately finalizes the speech event with `endTime: now`
+- `finalizeActiveSpeechEvent(endTime:)` creates a `SnoreEvent` with `category: .sleepTalking`, `intensity: .quiet`, and the same 2 s minimum duration as snore events
+- Both `stopSession()` and `stopAndDiscardSession()` finalize any in-progress speech events
+- `resetTrackingState()` clears all speech tracking state
+- Speech events do NOT interact with the soothing melody player — melody play/stop remains purely snore-driven
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Env/Sources/Services/SessionManager.swift` | +77/-4 | Speech event tracking state, priority finalization, gap-based finalization, `finalizeActiveSpeechEvent()` method, reset cleanup |
+| `Packages/Env/Sources/Services/UserPreferences.swift` | +12 | Added `detectSleepTalking` boolean preference (default false) |
+| `docs/trackers/f14-sleepguard-rebrand.md` | +2/-2 | P2-T3 marked Done; next task updated to P2-T4 |
+| `docs/FeatureTracker.md` | +5/-5 | Dashboard (50 done, 12 backlog, 81%), Activity Log, Completed, Up Next updated |
+
+### Architecture Decisions
+- **Gated by `detectSleepTalking` preference (default false)**: Since P2-T4 (Settings toggle UI) hasn't been built yet, adding the preference now prevents accidental speech event creation for all users. The toggle UI in P2-T4 will simply wire to this existing pref.
+- **Same 3-sample consecutive gate as snoring**: Keeps the pipeline consistent and filters out brief transient sounds that SoundAnalysis might misclassify as speech.
+- **Same 10 s gap threshold as snoring**: Natural breathing pauses during sleep talking are typically shorter than 10 s. This matches the snoring epoch definition.
+- **No intensity tiers for speech**: `SnoreEvent.intensity` is set to `.quiet` for all speech events. This keeps the data model simple; if needed, future phases can add speech-specific intensity (volume-based).
+- **Snoring priority enforced at sample level**: When `state != .none`, any active speech event is finalized immediately with `endTime: now`, ensuring the speech event never overlaps with a snore event.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors, zero warnings
+
+### Next Session
+- P2-T4: Settings toggle — "Detect Sleep Talking" on/off in `SettingsView`
+- P2-T5: Build & verify — end-to-end test with audio samples
+
+### Open Questions
+- None
+
+### Suggested Branch
+`feature/f14/p2-t3-speech-events`
+
+### Suggested Commit
+```
+[P2-T3] — Add sleep talking event creation with snoring priority
+
+- Add parallel speech event tracking state to SessionManager
+- finalizeActiveSpeechEvent() creates .sleepTalking SnoreEvents
+- 3-sample consecutive gate + 10s gap threshold + 2s minimum duration
+- Snoring detection immediately finalizes active speech events (priority)
+- Add detectSleepTalking preference (default false) for safe gating
+- Wire stopSession/stopAndDiscardSession to finalize speech events
+```

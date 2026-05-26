@@ -54,6 +54,16 @@ public final class SessionManager {
     private var activeBurstStart: Date?
     private var completedBursts: [(start: Date, end: Date)] = []
 
+    // MARK: - Speech event tracking state
+
+    private var activeSpeechEventStart: Date?
+    private var activeSpeechEventDBSum: Double = 0
+    private var activeSpeechEventDBCount: Int = 0
+    private var activeSpeechEventPeakDB: Double = 0
+    private var lastSpeechSampleTime: Date?
+    private var consecutiveSpeechSamples: Int = 0
+    private let requiredConsecutiveSpeechSamples: Int = 3
+
     // MARK: - Session aggregate state
 
     private var totalDBSum: Double = 0
@@ -181,6 +191,9 @@ public final class SessionManager {
         if activeEventStart != nil {
             finalizeActiveEvent()
         }
+        if activeSpeechEventStart != nil {
+            finalizeActiveSpeechEvent()
+        }
 
         guard let session = currentSession else { return nil }
 
@@ -269,6 +282,9 @@ public final class SessionManager {
         if activeEventStart != nil {
             finalizeActiveEvent()
         }
+        if activeSpeechEventStart != nil {
+            finalizeActiveSpeechEvent()
+        }
 
         // Delete the session's audio file and clean up
         if let session = currentSession {
@@ -341,6 +357,11 @@ public final class SessionManager {
 
         // Handle event tracking with debounce gap + per-burst tracking
         if state != .none {
+            // Snoring takes priority — finalize any active speech event immediately
+            if activeSpeechEventStart != nil {
+                finalizeActiveSpeechEvent(endTime: now)
+            }
+
             consecutiveSnoreSamples += 1
             consecutiveNonSnoreSamples = 0
             lastSnoringSampleTime = now
@@ -422,6 +443,40 @@ public final class SessionManager {
                 soothingMelodyPlayer.stop()
                 consecutiveNonSnoreSamples = 0
             }
+
+            // Speech event tracking (sleep talking)
+            if UserPreferences.shared.detectSleepTalking {
+                if currentSpeechDetected {
+                    consecutiveSpeechSamples += 1
+                    lastSpeechSampleTime = now
+                    guard consecutiveSpeechSamples >= requiredConsecutiveSpeechSamples else {
+                        return
+                    }
+                    if activeSpeechEventStart == nil {
+                        let backdate = TimeInterval(requiredConsecutiveSpeechSamples - 1) * 0.05
+                        activeSpeechEventStart = now.addingTimeInterval(-backdate)
+                        activeSpeechEventDBSum = Double(db)
+                        activeSpeechEventDBCount = 1
+                        activeSpeechEventPeakDB = Double(db)
+                        print("[SessionManager] 🗣️ New speech event started")
+                    } else {
+                        activeSpeechEventDBSum += Double(db)
+                        activeSpeechEventDBCount += 1
+                        if Double(db) > activeSpeechEventPeakDB {
+                            activeSpeechEventPeakDB = Double(db)
+                        }
+                    }
+                } else {
+                    consecutiveSpeechSamples = 0
+                    if let lastSpeech = lastSpeechSampleTime,
+                       activeSpeechEventStart != nil,
+                       now.timeIntervalSince(lastSpeech) >= eventGapThreshold
+                    {
+                        print("[SessionManager] Silence for \(eventGapThreshold)s — finalizing speech event")
+                        finalizeActiveSpeechEvent()
+                    }
+                }
+            }
         }
 
         // Update stored aggregate (averageDB only; others are computed on demand)
@@ -448,6 +503,12 @@ public final class SessionManager {
         consecutiveNonSnoreSamples = 0
         melodyStartTime = nil
         currentSpeechDetected = false
+        activeSpeechEventStart = nil
+        activeSpeechEventDBSum = 0
+        activeSpeechEventDBCount = 0
+        activeSpeechEventPeakDB = 0
+        lastSpeechSampleTime = nil
+        consecutiveSpeechSamples = 0
         completedBursts.removeAll(keepingCapacity: false)
     }
 
@@ -511,6 +572,46 @@ public final class SessionManager {
         activeEventDBCount = 0
         activeEventPeakDB = 0
         completedBursts.removeAll(keepingCapacity: false)
+    }
+
+    private func finalizeActiveSpeechEvent(endTime: Date? = nil) {
+        guard let startTime = activeSpeechEventStart, let session = currentSession else {
+            return
+        }
+        print("[SessionManager] Finalizing speech event at \(startTime)")
+
+        let eventEnd = endTime ?? (lastSpeechSampleTime ?? Date())
+        let eventSpan = eventEnd.timeIntervalSince(startTime)
+
+        // Discard events shorter than 2 s to filter out brief transients.
+        guard eventSpan >= 2.0 else {
+            activeSpeechEventStart = nil
+            activeSpeechEventDBSum = 0
+            activeSpeechEventDBCount = 0
+            activeSpeechEventPeakDB = 0
+            return
+        }
+
+        let event = SnoreEvent(
+            timestamp: startTime,
+            category: .sleepTalking,
+            intensity: .quiet,
+            averageDB: activeSpeechEventDBCount > 0 ? activeSpeechEventDBSum / Double(activeSpeechEventDBCount) : 0,
+            peakDB: activeSpeechEventPeakDB,
+            duration: eventSpan
+        )
+        event.session = session
+
+        if session.events == nil {
+            session.events = []
+        }
+        session.events?.append(event)
+        eventsCount = session.events?.count ?? 0
+
+        activeSpeechEventStart = nil
+        activeSpeechEventDBSum = 0
+        activeSpeechEventDBCount = 0
+        activeSpeechEventPeakDB = 0
     }
 
     private func audioFileURL(for sessionID: UUID) -> URL {
