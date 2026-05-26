@@ -1383,6 +1383,17 @@
         }
       }
     },
+    "settings.detectSleepTalking": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Detect Sleep Talking"
+          }
+        }
+      }
+    },
     "settings.maxClipLength": {
       "localizations": {
         "en": {

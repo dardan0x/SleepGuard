@@ -3519,3 +3519,51 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 - Add detectSleepTalking preference (default false) for safe gating
 - Wire stopSession/stopAndDiscardSession to finalize speech events
 ```
+
+
+## 2026-05-26 — Session 59 (continued): P2-T4 Settings Toggle
+
+### Completed
+- P2-T4: Added "Detect Sleep Talking" toggle to `SettingsRecordingSection`
+
+### Technical Details
+- Added localized string `settings.detectSleepTalking` = "Detect Sleep Talking" to `Localizable.xcstrings`
+- Regenerated `Strings.swift` (228 strings total)
+- Toggle uses the existing settings card pattern:
+  - `SettingsIconBackground(systemName: "bubble.left.fill", color: theme.accent)`
+  - `Text(Strings.settingsDetectSleepTalking)`
+  - `Toggle("", isOn: Binding(get:set:))` with `.labelsHidden()` and `.tint(theme.scoreGreen)`
+- Toggle is placed in `SettingsRecordingSection` (section title: "DETECTION") below the sensitivity picker
+- The toggle directly binds to `UserPreferences.detectSleepTalking`, which gates speech event creation in `SessionManager`
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/DesignSystem/Sources/Resources/Localizable.xcstrings` | +12 | Added `settings.detectSleepTalking` entry |
+| `Packages/DesignSystem/Sources/Strings.swift` | +1 | Regenerated — added `settingsDetectSleepTalking` accessor |
+| `Packages/Settings/Sources/Views/SettingsRecordingSection.swift` | +12 | Added sleep talking toggle row |
+| `docs/trackers/f14-sleepguard-rebrand.md` | +2/-2 | P2-T4 marked Done; next task updated to P2-T5 |
+| `docs/FeatureTracker.md` | +5/-5 | Dashboard (51 done, 11 backlog, 82%), Activity Log, Completed, Up Next updated |
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors, zero warnings
+
+### Next Session
+- P2-T5: Build & verify — end-to-end test with audio samples; ensure snoring accuracy is unchanged
+- P3-T1: Category filter — segmented picker (`All | Snoring | Sleep Talking | Noise`) in `SessionDetailView`
+
+### Open Questions
+- None
+
+### Suggested Branch
+`feature/f14/p2-t4-settings-toggle`
+
+### Suggested Commit
+```
+[P2-T4] — Add "Detect Sleep Talking" settings toggle
+
+- Add localized `settings.detectSleepTalking` string
+- Regenerate Strings.swift
+- Add toggle row to SettingsRecordingSection with bubble.left.fill icon
+- Bind toggle to UserPreferences.detectSleepTalking
+```
