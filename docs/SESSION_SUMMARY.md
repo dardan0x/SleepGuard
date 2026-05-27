@@ -4144,3 +4144,54 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 
 ### Open Questions
 - None
+
+---
+
+## 2026-05-27 — Session 63: Onboarding Health & Watch Screen
+
+### Completed
+- **F1-T6**: Health & Watch onboarding screen (`OnboardingPageHealthWatchView`)
+- Updated `designs/SnoreGuard.pen` onboarding flow: moved Health & Watch design into main 6-page sequence, updated all 7 screen variants to 6 progress dots
+
+### Technical Details
+- **New view**: `OnboardingPageHealthWatchView.swift` (Packages/Onboarding/Sources/Views/)
+  - Health illustration: concentric green rings (`#0A2818` fill, `#133D20` inner), `bed.double.fill` icon, `heart.fill` accent, blue dot
+  - Title + body about sleep stage breakdowns (deep/light/REM/awake) and smartwatch pairing
+  - Privacy pill: shield icon + "All health data stays on your device" in `bgElevated` capsule
+  - Primary button requests HealthKit authorization via `HealthKitSync.requestAuthorization()`
+  - Granted state: button turns `scoreGreen` with white dot + "Health connected" label
+  - 0.8-second `Task.sleep` after grant before calling `onContinue()` so user sees confirmation
+  - Secondary "Skip for now" button advances without requesting permission
+  - On appear: checks existing HealthKit auth status; auto-shows granted state if already authorized
+- **`OnboardingView`**: `totalPages` 5 → 6; inserted `OnboardingPageHealthWatchView` at tag 3; Mic shifted to tag 4; CTA shifted to tag 5
+- **Consistency**: same 0.8 s grant-delay added to `OnboardingPage4View` (Microphone permission)
+- **Localized strings** (6 new keys):
+  - `onboarding.healthWatch.title`, `.body`, `.badge`, `.buttonPrimary`, `.buttonSecondary`, `.granted`
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Onboarding/Sources/Views/OnboardingPageHealthWatchView.swift` | +112 | **New** — Health & Watch onboarding page with HealthKit auth, granted state, privacy pill |
+| `Packages/Onboarding/Sources/Views/OnboardingView.swift` | +4/-1 | `totalPages` 5→6; inserted `OnboardingPageHealthWatchView` at tag 3; shifted Mic/CTA tags |
+| `Packages/Onboarding/Sources/Views/OnboardingPage4View.swift` | +2/-0 | Added 0.8 s delay after mic permission grant before advancing |
+| `Packages/DesignSystem/Sources/Resources/Localizable.xcstrings` | +74/-0 | 6 new `onboarding.healthWatch.*` localized strings |
+| `Packages/DesignSystem/Sources/Strings.swift` | +6/-0 | Regenerated; added 6 new string accessors |
+| `docs/trackers/f1-onboarding.md` | +25/-4 | F1-T6 added to task table and detail section; version bumped to V1.1; completion date updated |
+| `docs/FeatureTracker.md` | +5/-5 | F1 tasks 5/5→6/6; total tasks 62→63; activity log + completed list updated |
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors
+
+### Suggested Branch
+`feature/f1-t6-health-watch-onboarding`
+
+### Suggested Commit
+`F1-T6 — Health & Watch onboarding screen with HealthKit auth and granted-state delay`
+- `OnboardingPageHealthWatchView` with concentric green illustration, privacy pill, HealthKit CTA
+- 0.8 s confirmation delay before auto-advance on both HealthKit and Microphone permission pages
+- Onboarding flow expanded from 5 → 6 pages
+- 6 new localized strings
+
+### Open Questions
+- None

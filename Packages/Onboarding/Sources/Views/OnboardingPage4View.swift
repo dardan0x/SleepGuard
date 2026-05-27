@@ -73,6 +73,7 @@ struct OnboardingPage4View: View {
             isRequesting = false
             if granted {
               showGranted = true
+              try? await Task.sleep(for: .seconds(0.8))
             }
             onContinue()
           }
