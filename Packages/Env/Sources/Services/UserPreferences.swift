@@ -124,6 +124,18 @@ public final class UserPreferences {
     }
   }
 
+  public var hasExplicitlySetEnhancedSleepTracking: Bool {
+    get {
+      access(keyPath: \.hasExplicitlySetEnhancedSleepTracking)
+      return defaults.bool(forKey: "hasExplicitlySetEnhancedSleepTracking")
+    }
+    set {
+      withMutation(keyPath: \.hasExplicitlySetEnhancedSleepTracking) {
+        defaults.set(newValue, forKey: "hasExplicitlySetEnhancedSleepTracking")
+      }
+    }
+  }
+
   public var recordingDelayMinutes: Int {
     get {
       access(keyPath: \.recordingDelayMinutes)

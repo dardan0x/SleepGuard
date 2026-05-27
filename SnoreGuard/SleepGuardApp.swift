@@ -53,6 +53,9 @@ struct SleepGuardApp: App {
       )
       .onAppear {
         HealthKitSync.shared.checkAuthorizationStatus()
+        if !userPreferences.hasExplicitlySetEnhancedSleepTracking {
+          userPreferences.enhancedSleepTracking = HealthKitSync.shared.isAuthorized
+        }
       }
       .onChange(of: sessionManager.isRecording) { _, isRecording in
         UIApplication.shared.isIdleTimerDisabled = isRecording
