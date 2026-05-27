@@ -52,7 +52,7 @@ struct MainTabView: View {
     private var customTabView: some View {
         ZStack(alignment: .bottom) {
             customContent
-                .padding(.bottom, 55)
+                .padding(.bottom, 60)
             
             if !sessionManager.isRecording && !sessionManager.isLiveSessionVisible {
                 customTabBar
