@@ -151,6 +151,7 @@ public enum Strings {
   public static var settingsDeleteAllConfirmMessage: String { String(localized: "settings.deleteAll.confirmMessage", bundle: .module) }
   public static var settingsDeleteAllConfirmTitle: String { String(localized: "settings.deleteAll.confirmTitle", bundle: .module) }
   public static var settingsDetectSleepTalking: String { String(localized: "settings.detectSleepTalking", bundle: .module) }
+  public static var settingsEnhancedSleepTracking: String { String(localized: "settings.enhancedSleepTracking", bundle: .module) }
   public static var settingsMaxClipLength: String { String(localized: "settings.maxClipLength", bundle: .module) }
   public static var settingsMaxClipLengthTitle: String { String(localized: "settings.maxClipLengthTitle", bundle: .module) }
   public static var settingsMicrophoneAccess: String { String(localized: "settings.microphoneAccess", bundle: .module) }

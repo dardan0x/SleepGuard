@@ -1491,6 +1491,17 @@
         }
       }
     },
+    "settings.enhancedSleepTracking": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enhanced Sleep Tracking"
+          }
+        }
+      }
+    },
     "settings.maxClipLength": {
       "localizations": {
         "en": {

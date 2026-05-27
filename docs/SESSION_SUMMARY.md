@@ -4019,3 +4019,46 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 
 ### Open Questions
 - None
+
+---
+
+## 2026-05-27 — Session 61: P4-T5 Enhanced Sleep Tracking Toggle
+
+### Completed
+- **P4-T5**: Settings toggle — "Enhanced Sleep Tracking" requiring Watch + HealthKit permission
+
+### Technical Details
+- Added `enhancedSleepTracking: Bool` to `UserPreferences` with manual `access(keyPath:)` / `withMutation(keyPath:)` pattern (same as other computed UserDefaults-backed properties)
+- Added toggle row to `SettingsWatchSection` with `bed.double.fill` icon in accent color
+- Toggle requests HealthKit authorization via `healthKitSync.requestAuthorization()` when turned ON (same pattern as `syncToHealthKit` toggle in `SettingsDataSection`)
+- Toggle is disabled (turned OFF) if HealthKit authorization is denied
+- Gated `fetchSleepStages` in `SessionDetailView.loadSession()`: only queries HealthKit sleep analysis when `userPreferences.enhancedSleepTracking == true`
+- Added localized string `settings.enhancedSleepTracking` → "Enhanced Sleep Tracking"
+- Regenerated `Strings.swift` via `python3 scripts/generate-strings.py`
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Env/Sources/Services/UserPreferences.swift` | +13/-0 | Added `enhancedSleepTracking` computed property with UserDefaults backing |
+| `Packages/Settings/Sources/Views/SettingsWatchSection.swift` | +20/-2 | Added toggle row with `bed.double.fill` icon; injected `UserPreferences` and `HealthKitSync` environments |
+| `Packages/Recordings/Sources/Views/SessionDetailView.swift` | +2/-1 | Added `UserPreferences` environment; gated `fetchSleepStages` behind `enhancedSleepTracking` |
+| `Packages/DesignSystem/Sources/Resources/Localizable.xcstrings` | +11/-0 | Added `settings.enhancedSleepTracking` localization entry |
+| `Packages/DesignSystem/Sources/Strings.swift` | +1/-0 | Regenerated; added `settingsEnhancedSleepTracking` accessor |
+| `docs/trackers/f14-sleepguard-rebrand.md` | +3/-3 | P4-T5 marked Done; acceptance criteria updated; next task updated to P4-T6 |
+| `docs/FeatureTracker.md` | +12/-12 | Dashboard (61 done, 1 backlog, 98%), Activity Log, Currently Active, Up Next updated |
+| `docs/features/f14-sleepguard-rebrand.md` | +2/-2 | Added P4-T5 to Tasks Completed and Remaining Work |
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors
+`F14-P4-T5 — Enhanced Sleep Tracking toggle in SettingsWatchSection`
+- Add `enhancedSleepTracking` to `UserPreferences` with UserDefaults backing
+- Toggle in `SettingsWatchSection` with `bed.double.fill` icon and HealthKit auth request
+- Gate `fetchSleepStages` in `SessionDetailView` behind the preference
+- Localize `settings.enhancedSleepTracking` string
+
+### Next Session
+- **P4-T6**: Build & verify — final pass for F14 Phase 4
+
+### Open Questions
+- None
