@@ -52,6 +52,12 @@ public enum Strings {
   public static var melodyEnabledSoothingMelodySheet: String { String(localized: "melody.enabled.soothing.melody.sheet", bundle: .module) }
   public static var muteForSession: String { String(localized: "mute.for.session", bundle: .module) }
   public static var offSoothingMelodyValueFormat: String { String(localized: "off.soothing.melody.value", bundle: .module) }
+  public static var onboardingHealthWatchBadge: String { String(localized: "onboarding.healthWatch.badge", bundle: .module) }
+  public static var onboardingHealthWatchBody: String { String(localized: "onboarding.healthWatch.body", bundle: .module) }
+  public static var onboardingHealthWatchButtonPrimary: String { String(localized: "onboarding.healthWatch.buttonPrimary", bundle: .module) }
+  public static var onboardingHealthWatchButtonSecondary: String { String(localized: "onboarding.healthWatch.buttonSecondary", bundle: .module) }
+  public static var onboardingHealthWatchGranted: String { String(localized: "onboarding.healthWatch.granted", bundle: .module) }
+  public static var onboardingHealthWatchTitle: String { String(localized: "onboarding.healthWatch.title", bundle: .module) }
   public static var onboardingPage1Button: String { String(localized: "onboarding.page1.button", bundle: .module) }
   public static var onboardingPage1Subtitle: String { String(localized: "onboarding.page1.subtitle", bundle: .module) }
   public static var onboardingPage1Title: String { String(localized: "onboarding.page1.title", bundle: .module) }

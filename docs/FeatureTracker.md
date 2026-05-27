@@ -2,7 +2,7 @@
 
 > Auto-updated by the AI after every task. This is the local source of truth.
 
-Last updated: 2026-05-27 (Session 61)
+Last updated: 2026-05-27 (Session 63)
 
 ---
 
@@ -33,8 +33,8 @@ Last updated: 2026-05-27 (Session 61)
 | Backlog | 2 |
 | Blocked | 0 |
 | — | — |
-| Total Tasks | 62 |
-| Tasks Done | 62 |
+| Total Tasks | 63 |
+| Tasks Done | 63 |
 | Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
 | Tasks Backlog | 0 |
@@ -45,7 +45,7 @@ Last updated: 2026-05-27 (Session 61)
 
 | ID | Feature | Priority | Status | Tasks | Progress | File |
 |----|---------|----------|--------|-------|----------|------|
-| F1 | Onboarding | P0 | Done | 5/5 | ██████████ 100% | [tracker](trackers/f1-onboarding.md) |
+| F1 | Onboarding | P0 | Done | 6/6 | ██████████ 100% | [tracker](trackers/f1-onboarding.md) |
 | F2 | Live Session | P0 | Done | 7/7 | ██████████ 100% | [tracker](trackers/f2-live-session.md) |
 | F3 | Statistics Dashboard | P1 | Done | 3/3 | ██████████ 100% | [tracker](trackers/f3-statistics.md) |
 | F4 | Recordings | P1 | Done | 6/6 + polish | ██████████ 100% | [tracker](trackers/f4-recordings.md) |
@@ -66,6 +66,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-05-27 | F1-T6 Health & Watch onboarding screen | Completed | `OnboardingPageHealthWatchView` with HealthKit auth, granted state, 0.8s delay, 6 localized strings; `OnboardingView` now 6 pages; design file updated; build succeeds |
 | 2026-05-27 | P4-T6 Build & verify | Completed | Clean build (zero errors); all F14 Phase 4 changes verified |
 | 2026-05-27 | P4-T5 Settings toggle | Completed | `enhancedSleepTracking` added to `UserPreferences`; toggle in `SettingsWatchSection` with `bed.double.fill` icon; requests HealthKit auth on enable; gates `fetchSleepStages` in `SessionDetailView`; localized; build succeeds |
 | 2026-05-26 | P4-T4 Statistics integration | Completed | `SleepStageBreakdownView` compact stage bar + 2×2 stat grid in `StatisticsLoadedView`; `MockDataGenerator` generates realistic sleep cycles for all mock sessions; build succeeds |
@@ -184,6 +185,7 @@ _Most recent first. The AI appends here after every task._
 
 | Task | Feature | Completed | Duration |
 |------|---------|-----------|----------|
+| F1-T6 Health & Watch onboarding | F1 | 2026-05-27 | — |
 | P4-T5 Settings toggle | F14 | 2026-05-27 | — |
 | P4-T4 Statistics integration | F14 | 2026-05-26 | — |
 | P4-T3 Stage timeline overlay | F14 | 2026-05-26 | — |

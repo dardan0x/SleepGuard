@@ -2548,6 +2548,72 @@
           }
         }
       }
+    },
+    "onboarding.healthWatch.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "See your sleep\ninside and out 🏥⌚"
+          }
+        }
+      }
+    },
+    "onboarding.healthWatch.body": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connect to Health to unlock sleep stage breakdowns — deep, light, REM, and awake. Paired with your smartwatch, your sleep picture gets even sharper."
+          }
+        }
+      }
+    },
+    "onboarding.healthWatch.badge": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All health data stays on your device"
+          }
+        }
+      }
+    },
+    "onboarding.healthWatch.buttonPrimary": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connect to Health"
+          }
+        }
+      }
+    },
+    "onboarding.healthWatch.buttonSecondary": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skip for now"
+          }
+        }
+      }
+    },
+    "onboarding.healthWatch.granted": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Health connected"
+          }
+        }
+      }
     }
   },
   "version": "1.0"
