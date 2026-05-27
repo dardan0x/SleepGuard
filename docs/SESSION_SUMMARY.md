@@ -4110,3 +4110,37 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 
 ### Open Questions
 - None
+
+---
+
+## 2026-05-27 — Session 62b: Enhanced Sleep Tracking Auto-Enable Polish
+
+### Completed
+- Auto-enable "Enhanced Sleep Tracking" for users who already granted HealthKit permission
+
+### Technical Details
+- Added `hasExplicitlySetEnhancedSleepTracking` to `UserPreferences` — tracks whether the user has manually toggled the setting
+- In `SleepGuardApp.onAppear`, after `checkAuthorizationStatus()`: if user has never manually toggled, sync `enhancedSleepTracking` to match `HealthKitSync.isAuthorized`
+  - This means users who granted HealthKit via `syncToHealthKit` automatically get sleep stage breakdowns without visiting Settings
+  - Users without HealthKit auth stay opted out
+- In `SettingsWatchSection`, when the user interacts with the toggle, `hasExplicitlySetEnhancedSleepTracking` is set to `true` so the app never overrides their choice again
+- This is a soft opt-in: respects user agency while removing friction for existing HealthKit users
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Env/Sources/Services/UserPreferences.swift` | +13/-0 | Added `hasExplicitlySetEnhancedSleepTracking` computed property |
+| `SnoreGuard/SleepGuardApp.swift` | +3/-1 | Auto-sync `enhancedSleepTracking` with HealthKit auth status on app appear (only if user hasn't explicitly set it) |
+| `Packages/Settings/Sources/Views/SettingsWatchSection.swift` | +1/-0 | Set `hasExplicitlySetEnhancedSleepTracking = true` on manual toggle |
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors
+
+`Polish — Auto-enable Enhanced Sleep Tracking for existing HealthKit users`
+- Add `hasExplicitlySetEnhancedSleepTracking` flag to `UserPreferences`
+- Auto-sync toggle with HealthKit auth on app launch (only until user manually toggles)
+- Respect user choice once explicitly set
+
+### Open Questions
+- None

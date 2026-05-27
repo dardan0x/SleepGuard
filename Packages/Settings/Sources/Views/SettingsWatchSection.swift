@@ -37,6 +37,7 @@ struct SettingsWatchSection: View {
           Toggle("", isOn: Binding(
             get: { userPreferences.enhancedSleepTracking },
             set: { newValue in
+              userPreferences.hasExplicitlySetEnhancedSleepTracking = true
               if newValue {
                 Task {
                   let granted = await healthKitSync.requestAuthorization()
