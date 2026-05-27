@@ -202,26 +202,16 @@ public final class AudioRecorder {
       throw RecordingError.invalidAudioFormat
     }
 
-    // Bandpass filter for snoring frequencies (100–500 Hz).
-    // Apple's built-in classifier already focuses on this band;
-    // filtering the recording removes non-snore noise.
-    let eq = AVAudioUnitEQ(numberOfBands: 1)
-    let band = eq.bands[0]
-    band.filterType = .bandPass
-    band.frequency = 300
-    band.bandwidth = 2.5
-    band.gain = 0
-    band.bypass = false
-    engine.attach(eq)
-    engine.connect(input, to: eq, format: format)
-    engine.connect(eq, to: engine.mainMixerNode, format: format)
-    engine.mainMixerNode.volume = 0
-
     if let audioFileURL = audioFileURL {
       audioFile = try AVAudioFile(forWriting: audioFileURL, settings: format.settings)
     }
 
-    eq.installTap(onBus: 0, bufferSize: 1024, format: format) { [weak self] buffer, _ in
+    // Tap the microphone directly. A record-only graph that routes the input
+    // through to mainMixerNode also feeds the speaker, and relying on volume = 0
+    // to mute it leaks — a mic that can hear the speaker forms a feedback loop.
+    // Tapping the input node captures full-band audio with no output path at all,
+    // so there is nothing to feed back.
+    input.installTap(onBus: 0, bufferSize: 1024, format: format) { [weak self] buffer, _ in
       guard let self else { return }
       let db = self.calculateDB(from: buffer)
       let features = self.fftAnalyzer.analyze(buffer: buffer, sampleRate: format.sampleRate)
@@ -253,14 +243,9 @@ public final class AudioRecorder {
     isPaused = true
     soundAnalyzer.stopAnalyzing()
     engine.stop()
-    // Remove tap from the EQ node so the engine can be safely deallocated.
+    // Remove the tap from the input node so the engine can be safely deallocated.
     // AVAudioEngine cannot be reliably restarted after stop() when a tap is installed.
-    for node in engine.attachedNodes {
-      if let eq = node as? AVAudioUnitEQ {
-        eq.removeTap(onBus: 0)
-        break
-      }
-    }
+    engine.inputNode.removeTap(onBus: 0)
     audioEngine = nil
     // audioFile is intentionally kept alive so resumeRecording() can continue appending.
   }
@@ -279,19 +264,8 @@ public final class AudioRecorder {
       throw RecordingError.invalidAudioFormat
     }
 
-    let eq = AVAudioUnitEQ(numberOfBands: 1)
-    let band = eq.bands[0]
-    band.filterType = .bandPass
-    band.frequency = 300
-    band.bandwidth = 2.5
-    band.gain = 0
-    band.bypass = false
-    engine.attach(eq)
-    engine.connect(input, to: eq, format: format)
-    engine.connect(eq, to: engine.mainMixerNode, format: format)
-    engine.mainMixerNode.volume = 0
-
-    eq.installTap(onBus: 0, bufferSize: 1024, format: format) { [weak self] buffer, _ in
+    // Tap the microphone directly — no output path, no feedback (see startRecording).
+    input.installTap(onBus: 0, bufferSize: 1024, format: format) { [weak self] buffer, _ in
       guard let self else { return }
       let db = self.calculateDB(from: buffer)
       let features = self.fftAnalyzer.analyze(buffer: buffer, sampleRate: format.sampleRate)
