@@ -11,6 +11,7 @@ public struct SessionDetailView: View {
   let sessionID: UUID
 
   @Environment(Theme.self) private var theme
+  @Environment(UserPreferences.self) private var userPreferences
   @Environment(\.modelContext) private var modelContext
   @Environment(\.dismiss) private var dismiss
 
@@ -258,7 +259,7 @@ public struct SessionDetailView: View {
         predicate: #Predicate { $0.id == sessionID }
       )
       if let session = try modelContext.fetch(descriptor).first {
-        if session.sleepStageSegments == nil {
+        if userPreferences.enhancedSleepTracking && session.sleepStageSegments == nil {
           let stages = await HealthKitSync.shared.fetchSleepStages(for: session)
           session.sleepStageSegments = stages.isEmpty ? [] : stages
           try modelContext.save()

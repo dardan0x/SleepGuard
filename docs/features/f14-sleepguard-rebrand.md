@@ -93,6 +93,7 @@ _Planned for Phase 3–4: Potential sleep stage detail or correlation views (def
 | P4-T2 | Stage correlation: Attach segments to `SleepSession` | 4 |
 | P4-T3 | Stage timeline overlay: `SleepStageBreakdownView` | 4 |
 | P4-T4 | Statistics integration: `SleepStageBreakdownView` + mock data | 4 |
+| P4-T5 | Settings toggle: "Enhanced Sleep Tracking" | 4 |
 
 ## Remaining Work
 
@@ -109,5 +110,5 @@ _Planned for Phase 3–4: Potential sleep stage detail or correlation views (def
 - **P4-T2** — Stage correlation: Map HealthKit segments to `SleepStageSegment`, attach to `SleepSession` ✅
 - **P4-T3** — Stage timeline overlay: `SleepStageBreakdownView` in `SessionDetailTimelineView` and `StatisticsLoadedView` ✅
 - **P4-T4** — Statistics integration: Stage breakdown in `StatisticsDashboardView` for Watch users ✅
-- **P4-T5** — Settings toggle: "Enhanced Sleep Tracking" requiring Watch + HealthKit permission
+- **P4-T5** — Settings toggle: "Enhanced Sleep Tracking" requiring Watch + HealthKit permission ✅
 - **P4-T6** — Build & verify
