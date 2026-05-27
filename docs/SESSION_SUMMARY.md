@@ -3875,7 +3875,7 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 
 ### Next Session
 - **P4-T2**: Stage correlation — wire `fetchSleepStages` into `SessionDetailView` (or `SessionManager` / save flow) to populate `SleepSession.sleepStageSegments`
-- **P4-T3**: SleepStageTimelineView — visual overlay of sleep stages alongside snoring timeline
+- **P4-T3**: SleepStageBreakdownView — visual overlay of sleep stages alongside snoring timeline and in Statistics dashboard
 
 ### Open Questions
 - Should stage fetching happen automatically when opening `SessionDetailView` (lazy load), or should it be cached at session-save time?
@@ -3893,7 +3893,7 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 - Stores returned stages directly on the model; if HealthKit returns empty, stores `[]` to prevent repeated queries on subsequent views
 - `try modelContext.save()` persists the result to SwiftData so the fetch is a one-time operation per session
 - Non-blocking: HealthKit is local storage so the query completes in milliseconds; UI remains in `.loading` briefly
-- No UI changes in this task — `SleepStageTimelineView` (P4-T3) will consume the populated data
+- No UI changes in this task — `SleepStageBreakdownView` (P4-T3) will consume the populated data
 
 ### Files Changed
 | File | Lines | What Changed |
@@ -3906,7 +3906,116 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 - **BUILD SUCCEEDED** — zero errors; pre-existing asset warnings only
 
 ### Next Session
-- **P4-T3**: SleepStageTimelineView — visual overlay of sleep stages (awake/REM/light/deep) alongside snoring timeline in SessionDetailView
+- **P4-T3**: SleepStageBreakdownView — visual overlay of sleep stages (awake/REM/light/deep) in SessionDetailTimelineView and StatisticsLoadedView
+
+### Open Questions
+- None
+
+
+## 2026-05-26 — Session 60 (continued): P4-T3 Stage timeline overlay
+
+### Completed
+- **P4-T3**: Created `SleepStageBreakdownView` — Canvas-based sleep stage visualization for use in `SessionDetailTimelineView` and `StatisticsLoadedView`
+
+### Technical Details
+- `SleepStageBreakdownView` uses `Canvas` (matching `SnoringTimelineView` style): 32 px bar with `bgCard` background, 8 pt corner radius, colored segments proportional to stage duration
+- Stage colors added to `Theme`: deep = `#5E5CE6`, light = `#64D2FF`, REM = `#BF5AF2`, awake = `#FF9F0A`
+- Legend row below the bar: 4 tiny colored dots + stage name labels (`Deep`, `Light`, `REM`, `Awake`)
+- Conditionally shown in `SessionDetailTimelineView` only when `session.sleepStageSegments?.isEmpty == false`
+- Hidden for legacy sessions (`nil`) and nights with no Watch data (`[]`)
+- 5 new localized strings: `recordings.detail.sleepStagesLabel`, `sleepStage.awake`, `sleepStage.deep`, `sleepStage.light`, `sleepStage.rem`
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/DesignSystem/Sources/Components/Theme.swift` | +12/-0 | Added `stageDeepColor`, `stageLightColor`, `stageREMColor`, `stageAwakeColor`, and `stageColor(_:)` helper |
+| `Packages/DesignSystem/Sources/Components/SleepStageBreakdownView.swift` | +63/-0 | New Canvas-based sleep stage breakdown view with legend |
+| `Packages/Recordings/Sources/Views/SessionDetailTimelineView.swift` | +8/-0 | Conditionally shows `SleepStageBreakdownView` above `SnoringTimelineView` |
+| `Packages/DesignSystem/Sources/Resources/Localizable.xcstrings` | +45/-0 | Added 5 localization keys |
+| `Packages/DesignSystem/Sources/Strings.swift` | +5/-0 | Auto-regenerated |
+| `docs/trackers/f14-sleepguard-rebrand.md` | +6/-6 | P4-T3 → Done; acceptance criteria updated; next task updated to P4-T4 |
+| `docs/FeatureTracker.md` | +6/-6 | Dashboard (58 done, 4 backlog, 94%), Activity Log, Currently Active, Up Next updated |
+| `docs/features/f14-sleepguard-rebrand.md` | +8/-2 | Added `SleepStageBreakdownView` to files table; updated tasks completed and remaining work |
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors; pre-existing asset warnings only
+
+### Next Session
+- **P4-T4**: Statistics integration — stage breakdown in `StatisticsDashboardView` for Watch users
+
+### Open Questions
+- None
+
+
+## 2026-05-26 — Session 60 (continued): P4-T4 Statistics integration
+
+### Completed
+- **P4-T4**: Added `SleepStageBreakdownView` to `StatisticsDashboardView` with dummy/mock data support
+
+### Technical Details
+- `SleepStageBreakdownView` (DesignSystem) shows a compact 16 px Canvas stacked bar (deep/light/REM/awake proportions) + 2×2 `StatCard` grid with stage durations
+- Placed in `StatisticsLoadedView` between `StatisticsStatsGrid` and `StatisticsMiniChartSection`
+- Conditionally shown only when `session.sleepStageSegments?.isEmpty == false`
+- `MockDataGenerator.generate()` now creates realistic `SleepStageSegment` arrays for every mock session
+  - Simulates ~90-minute sleep cycles: light → deep → light → REM, with brief awake transitions
+  - Stage distributions: deep 15–25%, light 35–50%, REM 20–30%, awake 0–5 min between cycles
+  - Initial light sleep phase (10–20 min) before first cycle
+- Uses existing `DurationFormatter.hoursAndMinutes` for consistent duration formatting
+- Reuses existing stage color theme tokens (`stageDeepColor`, `stageLightColor`, `stageREMColor`, `stageAwakeColor`)
+- 1 new localized string: `statistics.sleepStagesLabel`
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/DesignSystem/Sources/Components/SleepStageBreakdownView.swift` | +95/-0 | New compact stage bar + 2×2 stat grid component |
+| `Packages/Statistics/Sources/Views/StatisticsLoadedView.swift` | +4/-0 | Conditionally shows `SleepStageBreakdownView` below stats grid |
+| `Packages/Env/Sources/Services/MockDataGenerator.swift` | +47/-1 | Added `generateSleepStages(duration:)` helper; wired into session creation |
+| `Packages/DesignSystem/Sources/Resources/Localizable.xcstrings` | +13/-0 | Added `statistics.sleepStagesLabel` |
+| `Packages/DesignSystem/Sources/Strings.swift` | +1/-0 | Auto-regenerated |
+| `docs/trackers/f14-sleepguard-rebrand.md` | +4/-4 | P4-T4 → Done; acceptance criteria updated; next task P4-T5 |
+| `docs/FeatureTracker.md` | +7/-6 | Dashboard (59 done, 3 backlog, 95%), Activity Log, Currently Active, Up Next updated |
+| `docs/features/f14-sleepguard-rebrand.md` | +3/-2 | Added `SleepStageBreakdownView` to files table; updated tasks completed and remaining work |
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors; pre-existing asset warnings only
+
+### Next Session
+- **P4-T5**: Settings toggle — "Enhanced Sleep Tracking" requiring Watch + HealthKit permission
+
+### Open Questions
+- None
+
+---
+
+## 2026-05-26 — Session 60 continued: P4-T4 Verification & Bug Fixes
+
+### Completed
+- **P4-T4 Verified**: Hypnogram chart now renders correctly with realistic sleep cycles after fixing multiple visual bugs
+
+### Technical Details
+- **Fixed 0-width segments**: `hypnogramSegments()` was calculating `width = relativeDuration * width` where `relativeDuration = stage.duration / session.totalDuration`. When `session.totalDuration` returned 0 (because `endDate` was nil for in-progress/faulted sessions), all segment widths became 0. Fixed by:
+  - Adding `max(session.totalDuration, 1)` guard in `hypnogramSegments()`
+  - Ensuring `SleepSession.totalDuration` safely computes `endDate?.timeIntervalSince(startDate) ?? 0`
+- **Fixed color regression**: `Theme.stageLightColor` had accidentally been changed to `.green` during debugging; restored to design-token `#0A84FF` (blue)
+- **Reordered `SleepStage` enum**: Changed from `deep, light, rem, awake` to `awake, rem, light, deep` for visual band order consistency (top-to-bottom in chart)
+- **Cleaned view hierarchy**: Removed redundant standalone `SleepStageLegendView`; `SleepStageBreakdownView` owns its chart + 2×2 legend grid
+- **Removed all debug code**: White borders, debug text overlays, debug color overrides, and white center dots removed from `SleepStageHypnogramChart`
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/DesignSystem/Sources/Components/SleepStageBreakdownView.swift` | +15/-50 | Removed all debug overlays; restored actual `segment.color` rendering; cleaned up Canvas |
+| `Packages/DesignSystem/Sources/Components/Theme.swift` | +1/-1 | `stageLightColor` restored from `.green` to `Color(hex: "#0A84FF")` |
+| `Packages/Models/Sources/Data/SleepSession.swift` | +2/-2 | `SleepStage` enum reordered to `awake, rem, light, deep`; `totalDuration` computed safely |
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors; pre-existing asset warnings only
+
+### Screenshot Verification
+- Hypnogram chart shows: yellow (awake) at edges, blue (light sleep) bars distributed across chart, 4-band layout with subtle horizontal grid lines, time labels at bottom, 2×2 legend grid with correct durations
+
+### Next Session
+- **P4-T5**: Settings toggle — "Enhanced Sleep Tracking" requiring Watch + HealthKit permission
 
 ### Open Questions
 - None

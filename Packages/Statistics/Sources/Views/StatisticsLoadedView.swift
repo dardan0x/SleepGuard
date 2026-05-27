@@ -16,47 +16,49 @@ struct StatisticsLoadedView: View {
     let onViewCalendar: () -> Void
     
     var body: some View {
-        ZStack(alignment: .bottom) {
-            VStack(spacing: 0) {
-                StatisticsLoadedHeaderView(onViewCalendar: onViewCalendar)
-                    .padding(.horizontal, 20)
-                    .padding(.top, 10)
-                
-                ScrollView {
-                    VStack(spacing: DeviceSize.isCompactHeight ? 10 : 16) {
-                        StatisticsWeekSelector(weekDays: weekDays, onViewTrends: onViewTrends)
-                        
-                        SleepScoreGauge(score: dayScore, theme: theme, size: 120)
-                        
-                        VStack(spacing: 4) {
-                            Text(daySessionCount > 1 ? "\(daySessionCount) \(Strings.recordingsStatisticsLoadedView)" : "\(Strings.lastNightStatisticsLoadedView)")
-                                .font(.system(size: 12, weight: .semibold))
-                                .foregroundStyle(theme.textTertiary)
-                                .tracking(1)
-                            
-                            Text("\(dateString) · \(timeRangeString)")
-                                .font(.system(size: 15))
-                                .foregroundStyle(theme.textSecondary)
-                        }
-                        
-                        StatisticsStatsGrid(session: session)
-                        
-                        if !recentSessions.isEmpty {
-                            StatisticsMiniChartSection(recentSessions: recentSessions)
-                        }
-                    }
-                    .padding(.horizontal, 20)
-                }
+        VStack(spacing: 0) {
+            StatisticsLoadedHeaderView(onViewCalendar: onViewCalendar)
+                .padding(.horizontal, 20)
                 .padding(.top, 10)
+            
+            ScrollView {
+                VStack(spacing: DeviceSize.isCompactHeight ? 10 : 16) {
+                    StatisticsWeekSelector(weekDays: weekDays, onViewTrends: onViewTrends)
+                    
+                    SleepScoreGauge(score: dayScore, theme: theme, size: 120)
+                    
+                    VStack(spacing: 4) {
+                        Text(daySessionCount > 1 ? "\(daySessionCount) \(Strings.recordingsStatisticsLoadedView)" : "\(Strings.lastNightStatisticsLoadedView)")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundStyle(theme.textTertiary)
+                            .tracking(1)
+                        
+                        Text("\(dateString) · \(timeRangeString)")
+                            .font(.system(size: 15))
+                            .foregroundStyle(theme.textSecondary)
+                    }
+                    
+                    StatisticsStatsGrid(session: session)
+                    
+                    if let stages = session.sleepStageSegments, !stages.isEmpty {
+                        SleepStageBreakdownView(session: session, theme: theme)
+                    }
+                    
+                    if !recentSessions.isEmpty {
+                        StatisticsMiniChartSection(recentSessions: recentSessions)
+                    }
+                }
+                .padding(.horizontal, 20)
             }
+            .padding(.top, 10)
             
             StartRecordingButton(height: 56) {
                 onStartRecording()
             }
             .padding(.horizontal, 20)
-            .background(theme.bgPrimary.ignoresSafeArea(edges: .bottom))
-            .padding(.bottom, 20)
+            
         }
+        .background(theme.bgPrimary.ignoresSafeArea(edges: .bottom))
         .toolbar(.hidden, for: .navigationBar)
     }
     

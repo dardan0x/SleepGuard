@@ -3,6 +3,8 @@
 ## Status: In Progress
 ## Phase 1 Completed: 2026-05-25
 ## Phase 2 Completed: 2026-05-26
+## Phase 3 Completed: 2026-05-26
+## Phase 4 In Progress: 2026-05-26
 
 ## Summary
 
@@ -25,6 +27,8 @@ Rebrand the app from SnoreGuard to SleepGuard and expand audio detection from sn
 | `Packages/SleepSession/Sources/Views/BedsideClockView.swift` | SleepSession | `currentSnoringState` → `currentDetectionState` references |
 | `Packages/Recordings/Sources/Views/SessionDetailView.swift` | Recordings | Future home for category filter and sleep stage timeline overlay |
 | `Packages/Recordings/Sources/Views/SessionDetailEventsView.swift` | Recordings | Future home for segmented category picker |
+| `Packages/DesignSystem/Sources/Components/SleepStageBreakdownView.swift` | DesignSystem | Compact stage bar + 2×2 stat grid for Statistics dashboard and session detail timeline |
+| `Packages/DesignSystem/Sources/Components/SleepStageBreakdownView.swift` | DesignSystem | Compact stage bar + 2×2 stat grid for Statistics dashboard |
 | `Packages/Recordings/Sources/Views/SessionDetailTimelineView.swift` | Recordings | Future home for multi-category color rendering |
 | `Packages/Recordings/Sources/Views/EventRow.swift` | Recordings | Future home for category-based icons |
 | `Packages/Recordings/Sources/Views/PlayerSheetView.swift` | Recordings | Future title updates based on event category |
@@ -79,6 +83,16 @@ _Planned for Phase 3–4: Potential sleep stage detail or correlation views (def
 | P2-T3 | Event creation for `.sleepTalking` | 2 |
 | P2-T4 | Settings toggle "Detect Sleep Talking" | 2 |
 | P2-T5 | Build & verify — zero errors, no regressions | 2 |
+| P3-T1 | Category filter: Segmented picker in `SessionDetailView` | 3 |
+| P3-T2 | EventRow icons: Category-based icons | 3 |
+| P3-T3 | Timeline multi-color: Sleep talking = purple, noise = orange | 3 |
+| P3-T4 | Stats grid supplement: Optional disturbance row | 3 |
+| P3-T5 | Player labels: Title based on event category | 3 |
+| P3-T6 | Build & verify — zero errors, Phase 3 UI verified | 3 |
+| P4-T1 | HealthKit read sleep stages | 4 |
+| P4-T2 | Stage correlation: Attach segments to `SleepSession` | 4 |
+| P4-T3 | Stage timeline overlay: `SleepStageBreakdownView` | 4 |
+| P4-T4 | Statistics integration: `SleepStageBreakdownView` + mock data | 4 |
 
 ## Remaining Work
 
@@ -91,9 +105,9 @@ _Planned for Phase 3–4: Potential sleep stage detail or correlation views (def
 - **P3-T6** — Build & verify: Screenshot comparison with design tokens
 
 ### Phase 4: Apple Watch Sleep Stages
-- **P4-T1** — HealthKit read: Extend `HealthKitSync` to query `HKCategoryValueSleepAnalysis`
-- **P4-T2** — Stage correlation: Map HealthKit segments to `SleepStageSegment`, attach to `SleepSession`
-- **P4-T3** — Stage timeline overlay: New `SleepStageTimelineView` above audio timeline
-- **P4-T4** — Statistics integration: Stage breakdown in `StatisticsDashboardView` for Watch users
+- **P4-T1** — HealthKit read: Extend `HealthKitSync` to query `HKCategoryValueSleepAnalysis` ✅
+- **P4-T2** — Stage correlation: Map HealthKit segments to `SleepStageSegment`, attach to `SleepSession` ✅
+- **P4-T3** — Stage timeline overlay: `SleepStageBreakdownView` in `SessionDetailTimelineView` and `StatisticsLoadedView` ✅
+- **P4-T4** — Statistics integration: Stage breakdown in `StatisticsDashboardView` for Watch users ✅
 - **P4-T5** — Settings toggle: "Enhanced Sleep Tracking" requiring Watch + HealthKit permission
 - **P4-T6** — Build & verify
