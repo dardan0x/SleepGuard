@@ -34,12 +34,12 @@ Last updated: 2026-05-27 (Session 61)
 | Blocked | 0 |
 | — | — |
 | Total Tasks | 62 |
-| Tasks Done | 61 |
+| Tasks Done | 62 |
 | Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
-| Tasks Backlog | 1 |
+| Tasks Backlog | 0 |
 | — | — |
-| **Progress** | **98%** |
+| **Progress** | **100%** |
 
 ## Features
 
@@ -58,7 +58,7 @@ Last updated: 2026-05-27 (Session 61)
 | F11 | Apple Watch | P2 | Done | 4/4 | ██████████ 100% | [tracker](trackers/f11-apple-watch.md) |
 | F12 | HealthKit | P1 | Done | 3/3 | ██████████ 100% | [tracker](trackers/f12-healthkit.md) |
 | F13 | CloudKit Sync | P2 | Backlog | 0/3 | ░░░░░░░░░░ 0% | [tracker](trackers/f13-cloudkit-sync.md) |
-| F14 | SleepGuard Rebrand & Multi-Sound | P0 | In Progress | 21/21 | ██████████ 98% | [tracker](trackers/f14-sleepguard-rebrand.md) |
+| F14 | SleepGuard Rebrand & Multi-Sound | P0 | Done | 21/21 | ██████████ 100% | [tracker](trackers/f14-sleepguard-rebrand.md) |
 
 ## Activity Log
 
@@ -66,6 +66,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-05-27 | P4-T6 Build & verify | Completed | Clean build (zero errors); all F14 Phase 4 changes verified |
 | 2026-05-27 | P4-T5 Settings toggle | Completed | `enhancedSleepTracking` added to `UserPreferences`; toggle in `SettingsWatchSection` with `bed.double.fill` icon; requests HealthKit auth on enable; gates `fetchSleepStages` in `SessionDetailView`; localized; build succeeds |
 | 2026-05-26 | P4-T4 Statistics integration | Completed | `SleepStageBreakdownView` compact stage bar + 2×2 stat grid in `StatisticsLoadedView`; `MockDataGenerator` generates realistic sleep cycles for all mock sessions; build succeeds |
 | 2026-05-26 | P4-T4 Verified | Verified | Hypnogram chart renders correctly after fixing division-by-zero (0-width segments), color regression (light restored to #0A84FF blue), and SleepStage enum reorder (awake→rem→light→deep top-to-bottom); debug code removed; clean build; screenshot verified |
@@ -177,7 +178,7 @@ _Most recent first. The AI appends here after every task._
 
 | Task | Feature | Started | Assignee |
 |------|---------|---------|----------|
-| P4-T6 Build & verify | F14 | 2026-05-27 | — |
+| (none) | — | — | — |
 
 ## Completed (last 10)
 
@@ -227,7 +228,7 @@ _Unblocked tasks in priority order. F13 (CloudKit Sync) is intentionally skipped
 
 | Task | Feature | Priority | Why Ready |
 |------|---------|----------|-----------|
-| P4-T6 Build & verify | F14 | P2 | Depends on P4-T5 |
+| (none) | — | — | All tasks complete |
 
 ## Completed (last 10)
 

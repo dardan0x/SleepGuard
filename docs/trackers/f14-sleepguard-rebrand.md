@@ -48,7 +48,7 @@ Rebrand SnoreGuard to SleepGuard and expand detection from snore-only to multi-s
 | P4-T3 | Stage timeline overlay | ✅ Done | `SleepStageBreakdownView` compact stage bar + 2×2 stat grid; shown in `SessionDetailTimelineView` and `StatisticsLoadedView`; 5 localized strings; build succeeds |
 | P4-T4 | Statistics integration | ✅ Done | `SleepStageBreakdownView` compact stage bar + 2×2 stat grid in `StatisticsLoadedView`; `MockDataGenerator` generates realistic sleep cycles; build succeeds |
 | P4-T5 | Settings toggle | ✅ Done | "Enhanced Sleep Tracking" toggle in SettingsWatchSection; requests HealthKit auth on enable; gates `fetchSleepStages` in SessionDetailView |
-| P4-T6 | Build & verify | ⬜ Backlog | — |
+| P4-T6 | Build & verify | ✅ Done | Clean build (zero errors); all F14 changes verified |
 
 ## Prompt Used
 
@@ -60,7 +60,7 @@ User requested a detailed plan for rebranding SnoreGuard to SleepGuard and expan
 - P2-T2 completed in Session 59
 - P2-T3 completed in Session 59
 - Phase 2 complete (P2-T1 through P2-T5)
-- **Next task to pick up: P4-T6 (Build & verify)**
+- F14 is now complete (21/21 tasks)
 - When user says "continue" or "work on what's next", start with the 🟡 Next task in this tracker
 - F13 (CloudKit Sync) is intentionally skipped — do NOT work on it unless explicitly asked
 - Feature doc: `docs/features/f14-sleepguard-rebrand.md`

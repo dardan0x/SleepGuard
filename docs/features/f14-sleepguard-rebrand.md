@@ -1,10 +1,10 @@
 # Feature: F14 — SleepGuard Rebrand & Multi-Sound Detection
 
-## Status: In Progress
+## Status: Done
 ## Phase 1 Completed: 2026-05-25
 ## Phase 2 Completed: 2026-05-26
 ## Phase 3 Completed: 2026-05-26
-## Phase 4 In Progress: 2026-05-26
+## Phase 4 Completed: 2026-05-27
 
 ## Summary
 
@@ -111,4 +111,4 @@ _Planned for Phase 3–4: Potential sleep stage detail or correlation views (def
 - **P4-T3** — Stage timeline overlay: `SleepStageBreakdownView` in `SessionDetailTimelineView` and `StatisticsLoadedView` ✅
 - **P4-T4** — Statistics integration: Stage breakdown in `StatisticsDashboardView` for Watch users ✅
 - **P4-T5** — Settings toggle: "Enhanced Sleep Tracking" requiring Watch + HealthKit permission ✅
-- **P4-T6** — Build & verify
+- **P4-T6** — Build & verify ✅
