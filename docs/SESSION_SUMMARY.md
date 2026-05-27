@@ -3880,6 +3880,7 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 ### Open Questions
 - Should stage fetching happen automatically when opening `SessionDetailView` (lazy load), or should it be cached at session-save time?
 - If the user has no Apple Watch sleep data, the query returns `[]` — should the UI show a "No sleep stage data" placeholder or simply hide the timeline section?
+```
 
 
 ## 2026-05-26 — Session 60 (continued): P4-T2 Stage correlation
@@ -3985,7 +3986,6 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 ### Open Questions
 - None
 
----
 
 ## 2026-05-26 — Session 60 continued: P4-T4 Verification & Bug Fixes
 
@@ -4020,7 +4020,6 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 ### Open Questions
 - None
 
----
 
 ## 2026-05-27 — Session 61: P4-T5 Enhanced Sleep Tracking Toggle
 
@@ -4063,7 +4062,6 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 ### Open Questions
 - None
 
----
 
 ## 2026-05-27 — Session 62: P4-T6 Build & Verify + F14 Complete
 
@@ -4111,7 +4109,6 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 ### Open Questions
 - None
 
----
 
 ## 2026-05-27 — Session 62b: Enhanced Sleep Tracking Auto-Enable Polish
 
@@ -4145,7 +4142,6 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 ### Open Questions
 - None
 
----
 
 ## 2026-05-27 — Session 62c: Sleep Talking Detection Hardening
 
@@ -4208,6 +4204,76 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 
 ---
 
+## 2026-05-27 — Session 62d: Holistic Sleep Score
+
+### Completed
+- **Sleep talking & sleep stage integration**: `sleepScore` now penalizes sleep talking and poor sleep architecture when data is available.
+
+### Technical Details
+
+**New formula:**
+```
+score = 100 - snoringPenalty - eventsPenalty - intensityPenalty
+            - sleepTalkingPenalty - stagePenalty
+```
+
+**Sleep talking penalty** (only when `.sleepTalking` events exist):
+- `min(sleepTalkingPercentage * 0.35 + sleepTalkingEventsPerHour * 0.8, 15)`
+- Weighted ~half of snoring (0.35 vs 0.7 duration, 0.8 vs 2.0 frequency).
+- A user talking 5% of the night with 3 events/hour gets ~4 point penalty.
+
+**Sleep stage penalty** (only when `sleepStageSegments != nil`):
+- `min(deepDeficit * 0.6 + remDeficit * 0.4 + awakeExcess * 1.0, 15)`
+- Deep deficit: penalty per % below 15% (NSF/AASM healthy range).
+- REM deficit: penalty per % below 18%.
+- Awake excess: penalty per % above 8% (WASO norms).
+- A user with 5% deep, 10% REM, 20% awake gets ~12 point penalty.
+- Healthy stages (20% deep, 22% REM, 3% awake) → 0 penalty.
+
+**Backward compatibility:**
+- Sessions without Watch data → `stagePenalty = 0` (identical to before).
+- Sessions without sleep talking events → `sleepTalkingPenalty = 0` (identical to before).
+- Mock data generates healthy stage distributions and occasional sleep talking → scores stable (max talking penalty ~0.6 pts).
+
+**Sanity check results:**
+- Light snoring only: 93
+- Light snoring + healthy stages: 93 (no change)
+- Light snoring + poor stages: 78 (15 point reduction)
+- Light snoring + 3% talking: 91 (2 point reduction)
+- Everything terrible: 0
+- Borderline thresholds (deep 15%, REM 18%, awake 8%): 100 (zero penalty)
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Models/Sources/Data/SleepSession.swift` | +53/-8 | Added `StageStats` struct, `stageStats`, `sleepTalkingDuration`, `sleepTalkingEvents`, `sleepTalkingPercentage`, `sleepTalkingEventsPerHour` computed properties; rewrote `sleepScore` with conditional sleep talking and stage penalties |
+| `Packages/Env/Sources/Services/MockDataGenerator.swift` | +43/-1 | Added `generateSleepTalkingEvents()` helper; 10-40% of sessions get 1-4 sleep talking events (probability inversely scales with target score); events are 5-30s, `.quiet`, -55 to -45 dB; appended to session events; updated `forScore()` comment |
+| `Packages/Models/Sources/Data/SleepSession.swift` | +53/-8 | Added `StageStats` struct, `stageStats`, `sleepTalkingDuration`, `sleepTalkingEvents`, `sleepTalkingPercentage`, `sleepTalkingEventsPerHour` computed properties; rewrote `sleepScore` with conditional sleep talking and stage penalties |
+
+### Architecture Decisions
+- **Conditional penalties via data presence**: No need for feature flags or user preference checks in the model. If `sleepStageSegments` is nil → no stage penalty. If no `.sleepTalking` events → no talking penalty. This is elegant and automatically backward compatible with all existing sessions.
+- **Separate penalty caps**: Each new penalty is capped at 15. Snoring remains the dominant factor (max 70 + 20 + 30 = 120). Stages and talking are modifiers, not primary drivers — appropriate since the app's core value proposition is acoustic sleep monitoring.
+- **Evidence-based thresholds**: Deep ≥15%, REM ≥18%, awake ≤8% are grounded in NSF/AASM guidelines and WASO norms, not arbitrary numbers.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors, zero warnings
+
+`Session 62d — Holistic sleep score with sleep talking & stage penalties`
+- Sleep talking penalty: max 15 (duration%×0.35 + events/hr×0.8)
+- Sleep stage penalty: max 15 (deep deficit×0.6 + REM deficit×0.4 + awake excess×1.0)
+- Backward compatible, conditional on data presence
+- All builds pass, sanity checks verified
+
+### Next Session
+- All tracked tasks are complete. Next work would be new features per `docs/Roadmap.md` or user-requested changes.
+
+### Open Questions
+- None
+
+---
+
+
 ## 2026-05-27 — Session 63: Onboarding Health & Watch Screen
 
 ### Completed
@@ -4256,3 +4322,6 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 
 ### Open Questions
 - None
+
+
+

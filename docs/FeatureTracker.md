@@ -66,6 +66,8 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-05-27 | Mock data sleep talking | Completed | `MockDataGenerator` now generates `.sleepTalking` events for ~10-40% of sessions (probability scales inversely with target score); 1-4 events per session, 5-30s each, `.quiet` intensity, -55 to -45 dB; spread randomly across session; max score impact ~0.6 pts — well within ±12 drift tolerance; build succeeds |
+| 2026-05-27 | Holistic sleep score formula | Completed | `sleepScore` now includes conditional `sleepTalkingPenalty` (max 15: duration%×0.35 + events/hr×0.8) and `stagePenalty` (max 15: deep deficit×0.6 + REM deficit×0.4 + awake excess×1.0); thresholds grounded in sleep medicine (deep≥15%, REM≥18%, awake≤8%); backward compatible (nil stages = 0, no talking events = 0); build succeeds; sanity checks verified |
 | 2026-05-27 | Speech detection threshold tuning | Completed | `SpeechDetector.dbFloor` -40 → -55; speech event min duration 2.0s → 0.5s; debug logging for rejections; catches quiet sleep talking and brief utterances; build succeeds |
 | 2026-05-27 | Expanded speech/vocalization identifiers | Completed | `speechIdentifiers` 5 → 22: whisper, mumble, mutter, stutter, groan, moan, sigh, grunt, grumble, exclaim, gasp, yell, scream, shout, laugh, giggle, whimper; build succeeds |
 | 2026-05-27 | Baby sound detection | Completed | `babyIdentifiers` (`baby_crying`, `baby_laughter`, `babble`) added to `SoundAnalysisDetector`; feeds into speech confidence pipeline; creates `.sleepTalking` events; build succeeds |

@@ -20,6 +20,14 @@ public struct SleepStageSegment: Codable, Sendable {
   }
 }
 
+/// Aggregated sleep stage percentages derived from `sleepStageSegments`.
+public struct StageStats: Sendable {
+  public let awakePct: Double
+  public let remPct: Double
+  public let lightPct: Double
+  public let deepPct: Double
+}
+
 @Model
 public final class SleepSession {
     @Attribute(.unique) public var id: UUID
@@ -94,6 +102,26 @@ public final class SleepSession {
         events?.filter { $0.category == .snoring }.reduce(0) { $0 + $1.snoreDuration } ?? 0
     }
 
+    /// Total duration of sleep talking events.
+    public var sleepTalkingDuration: TimeInterval {
+        events?.filter { $0.category == .sleepTalking }.reduce(0) { $0 + $1.snoreDuration } ?? 0
+    }
+
+    /// Sleep talking events count.
+    public var sleepTalkingEvents: Int {
+        events?.filter { $0.category == .sleepTalking }.count ?? 0
+    }
+
+    /// Sleep talking duration as a percentage of total session time.
+    public var sleepTalkingPercentage: Double {
+        totalDuration > 0 ? (sleepTalkingDuration / totalDuration) * 100 : 0
+    }
+
+    /// Sleep talking events per hour.
+    public var sleepTalkingEventsPerHour: Double {
+        totalDuration > 0 ? Double(sleepTalkingEvents) / (totalDuration / 3600) : 0
+    }
+
     /// Total duration of events matching a specific sound category.
     public func duration(for category: SoundCategory) -> TimeInterval {
         events?.filter { $0.category == category }.reduce(0) { $0 + $1.snoreDuration } ?? 0
@@ -114,6 +142,25 @@ public final class SleepSession {
 
     public var eventsPerHour: Double {
         totalDuration > 0 ? Double(eventsCount) / (totalDuration / 3600) : 0
+    }
+
+    /// Percentage breakdown of sleep stages when Watch data is available.
+    public var stageStats: StageStats? {
+        guard let segments = sleepStageSegments, !segments.isEmpty else { return nil }
+        let total = segments.reduce(0) { $0 + $1.duration }
+        guard total > 0 else { return nil }
+
+        let awake = segments.filter { $0.stage == .awake }.reduce(0) { $0 + $1.duration }
+        let rem = segments.filter { $0.stage == .rem }.reduce(0) { $0 + $1.duration }
+        let light = segments.filter { $0.stage == .light }.reduce(0) { $0 + $1.duration }
+        let deep = segments.filter { $0.stage == .deep }.reduce(0) { $0 + $1.duration }
+
+        return StageStats(
+            awakePct: (awake / total) * 100,
+            remPct: (rem / total) * 100,
+            lightPct: (light / total) * 100,
+            deepPct: (deep / total) * 100
+        )
     }
 
     public var sleepScore: Int {
@@ -174,6 +221,30 @@ public final class SleepSession {
         let epicRatio = detectedSnoringDuration > 0 ? epicDuration / detectedSnoringDuration : 0
         let intensityPenalty = min(Int(lightRatio * 10 + loudRatio * 20 + epicRatio * 30), 30)
 
-        return max(0, 100 - snoringPenalty - eventsPenalty - intensityPenalty)
+        // Sleep talking penalty — only applies when sleep talking events exist.
+        // Weighted ~half of snoring: less severe but still a genuine fragmentation event.
+        let sleepTalkingPenalty: Int
+        if sleepTalkingEvents > 0 {
+            let talkingPctPenalty = sleepTalkingPercentage * 0.35
+            let talkingFreqPenalty = sleepTalkingEventsPerHour * 0.8
+            sleepTalkingPenalty = min(Int(talkingPctPenalty + talkingFreqPenalty), 15)
+        } else {
+            sleepTalkingPenalty = 0
+        }
+
+        // Sleep stage penalty — only applies when Watch/HealthKit data is available.
+        // Evidence-based thresholds: deep ≥15%, REM ≥18%, awake ≤8%.
+        let stagePenalty: Int
+        if let stats = stageStats {
+            let deepDeficit = max(0, (15 - stats.deepPct) * 0.6)
+            let remDeficit = max(0, (18 - stats.remPct) * 0.4)
+            let awakeExcess = max(0, (stats.awakePct - 8) * 1.0)
+            stagePenalty = min(Int(deepDeficit + remDeficit + awakeExcess), 15)
+        } else {
+            stagePenalty = 0
+        }
+
+        return max(0, 100 - snoringPenalty - eventsPenalty - intensityPenalty
+                   - sleepTalkingPenalty - stagePenalty)
     }
 }
