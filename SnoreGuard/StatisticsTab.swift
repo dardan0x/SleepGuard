@@ -7,6 +7,7 @@ import Statistics
 
 struct StatisticsTab: View {
   @State private var routerPath = RouterPath()
+  @Environment(TabCoordinator.self) private var tabCoordinator
   @Environment(UserPreferences.self) private var userPreferences
   @Environment(SessionManager.self) private var sessionManager
   @Environment(HealthKitSync.self) private var healthKitSync
@@ -53,6 +54,11 @@ struct StatisticsTab: View {
       } else {
         routerPath.navigateToRoot()
         routerPath.presentedSheet = .sessionSummary
+      }
+    }
+    .onChange(of: tabCoordinator.resetSignal) { _, signal in
+      if let signal, signal.tab == 0 {
+        routerPath.navigateToRoot()
       }
     }
     .environment(routerPath)

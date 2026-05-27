@@ -4,6 +4,7 @@ import Recordings
 
 struct RecordingsTab: View {
   @State private var routerPath = RouterPath()
+  @Environment(TabCoordinator.self) private var tabCoordinator
 
   var body: some View {
     NavigationStack(path: Binding(
@@ -12,6 +13,11 @@ struct RecordingsTab: View {
     )) {
       RecordingsListView()
         .withAppRouter()
+    }
+    .onChange(of: tabCoordinator.resetSignal) { _, signal in
+      if let signal, signal.tab == 1 {
+        routerPath.navigateToRoot()
+      }
     }
     .environment(routerPath)
   }

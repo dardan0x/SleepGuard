@@ -9,7 +9,7 @@ import Settings
 struct MainTabView: View {
     @Environment(Theme.self) private var theme
     @Environment(SessionManager.self) private var sessionManager
-    @State private var selectedTab = 0
+    @State private var tabCoordinator = TabCoordinator()
     @Namespace private var tabAnimation
     
     var body: some View {
@@ -23,28 +23,35 @@ struct MainTabView: View {
     // MARK: - iOS 26+ (system TabView)
     
     private var systemTabView: some View {
-        TabView {
+        TabView(selection: Binding(
+            get: { tabCoordinator.selectedTab },
+            set: { tabCoordinator.selectTab($0) }
+        )) {
             StatisticsTab()
                 .toolbar(sessionManager.isRecording || sessionManager.isLiveSessionVisible ? .hidden : .visible, for: .tabBar)
                 .tabItem {
                     Label(Strings.tabStatistics, systemImage: "chart.bar.fill")
                 }
+                .tag(0)
             
             RecordingsTab()
                 .toolbar(sessionManager.isRecording || sessionManager.isLiveSessionVisible ? .hidden : .visible, for: .tabBar)
                 .tabItem {
                     Label(Strings.tabMedia, systemImage: "waveform")
                 }
+                .tag(1)
             
             SettingsTab()
                 .toolbar(sessionManager.isRecording || sessionManager.isLiveSessionVisible ? .hidden : .visible, for: .tabBar)
                 .tabItem {
                     Label(Strings.tabSettings, systemImage: "gearshape")
                 }
+                .tag(2)
         }
         .tint(theme.accent)
         .animation(nil, value: sessionManager.isLiveSessionVisible)
         .overlay(sessionProcessingOverlay)
+        .environment(tabCoordinator)
     }
     
     // MARK: - iOS < 26 (custom floating tab bar)
@@ -61,21 +68,22 @@ struct MainTabView: View {
             sessionProcessingOverlay
         }
         .ignoresSafeArea(.keyboard)
+        .environment(tabCoordinator)
     }
     
     @ViewBuilder
     private var customContent: some View {
         StatisticsTab()
-            .opacity(selectedTab == 0 ? 1 : 0)
-            .allowsHitTesting(selectedTab == 0)
+            .opacity(tabCoordinator.selectedTab == 0 ? 1 : 0)
+            .allowsHitTesting(tabCoordinator.selectedTab == 0)
         
         RecordingsTab()
-            .opacity(selectedTab == 1 ? 1 : 0)
-            .allowsHitTesting(selectedTab == 1)
+            .opacity(tabCoordinator.selectedTab == 1 ? 1 : 0)
+            .allowsHitTesting(tabCoordinator.selectedTab == 1)
         
         SettingsTab()
-            .opacity(selectedTab == 2 ? 1 : 0)
-            .allowsHitTesting(selectedTab == 2)
+            .opacity(tabCoordinator.selectedTab == 2 ? 1 : 0)
+            .allowsHitTesting(tabCoordinator.selectedTab == 2)
     }
     
     private var customTabBar: some View {
@@ -138,11 +146,11 @@ struct MainTabView: View {
     }
     
     private func tabItem(index: Int, icon: String, label: String) -> some View {
-        let isSelected = selectedTab == index
+        let isSelected = tabCoordinator.selectedTab == index
         
         return Button {
             withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
-                selectedTab = index
+                tabCoordinator.selectTab(index)
             }
         } label: {
             VStack(spacing: 4) {
@@ -181,5 +189,3 @@ struct MainTabView: View {
         .buttonStyle(.plain)
     }
 }
-
-
