@@ -4147,6 +4147,67 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 
 ---
 
+## 2026-05-27 — Session 62c: Sleep Talking Detection Hardening
+
+### Completed
+- **P5-T1**: Bandpass filter bugfix — removed EQ from audio chain
+- **P5-T2**: Sleep score excludes non-snoring events
+- **P5-T3**: Category-specific events title
+- **P5-T4**: Baby sound detection
+- **P5-T5**: Expanded speech/vocalization identifiers
+- **P5-T6**: Speech detection threshold tuning
+
+### Technical Details
+- **Root cause of sleep talking never being detected**: `AudioRecorder` applied a bandpass EQ (100–500 Hz) before the SoundAnalysis tap. Apple's built-in classifier was trained on full-spectrum audio; stripping frequencies above ~700 Hz destroyed the spectral features it uses to detect speech. Removed the EQ entirely — tap now runs on raw `inputNode`. FFT analyzer already distinguishes snoring from speech via `lowFreqRatio` and `spectralCentroid` on full-spectrum audio, so snoring detection remains accurate.
+- **Sleep score fairness**: `SleepSession.snoringDuration` and `sleepScore` were counting ALL events (including sleep talking) as snoring, unfairly penalizing the score. Both now filter by `.snoring` category only.
+- **Dynamic event titles**: `SessionDetailEventsView` accepts a `title: String` parameter. `SessionDetailView` computes the title from `selectedFilter`: All → "EVENTS", Snoring → "SNORING EVENTS", Sleep Talking → "SLEEP TALKING EVENTS", Noise → "DISTURBANCES". Four new localized format strings added.
+- **Baby sounds**: Added `babyIdentifiers` (`baby_crying`, `baby_laughter`, `babble`) to `SoundAnalysisDetector`; baby confidence is merged into `maxSpeechConfidence` so baby sounds flow through the same `.sleepTalking` event pipeline.
+- **Vocalization expansion**: `speechIdentifiers` grew from 5 → 22 entries to catch sleep talking variants: `whisper`, `mumble`, `mutter`, `stutter`, `groan`, `moan`, `sigh`, `grunt`, `grumble`, `exclaim`, `gasp`, `yell`, `scream`, `shout`, `laugh`, `giggle`, `whimper`.
+- **Threshold tuning for real-world sleep talking**:
+  - `SpeechDetector.dbFloor`: -40.0 → -55.0. Sleep talking at nightstand distance is typically -50 to -60 dBFS; the old floor rejected virtually all quiet speech.
+  - `SessionManager` speech event min duration: 2.0s → 0.5s. Combined with SoundAnalysis's ~1s analysis window lag + 3-sample consecutive gate, the old threshold required >3s of continuous talking to survive. Most sleep talking is 0.5–1.5s.
+  - Added debug prints to `SpeechDetector.classify` and `finalizeActiveSpeechEvent` so rejections are visible in console.
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/AudioEngine/Sources/Engine/AudioRecorder.swift` | -27 | Removed `AVAudioUnitEQ` bandpass filter; tap moved from `eq` node to `inputNode` (raw audio); `pauseRecording` now removes tap from `inputNode` directly |
+| `Packages/AudioEngine/Sources/Engine/SoundAnalysisDetector.swift` | +8/-1 | Added `babyIdentifiers`; expanded `speechIdentifiers` from 5 → 22; baby confidence merged into `maxSpeechConfidence` |
+| `Packages/AudioEngine/Sources/Engine/SpeechDetector.swift` | +7/-1 | `dbFloor` -40.0 → -55.0; added DEBUG prints for confidence and dB rejections |
+| `Packages/Models/Sources/Data/SleepSession.swift` | +2/-2 | `snoringDuration` filters by `.snoring`; `sleepScore` iterates over `snoringEvents` only |
+| `Packages/Recordings/Sources/Views/SessionDetailView.swift` | +9/-1 | Added `eventsTitle` computed property based on `selectedFilter`; passes title to `SessionDetailEventsView` |
+| `Packages/Recordings/Sources/Views/SessionDetailEventsView.swift` | +2/-1 | Added `title: String` parameter; uses passed title instead of hardcoded `sessionRecordingEventsFormat` |
+| `Packages/DesignSystem/Sources/Resources/Localizable.xcstrings` | +48 | Added 4 category-specific event format strings |
+| `Packages/DesignSystem/Sources/Strings.swift` | +4 | Regenerated with 250 strings |
+| `Packages/Env/Sources/Services/SessionManager.swift` | +2/-1 | Speech event min duration 2.0s → 0.5s; added debug print for discarded short events |
+| `docs/trackers/f14-sleepguard-rebrand.md` | +8/-1 | Added P5-T1 through P5-T6; updated task count 21→27 |
+| `docs/FeatureTracker.md` | +6/-3 | Activity log entries for all 6 tasks; dashboard 64→70 tasks done |
+
+### Architecture Decisions
+- **Remove EQ instead of adding a second tap**: A second tap (full-spectrum for SoundAnalysis, filtered for FFT/recording) would be more complex and risk synchronization issues. Removing the EQ entirely is simpler and correct — the FFT analyzer already computes spectral features relative to total energy, so it naturally distinguishes snoring (low-frequency dominant) from speech (broad spectrum).
+- **Merge baby/vocalization confidence into speechConfidence**: Rather than adding parallel `babyConfidence`/`vocalizationConfidence` properties and complicating `SessionManager`, all human-vocalization confidence feeds into the existing `speechConfidence` variable. The downstream pipeline (thresholds, consecutive gate, event finalization) is identical.
+- **Separate thresholds for speech vs snoring**: Snoring events keep the 2s minimum (appropriate for snoring epochs). Speech events get 0.5s minimum (appropriate for brief utterances). This is hardcoded because the two sound categories have fundamentally different temporal characteristics.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors, zero warnings
+
+`F14-P5-T1..T6 — Sleep talking detection hardening`
+- Bandpass filter removed (root cause of speech never being detected)
+- Sleep score fixed to exclude non-snoring events
+- Dynamic category-specific event titles
+- Baby sounds + 17 additional vocalization identifiers
+- dB floor -55, min duration 0.5s for speech events
+- All builds pass
+
+### Next Session
+- All tracked tasks are complete. Next work would be new features per `docs/Roadmap.md` or user-requested changes.
+
+### Open Questions
+- None
+
+---
+
 ## 2026-05-27 — Session 63: Onboarding Health & Watch Screen
 
 ### Completed

@@ -583,8 +583,10 @@ public final class SessionManager {
         let eventEnd = endTime ?? (lastSpeechSampleTime ?? Date())
         let eventSpan = eventEnd.timeIntervalSince(startTime)
 
-        // Discard events shorter than 2 s to filter out brief transients.
-        guard eventSpan >= 2.0 else {
+        // Discard events shorter than 0.5 s. Sleep talking utterances (single words,
+        // mumbles, groans) are typically 0.5–2 s, much shorter than snoring epochs.
+        guard eventSpan >= 0.5 else {
+            print("[SessionManager] Speech event discarded: span \(String(format: "%.2f", eventSpan))s < 0.5s minimum")
             activeSpeechEventStart = nil
             activeSpeechEventDBSum = 0
             activeSpeechEventDBCount = 0

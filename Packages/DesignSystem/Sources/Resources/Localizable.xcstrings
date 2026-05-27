@@ -1326,6 +1326,50 @@
         }
       }
     },
+    "session.recording.eventsFormat.all": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "EVENTS · %lld"
+          }
+        }
+      }
+    },
+    "session.recording.eventsFormat.noise": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DISTURBANCES · %lld"
+          }
+        }
+      }
+    },
+    "session.recording.eventsFormat.sleepTalking": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SLEEP TALKING EVENTS · %lld"
+          }
+        }
+      }
+    },
+    "session.recording.eventsFormat.snoring": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SNORING EVENTS · %lld"
+          }
+        }
+      }
+    },
     "session.recording.statusFormat": {
       "localizations": {
         "en": {

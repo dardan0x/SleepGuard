@@ -49,6 +49,12 @@ Rebrand SnoreGuard to SleepGuard and expand detection from snore-only to multi-s
 | P4-T4 | Statistics integration | ✅ Done | `SleepStageBreakdownView` compact stage bar + 2×2 stat grid in `StatisticsLoadedView`; `MockDataGenerator` generates realistic sleep cycles; build succeeds |
 | P4-T5 | Settings toggle | ✅ Done | "Enhanced Sleep Tracking" toggle in SettingsWatchSection; requests HealthKit auth on enable; gates `fetchSleepStages` in SessionDetailView |
 | P4-T6 | Build & verify | ✅ Done | Clean build (zero errors); all F14 changes verified |
+| P5-T1 | Bandpass filter bugfix — sleep talking never detected | ✅ Done | EQ (100–500 Hz) removed from `AudioRecorder`; tap now runs on raw `inputNode`; SoundAnalysis receives full-spectrum audio; FFT analyzer already distinguishes snoring from speech on full audio |
+| P5-T2 | Sleep score excludes non-snoring events | ✅ Done | `SleepSession.snoringDuration` and `sleepScore` now filter by `.snoring` category only; sleep talking no longer incorrectly penalizes score |
+| P5-T3 | Category-specific events title | ✅ Done | `SessionDetailEventsView` accepts dynamic title; `SessionDetailView` passes format string based on selected filter (All/Snoring/Sleep Talking/Noise); 4 new localized strings |
+| P5-T4 | Baby sound detection | ✅ Done | Added `babyIdentifiers` (`baby_crying`, `baby_laughter`, `babble`) to `SoundAnalysisDetector`; baby confidence feeds into `speechConfidence` pipeline; creates `.sleepTalking` events |
+| P5-T5 | Expanded speech/vocalization identifiers | ✅ Done | `speechIdentifiers` expanded from 5 → 22 entries: `whisper`, `mumble`, `mutter`, `stutter`, `groan`, `moan`, `sigh`, `grunt`, `grumble`, `exclaim`, `gasp`, `yell`, `scream`, `shout`, `laugh`, `giggle`, `whimper` |
+| P5-T6 | Speech detection threshold tuning | ✅ Done | `SpeechDetector.dbFloor` lowered from -40.0 → -55.0 to catch quiet sleep talking at nightstand distance; speech event minimum duration lowered from 2.0s → 0.5s to capture brief utterances; debug logging added |
 
 ## Prompt Used
 
@@ -58,9 +64,10 @@ User requested a detailed plan for rebranding SnoreGuard to SleepGuard and expan
 
 - Phase 1 completed in Session 58
 - P2-T2 completed in Session 59
+- **Bugfix (Session 61)**: Bandpass filter (100–500 Hz) applied before SoundAnalysis tap was destroying speech spectral content above ~700 Hz, causing sleep talking to never be detected. Removed EQ entirely — tap now runs on raw input node. FFT analyzer already distinguishes snoring from speech via `lowFreqRatio` and `spectralCentroid` on full-spectrum audio, so snoring detection remains accurate. Also fixed `snoringDuration` and `sleepScore` to only count `.snoring` events, preventing sleep talking from incorrectly penalizing the score.
 - P2-T3 completed in Session 59
 - Phase 2 complete (P2-T1 through P2-T5)
-- F14 is now complete (21/21 tasks)
+- F14 is now complete (27/27 tasks)
 - When user says "continue" or "work on what's next", start with the 🟡 Next task in this tracker
 - F13 (CloudKit Sync) is intentionally skipped — do NOT work on it unless explicitly asked
 - Feature doc: `docs/features/f14-sleepguard-rebrand.md`

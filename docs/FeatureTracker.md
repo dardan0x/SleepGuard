@@ -33,8 +33,8 @@ Last updated: 2026-05-27 (Session 63)
 | Backlog | 2 |
 | Blocked | 0 |
 | — | — |
-| Total Tasks | 63 |
-| Tasks Done | 63 |
+| Total Tasks | 70 |
+| Tasks Done | 70 |
 | Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
 | Tasks Backlog | 0 |
@@ -58,7 +58,7 @@ Last updated: 2026-05-27 (Session 63)
 | F11 | Apple Watch | P2 | Done | 4/4 | ██████████ 100% | [tracker](trackers/f11-apple-watch.md) |
 | F12 | HealthKit | P1 | Done | 3/3 | ██████████ 100% | [tracker](trackers/f12-healthkit.md) |
 | F13 | CloudKit Sync | P2 | Backlog | 0/3 | ░░░░░░░░░░ 0% | [tracker](trackers/f13-cloudkit-sync.md) |
-| F14 | SleepGuard Rebrand & Multi-Sound | P0 | Done | 21/21 | ██████████ 100% | [tracker](trackers/f14-sleepguard-rebrand.md) |
+| F14 | SleepGuard Rebrand & Multi-Sound | P0 | Done | 27/27 | ██████████ 100% | [tracker](trackers/f14-sleepguard-rebrand.md) |
 
 ## Activity Log
 
@@ -66,6 +66,11 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-05-27 | Speech detection threshold tuning | Completed | `SpeechDetector.dbFloor` -40 → -55; speech event min duration 2.0s → 0.5s; debug logging for rejections; catches quiet sleep talking and brief utterances; build succeeds |
+| 2026-05-27 | Expanded speech/vocalization identifiers | Completed | `speechIdentifiers` 5 → 22: whisper, mumble, mutter, stutter, groan, moan, sigh, grunt, grumble, exclaim, gasp, yell, scream, shout, laugh, giggle, whimper; build succeeds |
+| 2026-05-27 | Baby sound detection | Completed | `babyIdentifiers` (`baby_crying`, `baby_laughter`, `babble`) added to `SoundAnalysisDetector`; feeds into speech confidence pipeline; creates `.sleepTalking` events; build succeeds |
+| 2026-05-27 | Category-specific events title | Completed | `SessionDetailEventsView` now accepts a dynamic title; `SessionDetailView` passes category-specific format string based on selected filter (All/Snoring/Sleep Talking/Noise); 4 new localized strings added; build succeeds |
+| 2026-05-27 | Sleep talking detection bugfix | Completed | Removed bandpass filter from audio chain so SoundAnalysis receives full-spectrum audio; fixed `SleepSession.snoringDuration` and `sleepScore` to only count `.snoring` events; build succeeds |
 | 2026-05-27 | F1-T6 Health & Watch onboarding screen | Completed | `OnboardingPageHealthWatchView` with HealthKit auth, granted state, 0.8s delay, 6 localized strings; `OnboardingView` now 6 pages; design file updated; build succeeds |
 | 2026-05-27 | P4-T6 Build & verify | Completed | Clean build (zero errors); all F14 Phase 4 changes verified |
 | 2026-05-27 | P4-T5 Settings toggle | Completed | `enhancedSleepTracking` added to `UserPreferences`; toggle in `SettingsWatchSection` with `bed.double.fill` icon; requests HealthKit auth on enable; gates `fetchSleepStages` in `SessionDetailView`; localized; build succeeds |

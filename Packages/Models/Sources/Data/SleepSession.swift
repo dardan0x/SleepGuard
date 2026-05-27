@@ -91,7 +91,7 @@ public final class SleepSession {
     }
 
     public var snoringDuration: TimeInterval {
-        events?.reduce(0) { $0 + $1.snoreDuration } ?? 0
+        events?.filter { $0.category == .snoring }.reduce(0) { $0 + $1.snoreDuration } ?? 0
     }
 
     /// Total duration of events matching a specific sound category.
@@ -118,8 +118,9 @@ public final class SleepSession {
 
     public var sleepScore: Int {
         let events = self.events ?? []
+        let snoringEvents = events.filter { $0.category == .snoring }
         let totalDuration = self.totalDuration
-        let eventCount = events.count
+        let eventCount = snoringEvents.count
 
         guard totalDuration > 0 else {
             return 100
@@ -141,7 +142,7 @@ public final class SleepSession {
         var loudDuration: TimeInterval = 0
         var epicDuration: TimeInterval = 0
 
-        for event in events {
+        for event in snoringEvents {
             let duration = event.snoreDuration
             detectedSnoringDuration += duration
             switch event.intensity {

@@ -141,6 +141,10 @@ public enum Strings {
   public static var sessionPrestartTitle: String { String(localized: "session.prestart.title", bundle: .module) }
   public static var sessionRecordingEventsCountUpperFormat: String { String(localized: "session.recording.eventsCountUpperFormat", bundle: .module) }
   public static var sessionRecordingEventsFormat: String { String(localized: "session.recording.eventsFormat", bundle: .module) }
+  public static var sessionRecordingEventsFormatAll: String { String(localized: "session.recording.eventsFormat.all", bundle: .module) }
+  public static var sessionRecordingEventsFormatNoise: String { String(localized: "session.recording.eventsFormat.noise", bundle: .module) }
+  public static var sessionRecordingEventsFormatSleepTalking: String { String(localized: "session.recording.eventsFormat.sleepTalking", bundle: .module) }
+  public static var sessionRecordingEventsFormatSnoring: String { String(localized: "session.recording.eventsFormat.snoring", bundle: .module) }
   public static var sessionRecordingStatusFormat: String { String(localized: "session.recording.statusFormat", bundle: .module) }
   public static var sessionSummaryLowBatteryForceSaveInfo: String { String(localized: "session.summary.lowBattery.forceSave.info", bundle: .module) }
   public static var sessionSummaryMelodyGapsInfo: String { String(localized: "session.summary.melodyGapsInfo", bundle: .module) }
