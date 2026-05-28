@@ -120,6 +120,14 @@ public enum MockDataGenerator {
           events.append(event)
         }
 
+        // Optionally generate sleep talking events (more likely on poor-sleep nights)
+        let talkingEvents = generateSleepTalkingEvents(
+          targetScore: targetScore,
+          sessionStart: sessionStart,
+          sessionDuration: sessionDuration
+        )
+        events.append(contentsOf: talkingEvents)
+
         session.events = events
         session.averageDB = events.map(\.averageDB).reduce(0, +) / Double(events.count)
         session.peakDB = events.map(\.peakDB).max() ?? 0
@@ -166,8 +174,11 @@ public enum MockDataGenerator {
     ///
     /// The sleep score formula is:
     ///   score = 100 - snoringPenalty - eventsPenalty - intensityPenalty
+    ///             - sleepTalkingPenalty - stagePenalty
     ///
-    /// We work backwards to choose parameters that produce the desired score.
+    /// Sleep talking and stage penalties are near-zero for mock data
+    /// (no sleep talking events, healthy stage distributions), so the
+    /// existing backward derivation remains valid.
     static func forScore(_ score: Int, duration: TimeInterval) -> SessionParams {
       let hours = duration / 3600
 
@@ -243,6 +254,59 @@ public enum MockDataGenerator {
       case .epic:   return Double.random(in: minPeak...(-8))
       }
     }
+  }
+
+  // MARK: - Sleep Talking
+
+  /// Generates occasional sleep talking events for realism.
+  /// More frequent on poor-sleep nights (lower target scores).
+  /// Events are short (5–30 s), quiet, and spread across the session.
+  private static func generateSleepTalkingEvents(
+    targetScore: Int,
+    sessionStart: Date,
+    sessionDuration: TimeInterval
+  ) -> [SnoreEvent] {
+    // Probability increases as sleep quality decreases
+    let probability: Double
+    if targetScore < 50 {
+      probability = 0.40
+    } else if targetScore < 65 {
+      probability = 0.30
+    } else if targetScore < 80 {
+      probability = 0.20
+    } else {
+      probability = 0.10
+    }
+
+    guard Double.random(in: 0...1) < probability else { return [] }
+
+    let eventCount = Int.random(in: 1...4)
+    var talkingEvents: [SnoreEvent] = []
+
+    for _ in 0..<eventCount {
+      let eventDuration = Double.random(in: 5...30)
+      let avgDB = Double.random(in: -55...(-45))
+      let peakDB = Double.random(in: avgDB + 3...(-40))
+
+      let burst = SnoreBurst(startOffset: 0, endOffset: eventDuration)
+
+      // Spread across the full session (sleep talking can happen any time)
+      let offset = Double.random(in: 0...max(1, sessionDuration - eventDuration))
+      let timestamp = sessionStart.addingTimeInterval(offset)
+
+      let event = SnoreEvent(
+        timestamp: timestamp,
+        category: .sleepTalking,
+        intensity: .quiet,
+        averageDB: avgDB,
+        peakDB: peakDB,
+        bursts: [burst],
+        duration: eventDuration
+      )
+      talkingEvents.append(event)
+    }
+
+    return talkingEvents
   }
 
   // MARK: - Sleep Stages

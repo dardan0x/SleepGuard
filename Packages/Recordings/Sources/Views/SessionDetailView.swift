@@ -66,6 +66,7 @@ public struct SessionDetailView: View {
 
         SessionDetailEventsView(
           events: filteredEvents,
+          title: eventsTitle,
           onShowAll: { activeSheet = .events },
           onPlayEvent: { event in
             activeSheet = .player(initialEvent: event)
@@ -259,7 +260,9 @@ public struct SessionDetailView: View {
         predicate: #Predicate { $0.id == sessionID }
       )
       if let session = try modelContext.fetch(descriptor).first {
-        if userPreferences.enhancedSleepTracking && session.sleepStageSegments == nil {
+        let stagesEmptyAndOld = (session.sleepStageSegments?.isEmpty == true)
+          && (session.endDate?.timeIntervalSinceNow ?? 0) < -3600
+        if userPreferences.enhancedSleepTracking && (session.sleepStageSegments == nil || stagesEmptyAndOld) {
           let stages = await HealthKitSync.shared.fetchSleepStages(for: session)
           session.sleepStageSegments = stages.isEmpty ? [] : stages
           try modelContext.save()
@@ -328,6 +331,15 @@ public struct SessionDetailView: View {
   private var filteredEvents: [SnoreEvent] {
     guard case .loaded(_, let sortedEvents, _) = viewState else { return [] }
     return sortedEvents.filter { selectedFilter.includes(event: $0) }
+  }
+
+  private var eventsTitle: String {
+    switch selectedFilter {
+    case .all: return Strings.sessionRecordingEventsFormatAll
+    case .snoring: return Strings.sessionRecordingEventsFormatSnoring
+    case .sleepTalking: return Strings.sessionRecordingEventsFormatSleepTalking
+    case .noise: return Strings.sessionRecordingEventsFormatNoise
+    }
   }
 
   private enum EventCategoryFilter: String, CaseIterable {

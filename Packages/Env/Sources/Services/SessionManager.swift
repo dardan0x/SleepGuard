@@ -533,12 +533,11 @@ public final class SessionManager {
 
         let eventSpan = (lastSnoringSampleTime ?? Date()).timeIntervalSince(startTime)
 
-        // Discard events shorter than 2 s to filter out brief breathing waves
-        // and transients. This value is intentionally not user-configurable.
-        // When the mic is paused by soothing melody we lower the threshold to
-        // 0.5 s — enough to ensure the event shows meaningful duration in the UI
-        // while still filtering out genuine transients.
-        let minDuration: TimeInterval = skipMinDuration ? 0.5 : 2.0
+        // Discard events shorter than `minEventDuration` (sensitivity-dependent —
+        // 2 s on Low to filter out transients, 0.5 s on High to catch isolated
+        // single snores). When the mic is paused by soothing melody we always
+        // lower to 0.5 s so the truncated event still has meaningful duration.
+        let minDuration: TimeInterval = skipMinDuration ? 0.5 : minEventDuration
         guard eventSpan >= minDuration else {
             activeEventStart = nil
             activeEventIntensity = nil
@@ -583,8 +582,10 @@ public final class SessionManager {
         let eventEnd = endTime ?? (lastSpeechSampleTime ?? Date())
         let eventSpan = eventEnd.timeIntervalSince(startTime)
 
-        // Discard events shorter than 2 s to filter out brief transients.
-        guard eventSpan >= 2.0 else {
+        // Discard events shorter than 0.5 s. Sleep talking utterances (single words,
+        // mumbles, groans) are typically 0.5–2 s, much shorter than snoring epochs.
+        guard eventSpan >= 0.5 else {
+            print("[SessionManager] Speech event discarded: span \(String(format: "%.2f", eventSpan))s < 0.5s minimum")
             activeSpeechEventStart = nil
             activeSpeechEventDBSum = 0
             activeSpeechEventDBCount = 0
@@ -620,21 +621,49 @@ public final class SessionManager {
             .appendingPathComponent("session_\(sessionID.uuidString).caf")
     }
 
+    /// Calibrated thresholds + SoundAnalysis confidence gates for the full-band
+    /// capture path. Values come from analysis of real bedroom recordings (see
+    /// docs/SNORE_DETECTION_HANDOVER.md). Low = noisier rooms / stricter filtering;
+    /// Medium = typical quiet bedroom (default); High = very quiet rooms.
     private func applyDetectionSensitivity() {
         let sensitivity = UserPreferences.shared.detectionSensitivity
-        let offset: Float
         switch sensitivity {
         case .low:
-            offset = 5.0
+            snoreDetector.quietThreshold = -45.0
+            snoreDetector.lightThreshold = -35.0
+            snoreDetector.loudThreshold = -20.0
+            snoreDetector.epicThreshold = -10.0
+            snoreDetector.confidenceGate = 0.45
+            snoreDetector.highConfidenceGate = 0.65
+            snoreDetector.quietFallbackGate = 0.55
         case .medium:
-            offset = 0.0
+            snoreDetector.quietThreshold = -50.0
+            snoreDetector.lightThreshold = -40.0
+            snoreDetector.loudThreshold = -25.0
+            snoreDetector.epicThreshold = -15.0
+            snoreDetector.confidenceGate = 0.35
+            snoreDetector.highConfidenceGate = 0.55
+            snoreDetector.quietFallbackGate = 0.45
         case .high:
-            offset = -5.0
+            snoreDetector.quietThreshold = -55.0
+            snoreDetector.lightThreshold = -45.0
+            snoreDetector.loudThreshold = -30.0
+            snoreDetector.epicThreshold = -20.0
+            snoreDetector.confidenceGate = 0.25
+            snoreDetector.highConfidenceGate = 0.45
+            snoreDetector.quietFallbackGate = 0.35
         }
-        snoreDetector.quietThreshold = -30.0 + offset
-        snoreDetector.lightThreshold = -20.0 + offset
-        snoreDetector.loudThreshold = -10.0 + offset
-        snoreDetector.epicThreshold = -5.0 + offset
+    }
+
+    /// Minimum snore-event duration. Sensitivity-dependent so isolated single
+    /// snores (~1 s) are retained on Medium/High while Low still filters
+    /// transient sounds. Ground-truthed against bedroom recordings.
+    private var minEventDuration: TimeInterval {
+        switch UserPreferences.shared.detectionSensitivity {
+        case .low: return 2.0
+        case .medium: return 1.0
+        case .high: return 0.5
+        }
     }
 
     private func intensity(from state: DetectionState) -> SnoreIntensity {

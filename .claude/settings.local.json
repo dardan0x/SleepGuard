@@ -4,7 +4,12 @@
       "Bash(npx -y @steipete/peekaboo --help)",
       "Bash(timeout 10 npx -y @steipete/peekaboo mcp)",
       "Bash(npx -y @steipete/peekaboo tools)",
-      "mcp__*"
+      "mcp__*",
+      "Read(//Users/user/Downloads/**)",
+      "Bash(python3 -c \"import numpy\")",
+      "Bash(pip3 install *)",
+      "mcp__XcodeBuildMCP__session_show_defaults",
+      "mcp__XcodeBuildMCP__build_sim"
     ]
   }
 }

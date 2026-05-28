@@ -21,7 +21,14 @@ public final class SoundAnalysisDetector: NSObject, SNResultsObserving {
   private var streamAnalyzer: SNAudioStreamAnalyzer?
   private var analysisRequest: SNClassifySoundRequest?
   private let snoreIdentifiers = ["snore", "snoring"]
-  private let speechIdentifiers = ["speech", "talking", "conversation", "narration", "monologue"]
+  private let speechIdentifiers = [
+    "speech", "talking", "conversation", "narration", "monologue",
+    "whisper", "mumble", "mutter", "stutter",
+    "groan", "moan", "sigh", "grunt", "grumble",
+    "exclaim", "gasp", "yell", "scream", "shout",
+    "laugh", "giggle", "whimper"
+  ]
+  private let babyIdentifiers = ["baby_crying", "baby_laughter", "babble"]
 
   private override init() {
     super.init()
@@ -103,6 +110,9 @@ public final class SoundAnalysisDetector: NSObject, SNResultsObserving {
         maxSnoreConfidence = max(maxSnoreConfidence, Float(classification.confidence))
       }
       if speechIdentifiers.contains(where: { id.contains($0) }) {
+        maxSpeechConfidence = max(maxSpeechConfidence, Float(classification.confidence))
+      }
+      if babyIdentifiers.contains(where: { id.contains($0) }) {
         maxSpeechConfidence = max(maxSpeechConfidence, Float(classification.confidence))
       }
     }

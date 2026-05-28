@@ -2,7 +2,7 @@
 
 > Auto-updated by the AI after every task. This is the local source of truth.
 
-Last updated: 2026-05-27 (Session 63)
+Last updated: 2026-05-28 (Session 64)
 
 ---
 
@@ -33,8 +33,8 @@ Last updated: 2026-05-27 (Session 63)
 | Backlog | 2 |
 | Blocked | 0 |
 | — | — |
-| Total Tasks | 63 |
-| Tasks Done | 63 |
+| Total Tasks | 70 |
+| Tasks Done | 70 |
 | Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
 | Tasks Backlog | 0 |
@@ -58,7 +58,7 @@ Last updated: 2026-05-27 (Session 63)
 | F11 | Apple Watch | P2 | Done | 4/4 | ██████████ 100% | [tracker](trackers/f11-apple-watch.md) |
 | F12 | HealthKit | P1 | Done | 3/3 | ██████████ 100% | [tracker](trackers/f12-healthkit.md) |
 | F13 | CloudKit Sync | P2 | Backlog | 0/3 | ░░░░░░░░░░ 0% | [tracker](trackers/f13-cloudkit-sync.md) |
-| F14 | SleepGuard Rebrand & Multi-Sound | P0 | Done | 21/21 | ██████████ 100% | [tracker](trackers/f14-sleepguard-rebrand.md) |
+| F14 | SleepGuard Rebrand & Multi-Sound | P0 | Done | 27/27 | ██████████ 100% | [tracker](trackers/f14-sleepguard-rebrand.md) |
 
 ## Activity Log
 
@@ -66,6 +66,15 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-05-28 | Sleep stages info sheet | Completed | `SleepStagesInfoView` educational sheet showing personalized stage interpretation (Good/Low/High badges with recommended ranges), score impact formula, and visual threshold bars; info button added to `SleepStageBreakdownView` header; 15 new localized strings; close button (`xmark.circle.fill`); build succeeds |
+| 2026-05-28 | HealthKit sleep stage query fix | Completed | Removed `.strictStartDate` from `fetchSleepStages` predicate so overlapping Watch samples are included; added `stagesEmptyAndOld` retry in `SessionDetailView` for sessions >1h old with empty stage arrays; build succeeds |
+| 2026-05-27 | Mock data sleep talking | Completed | `MockDataGenerator` now generates `.sleepTalking` events for ~10-40% of sessions (probability scales inversely with target score); 1-4 events per session, 5-30s each, `.quiet` intensity, -55 to -45 dB; spread randomly across session; max score impact ~0.6 pts — well within ±12 drift tolerance; build succeeds |
+| 2026-05-27 | Holistic sleep score formula | Completed | `sleepScore` now includes conditional `sleepTalkingPenalty` (max 15: duration%×0.35 + events/hr×0.8) and `stagePenalty` (max 15: deep deficit×0.6 + REM deficit×0.4 + awake excess×1.0); thresholds grounded in sleep medicine (deep≥15%, REM≥18%, awake≤8%); backward compatible (nil stages = 0, no talking events = 0); build succeeds; sanity checks verified |
+| 2026-05-27 | Speech detection threshold tuning | Completed | `SpeechDetector.dbFloor` -40 → -55; speech event min duration 2.0s → 0.5s; debug logging for rejections; catches quiet sleep talking and brief utterances; build succeeds |
+| 2026-05-27 | Expanded speech/vocalization identifiers | Completed | `speechIdentifiers` 5 → 22: whisper, mumble, mutter, stutter, groan, moan, sigh, grunt, grumble, exclaim, gasp, yell, scream, shout, laugh, giggle, whimper; build succeeds |
+| 2026-05-27 | Baby sound detection | Completed | `babyIdentifiers` (`baby_crying`, `baby_laughter`, `babble`) added to `SoundAnalysisDetector`; feeds into speech confidence pipeline; creates `.sleepTalking` events; build succeeds |
+| 2026-05-27 | Category-specific events title | Completed | `SessionDetailEventsView` now accepts a dynamic title; `SessionDetailView` passes category-specific format string based on selected filter (All/Snoring/Sleep Talking/Noise); 4 new localized strings added; build succeeds |
+| 2026-05-27 | Sleep talking detection bugfix | Completed | Removed bandpass filter from audio chain so SoundAnalysis receives full-spectrum audio; fixed `SleepSession.snoringDuration` and `sleepScore` to only count `.snoring` events; build succeeds |
 | 2026-05-27 | F1-T6 Health & Watch onboarding screen | Completed | `OnboardingPageHealthWatchView` with HealthKit auth, granted state, 0.8s delay, 6 localized strings; `OnboardingView` now 6 pages; design file updated; build succeeds |
 | 2026-05-27 | P4-T6 Build & verify | Completed | Clean build (zero errors); all F14 Phase 4 changes verified |
 | 2026-05-27 | P4-T5 Settings toggle | Completed | `enhancedSleepTracking` added to `UserPreferences`; toggle in `SettingsWatchSection` with `bed.double.fill` icon; requests HealthKit auth on enable; gates `fetchSleepStages` in `SessionDetailView`; localized; build succeeds |
@@ -185,6 +194,8 @@ _Most recent first. The AI appends here after every task._
 
 | Task | Feature | Completed | Duration |
 |------|---------|-----------|----------|
+| Sleep stages info sheet | F14 | 2026-05-28 | — |
+| HealthKit sleep stage query fix | F12 | 2026-05-28 | — |
 | F1-T6 Health & Watch onboarding | F1 | 2026-05-27 | — |
 | P4-T5 Settings toggle | F14 | 2026-05-27 | — |
 | P4-T4 Statistics integration | F14 | 2026-05-26 | — |

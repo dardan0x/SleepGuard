@@ -3880,6 +3880,7 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 ### Open Questions
 - Should stage fetching happen automatically when opening `SessionDetailView` (lazy load), or should it be cached at session-save time?
 - If the user has no Apple Watch sleep data, the query returns `[]` — should the UI show a "No sleep stage data" placeholder or simply hide the timeline section?
+```
 
 
 ## 2026-05-26 — Session 60 (continued): P4-T2 Stage correlation
@@ -3985,7 +3986,6 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 ### Open Questions
 - None
 
----
 
 ## 2026-05-26 — Session 60 continued: P4-T4 Verification & Bug Fixes
 
@@ -4020,7 +4020,6 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 ### Open Questions
 - None
 
----
 
 ## 2026-05-27 — Session 61: P4-T5 Enhanced Sleep Tracking Toggle
 
@@ -4063,7 +4062,6 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 ### Open Questions
 - None
 
----
 
 ## 2026-05-27 — Session 62: P4-T6 Build & Verify + F14 Complete
 
@@ -4111,7 +4109,6 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 ### Open Questions
 - None
 
----
 
 ## 2026-05-27 — Session 62b: Enhanced Sleep Tracking Auto-Enable Polish
 
@@ -4145,7 +4142,137 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 ### Open Questions
 - None
 
+
+## 2026-05-27 — Session 62c: Sleep Talking Detection Hardening
+
+### Completed
+- **P5-T1**: Bandpass filter bugfix — removed EQ from audio chain
+- **P5-T2**: Sleep score excludes non-snoring events
+- **P5-T3**: Category-specific events title
+- **P5-T4**: Baby sound detection
+- **P5-T5**: Expanded speech/vocalization identifiers
+- **P5-T6**: Speech detection threshold tuning
+
+### Technical Details
+- **Root cause of sleep talking never being detected**: `AudioRecorder` applied a bandpass EQ (100–500 Hz) before the SoundAnalysis tap. Apple's built-in classifier was trained on full-spectrum audio; stripping frequencies above ~700 Hz destroyed the spectral features it uses to detect speech. Removed the EQ entirely — tap now runs on raw `inputNode`. FFT analyzer already distinguishes snoring from speech via `lowFreqRatio` and `spectralCentroid` on full-spectrum audio, so snoring detection remains accurate.
+- **Sleep score fairness**: `SleepSession.snoringDuration` and `sleepScore` were counting ALL events (including sleep talking) as snoring, unfairly penalizing the score. Both now filter by `.snoring` category only.
+- **Dynamic event titles**: `SessionDetailEventsView` accepts a `title: String` parameter. `SessionDetailView` computes the title from `selectedFilter`: All → "EVENTS", Snoring → "SNORING EVENTS", Sleep Talking → "SLEEP TALKING EVENTS", Noise → "DISTURBANCES". Four new localized format strings added.
+- **Baby sounds**: Added `babyIdentifiers` (`baby_crying`, `baby_laughter`, `babble`) to `SoundAnalysisDetector`; baby confidence is merged into `maxSpeechConfidence` so baby sounds flow through the same `.sleepTalking` event pipeline.
+- **Vocalization expansion**: `speechIdentifiers` grew from 5 → 22 entries to catch sleep talking variants: `whisper`, `mumble`, `mutter`, `stutter`, `groan`, `moan`, `sigh`, `grunt`, `grumble`, `exclaim`, `gasp`, `yell`, `scream`, `shout`, `laugh`, `giggle`, `whimper`.
+- **Threshold tuning for real-world sleep talking**:
+  - `SpeechDetector.dbFloor`: -40.0 → -55.0. Sleep talking at nightstand distance is typically -50 to -60 dBFS; the old floor rejected virtually all quiet speech.
+  - `SessionManager` speech event min duration: 2.0s → 0.5s. Combined with SoundAnalysis's ~1s analysis window lag + 3-sample consecutive gate, the old threshold required >3s of continuous talking to survive. Most sleep talking is 0.5–1.5s.
+  - Added debug prints to `SpeechDetector.classify` and `finalizeActiveSpeechEvent` so rejections are visible in console.
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/AudioEngine/Sources/Engine/AudioRecorder.swift` | -27 | Removed `AVAudioUnitEQ` bandpass filter; tap moved from `eq` node to `inputNode` (raw audio); `pauseRecording` now removes tap from `inputNode` directly |
+| `Packages/AudioEngine/Sources/Engine/SoundAnalysisDetector.swift` | +8/-1 | Added `babyIdentifiers`; expanded `speechIdentifiers` from 5 → 22; baby confidence merged into `maxSpeechConfidence` |
+| `Packages/AudioEngine/Sources/Engine/SpeechDetector.swift` | +7/-1 | `dbFloor` -40.0 → -55.0; added DEBUG prints for confidence and dB rejections |
+| `Packages/Models/Sources/Data/SleepSession.swift` | +2/-2 | `snoringDuration` filters by `.snoring`; `sleepScore` iterates over `snoringEvents` only |
+| `Packages/Recordings/Sources/Views/SessionDetailView.swift` | +9/-1 | Added `eventsTitle` computed property based on `selectedFilter`; passes title to `SessionDetailEventsView` |
+| `Packages/Recordings/Sources/Views/SessionDetailEventsView.swift` | +2/-1 | Added `title: String` parameter; uses passed title instead of hardcoded `sessionRecordingEventsFormat` |
+| `Packages/DesignSystem/Sources/Resources/Localizable.xcstrings` | +48 | Added 4 category-specific event format strings |
+| `Packages/DesignSystem/Sources/Strings.swift` | +4 | Regenerated with 250 strings |
+| `Packages/Env/Sources/Services/SessionManager.swift` | +2/-1 | Speech event min duration 2.0s → 0.5s; added debug print for discarded short events |
+| `docs/trackers/f14-sleepguard-rebrand.md` | +8/-1 | Added P5-T1 through P5-T6; updated task count 21→27 |
+| `docs/FeatureTracker.md` | +6/-3 | Activity log entries for all 6 tasks; dashboard 64→70 tasks done |
+
+### Architecture Decisions
+- **Remove EQ instead of adding a second tap**: A second tap (full-spectrum for SoundAnalysis, filtered for FFT/recording) would be more complex and risk synchronization issues. Removing the EQ entirely is simpler and correct — the FFT analyzer already computes spectral features relative to total energy, so it naturally distinguishes snoring (low-frequency dominant) from speech (broad spectrum).
+- **Merge baby/vocalization confidence into speechConfidence**: Rather than adding parallel `babyConfidence`/`vocalizationConfidence` properties and complicating `SessionManager`, all human-vocalization confidence feeds into the existing `speechConfidence` variable. The downstream pipeline (thresholds, consecutive gate, event finalization) is identical.
+- **Separate thresholds for speech vs snoring**: Snoring events keep the 2s minimum (appropriate for snoring epochs). Speech events get 0.5s minimum (appropriate for brief utterances). This is hardcoded because the two sound categories have fundamentally different temporal characteristics.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors, zero warnings
+
+`F14-P5-T1..T6 — Sleep talking detection hardening`
+- Bandpass filter removed (root cause of speech never being detected)
+- Sleep score fixed to exclude non-snoring events
+- Dynamic category-specific event titles
+- Baby sounds + 17 additional vocalization identifiers
+- dB floor -55, min duration 0.5s for speech events
+- All builds pass
+
+### Next Session
+- All tracked tasks are complete. Next work would be new features per `docs/Roadmap.md` or user-requested changes.
+
+### Open Questions
+- None
+
 ---
+
+## 2026-05-27 — Session 62d: Holistic Sleep Score
+
+### Completed
+- **Sleep talking & sleep stage integration**: `sleepScore` now penalizes sleep talking and poor sleep architecture when data is available.
+
+### Technical Details
+
+**New formula:**
+```
+score = 100 - snoringPenalty - eventsPenalty - intensityPenalty
+            - sleepTalkingPenalty - stagePenalty
+```
+
+**Sleep talking penalty** (only when `.sleepTalking` events exist):
+- `min(sleepTalkingPercentage * 0.35 + sleepTalkingEventsPerHour * 0.8, 15)`
+- Weighted ~half of snoring (0.35 vs 0.7 duration, 0.8 vs 2.0 frequency).
+- A user talking 5% of the night with 3 events/hour gets ~4 point penalty.
+
+**Sleep stage penalty** (only when `sleepStageSegments != nil`):
+- `min(deepDeficit * 0.6 + remDeficit * 0.4 + awakeExcess * 1.0, 15)`
+- Deep deficit: penalty per % below 15% (NSF/AASM healthy range).
+- REM deficit: penalty per % below 18%.
+- Awake excess: penalty per % above 8% (WASO norms).
+- A user with 5% deep, 10% REM, 20% awake gets ~12 point penalty.
+- Healthy stages (20% deep, 22% REM, 3% awake) → 0 penalty.
+
+**Backward compatibility:**
+- Sessions without Watch data → `stagePenalty = 0` (identical to before).
+- Sessions without sleep talking events → `sleepTalkingPenalty = 0` (identical to before).
+- Mock data generates healthy stage distributions and occasional sleep talking → scores stable (max talking penalty ~0.6 pts).
+
+**Sanity check results:**
+- Light snoring only: 93
+- Light snoring + healthy stages: 93 (no change)
+- Light snoring + poor stages: 78 (15 point reduction)
+- Light snoring + 3% talking: 91 (2 point reduction)
+- Everything terrible: 0
+- Borderline thresholds (deep 15%, REM 18%, awake 8%): 100 (zero penalty)
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Models/Sources/Data/SleepSession.swift` | +53/-8 | Added `StageStats` struct, `stageStats`, `sleepTalkingDuration`, `sleepTalkingEvents`, `sleepTalkingPercentage`, `sleepTalkingEventsPerHour` computed properties; rewrote `sleepScore` with conditional sleep talking and stage penalties |
+| `Packages/Env/Sources/Services/MockDataGenerator.swift` | +43/-1 | Added `generateSleepTalkingEvents()` helper; 10-40% of sessions get 1-4 sleep talking events (probability inversely scales with target score); events are 5-30s, `.quiet`, -55 to -45 dB; appended to session events; updated `forScore()` comment |
+| `Packages/Models/Sources/Data/SleepSession.swift` | +53/-8 | Added `StageStats` struct, `stageStats`, `sleepTalkingDuration`, `sleepTalkingEvents`, `sleepTalkingPercentage`, `sleepTalkingEventsPerHour` computed properties; rewrote `sleepScore` with conditional sleep talking and stage penalties |
+
+### Architecture Decisions
+- **Conditional penalties via data presence**: No need for feature flags or user preference checks in the model. If `sleepStageSegments` is nil → no stage penalty. If no `.sleepTalking` events → no talking penalty. This is elegant and automatically backward compatible with all existing sessions.
+- **Separate penalty caps**: Each new penalty is capped at 15. Snoring remains the dominant factor (max 70 + 20 + 30 = 120). Stages and talking are modifiers, not primary drivers — appropriate since the app's core value proposition is acoustic sleep monitoring.
+- **Evidence-based thresholds**: Deep ≥15%, REM ≥18%, awake ≤8% are grounded in NSF/AASM guidelines and WASO norms, not arbitrary numbers.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors, zero warnings
+
+`Session 62d — Holistic sleep score with sleep talking & stage penalties`
+- Sleep talking penalty: max 15 (duration%×0.35 + events/hr×0.8)
+- Sleep stage penalty: max 15 (deep deficit×0.6 + REM deficit×0.4 + awake excess×1.0)
+- Backward compatible, conditional on data presence
+- All builds pass, sanity checks verified
+
+### Next Session
+- All tracked tasks are complete. Next work would be new features per `docs/Roadmap.md` or user-requested changes.
+
+### Open Questions
+- None
+
+---
+
 
 ## 2026-05-27 — Session 63: Onboarding Health & Watch Screen
 
@@ -4192,6 +4319,103 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 - 0.8 s confirmation delay before auto-advance on both HealthKit and Microphone permission pages
 - Onboarding flow expanded from 5 → 6 pages
 - 6 new localized strings
+
+### Open Questions
+- None
+
+---
+
+## 2026-05-27 → 2026-05-28 — Session: Snore Detection Investigation & Recalibration
+
+### Completed
+- **Investigation**: User reported app under-counts vs competitor (~3 min vs ~25 min on the same night). Mapped the full pipeline: `AudioRecorder` → `SoundAnalysisDetector` + `FFTAnalyzer` → `SnoreDetector.classify()` → `SessionManager` event tracking.
+- **Data-driven diagnosis on user's overnight session**: parsed `rawlog_*.json` (303k samples, 4.5 h) and read the 3.1 GB raw `.caf` (Float32 PCM, offset 4096) directly in Python. Proved per-second RMS sat at the noise floor — loudest 25 min at −69.6 dBFS, only ~2 dB above the −72 median. **Snoring never reached the detector at a usable level**; thresholds/event-logic were never going to matter.
+- **Capture path rewrite — 3 iterations on real device**:
+  1. ❌ `mode: .measurement → .default` + `setInputGain(1.0)` to boost level. AGC + maxed preamp amplified the noise floor → mic sounded loud/noisy. **Reverted.**
+  2. ❌ Narrow band-pass (125–700 Hz) → 40 Hz high-pass for full-band capture. User reported **loud speaker feedback during recording** — `engine.mainMixerNode.volume = 0` was leaking. **Superseded by #3.**
+  3. ✅ **Removed the EQ/mixer/speaker graph entirely.** `start/resumeRecording` now tap `inputNode` directly (no output path = nothing to feed back); `pauseRecording` updated to remove tap from `inputNode`.
+- **Overnight verification** (build #3): user reported **3 min → 15 min detected (5× improvement)**, peak −12.8 dBFS, `snoreConfidence` reaching 0.89, speaker feedback gone.
+- **Ground-truth validation against the new `.caf`**: built an independent burst-detector (energy spikes with snore periodicity, no SoundAnalysis) → estimated 24.2 min "loose" / 16.6 min "strong" snoring. Extracted 12 WAV samples (densest snore stretches, true-quiet references, suspicious peaks); user listening test confirmed quiet samples are silent, the −28 dBFS peak at t=60 was a cough (not snoring), and a 1-second isolated snore at t=330 was missed by both detector and competitor-comparable. **Real snore time ≈ 22–25 min.**
+- **Threshold recalibration**:
+  - `SnoreDetector` gained `confidenceGate`/`highConfidenceGate`/`quietFallbackGate` Float properties (medium defaults 0.35/0.55/0.45, replacing hardcoded 0.5/0.7/0.6).
+  - dB defaults dropped to −50/−40/−25/−15 (was −30/−20/−10/−5).
+  - `SessionManager.applyDetectionSensitivity` rewritten to set all 7 detector values per Low/Med/High instead of a single dB offset.
+  - `minEventDuration` (computed property, sensitivity-dependent 2/1/0.5 s per Low/Med/High) replaces the hardcoded 2 s in `finalizeActiveEvent` — lets isolated single snores (~1 s) survive on Medium/High.
+- **Handover doc** created at `docs/SNORE_DETECTION_HANDOVER.md` (self-contained: problem, pipeline map, all data tables, change history with revert tracking, decision tree for next session, offline-analysis recipes).
+
+### Technical Details
+- The detector funnel was 100% dependent on SoundAnalysis: `SnoreDetector.classify()` (`SnoreDetector.swift:35`) takes the SA path whenever `snoreConfidence > 0`, which was true for ~100% of samples → the FFT/dB spectral fallback **never ran**. Still doesn't post-recalibration; flagged as open.
+- `FFTAnalyzer.spectralScore` is logged as `0.000` for every one of the 303k samples in the old log AND every one of the 407k samples in the new log → the FFT is hitting its zero-guard early-return (`fftSetup` likely nil or `floatChannelData` nil). Flagged.
+- Speaker-feedback root cause: `engine.mainMixerNode.volume = 0` does **not** fully mute the `.playAndRecord` + `.defaultToSpeaker` output path. Loud input still leaks audibly. Removing the input→mixer connection entirely (tap `inputNode` directly) was the correct fix; the input node renders without an explicit downstream graph connection because the tap drives it.
+- `.caf` format used by the app: raw little-endian Float32 PCM, mono 48 kHz, data starts at byte offset 4096. Readable with Python `array.array('f', file.read())` — no ffmpeg/sox needed.
+- Burst-detection algorithm: 100 ms RMS windows; rolling 30 s median as local noise floor; burst = ≥6 dB above floor for 0.3–3.5 s; episode = ≥3 bursts within 8 s gaps. STRONG/LOOSE estimates give a confidence interval on "real snoring."
+- Sensitivity tiers calibrated against ground truth, not guessed: dB floors sit ~10 dB above measured noise floor (~−65) and ~10 dB below measured snore peaks (~−45). A cough at −28 dBFS won't fire even on High because SA gives coughs low snore-confidence (`confidenceGate` filters on classifier output, not amplitude).
+- Detected-time vs event-time mismatch: per-sample state classification gives ~9 min on the new log, but the app displays ~15 min because of event merging (gap-threshold 10 s within `SessionManager.swift`).
+
+### Files Changed
+
+| File | What Changed |
+|------|--------------|
+| `Packages/AudioEngine/Sources/Engine/AudioRecorder.swift` | Removed EQ/mixer/speaker graph; `start/resumeRecording` install tap on `inputNode` directly; `pauseRecording` removes tap from `inputNode`. (Earlier in-session attempts `.measurement→.default+gain` and narrow→high-pass were reverted/superseded — net diff is just the direct-tap pattern.) |
+| `Packages/AudioEngine/Sources/Engine/SnoreDetector.swift` | Added `confidenceGate`/`highConfidenceGate`/`quietFallbackGate` Float properties (defaults 0.35/0.55/0.45); dB defaults changed to -50/-40/-25/-15; replaced hardcoded 0.5/0.7/0.6 in `classifyWithSoundAnalysis` with the new properties; updated doc comments. |
+| `Packages/Env/Sources/Services/SessionManager.swift` | Rewrote `applyDetectionSensitivity()` to set all 7 detector values per Low/Med/High; added `minEventDuration` computed property (2/1/0.5 s); replaced hardcoded `2.0` in `finalizeActiveEvent` with `minEventDuration`; updated the surrounding doc comment. |
+| `docs/SNORE_DETECTION_HANDOVER.md` | **New** — self-contained investigation handover. Pipeline map, all data tables, full code-change history with revert tracking, decision tree for next session keyed on the next-night test outcome, offline-analysis Python recipes. |
+
+### Build Status
+- **BUILD SUCCEEDED** after every change (verified with `mcp__XcodeBuildMCP__build_sim`). SourceKit shows `AVAudioSession unavailable in macOS` warnings on `AudioRecorder.swift` — these are iOS-only-file indexing false positives, not compiler errors.
+
+`Fix snore detection capture path + recalibrate thresholds`
+- AudioRecorder: tap `inputNode` directly, remove EQ/mixer/speaker graph that leaked audible feedback at non-trivial input levels
+- SnoreDetector: configurable SA confidence gates; dB defaults recalibrated for full-band capture (old values were tuned for the old narrow band-pass)
+- SessionManager: per-sensitivity SA gate + dB floor + minEventDuration mapping; `minEventDuration` now sensitivity-dependent (2/1/0.5 s) so isolated single snores survive on Medium/High
+- Add `docs/SNORE_DETECTION_HANDOVER.md` with investigation findings, ground-truth data, and decision tree for next-session iteration
+
+### Open Questions
+- **Next-night verification pending**: confirm displayed snore time lands ~20–24 min on Medium for a typical night, and that the anti-snore melody doesn't fire on non-snores.
+- `FFTAnalyzer.spectralScore` returns 0 for every sample — secondary bug; fallback path is non-functional. Worth fixing once the SA path is validated.
+- `SnoreDetector.swift:35` — `if snoreConfidence > 0 { return classifyWithSoundAnalysis(...) }` shadows the spectral path ~100% of the time. Should become `>= 0.05` (or similar) once the FFT is fixed so the fallback can actually rescue when SA is unsure.
+- Whether `inputNode.installTap` without a downstream connection runs reliably across all iOS versions and device routings (Bluetooth, USB mic, etc.) — works on the user's iPhone per the overnight test, but worth a wider-device validation before shipping.
+
+
+
+---
+
+## 2026-05-28 — Session 64: Sleep Stages Info Sheet + HealthKit Query Fix
+
+### Completed
+- **Sleep stages info sheet**: `SleepStagesInfoView` educational sheet that opens from the `info.circle` button in `SleepStageBreakdownView`. Shows personalized stage interpretation with status badges (Good/Low/High), recommended ranges for each stage, score impact formula, and visual threshold bars comparing the user's actual values against targets.
+- **HealthKit sleep stage query fix**: Removed `.strictStartDate` from `HealthKitSync.fetchSleepStages` so overlapping Watch samples are included. Added `stagesEmptyAndOld` retry logic in `SessionDetailView` for sessions older than 1 hour that previously fetched empty stage arrays.
+
+### Technical Details
+- `SleepStagesInfoView` uses `@Environment(\.dismiss)` for the close button (`xmark.circle.fill`)
+- Stage cards show: color indicator, name, status badge, duration + percentage, recommended range (only when not Good), and one-sentence description
+- Score impact section shows the formula (Deep ≥15%, REM ≥18%, Awake ≤8%), actual penalty, and 3 threshold bars with target markers
+- Threshold bars use `GeometryReader` to render value bar + target circle marker on a shared background
+- 15 new localized strings for sleep stages info content + 1 new `action.close` string
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/DesignSystem/Sources/Components/SleepStagesInfoView.swift` | +274 | **New** — Educational sheet with stage cards, score impact, threshold bars |
+| `Packages/DesignSystem/Sources/Components/SleepStageBreakdownView.swift` | +18/-2 | Added `info.circle` button + `.sheet` presentation |
+| `Packages/Env/Sources/Services/HealthKitSync.swift` | +1/-1 | Removed `.strictStartDate` from sleep stage query predicate |
+| `Packages/Recordings/Sources/Views/SessionDetailView.swift` | +4/-1 | Added `stagesEmptyAndOld` retry for old sessions with empty stage arrays |
+| `Packages/DesignSystem/Sources/Resources/Localizable.xcstrings` | +156 | 16 new localized strings |
+| `Packages/DesignSystem/Sources/Strings.swift` | regenerated | Auto-generated accessors |
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors
+
+### Suggested Branch
+`feature/sleep-stages-info-sheet`
+
+### Suggested Commit
+`Session 64 — Sleep stages info sheet + HealthKit query fix`
+- SleepStagesInfoView with personalized stage interpretation and score impact
+- Info button on SleepStageBreakdownView header
+- Fix HealthKit query to include overlapping sleep stage samples
+- Retry empty stage fetches for sessions older than 1 hour
 
 ### Open Questions
 - None
