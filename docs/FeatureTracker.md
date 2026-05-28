@@ -2,7 +2,7 @@
 
 > Auto-updated by the AI after every task. This is the local source of truth.
 
-Last updated: 2026-05-27 (Session 63)
+Last updated: 2026-05-28 (Session 64)
 
 ---
 
@@ -66,6 +66,8 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-05-28 | Sleep stages info sheet | Completed | `SleepStagesInfoView` educational sheet showing personalized stage interpretation (Good/Low/High badges with recommended ranges), score impact formula, and visual threshold bars; info button added to `SleepStageBreakdownView` header; 15 new localized strings; close button (`xmark.circle.fill`); build succeeds |
+| 2026-05-28 | HealthKit sleep stage query fix | Completed | Removed `.strictStartDate` from `fetchSleepStages` predicate so overlapping Watch samples are included; added `stagesEmptyAndOld` retry in `SessionDetailView` for sessions >1h old with empty stage arrays; build succeeds |
 | 2026-05-27 | Mock data sleep talking | Completed | `MockDataGenerator` now generates `.sleepTalking` events for ~10-40% of sessions (probability scales inversely with target score); 1-4 events per session, 5-30s each, `.quiet` intensity, -55 to -45 dB; spread randomly across session; max score impact ~0.6 pts — well within ±12 drift tolerance; build succeeds |
 | 2026-05-27 | Holistic sleep score formula | Completed | `sleepScore` now includes conditional `sleepTalkingPenalty` (max 15: duration%×0.35 + events/hr×0.8) and `stagePenalty` (max 15: deep deficit×0.6 + REM deficit×0.4 + awake excess×1.0); thresholds grounded in sleep medicine (deep≥15%, REM≥18%, awake≤8%); backward compatible (nil stages = 0, no talking events = 0); build succeeds; sanity checks verified |
 | 2026-05-27 | Speech detection threshold tuning | Completed | `SpeechDetector.dbFloor` -40 → -55; speech event min duration 2.0s → 0.5s; debug logging for rejections; catches quiet sleep talking and brief utterances; build succeeds |
@@ -192,6 +194,8 @@ _Most recent first. The AI appends here after every task._
 
 | Task | Feature | Completed | Duration |
 |------|---------|-----------|----------|
+| Sleep stages info sheet | F14 | 2026-05-28 | — |
+| HealthKit sleep stage query fix | F12 | 2026-05-28 | — |
 | F1-T6 Health & Watch onboarding | F1 | 2026-05-27 | — |
 | P4-T5 Settings toggle | F14 | 2026-05-27 | — |
 | P4-T4 Statistics integration | F14 | 2026-05-26 | — |

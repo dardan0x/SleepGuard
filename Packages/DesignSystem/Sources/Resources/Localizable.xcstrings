@@ -32,6 +32,17 @@
         }
       }
     },
+    "action.close": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Close"
+          }
+        }
+      }
+    },
     "action.delete": {
       "localizations": {
         "en": {
@@ -2655,6 +2666,204 @@
           "stringUnit": {
             "state": "translated",
             "value": "Health connected"
+          }
+        }
+      }
+    },
+    "sleepStagesInfo.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "About Sleep Stages"
+          }
+        }
+      }
+    },
+    "sleepStagesInfo.yourStages": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your Stages"
+          }
+        }
+      }
+    },
+    "sleepStagesInfo.scoreImpact": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Score Impact"
+          }
+        }
+      }
+    },
+    "sleepStagesInfo.stageStatus.good": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Good"
+          }
+        }
+      }
+    },
+    "sleepStagesInfo.stageStatus.low": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Low"
+          }
+        }
+      }
+    },
+    "sleepStagesInfo.stageStatus.high": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "High"
+          }
+        }
+      }
+    },
+    "sleepStagesInfo.awake.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Time spent awake during the night. Brief awakenings are normal."
+          }
+        }
+      }
+    },
+    "sleepStagesInfo.rem.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rapid Eye Movement sleep. Important for memory, learning, and mood."
+          }
+        }
+      }
+    },
+    "sleepStagesInfo.light.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Light sleep transitions you between wakefulness and deeper stages."
+          }
+        }
+      }
+    },
+    "sleepStagesInfo.deep.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deep sleep restores the body, supports immune function, and aids recovery."
+          }
+        }
+      }
+    },
+    "sleepStagesInfo.scoreFormula": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sleep stages can affect your score by up to 15 points. Targets: Deep ≥ 15%, REM ≥ 18%, Awake ≤ 8%."
+          }
+        }
+      }
+    },
+    "sleepStagesInfo.penaltyFormat": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This session's stage penalty: -%d points"
+          }
+        }
+      }
+    },
+    "sleepStagesInfo.noPenalty": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This session has no stage penalty — great sleep architecture!"
+          }
+        }
+      }
+    },
+    "sleepStagesInfo.recommended": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recommended: %@"
+          }
+        }
+      }
+    },
+    "sleepStagesInfo.recommended.awake": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "≤ 8%"
+          }
+        }
+      }
+    },
+    "sleepStagesInfo.recommended.rem": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "≥ 18%"
+          }
+        }
+      }
+    },
+    "sleepStagesInfo.recommended.light": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "45–55%"
+          }
+        }
+      }
+    },
+    "sleepStagesInfo.recommended.deep": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "≥ 15%"
           }
         }
       }

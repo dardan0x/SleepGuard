@@ -4376,3 +4376,46 @@ score = 100 - snoringPenalty - eventsPenalty - intensityPenalty
 - `SnoreDetector.swift:35` — `if snoreConfidence > 0 { return classifyWithSoundAnalysis(...) }` shadows the spectral path ~100% of the time. Should become `>= 0.05` (or similar) once the FFT is fixed so the fallback can actually rescue when SA is unsure.
 - Whether `inputNode.installTap` without a downstream connection runs reliably across all iOS versions and device routings (Bluetooth, USB mic, etc.) — works on the user's iPhone per the overnight test, but worth a wider-device validation before shipping.
 
+
+
+---
+
+## 2026-05-28 — Session 64: Sleep Stages Info Sheet + HealthKit Query Fix
+
+### Completed
+- **Sleep stages info sheet**: `SleepStagesInfoView` educational sheet that opens from the `info.circle` button in `SleepStageBreakdownView`. Shows personalized stage interpretation with status badges (Good/Low/High), recommended ranges for each stage, score impact formula, and visual threshold bars comparing the user's actual values against targets.
+- **HealthKit sleep stage query fix**: Removed `.strictStartDate` from `HealthKitSync.fetchSleepStages` so overlapping Watch samples are included. Added `stagesEmptyAndOld` retry logic in `SessionDetailView` for sessions older than 1 hour that previously fetched empty stage arrays.
+
+### Technical Details
+- `SleepStagesInfoView` uses `@Environment(\.dismiss)` for the close button (`xmark.circle.fill`)
+- Stage cards show: color indicator, name, status badge, duration + percentage, recommended range (only when not Good), and one-sentence description
+- Score impact section shows the formula (Deep ≥15%, REM ≥18%, Awake ≤8%), actual penalty, and 3 threshold bars with target markers
+- Threshold bars use `GeometryReader` to render value bar + target circle marker on a shared background
+- 15 new localized strings for sleep stages info content + 1 new `action.close` string
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/DesignSystem/Sources/Components/SleepStagesInfoView.swift` | +274 | **New** — Educational sheet with stage cards, score impact, threshold bars |
+| `Packages/DesignSystem/Sources/Components/SleepStageBreakdownView.swift` | +18/-2 | Added `info.circle` button + `.sheet` presentation |
+| `Packages/Env/Sources/Services/HealthKitSync.swift` | +1/-1 | Removed `.strictStartDate` from sleep stage query predicate |
+| `Packages/Recordings/Sources/Views/SessionDetailView.swift` | +4/-1 | Added `stagesEmptyAndOld` retry for old sessions with empty stage arrays |
+| `Packages/DesignSystem/Sources/Resources/Localizable.xcstrings` | +156 | 16 new localized strings |
+| `Packages/DesignSystem/Sources/Strings.swift` | regenerated | Auto-generated accessors |
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors
+
+### Suggested Branch
+`feature/sleep-stages-info-sheet`
+
+### Suggested Commit
+`Session 64 — Sleep stages info sheet + HealthKit query fix`
+- SleepStagesInfoView with personalized stage interpretation and score impact
+- Info button on SleepStageBreakdownView header
+- Fix HealthKit query to include overlapping sleep stage samples
+- Retry empty stage fetches for sessions older than 1 hour
+
+### Open Questions
+- None
