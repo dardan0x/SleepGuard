@@ -15,7 +15,7 @@ List past sleep sessions grouped by month. Tapping a session opens a detail view
 | `Packages/Recordings/Sources/Recordings/RecordingsListView.swift` | Container view with ViewState, month-grouped sections, empty/loaded/error states |
 | `Packages/Recordings/Sources/Recordings/RecordingRowView.swift` | Presentational row with date, duration, events, score badge, tap navigation |
 | `Packages/Recordings/Sources/Recordings/SessionDetailView.swift` | Session detail with score gauge, stats grid, timeline, event list, mini player |
-| `SnoreGuard/AppRegistry.swift` | Route registration for `.recordingDetail(id:)` → `SessionDetailView` |
+| `SleepGuard/AppRegistry.swift` | Route registration for `.recordingDetail(id:)` → `SessionDetailView` |
 | `Packages/AudioEngine/Sources/AudioEngine/AudioRecorder.swift` | Audio file saving infrastructure (full session `.caf` file) |
 | `Packages/Models/Sources/Models/SleepSession.swift` | `audioFileURL` property added |
 | `Packages/Env/Sources/Env/SessionManager.swift` | File URL generation, audio cleanup on discard |

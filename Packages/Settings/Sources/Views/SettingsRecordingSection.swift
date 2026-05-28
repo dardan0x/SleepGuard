@@ -32,6 +32,19 @@ struct SettingsRecordingSection: View {
           .pickerStyle(.segmented)
           .frame(width: 180)
         }
+        HStack(spacing: 10) {
+          SettingsIconBackground(systemName: "bubble.left.fill", color: theme.accent)
+          Text(Strings.settingsDetectSleepTalking)
+            .font(.system(size: 15))
+            .foregroundStyle(theme.textPrimary)
+          Spacer()
+          Toggle("", isOn: Binding(
+            get: { userPreferences.detectSleepTalking },
+            set: { userPreferences.detectSleepTalking = $0 }
+          ))
+          .labelsHidden()
+          .tint(theme.scoreGreen)
+        }
       }
       .padding(16)
       .background(theme.bgCard)

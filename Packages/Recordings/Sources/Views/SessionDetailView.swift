@@ -11,15 +11,17 @@ public struct SessionDetailView: View {
   let sessionID: UUID
 
   @Environment(Theme.self) private var theme
+  @Environment(UserPreferences.self) private var userPreferences
   @Environment(\.modelContext) private var modelContext
   @Environment(\.dismiss) private var dismiss
 
   @State private var viewState: ViewState = .loading
   @State private var activeSheet: DetailSheet?
+  @State private var selectedFilter: EventCategoryFilter = .all
 
   // MARK: - Share
-  @State private var isSharePresented = false
-  @State private var shareItems: [Any] = []
+  @State private var isGeneratingPDF = false
+  @State private var isExportingEvent = false
 
   public init(sessionID: UUID) {
     self.sessionID = sessionID
@@ -33,8 +35,8 @@ public struct SessionDetailView: View {
           .task {
             await loadSession()
           }
-      case .loaded(let session, let sortedEvents, let isClipSession):
-        loadedBody(session: session, sortedEvents: sortedEvents, isClipSession: isClipSession)
+      case .loaded(let session, _, let isClipSession):
+        loadedBody(session: session, isClipSession: isClipSession)
       case .error:
         errorBody
       }
@@ -42,7 +44,7 @@ public struct SessionDetailView: View {
     .background(theme.bgPrimary.ignoresSafeArea())
   }
 
-  private func loadedBody(session: SleepSession, sortedEvents: [SnoreEvent], isClipSession: Bool) -> some View {
+  private func loadedBody(session: SleepSession, isClipSession: Bool) -> some View {
     ScrollView {
       VStack(spacing: 24) {
         SessionDetailHeaderView(session: session, score: session.sleepScore)
@@ -53,8 +55,18 @@ public struct SessionDetailView: View {
 
         LowBatteryBannerView(session: session)
 
+        if shouldShowFilter {
+          Picker("", selection: $selectedFilter) {
+            ForEach(EventCategoryFilter.allCases, id: \.self) { filter in
+              Text(filter.displayName).tag(filter)
+            }
+          }
+          .pickerStyle(.segmented)
+        }
+
         SessionDetailEventsView(
-          events: sortedEvents,
+          events: filteredEvents,
+          title: eventsTitle,
           onShowAll: { activeSheet = .events },
           onPlayEvent: { event in
             activeSheet = .player(initialEvent: event)
@@ -89,10 +101,11 @@ public struct SessionDetailView: View {
           Button {
             exportReport(session: session)
           } label: {
-            Image(systemName: "doc.text")
+            Image(systemName: isGeneratingPDF ? "clock" : "doc.text")
               .font(.system(size: 17))
-              .foregroundStyle(theme.accent)
+              .foregroundStyle(isGeneratingPDF ? theme.textTertiary : theme.accent)
           }
+          .disabled(isGeneratingPDF)
           if !isClipSession, session.audioFileURL != nil {
             Button {
               shareFullSession(session: session)
@@ -117,21 +130,30 @@ public struct SessionDetailView: View {
       case .player(let initialEvent):
         PlayerSheetView(
           session: session,
-          sortedEvents: initialEvent.map { [$0] } ?? sortedEvents,
+          sortedEvents: initialEvent.map { [$0] } ?? filteredEvents,
           isClipSession: isClipSession,
           initialEvent: initialEvent
         )
       case .events:
         EventsSheetView(
           session: session,
-          events: sortedEvents,
+          events: filteredEvents,
           isClipSession: isClipSession,
           onPlayEvent: { _ in }
         )
       }
     }
-    .sheet(isPresented: $isSharePresented) {
-      ActivityView(activityItems: shareItems)
+
+    .overlay {
+      if isExportingEvent {
+        ZStack {
+          theme.bgPrimary.opacity(0.7)
+            .ignoresSafeArea()
+          ProgressView()
+            .scaleEffect(1.5)
+            .tint(theme.accent)
+        }
+      }
     }
   }
 
@@ -193,12 +215,14 @@ public struct SessionDetailView: View {
 
   private func shareEventClip(url: URL) {
     guard FileManager.default.fileExists(atPath: url.path) else { return }
-    shareItems = [url]
-    isSharePresented = true
+    presentShareSheet(items: [url])
   }
 
   private func exportAndShare(event: SnoreEvent, in session: SleepSession) async {
     guard let sourceURL = AudioFileURLResolver.resolve(session.audioFileURL) else { return }
+
+    isExportingEvent = true
+    defer { isExportingEvent = false }
 
     let asset = AVURLAsset(url: sourceURL)
     guard let exportSession = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetAppleM4A) else { return }
@@ -224,8 +248,12 @@ public struct SessionDetailView: View {
     await exportSession.export()
     guard exportSession.status == .completed else { return }
 
-    shareItems = [clipURL]
-    isSharePresented = true
+    // Verify the exported file exists and has content before presenting
+    guard FileManager.default.fileExists(atPath: clipURL.path),
+          let attrs = try? FileManager.default.attributesOfItem(atPath: clipURL.path),
+          let fileSize = attrs[.size] as? Int, fileSize > 0 else { return }
+
+    presentShareSheet(items: [clipURL])
   }
 
   // MARK: - Data & Actions
@@ -248,6 +276,14 @@ public struct SessionDetailView: View {
         predicate: #Predicate { $0.id == sessionID }
       )
       if let session = try modelContext.fetch(descriptor).first {
+        let stagesEmptyAndOld = (session.sleepStageSegments?.isEmpty == true)
+          && (session.endDate?.timeIntervalSinceNow ?? 0) < -3600
+        if userPreferences.enhancedSleepTracking && (session.sleepStageSegments == nil || stagesEmptyAndOld) {
+          let stages = await HealthKitSync.shared.fetchSleepStages(for: session)
+          session.sleepStageSegments = stages.isEmpty ? [] : stages
+          try modelContext.save()
+        }
+
         let sortedEvents = session.events?.sorted(by: { $0.timestamp < $1.timestamp }) ?? []
         let isClipSession = sortedEvents.contains(where: { AudioFileURLResolver.resolve($0.audioFileURL) != nil })
         viewState = .loaded(session: session, sortedEvents: sortedEvents, isClipSession: isClipSession)
@@ -265,17 +301,24 @@ public struct SessionDetailView: View {
 
   private func exportReport(session: SleepSession) {
     Task {
+      isGeneratingPDF = true
+      defer { isGeneratingPDF = false }
       if let url = SleepReportPDFGenerator().generatePDF(for: session) {
-        shareItems = [url]
-        isSharePresented = true
+        presentShareSheet(items: [url])
       }
     }
   }
 
   private func shareFullSession(session: SleepSession) {
     guard let url = AudioFileURLResolver.resolve(session.audioFileURL) else { return }
-    shareItems = [url]
-    isSharePresented = true
+    presentShareSheet(items: [url])
+  }
+
+  private func presentShareSheet(items: [Any]) {
+    guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+          let rootVC = windowScene.keyWindow?.rootViewController else { return }
+    let activityVC = UIActivityViewController(activityItems: items, applicationActivities: nil)
+    rootVC.present(activityVC, animated: true)
   }
 
   private func deleteSession() {
@@ -300,6 +343,50 @@ public struct SessionDetailView: View {
       }
     } catch {
       // Deletion failed; fail silently
+    }
+  }
+
+  private var shouldShowFilter: Bool {
+    guard case .loaded(_, let sortedEvents, _) = viewState else { return false }
+    return Set(sortedEvents.map(\.category)).count > 1
+  }
+
+  private var filteredEvents: [SnoreEvent] {
+    guard case .loaded(_, let sortedEvents, _) = viewState else { return [] }
+    return sortedEvents.filter { selectedFilter.includes(event: $0) }
+  }
+
+  private var eventsTitle: String {
+    switch selectedFilter {
+    case .all: return Strings.sessionRecordingEventsFormatAll
+    case .snoring: return Strings.sessionRecordingEventsFormatSnoring
+    case .sleepTalking: return Strings.sessionRecordingEventsFormatSleepTalking
+    case .noise: return Strings.sessionRecordingEventsFormatNoise
+    }
+  }
+
+  private enum EventCategoryFilter: String, CaseIterable {
+    case all
+    case snoring
+    case sleepTalking
+    case noise
+
+    var displayName: String {
+      switch self {
+      case .all: return Strings.filterAll
+      case .snoring: return Strings.filterSnoring
+      case .sleepTalking: return Strings.filterSleepTalking
+      case .noise: return Strings.filterNoise
+      }
+    }
+
+    func includes(event: SnoreEvent) -> Bool {
+      switch self {
+      case .all: return true
+      case .snoring: return event.category == .snoring
+      case .sleepTalking: return event.category == .sleepTalking
+      case .noise: return event.category == .noise || event.category == .coughing || event.category == .other
+      }
     }
   }
 

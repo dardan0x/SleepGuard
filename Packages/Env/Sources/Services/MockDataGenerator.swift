@@ -120,9 +120,18 @@ public enum MockDataGenerator {
           events.append(event)
         }
 
+        // Optionally generate sleep talking events (more likely on poor-sleep nights)
+        let talkingEvents = generateSleepTalkingEvents(
+          targetScore: targetScore,
+          sessionStart: sessionStart,
+          sessionDuration: sessionDuration
+        )
+        events.append(contentsOf: talkingEvents)
+
         session.events = events
         session.averageDB = events.map(\.averageDB).reduce(0, +) / Double(events.count)
         session.peakDB = events.map(\.peakDB).max() ?? 0
+        session.sleepStageSegments = generateSleepStages(duration: sessionDuration)
 
         // Verify score is in expected range; log if significantly off
         let computedScore = session.sleepScore
@@ -165,8 +174,11 @@ public enum MockDataGenerator {
     ///
     /// The sleep score formula is:
     ///   score = 100 - snoringPenalty - eventsPenalty - intensityPenalty
+    ///             - sleepTalkingPenalty - stagePenalty
     ///
-    /// We work backwards to choose parameters that produce the desired score.
+    /// Sleep talking and stage penalties are near-zero for mock data
+    /// (no sleep talking events, healthy stage distributions), so the
+    /// existing backward derivation remains valid.
     static func forScore(_ score: Int, duration: TimeInterval) -> SessionParams {
       let hours = duration / 3600
 
@@ -242,6 +254,158 @@ public enum MockDataGenerator {
       case .epic:   return Double.random(in: minPeak...(-8))
       }
     }
+  }
+
+  // MARK: - Sleep Talking
+
+  /// Generates occasional sleep talking events for realism.
+  /// More frequent on poor-sleep nights (lower target scores).
+  /// Events are short (5–30 s), quiet, and spread across the session.
+  private static func generateSleepTalkingEvents(
+    targetScore: Int,
+    sessionStart: Date,
+    sessionDuration: TimeInterval
+  ) -> [SnoreEvent] {
+    // Probability increases as sleep quality decreases
+    let probability: Double
+    if targetScore < 50 {
+      probability = 0.40
+    } else if targetScore < 65 {
+      probability = 0.30
+    } else if targetScore < 80 {
+      probability = 0.20
+    } else {
+      probability = 0.10
+    }
+
+    guard Double.random(in: 0...1) < probability else { return [] }
+
+    let eventCount = Int.random(in: 1...4)
+    var talkingEvents: [SnoreEvent] = []
+
+    for _ in 0..<eventCount {
+      let eventDuration = Double.random(in: 5...30)
+      let avgDB = Double.random(in: -55...(-45))
+      let peakDB = Double.random(in: avgDB + 3...(-40))
+
+      let burst = SnoreBurst(startOffset: 0, endOffset: eventDuration)
+
+      // Spread across the full session (sleep talking can happen any time)
+      let offset = Double.random(in: 0...max(1, sessionDuration - eventDuration))
+      let timestamp = sessionStart.addingTimeInterval(offset)
+
+      let event = SnoreEvent(
+        timestamp: timestamp,
+        category: .sleepTalking,
+        intensity: .quiet,
+        averageDB: avgDB,
+        peakDB: peakDB,
+        bursts: [burst],
+        duration: eventDuration
+      )
+      talkingEvents.append(event)
+    }
+
+    return talkingEvents
+  }
+
+  // MARK: - Sleep Stages
+
+  /// Generates realistic sleep stage segments for a session of the given duration.
+  /// Produces a continuous hypnogram with no gaps: light → deep → light → REM cycles.
+  private static func generateSleepStages(duration: TimeInterval) -> [SleepStageSegment] {
+    var segments: [SleepStageSegment] = []
+    var offset: TimeInterval = 0
+
+    // Awake at start (sleep onset: 2–6 min)
+    let awakeStart = Double.random(in: 120...360)
+    segments.append(SleepStageSegment(stage: .awake, startOffset: offset, duration: awakeStart))
+    offset += awakeStart
+
+    // Initial light sleep (falling asleep: 5–10 min)
+    let initialLight = Double.random(in: 300...600)
+    segments.append(SleepStageSegment(stage: .light, startOffset: offset, duration: initialLight))
+    offset += initialLight
+
+    var cycleIndex = 0
+    while offset < duration - 300 {
+      let remaining = duration - offset
+      let cycleDuration = min(5400 + Double.random(in: -300...300), remaining)
+      let progress = offset / duration
+
+      // Deep decreases from ~22% early to ~0% late; REM increases from ~15% to ~30%
+      let deepRatio = max(0, Double.random(in: 0.18...0.25) - progress * 0.22)
+      let remRatio = min(0.30, Double.random(in: 0.13...0.18) + progress * 0.15)
+      let lightDuration = cycleDuration * (1.0 - deepRatio - remRatio)
+
+      let deepDuration = cycleDuration * deepRatio
+      let remDuration = cycleDuration * remRatio
+
+      // Light → Deep → Light → REM → Light (always contiguous)
+      let preDeepLight = lightDuration * 0.25
+      let postDeepLight = lightDuration * 0.30
+      let finalLight = lightDuration * 0.45
+
+      segments.append(SleepStageSegment(stage: .light, startOffset: offset, duration: preDeepLight))
+      offset += preDeepLight
+
+      if deepDuration > 60 {
+        segments.append(SleepStageSegment(stage: .deep, startOffset: offset, duration: deepDuration))
+        offset += deepDuration
+      }
+
+      segments.append(SleepStageSegment(stage: .light, startOffset: offset, duration: postDeepLight))
+      offset += postDeepLight
+
+      if remDuration > 60 {
+        segments.append(SleepStageSegment(stage: .rem, startOffset: offset, duration: remDuration))
+        offset += remDuration
+      }
+
+      segments.append(SleepStageSegment(stage: .light, startOffset: offset, duration: max(0, finalLight)))
+      offset += max(0, finalLight)
+
+      cycleIndex += 1
+
+      // Brief awake between cycles (~8% chance, 30s–2min)
+      if Double.random(in: 0...1) < 0.08 && offset < duration - 120 {
+        let awake = Double.random(in: 30...120)
+        segments.append(SleepStageSegment(stage: .awake, startOffset: offset, duration: awake))
+        offset += awake
+      }
+    }
+
+    // Fill remaining time with light sleep
+    if offset < duration {
+      segments.append(SleepStageSegment(stage: .light, startOffset: offset, duration: duration - offset))
+      offset = duration
+    }
+
+    // Final awakening: replace last 3–6 min with awake
+    if let last = segments.last, last.stage != .awake {
+      let awakeDuration = Double.random(in: 180...360)
+      let awakeStart = duration - awakeDuration
+      if awakeStart > last.startOffset {
+        segments[segments.count - 1] = SleepStageSegment(
+          stage: last.stage,
+          startOffset: last.startOffset,
+          duration: awakeStart - last.startOffset
+        )
+        segments.append(SleepStageSegment(
+          stage: .awake,
+          startOffset: awakeStart,
+          duration: awakeDuration
+        ))
+      } else {
+        segments[segments.count - 1] = SleepStageSegment(
+          stage: .awake,
+          startOffset: last.startOffset,
+          duration: duration - last.startOffset
+        )
+      }
+    }
+
+    return segments
   }
 }
 

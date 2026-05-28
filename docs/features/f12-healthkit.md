@@ -15,8 +15,8 @@ Sync sleep session data to Apple Health so users can view sleep trends alongside
 | `Packages/Env/Sources/Env/UserPreferences.swift` | Added `syncToHealthKit` toggle |
 | `Packages/Settings/Sources/Settings/SettingsView.swift` | Added HealthKit sync toggle in Data section |
 | `Packages/SleepSession/Sources/SleepSession/SessionSummaryView.swift` | Triggers HealthKit sync after session save |
-| `SnoreGuard/SnoreGuard/SnoreGuard.entitlements` | HealthKit capability entitlement |
-| `SnoreGuard.xcodeproj/project.pbxproj` | Build settings for entitlements and Info.plist usage descriptions |
+| `SleepGuard/SleepGuard/SleepGuard.entitlements` | HealthKit capability entitlement |
+| `SleepGuard.xcodeproj/project.pbxproj` | Build settings for entitlements and Info.plist usage descriptions |
 
 ## Routes
 

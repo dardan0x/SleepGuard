@@ -100,6 +100,54 @@ public final class UserPreferences {
     }
   }
 
+  public var hasExplicitlySetSyncToHealthKit: Bool {
+    get {
+      access(keyPath: \.hasExplicitlySetSyncToHealthKit)
+      return defaults.bool(forKey: "hasExplicitlySetSyncToHealthKit")
+    }
+    set {
+      withMutation(keyPath: \.hasExplicitlySetSyncToHealthKit) {
+        defaults.set(newValue, forKey: "hasExplicitlySetSyncToHealthKit")
+      }
+    }
+  }
+
+  public var detectSleepTalking: Bool {
+    get {
+      access(keyPath: \.detectSleepTalking)
+      return defaults.bool(forKey: "detectSleepTalking")
+    }
+    set {
+      withMutation(keyPath: \.detectSleepTalking) {
+        defaults.set(newValue, forKey: "detectSleepTalking")
+      }
+    }
+  }
+
+  public var enhancedSleepTracking: Bool {
+    get {
+      access(keyPath: \.enhancedSleepTracking)
+      return defaults.bool(forKey: "enhancedSleepTracking")
+    }
+    set {
+      withMutation(keyPath: \.enhancedSleepTracking) {
+        defaults.set(newValue, forKey: "enhancedSleepTracking")
+      }
+    }
+  }
+
+  public var hasExplicitlySetEnhancedSleepTracking: Bool {
+    get {
+      access(keyPath: \.hasExplicitlySetEnhancedSleepTracking)
+      return defaults.bool(forKey: "hasExplicitlySetEnhancedSleepTracking")
+    }
+    set {
+      withMutation(keyPath: \.hasExplicitlySetEnhancedSleepTracking) {
+        defaults.set(newValue, forKey: "hasExplicitlySetEnhancedSleepTracking")
+      }
+    }
+  }
+
   public var recordingDelayMinutes: Int {
     get {
       access(keyPath: \.recordingDelayMinutes)

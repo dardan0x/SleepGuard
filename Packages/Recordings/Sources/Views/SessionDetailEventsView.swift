@@ -4,6 +4,7 @@ import DesignSystem
 
 struct SessionDetailEventsView: View {
   let events: [SnoreEvent]
+  let title: String
   let onShowAll: () -> Void
   let onPlayEvent: (SnoreEvent) -> Void
   let onShareEvent: (SnoreEvent) -> Void
@@ -11,7 +12,7 @@ struct SessionDetailEventsView: View {
 
   var body: some View {
     VStack(alignment: .leading, spacing: 16) {
-      Text(String(format: Strings.sessionRecordingEventsFormat, events.count))
+      Text(String(format: title, events.count))
         .font(.system(size: 12, weight: .semibold))
         .foregroundStyle(theme.textTertiary)
         .tracking(1)
@@ -36,6 +37,7 @@ struct SessionDetailEventsView: View {
             .foregroundStyle(theme.accent)
         }
         .frame(maxWidth: .infinity, alignment: .center)
+        .padding(.bottom, 10)
       }
     }
   }

@@ -26,34 +26,35 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		CE1588F82FAA9946001B61AA /* SnoreGuard.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SnoreGuard.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		CE158A3C2FAB2EC7001B61AA /* SnoreGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SnoreGuard.xcodeproj; sourceTree = "<group>"; };
-		CE258F042FAC77A5004C0C0D /* SnoreGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SnoreGuard.xcodeproj; sourceTree = "<group>"; };
-		CE2590142FAD1D8E004C0C0D /* SnoreGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SnoreGuard.xcodeproj; sourceTree = "<group>"; };
-		CE2591162FAE9289004C0C0D /* SnoreGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SnoreGuard.xcodeproj; sourceTree = "<group>"; };
-		CE25912E2FAE9E98004C0C0D /* SnoreGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SnoreGuard.xcodeproj; sourceTree = "<group>"; };
-		CE4A51A12FB625C6005BC562 /* SnoreGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SnoreGuard.xcodeproj; sourceTree = "<group>"; };
+		CE1472B62FC47140009A5425 /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
+		CE1588F82FAA9946001B61AA /* SleepGuard.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SleepGuard.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CE158A3C2FAB2EC7001B61AA /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
+		CE258F042FAC77A5004C0C0D /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
+		CE2590142FAD1D8E004C0C0D /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
+		CE2591162FAE9289004C0C0D /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
+		CE25912E2FAE9E98004C0C0D /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
+		CE4A51A12FB625C6005BC562 /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
 		CE587D245C122AB22F7BD248 /* sounds */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = folder; path = sounds; sourceTree = "<group>"; };
-		CEA51B4D2FBFA95A0092AF44 /* SnoreGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SnoreGuard.xcodeproj; sourceTree = "<group>"; };
+		CEA51B4D2FBFA95A0092AF44 /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		CEA51B5A2FBFB8860092AF44 /* Exceptions for "SnoreGuard" folder in "SnoreGuard" target */ = {
+		CEA51B5A2FBFB8860092AF44 /* Exceptions for "SleepGuard" folder in "SleepGuard" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
-			target = CE1588F72FAA9946001B61AA /* SnoreGuard */;
+			target = CE1588F72FAA9946001B61AA /* SleepGuard */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		CE1588FA2FAA9946001B61AA /* SnoreGuard */ = {
+		CE1588FA2FAA9946001B61AA /* SleepGuard */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				CEA51B5A2FBFB8860092AF44 /* Exceptions for "SnoreGuard" folder in "SnoreGuard" target */,
+				CEA51B5A2FBFB8860092AF44 /* Exceptions for "SleepGuard" folder in "SleepGuard" target */,
 			);
-			path = SnoreGuard;
+			path = SleepGuard;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -84,10 +85,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		CE1472B92FC47140009A5425 /* Products */ = {
+			isa = PBXGroup;
+			name = Products;
+			sourceTree = "<group>";
+		};
 		CE1588EF2FAA9946001B61AA = {
 			isa = PBXGroup;
 			children = (
-				CE1588FA2FAA9946001B61AA /* SnoreGuard */,
+				CE1588FA2FAA9946001B61AA /* SleepGuard */,
 				CE1588F92FAA9946001B61AA /* Products */,
 				CE587D245C122AB22F7BD248 /* sounds */,
 			);
@@ -96,7 +102,7 @@
 		CE1588F92FAA9946001B61AA /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				CE1588F82FAA9946001B61AA /* SnoreGuard.app */,
+				CE1588F82FAA9946001B61AA /* SleepGuard.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -149,9 +155,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		CE1588F72FAA9946001B61AA /* SnoreGuard */ = {
+		CE1588F72FAA9946001B61AA /* SleepGuard */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = CE1589052FAA994A001B61AA /* Build configuration list for PBXNativeTarget "SnoreGuard" */;
+			buildConfigurationList = CE1589052FAA994A001B61AA /* Build configuration list for PBXNativeTarget "SleepGuard" */;
 			buildPhases = (
 				927D6E7A9EC6CB21714DD8F4 /* Generate Strings.swift */,
 				CE1588F42FAA9946001B61AA /* Sources */,
@@ -163,9 +169,9 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				CE1588FA2FAA9946001B61AA /* SnoreGuard */,
+				CE1588FA2FAA9946001B61AA /* SleepGuard */,
 			);
-			name = SnoreGuard;
+			name = SleepGuard;
 			packageProductDependencies = (
 				47C01997BFA64842BA01B54E /* Models */,
 				3E369988AA3966E99F3F6D29 /* AudioEngine */,
@@ -177,8 +183,8 @@
 				7AA654EA1F14D9C6F15AB82A /* Recordings */,
 				167C10ECFE58FBF4929EF997 /* Settings */,
 			);
-			productName = SnoreGuard;
-			productReference = CE1588F82FAA9946001B61AA /* SnoreGuard.app */;
+			productName = SleepGuard;
+			productReference = CE1588F82FAA9946001B61AA /* SleepGuard.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -196,7 +202,7 @@
 					};
 				};
 			};
-			buildConfigurationList = CE1588F32FAA9946001B61AA /* Build configuration list for PBXProject "SnoreGuard" */;
+			buildConfigurationList = CE1588F32FAA9946001B61AA /* Build configuration list for PBXProject "SleepGuard" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -222,36 +228,40 @@
 			projectReferences = (
 				{
 					ProductGroup = CE2591182FAE9289004C0C0D /* Products */;
-					ProjectRef = CE2591162FAE9289004C0C0D /* SnoreGuard.xcodeproj */;
+					ProjectRef = CE2591162FAE9289004C0C0D /* SleepGuard.xcodeproj */;
 				},
 				{
 					ProductGroup = CE158A3D2FAB2EC7001B61AA /* Products */;
-					ProjectRef = CE158A3C2FAB2EC7001B61AA /* SnoreGuard.xcodeproj */;
+					ProjectRef = CE158A3C2FAB2EC7001B61AA /* SleepGuard.xcodeproj */;
 				},
 				{
 					ProductGroup = CE2591312FAE9E98004C0C0D /* Products */;
-					ProjectRef = CE25912E2FAE9E98004C0C0D /* SnoreGuard.xcodeproj */;
+					ProjectRef = CE25912E2FAE9E98004C0C0D /* SleepGuard.xcodeproj */;
 				},
 				{
 					ProductGroup = CE2590162FAD1D8E004C0C0D /* Products */;
-					ProjectRef = CE2590142FAD1D8E004C0C0D /* SnoreGuard.xcodeproj */;
+					ProjectRef = CE2590142FAD1D8E004C0C0D /* SleepGuard.xcodeproj */;
 				},
 				{
 					ProductGroup = CE4A51A42FB625C6005BC562 /* Products */;
-					ProjectRef = CE4A51A12FB625C6005BC562 /* SnoreGuard.xcodeproj */;
+					ProjectRef = CE4A51A12FB625C6005BC562 /* SleepGuard.xcodeproj */;
 				},
 				{
 					ProductGroup = CEA51B502FBFA95A0092AF44 /* Products */;
-					ProjectRef = CEA51B4D2FBFA95A0092AF44 /* SnoreGuard.xcodeproj */;
+					ProjectRef = CEA51B4D2FBFA95A0092AF44 /* SleepGuard.xcodeproj */;
 				},
 				{
 					ProductGroup = CE258F062FAC77A5004C0C0D /* Products */;
-					ProjectRef = CE258F042FAC77A5004C0C0D /* SnoreGuard.xcodeproj */;
+					ProjectRef = CE258F042FAC77A5004C0C0D /* SleepGuard.xcodeproj */;
+				},
+				{
+					ProductGroup = CE1472B92FC47140009A5425 /* Products */;
+					ProjectRef = CE1472B62FC47140009A5425 /* SleepGuard.xcodeproj */;
 				},
 			);
 			projectRoot = "";
 			targets = (
-				CE1588F72FAA9946001B61AA /* SnoreGuard */,
+				CE1588F72FAA9946001B61AA /* SleepGuard */,
 			);
 		};
 /* End PBXProject section */
@@ -428,7 +438,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = SnoreGuard/SnoreGuard.entitlements;
+				CODE_SIGN_ENTITLEMENTS = SleepGuard/SleepGuard.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = ZE4DJ923B5;
@@ -436,16 +446,14 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				GENERATE_STRING_CATALOG_SYMBOLS = YES;
-				INFOPLIST_FILE = SnoreGuard/Info.plist;
+				INFOPLIST_FILE = SleepGuard/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "";
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "SnoreGuard reads sleep data to provide a complete picture of your sleep quality.";
-				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "SnoreGuard writes sleep session data to Apple Health so you can track sleep quality alongside other health metrics.";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "SnoreGuard uses the microphone to detect snoring during sleep sessions. Audio is analyzed locally on your device.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "SleepGuard reads sleep data to provide a complete picture of your sleep quality.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "SleepGuard writes sleep session data to Apple Health so you can track sleep quality alongside other health metrics.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "SleepGuard uses the microphone to detect snoring during sleep sessions. Audio is analyzed locally on your device.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UIBackgroundModes = (
-					audio,
-				);
+				INFOPLIST_KEY_UIBackgroundModes = audio;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
@@ -454,7 +462,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.daki.exampleProject.SnoreGuard;
+				PRODUCT_BUNDLE_IDENTIFIER = com.daki.exampleProject.SleepGuard;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -478,16 +486,14 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				GENERATE_STRING_CATALOG_SYMBOLS = YES;
-				INFOPLIST_FILE = SnoreGuard/Info.plist;
+				INFOPLIST_FILE = SleepGuard/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "";
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "SnoreGuard reads sleep data to provide a complete picture of your sleep quality.";
-				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "SnoreGuard writes sleep session data to Apple Health so you can track sleep quality alongside other health metrics.";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "SnoreGuard uses the microphone to detect snoring during sleep sessions. Audio is analyzed locally on your device.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "SleepGuard reads sleep data to provide a complete picture of your sleep quality.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "SleepGuard writes sleep session data to Apple Health so you can track sleep quality alongside other health metrics.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "SleepGuard uses the microphone to detect snoring during sleep sessions. Audio is analyzed locally on your device.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UIBackgroundModes = (
-					audio,
-				);
+				INFOPLIST_KEY_UIBackgroundModes = audio;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
@@ -496,7 +502,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.daki.exampleProject.SnoreGuard;
+				PRODUCT_BUNDLE_IDENTIFIER = com.daki.exampleProject.SleepGuard;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -511,7 +517,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		CE1588F32FAA9946001B61AA /* Build configuration list for PBXProject "SnoreGuard" */ = {
+		CE1588F32FAA9946001B61AA /* Build configuration list for PBXProject "SleepGuard" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				CE1589032FAA994A001B61AA /* Debug */,
@@ -520,7 +526,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		CE1589052FAA994A001B61AA /* Build configuration list for PBXNativeTarget "SnoreGuard" */ = {
+		CE1589052FAA994A001B61AA /* Build configuration list for PBXNativeTarget "SleepGuard" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				CE1589062FAA994A001B61AA /* Debug */,
@@ -589,7 +595,7 @@
 /* Begin XCRemoteSwiftPackageReference section */
 		47447378A1132717B2E05DE4 /* XCRemoteSwiftPackageReference "Recordings" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "file:///Users/user/Documents/VibeCodingProjects/SnoreGuard/Packages/Recordings";
+			repositoryURL = "file:///Users/user/Documents/VibeCodingProjects/SleepGuard/Packages/Recordings";
 			requirement = {
 				kind = exactVersion;
 				version = 1.0.0;
@@ -597,7 +603,7 @@
 		};
 		E15F4B743C5A82C6A11DD6F1 /* XCRemoteSwiftPackageReference "DesignSystem" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "file:///Users/user/Documents/VibeCodingProjects/SnoreGuard/Packages/DesignSystem";
+			repositoryURL = "file:///Users/user/Documents/VibeCodingProjects/SleepGuard/Packages/DesignSystem";
 			requirement = {
 				kind = exactVersion;
 				version = 1.0.0;

@@ -33,6 +33,97 @@ When editing existing code:
 
 When your changes create orphans: remove what YOUR changes made unused. Don't remove pre-existing dead code unless asked. The test: every changed line traces directly to the request.
 
+## Design Compliance
+
+**The design file at `designs/SleepGuard.pen` is the single source of truth for all UI.**
+
+Before implementing or modifying ANY view:
+1. Read the relevant screen(s) from `designs/SleepGuard.pen` using Pencil MCP tools.
+2. Extract screenshots of the design for visual reference.
+3. Match colors, typography, spacing, corner radius, and component structure exactly.
+4. Use the design tokens (variables) defined in the .pen file — never hardcode values that differ.
+
+**Design tokens (from `designs/SleepGuard.pen`):**
+- `bg-primary`: `#000000`
+- `bg-secondary`: `#1C1C1E`
+- `bg-card`: `#2C2C2E`
+- `bg-elevated`: `#3A3A3C`
+- `accent`: `#5E9CFF`
+- `text-primary`: `#FFFFFF`
+- `text-secondary`: `#ABABAB`
+- `text-tertiary`: `#8E8E93`
+- `text-dim`: `#FFFFFF66`
+- `score-green`: `#30D158`
+- `score-amber`: `#FF9F0A`
+- `score-red`: `#FF453A`
+- `snore-quiet`: `#8E8E93`
+- `snore-light`: `#FF9F0A`
+- `snore-loud`: `#FF453A`
+- `radius-card`: `16`
+- `radius-small`: `12`
+- `font-body`: `Inter`
+
+If a design token is missing for a property, derive it from the screenshot or ask. Never guess a color or radius that contradicts the design.
+
+## Localization (Non-Negotiable)
+
+**All user-facing strings must be localized. Never hardcode text in views.**
+
+### Where strings live
+- **Source of truth**: `Packages/DesignSystem/Sources/Resources/Localizable.xcstrings`
+- **Generated accessor**: `Packages/DesignSystem/Sources/Strings.swift` (auto-generated — never edit manually)
+- **Helper file**: `Packages/DesignSystem/Sources/Resources/Strings.txt` (optional staging area)
+
+### Key format
+Use lowercase dot-notation that describes the context:
+```
+feature.subfeature.element.purpose
+```
+Examples: `action.save`, `settings.theme.dark`, `session.summary.title`
+
+### Adding a new string
+
+**Option A — direct edit (preferred for one-off additions):**
+1. Open `Packages/DesignSystem/Sources/Resources/Localizable.xcstrings`
+2. Add the entry following the existing JSON structure with `"extractionState": "manual"`
+3. Run `python3 scripts/generate-strings.py` to regenerate `Strings.swift`
+
+**Option B — via Strings.txt (preferred for batch additions):**
+1. Open `Packages/DesignSystem/Sources/Resources/Strings.txt`
+2. Add entries in one of these formats:
+   ```
+   key
+   key = value
+   "key" = "value"
+   ```
+3. Run `python3 scripts/generate-xcstrings.py`
+   - This merges entries into `Localizable.xcstrings`
+   - Then auto-runs `generate-strings.py` to update `Strings.swift`
+
+### Using strings in code
+Always reference strings through the generated `Strings` enum from `DesignSystem`:
+```swift
+import DesignSystem
+
+Text(Strings.actionSave)
+Text(Strings.settingsThemeDark)
+```
+
+**Forbidden:**
+```swift
+Text("Save")                           // ❌ Hardcoded
+Text("Dark")                           // ❌ Hardcoded
+String(localized: "action.save")       // ❌ Bypassing Strings.swift
+```
+
+**Allowed exceptions:**
+- Non-user-facing strings (debug prints, internal keys)
+- Purely decorative punctuation in layout (`Text("·")`, `Text("|")`)
+- Numeric/format interpolations that have no semantic value
+
+### Verification
+Before marking any UI task complete, grep the changed files for hardcoded string literals inside `Text(...)`, `Button(...)`, or `navigationTitle(...)` calls. Every user-facing literal must trace back to `Strings.`.
+
 ## Working Style
 
 - Enter plan mode for any non-trivial task (3+ steps or architectural decisions). Think before building.
@@ -89,6 +180,28 @@ These are non-negotiable. They come from production patterns in apps like IceCub
 - Pull-to-refresh fires haptics via `HapticManager`.
 - Platform branching: `#if !os(visionOS)` for custom backgrounds.
 
+### View Componentization (Hard Limits)
+
+These thresholds prevent monolithic views. Enforce them during implementation and code review.
+
+**File size limits:**
+- No view file should exceed **200 lines**. If it does, split it.
+- A container view (with `switch viewState`) should be **≤100 lines**. State views (`.loading`, `.empty`, `.loaded`, `.error`) live in separate files.
+
+**What to extract into separate files:**
+- State-specific views: `[Feature]EmptyView`, `[Feature]ErrorView`, `[Feature]LoadedView`
+- Reusable rows/cards: `[Feature]RowView`, `[Feature]StatCard`, `[Feature]EventRow`
+- Full-screen overlays: `AlarmOverlayView`, `PermissionOverlayView`
+- Shared visualization components used by 2+ packages: move to `DesignSystem`
+
+**What stays inline (fine as private computed properties):**
+- Simple headers, badges, or labels under 10 lines
+- One-off buttons that are not reused
+- Private helper formatting functions
+
+**Duplication rule:**
+- If the same view struct appears in 2+ files, extract it to `DesignSystem` immediately. Do not copy-paste view code.
+
 ### Packages
 
 - Feature packages never import other feature packages. Only: Models, Network, Env, DesignSystem.
@@ -142,7 +255,7 @@ SESSION END
 
 ## Local Tracker (Auto-Updated)
 
-Kimi auto-updates `docs/FeatureTracker.md` and `docs/trackers/*.md` after every task.
+Claude auto-updates `docs/FeatureTracker.md` and `docs/trackers/*.md` after every task.
 Local tracker updates happen FIRST — they survive session loss and are the primary source of truth.
 Templates: `docs/templates/FeatureTracker.md` and `docs/templates/feature-tracker-detail.md`.
 
@@ -169,23 +282,25 @@ mcp__XcodeBuildMCP__build_run_sim
 mcp__XcodeBuildMCP__test_sim
 ```
 
-**Why `simulatorId`:** `iPhone 16e` is ambiguous (exists on iOS 18.3, 26.0, and 26.2). Using the UDID pins the iOS 26.2 simulator and eliminates flakiness.
+**Why `simulatorId`:** `iPhone 17 Pro` is ambiguous (exists on iOS 18.3, 26.0, and 26.2). Using the UDID pins the iOS 26.2 simulator and eliminates flakiness.
 
 **Fallback (Shell):**
 ```bash
-xcodebuild -project SnoreGuard.xcodeproj -scheme SnoreGuard -destination 'platform=iOS Simulator,name=iPhone 16e,OS=26.2' build
+xcodebuild -project SleepGuard.xcodeproj -scheme SleepGuard -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2' build
 ```
 
-End every task with:
+## Session End Requirements
+
+At the end of every coding session — even if mid-feature — you MUST produce detailed documentation. This is non-negotiable. The user reviews this to understand what was built and why.
+
+Include:
 - **Files changed:** [list every file touched]
 - **What changed:** [one line per file]
 - **Follow-up needed:** [anything requiring a decision]
 - **Suggested branch**: `feature/[f#]/[t#]-short-description`
 - **Suggested commit**: `[Task ID] — [Short description]` with bullet list of changes
 
-## Session End Requirements
-
-At the end of every coding session — even if mid-feature — you MUST produce detailed documentation. This is non-negotiable. The user reviews this to understand what was built and why.
+> ⚠️ **Never omit Suggested branch and Suggested commit.** The user relies on these for git bookkeeping. This is part of the handoff.
 
 ### 1. Update `docs/SESSION_SUMMARY.md`
 
@@ -215,16 +330,24 @@ Append a new session entry with this structure:
 ### Build Status
 - **BUILD SUCCEEDED / FAILED** — [if failed, what errors and how they were resolved]
 
-### Git Handoff
-- **Suggested branch**: `feature/[f#]/[t#]-short-description`
-- **Suggested commit**: `[Task ID] — [Short description]` with bullet list of changes
+### Suggested Branch
+`feature/[f#]/[t#]-short-description`
+
+### Suggested Commit
+`[Task ID] — [Short description]`
+
+### Changes done
+```
+- [Change 1]
+- [Change 2]
+```
+```
 
 ### Next Session
 - [Task ID]: [What to start next and why]
 
 ### Open Questions
 - [Question that needs user input or future decision]
-```
 
 ### 2. Create Feature Doc When Feature Ships
 

@@ -127,13 +127,11 @@ docs/architecture/
 docs/plans/
 docs/simulation/
 docs/templates/
-docs/trackers/
 docs/AGENTS_TEMPLATE.md
 docs/CLAUDE_TEMPLATE.md
 docs/IdeaBrief.md
 docs/KICKOFF_PROMPT.md
 docs/ProjectArchitecture.md
-docs/Roadmap.md
 docs/SESSION_RESUME_PROMPT.md
 docs/SETUP_GUIDE.md
 docs/SIMULATION_SNORING_ANALYZER.md

@@ -24,10 +24,16 @@ public struct SleepReportPDFGenerator {
   private let loudColor = UIColor(red: 1, green: 0.271, blue: 0.227, alpha: 1)
   private let epicColor = UIColor(red: 1, green: 0.176, blue: 0.333, alpha: 1)
 
+  // Sleep stage colors matching Theme
+  private let stageDeepColor = UIColor(red: 0.369, green: 0.361, blue: 0.902, alpha: 1)
+  private let stageLightColor = UIColor(red: 0.039, green: 0.518, blue: 1.0, alpha: 1)
+  private let stageREMColor = UIColor(red: 0.392, green: 0.824, blue: 1.0, alpha: 1)
+  private let stageAwakeColor = UIColor(red: 1.0, green: 0.839, blue: 0.039, alpha: 1)
+
   public func generatePDF(for session: SleepSession) -> URL? {
     let appName = Bundle.main.infoDictionary?["CFBundleDisplayName"] as? String
       ?? Bundle.main.infoDictionary?["CFBundleName"] as? String
-      ?? "SnoreGuard"
+      ?? "SleepGuard"
     let reportTitle = "\(appName) Sleep Report"
 
     let format = UIGraphicsPDFRendererFormat()
@@ -43,18 +49,11 @@ public struct SleepReportPDFGenerator {
     }
 
     do {
-      // Force light mode trait collection so colors render exactly as defined
-      // and are not shifted by device dark mode
-      let lightTraits = UITraitCollection(userInterfaceStyle: .light)
-      let previousTraits = UITraitCollection.current
-      UITraitCollection.current = lightTraits
-      defer { UITraitCollection.current = previousTraits }
-
       try renderer.writePDF(to: pdfURL) { context in
         context.beginPage()
         let cgContext = context.cgContext
 
-        // White page background (prevents dark mode viewers from showing dark bg)
+        // White page background
         let pageRect = CGRect(x: 0, y: 0, width: pageWidth, height: pageHeight)
         pageBg.setFill()
         UIRectFill(pageRect)
@@ -66,12 +65,24 @@ public struct SleepReportPDFGenerator {
         y += 32
 
         // Score card
-        y += drawScoreCard(score: session.sleepScore, at: y)
+        y += drawScoreCard(session: session, at: y)
         y += 32
 
         // Stats grid
         y += drawStatsGrid(session: session, at: y)
         y += 32
+
+        // Sleep architecture (if Watch data available)
+        if let stages = session.sleepStageSegments, !stages.isEmpty {
+          y += drawSleepArchitecture(session: session, at: y)
+          y += 32
+        }
+
+        // Sleep talking summary (if any)
+        if session.sleepTalkingEvents > 0 {
+          y += drawSleepTalkingSummary(session: session, at: y)
+          y += 32
+        }
 
         // Events section
         if let events = session.events, !events.isEmpty {
@@ -83,6 +94,7 @@ public struct SleepReportPDFGenerator {
       }
       return pdfURL
     } catch {
+      print("[SleepReportPDFGenerator] PDF generation failed: \(error)")
       return nil
     }
   }
@@ -93,7 +105,6 @@ public struct SleepReportPDFGenerator {
     let headerHeight: CGFloat = 140
     let bannerRect = CGRect(x: 0, y: 0, width: pageWidth, height: headerHeight)
 
-    // Red gradient background
     let gradient = CGGradient(
       colorsSpace: CGColorSpaceCreateDeviceRGB(),
       colors: [
@@ -110,24 +121,21 @@ public struct SleepReportPDFGenerator {
       options: []
     )
 
-    // Title
     let titleAttrs: [NSAttributedString.Key: Any] = [
       .font: UIFont.systemFont(ofSize: 32, weight: .bold),
-      .foregroundColor: UIColor(red: 1, green: 1, blue: 1, alpha: 1),
+      .foregroundColor: UIColor.white,
     ]
     title.draw(at: CGPoint(x: margin, y: 44), withAttributes: titleAttrs)
 
-    // Date
     let formatter = DateFormatter()
     formatter.dateFormat = "EEEE, MMMM d, yyyy"
     let dateText = formatter.string(from: session.startDate)
     let dateAttrs: [NSAttributedString.Key: Any] = [
       .font: UIFont.systemFont(ofSize: 14, weight: .medium),
-      .foregroundColor: UIColor(red: 1, green: 1, blue: 1, alpha: 0.85),
+      .foregroundColor: UIColor.white.withAlphaComponent(0.85),
     ]
     dateText.draw(at: CGPoint(x: margin, y: 84), withAttributes: dateAttrs)
 
-    // Decorative circle
     let circlePath = UIBezierPath(
       arcCenter: CGPoint(x: pageWidth - 60, y: 70),
       radius: 40,
@@ -135,10 +143,9 @@ public struct SleepReportPDFGenerator {
       endAngle: .pi * 2,
       clockwise: true
     )
-    UIColor(red: 1, green: 1, blue: 1, alpha: 0.15).setFill()
+    UIColor.white.withAlphaComponent(0.15).setFill()
     circlePath.fill()
 
-    // Small inner circle
     let innerPath = UIBezierPath(
       arcCenter: CGPoint(x: pageWidth - 60, y: 70),
       radius: 24,
@@ -146,7 +153,7 @@ public struct SleepReportPDFGenerator {
       endAngle: .pi * 2,
       clockwise: true
     )
-    UIColor(red: 1, green: 1, blue: 1, alpha: 0.25).setFill()
+    UIColor.white.withAlphaComponent(0.25).setFill()
     innerPath.fill()
 
     return headerHeight
@@ -154,16 +161,15 @@ public struct SleepReportPDFGenerator {
 
   // MARK: - Score Card
 
-  private func drawScoreCard(score: Int, at y: CGFloat) -> CGFloat {
+  private func drawScoreCard(session: SleepSession, at y: CGFloat) -> CGFloat {
     let cardHeight: CGFloat = 140
     let cardRect = CGRect(x: margin, y: y, width: pageWidth - margin * 2, height: cardHeight)
 
-    // Card background
     let cardPath = UIBezierPath(roundedRect: cardRect, cornerRadius: 20)
     cardBg.setFill()
     cardPath.fill()
 
-    // Score circle
+    let score = session.sleepScore
     let circleRadius: CGFloat = 44
     let circleCenter = CGPoint(x: margin + 60, y: y + cardHeight / 2)
     let circlePath = UIBezierPath(
@@ -176,7 +182,6 @@ public struct SleepReportPDFGenerator {
     scoreColor(score).withAlphaComponent(0.15).setFill()
     circlePath.fill()
 
-    // Score number
     let scoreAttrs: [NSAttributedString.Key: Any] = [
       .font: UIFont.systemFont(ofSize: 36, weight: .bold),
       .foregroundColor: scoreColor(score),
@@ -188,21 +193,18 @@ public struct SleepReportPDFGenerator {
       withAttributes: scoreAttrs
     )
 
-    // Label
     let labelAttrs: [NSAttributedString.Key: Any] = [
       .font: UIFont.systemFont(ofSize: 12, weight: .semibold),
       .foregroundColor: textSecondary,
     ]
     "SLEEP SCORE".draw(at: CGPoint(x: margin + 120, y: y + 44), withAttributes: labelAttrs)
 
-    // Rating
     let ratingAttrs: [NSAttributedString.Key: Any] = [
       .font: UIFont.systemFont(ofSize: 24, weight: .bold),
       .foregroundColor: scoreColor(score),
     ]
     scoreRating(score).draw(at: CGPoint(x: margin + 120, y: y + 62), withAttributes: ratingAttrs)
 
-    // Divider line
     let linePath = UIBezierPath()
     linePath.move(to: CGPoint(x: margin + 120, y: y + 104))
     linePath.addLine(to: CGPoint(x: pageWidth - margin - 24, y: y + 104))
@@ -210,28 +212,37 @@ public struct SleepReportPDFGenerator {
     linePath.lineWidth = 1
     linePath.stroke()
 
-    // Subtext
     let subAttrs: [NSAttributedString.Key: Any] = [
       .font: UIFont.systemFont(ofSize: 12, weight: .medium),
       .foregroundColor: textSecondary,
     ]
-    "Based on snoring duration & event frequency".draw(
-      at: CGPoint(x: margin + 120, y: y + 112),
-      withAttributes: subAttrs
-    )
+    var subtitle = "Based on snoring & event frequency"
+    if session.sleepStageSegments?.isEmpty == false {
+      subtitle = "Based on snoring, sleep stages & events"
+    }
+    subtitle.draw(at: CGPoint(x: margin + 120, y: y + 112), withAttributes: subAttrs)
 
     return cardHeight
   }
 
   // MARK: - Stats Grid
 
-    private func drawStatsGrid(session: SleepSession, at y: CGFloat) -> CGFloat {
-        let stats: [(label: String, value: String, icon: String)] = [
-            (Strings.recordingsPlayerStatDuration, durationString(session.totalDuration), "⏱"),
-            (Strings.sessionSummaryStatSnoring, String(format: "%.0f%%", session.snoringPercentage), "📊"),
-            (Strings.recordingsDetailEventsLabel, "\(session.eventsCount)", "🔔"),
-            (Strings.eventsHourPdfGenerator, String(format: "%.1f", session.eventsPerHour), "📈"),
-        ]
+  private func drawStatsGrid(session: SleepSession, at y: CGFloat) -> CGFloat {
+    var stats: [(label: String, value: String, icon: String)] = [
+      (Strings.recordingsPlayerStatDuration, durationString(session.totalDuration), "⏱"),
+      (Strings.sessionSummaryStatSnoring, String(format: "%.0f%%", session.snoringPercentage), "📊"),
+      (Strings.sessionSummaryStatSnoreTime, durationString(session.snoringDuration), "🔊"),
+      (Strings.recordingsDetailEventsLabel, "\(session.eventsCount)", "🔔"),
+    ]
+
+    if session.sleepTalkingEvents > 0 {
+      stats.append((Strings.filterSleepTalking, "\(session.sleepTalkingEvents)", "🗣"))
+      stats.append((
+        Strings.filterSleepTalking,
+        String(format: "%.0f%%", session.sleepTalkingPercentage),
+        "💬"
+      ))
+    }
 
     let cardWidth = (pageWidth - margin * 2 - 16) / 2
     let cardHeight: CGFloat = 90
@@ -244,25 +255,21 @@ public struct SleepReportPDFGenerator {
       let rowY = y + CGFloat(row) * (cardHeight + 16)
       let cardRect = CGRect(x: x, y: rowY, width: cardWidth, height: cardHeight)
 
-      // Card background
       let cardPath = UIBezierPath(roundedRect: cardRect, cornerRadius: 16)
       cardBg.setFill()
       cardPath.fill()
 
-      // Icon
       let iconAttrs: [NSAttributedString.Key: Any] = [
         .font: UIFont.systemFont(ofSize: 20),
       ]
       stat.icon.draw(at: CGPoint(x: x + 16, y: rowY + 16), withAttributes: iconAttrs)
 
-      // Label
       let labelAttrs: [NSAttributedString.Key: Any] = [
         .font: UIFont.systemFont(ofSize: 11, weight: .semibold),
         .foregroundColor: textSecondary,
       ]
       stat.label.draw(at: CGPoint(x: x + 16, y: rowY + 44), withAttributes: labelAttrs)
 
-      // Value
       let valueAttrs: [NSAttributedString.Key: Any] = [
         .font: UIFont.systemFont(ofSize: 22, weight: .bold),
         .foregroundColor: textPrimary,
@@ -275,6 +282,84 @@ public struct SleepReportPDFGenerator {
     return maxY - y
   }
 
+  // MARK: - Sleep Architecture
+
+  private func drawSleepArchitecture(session: SleepSession, at y: CGFloat) -> CGFloat {
+    guard let stats = session.stageStats else { return 0 }
+
+    let sectionHeight: CGFloat = 140
+    let cardRect = CGRect(x: margin, y: y, width: pageWidth - margin * 2, height: sectionHeight)
+    let cardPath = UIBezierPath(roundedRect: cardRect, cornerRadius: 16)
+    cardBg.setFill()
+    cardPath.fill()
+
+    let headerAttrs: [NSAttributedString.Key: Any] = [
+      .font: UIFont.systemFont(ofSize: 14, weight: .bold),
+      .foregroundColor: textPrimary,
+    ]
+    Strings.statisticsSleepStagesLabel.draw(at: CGPoint(x: margin + 16, y: y + 16), withAttributes: headerAttrs)
+
+    let stages: [(name: String, pct: Double, color: UIColor)] = [
+      (Strings.sleepStageDeepSleep, stats.deepPct, stageDeepColor),
+      (Strings.sleepStageLightSleep, stats.lightPct, stageLightColor),
+      (Strings.sleepStageRem, stats.remPct, stageREMColor),
+      (Strings.sleepStageAwake, stats.awakePct, stageAwakeColor),
+    ]
+
+    let barMaxWidth = pageWidth - margin * 2 - 180
+    let maxPct = max(stages.map(\.pct).max() ?? 1, 1)
+
+    for (index, stage) in stages.enumerated() {
+      let rowY = y + 48 + CGFloat(index) * 22
+
+      let nameAttrs: [NSAttributedString.Key: Any] = [
+        .font: UIFont.systemFont(ofSize: 12, weight: .medium),
+        .foregroundColor: textPrimary,
+      ]
+      stage.name.draw(at: CGPoint(x: margin + 16, y: rowY), withAttributes: nameAttrs)
+
+      let barWidth = (stage.pct / maxPct) * barMaxWidth
+      let barRect = CGRect(x: margin + 110, y: rowY + 3, width: max(barWidth, 4), height: 10)
+      let barPath = UIBezierPath(roundedRect: barRect, cornerRadius: 5)
+      stage.color.setFill()
+      barPath.fill()
+
+      let pctAttrs: [NSAttributedString.Key: Any] = [
+        .font: UIFont.systemFont(ofSize: 12, weight: .semibold),
+        .foregroundColor: textSecondary,
+      ]
+      let pctText = String(format: "%.0f%%", stage.pct)
+      pctText.draw(at: CGPoint(x: margin + 122 + barWidth, y: rowY), withAttributes: pctAttrs)
+    }
+
+    return sectionHeight
+  }
+
+  // MARK: - Sleep Talking Summary
+
+  private func drawSleepTalkingSummary(session: SleepSession, at y: CGFloat) -> CGFloat {
+    let cardHeight: CGFloat = 64
+    let cardRect = CGRect(x: margin, y: y, width: pageWidth - margin * 2, height: cardHeight)
+    let cardPath = UIBezierPath(roundedRect: cardRect, cornerRadius: 16)
+    cardBg.setFill()
+    cardPath.fill()
+
+    let headerAttrs: [NSAttributedString.Key: Any] = [
+      .font: UIFont.systemFont(ofSize: 14, weight: .bold),
+      .foregroundColor: textPrimary,
+    ]
+    Strings.filterSleepTalking.draw(at: CGPoint(x: margin + 16, y: y + 12), withAttributes: headerAttrs)
+
+    let detailAttrs: [NSAttributedString.Key: Any] = [
+      .font: UIFont.systemFont(ofSize: 13, weight: .medium),
+      .foregroundColor: textSecondary,
+    ]
+    let detailText = "\(session.sleepTalkingEvents) events · \(durationString(session.sleepTalkingDuration)) · \(String(format: "%.0f%%", session.sleepTalkingPercentage)) of session"
+    detailText.draw(at: CGPoint(x: margin + 16, y: y + 36), withAttributes: detailAttrs)
+
+    return cardHeight
+  }
+
   // MARK: - Events Section
 
   private func drawEventsSection(
@@ -285,19 +370,16 @@ public struct SleepReportPDFGenerator {
   ) -> CGFloat {
     var currentY = y
 
-    // Section header
     let headerAttrs: [NSAttributedString.Key: Any] = [
       .font: UIFont.systemFont(ofSize: 14, weight: .bold),
       .foregroundColor: textPrimary,
     ]
-    "Snore Events".draw(at: CGPoint(x: margin, y: currentY), withAttributes: headerAttrs)
+    "Events".draw(at: CGPoint(x: margin, y: currentY), withAttributes: headerAttrs)
     currentY += 28
 
-    // Header row
     drawEventHeader(at: currentY)
     currentY += 28
 
-    // Divider
     let divider = UIBezierPath()
     divider.move(to: CGPoint(x: margin, y: currentY - 8))
     divider.addLine(to: CGPoint(x: pageWidth - margin, y: currentY - 8))
@@ -322,8 +404,9 @@ public struct SleepReportPDFGenerator {
       .foregroundColor: textPrimary,
     ]
     "Time".draw(at: CGPoint(x: margin, y: y), withAttributes: attrs)
-    "Duration".draw(at: CGPoint(x: margin + 100, y: y), withAttributes: attrs)
-    "Intensity".draw(at: CGPoint(x: margin + 200, y: y), withAttributes: attrs)
+    "Type".draw(at: CGPoint(x: margin + 100, y: y), withAttributes: attrs)
+    "Duration".draw(at: CGPoint(x: margin + 210, y: y), withAttributes: attrs)
+    "Intensity".draw(at: CGPoint(x: margin + 320, y: y), withAttributes: attrs)
   }
 
   private func drawEventRow(_ event: SnoreEvent, at y: CGFloat) -> CGFloat {
@@ -333,16 +416,15 @@ public struct SleepReportPDFGenerator {
     let durationText = durationString(event.snoreDuration)
     let intensityText = event.intensity.rawValue.capitalized
     let color = intensityColor(event.intensity)
+    let categoryText = categoryLabel(event.category)
 
     let rowHeight: CGFloat = 36
 
-    // Alternating row background
     let rowRect = CGRect(x: margin, y: y, width: pageWidth - margin * 2, height: rowHeight)
     let rowPath = UIBezierPath(roundedRect: rowRect, cornerRadius: 8)
     rowBg.setFill()
     rowPath.fill()
 
-    // Color dot
     let dotPath = UIBezierPath(
       arcCenter: CGPoint(x: margin + 12, y: y + rowHeight / 2),
       radius: 5,
@@ -353,28 +435,31 @@ public struct SleepReportPDFGenerator {
     color.setFill()
     dotPath.fill()
 
-    // Time
     let timeAttrs: [NSAttributedString.Key: Any] = [
       .font: UIFont.monospacedDigitSystemFont(ofSize: 13, weight: .medium),
       .foregroundColor: textPrimary,
     ]
     timeText.draw(at: CGPoint(x: margin + 28, y: y + 9), withAttributes: timeAttrs)
 
-    // Duration
+    let catAttrs: [NSAttributedString.Key: Any] = [
+      .font: UIFont.systemFont(ofSize: 12, weight: .medium),
+      .foregroundColor: textSecondary,
+    ]
+    categoryText.draw(at: CGPoint(x: margin + 100, y: y + 10), withAttributes: catAttrs)
+
     let durAttrs: [NSAttributedString.Key: Any] = [
       .font: UIFont.monospacedDigitSystemFont(ofSize: 13, weight: .regular),
       .foregroundColor: textSecondary,
     ]
-    durationText.draw(at: CGPoint(x: margin + 100, y: y + 9), withAttributes: durAttrs)
+    durationText.draw(at: CGPoint(x: margin + 210, y: y + 9), withAttributes: durAttrs)
 
-    // Intensity with pill background
     let intensityAttrs: [NSAttributedString.Key: Any] = [
       .font: UIFont.systemFont(ofSize: 12, weight: .semibold),
       .foregroundColor: color,
     ]
     let intensitySize = intensityText.size(withAttributes: intensityAttrs)
     let pillRect = CGRect(
-      x: margin + 200,
+      x: margin + 320,
       y: y + 6,
       width: intensitySize.width + 20,
       height: 24
@@ -397,7 +482,7 @@ public struct SleepReportPDFGenerator {
       .font: UIFont.systemFont(ofSize: 10, weight: .medium),
       .foregroundColor: textSecondary.withAlphaComponent(0.7),
     ]
-    let text = "Generated by SnoreGuard"
+    let text = "Generated by SleepGuard"
     let size = text.size(withAttributes: attrs)
     text.draw(
       at: CGPoint(x: (pageWidth - size.width) / 2, y: y),
@@ -429,6 +514,14 @@ public struct SleepReportPDFGenerator {
     case .light: return lightColor
     case .loud: return loudColor
     case .epic: return epicColor
+    }
+  }
+
+  private func categoryLabel(_ category: SoundCategory) -> String {
+    switch category {
+    case .snoring: return "Snoring"
+    case .sleepTalking: return "Sleep Talking"
+    case .noise, .coughing, .other: return "Noise"
     }
   }
 

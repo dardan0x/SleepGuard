@@ -7,7 +7,7 @@ import DesignSystem
 import Onboarding
 
 @main
-struct SnoreGuardApp: App {
+struct SleepGuardApp: App {
   @Environment(\.scenePhase) private var scenePhase
   @State private var userPreferences = UserPreferences.shared
   @State private var sessionManager = SessionManager.shared
@@ -53,6 +53,12 @@ struct SnoreGuardApp: App {
       )
       .onAppear {
         HealthKitSync.shared.checkAuthorizationStatus()
+        if !userPreferences.hasExplicitlySetSyncToHealthKit {
+          userPreferences.syncToHealthKit = HealthKitSync.shared.isAuthorized
+        }
+        if !userPreferences.hasExplicitlySetEnhancedSleepTracking {
+          userPreferences.enhancedSleepTracking = HealthKitSync.shared.isAuthorized
+        }
       }
       .onChange(of: sessionManager.isRecording) { _, isRecording in
         UIApplication.shared.isIdleTimerDisabled = isRecording

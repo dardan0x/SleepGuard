@@ -16,9 +16,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "CE1588F72FAA9946001B61AA"
-               BuildableName = "SnoreGuard.app"
-               BlueprintName = "SnoreGuard"
-               ReferencedContainer = "container:SnoreGuard.xcodeproj">
+               BuildableName = "SleepGuard.app"
+               BlueprintName = "SleepGuard"
+               ReferencedContainer = "container:SleepGuard.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -45,9 +45,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "CE1588F72FAA9946001B61AA"
-            BuildableName = "SnoreGuard.app"
-            BlueprintName = "SnoreGuard"
-            ReferencedContainer = "container:SnoreGuard.xcodeproj">
+            BuildableName = "SleepGuard.app"
+            BlueprintName = "SleepGuard"
+            ReferencedContainer = "container:SleepGuard.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -62,9 +62,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "CE1588F72FAA9946001B61AA"
-            BuildableName = "SnoreGuard.app"
-            BlueprintName = "SnoreGuard"
-            ReferencedContainer = "container:SnoreGuard.xcodeproj">
+            BuildableName = "SleepGuard.app"
+            BlueprintName = "SleepGuard"
+            ReferencedContainer = "container:SleepGuard.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

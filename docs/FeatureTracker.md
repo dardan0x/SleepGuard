@@ -1,8 +1,8 @@
-# SnoreGuard — Feature Tracker
+# SleepGuard — Feature Tracker
 
 > Auto-updated by the AI after every task. This is the local source of truth.
 
-Last updated: 2026-05-24 (Session 57)
+Last updated: 2026-05-28 (Session 65)
 
 ---
 
@@ -27,8 +27,14 @@ Last updated: 2026-05-24 (Session 57)
 | Backlog | 0 |
 | Blocked | 0 |
 | — | — |
-| Total Tasks | 42 |
-| Tasks Done | 42 |
+| Features (V3) | 1 |
+| Done | 0 |
+| In Progress | 1 |
+| Backlog | 2 |
+| Blocked | 0 |
+| — | — |
+| Total Tasks | 70 |
+| Tasks Done | 70 |
 | Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
 | Tasks Backlog | 0 |
@@ -39,7 +45,7 @@ Last updated: 2026-05-24 (Session 57)
 
 | ID | Feature | Priority | Status | Tasks | Progress | File |
 |----|---------|----------|--------|-------|----------|------|
-| F1 | Onboarding | P0 | Done | 5/5 | ██████████ 100% | [tracker](trackers/f1-onboarding.md) |
+| F1 | Onboarding | P0 | Done | 6/6 | ██████████ 100% | [tracker](trackers/f1-onboarding.md) |
 | F2 | Live Session | P0 | Done | 7/7 | ██████████ 100% | [tracker](trackers/f2-live-session.md) |
 | F3 | Statistics Dashboard | P1 | Done | 3/3 | ██████████ 100% | [tracker](trackers/f3-statistics.md) |
 | F4 | Recordings | P1 | Done | 6/6 + polish | ██████████ 100% | [tracker](trackers/f4-recordings.md) |
@@ -52,6 +58,7 @@ Last updated: 2026-05-24 (Session 57)
 | F11 | Apple Watch | P2 | Done | 4/4 | ██████████ 100% | [tracker](trackers/f11-apple-watch.md) |
 | F12 | HealthKit | P1 | Done | 3/3 | ██████████ 100% | [tracker](trackers/f12-healthkit.md) |
 | F13 | CloudKit Sync | P2 | Backlog | 0/3 | ░░░░░░░░░░ 0% | [tracker](trackers/f13-cloudkit-sync.md) |
+| F14 | SleepGuard Rebrand & Multi-Sound | P0 | Done | 27/27 | ██████████ 100% | [tracker](trackers/f14-sleepguard-rebrand.md) |
 
 ## Activity Log
 
@@ -59,11 +66,43 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-05-28 | PDF generator polish + loading fix | Completed | Removed Avg/Peak dB from PDF stats; widened column spacing in event rows and sleep architecture section; added `isGeneratingPDF` state to `SessionDetailView` — disables export button and shows clock icon during generation, preventing double-tap; build succeeds |
+| 2026-05-28 | PDF generator new stats | Completed | Added sleep architecture section (horizontal stage bars) when Watch data available; added sleep talking summary card; expanded stats grid with snore time and sleep talking data; updated event table with Type column showing category; removed `UITraitCollection` manipulation fixing first-time generation failure; added error logging; build succeeds |
+| 2026-05-28 | Sleep stages info sheet | Completed | `SleepStagesInfoView` educational sheet showing personalized stage interpretation (Good/Low/High badges with recommended ranges), score impact formula, and visual threshold bars; info button added to `SleepStageBreakdownView` header; 15 new localized strings; close button (`xmark.circle.fill`); build succeeds |
+| 2026-05-28 | HealthKit sleep stage query fix | Completed | Removed `.strictStartDate` from `fetchSleepStages` predicate so overlapping Watch samples are included; added `stagesEmptyAndOld` retry in `SessionDetailView` for sessions >1h old with empty stage arrays; build succeeds |
+| 2026-05-27 | Mock data sleep talking | Completed | `MockDataGenerator` now generates `.sleepTalking` events for ~10-40% of sessions (probability scales inversely with target score); 1-4 events per session, 5-30s each, `.quiet` intensity, -55 to -45 dB; spread randomly across session; max score impact ~0.6 pts — well within ±12 drift tolerance; build succeeds |
+| 2026-05-27 | Holistic sleep score formula | Completed | `sleepScore` now includes conditional `sleepTalkingPenalty` (max 15: duration%×0.35 + events/hr×0.8) and `stagePenalty` (max 15: deep deficit×0.6 + REM deficit×0.4 + awake excess×1.0); thresholds grounded in sleep medicine (deep≥15%, REM≥18%, awake≤8%); backward compatible (nil stages = 0, no talking events = 0); build succeeds; sanity checks verified |
+| 2026-05-27 | Speech detection threshold tuning | Completed | `SpeechDetector.dbFloor` -40 → -55; speech event min duration 2.0s → 0.5s; debug logging for rejections; catches quiet sleep talking and brief utterances; build succeeds |
+| 2026-05-27 | Expanded speech/vocalization identifiers | Completed | `speechIdentifiers` 5 → 22: whisper, mumble, mutter, stutter, groan, moan, sigh, grunt, grumble, exclaim, gasp, yell, scream, shout, laugh, giggle, whimper; build succeeds |
+| 2026-05-27 | Baby sound detection | Completed | `babyIdentifiers` (`baby_crying`, `baby_laughter`, `babble`) added to `SoundAnalysisDetector`; feeds into speech confidence pipeline; creates `.sleepTalking` events; build succeeds |
+| 2026-05-27 | Category-specific events title | Completed | `SessionDetailEventsView` now accepts a dynamic title; `SessionDetailView` passes category-specific format string based on selected filter (All/Snoring/Sleep Talking/Noise); 4 new localized strings added; build succeeds |
+| 2026-05-27 | Sleep talking detection bugfix | Completed | Removed bandpass filter from audio chain so SoundAnalysis receives full-spectrum audio; fixed `SleepSession.snoringDuration` and `sleepScore` to only count `.snoring` events; build succeeds |
+| 2026-05-27 | F1-T6 Health & Watch onboarding screen | Completed | `OnboardingPageHealthWatchView` with HealthKit auth, granted state, 0.8s delay, 6 localized strings; `OnboardingView` now 6 pages; design file updated; build succeeds |
+| 2026-05-27 | P4-T6 Build & verify | Completed | Clean build (zero errors); all F14 Phase 4 changes verified |
+| 2026-05-27 | P4-T5 Settings toggle | Completed | `enhancedSleepTracking` added to `UserPreferences`; toggle in `SettingsWatchSection` with `bed.double.fill` icon; requests HealthKit auth on enable; gates `fetchSleepStages` in `SessionDetailView`; localized; build succeeds |
+| 2026-05-26 | P4-T4 Statistics integration | Completed | `SleepStageBreakdownView` compact stage bar + 2×2 stat grid in `StatisticsLoadedView`; `MockDataGenerator` generates realistic sleep cycles for all mock sessions; build succeeds |
+| 2026-05-26 | P4-T4 Verified | Verified | Hypnogram chart renders correctly after fixing division-by-zero (0-width segments), color regression (light restored to #0A84FF blue), and SleepStage enum reorder (awake→rem→light→deep top-to-bottom); debug code removed; clean build; screenshot verified |
+| 2026-05-26 | P4-T3 Stage timeline overlay | Completed | `SleepStageBreakdownView` compact stage bar + 2×2 stat grid with deep/light/REM/awake colors + legend; shown in `SessionDetailTimelineView` and `StatisticsLoadedView`; 5 localized strings; build succeeds |
+| 2026-05-26 | P4-T2 Stage correlation | Completed | `SessionDetailView.loadSession()` auto-fetches sleep stages when `sleepStageSegments == nil`, stores `[]` for no-data to avoid re-query, persists via SwiftData; build succeeds |
+| 2026-05-26 | P4-T1 HealthKit read sleep stages | Completed | `fetchSleepStages(for:)` queries HK sleep analysis samples, maps to `SleepStageSegment`; `mapSleepStage` maps core/deep/REM/awake; skips legacy/in-bed/unspecified; build succeeds |
+| 2026-05-26 | P3-T6 Build & verify | Completed | Clean build (zero errors); pre-existing asset warnings only; Phase 3 UI verified |
+| 2026-05-26 | P3-T5 Player labels | Completed | `PlayerSheetView` navigation title changes based on event category: snoring = "Snoring Player", sleep talking = "Sleep Talking Player", noise = "Noise Player"; localized 2 new title strings; build succeeds |
+| 2026-05-26 | P3-T4 Stats grid supplement | Completed | Optional disturbance row in `SessionDetailHeaderView`: full-width `StatCard` below the 2×2 grid, shows non-snoring event count, hidden for snoring-only sessions; localized `session.disturbances`; build succeeds |
+| 2026-05-26 | P3-T3 Timeline multi-color | Completed | `SnoringTimelineView` renders events by category: snoring retains intensity colors, sleep talking = purple, noise/coughing/other = orange; `eventColor(_:)` helper; build succeeds |
+| 2026-05-26 | P3-T2 EventRow icons | Completed | Category-based icons in `EventRow`: snoring retains intensity dot, sleep talking shows purple `bubble.left.fill`, noise shows orange `waveform`; `Theme` gained `sleepTalkingColor` and `noiseColor` for P3-T3 reuse; build succeeds |
+| 2026-05-26 | P3-T1 Category filter | Completed | Segmented picker (`All | Snoring | Sleep Talking | Noise`) in `SessionDetailView`; dynamic show/hide when session has multiple categories; filter wired to events list, player sheet, and events sheet; localized 4 filter strings; build succeeds |
+| 2026-05-26 | P2-T5 Build & verify | Completed | Clean build (zero errors); code review confirms snoring behavior unchanged when toggle off; speech priority finalization correct; no regressions; pre-existing asset warnings only |
+| 2026-05-26 | P2-T4 Settings toggle | Completed | "Detect Sleep Talking" toggle in SettingsRecordingSection; localized `settings.detectSleepTalking` string; `Strings.swift` regenerated; toggle wired to `UserPreferences.detectSleepTalking`; build succeeds |
+| 2026-05-26 | P2-T3 Event creation for sleep talking | Completed | Parallel speech event tracking in SessionManager; `finalizeActiveSpeechEvent()` creates `.sleepTalking` events; 3-sample consecutive gate; snoring priority finalizes speech immediately; `detectSleepTalking` pref (default false); build succeeds |
+| 2026-05-26 | P2-T2 Parallel detection wiring | Completed | SpeechDetector wired into SessionManager processing loop; `currentSpeechDetected` exposed; snoring priority preserved; debug prints include speechConfidence; build succeeds |
+| 2026-05-25 | SleepGuard Rebrand — Phase 1 Foundation | Completed | Model expansion (SleepStageSegment, SoundCategory.coughing), DetectionState rename, app-wide rebrand (bundle ID, display name, strings), build succeeds |
+| 2026-05-26 | P2-T1 SpeechDetector | Completed | SpeechDetector singleton with confidence + db thresholds; SoundAnalysisDetector extracts speech confidence from built-in classifier; build succeeds |
+| 2026-05-25 | F14 Feature Doc | Completed | Created `docs/features/f14-sleepguard-rebrand.md` with full template: Files (23 entries), Routes, State, Edge Cases (7), Tasks Completed (5), Remaining Work (Phases 2–4, 15 tasks) |
 | 2026-05-24 | Unify duration format across app | Completed | Created `DurationFormatter.hoursAndMinutes` in DesignSystem. Updated TrendsView, Last7NightsStatGrid, Last7NightsRow, SessionStatsGrid, NightGroupRowView to use shared formatter. Removed 5 single-use private wrapper functions. TrendsView label changed from "SNORING MINUTES" to "AVG SNORING". Build succeeds |
 | 2026-05-23 | Mock data for App Store screenshots | Completed | Created `MockDataGenerator` generating realistic May 1–23 sleep sessions with trending scores (worse→better), variable events, midnight GMT+2 starts, and multi-session days. Wired `-generateMockData` DEBUG launch argument. Data verified on Statistics dashboard. Build succeeds |
 | 2026-05-22 | Future-proof data model for multi-sound detection | Completed | Added `SoundCategory` enum (snoring/sleepTalking/noise/other) to `SnoreEvent` with default `.snoring` — lightweight SwiftData migration, zero data loss. Added `SleepSession.duration(for:)` helper. Explicit `.snoring` in `SessionManager`. No UI changes — stats grid unchanged. Build succeeds |
 | 2026-05-22 | Snore detection thresholds + epic tier + sensitivity | Completed | Added 4th `.epic` intensity tier matching SnoreLab. Tightened SoundAnalysis floors (-60→-45, -40→-30, -25→-15) and spectral thresholds (-35→-30, -25→-20, -15→-10, epic=-5). Wired `UserPreferences.detectionSensitivity` to shift thresholds ±5 dB. Updated `sleepScore` for epic penalty. Added `SettingsRecordingSection` with picker. All intensity switches updated. Build succeeds |
-| 2026-05-22 | Background audio recording fix | Completed | `SnoreGuard/Info.plist` now explicitly contains `UIBackgroundModes = [audio]` (was missing from built app despite build setting). `AudioRecorder` added `.mixWithOthers`, `isPaused` flag, `routeChangeNotification` + `didBecomeActiveNotification` observers, and robust `resumeRecordingIfNeeded()` fallback. `SoothingMelodyPlayer` no longer changes `AVAudioSession` category to `.playback` (was dropping mic). Build succeeds |
+| 2026-05-22 | Background audio recording fix | Completed | `SleepGuard/Info.plist` now explicitly contains `UIBackgroundModes = [audio]` (was missing from built app despite build setting). `AudioRecorder` added `.mixWithOthers`, `isPaused` flag, `routeChangeNotification` + `didBecomeActiveNotification` observers, and robust `resumeRecordingIfNeeded()` fallback. `SoothingMelodyPlayer` no longer changes `AVAudioSession` category to `.playback` (was dropping mic). Build succeeds |
 | 2026-05-22 | Snoring time calculation refactor | Completed | `SnoreEvent` gained `duration` field storing event-span (first→last snore, including natural breathing pauses). `snoreDuration` returns `duration` for new data, falls back to burst-sum for legacy. `SleepSession.snoringDuration` no longer adds `gapsDuration`. Aligns with SnoreClock/SnoreLab validated epoch-based measurement. Build succeeds |
 | 2026-05-19 | Increase snore event gap threshold | Completed | `eventGapThreshold` in SessionManager changed from 3.0 → 10.0 s. Brief breathing pauses under 10 s now merge into a single SnoreEvent instead of splitting into separate events. Existing burst tracking and gap-free clip extraction already support this. Melody play/stop logic is decoupled and unaffected. Build succeeds |
 | 2026-05-19 | Low battery force-save + banner | Completed | SessionManager polls battery every 30s during recording; at ≤2% calls `forceSaveDueToLowBattery()` which stops session and sets `forceSaveReason`. StatisticsTab auto-saves force-saved sessions to SwiftData + HealthKit without showing summary sheet. UserDefaults stores termination reason keyed by session ID. New `LowBatteryBannerView` (MelodyGapsBannerView-inspired) shown in `SessionSummaryView` and `SessionDetailView` when reason exists. Cleanup on session delete. No SleepSession model changes. Build succeeds |
@@ -157,6 +196,23 @@ _Most recent first. The AI appends here after every task._
 
 | Task | Feature | Completed | Duration |
 |------|---------|-----------|----------|
+| PDF generator polish + loading fix | F4 | 2026-05-28 | — |
+| PDF generator new stats | F4 | 2026-05-28 | — |
+| Sleep stages info sheet | F14 | 2026-05-28 | — |
+| HealthKit sleep stage query fix | F12 | 2026-05-28 | — |
+| F1-T6 Health & Watch onboarding | F1 | 2026-05-27 | — |
+| P4-T5 Settings toggle | F14 | 2026-05-27 | — |
+| P4-T4 Statistics integration | F14 | 2026-05-26 | — |
+| P4-T3 Stage timeline overlay | F14 | 2026-05-26 | — |
+| P4-T2 Stage correlation | F14 | 2026-05-26 | — |
+| P3-T6 Build & verify | F14 | 2026-05-26 | — |
+| P3-T5 Player labels | F14 | 2026-05-26 | — |
+| P3-T4 Stats grid supplement | F14 | 2026-05-26 | — |
+| P3-T3 Timeline multi-color | F14 | 2026-05-26 | — |
+| P3-T2 EventRow icons | F14 | 2026-05-26 | — |
+| P3-T1 Category filter | F14 | 2026-05-26 | — |
+| P2-T5 Build & verify | F14 | 2026-05-26 | — |
+| SleepGuard Rebrand — Phase 1 Foundation | F14 | 2026-05-25 | — |
 | Session 39 | F4 | 2026-05-12 | — |
 | Session 38 | F4 | 2026-05-12 | — |
 | F4-T6 | F4 | 2026-05-09 | — |
@@ -171,19 +227,25 @@ _Most recent first. The AI appends here after every task._
 
 ## Up Next
 
-_Unblocked tasks in priority order. The AI updates this after every task._
+_Unblocked tasks in priority order. F13 (CloudKit Sync) is intentionally skipped for now. F14 is the active focus._
 
 | Task | Feature | Priority | Why Ready |
 |------|---------|----------|-----------|
-| F13-T1 | CloudKit Sync | P2 | No blockers |
-| F13-T2 | CloudKit Sync | P2 | Depends on F13-T1 |
-| F13-T3 | CloudKit Sync | P2 | Depends on F13-T1 |
+| (none) | — | — | — |
 
 ## Blocked
 
 | Task | Feature | Blocker | Since |
 |------|---------|---------|-------|
 | (none) | — | — | — |
+
+## Up Next
+
+_Unblocked tasks in priority order. F13 (CloudKit Sync) is intentionally skipped for now._
+
+| Task | Feature | Priority | Why Ready |
+|------|---------|----------|-----------|
+| (none) | — | — | All tasks complete |
 
 ## Completed (last 10)
 

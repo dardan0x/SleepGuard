@@ -6,7 +6,7 @@ public struct OnboardingView: View {
   @Environment(UserPreferences.self) private var userPreferences
   @Environment(Theme.self) private var theme
   @State private var currentPage = 0
-  private let totalPages = 5
+  private let totalPages = 6
 
   public init() {}
 
@@ -24,10 +24,12 @@ public struct OnboardingView: View {
             .tag(1)
           OnboardingPage3View(onContinue: { advance() })
             .tag(2)
-          OnboardingPage4View(onContinue: { advance() })
+          OnboardingPageHealthWatchView(onContinue: { advance() })
             .tag(3)
-          OnboardingPage5View(onContinue: { finishOnboarding() })
+          OnboardingPage4View(onContinue: { advance() })
             .tag(4)
+          OnboardingPage5View(onContinue: { finishOnboarding() })
+            .tag(5)
         }
         .tabViewStyle(.page(indexDisplayMode: .never))
 

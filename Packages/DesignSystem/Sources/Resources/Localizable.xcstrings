@@ -32,6 +32,17 @@
         }
       }
     },
+    "action.close": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Close"
+          }
+        }
+      }
+    },
     "action.delete": {
       "localizations": {
         "en": {
@@ -173,6 +184,26 @@
         }
       }
     },
+    "action.collapse": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Collapse"
+          }
+        }
+      }
+    },
+    "action.expand": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Expand"
+          }
+        }
+      }
+    },
     "always.soothing.melody.value": {
       "extractionState": "manual",
       "localizations": {
@@ -239,6 +270,28 @@
         }
       }
     },
+    "event.player.noise.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noise Player"
+          }
+        }
+      }
+    },
+    "event.player.sleepTalking.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sleep Talking Player"
+          }
+        }
+      }
+    },
     "event.player.noAudio.description": {
       "extractionState": "manual",
       "localizations": {
@@ -268,6 +321,61 @@
           "stringUnit": {
             "state": "translated",
             "value": "Events/Hour"
+          }
+        }
+      }
+    },
+    "filter.all": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All"
+          }
+        }
+      }
+    },
+    "filter.noise": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noise"
+          }
+        }
+      }
+    },
+    "filter.sleepTalking": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sleep Talking"
+          }
+        }
+      }
+    },
+    "filter.snoring": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Snoring"
+          }
+        }
+      }
+    },
+    "session.disturbances": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disturbances"
           }
         }
       }
@@ -507,7 +615,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "We detect your snores so you don't have to argue about them."
+            "value": "We detect snores, sleep talking, and nighttime noise so you don't have to wonder what happened."
           }
         }
       }
@@ -517,7 +625,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Snore Detection"
+            "value": "Sound Detection"
           }
         }
       }
@@ -587,7 +695,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Don't worry — we're only listening for\nsnores, not secrets."
+            "value": "Don't worry — we're only listening for sounds, not secrets."
           }
         }
       }
@@ -627,7 +735,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Everything is processed on your device.\nNo uploads. No weird cloud stuff.\nNo selling your snore drama."
+            "value": "Everything is processed on your device.\nNo uploads. No weird cloud stuff.\nNo selling your sleep drama."
           }
         }
       }
@@ -1102,7 +1210,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "SnoreGuard needs microphone access to detect snoring while you sleep. Please enable it in Settings."
+            "value": "SleepGuard needs microphone access to detect sounds while you sleep. Please enable it in Settings."
           }
         }
       }
@@ -1220,6 +1328,50 @@
       }
     },
     "session.recording.eventsFormat": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SNORING EVENTS · %lld"
+          }
+        }
+      }
+    },
+    "session.recording.eventsFormat.all": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "EVENTS · %lld"
+          }
+        }
+      }
+    },
+    "session.recording.eventsFormat.noise": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DISTURBANCES · %lld"
+          }
+        }
+      }
+    },
+    "session.recording.eventsFormat.sleepTalking": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SLEEP TALKING EVENTS · %lld"
+          }
+        }
+      }
+    },
+    "session.recording.eventsFormat.snoring": {
+      "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
@@ -1368,7 +1520,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "This will permanently delete all sleep sessions and snore events. This action cannot be undone."
+            "value": "This will permanently delete all sleep sessions and sound events. This action cannot be undone."
           }
         }
       }
@@ -1379,6 +1531,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Delete All Recordings?"
+          }
+        }
+      }
+    },
+    "settings.detectSleepTalking": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Detect Sleep Talking"
+          }
+        }
+      }
+    },
+    "settings.enhancedSleepTracking": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enhanced Sleep Tracking"
           }
         }
       }
@@ -2338,6 +2512,380 @@
           "stringUnit": {
             "state": "translated",
             "value": "Epic"
+          }
+        }
+      }
+    },
+    "recordings.detail.sleepStagesLabel": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SLEEP STAGES"
+          }
+        }
+      }
+    },
+    "sleepStage.awake": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Awake"
+          }
+        }
+      }
+    },
+    "sleepStage.deep": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deep"
+          }
+        }
+      }
+    },
+    "sleepStage.light": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Light"
+          }
+        }
+      }
+    },
+    "sleepStage.rem": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "REM"
+          }
+        }
+      }
+    },
+    "statistics.sleepStagesLabel": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SLEEP STAGES"
+          }
+        }
+      }
+    },
+    "sleepStage.deepSleep": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deep Sleep"
+          }
+        }
+      }
+    },
+    "sleepStage.lightSleep": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Light Sleep"
+          }
+        }
+      }
+    },
+    "onboarding.healthWatch.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "See your sleep\ninside and out 🏥⌚"
+          }
+        }
+      }
+    },
+    "onboarding.healthWatch.body": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connect to Health to unlock sleep stage breakdowns — deep, light, REM, and awake. Paired with your smartwatch, your sleep picture gets even sharper."
+          }
+        }
+      }
+    },
+    "onboarding.healthWatch.badge": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All health data stays on your device"
+          }
+        }
+      }
+    },
+    "onboarding.healthWatch.buttonPrimary": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connect to Health"
+          }
+        }
+      }
+    },
+    "onboarding.healthWatch.buttonSecondary": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skip for now"
+          }
+        }
+      }
+    },
+    "onboarding.healthWatch.granted": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Health connected"
+          }
+        }
+      }
+    },
+    "sleepStagesInfo.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "About Sleep Stages"
+          }
+        }
+      }
+    },
+    "sleepStagesInfo.yourStages": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your Stages"
+          }
+        }
+      }
+    },
+    "sleepStagesInfo.scoreImpact": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Score Impact"
+          }
+        }
+      }
+    },
+    "sleepStagesInfo.stageStatus.good": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Good"
+          }
+        }
+      }
+    },
+    "sleepStagesInfo.stageStatus.low": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Low"
+          }
+        }
+      }
+    },
+    "sleepStagesInfo.stageStatus.high": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "High"
+          }
+        }
+      }
+    },
+    "sleepStagesInfo.awake.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Time spent awake during the night. Brief awakenings are normal."
+          }
+        }
+      }
+    },
+    "sleepStagesInfo.rem.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rapid Eye Movement sleep. Important for memory, learning, and mood."
+          }
+        }
+      }
+    },
+    "sleepStagesInfo.light.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Light sleep transitions you between wakefulness and deeper stages."
+          }
+        }
+      }
+    },
+    "sleepStagesInfo.deep.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deep sleep restores the body, supports immune function, and aids recovery."
+          }
+        }
+      }
+    },
+    "sleepStagesInfo.scoreFormula": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sleep stages can affect your score by up to 15 points. Targets: Deep ≥ 15%, REM ≥ 18%, Awake ≤ 8%."
+          }
+        }
+      }
+    },
+    "sleepStagesInfo.penaltyFormat": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This session's stage penalty: -%d points"
+          }
+        }
+      }
+    },
+    "sleepStagesInfo.noPenalty": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This session has no stage penalty — great sleep architecture!"
+          }
+        }
+      }
+    },
+    "sleepStagesInfo.recommended": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recommended: %@"
+          }
+        }
+      }
+    },
+    "sleepStagesInfo.recommended.awake": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "≤ 8%"
+          }
+        }
+      }
+    },
+    "sleepStagesInfo.recommended.rem": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "≥ 18%"
+          }
+        }
+      }
+    },
+    "sleepStagesInfo.recommended.light": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "45–55%"
+          }
+        }
+      }
+    },
+    "sleepStagesInfo.recommended.deep": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "≥ 15%"
+          }
+        }
+      }
+    },
+    "pdf.avgDB": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avg dB"
+          }
+        }
+      }
+    },
+    "pdf.peakDB": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Peak dB"
           }
         }
       }

@@ -9,14 +9,14 @@ public struct SnoreSample: Codable, Sendable {
   public let db: Float
   public let spectralScore: Float
   public let snoreConfidence: Float
-  public let state: SnoringState
+  public let state: DetectionState
 
   public init(
     elapsed: TimeInterval,
     db: Float,
     spectralScore: Float,
     snoreConfidence: Float,
-    state: SnoringState
+    state: DetectionState
   ) {
     self.elapsed = elapsed
     self.db = db

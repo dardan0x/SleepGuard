@@ -15,7 +15,7 @@ Weekly and monthly bar charts showing snoring duration per night, colored by int
 | `Packages/Statistics/Sources/Statistics/TrendsView.swift` | Container view with week/month toggle, bar chart, legend, stat cards |
 | `Packages/Statistics/Sources/Statistics/StatisticsDashboardView.swift` | "View month >" button navigates to `.trends` |
 | `Packages/Env/Sources/Env/Router.swift` | `.trends` added to `RouterDestination` |
-| `SnoreGuard/AppRegistry.swift` | `.trends` mapped to `TrendsView()` |
+| `SleepGuard/AppRegistry.swift` | `.trends` mapped to `TrendsView()` |
 
 ## Routes
 

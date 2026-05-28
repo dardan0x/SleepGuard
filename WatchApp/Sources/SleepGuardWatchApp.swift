@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct SnoreGuardWatchApp: App {
+struct SleepGuardWatchApp: App {
   @WKApplicationDelegateAdaptor(WatchAppDelegate.self) var appDelegate
 
   var body: some Scene {

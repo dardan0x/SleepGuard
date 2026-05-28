@@ -35,15 +35,15 @@ When your changes create orphans: remove what YOUR changes made unused. Don't re
 
 ## Design Compliance
 
-**The design file at `designs/SnoreGuard.pen` is the single source of truth for all UI.**
+**The design file at `designs/SleepGuard.pen` is the single source of truth for all UI.**
 
 Before implementing or modifying ANY view:
-1. Read the relevant screen(s) from `designs/SnoreGuard.pen` using Pencil MCP tools.
+1. Read the relevant screen(s) from `designs/SleepGuard.pen` using Pencil MCP tools.
 2. Extract screenshots of the design for visual reference.
 3. Match colors, typography, spacing, corner radius, and component structure exactly.
 4. Use the design tokens (variables) defined in the .pen file — never hardcode values that differ.
 
-**Design tokens (from `designs/SnoreGuard.pen`):**
+**Design tokens (from `designs/SleepGuard.pen`):**
 - `bg-primary`: `#000000`
 - `bg-secondary`: `#1C1C1E`
 - `bg-card`: `#2C2C2E`
@@ -286,7 +286,7 @@ mcp__XcodeBuildMCP__test_sim
 
 **Fallback (Shell):**
 ```bash
-xcodebuild -project SnoreGuard.xcodeproj -scheme SnoreGuard -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2' build
+xcodebuild -project SleepGuard.xcodeproj -scheme SleepGuard -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2' build
 ```
 
 ## Session End Requirements
@@ -299,6 +299,8 @@ Include:
 - **Follow-up needed:** [anything requiring a decision]
 - **Suggested branch**: `feature/[f#]/[t#]-short-description`
 - **Suggested commit**: `[Task ID] — [Short description]` with bullet list of changes
+
+> ⚠️ **Never omit Suggested branch and Suggested commit.** The user relies on these for git bookkeeping. This is part of the handoff.
 
 ### 1. Update `docs/SESSION_SUMMARY.md`
 
@@ -328,12 +330,24 @@ Append a new session entry with this structure:
 ### Build Status
 - **BUILD SUCCEEDED / FAILED** — [if failed, what errors and how they were resolved]
 
+### Suggested Branch
+`feature/[f#]/[t#]-short-description`
+
+### Suggested Commit
+`[Task ID] — [Short description]`
+
+### Changes done
+```
+- [Change 1]
+- [Change 2]
+```
+```
+
 ### Next Session
 - [Task ID]: [What to start next and why]
 
 ### Open Questions
 - [Question that needs user input or future decision]
-```
 
 ### 2. Create Feature Doc When Feature Ships
 
