@@ -37,7 +37,7 @@ Record snoring from the Apple Watch microphone, enabling phone-free sleep tracki
 | Completed | 2026-05-07 |
 
 **Acceptance Criteria:**
-- [x] WatchOS app source files created (`SnoreGuardWatchApp.swift`, `ContentView.swift`)
+- [x] WatchOS app source files created (`SleepGuardWatchApp.swift`, `ContentView.swift`)
 - [x] Basic start/stop recording UI on watch
 - [x] Manual setup guide for Xcode target integration
 - [x] iPhone app detects paired watch availability

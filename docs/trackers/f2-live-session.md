@@ -52,7 +52,7 @@ Start/stop background recording with real-time snore detection. Displays a bedsi
 - [ ] Builds with zero errors
 
 **Prompt Used:**
-Resume SnoreGuard development. Proceed with F2-T3 following workflow exactly.
+Resume SleepGuard development. Proceed with F2-T3 following workflow exactly.
 
 **Notes:**
 - AudioRecorder accessed via `.shared` directly in view (consistent with SessionManager pattern) rather than through @Environment. This avoids modifying AppRegistry dependency graph for a single permission bool.
@@ -105,7 +105,7 @@ Proceed with F2-T4 (bedside clock active recording UI)
 - [x] Builds with zero errors
 
 **Prompt Used:**
-Resume SnoreGuard. Read AGENTS.md, docs/VIBE_CODING_WORKFLOW.md, docs/FeatureTracker.md, docs/SESSION_SUMMARY.md, docs/ProjectArchitecture.md, and the active feature tracker from docs/trackers/. Report state including which architecture doc the feature tracker references, then proceed with the next unblocked task following the workflow exactly.
+Resume SleepGuard. Read AGENTS.md, docs/VIBE_CODING_WORKFLOW.md, docs/FeatureTracker.md, docs/SESSION_SUMMARY.md, docs/ProjectArchitecture.md, and the active feature tracker from docs/trackers/. Report state including which architecture doc the feature tracker references, then proceed with the next unblocked task following the workflow exactly.
 
 **Notes:**
 - `SheetDestination.sessionSummary` simplified from `sessionSummary(sessionID:)` to `sessionSummary` (no payload) because the completed session is read from `SessionManager.completedSession`.
@@ -138,7 +138,7 @@ Resume SnoreGuard. Read AGENTS.md, docs/VIBE_CODING_WORKFLOW.md, docs/FeatureTra
 - [x] Builds with zero errors
 
 **Prompt Used:**
-Resume SnoreGuard. Read AGENTS.md, docs/VIBE_CODING_WORKFLOW.md, docs/FeatureTracker.md, docs/SESSION_SUMMARY.md, docs/ProjectArchitecture.md, and the active feature tracker from docs/trackers/. Report state including which architecture doc the feature tracker references, then proceed with the next unblocked task following the workflow exactly.
+Resume SleepGuard. Read AGENTS.md, docs/VIBE_CODING_WORKFLOW.md, docs/FeatureTracker.md, docs/SESSION_SUMMARY.md, docs/ProjectArchitecture.md, and the active feature tracker from docs/trackers/. Report state including which architecture doc the feature tracker references, then proceed with the next unblocked task following the workflow exactly.
 
 **Notes:**
 - `SheetDestination.sessionSummary` simplified from `sessionSummary(sessionID:)` to `sessionSummary` (no payload) because the completed session is read from `SessionManager.completedSession`.
@@ -188,7 +188,7 @@ _(decisions, issues, deviations)_
 - [x] Builds with zero errors
 
 **Prompt Used:**
-Resume SnoreGuard. Read AGENTS.md, docs/FeatureTracker.md, docs/SESSION_SUMMARY.md, docs/ProjectArchitecture.md, and the active feature tracker from docs/trackers/. Report state including which architecture doc the feature tracker references, then proceed with the next unblocked task following the workflow exactly.
+Resume SleepGuard. Read AGENTS.md, docs/FeatureTracker.md, docs/SESSION_SUMMARY.md, docs/ProjectArchitecture.md, and the active feature tracker from docs/trackers/. Report state including which architecture doc the feature tracker references, then proceed with the next unblocked task following the workflow exactly.
 
 **Notes:**
 - `StatisticsDashboardView` now has a "Start Recording" CTA that presents `.liveSession` sheet via `routerPath.presentedSheet`
@@ -329,7 +329,7 @@ Build a soothing melody sheet from the design file (node zvwP5) with a native wh
 - [x] `stop()` called on session end (`stopSession`, `stopAndDiscardSession`) to prevent audio leaking
 - [x] `BedsideClockView` shows compact overlay card when `isPlaying` — pulsing music icon, melody name, Stop button
 - [x] `MelodyPickerSheet` shows real sound names instead of dummy "Melody N" labels
-- [x] `SoothingMelodyPlayer` injected into app environment via `AppRegistry` + `SnoreGuardApp`
+- [x] `SoothingMelodyPlayer` injected into app environment via `AppRegistry` + `SleepGuardApp`
 - [x] Builds with zero errors
 - [x] Manual stop allows re-triggering on future snore events
 - [x] "Mute for session" button disables all further melody playback during current recording session

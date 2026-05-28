@@ -36,10 +36,10 @@ Rebrand the app from SnoreGuard to SleepGuard and expand audio detection from sn
 | `Packages/DesignSystem/Sources/Components/SessionStatsGrid.swift` | DesignSystem | Future home for optional disturbance summary row |
 | `Packages/DesignSystem/Sources/Resources/Localizable.xcstrings` | DesignSystem | Rebrand strings updated (onboarding, alerts, privacy copy) |
 | `Packages/Settings/Sources/Views/SettingsView.swift` | Settings | Future home for "Detect Sleep Talking" and "Enhanced Sleep Tracking" toggles |
-| `SnoreGuard/SleepGuardApp.swift` | App | App entry point renamed from `SnoreGuardApp` |
-| `SnoreGuard/Info.plist` | App | Added `CFBundleDisplayName` = "SleepGuard" |
-| `SnoreGuard.xcodeproj/project.pbxproj` | App | Bundle ID updated to `com.daki.exampleProject.SleepGuard` |
-| `WatchApp/Sources/SnoreGuardWatchApp.swift` | WatchApp | Watch app struct renamed to `SleepGuardWatchApp` |
+| `SleepGuard/SleepGuardApp.swift` | App | App entry point renamed from `SleepGuardApp` |
+| `SleepGuard/Info.plist` | App | Added `CFBundleDisplayName` = "SleepGuard" |
+| `SleepGuard.xcodeproj/project.pbxproj` | App | Bundle ID updated to `com.daki.exampleProject.SleepGuard` |
+| `WatchApp/Sources/SleepGuardWatchApp.swift` | WatchApp | Watch app struct renamed to `SleepGuardWatchApp` |
 
 ## Routes
 

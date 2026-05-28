@@ -172,11 +172,11 @@ _(decisions, issues, deviations)_
 - [x] Builds with zero errors
 
 **Prompt Used:**
-User requested creating the Health & Watch onboarding screen in the app based on the design in `designs/SnoreGuard.pen`. Screen inserts between Privacy (page 3) and Microphone (now page 5) in the onboarding flow.
+User requested creating the Health & Watch onboarding screen in the app based on the design in `designs/SleepGuard.pen`. Screen inserts between Privacy (page 3) and Microphone (now page 5) in the onboarding flow.
 
 **Notes:**
 - Same 0.8 s grant-delay pattern also added to `OnboardingPage4View` (Microphone permission) for consistency
-- Design file `designs/SnoreGuard.pen` updated: QtMq1 moved into main onboarding flow, all 7 screen variants now show 6 dots
+- Design file `designs/SleepGuard.pen` updated: QtMq1 moved into main onboarding flow, all 7 screen variants now show 6 dots
 - `OnboardingView.totalPages` changed from 5 → 6
 
 ---

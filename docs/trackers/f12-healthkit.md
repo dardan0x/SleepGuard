@@ -42,7 +42,7 @@ Sync sleep session data (sleep duration, snoring events) to Apple Health so user
 - [x] Builds with zero errors
 
 **Prompt Used:**
-Add HealthKit capability to SnoreGuard app target, create entitlements file, add usage descriptions to build settings, create HealthKitSync singleton in Env package with authorization request method.
+Add HealthKit capability to SleepGuard app target, create entitlements file, add usage descriptions to build settings, create HealthKitSync singleton in Env package with authorization request method.
 
 **Notes:**
 - `CODE_SIGN_ENTITLEMENTS` and `INFOPLIST_KEY_NSHealth*` added to both Debug and Release build settings in project.pbxproj
@@ -106,12 +106,12 @@ Add syncToHealthKit to UserPreferences, add HealthKit toggle to SettingsView Dat
 **Problem:** `HealthKitSync.isAuthorized` defaulted to `false` on every cold launch. `checkAuthorizationStatus()` existed but was never called, so after app restart the toggle could be ON yet sync silently skipped because `isAuthorized` was still `false`.
 
 **Fix:**
-- `SnoreGuardApp.swift` calls `HealthKitSync.shared.checkAuthorizationStatus()` in `.onAppear`
+- `SleepGuardApp.swift` calls `HealthKitSync.shared.checkAuthorizationStatus()` in `.onAppear`
 - `SettingsDataSection` toggle now only stays ON if `requestAuthorization()` returns `true`; if user denies, toggle snaps back OFF
 - `SessionSummaryView.saveSession()` re-checks auth status in the sync Task as a safety net
 
 **Files touched:**
-- `SnoreGuard/SnoreGuardApp.swift`
+- `SleepGuard/SleepGuardApp.swift`
 - `Packages/Settings/Sources/Views/SettingsDataSection.swift`
 - `Packages/SleepSession/Sources/Views/SessionSummaryView.swift`
 

@@ -18,8 +18,8 @@ First-launch onboarding flow that introduces the app, explains features, request
 | `Packages/Onboarding/Sources/Onboarding/OnboardingPage3View.swift` | Privacy screen: data stays on device |
 | `Packages/Onboarding/Sources/Onboarding/OnboardingPage4View.swift` | Mic permission: pulsing concentric rings + `AVAudioSession.requestRecordPermission()` |
 | `Packages/Onboarding/Sources/Onboarding/OnboardingPage5View.swift` | Motivation screen: CTA to start recording or browse stats |
-| `SnoreGuard/SnoreGuard/SnoreGuardApp.swift` | Onboarding gate: shows `OnboardingView` if `!hasCompletedOnboarding`, else `MainTabView` |
-| `SnoreGuard/SnoreGuard/AppRegistry.swift` | `SheetDestination.onboarding` mapped, `withEnvironments()` for sheets |
+| `SleepGuard/SleepGuard/SleepGuardApp.swift` | Onboarding gate: shows `OnboardingView` if `!hasCompletedOnboarding`, else `MainTabView` |
+| `SleepGuard/SleepGuard/AppRegistry.swift` | `SheetDestination.onboarding` mapped, `withEnvironments()` for sheets |
 
 ## Routes
 

@@ -43,7 +43,7 @@ Last night's summary card with sleep score (0-100), duration, snoring percentage
 - [x] Builds with zero errors
 
 **Prompt Used:**
-Resume SnoreGuard. Read AGENTS.md, docs/FeatureTracker.md, docs/SESSION_SUMMARY.md, docs/ProjectArchitecture.md, and the active feature tracker from docs/trackers/. Report state including which architecture doc the feature tracker references, then proceed with the next unblocked task following the workflow exactly.
+Resume SleepGuard. Read AGENTS.md, docs/FeatureTracker.md, docs/SESSION_SUMMARY.md, docs/ProjectArchitecture.md, and the active feature tracker from docs/trackers/. Report state including which architecture doc the feature tracker references, then proceed with the next unblocked task following the workflow exactly.
 
 **Notes:**
 - Container view (`StatisticsDashboardView`) uses `@Query(sort: \.startDate, order: .reverse)` to fetch latest session
@@ -71,7 +71,7 @@ Resume SnoreGuard. Read AGENTS.md, docs/FeatureTracker.md, docs/SESSION_SUMMARY.
 - [x] Builds with zero errors
 
 **Prompt Used:**
-Resume SnoreGuard. Read AGENTS.md, docs/FeatureTracker.md, docs/SESSION_SUMMARY.md, docs/ProjectArchitecture.md, and the active feature tracker from docs/trackers/. Report state including which architecture doc the feature tracker references, then proceed with the next unblocked task following the workflow exactly.
+Resume SleepGuard. Read AGENTS.md, docs/FeatureTracker.md, docs/SESSION_SUMMARY.md, docs/ProjectArchitecture.md, and the active feature tracker from docs/trackers/. Report state including which architecture doc the feature tracker references, then proceed with the next unblocked task following the workflow exactly.
 
 **Notes:**
 - `SleepScoreGauge`: Circular ring with `trim(from:to:)`, animated score fill, color-coded (green/orange/red), receives `score`, `theme`, `size` via init
@@ -98,7 +98,7 @@ Resume SnoreGuard. Read AGENTS.md, docs/FeatureTracker.md, docs/SESSION_SUMMARY.
 - [x] Builds with zero errors
 
 **Prompt Used:**
-Resume SnoreGuard. Read AGENTS.md, docs/FeatureTracker.md, docs/SESSION_SUMMARY.md, docs/ProjectArchitecture.md, and the active feature tracker from docs/trackers/. Report state including which architecture doc the feature tracker references, then proceed with the next unblocked task following the workflow exactly.
+Resume SleepGuard. Read AGENTS.md, docs/FeatureTracker.md, docs/SESSION_SUMMARY.md, docs/ProjectArchitecture.md, and the active feature tracker from docs/trackers/. Report state including which architecture doc the feature tracker references, then proceed with the next unblocked task following the workflow exactly.
 
 **Notes:**
 - Converted `.liveSession` from `SheetDestination` to `RouterDestination` to satisfy `routerPath.navigate(to:)` acceptance criteria

@@ -42,7 +42,7 @@ Configure detection sensitivity, recording options, data management (delete all 
 - [x] Builds with zero errors
 
 **Prompt Used:**
-Resume SnoreGuard. Read AGENTS.md, docs/FeatureTracker.md, docs/ProjectArchitecture.md, and the active feature tracker from docs/trackers/. Report state including which architecture doc the feature tracker references, then proceed with the next unblocked task following the workflow exactly — including Design Compliance: always reference designs/SnoreGuard.pen before building or modifying any view.
+Resume SleepGuard. Read AGENTS.md, docs/FeatureTracker.md, docs/ProjectArchitecture.md, and the active feature tracker from docs/trackers/. Report state including which architecture doc the feature tracker references, then proceed with the next unblocked task following the workflow exactly — including Design Compliance: always reference designs/SleepGuard.pen before building or modifying any view.
 
 **Notes:**
 Added `minSnoreDuration` (default 2s) and `maxClipLength` (default 30s) to UserPreferences to match design. Existing properties (`detectionSensitivity`, `saveAudioClips`, `appearance`) were already scaffolded in Phase 0.
@@ -70,14 +70,14 @@ Added `minSnoreDuration` (default 2s) and `maxClipLength` (default 30s) to UserP
 Same as F6-T1.
 
 **Notes:**
-Built complete SettingsView matching designs/SnoreGuard.pen:
+Built complete SettingsView matching designs/SleepGuard.pen:
 - Title row with gear icon in accent circle
 - Detection card: sensitivity slider (3-position), min snore duration stepper
 - Recording card: save audio clips toggle, max clip length picker (confirmationDialog)
 - Appearance card: theme picker (confirmationDialog)
 - Data card: delete all recordings button
 - About card: version static text, rate on App Store button
-Applied `.preferredColorScheme` in SnoreGuardApp based on UserPreferences.appearance.
+Applied `.preferredColorScheme` in SleepGuardApp based on UserPreferences.appearance.
 
 ---
 

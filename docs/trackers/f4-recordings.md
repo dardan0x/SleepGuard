@@ -47,7 +47,7 @@ List past sleep sessions grouped by month. Tapping a session opens a detail view
 - [x] Builds with zero errors
 
 **Prompt Used:**
-Resume SnoreGuard. Read AGENTS.md, docs/FeatureTracker.md, docs/SESSION_SUMMARY.md, docs/ProjectArchitecture.md, and the active feature tracker from docs/trackers/. Report state including which architecture doc the feature tracker references, then proceed with the next unblocked task following the workflow exactly.
+Resume SleepGuard. Read AGENTS.md, docs/FeatureTracker.md, docs/SESSION_SUMMARY.md, docs/ProjectArchitecture.md, and the active feature tracker from docs/trackers/. Report state including which architecture doc the feature tracker references, then proceed with the next unblocked task following the workflow exactly.
 
 **Notes:**
 - `MonthSection` made `public` to satisfy Swift visibility rules for use in `public enum ViewState`
@@ -73,7 +73,7 @@ Resume SnoreGuard. Read AGENTS.md, docs/FeatureTracker.md, docs/SESSION_SUMMARY.
 - [x] Builds with zero errors
 
 **Prompt Used:**
-Resume SnoreGuard. Read AGENTS.md, docs/FeatureTracker.md, docs/SESSION_SUMMARY.md, docs/ProjectArchitecture.md, and the active feature tracker from docs/trackers/. Report state including which architecture doc the feature tracker references, then proceed with the next unblocked task following the workflow exactly.
+Resume SleepGuard. Read AGENTS.md, docs/FeatureTracker.md, docs/SESSION_SUMMARY.md, docs/ProjectArchitecture.md, and the active feature tracker from docs/trackers/. Report state including which architecture doc the feature tracker references, then proceed with the next unblocked task following the workflow exactly.
 
 **Notes:**
 - Extracted inline row from `RecordingsListView.swift` into standalone `RecordingRowView.swift`
@@ -131,7 +131,7 @@ _(decisions, issues, deviations)_
 - [x] Builds with zero errors
 
 **Prompt Used:**
-Resume SnoreGuard. Read AGENTS.md, docs/FeatureTracker.md, docs/SESSION_SUMMARY.md, docs/ProjectArchitecture.md, and the active feature tracker from docs/trackers/. Report state including which architecture doc the feature tracker references, then proceed with the next unblocked task following the workflow exactly — including Design Compliance: always reference designs/SnoreGuard.pen before building or modifying any view.
+Resume SleepGuard. Read AGENTS.md, docs/FeatureTracker.md, docs/SESSION_SUMMARY.md, docs/ProjectArchitecture.md, and the active feature tracker from docs/trackers/. Report state including which architecture doc the feature tracker references, then proceed with the next unblocked task following the workflow exactly — including Design Compliance: always reference designs/SleepGuard.pen before building or modifying any view.
 
 **Notes:**
 - Simplified approach: save full session audio as one file, seek to event timestamps during playback
@@ -174,7 +174,7 @@ _(decisions, issues, deviations)_
 - [x] Builds with zero errors
 
 **Prompt Used:**
-Resume SnoreGuard. Read AGENTS.md, docs/FeatureTracker.md, docs/SESSION_SUMMARY.md, docs/ProjectArchitecture.md, and the active feature tracker from docs/trackers/. Report state including which architecture doc the feature tracker references, then proceed with the next unblocked task following the workflow exactly.
+Resume SleepGuard. Read AGENTS.md, docs/FeatureTracker.md, docs/SESSION_SUMMARY.md, docs/ProjectArchitecture.md, and the active feature tracker from docs/trackers/. Report state including which architecture doc the feature tracker references, then proceed with the next unblocked task following the workflow exactly.
 
 **Notes:**
 - Clip padding: 2 seconds before/after each event (matches existing export behavior)

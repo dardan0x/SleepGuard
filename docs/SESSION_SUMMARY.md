@@ -1,4 +1,4 @@
-# SnoreGuard Sprint Log
+# SleepGuard Sprint Log
 
 ## 2026-05-06 — Phase 0: Project Kickoff
 
@@ -33,7 +33,7 @@
 - **F1-T2**: Onboarding pages 1-3 (hook, features, privacy) with animated transitions
 - **F1-T3**: Page 4 mic permission with pulsing concentric rings using `Timer` + `@State var ringScale`; `AVAudioSession.requestRecordPermission()` wrapped in `withCheckedContinuation`
 - **F1-T4**: Page 5 motivation screen with dual CTA (`onCompleteToRecording`, `onCompleteToStatistics`)
-- **F1-T5**: Onboarding gate in `SnoreGuardApp.swift` — shows `OnboardingView` when `!hasCompletedOnboarding`, else `MainTabView`; `.sheet(item:)` registration for `.onboarding` in `AppRegistry.swift`
+- **F1-T5**: Onboarding gate in `SleepGuardApp.swift` — shows `OnboardingView` when `!hasCompletedOnboarding`, else `MainTabView`; `.sheet(item:)` registration for `.onboarding` in `AppRegistry.swift`
 
 ### Technical Details
 - `OnboardingView` uses `TabView` with `.tabViewStyle(.page(indexDisplayMode: .never))` for swipe paging
@@ -167,7 +167,7 @@
 | File | Lines | What Changed |
 |------|-------|--------------|
 | `Packages/Env/Sources/Services/SessionManager.swift` | +25/-0 | Battery monitoring (`batteryCheckCounter`, `checkBatteryLevel()`), `forceSaveReason`, `forceSaveDueToLowBattery()` |
-| `SnoreGuard/StatisticsTab.swift` | +28/-4 | Auto-save logic for force-saved sessions; `HealthKitSync` and `modelContext` environments; `autoSaveForceSavedSession()` helper |
+| `SleepGuard/StatisticsTab.swift` | +28/-4 | Auto-save logic for force-saved sessions; `HealthKitSync` and `modelContext` environments; `autoSaveForceSavedSession()` helper |
 | `Packages/DesignSystem/Sources/Components/LowBatteryBannerView.swift` | +32/-0 | New banner component; reads UserDefaults; styled like `MelodyGapsBannerView` |
 | `Packages/SleepSession/Sources/Views/SessionSummaryView.swift` | +2/-0 | Added `LowBatteryBannerView` below `MelodyGapsBannerView` |
 | `Packages/Recordings/Sources/Views/SessionDetailView.swift` | +3/-0 | Added `LowBatteryBannerView` below `MelodyGapsBannerView`; UserDefaults cleanup in `deleteSession()` |
@@ -378,7 +378,7 @@
 | `Packages/SleepSession/Sources/SleepSession/SessionSummaryView.swift` | +165 | New. Summary sheet UI with score ring, stats grid, Save/Discard buttons |
 | `Packages/Env/Sources/Env/SessionManager.swift` | +2/-0 | Added `completedSession: SleepSession?`; set in `stopSession()` |
 | `Packages/Env/Sources/Env/Router.swift` | +3/-5 | Simplified `.sessionSummary(sessionID:)` to `.sessionSummary` (no payload) |
-| `SnoreGuard/MainTabView.swift` | +9/-4 | Added `sessionManager` env; `.onChange` swaps sheet; `.sessionSummary` maps to `SessionSummaryView` |
+| `SleepGuard/MainTabView.swift` | +9/-4 | Added `sessionManager` env; `.onChange` swaps sheet; `.sessionSummary` maps to `SessionSummaryView` |
 | `Packages/SleepSession/Sources/SleepSession/SleepSessionView.swift` | +2/-1 | Added `Color.clear` branch when `completedSession != nil` |
 
 ### Architecture Decisions
@@ -414,7 +414,7 @@
 | File | Lines | What Changed |
 |------|-------|--------------|
 | `Packages/Statistics/Sources/Statistics/StatisticsDashboardView.swift` | +62/-2 | New dashboard layout with header and "Start Recording" CTA card |
-| `SnoreGuard/MainTabView.swift` | +6/-1 | Added `onDismiss` to `.sheet` that clears `completedSession` |
+| `SleepGuard/MainTabView.swift` | +6/-1 | Added `onDismiss` to `.sheet` that clears `completedSession` |
 
 ### Architecture Decisions
 - **Sheet `onDismiss` for state cleanup**: Rather than adding a dedicated `clearCompletedSession()` method, `StatisticsTab` handles cleanup when the sheet is dismissed. This keeps `SessionManager` simple and avoids exposing extra API surface.
@@ -493,8 +493,8 @@
 | File | Lines | What Changed |
 |------|-------|--------------|
 | `Packages/Env/Sources/Env/Router.swift` | +1/-8 | Moved `.liveSession` from `SheetDestination` to `RouterDestination` |
-| `SnoreGuard/AppRegistry.swift` | +2 | Added `.liveSession` → `SleepSessionView()` mapping in `withAppRouter()` |
-| `SnoreGuard/MainTabView.swift` | +1/-6 | Removed `.liveSession` from sheet switch; updated onboarding + completedSession handling |
+| `SleepGuard/AppRegistry.swift` | +2 | Added `.liveSession` → `SleepSessionView()` mapping in `withAppRouter()` |
+| `SleepGuard/MainTabView.swift` | +1/-6 | Removed `.liveSession` from sheet switch; updated onboarding + completedSession handling |
 | `Packages/Statistics/Sources/Statistics/StatisticsDashboardView.swift` | +2/-2 | Empty + loaded CTAs now use `routerPath.navigate(to: .liveSession)` |
 | `Packages/SleepSession/Sources/SleepSession/SleepSessionView.swift` | +1 | Added `.toolbar(.hidden, for: .navigationBar)` |
 | `docs/ProjectArchitecture.md` | +2/-1 | Added `.liveSession` to Routes table; updated recording screen description |
@@ -609,7 +609,7 @@
 **Bug 1 — Onboarding stuck on final screen:**
 - Root cause: `UserPreferences` uses `@Observable` with computed properties backed by `UserDefaults`
 - The `@Observable` macro auto-instruments *stored* properties only; computed properties silently emit zero observation notifications
-- When `OnboardingView.finishOnboarding()` set `hasCompletedOnboarding = true`, `SnoreGuardApp` never re-evaluated its body because no change was observed
+- When `OnboardingView.finishOnboarding()` set `hasCompletedOnboarding = true`, `SleepGuardApp` never re-evaluated its body because no change was observed
 - Fix: Added explicit `access(keyPath:)` and `withMutation(keyPath:)` calls to all computed properties in `UserPreferences`, matching Apple's documented pattern for observable computed properties
 - All five properties fixed: `hasCompletedOnboarding`, `detectionSensitivity`, `saveAudioClips`, `appearance`, `presentRecordingAfterOnboarding`
 
@@ -694,7 +694,7 @@ Or delete and reinstall the app on the simulator.
 
 | File | Lines | What Changed |
 |------|-------|--------------|
-| `SnoreGuard/AppRegistry.swift` | +1/-1 | `.recordingDetail(id:)` now maps to `SessionDetailView(sessionID: id)` instead of placeholder `Text` |
+| `SleepGuard/AppRegistry.swift` | +1/-1 | `.recordingDetail(id:)` now maps to `SessionDetailView(sessionID: id)` instead of placeholder `Text` |
 | `docs/trackers/f4-recordings.md` | +12/-6 | F4-T3 marked Done, F4-T5 marked Done with notes |
 | `docs/FeatureTracker.md` | +6/-5 | Dashboard updated: F4 4/5 (80%), Tasks Done 17, Progress 71% |
 
@@ -795,7 +795,7 @@ Or delete and reinstall the app on the simulator.
 |------|-------|--------------|
 | `Packages/Statistics/Sources/Statistics/TrendsView.swift` | +245 | New. Trends screen with picker, chart, legend, stat cards |
 | `Packages/Env/Sources/Env/Router.swift` | +1 | Added `.trends` to `RouterDestination` |
-| `SnoreGuard/AppRegistry.swift` | +2 | Mapped `.trends` → `TrendsView()` |
+| `SleepGuard/AppRegistry.swift` | +2 | Mapped `.trends` → `TrendsView()` |
 | `Packages/Statistics/Sources/Statistics/StatisticsDashboardView.swift` | +5/-3 | Wired "View month >" to `routerPath.navigate(to: .trends)` via closure |
 
 ### Build Status
@@ -817,7 +817,7 @@ Or delete and reinstall the app on the simulator.
 
 ### Completed
 - **F6-T1**: Extended `UserPreferences` with `minSnoreDuration` (default 2s) and `maxClipLength` (default 30s)
-- **F6-T2**: Built `SettingsView` form UI matching designs/SnoreGuard.pen
+- **F6-T2**: Built `SettingsView` form UI matching designs/SleepGuard.pen
 - **F6-T3**: Data management (delete all recordings) + About section
 
 ### Technical Details
@@ -830,7 +830,7 @@ Or delete and reinstall the app on the simulator.
   - Data card: "Delete All Recordings" destructive button with confirmation alert
   - About card: version string from Bundle, "Rate on App Store" link
 - Delete all data uses `@Environment(\.modelContext)` + `FetchDescriptor<SleepSession>`; cascade delete handles `SnoreEvent` children via SwiftData relationship
-- `SnoreGuardApp.swift` applies `.preferredColorScheme(colorScheme(for:))` based on `userPreferences.appearance`
+- `SleepGuardApp.swift` applies `.preferredColorScheme(colorScheme(for:))` based on `userPreferences.appearance`
 - `Color(hex:)` extension in DesignSystem made `public` so Settings package can use it
 
 ### Files Changed
@@ -839,7 +839,7 @@ Or delete and reinstall the app on the simulator.
 |------|-------|--------------|
 | `Packages/Env/Sources/Env/UserPreferences.swift` | +28 | Added `minSnoreDuration` and `maxClipLength` computed properties with UserDefaults backing |
 | `Packages/Settings/Sources/Settings/SettingsView.swift` | +281 | Complete rewrite. Full settings form UI with all design sections |
-| `SnoreGuard/SnoreGuardApp.swift` | +8 | Added `.preferredColorScheme` based on `UserPreferences.appearance` |
+| `SleepGuard/SleepGuardApp.swift` | +8 | Added `.preferredColorScheme` based on `UserPreferences.appearance` |
 | `Packages/DesignSystem/Sources/DesignSystem/Theme.swift` | +1/-1 | Made `Color(hex:)` extension `public` |
 | `docs/trackers/f6-settings.md` | +81/-40 | All tasks marked Done with notes |
 | `docs/FeatureTracker.md` | +12/-12 | F6 marked Done (3/3), Dashboard: 6/6 features done, 23/23 tasks done, 100% progress |
@@ -867,7 +867,7 @@ Or delete and reinstall the app on the simulator.
 ## 2026-05-06 — Session 17: V1 Polish / Bug Hunt Pass
 
 ### Completed
-- **Polish pass across F1–F6 V1**: Fixed visual discrepancies and functional bugs found by comparing live screens against `designs/SnoreGuard.pen`.
+- **Polish pass across F1–F6 V1**: Fixed visual discrepancies and functional bugs found by comparing live screens against `designs/SleepGuard.pen`.
 
 ### Technical Details
 - **RecordingsListView → RecordingRowView**: `RecordingsListView` was using generic `SessionRow` from DesignSystem instead of the custom `RecordingRowView` built in F4-T2. Swapped to `RecordingRowView` which shows date, duration, event count, and a colored score badge. Removed now-unused helpers (`dayString`, `weekdayString`, `durationString`, `intensityColor`).
@@ -899,7 +899,7 @@ Or delete and reinstall the app on the simulator.
 | `Packages/Statistics/Sources/Statistics/TrendsView.swift` | -12/+0 | Removed duplicate X-axis label HStack and custom `< Stats` toolbar item |
 | `Packages/SleepSession/Sources/SleepSession/BedsideClockView.swift` | +2/-2 | `Color.green` → `theme.scoreGreen`, `.quiet` statusLabel wording fix |
 | `Packages/SleepSession/Sources/SleepSession/RecordingPrestartView.swift` | +1/-1 | `Color.green` → `theme.scoreGreen` |
-| `SnoreGuard/MainTabView.swift` | +1/-0 | Added `.toolbarBackground(theme.bgSecondary, for: .tabBar)` |
+| `SleepGuard/MainTabView.swift` | +1/-0 | Added `.toolbarBackground(theme.bgSecondary, for: .tabBar)` |
 | `docs/FeatureTracker.md` | +1/-0 | Activity log entry for polish pass |
 
 ### Architecture Decisions
@@ -937,7 +937,7 @@ Or delete and reinstall the app on the simulator.
 | `Packages/Statistics/Sources/Statistics/CalendarView.swift` | +429 | New. Month calendar with day grid, month stats, selected-night card, legend, and navigation |
 | `Packages/Env/Sources/Env/Router.swift` | +1 | Added `.calendar` to `RouterDestination` |
 | `Packages/Statistics/Sources/Statistics/StatisticsDashboardView.swift` | +21/-5 | Wired `onViewCalendar` closure to Calendar button in empty and loaded states |
-| `SnoreGuard/AppRegistry.swift` | +2 | Mapped `.calendar` → `CalendarView()` in `withAppRouter()` |
+| `SleepGuard/AppRegistry.swift` | +2 | Mapped `.calendar` → `CalendarView()` in `withAppRouter()` |
 
 ### Build Status
 - **BUILD SUCCEEDED** — zero errors across all packages + app target
@@ -947,7 +947,7 @@ Or delete and reinstall the app on the simulator.
 - **Suggested commit**: `CalendarView — Month calendar with session dots, stats, and selected-night card`
 
 ### Open Questions
-- Should a Calendar screen be added to `designs/SnoreGuard.pen` for formal design compliance?
+- Should a Calendar screen be added to `designs/SleepGuard.pen` for formal design compliance?
 
 ---
 
@@ -1031,7 +1031,7 @@ Or delete and reinstall the app on the simulator.
 - **Roadmap update**: Marked V1.0 (F1–F6) and V1.1 (F7–F9) as complete; added V2.0 feature breakdowns with task counts
 - **V2 tracker creation**: Created `f10-smart-alarm.md`, `f11-apple-watch.md`, `f12-healthkit.md`, `f13-cloudkit-sync.md` with task tables and acceptance criteria
 - **F12-T1**: HealthKit capability + permissions
-  - Created `SnoreGuard/SnoreGuard.entitlements` with `com.apple.developer.healthkit`
+  - Created `SleepGuard/SleepGuard.entitlements` with `com.apple.developer.healthkit`
   - Added `CODE_SIGN_ENTITLEMENTS`, `NSHealthShareUsageDescription`, `NSHealthUpdateUsageDescription` to Debug/Release build settings in `project.pbxproj`
   - Added `HealthKit` framework to Env package via `linkerSettings` in `Package.swift`
   - Created `HealthKitSync` singleton in `Packages/Env/Sources/Env/HealthKitSync.swift` with `requestAuthorization()` and `checkAuthorizationStatus()`
@@ -1052,8 +1052,8 @@ Or delete and reinstall the app on the simulator.
 | `Packages/Settings/Sources/Settings/SettingsView.swift` | +16/-1 | Added HealthKit sync toggle in Data section with authorization request on enable |
 | `Packages/SleepSession/Sources/SleepSession/SessionSummaryView.swift` | +6 | Triggers HealthKit sync after session save when toggle is enabled |
 | `Packages/Env/Package.swift` | +1 | Added `linkerSettings: [.linkedFramework("HealthKit")]` |
-| `SnoreGuard/SnoreGuard/SnoreGuard.entitlements` | +8 | New. HealthKit capability entitlement |
-| `SnoreGuard.xcodeproj/project.pbxproj` | +4 | Added `CODE_SIGN_ENTITLEMENTS` and `NSHealth*` Info.plist keys to Debug + Release |
+| `SleepGuard/SleepGuard/SleepGuard.entitlements` | +8 | New. HealthKit capability entitlement |
+| `SleepGuard.xcodeproj/project.pbxproj` | +4 | Added `CODE_SIGN_ENTITLEMENTS` and `NSHealth*` Info.plist keys to Debug + Release |
 | `docs/Roadmap.md` | +18/-12 | V1/V1.1 marked complete; V2 features with task breakdowns added |
 | `docs/FeatureTracker.md` | +18/-6 | Added F10–F13 to dashboard; F12 marked In Progress → Done |
 | `docs/trackers/f10-smart-alarm.md` | +96 | New V2 tracker |
@@ -1158,7 +1158,7 @@ Or delete and reinstall the app on the simulator.
 
 ### Completed
 - **F11-T1**: WatchOS app target + basic UI
-  - Created `WatchApp/Sources/` with `SnoreGuardWatchApp.swift`, `ContentView.swift`, `WatchSessionManager.swift`, `WatchAudioRecorder.swift`
+  - Created `WatchApp/Sources/` with `SleepGuardWatchApp.swift`, `ContentView.swift`, `WatchSessionManager.swift`, `WatchAudioRecorder.swift`
   - Watch app features start/stop recording UI, event count badge, duration timer, snoring status label
   - Manual Xcode target setup documented in `WatchApp/README.md` (File → New → Target → watchOS App)
   - `Models` and `AudioEngine` packages updated with `watchOS(.v10)` platform support
@@ -1179,7 +1179,7 @@ Or delete and reinstall the app on the simulator.
 
 | File | Lines | What Changed |
 |------|-------|--------------|
-| `WatchApp/Sources/SnoreGuardWatchApp.swift` | +17 | New. Watch app entry point + WKApplicationDelegate with WCSession activation |
+| `WatchApp/Sources/SleepGuardWatchApp.swift` | +17 | New. Watch app entry point + WKApplicationDelegate with WCSession activation |
 | `WatchApp/Sources/ContentView.swift` | +56 | New. SwiftUI watch UI with idle/recording states, start/stop buttons |
 | `WatchApp/Sources/WatchSessionManager.swift` | +79 | New. Watch-side session manager with WCSessionDelegate, audio tick loop, data sync |
 | `WatchApp/Sources/WatchAudioRecorder.swift` | +47 | New. AVAudioEngine tap + dB calculation for watchOS |
@@ -1581,8 +1581,8 @@ append
 ### Files Changed
 | File | Lines | What Changed |
 |------|-------|--------------|
-| `SnoreGuard/AppRegistry.swift` | +8/-4 | Added 5 new services to environment graph |
-| `SnoreGuard/SnoreGuardApp.swift` | +5/-1 | Passed new services to dependency graph; added AudioEngine import |
+| `SleepGuard/AppRegistry.swift` | +8/-4 | Added 5 new services to environment graph |
+| `SleepGuard/SleepGuardApp.swift` | +5/-1 | Passed new services to dependency graph; added AudioEngine import |
 | `Models/Package.swift` | +1/-3 | Changed target path from `Sources/Data` to `Sources` to include Helpers |
 | `Recordings/Package.swift` | +1/-1 | Changed target path from `Sources/Views` to `Sources` to include Helpers |
 | `Models/Sources/Helpers/DateFormatters.swift` | +74 | New shared DateFormatter instances |
@@ -1614,7 +1614,7 @@ append
 - SessionDetailView is still 295 lines (down from 462). The remaining bulk is audio playback + export logic. Consider extracting `SessionDetailAudioController` and `SessionDetailShareController` helper types if further slimming is needed.
 - NightGroupRowView (179 lines) could be split further if needed.
 | `Packages/SleepSession/Sources/Views/SessionSummaryView.swift` | +45/-10 | Dark pill Save button with glow; 10-min duration check; `.alert` for short sessions |
-| `SnoreGuard/MainTabView.swift` | +90/-15 | iOS 26+ system TabView branch; custom floating pill tab bar for iOS < 26; hide during recording |
+| `SleepGuard/MainTabView.swift` | +90/-15 | iOS 26+ system TabView branch; custom floating pill tab bar for iOS < 26; hide during recording |
 | `Packages/AudioEngine/Sources/Engine/AudioRecorder.swift` | +45/-2 | Interruption + route change notification handlers; auto-resume logic; `notifyOthersOnDeactivation` |
 
 ### Architecture Decisions
@@ -1844,7 +1844,7 @@ append
 | `Packages/DesignSystem/Sources/Resources/Localizable.xcstrings` | +132/-132 | All 132 keys rewritten from raw English to semantic dot-notation |
 | `Packages/DesignSystem/Sources/Strings.swift` | +138/-138 | Regenerated with clean camelCase names from semantic keys |
 | `scripts/generate-strings.py` | +3/-1 | Added camelCase splitting; fixed double-Format suffix |
-| `SnoreGuard/MainTabView.swift` | +3/-3 | `tabMedia`, `tabSettings`, `tabStatistics` |
+| `SleepGuard/MainTabView.swift` | +3/-3 | `tabMedia`, `tabSettings`, `tabStatistics` |
 | `Packages/Statistics/Sources/Views/*` | +40/-40 | 9 files: stats constants updated |
 | `Packages/Settings/Sources/Views/*` | +35/-35 | 7 files: settings constants updated |
 | `Packages/Recordings/Sources/Views/*` | +55/-55 | 9 files: recordings constants updated |
@@ -2492,13 +2492,13 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 ## 2026-05-14 — Session 41: Last 7 Nights Screen + Duration Format Unification + Tab Navigation Fix
 
 ### Completed
-- **Last 7 Nights dedicated screen**: Created `Last7NightsView` matching design node fuq0d from `SnoreGuard.pen`. Includes custom nav bar with "Stats" back button, date range + avg sleep score header with week-over-week trend indicator (`+4 vs prev wk`), snoring minutes bar chart with intensity-based colors (quiet/gray, light/amber, loud/red), 2×2 stat grid (AVG SNORING, TOTAL EVENTS, BEST, WORST), and ALL NIGHTS list with score circles, day/date, duration, and snoring time.
+- **Last 7 Nights dedicated screen**: Created `Last7NightsView` matching design node fuq0d from `SleepGuard.pen`. Includes custom nav bar with "Stats" back button, date range + avg sleep score header with week-over-week trend indicator (`+4 vs prev wk`), snoring minutes bar chart with intensity-based colors (quiet/gray, light/amber, loud/red), 2×2 stat grid (AVG SNORING, TOTAL EVENTS, BEST, WORST), and ALL NIGHTS list with score circles, day/date, duration, and snoring time.
 - **Reusable components extracted**: `Last7NightsChartCard`, `Last7NightsStatGrid`, `Last7NightsRow`, `Last7NightsDaySummary`, `WeekOverWeekTrendCalculator` — all under 200 lines per AGENTS.md rules.
 - **New route `.last7Nights`**: Added to `RouterDestination` and mapped to `Last7NightsView()` in `AppRegistry`.
 - **"See all" button wired**: `StatisticsMiniChartSection` now uses `@Environment(RouterPath.self)` to navigate directly to `.last7Nights` instead of prop-drilling closures.
 - **Duration format unification**: Fixed all user-facing duration strings to use consistent `%d h %d min` / `%d min` format matching `NightGroupRowView`. Updated `Last7NightsRow`, `Last7NightsStatGrid`, `SessionSummaryView`, `BedsideClockView`, `WatchSessionManager`.
 - **Event player timestamp**: Added event start time (`hh:mm am/pm`) to `EventPlayerView.headerSection` before "Snoring Event", matching `EventRow` format.
-- **Tab navigation bugfix**: Root cause was `withAppDependencyGraph` injecting three `RouterPath` instances via `.environment()`, where the last one (`settingsRouterPath`) overwrote the previous two. All tabs shared the same navigation path, so pushing a detail view in Recordings tab polluted Statistics tab's stack. Fixed by giving each tab (`StatisticsTab`, `RecordingsTab`, `SettingsTab`) its own `@State private var routerPath = RouterPath()` injected via `.environment(routerPath)` scoped to the tab's view hierarchy. Removed shared router paths from `SnoreGuardApp` and `withAppDependencyGraph`.
+- **Tab navigation bugfix**: Root cause was `withAppDependencyGraph` injecting three `RouterPath` instances via `.environment()`, where the last one (`settingsRouterPath`) overwrote the previous two. All tabs shared the same navigation path, so pushing a detail view in Recordings tab polluted Statistics tab's stack. Fixed by giving each tab (`StatisticsTab`, `RecordingsTab`, `SettingsTab`) its own `@State private var routerPath = RouterPath()` injected via `.environment(routerPath)` scoped to the tab's view hierarchy. Removed shared router paths from `SleepGuardApp` and `withAppDependencyGraph`.
 - **Localization strings**: Added 8 new strings to `Localizable.xcstrings` and regenerated `Strings.swift`.
 
 ### Technical Details
@@ -2520,11 +2520,11 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 | `Packages/Statistics/Sources/Views/StatisticsMiniChartSection.swift` | +4/-2 | Removed `onSeeAll` closure; uses `@Environment(RouterPath)` + `.last7Nights` |
 | `Packages/Statistics/Sources/Views/StatisticsLoadedView.swift` | +1/-4 | Removed `onSeeAll` parameter passing |
 | `Packages/Env/Sources/Services/Router.swift` | +1/-0 | Added `.last7Nights` case |
-| `SnoreGuard/AppRegistry.swift` | +2/-8 | Mapped `.last7Nights` → `Last7NightsView`; removed shared router paths |
-| `SnoreGuard/StatisticsTab.swift` | +3/-2 | Own `@State var routerPath`; `.environment(routerPath)` |
-| `SnoreGuard/RecordingsTab.swift` | +3/-2 | Own `@State var routerPath`; `.environment(routerPath)` |
-| `SnoreGuard/SettingsTab.swift` | +3/-2 | Own `@State var routerPath`; `.environment(routerPath)` |
-| `SnoreGuard/SnoreGuardApp.swift` | +1/-6 | Removed shared `statisticsRouterPath`, `recordingsRouterPath`, `settingsRouterPath` |
+| `SleepGuard/AppRegistry.swift` | +2/-8 | Mapped `.last7Nights` → `Last7NightsView`; removed shared router paths |
+| `SleepGuard/StatisticsTab.swift` | +3/-2 | Own `@State var routerPath`; `.environment(routerPath)` |
+| `SleepGuard/RecordingsTab.swift` | +3/-2 | Own `@State var routerPath`; `.environment(routerPath)` |
+| `SleepGuard/SettingsTab.swift` | +3/-2 | Own `@State var routerPath`; `.environment(routerPath)` |
+| `SleepGuard/SleepGuardApp.swift` | +1/-6 | Removed shared `statisticsRouterPath`, `recordingsRouterPath`, `settingsRouterPath` |
 | `Packages/Recordings/Sources/Views/EventPlayerView.swift` | +13/-0 | Added `eventTimeString` helper + timestamp display in header |
 | `Packages/SleepSession/Sources/Views/SessionSummaryView.swift` | +5/-2 | Duration format: `%dh %02dm` → `%d h %d min` |
 | `Packages/SleepSession/Sources/Views/BedsideClockView.swift` | +7/-3 | Duration format: `%dh %02dm` → `%d h %d min` |
@@ -2619,21 +2619,21 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 - `BedsideClockView` gains a compact overlay card (`.overlay(alignment: .top)`) when `soothingMelodyPlayer.isPlaying`.
   - Shows pulsing `music.note` icon (`.symbolEffect(.pulse)`), melody name, and a bordered "Stop" button.
   - Uses `.transition(.move(edge: .top).combined(with: .opacity))` for smooth appearance.
-- `AppRegistry.swift` and `SnoreGuardApp.swift` updated to inject `SoothingMelodyPlayer.shared` into the environment graph.
+- `AppRegistry.swift` and `SleepGuardApp.swift` updated to inject `SoothingMelodyPlayer.shared` into the environment graph.
 - `UserPreferences.selectedMelodyID` default changed from 12 → 6 to match the new valid ID range (1–11).
 
 ### Files Changed
 | File | Lines | What Changed |
 |------|-------|--------------|
-| `SnoreGuard.xcodeproj/project.pbxproj` | +6 | Added `sounds/` folder reference to main app target resources build phase |
+| `SleepGuard.xcodeproj/project.pbxproj` | +6 | Added `sounds/` folder reference to main app target resources build phase |
 | `Packages/Models/Sources/Data/Melody.swift` | +11/-10 | Replaced dummy melodies with real filename + displayName mapping for 11 MP3s |
 | `Packages/Env/Sources/Services/SoothingMelodyPlayer.swift` | +65 | New — AVAudioPlayer wrapper with playIfNeeded, stop, auto-stop timer, isPlaying state |
 | `Packages/Env/Sources/Services/SessionManager.swift` | +4 | Triggers `playIfNeeded()` on new snore event; stops on session end |
 | `Packages/Env/Sources/Services/UserPreferences.swift` | +1/-1 | Default `selectedMelodyID` changed 12 → 6 |
 | `Packages/SleepSession/Sources/Views/BedsideClockView.swift` | +35 | Added `melodyOverlay` with pulsing icon, name, Stop button; injected `SoothingMelodyPlayer` |
 | `Packages/SleepSession/Sources/Views/SoothingMelodySheet.swift` | +1/-1 | Default `draftMelodyID` changed 12 → 6 |
-| `SnoreGuard/SnoreGuardApp.swift` | +2 | Injected `soothingMelodyPlayer` into `withAppDependencyGraph` |
-| `SnoreGuard/AppRegistry.swift` | +4 | Added `SoothingMelodyPlayer` parameter to `withAppDependencyGraph` and `withEnvironments` |
+| `SleepGuard/SleepGuardApp.swift` | +2 | Injected `soothingMelodyPlayer` into `withAppDependencyGraph` |
+| `SleepGuard/AppRegistry.swift` | +4 | Added `SoothingMelodyPlayer` parameter to `withAppDependencyGraph` and `withEnvironments` |
 
 ### Architecture Decisions
 - **Placement in Env package**: `SoothingMelodyPlayer` lives in `Env` because it needs `UserPreferences` (also in Env) and must be observable by `BedsideClockView` (in SleepSession, which imports Env). This avoids a new package and follows the existing singleton + `@Environment` pattern.
@@ -2643,7 +2643,7 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 
 ### Build Status
 - **BUILD SUCCEEDED** — zero errors, zero warnings.
-- Verified that MP3 files are present in built app bundle: `SnoreGuard.app/sounds/*.mp3` (11 files).
+- Verified that MP3 files are present in built app bundle: `SleepGuard.app/sounds/*.mp3` (11 files).
 
 ### Next Session
 - No immediate follow-up for this feature. The soothing melody is fully functional end-to-end.
@@ -2676,7 +2676,7 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 ### Files Changed
 | File | Lines | What Changed |
 |------|-------|--------------|
-| `SnoreGuard.xcodeproj/project.pbxproj` | +6 | Added `sounds/` folder reference to app target resources |
+| `SleepGuard.xcodeproj/project.pbxproj` | +6 | Added `sounds/` folder reference to app target resources |
 | `Packages/Models/Sources/Data/Melody.swift` | +11/-10 | Added `isCustom` flag; real filename + displayName mapping |
 | `Packages/Env/Sources/Services/SoothingMelodyPlayer.swift` | +45/-30 | Speaker override, subdirectory fallback, debug logging, session mute API |
 | `Packages/Env/Sources/Services/SessionManager.swift` | +6 | Triggers `playIfNeeded()` on new snore event; stops on session end; event logging |
@@ -2689,8 +2689,8 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 | `Packages/SleepSession/Sources/Views/MelodyPickerSheet.swift` | +65/-30 | Audio preview on tap (3s), "Record yours" row, custom melody list, delete |
 | `Packages/SleepSession/Sources/Views/RecordCustomMelodySheet.swift` | +165 | **New** — 10s recording sheet with playback, re-record, save |
 | `Packages/DesignSystem/Sources/Components/SheetHeader.swift` | +35 | **New** — Extracted `SheetHandle` and `SheetNavHeader` |
-| `SnoreGuard/SnoreGuardApp.swift` | +2 | Injected `SoothingMelodyPlayer` into environment |
-| `SnoreGuard/AppRegistry.swift` | +4 | Added `SoothingMelodyPlayer` to dependency graph |
+| `SleepGuard/SleepGuardApp.swift` | +2 | Injected `SoothingMelodyPlayer` into environment |
+| `SleepGuard/AppRegistry.swift` | +4 | Added `SoothingMelodyPlayer` to dependency graph |
 
 ### Architecture Decisions
 - **Custom melody storage in Env**: `CustomMelodyStorage` lives in `Env` because it's a runtime singleton service that manages file I/O and UserDefaults. `Models` package stays pure (no file system knowledge).
@@ -2712,7 +2712,7 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 ## 2026-05-15 — Session 45: Nightstand Mode — Auto-lock Prevention + Charging Alert + Mic Permission Gate
 
 ### Completed
-- **Idle timer disable during sleep sessions**: Added `UIApplication.shared.isIdleTimerDisabled` logic in `SnoreGuardApp.swift` tied to `SessionManager.isRecording`. Also handles `scenePhase` `.active` to re-disable the idle timer when returning from background (iOS auto-re-enables it on background).
+- **Idle timer disable during sleep sessions**: Added `UIApplication.shared.isIdleTimerDisabled` logic in `SleepGuardApp.swift` tied to `SessionManager.isRecording`. Also handles `scenePhase` `.active` to re-disable the idle timer when returning from background (iOS auto-re-enables it on background).
 - **Charging alert before recording**: Added an alert when the user taps Start Recording and the iPhone is not charging. Alert shows in both `RecordingPrestartView` (main start button) and `RecordingCountdownView` ("Start Now" button). Auto-start after countdown completion skips the alert since the user isn't present.
 - **Microphone permission gate before recording**: Both `RecordingPrestartView` and `RecordingCountdownView` now check `AudioRecorder.hasPermission` before starting. If undetermined, requests permission asynchronously; if denied, shows an alert with "Open Settings" that links to the app's Settings page. Recording cannot start without microphone access.
 - **Alert actions**: Charging alert: "Cancel" dismisses; "Start Anyway" proceeds. Microphone alert: "Cancel" dismisses; "Open Settings" routes to system Settings. Alert button actions wrapped in `Task { @MainActor in }` for safe actor isolation.
@@ -2725,7 +2725,7 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 ### Files Changed
 | File | Lines | What Changed |
 |------|-------|--------------|
-| `SnoreGuard/SnoreGuardApp.swift` | +9 | `scenePhase` env + `.onChange` for `isRecording` and `.active` to toggle idle timer |
+| `SleepGuard/SleepGuardApp.swift` | +9 | `scenePhase` env + `.onChange` for `isRecording` and `.active` to toggle idle timer |
 | `Packages/DesignSystem/Sources/Resources/Strings.txt` | +3 | Added charging alert title, message, startAnyway strings |
 | `Packages/DesignSystem/Sources/Resources/Localizable.xcstrings` | — | Regenerated with 3 new entries |
 | `Packages/DesignSystem/Sources/Strings.swift` | — | Regenerated with `sessionChargingAlertTitle`, `Message`, `StartAnyway` |
@@ -2813,7 +2813,7 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 | File | Lines | What Changed |
 |------|-------|--------------|
 | `Packages/SleepSession/Sources/Views/RecordingPrestartView.swift` | +24/-24 | Extracted button + cancel from ScrollView into pinned bottom bar via ZStack; bottom spacer 120→160 |
-| `SnoreGuard/MainTabView.swift` | +2/-2 | Added `.padding(.bottom, 86)` to `customContent` (iOS < 26); removed `.toolbarBackground(theme.bgSecondary, for: .tabBar)` from `systemTabView` (iOS 26+) |
+| `SleepGuard/MainTabView.swift` | +2/-2 | Added `.padding(.bottom, 86)` to `customContent` (iOS < 26); removed `.toolbarBackground(theme.bgSecondary, for: .tabBar)` from `systemTabView` (iOS 26+) |
 | `Packages/Env/Sources/Services/UserPreferences.swift` | +2/-2 | Default appearance `"system"` → `"dark"`; fallback `.system` → `.dark` |
 
 ### Architecture Decisions
@@ -2846,7 +2846,7 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 **Root cause:** `HealthKitSync.isAuthorized` was a runtime property defaulting to `false`. `checkAuthorizationStatus()` existed but was never invoked, so after any app restart the stored `UserPreferences.syncToHealthKit == true` flag had no effect — `sync(session:)` returned early because `isAuthorized` was still `false`.
 
 **Fixes applied:**
-1. `SnoreGuardApp.swift` — `.onAppear { HealthKitSync.shared.checkAuthorizationStatus() }` restores the real authorization state from `HKHealthStore` on every launch.
+1. `SleepGuardApp.swift` — `.onAppear { HealthKitSync.shared.checkAuthorizationStatus() }` restores the real authorization state from `HKHealthStore` on every launch.
 2. `SettingsDataSection.swift` — Toggle binding now requests auth *before* committing the preference. If `requestAuthorization()` returns `false`, the toggle snaps back OFF. This prevents the "toggle ON but nothing happens" UX.
 3. `SessionSummaryView.swift` — Sync Task calls `healthKitSync.checkAuthorizationStatus()` before `await healthKitSync.sync(session:)`, guarding against edge cases like permission revocation mid-session.
 
@@ -2854,7 +2854,7 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 
 | File | Lines | What Changed |
 |------|-------|--------------|
-| `SnoreGuard/SnoreGuardApp.swift` | +3 | `.onAppear` calls `HealthKitSync.shared.checkAuthorizationStatus()` |
+| `SleepGuard/SleepGuardApp.swift` | +3 | `.onAppear` calls `HealthKitSync.shared.checkAuthorizationStatus()` |
 | `Packages/Settings/Sources/Views/SettingsDataSection.swift` | +5/-3 | Toggle only commits `syncToHealthKit = true` when `requestAuthorization()` returns `granted` |
 | `Packages/SleepSession/Sources/Views/SessionSummaryView.swift` | +1 | `healthKitSync.checkAuthorizationStatus()` before `sync(session:)` |
 
@@ -2994,7 +2994,7 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 | `Packages/Statistics/Sources/Views/StatisticsLoadedView.swift` | +1/-1 | `@MainActor let onStartRecording: () -> Void` |
 | `Packages/Statistics/Sources/Views/StatisticsDashboardView.swift` | +2/-2 | Inline closures annotated `{ @MainActor in }` |
 | `Packages/SleepSession/Sources/Views/RecordingPrestartView.swift` | +10/-4 | `isCompactHeight` property; adaptive `iconSection` and `headlineSection` sizing |
-| `SnoreGuard/MainTabView.swift` | +25/-15 | `matchedGeometryEffect` sliding active pill; liquid glass materials + gradient highlights |
+| `SleepGuard/MainTabView.swift` | +25/-15 | `matchedGeometryEffect` sliding active pill; liquid glass materials + gradient highlights |
 
 ### Architecture Decisions
 - **MainActor on closures**: Propagating `@MainActor` through the closure type signature is cleaner than wrapping every call site in `Task { @MainActor in }`.
@@ -3062,7 +3062,7 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 
 **Background Audio Fix:**
 - Root cause: `UIBackgroundModes` was declared in build settings (`INFOPLIST_KEY_UIBackgroundModes = audio`) but was NOT being injected into the built `Info.plist` due to array-vs-string syntax mismatch in `project.pbxproj`. The built app had no background audio entitlement, so iOS suspended it on backgrounding.
-- Fixed by explicitly adding `UIBackgroundModes` array with `audio` to `SnoreGuard/Info.plist`, and correcting the pbxproj syntax to `(audio)` array format.
+- Fixed by explicitly adding `UIBackgroundModes` array with `audio` to `SleepGuard/Info.plist`, and correcting the pbxproj syntax to `(audio)` array format.
 - `AudioRecorder` improvements:
   - Added `.mixWithOthers` to `AVAudioSession` category options to prevent interruption by other apps' audio.
   - Added `isPaused` flag to distinguish intentional mic pauses (soothing melody) from unintended stops.
@@ -3082,8 +3082,8 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 
 | File | Lines | What Changed |
 |------|-------|--------------|
-| `SnoreGuard/Info.plist` | +7/-1 | Added `UIBackgroundModes` array with `audio` |
-| `SnoreGuard.xcodeproj/project.pbxproj` | +4/-2 | `INFOPLIST_KEY_UIBackgroundModes` changed from string `audio` to array `(audio)` |
+| `SleepGuard/Info.plist` | +7/-1 | Added `UIBackgroundModes` array with `audio` |
+| `SleepGuard.xcodeproj/project.pbxproj` | +4/-2 | `INFOPLIST_KEY_UIBackgroundModes` changed from string `audio` to array `(audio)` |
 | `Packages/AudioEngine/Sources/Engine/AudioRecorder.swift` | +46/-10 | `.mixWithOthers`; `isPaused`; route-change + didBecomeActive observers; `resumeRecordingIfNeeded()`; improved interruption handler |
 | `Packages/Env/Sources/Services/SoothingMelodyPlayer.swift` | +3/-4 | Removed `setCategory(.playback)` and `setActive(true)` calls that were dropping the mic |
 | `Packages/Models/Sources/Data/SnoreEvent.swift` | +14/-3 | Added `duration` property; updated init; `snoreDuration` returns event-span with burst-sum fallback |
@@ -3120,7 +3120,7 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 
 ### Completed
 - Researched clinically validated snoring intensity classification (SnoreLab uses quiet/light/loud/epic; medical literature: 40 dB SPL = breathing→snoring threshold, mean peaks 50–65 dB, highs 80–90 dB).
-- Identified core issue: SnoreGuard measures uncalibrated dBFS, not dB-SPL. Fixed thresholds have no absolute physiological meaning but can be improved relative to ambient noise.
+- Identified core issue: SleepGuard measures uncalibrated dBFS, not dB-SPL. Fixed thresholds have no absolute physiological meaning but can be improved relative to ambient noise.
 - Added **4th "epic" intensity tier** matching SnoreLab's clinically validated system.
 - **Tightened SoundAnalysis dB floors** from -60/-40/-25 to -45/-30/-15 to reduce false positives from ambient bedroom noise.
 - **Tightened spectral/base thresholds** from -35/-25/-15 to -30/-20/-10 with epic at -5.
@@ -3221,7 +3221,7 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 
 ### Completed
 - Created `MockDataGenerator` utility in `Packages/Env/Sources/Services/` that generates realistic `SleepSession` + `SnoreEvent` data for May 1–23, 2026
-- Wired `#if DEBUG` auto-generation trigger in `SnoreGuardApp.swift`: launch app with `-generateMockData` argument to populate data on first launch
+- Wired `#if DEBUG` auto-generation trigger in `SleepGuardApp.swift`: launch app with `-generateMockData` argument to populate data on first launch
 - Populated simulator SwiftData store with 20 nights of mock data (3 skipped days for realism)
 - Verified data renders correctly on Statistics dashboard with realistic score trend (worse → better), variable event counts, and midnight GMT+2 start times
 
@@ -3241,8 +3241,8 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 | File | Lines | What Changed |
 |------|-------|--------------|
 | `Packages/Env/Sources/Services/MockDataGenerator.swift` | +122/-0 | New file — generates realistic May 2026 sleep data |
-| `SnoreGuard/SnoreGuardApp.swift` | +9/-1 | Added `#if DEBUG` block that calls `MockDataGenerator.generate` when `-generateMockData` launch argument is present |
-| `.xcodebuildmcp/config.yaml` | +1/-1 | Fixed projectPath from `SnoreGuard` to `SleepGuard` to match actual directory |
+| `SleepGuard/SleepGuardApp.swift` | +9/-1 | Added `#if DEBUG` block that calls `MockDataGenerator.generate` when `-generateMockData` launch argument is present |
+| `.xcodebuildmcp/config.yaml` | +1/-1 | Fixed projectPath from `SleepGuard` to `SleepGuard` to match actual directory |
 
 ### Architecture Decisions
 - **Launch argument trigger over UI button**: More reliable for automation; no risk of shipping debug UI. The `-generateMockData` flag is ephemeral and only works in DEBUG builds.
@@ -3304,16 +3304,16 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 - Phase 1: Foundation — all tasks complete
   - P1-T3: Added `SleepStageSegment` + `SleepStage` enum to `SleepSession`; added `.coughing` to `SoundCategory`
   - P1-T4: Renamed `SnoringState` → `DetectionState` (internal refactor, zero migration, 5 files)
-  - P1-T1: Rebrand app struct `SnoreGuardApp` → `SleepGuardApp`, file renamed, bundle ID updated, `CFBundleDisplayName` added to Info.plist
+  - P1-T1: Rebrand app struct `SleepGuardApp` → `SleepGuardApp`, file renamed, bundle ID updated, `CFBundleDisplayName` added to Info.plist
   - P1-T2: Updated 6 user-facing strings in `Localizable.xcstrings` (onboarding title/description, microphone alert, delete-all confirmation, privacy copy)
   - P1-T5: Build verified — zero errors
 
 ### Technical Details
 - `SleepStageSegment` is a lightweight `Codable` struct stored as an array on `SleepSession`. `nil` for all existing sessions → no UI disruption.
 - `DetectionState` rename is purely code-level; the enum was never persisted in SwiftData (it's computed in real-time). All references in `SnoreDetector`, `SessionManager`, `BedsideClockView`, `SessionRawLogWriter`, `SnoreSample` updated.
-- Bundle ID changed from `com.daki.exampleProject.SnoreGuard` → `com.daki.exampleProject.SleepGuard` in Debug/Release configs.
+- Bundle ID changed from `com.daki.exampleProject.SleepGuard` → `com.daki.exampleProject.SleepGuard` in Debug/Release configs.
 - `CFBundleDisplayName` = "SleepGuard" added to `Info.plist` so the home screen label updates independently of target name.
-- All hardcoded "SnoreGuard" strings eliminated from Swift code (PDF generator, notification manager, watch app, comments).
+- All hardcoded "SleepGuard" strings eliminated from Swift code (PDF generator, notification manager, watch app, comments).
 
 ### Files Changed
 | File | Lines | What Changed |
@@ -3324,15 +3324,15 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 | `Packages/AudioEngine/Sources/Engine/SnoreSample.swift` | +1/-1 | `SnoringState` → `DetectionState` |
 | `Packages/Env/Sources/Services/SessionManager.swift` | +4/-4 | `currentSnoringState` → `currentDetectionState`, `intensity(from:)` param type |
 | `Packages/Env/Sources/Services/SessionRawLogWriter.swift` | +1/-1 | `SnoringState` → `DetectionState` |
-| `Packages/Env/Sources/Services/RecordingDelayManager.swift` | +2/-2 | Notification title "SnoreGuard" → "SleepGuard", ID updated |
+| `Packages/Env/Sources/Services/RecordingDelayManager.swift` | +2/-2 | Notification title "SleepGuard" → "SleepGuard", ID updated |
 | `Packages/SleepSession/Sources/Views/BedsideClockView.swift` | +2/-2 | `currentSnoringState` → `currentDetectionState` |
-| `Packages/Recordings/Sources/Views/SleepReportPDFGenerator.swift` | +2/-2 | "SnoreGuard" → "SleepGuard" in PDF header/footer |
+| `Packages/Recordings/Sources/Views/SleepReportPDFGenerator.swift` | +2/-2 | "SleepGuard" → "SleepGuard" in PDF header/footer |
 | `Packages/Recordings/Sources/Views/EventPlayerView.swift` | +1/-1 | Comment updated |
-| `WatchApp/Sources/SnoreGuardWatchApp.swift` | +1/-1 | `SnoreGuardWatchApp` → `SleepGuardWatchApp` |
-| `SnoreGuard/SnoreGuardApp.swift` | — | Deleted (renamed to `SleepGuardApp.swift`) |
-| `SnoreGuard/SleepGuardApp.swift` | +76/-0 | New file (renamed from `SnoreGuardApp.swift`) |
-| `SnoreGuard/Info.plist` | +2/-0 | Added `CFBundleDisplayName` = "SleepGuard" |
-| `SnoreGuard.xcodeproj/project.pbxproj` | +2/-2 | Bundle ID updated to `com.daki.exampleProject.SleepGuard` |
+| `WatchApp/Sources/SleepGuardWatchApp.swift` | +1/-1 | `SleepGuardWatchApp` → `SleepGuardWatchApp` |
+| `SleepGuard/SleepGuardApp.swift` | — | Deleted (renamed to `SleepGuardApp.swift`) |
+| `SleepGuard/SleepGuardApp.swift` | +76/-0 | New file (renamed from `SleepGuardApp.swift`) |
+| `SleepGuard/Info.plist` | +2/-0 | Added `CFBundleDisplayName` = "SleepGuard" |
+| `SleepGuard.xcodeproj/project.pbxproj` | +2/-2 | Bundle ID updated to `com.daki.exampleProject.SleepGuard` |
 | `Packages/DesignSystem/Sources/Resources/Localizable.xcstrings` | +6/-6 | 6 strings updated to SleepGuard/generic copy |
 
 ### Architecture Decisions
@@ -3350,7 +3350,7 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
   - Add "Detect Sleep Talking" toggle in Settings
 
 ### Open Questions
-- Should we rename the Xcode project file itself (`SnoreGuard.xcodeproj` → `SleepGuard.xcodeproj`) and all scheme names? This is developer-facing and can be deferred.
+- Should we rename the Xcode project file itself (`SleepGuard.xcodeproj` → `SleepGuard.xcodeproj`) and all scheme names? This is developer-facing and can be deferred.
 - Should the onboarding screens be redesigned to visually reflect "SleepGuard" (new hero images, colors)? The current onboarding is snore-focused.
 
 
@@ -4075,7 +4075,7 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 - F14 acceptance criteria all satisfied:
   - App displays as "SleepGuard" on home screen
   - Bundle ID updated to `com.daki.exampleProject.SleepGuard`
-  - All user-facing "SnoreGuard" references removed
+  - All user-facing "SleepGuard" references removed
   - Data model supports sleep stage segments without migration
   - `SoundCategory` supports `.sleepTalking`, `.coughing`, `.noise`
   - Sleep talking detected and recorded as `.sleepTalking` events
@@ -4128,7 +4128,7 @@ They derive from per-sample audio data (~20 Hz JSON log or FFT on audio clips). 
 | File | Lines | What Changed |
 |------|-------|--------------|
 | `Packages/Env/Sources/Services/UserPreferences.swift` | +13/-0 | Added `hasExplicitlySetEnhancedSleepTracking` computed property |
-| `SnoreGuard/SleepGuardApp.swift` | +3/-1 | Auto-sync `enhancedSleepTracking` with HealthKit auth status on app appear (only if user hasn't explicitly set it) |
+| `SleepGuard/SleepGuardApp.swift` | +3/-1 | Auto-sync `enhancedSleepTracking` with HealthKit auth status on app appear (only if user hasn't explicitly set it) |
 | `Packages/Settings/Sources/Views/SettingsWatchSection.swift` | +1/-0 | Set `hasExplicitlySetEnhancedSleepTracking = true` on manual toggle |
 
 ### Build Status
@@ -4278,7 +4278,7 @@ score = 100 - snoringPenalty - eventsPenalty - intensityPenalty
 
 ### Completed
 - **F1-T6**: Health & Watch onboarding screen (`OnboardingPageHealthWatchView`)
-- Updated `designs/SnoreGuard.pen` onboarding flow: moved Health & Watch design into main 6-page sequence, updated all 7 screen variants to 6 progress dots
+- Updated `designs/SleepGuard.pen` onboarding flow: moved Health & Watch design into main 6-page sequence, updated all 7 screen variants to 6 progress dots
 
 ### Technical Details
 - **New view**: `OnboardingPageHealthWatchView.swift` (Packages/Onboarding/Sources/Views/)

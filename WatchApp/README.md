@@ -1,6 +1,6 @@
-# SnoreGuard Watch App
+# SleepGuard Watch App
 
-This directory contains the Apple Watch companion app for SnoreGuard.
+This directory contains the Apple Watch companion app for SleepGuard.
 
 ## Manual Setup Required
 
@@ -8,12 +8,12 @@ The Watch app target must be added to the main Xcode project manually. The sourc
 
 ### Steps
 
-1. **Open SnoreGuard.xcodeproj in Xcode**
+1. **Open SleepGuard.xcodeproj in Xcode**
 
 2. **Add Watch App Target**
    - File → New → Target
    - Select "watchOS" tab → "App"
-   - Product Name: `SnoreGuardWatch`
+   - Product Name: `SleepGuardWatch`
    - Language: Swift
    - Interface: SwiftUI
    - Uncheck "Include Notification Scene"
@@ -22,7 +22,7 @@ The Watch app target must be added to the main Xcode project manually. The sourc
 3. **Replace Generated Files**
    - Delete the auto-generated `ContentView.swift` and `<AppName>App.swift` in the Watch target
    - Add the files from `WatchApp/Sources/` to the Watch target:
-     - `SnoreGuardWatchApp.swift`
+     - `SleepGuardWatchApp.swift`
      - `ContentView.swift`
      - `WatchSessionManager.swift`
      - `WatchAudioRecorder.swift`

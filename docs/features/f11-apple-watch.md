@@ -11,7 +11,7 @@ Record snoring from the Apple Watch microphone, enabling phone-free sleep tracki
 
 | File | Purpose |
 |------|---------|
-| `WatchApp/Sources/SnoreGuardWatchApp.swift` | Watch app entry point + WKApplicationDelegate |
+| `WatchApp/Sources/SleepGuardWatchApp.swift` | Watch app entry point + WKApplicationDelegate |
 | `WatchApp/Sources/ContentView.swift` | Watch UI with start/stop recording |
 | `WatchApp/Sources/WatchSessionManager.swift` | Watch-side session management + WCSessionDelegate |
 | `WatchApp/Sources/WatchAudioRecorder.swift` | AVAudioEngine tap + dB calculation |
