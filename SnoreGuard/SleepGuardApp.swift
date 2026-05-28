@@ -53,6 +53,9 @@ struct SleepGuardApp: App {
       )
       .onAppear {
         HealthKitSync.shared.checkAuthorizationStatus()
+        if !userPreferences.hasExplicitlySetSyncToHealthKit {
+          userPreferences.syncToHealthKit = HealthKitSync.shared.isAuthorized
+        }
         if !userPreferences.hasExplicitlySetEnhancedSleepTracking {
           userPreferences.enhancedSleepTracking = HealthKitSync.shared.isAuthorized
         }

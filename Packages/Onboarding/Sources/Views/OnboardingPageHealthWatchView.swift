@@ -5,6 +5,7 @@ import DesignSystem
 struct OnboardingPageHealthWatchView: View {
   let onContinue: () -> Void
   @Environment(HealthKitSync.self) private var healthKitSync
+  @Environment(UserPreferences.self) private var userPreferences
   @Environment(Theme.self) private var theme
   @State private var isRequesting = false
   @State private var showGranted = false
@@ -82,6 +83,12 @@ struct OnboardingPageHealthWatchView: View {
             isRequesting = false
             if granted {
               showGranted = true
+              if !userPreferences.hasExplicitlySetSyncToHealthKit {
+                userPreferences.syncToHealthKit = true
+              }
+              if !userPreferences.hasExplicitlySetEnhancedSleepTracking {
+                userPreferences.enhancedSleepTracking = true
+              }
               try? await Task.sleep(for: .seconds(0.8))
             }
             onContinue()

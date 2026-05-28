@@ -24,6 +24,7 @@ struct SettingsDataSection: View {
           Toggle("", isOn: Binding(
             get: { userPreferences.syncToHealthKit },
             set: { newValue in
+              userPreferences.hasExplicitlySetSyncToHealthKit = true
               if newValue {
                 Task {
                   let granted = await healthKitSync.requestAuthorization()
