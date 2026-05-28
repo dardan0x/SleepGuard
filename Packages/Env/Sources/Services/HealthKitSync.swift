@@ -52,7 +52,7 @@ public final class HealthKitSync {
 
     let startDate = session.startDate
     let endDate = session.endDate ?? startDate.addingTimeInterval(session.totalDuration)
-    let predicate = HKQuery.predicateForSamples(withStart: startDate, end: endDate, options: .strictStartDate)
+    let predicate = HKQuery.predicateForSamples(withStart: startDate, end: endDate, options: [])
     let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)
 
     return await withCheckedContinuation { continuation in
