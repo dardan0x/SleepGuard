@@ -20,9 +20,8 @@ public struct SessionDetailView: View {
   @State private var selectedFilter: EventCategoryFilter = .all
 
   // MARK: - Share
-  @State private var isSharePresented = false
-  @State private var shareItems: [Any] = []
   @State private var isGeneratingPDF = false
+  @State private var isExportingEvent = false
 
   public init(sessionID: UUID) {
     self.sessionID = sessionID
@@ -144,8 +143,17 @@ public struct SessionDetailView: View {
         )
       }
     }
-    .sheet(isPresented: $isSharePresented) {
-      ActivityView(activityItems: shareItems)
+
+    .overlay {
+      if isExportingEvent {
+        ZStack {
+          theme.bgPrimary.opacity(0.7)
+            .ignoresSafeArea()
+          ProgressView()
+            .scaleEffect(1.5)
+            .tint(theme.accent)
+        }
+      }
     }
   }
 
@@ -207,12 +215,14 @@ public struct SessionDetailView: View {
 
   private func shareEventClip(url: URL) {
     guard FileManager.default.fileExists(atPath: url.path) else { return }
-    shareItems = [url]
-    isSharePresented = true
+    presentShareSheet(items: [url])
   }
 
   private func exportAndShare(event: SnoreEvent, in session: SleepSession) async {
     guard let sourceURL = AudioFileURLResolver.resolve(session.audioFileURL) else { return }
+
+    isExportingEvent = true
+    defer { isExportingEvent = false }
 
     let asset = AVURLAsset(url: sourceURL)
     guard let exportSession = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetAppleM4A) else { return }
@@ -238,8 +248,12 @@ public struct SessionDetailView: View {
     await exportSession.export()
     guard exportSession.status == .completed else { return }
 
-    shareItems = [clipURL]
-    isSharePresented = true
+    // Verify the exported file exists and has content before presenting
+    guard FileManager.default.fileExists(atPath: clipURL.path),
+          let attrs = try? FileManager.default.attributesOfItem(atPath: clipURL.path),
+          let fileSize = attrs[.size] as? Int, fileSize > 0 else { return }
+
+    presentShareSheet(items: [clipURL])
   }
 
   // MARK: - Data & Actions
@@ -290,16 +304,21 @@ public struct SessionDetailView: View {
       isGeneratingPDF = true
       defer { isGeneratingPDF = false }
       if let url = SleepReportPDFGenerator().generatePDF(for: session) {
-        shareItems = [url]
-        isSharePresented = true
+        presentShareSheet(items: [url])
       }
     }
   }
 
   private func shareFullSession(session: SleepSession) {
     guard let url = AudioFileURLResolver.resolve(session.audioFileURL) else { return }
-    shareItems = [url]
-    isSharePresented = true
+    presentShareSheet(items: [url])
+  }
+
+  private func presentShareSheet(items: [Any]) {
+    guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+          let rootVC = windowScene.keyWindow?.rootViewController else { return }
+    let activityVC = UIActivityViewController(activityItems: items, applicationActivities: nil)
+    rootVC.present(activityVC, animated: true)
   }
 
   private func deleteSession() {

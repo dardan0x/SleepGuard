@@ -12,19 +12,25 @@ struct EventRow: View {
 
   var body: some View {
     HStack(spacing: 12) {
-      categoryIndicator
+      HStack(spacing: 12) {
+        categoryIndicator
 
-      Text(timeString(event.timestamp))
-        .font(.system(size: 16, weight: .semibold, design: .rounded))
-        .foregroundStyle(theme.textPrimary)
-        .monospacedDigit()
+        Text(timeString(event.timestamp))
+          .font(.system(size: 16, weight: .semibold, design: .rounded))
+          .foregroundStyle(theme.textPrimary)
+          .monospacedDigit()
 
-      Text(durationString(event.snoreDuration))
-        .font(.system(size: 14, weight: .medium))
-        .foregroundStyle(theme.textSecondary)
-        .monospacedDigit()
+        Text(durationString(event.snoreDuration))
+          .font(.system(size: 14, weight: .medium))
+          .foregroundStyle(theme.textSecondary)
+          .monospacedDigit()
 
-      Spacer()
+        Spacer()
+      }
+      .contentShape(Rectangle())
+      .onTapGesture {
+        onPlay()
+      }
 
       HStack(spacing: 12) {
         Button {
@@ -48,9 +54,6 @@ struct EventRow: View {
     .padding(.vertical, 14)
     .background(theme.bgCard)
     .cornerRadius(theme.radiusCard)
-    .onTapGesture {
-      onPlay()
-    }
   }
 
   @ViewBuilder
