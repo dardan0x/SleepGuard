@@ -16,12 +16,24 @@ public final class SnoreDetector {
 
   public var currentState: DetectionState = .none
 
-  /// Base thresholds in dBFS (medium sensitivity).
+  /// Base thresholds in dBFS (medium sensitivity defaults).
   /// These are relative to digital full scale, not calibrated dB-SPL.
-  public var quietThreshold: Float = -30.0
-  public var lightThreshold: Float = -20.0
-  public var loudThreshold: Float = -10.0
-  public var epicThreshold: Float = -5.0
+  /// Recalibrated for the full-band capture path — the old -30/-20/-10/-5 was
+  /// tuned for the narrow-bandpass build and sat above real snore levels.
+  public var quietThreshold: Float = -50.0
+  public var lightThreshold: Float = -40.0
+  public var loudThreshold: Float = -25.0
+  public var epicThreshold: Float = -15.0
+
+  /// SoundAnalysis confidence gates (medium sensitivity defaults).
+  /// `confidenceGate`: minimum to register as snoring at all.
+  /// `highConfidenceGate`: required for loud/epic intensities.
+  /// `quietFallbackGate`: counts as quiet even when dB is below all floors.
+  /// Recalibrated from 0.5/0.7/0.6 — the old defaults were too strict and
+  /// missed real bedroom snoring confirmed by independent burst analysis.
+  public var confidenceGate: Float = 0.35
+  public var highConfidenceGate: Float = 0.55
+  public var quietFallbackGate: Float = 0.45
 
   private init() {}
 
@@ -65,12 +77,11 @@ public final class SnoreDetector {
   /// Uses Apple's built-in sound classifier confidence.
   /// `snoreConfidence` is 0–1 from the 300-class pre-trained model.
   ///
-  /// When SoundAnalysis is confident (≥0.5), we trust it over raw dB thresholds
-  /// because the classifier distinguishes snoring from other loud sounds.
-  /// dB is used only for intensity, with floors tuned to reduce false positives
-  /// from ambient bedroom noise while still capturing quiet snoring.
+  /// Confidence gates are configurable per sensitivity. dB is used for intensity,
+  /// with floors tuned to reduce false positives from ambient bedroom noise
+  /// while still capturing quiet snoring.
   public func classifyWithSoundAnalysis(db: Float, snoreConfidence: Float) -> DetectionState {
-    guard snoreConfidence >= 0.5 else {
+    guard snoreConfidence >= confidenceGate else {
       return .none
     }
 
@@ -81,17 +92,17 @@ public final class SnoreDetector {
     let floorLight: Float = lightThreshold - 10
     let floorQuiet: Float = quietThreshold - 15
 
-    if db >= floorEpic && snoreConfidence >= 0.7 {
+    if db >= floorEpic && snoreConfidence >= highConfidenceGate {
       return .epic
-    } else if db >= floorLoud && snoreConfidence >= 0.7 {
+    } else if db >= floorLoud && snoreConfidence >= highConfidenceGate {
       return .loud
-    } else if db >= floorLight && snoreConfidence >= 0.5 {
+    } else if db >= floorLight && snoreConfidence >= confidenceGate {
       return .light
     } else if db >= floorQuiet {
       return .quiet
     }
-    // Even if dB is below all floors, if SoundAnalysis is ≥0.6 confident, count as quiet.
-    return snoreConfidence >= 0.6 ? .quiet : .none
+    // Even if dB is below all floors, sufficient classifier confidence counts as quiet.
+    return snoreConfidence >= quietFallbackGate ? .quiet : .none
   }
 
   // MARK: - Spectral Classification

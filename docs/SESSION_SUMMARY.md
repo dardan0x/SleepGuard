@@ -4323,5 +4323,56 @@ score = 100 - snoringPenalty - eventsPenalty - intensityPenalty
 ### Open Questions
 - None
 
+---
 
+## 2026-05-27 → 2026-05-28 — Session: Snore Detection Investigation & Recalibration
+
+### Completed
+- **Investigation**: User reported app under-counts vs competitor (~3 min vs ~25 min on the same night). Mapped the full pipeline: `AudioRecorder` → `SoundAnalysisDetector` + `FFTAnalyzer` → `SnoreDetector.classify()` → `SessionManager` event tracking.
+- **Data-driven diagnosis on user's overnight session**: parsed `rawlog_*.json` (303k samples, 4.5 h) and read the 3.1 GB raw `.caf` (Float32 PCM, offset 4096) directly in Python. Proved per-second RMS sat at the noise floor — loudest 25 min at −69.6 dBFS, only ~2 dB above the −72 median. **Snoring never reached the detector at a usable level**; thresholds/event-logic were never going to matter.
+- **Capture path rewrite — 3 iterations on real device**:
+  1. ❌ `mode: .measurement → .default` + `setInputGain(1.0)` to boost level. AGC + maxed preamp amplified the noise floor → mic sounded loud/noisy. **Reverted.**
+  2. ❌ Narrow band-pass (125–700 Hz) → 40 Hz high-pass for full-band capture. User reported **loud speaker feedback during recording** — `engine.mainMixerNode.volume = 0` was leaking. **Superseded by #3.**
+  3. ✅ **Removed the EQ/mixer/speaker graph entirely.** `start/resumeRecording` now tap `inputNode` directly (no output path = nothing to feed back); `pauseRecording` updated to remove tap from `inputNode`.
+- **Overnight verification** (build #3): user reported **3 min → 15 min detected (5× improvement)**, peak −12.8 dBFS, `snoreConfidence` reaching 0.89, speaker feedback gone.
+- **Ground-truth validation against the new `.caf`**: built an independent burst-detector (energy spikes with snore periodicity, no SoundAnalysis) → estimated 24.2 min "loose" / 16.6 min "strong" snoring. Extracted 12 WAV samples (densest snore stretches, true-quiet references, suspicious peaks); user listening test confirmed quiet samples are silent, the −28 dBFS peak at t=60 was a cough (not snoring), and a 1-second isolated snore at t=330 was missed by both detector and competitor-comparable. **Real snore time ≈ 22–25 min.**
+- **Threshold recalibration**:
+  - `SnoreDetector` gained `confidenceGate`/`highConfidenceGate`/`quietFallbackGate` Float properties (medium defaults 0.35/0.55/0.45, replacing hardcoded 0.5/0.7/0.6).
+  - dB defaults dropped to −50/−40/−25/−15 (was −30/−20/−10/−5).
+  - `SessionManager.applyDetectionSensitivity` rewritten to set all 7 detector values per Low/Med/High instead of a single dB offset.
+  - `minEventDuration` (computed property, sensitivity-dependent 2/1/0.5 s per Low/Med/High) replaces the hardcoded 2 s in `finalizeActiveEvent` — lets isolated single snores (~1 s) survive on Medium/High.
+- **Handover doc** created at `docs/SNORE_DETECTION_HANDOVER.md` (self-contained: problem, pipeline map, all data tables, change history with revert tracking, decision tree for next session, offline-analysis recipes).
+
+### Technical Details
+- The detector funnel was 100% dependent on SoundAnalysis: `SnoreDetector.classify()` (`SnoreDetector.swift:35`) takes the SA path whenever `snoreConfidence > 0`, which was true for ~100% of samples → the FFT/dB spectral fallback **never ran**. Still doesn't post-recalibration; flagged as open.
+- `FFTAnalyzer.spectralScore` is logged as `0.000` for every one of the 303k samples in the old log AND every one of the 407k samples in the new log → the FFT is hitting its zero-guard early-return (`fftSetup` likely nil or `floatChannelData` nil). Flagged.
+- Speaker-feedback root cause: `engine.mainMixerNode.volume = 0` does **not** fully mute the `.playAndRecord` + `.defaultToSpeaker` output path. Loud input still leaks audibly. Removing the input→mixer connection entirely (tap `inputNode` directly) was the correct fix; the input node renders without an explicit downstream graph connection because the tap drives it.
+- `.caf` format used by the app: raw little-endian Float32 PCM, mono 48 kHz, data starts at byte offset 4096. Readable with Python `array.array('f', file.read())` — no ffmpeg/sox needed.
+- Burst-detection algorithm: 100 ms RMS windows; rolling 30 s median as local noise floor; burst = ≥6 dB above floor for 0.3–3.5 s; episode = ≥3 bursts within 8 s gaps. STRONG/LOOSE estimates give a confidence interval on "real snoring."
+- Sensitivity tiers calibrated against ground truth, not guessed: dB floors sit ~10 dB above measured noise floor (~−65) and ~10 dB below measured snore peaks (~−45). A cough at −28 dBFS won't fire even on High because SA gives coughs low snore-confidence (`confidenceGate` filters on classifier output, not amplitude).
+- Detected-time vs event-time mismatch: per-sample state classification gives ~9 min on the new log, but the app displays ~15 min because of event merging (gap-threshold 10 s within `SessionManager.swift`).
+
+### Files Changed
+
+| File | What Changed |
+|------|--------------|
+| `Packages/AudioEngine/Sources/Engine/AudioRecorder.swift` | Removed EQ/mixer/speaker graph; `start/resumeRecording` install tap on `inputNode` directly; `pauseRecording` removes tap from `inputNode`. (Earlier in-session attempts `.measurement→.default+gain` and narrow→high-pass were reverted/superseded — net diff is just the direct-tap pattern.) |
+| `Packages/AudioEngine/Sources/Engine/SnoreDetector.swift` | Added `confidenceGate`/`highConfidenceGate`/`quietFallbackGate` Float properties (defaults 0.35/0.55/0.45); dB defaults changed to -50/-40/-25/-15; replaced hardcoded 0.5/0.7/0.6 in `classifyWithSoundAnalysis` with the new properties; updated doc comments. |
+| `Packages/Env/Sources/Services/SessionManager.swift` | Rewrote `applyDetectionSensitivity()` to set all 7 detector values per Low/Med/High; added `minEventDuration` computed property (2/1/0.5 s); replaced hardcoded `2.0` in `finalizeActiveEvent` with `minEventDuration`; updated the surrounding doc comment. |
+| `docs/SNORE_DETECTION_HANDOVER.md` | **New** — self-contained investigation handover. Pipeline map, all data tables, full code-change history with revert tracking, decision tree for next session keyed on the next-night test outcome, offline-analysis Python recipes. |
+
+### Build Status
+- **BUILD SUCCEEDED** after every change (verified with `mcp__XcodeBuildMCP__build_sim`). SourceKit shows `AVAudioSession unavailable in macOS` warnings on `AudioRecorder.swift` — these are iOS-only-file indexing false positives, not compiler errors.
+
+`Fix snore detection capture path + recalibrate thresholds`
+- AudioRecorder: tap `inputNode` directly, remove EQ/mixer/speaker graph that leaked audible feedback at non-trivial input levels
+- SnoreDetector: configurable SA confidence gates; dB defaults recalibrated for full-band capture (old values were tuned for the old narrow band-pass)
+- SessionManager: per-sensitivity SA gate + dB floor + minEventDuration mapping; `minEventDuration` now sensitivity-dependent (2/1/0.5 s) so isolated single snores survive on Medium/High
+- Add `docs/SNORE_DETECTION_HANDOVER.md` with investigation findings, ground-truth data, and decision tree for next-session iteration
+
+### Open Questions
+- **Next-night verification pending**: confirm displayed snore time lands ~20–24 min on Medium for a typical night, and that the anti-snore melody doesn't fire on non-snores.
+- `FFTAnalyzer.spectralScore` returns 0 for every sample — secondary bug; fallback path is non-functional. Worth fixing once the SA path is validated.
+- `SnoreDetector.swift:35` — `if snoreConfidence > 0 { return classifyWithSoundAnalysis(...) }` shadows the spectral path ~100% of the time. Should become `>= 0.05` (or similar) once the FFT is fixed so the fallback can actually rescue when SA is unsure.
+- Whether `inputNode.installTap` without a downstream connection runs reliably across all iOS versions and device routings (Bluetooth, USB mic, etc.) — works on the user's iPhone per the overnight test, but worth a wider-device validation before shipping.
 
