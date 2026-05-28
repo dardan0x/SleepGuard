@@ -100,6 +100,18 @@ public final class UserPreferences {
     }
   }
 
+  public var hasExplicitlySetSyncToHealthKit: Bool {
+    get {
+      access(keyPath: \.hasExplicitlySetSyncToHealthKit)
+      return defaults.bool(forKey: "hasExplicitlySetSyncToHealthKit")
+    }
+    set {
+      withMutation(keyPath: \.hasExplicitlySetSyncToHealthKit) {
+        defaults.set(newValue, forKey: "hasExplicitlySetSyncToHealthKit")
+      }
+    }
+  }
+
   public var detectSleepTalking: Bool {
     get {
       access(keyPath: \.detectSleepTalking)
