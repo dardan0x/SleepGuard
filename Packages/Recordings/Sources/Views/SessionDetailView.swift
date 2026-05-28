@@ -22,6 +22,7 @@ public struct SessionDetailView: View {
   // MARK: - Share
   @State private var isSharePresented = false
   @State private var shareItems: [Any] = []
+  @State private var isGeneratingPDF = false
 
   public init(sessionID: UUID) {
     self.sessionID = sessionID
@@ -101,10 +102,11 @@ public struct SessionDetailView: View {
           Button {
             exportReport(session: session)
           } label: {
-            Image(systemName: "doc.text")
+            Image(systemName: isGeneratingPDF ? "clock" : "doc.text")
               .font(.system(size: 17))
-              .foregroundStyle(theme.accent)
+              .foregroundStyle(isGeneratingPDF ? theme.textTertiary : theme.accent)
           }
+          .disabled(isGeneratingPDF)
           if !isClipSession, session.audioFileURL != nil {
             Button {
               shareFullSession(session: session)
@@ -285,6 +287,8 @@ public struct SessionDetailView: View {
 
   private func exportReport(session: SleepSession) {
     Task {
+      isGeneratingPDF = true
+      defer { isGeneratingPDF = false }
       if let url = SleepReportPDFGenerator().generatePDF(for: session) {
         shareItems = [url]
         isSharePresented = true

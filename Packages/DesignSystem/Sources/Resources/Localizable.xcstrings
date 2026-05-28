@@ -2867,6 +2867,28 @@
           }
         }
       }
+    },
+    "pdf.avgDB": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avg dB"
+          }
+        }
+      }
+    },
+    "pdf.peakDB": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Peak dB"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

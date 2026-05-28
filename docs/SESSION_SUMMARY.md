@@ -4419,3 +4419,44 @@ score = 100 - snoringPenalty - eventsPenalty - intensityPenalty
 
 ### Open Questions
 - None
+
+---
+
+## 2026-05-28 — Session 65: PDF Generator Polish & Loading Fix
+
+### Completed
+- **PDF first-time generation fix**: Removed `UITraitCollection.current` manipulation from `SleepReportPDFGenerator` — this global state mutation was causing `UIGraphicsPDFRenderer` to fail on first use. Added explicit error logging.
+- **PDF new stats**: Added Sleep Architecture section with horizontal stage bars (Deep/Light/REM/Awake) when Watch data is available; added Sleep Talking summary card; expanded stats grid to include snore time and sleep talking events/percentage; updated events table with a "Type" column showing event category (Snoring/Sleep Talking/Noise).
+- **PDF layout spacing**: Widened horizontal spacing in event row columns (Time/Type/Duration/Intensity) and in sleep architecture section (name label → bar → percentage) so elements don't crowd.
+- **PDF loading fix**: Added `isGeneratingPDF` state to `SessionDetailView` — the export button is disabled and shows a `clock` icon while the PDF is being generated, preventing the user's double-tap issue.
+
+### Technical Details
+- PDF stats grid is now dynamic: base 4 stats, expands to 6 when sleep talking data exists
+- Sleep architecture bars use `maxPct` normalization so the largest stage fills the available width
+- Event Type column uses `SoundCategory` mapping (`.snoring` → "Snoring", `.sleepTalking` → "Sleep Talking", `.noise/.coughing/.other` → "Noise")
+- `isGeneratingPDF` uses `defer` to guarantee reset even if generation throws
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Recordings/Sources/Views/SleepReportPDFGenerator.swift` | +120/-20 | Removed UITraitCollection hack; added sleep architecture section; added sleep talking summary; expanded stats grid; added event Type column; widened column spacing |
+| `Packages/Recordings/Sources/Views/SessionDetailView.swift` | +8/-3 | Added `isGeneratingPDF` state; disabled export button + clock icon during generation |
+| `Packages/DesignSystem/Sources/Resources/Localizable.xcstrings` | +22 | `pdf.avgDB`, `pdf.peakDB` (later removed from grid but strings kept) |
+| `Packages/DesignSystem/Sources/Strings.swift` | regenerated | Auto-generated accessors |
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors
+
+### Suggested Branch
+`feature/pdf-generator-polish`
+
+### Suggested Commit
+`Session 65 — PDF generator polish: fix first-time failure, add sleep stages & talking stats, loading state`
+- Fix first-time PDF generation by removing UITraitCollection manipulation
+- Add sleep architecture bars and sleep talking summary to PDF
+- Widen column spacing in event rows and stage bars
+- Disable PDF export button with clock icon during generation
+
+### Open Questions
+- None
