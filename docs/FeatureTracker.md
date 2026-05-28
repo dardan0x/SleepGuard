@@ -2,7 +2,7 @@
 
 > Auto-updated by the AI after every task. This is the local source of truth.
 
-Last updated: 2026-05-28 (Session 64)
+Last updated: 2026-05-28 (Session 65)
 
 ---
 
@@ -66,6 +66,8 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-05-28 | PDF generator polish + loading fix | Completed | Removed Avg/Peak dB from PDF stats; widened column spacing in event rows and sleep architecture section; added `isGeneratingPDF` state to `SessionDetailView` — disables export button and shows clock icon during generation, preventing double-tap; build succeeds |
+| 2026-05-28 | PDF generator new stats | Completed | Added sleep architecture section (horizontal stage bars) when Watch data available; added sleep talking summary card; expanded stats grid with snore time and sleep talking data; updated event table with Type column showing category; removed `UITraitCollection` manipulation fixing first-time generation failure; added error logging; build succeeds |
 | 2026-05-28 | Sleep stages info sheet | Completed | `SleepStagesInfoView` educational sheet showing personalized stage interpretation (Good/Low/High badges with recommended ranges), score impact formula, and visual threshold bars; info button added to `SleepStageBreakdownView` header; 15 new localized strings; close button (`xmark.circle.fill`); build succeeds |
 | 2026-05-28 | HealthKit sleep stage query fix | Completed | Removed `.strictStartDate` from `fetchSleepStages` predicate so overlapping Watch samples are included; added `stagesEmptyAndOld` retry in `SessionDetailView` for sessions >1h old with empty stage arrays; build succeeds |
 | 2026-05-27 | Mock data sleep talking | Completed | `MockDataGenerator` now generates `.sleepTalking` events for ~10-40% of sessions (probability scales inversely with target score); 1-4 events per session, 5-30s each, `.quiet` intensity, -55 to -45 dB; spread randomly across session; max score impact ~0.6 pts — well within ±12 drift tolerance; build succeeds |
@@ -194,6 +196,8 @@ _Most recent first. The AI appends here after every task._
 
 | Task | Feature | Completed | Duration |
 |------|---------|-----------|----------|
+| PDF generator polish + loading fix | F4 | 2026-05-28 | — |
+| PDF generator new stats | F4 | 2026-05-28 | — |
 | Sleep stages info sheet | F14 | 2026-05-28 | — |
 | HealthKit sleep stage query fix | F12 | 2026-05-28 | — |
 | F1-T6 Health & Watch onboarding | F1 | 2026-05-27 | — |

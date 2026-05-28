@@ -84,6 +84,8 @@ public enum Strings {
   public static var onboardingPage5Button: String { String(localized: "onboarding.page5.button", bundle: .module) }
   public static var onboardingPage5Title: String { String(localized: "onboarding.page5.title", bundle: .module) }
   public static var onboardingPrivacyJudgeSilently: String { String(localized: "onboarding.privacy.judgeSilently", bundle: .module) }
+  public static var pdfAvgDb: String { String(localized: "pdf.avgDB", bundle: .module) }
+  public static var pdfPeakDb: String { String(localized: "pdf.peakDB", bundle: .module) }
   public static var playRecordCustomMelodySheet: String { String(localized: "play.record.custom.melody.sheet", bundle: .module) }
   public static var playingSoothingMelodyPlayer: String { String(localized: "playing.soothing.melody.player", bundle: .module) }
   public static var processingSession: String { String(localized: "processing.session", bundle: .module) }
