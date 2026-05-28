@@ -48,6 +48,9 @@ struct EventRow: View {
     .padding(.vertical, 14)
     .background(theme.bgCard)
     .cornerRadius(theme.radiusCard)
+    .onTapGesture {
+      onPlay()
+    }
   }
 
   @ViewBuilder

@@ -74,6 +74,7 @@ public struct RecordingsListView: View {
         .listRowBackground(Color.clear)
       }
     }
+    .padding(.bottom, 10)
     .listStyle(.plain)
     .scrollContentBackground(.hidden)
     .background(theme.bgPrimary)

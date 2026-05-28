@@ -28,11 +28,11 @@ struct Last7NightsChartCard: View {
         .foregroundStyle(theme.textTertiary)
         .tracking(1)
 
-      Spacer()
-
-      Text(Strings.statsLast7nightsTapAbar)
-        .font(.system(size: 11, weight: .regular))
-        .foregroundStyle(theme.textTertiary)
+//      Spacer()
+//
+//      Text(Strings.statsLast7nightsTapAbar)
+//        .font(.system(size: 11, weight: .regular))
+//        .foregroundStyle(theme.textTertiary)
     }
   }
 

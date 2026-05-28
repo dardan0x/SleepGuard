@@ -43,3 +43,32 @@ public final class RouterPath {
     path.removeLast(path.count)
   }
 }
+
+/// Coordinates tab-bar behavior across the app's main tabs.
+/// Used to signal "pop to root" when the user taps the already-selected tab.
+@MainActor
+@Observable
+public final class TabCoordinator {
+  public var selectedTab = 0
+  public var resetSignal: TabResetSignal?
+
+  public init() {}
+
+  public func selectTab(_ index: Int) {
+    if selectedTab == index {
+      resetSignal = TabResetSignal(tab: index)
+    } else {
+      selectedTab = index
+    }
+  }
+}
+
+/// A unique signal indicating that a specific tab should pop to root.
+public struct TabResetSignal: Equatable, Sendable {
+  public let tab: Int
+  public let id = UUID()
+
+  public init(tab: Int) {
+    self.tab = tab
+  }
+}

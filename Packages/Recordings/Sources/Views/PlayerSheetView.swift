@@ -98,7 +98,7 @@ public struct PlayerSheetView: View {
         .padding(20)
       }
       .background(theme.bgPrimary.ignoresSafeArea())
-      .presentationDetents([.height(420)])
+      .presentationDetents([.height(470)])
       .presentationDragIndicator(.visible)
       .navigationTitle(playerNavigationTitle)
       .navigationBarTitleDisplayMode(.inline)
