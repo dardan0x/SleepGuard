@@ -2,7 +2,7 @@
 
 > Auto-updated by the AI after every task. This is the local source of truth.
 
-Last updated: 2026-05-28 (Session 65)
+Last updated: 2026-05-29 (Session 66)
 
 ---
 
@@ -66,6 +66,11 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-05-29 | F4 — Burst marker capsule spans + 4-color legend | Completed | `EventPlayerView.waveformMarkers` switched from `Circle` dots to `Capsule` shapes spanning each burst's `[startOffset, endOffset]` (min width 6 pt) for direct visual verification of detector output; position math fix `totalDuration → event.snoreDuration` resolves latent multi-event clustering bug; legend rebuilt as 4 chips (Quiet/Light/Loud/Epic) via `theme.intensityColor(_:)` so it can't drift from marker colors; build succeeds |
+| 2026-05-29 | F4 — Enhanced Audio playback `.dataPlayedBack` fix | Completed | Clips were cutting off ms-to-seconds early because `scheduleSegment`'s default `.dataConsumed` completion fires when source data is read (before output buffer drains) — our `handlePlaybackFinished` flushed the in-flight tail via `playerNode.stop()`. Switched to `completionCallbackType: .dataPlayedBack` so cleanup happens after the tail has actually played; build succeeds |
+| 2026-05-29 | F4 — Skeleton loading state in `PlayerSheetView` | Completed | Two new `@State` flags (`didFinishInitialLoad`, `hasLoadingTimedOut`); body's conditional chain restructured so the default during loading is a waveform-shaped `loadingSkeleton` with circular `ProgressView`, not `noAudioView` (which was flashing on the first render before `.task` ran). 10 s safety timeout falls through to `noAudioView` if loading hangs; build succeeds |
+| 2026-05-28 | F4 — Enhanced Audio playback feature | Completed | `ClipPlaybackController` rewritten on `AVAudioEngine + AVAudioPlayerNode + AVAudioUnitEQ` (full public API preserved); per-clip peak normalization to −3 dBFS capped at +24 dB; 80 Hz HP + 1.5 kHz LP bandpass; `enhancedAudioEnabled` toggle wired to new `UserPreferences.enhancedAudioPlayback` pref (defaults true); toggle UI card in `PlayerSheetView` under the player controls; sheet detent bumped 470 → 580 with `.large` added; 2 new localized strings; build succeeds |
+| 2026-05-28 | F9 — Temporal-context orphan-FP filter (attempted, reverted) | Reverted | `.caf` burst-detection on the recalibrated-build night showed short-event FPs (13 of 27) cannot be separated by peak_conf/peak_db (orphans median 0.57 conf > corroborated reals at 0.44) — only temporal proximity separates them (28 s vs 100 s median nearest-event distance). Implemented + built clean: `lastFinalizedEventEnd` state + `shortEventDurationThreshold = 2 s` + `temporalContextWindow = 30 s` discard in `finalizeActiveEvent`. **User reverted** the change after build; design preserved in `docs/SNORE_DETECTION_HANDOVER.md` for future revisit |
 | 2026-05-28 | PDF generator polish + loading fix | Completed | Removed Avg/Peak dB from PDF stats; widened column spacing in event rows and sleep architecture section; added `isGeneratingPDF` state to `SessionDetailView` — disables export button and shows clock icon during generation, preventing double-tap; build succeeds |
 | 2026-05-28 | PDF generator new stats | Completed | Added sleep architecture section (horizontal stage bars) when Watch data available; added sleep talking summary card; expanded stats grid with snore time and sleep talking data; updated event table with Type column showing category; removed `UITraitCollection` manipulation fixing first-time generation failure; added error logging; build succeeds |
 | 2026-05-28 | Sleep stages info sheet | Completed | `SleepStagesInfoView` educational sheet showing personalized stage interpretation (Good/Low/High badges with recommended ranges), score impact formula, and visual threshold bars; info button added to `SleepStageBreakdownView` header; 15 new localized strings; close button (`xmark.circle.fill`); build succeeds |

@@ -30,6 +30,8 @@ public enum Strings {
   public static var epicIntensityLabel: String { String(localized: "epic.intensity.label", bundle: .module) }
   public static var epicIntensityLabelEventPlayerView: String { String(localized: "epic.intensity.label.event.player.view", bundle: .module) }
   public static var eventHeaderSectionTotalEvents: String { String(localized: "event.header.section.totalEvents", bundle: .module) }
+  public static var eventPlayerEnhancedAudioDescription: String { String(localized: "event.player.enhancedAudio.description", bundle: .module) }
+  public static var eventPlayerEnhancedAudioLabel: String { String(localized: "event.player.enhancedAudio.label", bundle: .module) }
   public static var eventPlayerNavigationTitle: String { String(localized: "event.player.navigation.title", bundle: .module) }
   public static var eventPlayerNoAudioDescription: String { String(localized: "event.player.noAudio.description", bundle: .module) }
   public static var eventPlayerNoAudioTitle: String { String(localized: "event.player.noAudio.title", bundle: .module) }

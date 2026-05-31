@@ -2889,6 +2889,28 @@
           }
         }
       }
+    },
+    "event.player.enhancedAudio.label": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enhanced Audio"
+          }
+        }
+      }
+    },
+    "event.player.enhancedAudio.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Boosts volume and reduces background noise"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

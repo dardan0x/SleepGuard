@@ -30,3 +30,5 @@ epic.intensity.label.event.player.view = Epic
 session.bedside.snoreEpic = Epic snoring detected · just now
 stats.calendar.intensityEpic = Epic
 stats.calendar.legendEpic = Epic
+event.player.enhancedAudio.label = Enhanced Audio
+event.player.enhancedAudio.description = Boosts volume and reduces background noise

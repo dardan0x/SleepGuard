@@ -4460,3 +4460,89 @@ score = 100 - snoringPenalty - eventsPenalty - intensityPenalty
 
 ### Open Questions
 - None
+
+---
+
+## 2026-05-28 → 2026-05-29 — Session 66: Enhanced Audio Playback + Post-Recalibration Tuning
+
+> Two threads run in parallel through this session — finishing the F9 detection-tuning work that started in the prior "Snore Detection Investigation & Recalibration" entry, and building out a new Enhanced Audio playback feature in F4 (Recordings). The detection thread mostly verified or investigated; the Enhanced Audio thread is where the bulk of the code change lives.
+
+### Completed
+
+#### F4 — Enhanced Audio Playback (the headline feature)
+
+- **`ClipPlaybackController` rewritten on `AVAudioEngine`** (`Packages/Recordings/Sources/Helpers/ClipPlaybackController.swift`, ~310 lines, full rewrite of internals — entire public API preserved). Pipeline is `AVAudioPlayerNode → AVAudioUnitEQ → mainMixerNode`; engine lazy-starts on first `play()`, format-detected per clip, only re-connects when the format actually differs.
+- **Per-clip peak normalization**: on file load, `currentGainDB(for:)` reads the file's samples, finds peak amplitude, computes the gain to bring it to −3 dBFS, and caps at the EQ's +24 dB ceiling. Sets `eq.globalGain`. Quiet clips get max boost; loud clips get less — every clip plays at similar perceived loudness.
+- **Two-band EQ for noise reduction**: high-pass at 80 Hz (HVAC rumble + 50/60 Hz mains hum), low-pass at 1.5 kHz (broadband mic hiss). Snore energy lives 100 Hz–1 kHz so the passband preserves it entirely.
+- **`enhancedAudioEnabled` toggle**: public `Bool` on the controller with `didSet` that re-applies EQ bypass and (if a clip is loaded) recomputes per-clip gain. Wired to `UserPreferences.enhancedAudioPlayback` (new pref, defaults `true` on first access via explicit `defaults.object(forKey:)` check).
+- **Toggle UI in `PlayerSheetView`**: card matching the rest of the player's design tokens (`theme.bgCard`, `theme.radiusCard`, `theme.accent` toggle tint), label + description on the left, `Toggle` on the right. Only rendered in the clip-session branch — the legacy `AVAudioPlayer` single-event path isn't affected and showing the toggle there would be misleading. Binding writes both the controller (instant audio change) and `UserPreferences` (persistence).
+- **2 new localized strings** added via `Strings.txt` → `python3 scripts/generate-xcstrings.py`: `event.player.enhancedAudio.label` ("Enhanced Audio") and `event.player.enhancedAudio.description` ("Boosts volume and reduces background noise").
+- **Sheet detent bump 470 → 580** (`.presentationDetents([.height(580), .large])`). Added `.large` as a second detent so users can drag for more breathing room without losing the sized default.
+
+#### F4 — Audio cutting off early bug (`.dataPlayedBack` fix)
+
+- User reported clips ending milliseconds to seconds before the actual end.
+- Root cause: `AVAudioPlayerNode.scheduleSegment` defaults to `completionCallbackType: .dataConsumed`, which fires when the data is *read from the source*, not when it's been *played through the speakers*. Our `handlePlaybackFinished` immediately called `playerNode.stop()` (and possibly reconnected the chain for the next clip's format), flushing whatever was still in the output buffer.
+- Fix: pass `completionCallbackType: .dataPlayedBack` explicitly. Completion now fires after the audio has actually been heard, so cleanup is harmless.
+
+#### F4 — Skeleton loading state (replaces "Audio unavailable" flash)
+
+- User reported a brief "Audio unavailable" flash on the first render before the player set up.
+- Root cause: first body render happens *before* `.task` runs; with empty `events` and `legacyEventDuration = 0`, the original conditional chain fell through to `noAudioView`.
+- Fix: two new `@State` flags — `didFinishInitialLoad` (flipped at end of `.task`) and `hasLoadingTimedOut` (10 s safety net). Body restructured so the *default during loading* is a `loadingSkeleton` (waveform-shaped placeholder of `theme.bgElevated` shapes + circular `ProgressView`), not `noAudioView`. `noAudioView` now only shows once loading is genuinely over (or times out).
+
+#### F4 — Burst markers: position math, capsule spans, 4-color legend
+
+- **Position math fix**: `position = burst.startOffset / totalDuration` was a latent multi-event bug — burst offsets are event-relative, not session-relative. Changed to `burst.startOffset / event.snoreDuration` with an `event.snoreDuration > 0` guard. Invisible in single-event view; would have clustered all dots at the far left in multi-event sessions.
+- **Dots → capsule spans**: replaced `Circle` markers (showing only burst *start*) with `Capsule` shapes spanning `[startOffset, endOffset]` so users can see *both* when each burst started AND how long it lasted. Minimum width 6 pt so very short bursts stay visible at all sheet sizes. Loosened the fallback guard from `count > 1` to `!isEmpty` so single-burst events also show their span.
+- **Legend: 2-color → 4-color**: was hardcoded `theme.scoreAmber` + `theme.scoreRed` ("Light snore" / "Loud snore"), which left users staring at gray dots for Quiet events with no matching legend entry. Replaced with four chips (Quiet / Light / Loud / Epic) pulled via `theme.intensityColor(_:)` — same source the markers use, can't drift out of sync. Tightened chip spacing from 20/6 to 14/4 so all four fit on any iPhone width. Reuses existing intensity-label strings; no new localization needed.
+
+#### F9 — Post-recalibration tuning (continuation of prior session)
+
+- **Real-night verification of fix #4** (the SA-gate + dB-floor + `minEventDuration` per-sensitivity recalibration applied in the previous session): user's overnight on the recalibrated Medium build logged 20.94 min / 65 events for a ~21 min subjective night. Independent burst-detection on the `.caf` reported LOOSE 26.1 min / STRONG 16.6 min — confirming the app is already in the right neighborhood. No further tuning needed for Medium/Low defaults.
+- **Short-event orphan-FP investigation**: user reported FPs on High after subsequent night testing. Cross-referenced 27 short app events (<2 s) against the independent burst detector: 14 corroborated by ≥3 nearby bursts (real isolated snores), 13 orphans (real FPs). **Key finding**: peak_conf and peak_db cannot separate them — orphans actually have *higher* median `peak_conf` (0.57 vs 0.44). Only `nearest_other_event_distance` separates cleanly (28 s vs 100 s medians).
+- **Temporal-context filter — applied, then reverted by user**: implemented Option B from the analysis (`lastFinalizedEventEnd` state + `shortEventDurationThreshold = 2.0 s` + `temporalContextWindow = 30 s` discard in `finalizeActiveEvent`, skipped on `skipMinDuration`). Built clean. User reverted the change in a subsequent edit. Design + decision tree + supporting data tables preserved in `docs/SNORE_DETECTION_HANDOVER.md` for future revisit.
+
+### Technical Details
+
+- **`.dataPlayedBack` vs `.dataConsumed`**: the underrated `AVAudioPlayerNode` API choice. `.dataConsumed` (default) fires when the source data has been *handed to the engine* — the output buffer is still draining. `.dataPlayedBack` fires only after the audio has actually been *heard*. For any audio app where the completion handler does cleanup (stop, reconnect, advance), `.dataPlayedBack` is the right choice.
+- **Per-clip normalization math**: `gainDB = 20 * log10(targetPeak / sourcePeak)`, clamped `[0, 24]`. `targetPeak = 0.708` ≈ −3 dBFS. Never attenuates a loud clip (`max(gainDB, 0)`); never exceeds the EQ's headroom (`min(gainDB, 24)`).
+- **`UserPreferences.enhancedAudioPlayback` defaulting**: standard `defaults.bool(forKey:)` returns `false` when a key has never been written. To get a *true* default on first access we check `defaults.object(forKey: "enhancedAudioPlayback") == nil` first. This is the same trick used by `recordingDelayMinutes` for non-zero defaults.
+- **Sheet-size math**: the original 470 pt detent comfortably held `EventPlayerView` (~280 pt) + scrubber + controls. The new toggle card is ~80 pt; 470 + 80 + spacing overflowed into the `ScrollView`'s hidden region, which is why the toggle was "invisible" until the bump. 580 fits the new content without scrolling.
+- **Skeleton state machine**: there are *two* exits from the skeleton — `didFinishInitialLoad` (normal path, set at end of `.task`) and `hasLoadingTimedOut` (10 s safety, set by a parallel `Task`). Cancelled when the normal path wins, so the timeout almost never fires in practice — it's purely there to prevent the user from being stuck on a skeleton if the legacy async export silently fails.
+- **Burst-span visualization as F9 diagnostic tool**: the capsule shapes are the direct visual answer to "is this burst a real snore or an orphan FP?" — narrow capsule sitting on flat waveform is the exact shape of the orphan-FP pattern surfaced in the F9 investigation. Visible at a glance now without scrubbing audio.
+
+### Files Changed
+
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Recordings/Sources/Helpers/ClipPlaybackController.swift` | ~+310/−265 | Full rewrite of internals on `AVAudioEngine`; same public surface preserved |
+| `Packages/Recordings/Sources/Views/PlayerSheetView.swift` | ~+80/−30 | Toggle UI, sheet detent, skeleton loading state, init from `UserPreferences` |
+| `Packages/Recordings/Sources/Views/EventPlayerView.swift` | ~+30/−15 | Burst marker math fix, dots → capsule spans, 4-color legend with helper |
+| `Packages/Env/Sources/Services/UserPreferences.swift` | +18 | New `enhancedAudioPlayback` pref (default `true`) |
+| `Packages/DesignSystem/Sources/Resources/Strings.txt` | +2 | 2 new keys |
+| `Packages/DesignSystem/Sources/Resources/Localizable.xcstrings` | +74 | Auto-regenerated via `generate-xcstrings.py` |
+| `Packages/DesignSystem/Sources/Strings.swift` | +2 | Auto-regenerated accessors |
+| `docs/trackers/f4-recordings.md` | (refinements section) | "Session 66 Refinements — Enhanced Audio Playback" |
+| `docs/trackers/f9-enhanced-detection.md` | (refinements section) | "Session 66 Refinements — Post-Recalibration Tuning" |
+| `docs/FeatureTracker.md` | activity log + last-updated | New rows for each major change |
+| `docs/SNORE_DETECTION_HANDOVER.md` | already current | Existing handover doc covers the F9 investigation methodology |
+
+### Build Status
+
+- **BUILD SUCCEEDED** after every change. The recurring SourceKit `AVAudioSession unavailable in macOS` and `No such module 'DesignSystem'` warnings on iOS-only files are indexer false positives — the iOS Simulator builds compile clean with zero errors.
+
+### Suggested Branch
+`feature/enhanced-audio-playback`
+
+### Suggested Commit
+`Session 66 — Enhanced Audio playback + burst-span markers + post-recalibration tuning`
+- F4: rewrite `ClipPlaybackController` on `AVAudioEngine` with EQ bandpass + per-clip peak normalization; toggleable via `UserPreferences.enhancedAudioPlayback` (default true)
+- F4: add toggle UI card in `PlayerSheetView`; bump sheet detent 470→580 to fit; add skeleton loading state replacing "Audio unavailable" flash
+- F4: fix audio cutting off early via `completionCallbackType: .dataPlayedBack`
+- F4: replace burst-marker dots with capsule spans; fix position math (multi-event bug); 4-color intensity legend
+- F9: continuation work on post-recalibration short-event FP filter — temporal-context implementation built clean but reverted by user; design preserved in handover doc
+- 2 new localized strings; build succeeds
+
+### Open Questions
+- Whether to re-apply the F9 temporal-context filter or leave the orphan-FP shape visible to users via the F4 capsule-span markers as the user's diagnostic tool (depends on whether users actually inspect events vs. trust totals). Defer until next-night reports come in.

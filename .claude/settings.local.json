@@ -9,7 +9,9 @@
       "Bash(python3 -c \"import numpy\")",
       "Bash(pip3 install *)",
       "mcp__XcodeBuildMCP__session_show_defaults",
-      "mcp__XcodeBuildMCP__build_sim"
+      "mcp__XcodeBuildMCP__build_sim",
+      "Bash(xcodebuild -project SleepGuard.xcodeproj -scheme SleepGuard -destination 'platform=iOS Simulator,id=B65D6E9B-35AB-4AE7-B425-F8C9E3E35539' -configuration Debug build)",
+      "Bash(python3 scripts/generate-xcstrings.py)"
     ]
   }
 }
