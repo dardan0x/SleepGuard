@@ -30,6 +30,15 @@ public struct PlayerSheetView: View {
   // MARK: - Loading
   @State private var isReady = false
   @State private var isLoadingWaveform = false
+  /// Becomes true once the initial `.task` finishes (or the safety timeout
+  /// fires). While false and there's no playable audio yet, the body shows
+  /// the loading skeleton instead of the "Audio unavailable" view. This
+  /// removes the brief flash users saw on launch where `noAudioView` rendered
+  /// for one frame before the player was set up.
+  @State private var didFinishInitialLoad = false
+  /// Safety net: if loading is still pending after 10 s, fall through to
+  /// `noAudioView` so users aren't stuck on the skeleton forever.
+  @State private var hasLoadingTimedOut = false
 
   /// Resolves the session's full audio source, preferring the legacy file and
   /// falling back to the raw archive (used after clip extraction moves it).
@@ -55,27 +64,26 @@ public struct PlayerSheetView: View {
     NavigationStack {
       ScrollView {
         VStack(spacing: 24) {
-          if isClipSession, let currentEvent = playbackController.currentEvent {
-            if playbackController.hasAudioForCurrentEvent {
-              EventPlayerView(
-                event: currentEvent,
-                waveformSamples: waveformSamples,
-                isPlaying: playbackController.isPlaying,
-                currentTime: playbackController.currentTime,
-                totalDuration: playbackController.totalClipsDuration,
-                eventNumber: playbackController.currentEventNumber,
-                totalEvents: playbackController.totalEventCount,
-                onTogglePlayback: { playbackController.togglePlayback() },
-                onSkipBack: { skipClipPlayback(by: -15) },
-                onSkipForward: { skipClipPlayback(by: 15) },
-                onScrub: { relative in playbackController.seek(to: relative) },
-                isReady: isReady,
-                isLoadingWaveform: isLoadingWaveform
-              )
-            } else {
-              noAudioView(event: currentEvent)
-            }
-          } else if let initialEvent, legacyEventDuration > 0 {
+          if isClipSession,
+             let currentEvent = playbackController.currentEvent,
+             playbackController.hasAudioForCurrentEvent {
+            EventPlayerView(
+              event: currentEvent,
+              waveformSamples: waveformSamples,
+              isPlaying: playbackController.isPlaying,
+              currentTime: playbackController.currentTime,
+              totalDuration: playbackController.totalClipsDuration,
+              eventNumber: playbackController.currentEventNumber,
+              totalEvents: playbackController.totalEventCount,
+              onTogglePlayback: { playbackController.togglePlayback() },
+              onSkipBack: { skipClipPlayback(by: -15) },
+              onSkipForward: { skipClipPlayback(by: 15) },
+              onScrub: { relative in playbackController.seek(to: relative) },
+              isReady: isReady,
+              isLoadingWaveform: isLoadingWaveform
+            )
+            enhancedAudioToggle
+          } else if !isClipSession, let initialEvent, legacyEventDuration > 0 {
             EventPlayerView(
               event: initialEvent,
               waveformSamples: waveformSamples,
@@ -91,14 +99,25 @@ public struct PlayerSheetView: View {
               isReady: isReady,
               isLoadingWaveform: isLoadingWaveform
             )
-          } else if let initialEvent {
-            noAudioView(event: initialEvent)
+          } else if didFinishInitialLoad || hasLoadingTimedOut {
+            // Loading is over (either completed or hit the 10 s safety net)
+            // and we still don't have audio — show the unavailable state.
+            if let event = playbackController.currentEvent ?? initialEvent {
+              noAudioView(event: event)
+            }
+          } else {
+            // Initial load still in progress — show skeleton to avoid the
+            // "Audio unavailable" flash users were seeing.
+            loadingSkeleton
           }
         }
         .padding(20)
       }
       .background(theme.bgPrimary.ignoresSafeArea())
-      .presentationDetents([.height(470)])
+      // Was `.height(470)` — bumped so the Enhanced Audio toggle below the
+      // player controls is visible without scrolling. `.large` is also offered
+      // so users can drag up for more breathing room if they want.
+      .presentationDetents([.height(580), .large])
       .presentationDragIndicator(.visible)
       .navigationTitle(playerNavigationTitle)
       .navigationBarTitleDisplayMode(.inline)
@@ -123,6 +142,22 @@ public struct PlayerSheetView: View {
         }
       }
 
+      // Skeleton timeout: after 10 s of no playable audio, fall through to
+      // `noAudioView`. The async legacy export normally completes in under
+      // a few seconds; this is purely a safety net so the skeleton can't be
+      // stuck forever if export fails silently.
+      let skeletonTimeoutTask = Task {
+        try? await Task.sleep(for: .seconds(10))
+        if !Task.isCancelled {
+          await MainActor.run { hasLoadingTimedOut = true }
+        }
+      }
+
+      // Initialize the enhancement toggle from the persisted user preference
+      // BEFORE loading the first clip — `setupPlayerForCurrentEvent` reads
+      // `enhancedAudioEnabled` to compute per-clip normalization gain.
+      playbackController.enhancedAudioEnabled = UserPreferences.shared.enhancedAudioPlayback
+
       if isClipSession {
         playbackController.loadEvents(sortedEvents)
         if let initialEvent,
@@ -143,7 +178,9 @@ public struct PlayerSheetView: View {
       }
 
       loadingTask.cancel()
+      skeletonTimeoutTask.cancel()
       isReady = true
+      didFinishInitialLoad = true
     }
     .task(id: legacyIsPlaying) {
       if !isClipSession {
@@ -221,6 +258,85 @@ public struct PlayerSheetView: View {
     guard exportSession.status == .completed else { return [] }
 
     return WaveformGenerator.generateSamples(from: clipURL)
+  }
+
+  // MARK: - Loading Skeleton
+
+  /// Placeholder shown while the player is being set up (clip controller or
+  /// legacy async export). Mimics the rough shape of `EventPlayerView` so the
+  /// sheet layout doesn't jump when it transitions to the real player.
+  /// A circular `ProgressView` makes it clear something is in progress.
+  private var loadingSkeleton: some View {
+    VStack(spacing: 20) {
+      // Waveform placeholder
+      RoundedRectangle(cornerRadius: theme.radiusSmall)
+        .fill(theme.bgElevated)
+        .frame(height: 80)
+
+      // Scrubber + time placeholders
+      VStack(spacing: 8) {
+        RoundedRectangle(cornerRadius: 2)
+          .fill(theme.bgElevated)
+          .frame(height: 4)
+        HStack {
+          Text("0:00")
+            .font(.system(size: 12, weight: .medium))
+          Spacer()
+          Text("0:00")
+            .font(.system(size: 12, weight: .medium))
+        }
+        .foregroundStyle(theme.textTertiary)
+      }
+
+      // Transport controls placeholder
+      HStack(spacing: 28) {
+        Circle().fill(theme.bgElevated).frame(width: 44, height: 44)
+        Circle().fill(theme.bgElevated).frame(width: 64, height: 64)
+        Circle().fill(theme.bgElevated).frame(width: 44, height: 44)
+      }
+      .padding(.top, 4)
+
+      ProgressView()
+        .progressViewStyle(.circular)
+        .tint(theme.accent)
+        .padding(.top, 4)
+    }
+    .padding(20)
+    .frame(maxWidth: .infinity)
+    .background(theme.bgCard)
+    .cornerRadius(theme.radiusCard)
+  }
+
+  // MARK: - Enhanced Audio Toggle
+
+  /// Toggle for band-pass + per-clip peak normalization on the event player.
+  /// Persisted via `UserPreferences.enhancedAudioPlayback` so the choice
+  /// survives across sessions.
+  private var enhancedAudioToggle: some View {
+    HStack(alignment: .center, spacing: 12) {
+      VStack(alignment: .leading, spacing: 2) {
+        Text(Strings.eventPlayerEnhancedAudioLabel)
+          .font(.system(size: 15, weight: .medium))
+          .foregroundStyle(theme.textPrimary)
+        Text(Strings.eventPlayerEnhancedAudioDescription)
+          .font(.system(size: 12))
+          .foregroundStyle(theme.textSecondary)
+      }
+      Spacer(minLength: 0)
+      Toggle("", isOn: Binding(
+        get: { playbackController.enhancedAudioEnabled },
+        set: { newValue in
+          playbackController.enhancedAudioEnabled = newValue
+          UserPreferences.shared.enhancedAudioPlayback = newValue
+        }
+      ))
+      .labelsHidden()
+      .tint(theme.accent)
+    }
+    .padding(16)
+    .frame(maxWidth: .infinity)
+    .background(theme.bgCard)
+    .cornerRadius(theme.radiusCard)
   }
 
   // MARK: - No Audio State

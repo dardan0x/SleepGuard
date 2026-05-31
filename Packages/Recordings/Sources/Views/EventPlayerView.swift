@@ -114,7 +114,7 @@ struct EventPlayerView: View {
   private var waveformSection: some View {
     VStack(spacing: 12) {
       // Dots above waveform
-      waveformMarkers
+//      waveformMarkers
 
       // Bar waveform with progress indicator
       GeometryReader { geometry in
@@ -166,18 +166,26 @@ struct EventPlayerView: View {
   private var waveformMarkers: some View {
     GeometryReader { geometry in
       ZStack(alignment: .leading) {
-        // Marker dots at burst positions if available, otherwise one at start
-        if let bursts = event.bursts, bursts.count > 1 {
+        // Burst-span markers: each capsule spans the burst's actual start→end
+        // duration so users can directly read which segments of the waveform
+        // the detector classified as snoring (vs. just where it began).
+        // Burst offsets are relative to THIS event's start — divide by
+        // `event.snoreDuration`, NOT `totalDuration` (which is the whole
+        // session in multi-event mode and would cluster spans at the left).
+        // Falls back to a single dot at the start when burst data is missing
+        // (legacy events recorded before the burst model existed).
+        if let bursts = event.bursts, !bursts.isEmpty, event.snoreDuration > 0 {
           ForEach(bursts.indices, id: \.self) { index in
             let burst = bursts[index]
-            let position = burst.startOffset / totalDuration
-            Circle()
+            let startPos = burst.startOffset / event.snoreDuration
+            let endPos = min(burst.endOffset / event.snoreDuration, 1.0)
+            let startX = CGFloat(startPos) * geometry.size.width
+            // Minimum 6 pt wide so very short bursts stay visible at all sizes.
+            let widthPx = max(CGFloat(endPos - startPos) * geometry.size.width, 6)
+            Capsule()
               .fill(intensityColor)
-              .frame(width: 8, height: 8)
-              .position(
-                x: CGFloat(position) * geometry.size.width,
-                y: geometry.size.height / 2
-              )
+              .frame(width: widthPx, height: 6)
+              .position(x: startX + widthPx / 2, y: geometry.size.height / 2)
           }
         } else {
           Circle()
@@ -266,25 +274,26 @@ struct EventPlayerView: View {
 
   // MARK: - Legend
 
+  /// Four-intensity legend so users can read what dot/text color means anywhere
+  /// in the app. Pulls colors via `theme.intensityColor(_:)` — the same source
+  /// the burst-dots and header use — so the legend never drifts out of sync.
   private var legendSection: some View {
-    HStack(spacing: 20) {
-      HStack(spacing: 6) {
-        Circle()
-          .fill(theme.scoreAmber)
-          .frame(width: 8, height: 8)
-          Text(Strings.lightSnoreEventPlayerView)
-          .font(.system(size: 12, weight: .medium))
-          .foregroundStyle(theme.textSecondary)
-      }
+    HStack(spacing: 14) {
+      legendItem(intensity: .quiet, label: Strings.quietIntensityLabel)
+      legendItem(intensity: .light, label: Strings.lightIntensityLabelEventPlayerView)
+      legendItem(intensity: .loud, label: Strings.loudIntensityLabelEventPlayerView)
+      legendItem(intensity: .epic, label: Strings.epicIntensityLabelEventPlayerView)
+    }
+  }
 
-      HStack(spacing: 6) {
-        Circle()
-          .fill(theme.scoreRed)
-          .frame(width: 8, height: 8)
-          Text(Strings.loudSnoreEventPlayerView)
-          .font(.system(size: 12, weight: .medium))
-          .foregroundStyle(theme.textSecondary)
-      }
+  private func legendItem(intensity: SnoreIntensity, label: String) -> some View {
+    HStack(spacing: 4) {
+      Circle()
+        .fill(theme.intensityColor(intensity))
+        .frame(width: 8, height: 8)
+      Text(label)
+        .font(.system(size: 12, weight: .medium))
+        .foregroundStyle(theme.textSecondary)
     }
   }
 

@@ -136,6 +136,23 @@ public final class UserPreferences {
     }
   }
 
+  /// When true, snore-event clips play through a band-pass + per-clip
+  /// peak normalization on the event player. Defaults to true so new
+  /// installs hear the enhancement immediately.
+  public var enhancedAudioPlayback: Bool {
+    get {
+      access(keyPath: \.enhancedAudioPlayback)
+      // Default true on first access (when key has never been written).
+      if defaults.object(forKey: "enhancedAudioPlayback") == nil { return true }
+      return defaults.bool(forKey: "enhancedAudioPlayback")
+    }
+    set {
+      withMutation(keyPath: \.enhancedAudioPlayback) {
+        defaults.set(newValue, forKey: "enhancedAudioPlayback")
+      }
+    }
+  }
+
   public var hasExplicitlySetEnhancedSleepTracking: Bool {
     get {
       access(keyPath: \.hasExplicitlySetEnhancedSleepTracking)
