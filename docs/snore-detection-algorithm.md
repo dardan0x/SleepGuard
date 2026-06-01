@@ -68,13 +68,13 @@ Uses `SNClassifySoundRequest(classifierIdentifier: .version1)` — Apple's 300-c
 |------|-----------|--------|
 | 1 | `snoreConfidence < confidenceGate` | `.none` |
 | 2 | `db >= epicThreshold` && `snoreConfidence >= highConfidenceGate` | `.epic` |
-| 3 | `db >= loudThreshold - 5` && `snoreConfidence >= highConfidenceGate` | `.loud` |
-| 4 | `db >= lightThreshold - 10` && `snoreConfidence >= confidenceGate` | `.light` |
-| 5 | `db >= quietThreshold - 15` | `.quiet` |
+| 3 | `db >= loudThreshold` | `.loud` |
+| 4 | `db >= lightThreshold` | `.light` |
+| 5 | `db >= quietThreshold` | `.quiet` |
 | 6 | `snoreConfidence >= quietFallbackGate` | `.quiet` |
 | 7 | Otherwise | `.none` |
 
-**Why floors are offset below base thresholds:** SoundAnalysis already confirmed spectral snore-likeness, so we can be more lenient on dB than the pure-FFT path. This catches quiet snoring without letting ambient noise through.
+**Why only epic uses `highConfidenceGate`:** ML confidence already gated entry in step 1, so the audio is confirmed snore-like. Within that, intensity should be driven primarily by amplitude (dB). Requiring the same high confidence for `loud` was collapsing the intensity distribution — loud snores with moderate confidence (0.35–0.54) were falling through to the oversized light bucket.
 
 #### Layer 2: FFT Spectral Fallback
 
@@ -503,9 +503,9 @@ Result: EventCard, PlayerSheetView, and waveform all show the same duration.
 
 | Sensitivity | quiet | light | loud | epic | confGate | highConf | quietFallback | minEventDur |
 |-------------|-------|-------|------|------|----------|----------|---------------|-------------|
-| **Low** (noisy rooms) | -45 | -35 | -20 | -10 | 0.45 | 0.65 | 0.55 | 2.0 s |
-| **Medium** (default) | -50 | -40 | -25 | -15 | 0.35 | 0.55 | 0.45 | 1.0 s |
-| **High** (quiet rooms) | -55 | -45 | -30 | -20 | 0.25 | 0.45 | 0.35 | 0.5 s |
+| **Low** (noisy rooms) | -45 | -35 | -15 | -5 | 0.45 | 0.65 | 0.55 | 2.0 s |
+| **Medium** (default) | -50 | -40 | -20 | -10 | 0.35 | 0.55 | 0.45 | 1.0 s |
+| **High** (quiet rooms) | -55 | -45 | -25 | -15 | 0.25 | 0.45 | 0.35 | 0.5 s |
 
 ### 10.2 What Each Sensitivity Changes
 

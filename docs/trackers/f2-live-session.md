@@ -422,6 +422,18 @@ After completing a task in this feature:
 - **Force-finalized event minimum**: `finalizeActiveEvent(skipMinDuration: true)` now uses 0.5s floor instead of bypassing the check entirely. Prevents 0-second events from being saved while still allowing short melody-triggered events.
 - **MelodyGapsBannerView pluralization**: `durationString` now returns "over 1 min" / "over 2 mins" / "over 1 h 30 mins" with proper singular/plural localization keys (`time.minute.singular`, `time.minute.plural`, `time.hour.singular`, `time.hour.plural`, `common.over`).
 
+### Session 69 Refinements (2026-06-01)
+
+- **Snore intensity classification fix**: `classifyWithSoundAnalysis` was using `floorLight = lightThreshold - 10` (-50 dBFS) which overlapped with `quietThreshold` (-50), creating a 20 dB catch-all light bucket. Both loud and epic required `highConfidenceGate` (0.55), so moderate-confidence snores at -20 dBFS fell through to light. Fixed: removed all floor offsets; only epic requires `highConfidenceGate`; loud uses base `confidenceGate`.
+- **Peak dB for intensity**: Added `calculatePeakDB` to `AudioRecorder` (exposed as `currentPeakDB`). `SessionManager.processAudioLevel` passes peak dB to the classifier. Snoring is impulsive — peak dB is typically 6–15 dB higher than RMS over 1024-sample buffers, making loud/epic realistically reachable.
+- **Thresholds lowered 5 dB**: loud/epic shifted down across all sensitivities to match real-world captured levels at typical bedside distances:
+  - Low: loud -15, epic -5
+  - Medium: loud -20, epic -10
+  - High: loud -25, epic -15
+- **Docs updated**: `docs/snore-detection-algorithm.md` logic table and threshold table corrected.
+
+---
+
 ### F2-T12 — Low Battery Force-Save
 
 | Field | Value |

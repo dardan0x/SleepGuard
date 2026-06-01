@@ -18,12 +18,12 @@ public final class SnoreDetector {
 
   /// Base thresholds in dBFS (medium sensitivity defaults).
   /// These are relative to digital full scale, not calibrated dB-SPL.
-  /// Recalibrated for the full-band capture path — the old -30/-20/-10/-5 was
-  /// tuned for the narrow-bandpass build and sat above real snore levels.
+  /// loud/epic lowered 5 dB (2026-06-01) because RMS over 23 ms buffers
+  /// under-reports impulsive snoring peaks; peak-dB classification compensates.
   public var quietThreshold: Float = -50.0
   public var lightThreshold: Float = -40.0
-  public var loudThreshold: Float = -25.0
-  public var epicThreshold: Float = -15.0
+  public var loudThreshold: Float = -20.0
+  public var epicThreshold: Float = -10.0
 
   /// SoundAnalysis confidence gates (medium sensitivity defaults).
   /// `confidenceGate`: minimum to register as snoring at all.
@@ -85,23 +85,19 @@ public final class SnoreDetector {
       return .none
     }
 
-    // Floors are offset below base thresholds because ML already confirmed
-    // snore-like spectral content. Keeps quiet snoring but rejects noise floor.
-    let floorEpic: Float = epicThreshold
-    let floorLoud: Float = loudThreshold - 5
-    let floorLight: Float = lightThreshold - 10
-    let floorQuiet: Float = quietThreshold - 15
-
-    if db >= floorEpic && snoreConfidence >= highConfidenceGate {
+    // Intensity is primarily amplitude-based. ML confidence already gated
+    // entry above, so dB alone determines tier. Only epic requires extra
+    // confidence to avoid false positives at the extreme end.
+    if db >= epicThreshold && snoreConfidence >= highConfidenceGate {
       return .epic
-    } else if db >= floorLoud && snoreConfidence >= highConfidenceGate {
+    } else if db >= loudThreshold {
       return .loud
-    } else if db >= floorLight && snoreConfidence >= confidenceGate {
+    } else if db >= lightThreshold {
       return .light
-    } else if db >= floorQuiet {
+    } else if db >= quietThreshold {
       return .quiet
     }
-    // Even if dB is below all floors, sufficient classifier confidence counts as quiet.
+    // Even if dB is below all thresholds, sufficient classifier confidence counts as quiet.
     return snoreConfidence >= quietFallbackGate ? .quiet : .none
   }
 
