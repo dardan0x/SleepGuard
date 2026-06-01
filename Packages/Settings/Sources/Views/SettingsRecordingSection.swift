@@ -45,6 +45,27 @@ struct SettingsRecordingSection: View {
           .labelsHidden()
           .tint(theme.scoreGreen)
         }
+
+        #if DEBUG
+        HStack(spacing: 10) {
+          SettingsIconBackground(systemName: "archivebox.fill", color: theme.accent)
+          VStack(alignment: .leading, spacing: 2) {
+            Text(Strings.settingsPreserveRawAudio)
+              .font(.system(size: 15))
+              .foregroundStyle(theme.textPrimary)
+            Text(Strings.settingsPreserveRawAudioDescription)
+              .font(.system(size: 12))
+              .foregroundStyle(theme.textSecondary)
+          }
+          Spacer()
+          Toggle("", isOn: Binding(
+            get: { userPreferences.preserveRawAudio },
+            set: { userPreferences.preserveRawAudio = $0 }
+          ))
+          .labelsHidden()
+          .tint(theme.scoreGreen)
+        }
+        #endif
       }
       .padding(16)
       .background(theme.bgCard)

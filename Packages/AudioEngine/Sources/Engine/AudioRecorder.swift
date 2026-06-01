@@ -32,6 +32,11 @@ public final class AudioRecorder {
   /// Spectral snore-likelihood score (0–1). Updated in real-time from FFT analysis.
   public var spectralScore: Float = 0
   public var hasPermission = false
+  /// Whether audio is currently being written to a file. Set to false after repeated write failures.
+  public var isWritingToFile = false
+  /// The event file currently being written to, if any.
+  public private(set) var currentEventFile: AVAudioFile?
+  public private(set) var currentEventID: UUID?
 
   private var audioEngine: AVAudioEngine?
   private var audioFile: AVAudioFile?
@@ -39,6 +44,7 @@ public final class AudioRecorder {
   private let soundAnalyzer = SoundAnalysisDetector.shared
   private var cumulativeFramePosition: AVAudioFramePosition = 0
   private var recordingFormat: AVAudioFormat?
+  private var consecutiveWriteFailures = 0
 
   private init() {
     checkPermission()
@@ -205,6 +211,7 @@ public final class AudioRecorder {
     if let audioFileURL = audioFileURL {
       audioFile = try AVAudioFile(forWriting: audioFileURL, settings: format.settings)
     }
+    isWritingToFile = audioFile != nil || currentEventFile != nil
 
     // Tap the microphone directly. A record-only graph that routes the input
     // through to mainMixerNode also feeds the speaker, and relying on volume = 0
@@ -217,11 +224,32 @@ public final class AudioRecorder {
       let features = self.fftAnalyzer.analyze(buffer: buffer, sampleRate: format.sampleRate)
       self.soundAnalyzer.analyze(buffer: buffer, at: self.cumulativeFramePosition)
       self.cumulativeFramePosition += AVAudioFramePosition(buffer.frameLength)
+      var didWrite = false
       if let audioFile = self.audioFile {
         do {
           try audioFile.write(from: buffer)
+          didWrite = true
         } catch {
           print("[AudioRecorder] Failed to write audio buffer: \(error)")
+        }
+      }
+      if let eventFile = self.currentEventFile {
+        do {
+          try eventFile.write(from: buffer)
+          didWrite = true
+        } catch {
+          print("[AudioRecorder] Failed to write event buffer: \(error)")
+        }
+      }
+      if didWrite {
+        self.consecutiveWriteFailures = 0
+      } else if self.audioFile != nil || self.currentEventFile != nil {
+        self.consecutiveWriteFailures += 1
+        if self.consecutiveWriteFailures >= 3 {
+          print("[AudioRecorder] Too many write failures — stopping file writes")
+          self.isWritingToFile = false
+          self.audioFile = nil
+          self.currentEventFile = nil
         }
       }
       Task { @MainActor in
@@ -271,11 +299,32 @@ public final class AudioRecorder {
       let features = self.fftAnalyzer.analyze(buffer: buffer, sampleRate: format.sampleRate)
       self.soundAnalyzer.analyze(buffer: buffer, at: self.cumulativeFramePosition)
       self.cumulativeFramePosition += AVAudioFramePosition(buffer.frameLength)
+      var didWrite = false
       if let audioFile = self.audioFile {
         do {
           try audioFile.write(from: buffer)
+          didWrite = true
         } catch {
           print("[AudioRecorder] Failed to write audio buffer: \(error)")
+        }
+      }
+      if let eventFile = self.currentEventFile {
+        do {
+          try eventFile.write(from: buffer)
+          didWrite = true
+        } catch {
+          print("[AudioRecorder] Failed to write event buffer: \(error)")
+        }
+      }
+      if didWrite {
+        self.consecutiveWriteFailures = 0
+      } else if self.audioFile != nil || self.currentEventFile != nil {
+        self.consecutiveWriteFailures += 1
+        if self.consecutiveWriteFailures >= 3 {
+          print("[AudioRecorder] Too many write failures — stopping file writes")
+          self.isWritingToFile = false
+          self.audioFile = nil
+          self.currentEventFile = nil
         }
       }
       Task { @MainActor in
@@ -291,15 +340,34 @@ public final class AudioRecorder {
     isPaused = false
   }
 
+  public func startEventFile(eventID: UUID, url: URL) throws {
+    guard let format = recordingFormat else { return }
+    currentEventFile = try AVAudioFile(forWriting: url, settings: format.settings)
+    currentEventID = eventID
+    isWritingToFile = audioFile != nil || currentEventFile != nil
+  }
+
+  public func finalizeEventFile() -> URL? {
+    let url = currentEventFile?.url
+    currentEventFile = nil
+    currentEventID = nil
+    isWritingToFile = audioFile != nil || currentEventFile != nil
+    return url
+  }
+
   public func stopRecording() {
     soundAnalyzer.stopAnalyzing()
     audioEngine?.stop()
     audioEngine?.inputNode.removeTap(onBus: 0)
     audioEngine = nil
     audioFile = nil
+    currentEventFile = nil
+    currentEventID = nil
     cumulativeFramePosition = 0
     isRecording = false
     isPaused = false
+    isWritingToFile = false
+    consecutiveWriteFailures = 0
     currentDB = -160.0
     spectralScore = 0
 

@@ -143,10 +143,10 @@ public enum AudioClipExtractor {
 
   // MARK: - Private
 
-  private struct SpectralData {
-    let dominantFrequency: Double
-    let spectralCentroid: Double
-    let lowFreqRatio: Double
+  public struct SpectralData {
+    public let dominantFrequency: Double
+    public let spectralCentroid: Double
+    public let lowFreqRatio: Double
   }
 
   /// Extracts a single clip when the total session duration is not known in advance.
@@ -169,7 +169,7 @@ public enum AudioClipExtractor {
     )
   }
 
-  private static func analyzeSpectralFeatures(of url: URL) async -> SpectralData {
+  public static func analyzeSpectralFeatures(of url: URL) async -> SpectralData {
     guard let audioFile = try? AVAudioFile(forReading: url) else {
       return SpectralData(dominantFrequency: 0, spectralCentroid: 0, lowFreqRatio: 0)
     }

@@ -1652,6 +1652,28 @@
         }
       }
     },
+    "settings.preserveRawAudio": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preserve raw session audio"
+          }
+        }
+      }
+    },
+    "settings.preserveRawAudio.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Records full session .caf for algorithm debugging (5 GB+)"
+          }
+        }
+      }
+    },
     "settings.saveAudioClips": {
       "localizations": {
         "en": {
