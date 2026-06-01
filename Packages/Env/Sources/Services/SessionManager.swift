@@ -201,17 +201,21 @@ public final class SessionManager {
         processingTask?.cancel()
         processingTask = nil
 
-        audioRecorder.stopRecording()
         soothingMelodyPlayer.stop()
         isRecording = false
 
-        // Finalize any in-progress snore event (include trailing gap since user stopped mid-session)
+        // Finalize any in-progress events BEFORE stopping the audio engine.
+        // finalizeActiveEvent() calls finalizeEventFile() to capture the raw
+        // .caf URL; if stopRecording() runs first, currentEventFile is nilled
+        // and the event's audio is lost forever.
         if activeEventStart != nil {
             finalizeActiveEvent()
         }
         if activeSpeechEventStart != nil {
             finalizeActiveSpeechEvent()
         }
+
+        audioRecorder.stopRecording()
 
         // Wait for any in-flight per-event compression tasks to finish.
         for task in pendingEventTasks {
@@ -287,16 +291,19 @@ public final class SessionManager {
             processingTask?.cancel()
             processingTask = nil
 
-            audioRecorder.stopRecording()
             soothingMelodyPlayer.stop()
             isRecording = false
 
+            // Finalize events BEFORE stopping audio engine so file URLs are
+            // captured while currentEventFile still exists.
             if activeEventStart != nil {
                 finalizeActiveEvent()
             }
             if activeSpeechEventStart != nil {
                 finalizeActiveSpeechEvent()
             }
+
+            audioRecorder.stopRecording()
 
             // Wait for any in-flight compression tasks before deleting files.
             for task in pendingEventTasks {
