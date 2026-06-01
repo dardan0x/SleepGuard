@@ -71,7 +71,7 @@ public enum AudioClipExtractor {
     return results
   }
 
-  private static func extractSingleClip(
+  public static func extractSingleClip(
     for event: SnoreEvent,
     sessionURL: URL,
     sessionStart: Date,
@@ -147,6 +147,26 @@ public enum AudioClipExtractor {
     let dominantFrequency: Double
     let spectralCentroid: Double
     let lowFreqRatio: Double
+  }
+
+  /// Extracts a single clip when the total session duration is not known in advance.
+  /// Computes duration from the asset on demand.
+  public static func extractSingleClip(
+    for event: SnoreEvent,
+    sessionURL: URL,
+    sessionStart: Date,
+    padding: TimeInterval = 0.0,
+    outputDirectory: URL
+  ) async -> ClipResult? {
+    let totalDuration = await AVURLAsset(url: sessionURL).duration.seconds
+    return await extractSingleClip(
+      for: event,
+      sessionURL: sessionURL,
+      sessionStart: sessionStart,
+      totalDuration: totalDuration,
+      padding: padding,
+      outputDirectory: outputDirectory
+    )
   }
 
   private static func analyzeSpectralFeatures(of url: URL) async -> SpectralData {

@@ -73,6 +73,11 @@ public final class SessionManager {
     private var processingTask: Task<Void, Never>?
     private var batteryCheckCounter = 0
 
+    // MARK: - Incremental clip extraction
+
+    private var clipExtractionQueue: Task<Void, Never>?
+    private var pendingClipExtractions: [SnoreEvent] = []
+
     private init() {
         NotificationCenter.default.addObserver(
             self,
@@ -116,11 +121,15 @@ public final class SessionManager {
         processingTask?.cancel()
         soothingMelodyPlayer.resetSessionMute()
 
+        // Clean up any orphaned files from a previous force-closed session.
+        PendingSessionStore.shared.cleanupIfNeeded()
+
         let session = SleepSession(startDate: Date())
         let audioURL = audioFileURL(for: session.id)
         session.audioFileURL = AudioFileURLResolver.filename(from: audioURL)
         session.recordingGaps = []
         currentSession = session
+        PendingSessionStore.shared.setPending(sessionID: session.id)
 
         // Apply detection sensitivity thresholds before starting
         applyDetectionSensitivity()
@@ -195,6 +204,11 @@ public final class SessionManager {
             finalizeActiveSpeechEvent()
         }
 
+        // Wait for any in-flight incremental clip extractions to finish.
+        if let queue = clipExtractionQueue {
+            await queue.value
+        }
+
         guard let session = currentSession else { return nil }
 
         let now = Date()
@@ -203,30 +217,32 @@ public final class SessionManager {
         session.averageDB = totalDBCount > 0 ? totalDBSum / Double(totalDBCount) : 0
         eventsCount = session.eventsCount
 
-        // Extract per-event clips and spectral features; preserve full session as raw data
+        // Extract clips for any events that were finalized at stop-time or failed earlier.
         if let events = session.events, !events.isEmpty,
-           let sessionURL = AudioFileURLResolver.resolve(session.audioFileURL)
+           let sessionURL = sessionAudioURL(for: session)
         {
             let docs = FileManager.default
                 .urls(for: .documentDirectory, in: .userDomainMask)[0]
-            let results = await AudioClipExtractor.extractClips(
-                from: sessionURL,
-                events: events,
-                sessionStart: session.startDate,
-                padding: 0.3,
-                outputDirectory: docs
-            )
-            for result in results {
-                if let event = events.first(where: { $0.id == result.eventID }) {
+            for event in events where event.audioFileURL == nil {
+                if let result = await AudioClipExtractor.extractSingleClip(
+                    for: event,
+                    sessionURL: sessionURL,
+                    sessionStart: session.startDate,
+                    totalDuration: now.timeIntervalSince(session.startDate),
+                    padding: 0.3,
+                    outputDirectory: docs
+                ) {
                     event.audioFileURL = AudioFileURLResolver.filename(from: result.clipURL)
                     event.dominantFrequency = result.dominantFrequency
                     event.spectralCentroid = result.spectralCentroid
                     event.lowFreqRatio = result.lowFreqRatio
+                    PendingSessionStore.shared.addFile(result.clipURL.lastPathComponent)
                 }
             }
             // Preserve full session audio for future re-processing (threshold changes, migrations).
             // Clips become the primary playback source; raw file is the ground-truth archive.
-            if !results.isEmpty {
+            let hasClips = events.contains { $0.audioFileURL != nil }
+            if hasClips, session.rawAudioFileURL == nil {
                 session.rawAudioFileURL = session.audioFileURL
                 session.audioFileURL = nil
             }
@@ -237,6 +253,9 @@ public final class SessionManager {
         // Save raw classification log
         let logFilename = await SessionRawLogWriter.shared.stop()
         session.rawLogFileURL = logFilename
+        if let logFilename {
+            PendingSessionStore.shared.addFile(logFilename)
+        }
 
         let result = session
         completedSession = result
@@ -266,38 +285,47 @@ public final class SessionManager {
         if let url = AudioFileURLResolver.resolve(completedSession?.rawLogFileURL) {
             try? FileManager.default.removeItem(at: url)
         }
+        PendingSessionStore.shared.cleanupIfNeeded()
         completedSession = nil
     }
 
     /// Stops the current recording and discards the session without presenting the summary.
     /// Used when the user explicitly chooses to stop a session that is below the minimum duration.
     public func stopAndDiscardSession() {
-        processingTask?.cancel()
-        processingTask = nil
+        Task { @MainActor in
+            processingTask?.cancel()
+            processingTask = nil
 
-        audioRecorder.stopRecording()
-        soothingMelodyPlayer.stop()
-        isRecording = false
+            audioRecorder.stopRecording()
+            soothingMelodyPlayer.stop()
+            isRecording = false
 
-        if activeEventStart != nil {
-            finalizeActiveEvent()
-        }
-        if activeSpeechEventStart != nil {
-            finalizeActiveSpeechEvent()
-        }
-
-        // Delete the session's audio file and clean up
-        if let session = currentSession {
-            if let url = AudioFileURLResolver.resolve(session.audioFileURL) {
-                try? FileManager.default.removeItem(at: url)
+            if activeEventStart != nil {
+                finalizeActiveEvent()
             }
-            if let url = AudioFileURLResolver.resolve(session.rawAudioFileURL) {
-                try? FileManager.default.removeItem(at: url)
+            if activeSpeechEventStart != nil {
+                finalizeActiveSpeechEvent()
             }
-        }
 
-        currentSession = nil
-        resetTrackingState()
+            // Wait for any in-flight incremental extractions before deleting files.
+            if let queue = clipExtractionQueue {
+                await queue.value
+            }
+
+            // Delete the session's audio file and clean up
+            if let session = currentSession {
+                if let url = AudioFileURLResolver.resolve(session.audioFileURL) {
+                    try? FileManager.default.removeItem(at: url)
+                }
+                if let url = AudioFileURLResolver.resolve(session.rawAudioFileURL) {
+                    try? FileManager.default.removeItem(at: url)
+                }
+            }
+
+            PendingSessionStore.shared.cleanupIfNeeded()
+            currentSession = nil
+            resetTrackingState()
+        }
     }
 
     // MARK: - Real-time audio processing
@@ -485,6 +513,50 @@ public final class SessionManager {
         }
     }
 
+    // MARK: - Incremental clip extraction
+
+    private func scheduleClipExtraction(for event: SnoreEvent) {
+        pendingClipExtractions.append(event)
+        processExtractionQueue()
+    }
+
+    private func processExtractionQueue() {
+        guard clipExtractionQueue == nil, !pendingClipExtractions.isEmpty else { return }
+        let event = pendingClipExtractions.removeFirst()
+        clipExtractionQueue = Task { @MainActor in
+            await extractClip(for: event)
+            clipExtractionQueue = nil
+            processExtractionQueue()
+        }
+    }
+
+    private func extractClip(for event: SnoreEvent) async {
+        guard let session = currentSession,
+              let sessionURL = AudioFileURLResolver.resolve(session.audioFileURL) else { return }
+        let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        if let result = await AudioClipExtractor.extractSingleClip(
+            for: event,
+            sessionURL: sessionURL,
+            sessionStart: session.startDate,
+            totalDuration: Date().timeIntervalSince(session.startDate),
+            padding: 0.3,
+            outputDirectory: docs
+        ) {
+            event.audioFileURL = AudioFileURLResolver.filename(from: result.clipURL)
+            event.dominantFrequency = result.dominantFrequency
+            event.spectralCentroid = result.spectralCentroid
+            event.lowFreqRatio = result.lowFreqRatio
+            PendingSessionStore.shared.addFile(result.clipURL.lastPathComponent)
+        }
+    }
+
+    private func sessionAudioURL(for session: SleepSession) -> URL? {
+        if let url = AudioFileURLResolver.resolve(session.audioFileURL) {
+            return url
+        }
+        return AudioFileURLResolver.resolve(session.rawAudioFileURL)
+    }
+
     // MARK: - Private helpers
 
     private func resetTrackingState() {
@@ -565,6 +637,8 @@ public final class SessionManager {
         session.events?.append(event)
         eventsCount = session.events?.count ?? 0
 
+        scheduleClipExtraction(for: event)
+
         activeEventStart = nil
         activeEventIntensity = nil
         activeEventDBSum = 0
@@ -608,6 +682,8 @@ public final class SessionManager {
         }
         session.events?.append(event)
         eventsCount = session.events?.count ?? 0
+
+        scheduleClipExtraction(for: event)
 
         activeSpeechEventStart = nil
         activeSpeechEventDBSum = 0

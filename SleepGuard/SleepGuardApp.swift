@@ -52,6 +52,7 @@ struct SleepGuardApp: App {
         soothingMelodyPlayer: SoothingMelodyPlayer.shared
       )
       .onAppear {
+        PendingSessionStore.shared.cleanupIfNeeded()
         HealthKitSync.shared.checkAuthorizationStatus()
         if !userPreferences.hasExplicitlySetSyncToHealthKit {
           userPreferences.syncToHealthKit = HealthKitSync.shared.isAuthorized
