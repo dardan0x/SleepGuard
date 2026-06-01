@@ -4711,3 +4711,59 @@ score = 100 - snoringPenalty - eventsPenalty - intensityPenalty
 ### Open Questions
 - Should we expose a per-user calibration step (e.g., "make a loud snore sound") to personalize thresholds?
 - Is the 5 dB shift enough, or do bedroom acoustics vary more than expected?
+
+---
+
+## 2026-06-01 — Session 70: Settings Storage Limits
+
+### Completed
+- **F6-T4**: Storage limit settings with automatic audio cleanup
+
+### Technical Details
+- `UserPreferences` gained 4 new properties: `limitStorageEnabled` (default true), `storageLimitMB` (default 500), `limitDaysEnabled` (default true), `maxDays` (default 30)
+- `StorageLimitEnforcer` singleton enforces both size-based and day-based limits; file I/O runs off MainActor via `Task.detached` so launch/save never block
+- Cleanup plan pattern: MainActor fetches sessions + clears audio URL properties immediately (so model stays consistent), background task deletes files from disk, then context is saved
+- `SettingsStorageSection` added to `SettingsView` with toggles + menu pickers for MB (100/250/500/1000/2000) and days (7/14/30/60/90)
+- Enforcer triggers on app launch (`.task` in `SleepGuardApp`) and after every session save (`SessionSummaryView.saveSession`)
+- Session metadata (SwiftData models) is never deleted — only audio files are removed
+- 11 new localized strings added; `Strings.swift` regenerated
+- DEBUG-only "Test Storage Cleanup" button injects dummy 1 MB audio files and runs the enforcer, showing a report alert
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Env/Sources/Services/UserPreferences.swift` | +48 | Added `limitStorageEnabled`, `storageLimitMB`, `limitDaysEnabled`, `maxDays` with manual access/withMutation |
+| `Packages/Env/Sources/Services/StorageLimitEnforcer.swift` | +304 | New async nonisolated service; `CleanupPlan` + `CleanupReport`; day/size limit builders; off-MainActor file deletion; debug dummy injection |
+| `Packages/Settings/Sources/Views/SettingsStorageSection.swift` | +133 | New section with toggles, pickers, and DEBUG test button |
+| `Packages/Settings/Sources/Views/SettingsView.swift` | +1 | Added `SettingsStorageSection()` to VStack |
+| `Packages/SleepSession/Sources/Views/SessionSummaryView.swift` | +4 | `Task { await enforcer.enforceLimits(...) }` after `modelContext.save()` |
+| `SleepGuard/SleepGuardApp.swift` | +6/-3 | `.task` for `PendingSessionStore.cleanupIfNeeded()` + `StorageLimitEnforcer`; `.onAppear` keeps sync HealthKit state |
+| `Packages/DesignSystem/Sources/Resources/Localizable.xcstrings` | +90 | 11 new settings strings |
+| `Packages/DesignSystem/Sources/Strings.swift` | +11 | Auto-regenerated accessors |
+
+### Architecture Decisions
+- **Async + nonisolated enforcer**: Removed `@MainActor` from `StorageLimitEnforcer` so `Task.detached` can do file deletion without blocking UI. Model mutations happen on MainActor; file deletion happens in background.
+- **Clear URLs before deleting files**: Model objects have their `audioFileURL` / `rawAudioFileURL` / `rawLogFileURL` cleared and saved immediately, so the UI can't reference orphaned files even if background deletion is slow.
+- **`.task` over `.onAppear` + `Task { }`**: `.task` is the idiomatic SwiftUI way to run async work on view appearance; it's auto-cancelled on disappear and avoids nested closure boilerplate.
+- **Default limits**: 500 MB / 30 days chosen as reasonable defaults that won't surprise users but prevent unbounded storage growth.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors.
+
+### Suggested Branch
+`feature/f6/t4-storage-limits`
+
+### Suggested Commit
+`F6-T4 — Settings storage limits with automatic audio cleanup`
+- Add UserPreferences properties for storage limit and max age
+- Create StorageLimitEnforcer with async off-MainActor file deletion
+- Add SettingsStorageSection UI with toggles and pickers
+- Trigger cleanup on app launch and after session save
+- Preserve session metadata, delete only audio files
+- Add DEBUG test helper and localized strings
+
+### Next Session
+- (none — this was a user-requested enhancement)
+
+### Open Questions
+- Should speech events also get per-event audio clips that are subject to these limits? Currently speech events are metadata-only.

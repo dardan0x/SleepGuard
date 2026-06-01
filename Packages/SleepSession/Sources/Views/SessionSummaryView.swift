@@ -211,6 +211,10 @@ public struct SessionSummaryView: View {
 
     PendingSessionStore.shared.clearPending()
 
+    Task {
+      await StorageLimitEnforcer.shared.enforceLimits(modelContext: modelContext)
+    }
+
     if userPreferences.syncToHealthKit {
       Task {
         healthKitSync.checkAuthorizationStatus()

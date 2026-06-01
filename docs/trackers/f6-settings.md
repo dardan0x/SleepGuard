@@ -23,6 +23,7 @@ Configure detection sensitivity, recording options, data management (delete all 
 | F6-T1 | Settings model + UserPreferences extensions | State | Done | — | Env | 2026-05-06 | 2026-05-06 |
 | F6-T2 | SettingsView form UI | UI | Done | F6-T1 | Settings | 2026-05-06 | 2026-05-06 |
 | F6-T3 | Data management + about | UI | Done | F6-T2 | Settings | 2026-05-06 | 2026-05-06 |
+| F6-T4 | Storage limits with automatic audio cleanup | Feature | Done | — | Env/Settings | 2026-06-01 | 2026-06-01 |
 
 ## Task Details
 
@@ -101,6 +102,38 @@ Same as F6-T1.
 
 **Notes:**
 Delete All uses `@Environment(\.modelContext)` with `FetchDescriptor<SleepSession>` and cascade delete via SwiftData relationship. Includes confirmation alert with destructive button. About section shows app version from Bundle and "Rate on App Store" link.
+
+---
+
+---
+
+### F6-T4 — Storage limits with automatic audio cleanup
+
+| Field | Value |
+|-------|-------|
+| Arch Ref | docs/architecture/state.md, docs/architecture/views.md |
+| Status | Done |
+| Started | 2026-06-01 |
+| Completed | 2026-06-01 |
+
+**Acceptance Criteria:**
+- [x] User can enable/disable a storage size limit (default 500 MB)
+- [x] User can enable/disable a max age limit (default 30 days)
+- [x] When limits are exceeded, oldest audio files are deleted automatically
+- [x] Session metadata (SwiftData models) is preserved — only audio files are removed
+- [x] Cleanup runs on app launch and after every saved session
+- [x] File deletion does not block the main thread
+- [x] All UI strings localized
+- [x] Builds with zero errors
+
+**Prompt Used:**
+Add storage limit options to SettingsView: max size (MB) and max age (days), both enabled by default. When limits are exceeded, delete oldest recordings. Keep session metadata. Run cleanup on launch and after save.
+
+**Notes:**
+- `StorageLimitEnforcer` is nonisolated async; file I/O runs in `Task.detached`, model updates stay on MainActor
+- Cleanup plan pattern clears model URLs immediately (save context), then deletes files in background
+- DEBUG-only "Test Storage Cleanup" button creates dummy 1 MB files and shows a report alert
+- `.task` used in `SleepGuardApp` instead of `.onAppear` + `Task { }` for idiomatic SwiftUI async lifecycle
 
 ---
 

@@ -30,6 +30,7 @@ public struct SettingsView: View {
           SettingsRecordingSection()
           SettingsAppearanceSection()
           SettingsWatchSection()
+          SettingsStorageSection()
           SettingsDataSection(onShowDeleteConfirmation: { showDeleteConfirmation = true })
           SettingsAboutSection(onRateApp: rateApp)
         }

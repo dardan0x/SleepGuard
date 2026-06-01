@@ -167,8 +167,13 @@ public enum Strings {
   public static var settingsDeleteAllConfirmTitle: String { String(localized: "settings.deleteAll.confirmTitle", bundle: .module) }
   public static var settingsDetectSleepTalking: String { String(localized: "settings.detectSleepTalking", bundle: .module) }
   public static var settingsEnhancedSleepTracking: String { String(localized: "settings.enhancedSleepTracking", bundle: .module) }
+  public static var settingsLimitDays: String { String(localized: "settings.limitDays", bundle: .module) }
+  public static var settingsLimitDaysDescription: String { String(localized: "settings.limitDaysDescription", bundle: .module) }
+  public static var settingsLimitStorage: String { String(localized: "settings.limitStorage", bundle: .module) }
+  public static var settingsLimitStorageDescription: String { String(localized: "settings.limitStorageDescription", bundle: .module) }
   public static var settingsMaxClipLength: String { String(localized: "settings.maxClipLength", bundle: .module) }
   public static var settingsMaxClipLengthTitle: String { String(localized: "settings.maxClipLengthTitle", bundle: .module) }
+  public static var settingsMaxDays: String { String(localized: "settings.maxDays", bundle: .module) }
   public static var settingsMicrophoneAccess: String { String(localized: "settings.microphoneAccess", bundle: .module) }
   public static var settingsMicrophoneEnable: String { String(localized: "settings.microphoneEnable", bundle: .module) }
   public static var settingsMicrophoneStatusDenied: String { String(localized: "settings.microphoneStatusDenied", bundle: .module) }
@@ -185,18 +190,24 @@ public enum Strings {
   public static var settingsSectionDetection: String { String(localized: "settings.section.detection", bundle: .module) }
   public static var settingsSectionPermissions: String { String(localized: "settings.section.permissions", bundle: .module) }
   public static var settingsSectionRecording: String { String(localized: "settings.section.recording", bundle: .module) }
+  public static var settingsSectionStorage: String { String(localized: "settings.section.storage", bundle: .module) }
   public static var settingsSectionWatch: String { String(localized: "settings.section.watch", bundle: .module) }
   public static var settingsSensitivity: String { String(localized: "settings.sensitivity", bundle: .module) }
   public static var settingsSensitivityHigh: String { String(localized: "settings.sensitivity.high", bundle: .module) }
   public static var settingsSensitivityLow: String { String(localized: "settings.sensitivity.low", bundle: .module) }
   public static var settingsSensitivityMedium: String { String(localized: "settings.sensitivity.medium", bundle: .module) }
+  public static var settingsStorageLimitMb: String { String(localized: "settings.storageLimitMB", bundle: .module) }
   public static var settingsSyncHealth: String { String(localized: "settings.syncHealth", bundle: .module) }
+  public static var settingsTestCleanup: String { String(localized: "settings.testCleanup", bundle: .module) }
+  public static var settingsTestCleanupResultFormat: String { String(localized: "settings.testCleanupResultFormat", bundle: .module) }
   public static var settingsTheme: String { String(localized: "settings.theme", bundle: .module) }
   public static var settingsThemeAlwaysDark: String { String(localized: "settings.theme.alwaysDark", bundle: .module) }
   public static var settingsThemeChoose: String { String(localized: "settings.theme.choose", bundle: .module) }
   public static var settingsThemeDark: String { String(localized: "settings.theme.dark", bundle: .module) }
   public static var settingsThemeLight: String { String(localized: "settings.theme.light", bundle: .module) }
   public static var settingsThemeSystem: String { String(localized: "settings.theme.system", bundle: .module) }
+  public static var settingsUnitDays: String { String(localized: "settings.unit.days", bundle: .module) }
+  public static var settingsUnitMb: String { String(localized: "settings.unit.mb", bundle: .module) }
   public static var settingsUnitSeconds: String { String(localized: "settings.unit.seconds", bundle: .module) }
   public static var settingsUnitSecondsShort: String { String(localized: "settings.unit.seconds.short", bundle: .module) }
   public static var settingsVersion: String { String(localized: "settings.version", bundle: .module) }
