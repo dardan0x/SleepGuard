@@ -50,6 +50,18 @@ public final class UserPreferences {
     }
   }
 
+  public var preserveRawAudio: Bool {
+    get {
+      access(keyPath: \.preserveRawAudio)
+      return defaults.bool(forKey: "preserveRawAudio")
+    }
+    set {
+      withMutation(keyPath: \.preserveRawAudio) {
+        defaults.set(newValue, forKey: "preserveRawAudio")
+      }
+    }
+  }
+
   public var appearance: AppearanceSetting {
     get {
       access(keyPath: \.appearance)

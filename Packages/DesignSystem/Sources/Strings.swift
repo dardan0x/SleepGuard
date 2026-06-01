@@ -175,6 +175,8 @@ public enum Strings {
   public static var settingsMicrophoneStatusGranted: String { String(localized: "settings.microphoneStatusGranted", bundle: .module) }
   public static var settingsMicrophoneStatusNotDetermined: String { String(localized: "settings.microphoneStatusNotDetermined", bundle: .module) }
   public static var settingsMinSnoreDuration: String { String(localized: "settings.minSnoreDuration", bundle: .module) }
+  public static var settingsPreserveRawAudio: String { String(localized: "settings.preserveRawAudio", bundle: .module) }
+  public static var settingsPreserveRawAudioDescription: String { String(localized: "settings.preserveRawAudio.description", bundle: .module) }
   public static var settingsRateApp: String { String(localized: "settings.rateApp", bundle: .module) }
   public static var settingsSaveAudioClips: String { String(localized: "settings.saveAudioClips", bundle: .module) }
   public static var settingsSectionAbout: String { String(localized: "settings.section.about", bundle: .module) }

@@ -2,7 +2,7 @@
 
 > Auto-updated by the AI after every task. This is the local source of truth.
 
-Last updated: 2026-05-29 (Session 66)
+Last updated: 2026-06-01 (Session 68)
 
 ---
 
@@ -66,6 +66,8 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-06-01 | Direct Per-Event Recording | Completed | Eliminated full-session `.caf` in production. Per-event `.caf` written directly during session, compressed to `.m4a` + FFT on finalize, raw deleted. Full-session only when `preserveRawAudio` debug toggle is on. `PendingSessionStore.setPending` no longer hardcodes session filename. `AudioClipExtractor.analyzeSpectralFeatures` now public. Settings debug toggle with localized strings. Build succeeds |
+| 2026-06-01 | Incremental Background Clip Extraction | Completed | Each event's clip extracted immediately after finalization during the session, spreading `AVAssetExportSession` + FFT work across the night. `PendingSessionStore` tracks all files for unsaved sessions; cleans up on discard/force-close/relaunch. Save Session is nearly instantaneous. Build succeeds |
 | 2026-05-29 | F4 — Burst marker capsule spans + 4-color legend | Completed | `EventPlayerView.waveformMarkers` switched from `Circle` dots to `Capsule` shapes spanning each burst's `[startOffset, endOffset]` (min width 6 pt) for direct visual verification of detector output; position math fix `totalDuration → event.snoreDuration` resolves latent multi-event clustering bug; legend rebuilt as 4 chips (Quiet/Light/Loud/Epic) via `theme.intensityColor(_:)` so it can't drift from marker colors; build succeeds |
 | 2026-05-29 | F4 — Enhanced Audio playback `.dataPlayedBack` fix | Completed | Clips were cutting off ms-to-seconds early because `scheduleSegment`'s default `.dataConsumed` completion fires when source data is read (before output buffer drains) — our `handlePlaybackFinished` flushed the in-flight tail via `playerNode.stop()`. Switched to `completionCallbackType: .dataPlayedBack` so cleanup happens after the tail has actually played; build succeeds |
 | 2026-05-29 | F4 — Skeleton loading state in `PlayerSheetView` | Completed | Two new `@State` flags (`didFinishInitialLoad`, `hasLoadingTimedOut`); body's conditional chain restructured so the default during loading is a waveform-shaped `loadingSkeleton` with circular `ProgressView`, not `noAudioView` (which was flashing on the first render before `.task` ran). 10 s safety timeout falls through to `noAudioView` if loading hangs; build succeeds |

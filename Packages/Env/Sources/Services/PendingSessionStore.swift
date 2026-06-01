@@ -16,9 +16,14 @@ public final class PendingSessionStore {
   // MARK: - Public API
 
   /// Register a new session as pending. Any previous pending session is cleaned up first.
-  public func setPending(sessionID: UUID) {
+  /// Pass the session audio filename only when a full-session raw file is being recorded.
+  public func setPending(sessionID: UUID, sessionAudioFilename: String? = nil) {
     cleanupIfNeeded()
-    let record = PendingSessionRecord(sessionID: sessionID, fileNames: ["session_\(sessionID.uuidString).caf"])
+    var fileNames: [String] = []
+    if let sessionAudioFilename = sessionAudioFilename {
+      fileNames.append(sessionAudioFilename)
+    }
+    let record = PendingSessionRecord(sessionID: sessionID, fileNames: fileNames)
     save(record)
   }
 

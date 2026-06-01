@@ -4598,3 +4598,55 @@ score = 100 - snoringPenalty - eventsPenalty - intensityPenalty
 ### Open Questions
 - Should we add a subtle UI indicator that clips are being extracted in the background? Currently it's invisible to the user.
 - Should the incremental extraction task be wrapped in `beginBackgroundTask` so it can finish if the app goes to background mid-extraction?
+
+## 2026-06-01 — Session 68: Direct Per-Event Recording
+
+### Completed
+- Eliminated full-session `.caf` recording in production mode. Per-event `.caf` files are written directly during the session, compressed to `.m4a` on finalize, and raw `.caf` is deleted immediately.
+- `SessionManager` now creates per-event audio files when snoring starts, compresses them to AAC `.m4a` when the event ends, runs FFT spectral analysis on the compressed clip, and cleans up the raw file.
+- Full-session `.caf` is only recorded when `UserPreferences.preserveRawAudio == true` (debug-only toggle, defaults `false`). When enabled, behavior matches the old full-session + per-event clips path for algorithm testing.
+- `PendingSessionStore.setPending()` now accepts an optional session audio filename so it doesn't track a non-existent full-session file in production mode.
+- `AudioClipExtractor.analyzeSpectralFeatures` is now public so `SessionManager` can run FFT on freshly compressed `.m4a` event files.
+- `#if DEBUG` Settings toggle for `preserveRawAudio` with localized label and description.
+
+### Technical Details
+- `AudioRecorder.startEventFile(eventID:url:)` / `finalizeEventFile()` — already existed and required no changes. The tap writes to both the optional full-session file and the current event file simultaneously.
+- `SessionManager.finalizeActiveEvent()` closes the event file via `audioRecorder.finalizeEventFile()`, then spawns a `Task` that uses `AVAssetExportSession` (preset `AppleM4A`) to compress the raw `.caf` to `.m4a`, runs `AudioClipExtractor.analyzeSpectralFeatures` on the result, populates `event.audioFileURL` / `dominantFrequency` / `spectralCentroid` / `lowFreqRatio`, then deletes the raw `.caf`.
+- `pendingEventTasks: [Task<Void, Never>]` tracks all in-flight compression tasks. `stopSession()` awaits them before presenting the summary, ensuring every saved event has its audio ready.
+- `stopAndDiscardSession()` now also iterates `session.events` and deletes each event's audio file, preventing leaks when the user discards a short session.
+- Melody pause handling unchanged: when melody starts, `finalizeActiveEvent(skipMinDuration: true)` is called before the mic pauses, so the event file is closed and compressed. Post-melody snoring starts a new event with a new file.
+- Speech events do not create audio files (no per-event recording for sleep talking; clips are snore-only).
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Env/Sources/Services/SessionManager.swift` | ~+110/-120 | Removed incremental clip extraction queue; added per-event file creation, async compression + FFT, `pendingEventTasks`, conditional full-session recording, event-file cleanup on discard |
+| `Packages/Env/Sources/Services/PendingSessionStore.swift` | +4/-3 | `setPending` now takes optional `sessionAudioFilename` instead of hardcoding session `.caf` |
+| `Packages/AudioEngine/Sources/Engine/AudioClipExtractor.swift` | +2/-2 | `SpectralData` and `analyzeSpectralFeatures` are now `public` |
+| `Packages/Settings/Sources/Views/SettingsRecordingSection.swift` | +18 | `#if DEBUG` toggle for `preserveRawAudio` with subtitle description |
+| `Packages/DesignSystem/Sources/Resources/Localizable.xcstrings` | +24 | Added `settings.preserveRawAudio` and `settings.preserveRawAudio.description` |
+| `Packages/DesignSystem/Sources/Strings.swift` | +2 | Auto-regenerated accessors for new settings strings |
+
+### Architecture Decisions
+- **No queue for compression tasks**: Each event gets its own `Task`. Since events are typically minutes apart and compression is fast for small files, overlap is rare. `stopSession()` gathers all pending tasks with `await task.value`.
+- **Compress on finalize, not on stop**: This spreads CPU/battery impact across the night and makes `stopSession()` nearly instant (just awaits any stragglers).
+- **Keep `.m4a`, delete `.caf` immediately on success**: The `.m4a` is the permanent playback source. If compression fails, the raw `.caf` is left on disk as a fallback; it will be cleaned up on discard or by `PendingSessionStore` if the session is never saved.
+- **Debug toggle, not a retention policy**: The user explicitly rejected retention-based approaches because a 5 GB file can fail to write when only 1 GB is free. The debug override is the only path to full-session recording.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors.
+
+`[Perf] Direct per-event recording — eliminate 5 GB full-session .caf in production`
+- Write per-event `.caf` directly during session; compress to `.m4a` + FFT on finalize
+- Delete raw `.caf` after successful compression; `pendingEventTasks` ensures stopSession waits
+- Full-session `.caf` only recorded when `preserveRawAudio` debug toggle is enabled
+- `PendingSessionStore.setPending` no longer hardcodes session filename
+- `AudioClipExtractor.analyzeSpectralFeatures` made public
+- Debug settings toggle with localized strings
+
+### Next Session
+- Test per-event recording end-to-end on device/simulator with a short simulated session to verify `.m4a` files are created, spectral data is populated, and playback works.
+- Consider adding `beginBackgroundTask` around the compression task if the app goes to background mid-compression.
+
+### Open Questions
+- Should speech events also get per-event audio clips? Currently they are metadata-only.
