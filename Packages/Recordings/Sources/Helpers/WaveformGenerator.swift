@@ -4,7 +4,10 @@ import AudioEngine
 /// Generates downsampled waveform amplitude samples and spectrum data from an audio file.
 public enum WaveformGenerator {
   /// Reads an audio file and returns ~300 amplitude points for visualization.
-  public static func generateSamples(from url: URL, pointCount: Int = 300) -> [Float] {
+  /// When `maxDuration` is provided, only the first `maxDuration` seconds are
+  /// sampled. This keeps the waveform aligned with the algorithm-defined event
+  /// duration even when the underlying audio file contains trailing silence.
+  public static func generateSamples(from url: URL, pointCount: Int = 300, maxDuration: TimeInterval? = nil) -> [Float] {
     guard let audioFile = try? AVAudioFile(forReading: url) else {
       return []
     }
@@ -12,36 +15,41 @@ public enum WaveformGenerator {
     let format = audioFile.processingFormat
     let sampleRate = format.sampleRate
     let totalFrames = Int(audioFile.length)
-    guard totalFrames > 0, sampleRate > 0 else { return [] }
+    let maxFrames = maxDuration.map { min(totalFrames, Int($0 * sampleRate)) } ?? totalFrames
+    guard maxFrames > 0, sampleRate > 0 else { return [] }
 
     let bufferSize = 1024
     let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: AVAudioFrameCount(bufferSize))!
-    let framesPerPoint = max(1, totalFrames / pointCount)
+    let framesPerPoint = max(1, maxFrames / pointCount)
 
     var samples = [Float](repeating: 0, count: pointCount)
     var pointIndex = 0
     var frameAccumulator: Float = 0
-    var frameCount = 0
+    var framesInCurrentPoint = 0
+    var totalFramesProcessed = 0
 
-    while audioFile.framePosition < audioFile.length {
+    while audioFile.framePosition < audioFile.length, totalFramesProcessed < maxFrames {
       do {
         try audioFile.read(into: buffer)
         guard let channelData = buffer.floatChannelData?[0] else { continue }
         let frameLength = Int(buffer.frameLength)
 
         for i in 0..<frameLength {
+          if totalFramesProcessed >= maxFrames { break }
+
           let sample = abs(channelData[i])
           frameAccumulator += sample
-          frameCount += 1
+          framesInCurrentPoint += 1
+          totalFramesProcessed += 1
 
-          if frameCount >= framesPerPoint {
-            let average = frameAccumulator / Float(frameCount)
+          if framesInCurrentPoint >= framesPerPoint {
+            let average = frameAccumulator / Float(framesInCurrentPoint)
             if pointIndex < pointCount {
               samples[pointIndex] = average
               pointIndex += 1
             }
             frameAccumulator = 0
-            frameCount = 0
+            framesInCurrentPoint = 0
           }
         }
       } catch {

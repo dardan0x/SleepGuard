@@ -4651,7 +4651,48 @@ score = 100 - snoringPenalty - eventsPenalty - intensityPenalty
 ### Open Questions
 - Should speech events also get per-event audio clips? Currently they are metadata-only.
 
-## 2026-06-01 — Session 69: Snore Intensity Classification Fix
+## 2026-06-01 — Session 69: Fix Snore Duration / Audio File Mismatch
+
+### Completed
+- Fixed the discrepancy where `EventCard` showed 1s but `PlayerSheetView` showed 11s for the same snore event.
+- Root cause: per-event audio files include the 10s trailing silence debounce gap, but `snoreDuration` correctly excludes it.
+- Made the fix future-proof and SwiftData-migration-safe.
+
+### Technical Details
+- `ClipPlaybackController` now respects `event.snoreDuration` as the canonical playback duration instead of overwriting it with the raw audio file length.
+- `WaveformGenerator.generateSamples(from:maxDuration:)` gained an optional `maxDuration` parameter so waveform visualization is trimmed to the algorithm-defined duration, eliminating flatline silence tails in the UI.
+- `ClipPlaybackController` schedules `AVAudioPlayerNode.scheduleSegment` with a frame count capped to `currentClipDuration`, so playback stops at the correct time even though the underlying file is longer.
+- All seek, scrub, progress-tick, and pause time-clamping now use `currentClipDuration` (algorithm-defined) rather than `currentFileDuration` (raw file length).
+- Zero SwiftData schema changes; zero audio file mutations. The full audio (including trailing silence) is preserved on disk. If a future algorithm decides to include the gap, only `SnoreEvent.snoreDuration` needs to change — the playback and visualization layers will automatically follow.
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Recordings/Sources/Helpers/WaveformGenerator.swift` | +12/-8 | Added `maxDuration: TimeInterval?` parameter to `generateSamples(from:pointCount:maxDuration:)`. Limits frame reading to `min(totalFrames, maxDuration * sampleRate)` so waveforms match the metric duration. |
+| `Packages/Recordings/Sources/Helpers/ClipPlaybackController.swift` | +16/-8 | Added `currentClipDuration` computed property (algorithm-defined, capped by file length). Removed `clipDurations` overwrite in `setupPlayerForCurrentEvent()`. Capped `scheduleSegment` frame count, seek bounds, progress ticks, and pause clamping to `currentClipDuration`. |
+| `Packages/Recordings/Sources/Views/PlayerSheetView.swift` | +1/-1 | Passes `event.snoreDuration` as `maxDuration` to `WaveformGenerator.generateSamples` for clip-session waveforms. |
+
+### Architecture Decisions
+- **Non-destructive fix**: Audio files are NOT trimmed. The 10s trailing silence is kept on disk for future algorithm changes or debugging. Only playback and visualization are bounded.
+- **No SwiftData migration**: The fix is purely in the playback/visualization layer. `SnoreEvent.duration` and `SnoreEvent.bursts` remain the only stored data. Changing the duration algorithm later only requires editing `snoreDuration` — no migration, no file re-processing.
+- **Algorithm-agnostic playback boundary**: `currentClipDuration = min(clipDurations[currentEventIndex], currentFileDuration)` means playback can never exceed the file, but the UI/playback timeline is driven by `snoreDuration`. This dual-source approach is resilient to missing or truncated files.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors.
+
+`[Fix] Align clip playback and waveform with algorithm-defined snoreDuration`
+- WaveformGenerator.generateSamples: add maxDuration parameter for duration-limited waveform sampling
+- ClipPlaybackController: use currentClipDuration (snoreDuration) instead of file duration for playback bounds, scheduling, seeking, and progress
+- PlayerSheetView: pass event.snoreDuration to waveform generator so visualization matches metric duration
+
+### Next Session
+- Consider whether speech events (which also use the 10s gap threshold) need the same playback-duration fix. Speech events currently have no per-event audio files, so the issue does not apply yet.
+- Evaluate if `spectrumSamples` should also get a `maxDuration` parameter when it is brought into active use.
+
+### Open Questions
+- Should there be a user-facing toggle to "include silence gaps in playback" for debugging or curiosity? (Probably not — keeps UI simple.)
+
+## 2026-06-01 — Session 70: Snore Intensity Classification Fix
 
 ### Completed
 - Fixed `SnoreDetector.classifyWithSoundAnalysis` removing broken dB floor offsets that collapsed almost all snoring into the "light" bucket.
@@ -4714,7 +4755,7 @@ score = 100 - snoringPenalty - eventsPenalty - intensityPenalty
 
 ---
 
-## 2026-06-01 — Session 70: Settings Storage Limits
+## 2026-06-01 — Session 71: Settings Storage Limits
 
 ### Completed
 - **F6-T4**: Storage limit settings with automatic audio cleanup
