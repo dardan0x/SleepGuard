@@ -2,7 +2,7 @@
 
 > Auto-updated by the AI after every task. This is the local source of truth.
 
-Last updated: 2026-06-01 (Session 68)
+Last updated: 2026-06-01 (Session 69)
 
 ---
 
@@ -66,6 +66,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-06-01 | Snore Intensity Classification Fix | Completed | Fixed `classifyWithSoundAnalysis` removing broken floor offsets that collapsed all snoring into light. Added `calculatePeakDB` to AudioRecorder; intensity classification now uses peak dB (6–15 dB higher than RMS for impulsive snoring) instead of RMS over 23 ms buffers. Lowered loud/epic thresholds by 5 dB across all sensitivities. Updated docs/snore-detection-algorithm.md. Build succeeds |
 | 2026-06-01 | Direct Per-Event Recording | Completed | Eliminated full-session `.caf` in production. Per-event `.caf` written directly during session, compressed to `.m4a` + FFT on finalize, raw deleted. Full-session only when `preserveRawAudio` debug toggle is on. `PendingSessionStore.setPending` no longer hardcodes session filename. `AudioClipExtractor.analyzeSpectralFeatures` now public. Settings debug toggle with localized strings. Build succeeds |
 | 2026-06-01 | Incremental Background Clip Extraction | Completed | Each event's clip extracted immediately after finalization during the session, spreading `AVAssetExportSession` + FFT work across the night. `PendingSessionStore` tracks all files for unsaved sessions; cleans up on discard/force-close/relaunch. Save Session is nearly instantaneous. Build succeeds |
 | 2026-05-29 | F4 — Burst marker capsule spans + 4-color legend | Completed | `EventPlayerView.waveformMarkers` switched from `Circle` dots to `Capsule` shapes spanning each burst's `[startOffset, endOffset]` (min width 6 pt) for direct visual verification of detector output; position math fix `totalDuration → event.snoreDuration` resolves latent multi-event clustering bug; legend rebuilt as 4 chips (Quiet/Light/Loud/Epic) via `theme.intensityColor(_:)` so it can't drift from marker colors; build succeeds |

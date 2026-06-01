@@ -29,6 +29,9 @@ public final class AudioRecorder {
   public var isRecording = false
   public var isPaused = false
   public var currentDB: Float = -160.0
+  /// Peak dB of the current buffer (0 dBFS = digital full scale). Tracks impulsive
+  /// peaks better than RMS `currentDB`, which is used for intensity classification.
+  public var currentPeakDB: Float = -160.0
   /// Spectral snore-likelihood score (0–1). Updated in real-time from FFT analysis.
   public var spectralScore: Float = 0
   public var hasPermission = false
@@ -221,6 +224,7 @@ public final class AudioRecorder {
     input.installTap(onBus: 0, bufferSize: 1024, format: format) { [weak self] buffer, _ in
       guard let self else { return }
       let db = self.calculateDB(from: buffer)
+      let peakDB = self.calculatePeakDB(from: buffer)
       let features = self.fftAnalyzer.analyze(buffer: buffer, sampleRate: format.sampleRate)
       self.soundAnalyzer.analyze(buffer: buffer, at: self.cumulativeFramePosition)
       self.cumulativeFramePosition += AVAudioFramePosition(buffer.frameLength)
@@ -254,6 +258,7 @@ public final class AudioRecorder {
       }
       Task { @MainActor in
         self.currentDB = db
+        self.currentPeakDB = peakDB
         self.spectralScore = features.spectralScore
       }
     }
@@ -296,6 +301,7 @@ public final class AudioRecorder {
     input.installTap(onBus: 0, bufferSize: 1024, format: format) { [weak self] buffer, _ in
       guard let self else { return }
       let db = self.calculateDB(from: buffer)
+      let peakDB = self.calculatePeakDB(from: buffer)
       let features = self.fftAnalyzer.analyze(buffer: buffer, sampleRate: format.sampleRate)
       self.soundAnalyzer.analyze(buffer: buffer, at: self.cumulativeFramePosition)
       self.cumulativeFramePosition += AVAudioFramePosition(buffer.frameLength)
@@ -369,6 +375,7 @@ public final class AudioRecorder {
     isWritingToFile = false
     consecutiveWriteFailures = 0
     currentDB = -160.0
+    currentPeakDB = -160.0
     spectralScore = 0
 
     try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
@@ -383,6 +390,23 @@ public final class AudioRecorder {
     }
     let rms = sqrt(sum / Float(frameLength))
     let db = 20 * log10(max(rms, 1e-10))
+    return db
+  }
+
+  /// Peak level (0 dBFS = full scale) of the buffer. Better than RMS for
+  /// impulsive sounds like snoring, where the perceptual loudness is driven
+  /// by sharp peaks rather than average energy.
+  private func calculatePeakDB(from buffer: AVAudioPCMBuffer) -> Float {
+    guard let channelData = buffer.floatChannelData?[0] else { return -160.0 }
+    let frameLength = Int(buffer.frameLength)
+    var peak: Float = 0
+    for i in 0..<frameLength {
+      let absVal = abs(channelData[i])
+      if absVal > peak {
+        peak = absVal
+      }
+    }
+    let db = 20 * log10(max(peak, 1e-10))
     return db
   }
 }

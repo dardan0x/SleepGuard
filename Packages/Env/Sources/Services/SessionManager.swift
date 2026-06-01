@@ -161,6 +161,7 @@ public final class SessionManager {
                 let saSpeechConf = SoundAnalysisDetector.shared.speechConfidence
                 processAudioLevel(
                     db: audioRecorder.currentDB,
+                    peakDB: audioRecorder.currentPeakDB,
                     spectralScore: audioRecorder.spectralScore,
                     snoreConfidence: saConf,
                     speechConfidence: saSpeechConf
@@ -339,11 +340,11 @@ public final class SessionManager {
 
     /// Call this from the view when `audioRecorder.currentDB` changes.
     public func processAudioLevel(db: Float) {
-        processAudioLevel(db: db, spectralScore: 0, snoreConfidence: 0, speechConfidence: 0)
+        processAudioLevel(db: db, peakDB: nil, spectralScore: 0, snoreConfidence: 0, speechConfidence: 0)
     }
 
     /// Call this from the view when audio features are available.
-    public func processAudioLevel(db: Float, spectralScore: Float = 0, snoreConfidence: Float = 0, speechConfidence: Float = 0) {
+    public func processAudioLevel(db: Float, peakDB: Float? = nil, spectralScore: Float = 0, snoreConfidence: Float = 0, speechConfidence: Float = 0) {
         guard isRecording, let session = currentSession else { return }
 
         let now = Date()
@@ -360,11 +361,14 @@ public final class SessionManager {
             session.peakDB = Double(db)
         }
 
-        // Classify snoring state (SoundAnalysis → FFT → thresholds)
-        let state = snoreDetector.classify(db: db, spectralScore: spectralScore, snoreConfidence: snoreConfidence)
+        // Classify snoring state (SoundAnalysis → FFT → thresholds).
+        // Use peakDB for intensity — snoring is impulsive and peak carries
+        // more perceptual loudness than RMS over a 23 ms buffer.
+        let classifyDB = peakDB ?? db
+        let state = snoreDetector.classify(db: classifyDB, spectralScore: spectralScore, snoreConfidence: snoreConfidence)
         #if DEBUG
         if snoreConfidence > 0.1 || spectralScore > 0.1 || speechConfidence > 0.1 {
-            print("[SessionManager] classify db=\(String(format: "%.1f", db)) spectral=\(String(format: "%.2f", spectralScore)) snoreConf=\(String(format: "%.2f", snoreConfidence)) speechConf=\(String(format: "%.2f", speechConfidence)) → snore=\(state) speech=\(speechDetector.isSpeechDetected)")
+            print("[SessionManager] classify rms=\(String(format: "%.1f", db)) peak=\(String(format: "%.1f", classifyDB)) spectral=\(String(format: "%.2f", spectralScore)) snoreConf=\(String(format: "%.2f", snoreConfidence)) speechConf=\(String(format: "%.2f", speechConfidence)) → snore=\(state) speech=\(speechDetector.isSpeechDetected)")
         }
         #endif
 
@@ -725,33 +729,37 @@ public final class SessionManager {
     }
 
     /// Calibrated thresholds + SoundAnalysis confidence gates for the full-band
-    /// capture path. Values come from analysis of real bedroom recordings (see
-    /// docs/SNORE_DETECTION_HANDOVER.md). Low = noisier rooms / stricter filtering;
+    /// capture path. Low = noisier rooms / stricter filtering;
     /// Medium = typical quiet bedroom (default); High = very quiet rooms.
+    ///
+    /// loud/epic lowered by 5 dB (2026-06-01) because RMS over 23 ms buffers
+    /// under-reports impulsive snoring peaks. Peak-dB classification now
+    /// compensates, but the thresholds were still sitting above real captured
+    /// levels for loud snoring at typical bedside distances.
     private func applyDetectionSensitivity() {
         let sensitivity = UserPreferences.shared.detectionSensitivity
         switch sensitivity {
         case .low:
             snoreDetector.quietThreshold = -45.0
             snoreDetector.lightThreshold = -35.0
-            snoreDetector.loudThreshold = -20.0
-            snoreDetector.epicThreshold = -10.0
+            snoreDetector.loudThreshold = -15.0
+            snoreDetector.epicThreshold = -5.0
             snoreDetector.confidenceGate = 0.45
             snoreDetector.highConfidenceGate = 0.65
             snoreDetector.quietFallbackGate = 0.55
         case .medium:
             snoreDetector.quietThreshold = -50.0
             snoreDetector.lightThreshold = -40.0
-            snoreDetector.loudThreshold = -25.0
-            snoreDetector.epicThreshold = -15.0
+            snoreDetector.loudThreshold = -20.0
+            snoreDetector.epicThreshold = -10.0
             snoreDetector.confidenceGate = 0.35
             snoreDetector.highConfidenceGate = 0.55
             snoreDetector.quietFallbackGate = 0.45
         case .high:
             snoreDetector.quietThreshold = -55.0
             snoreDetector.lightThreshold = -45.0
-            snoreDetector.loudThreshold = -30.0
-            snoreDetector.epicThreshold = -20.0
+            snoreDetector.loudThreshold = -25.0
+            snoreDetector.epicThreshold = -15.0
             snoreDetector.confidenceGate = 0.25
             snoreDetector.highConfidenceGate = 0.45
             snoreDetector.quietFallbackGate = 0.35

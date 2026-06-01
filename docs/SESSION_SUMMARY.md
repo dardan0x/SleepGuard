@@ -4650,3 +4650,64 @@ score = 100 - snoringPenalty - eventsPenalty - intensityPenalty
 
 ### Open Questions
 - Should speech events also get per-event audio clips? Currently they are metadata-only.
+
+## 2026-06-01 — Session 69: Snore Intensity Classification Fix
+
+### Completed
+- Fixed `SnoreDetector.classifyWithSoundAnalysis` removing broken dB floor offsets that collapsed almost all snoring into the "light" bucket.
+- Added `calculatePeakDB` to `AudioRecorder` and exposed `currentPeakDB`; intensity classification now uses peak level instead of RMS because snoring is impulsive and RMS over 23 ms buffers under-reports perceptual loudness by 6–15 dB.
+- Lowered loud/epic thresholds by 5 dB across all sensitivities to match real-world captured levels at typical bedside distances.
+- Updated `docs/snore-detection-algorithm.md` logic table and threshold table to reflect the corrected classification rules.
+
+### Technical Details
+- **Root cause of light-only detection:** `floorLight = lightThreshold - 10` made light start at -50 dBFS (same as quiet), creating a 20 dB catch-all bucket. Both loud and epic required `highConfidenceGate` (0.55), so moderate-confidence snores at -20 dBFS fell through to light.
+- **Fix:** Intensity is now purely amplitude-driven after ML confidence gates entry. Only epic requires `highConfidenceGate`. Thresholds are used directly without downward offsets.
+- **Peak dB:** `AudioRecorder` computes `20 * log10(maxSample)` per 1024-sample buffer. SessionManager passes `currentPeakDB` to `SnoreDetector.classify`. Event statistics (`averageDB`, `peakDB`) continue to use RMS `db` for consistency with historical data.
+- **Threshold changes:**
+  - Low: loud -20 → -15, epic -10 → -5
+  - Medium: loud -25 → -20, epic -15 → -10
+  - High: loud -30 → -25, epic -20 → -15
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/AudioEngine/Sources/Engine/SnoreDetector.swift` | +8/-14 | Removed floor offsets; intensity uses direct thresholds; only epic requires highConfidenceGate; default thresholds updated |
+| `Packages/AudioEngine/Sources/Engine/AudioRecorder.swift` | +25/-3 | Added `currentPeakDB` property + `calculatePeakDB()` method; peak computed in tap alongside RMS dB |
+| `Packages/Env/Sources/Services/SessionManager.swift` | +18/-12 | `processAudioLevel` accepts `peakDB`; classification uses peak; thresholds lowered 5 dB; debug print shows rms+peak |
+| `docs/snore-detection-algorithm.md` | +8/-8 | Updated logic table and threshold table; documented rationale for peak-dB and epic-only high confidence |
+
+### Architecture Decisions
+- **Peak for classification, RMS for statistics:** Peak captures impulsive snore loudness; RMS is better for long-term averages and backward-compatible event stats.
+- **Amplitude-driven intensity, not confidence-driven:** ML confidence gates whether it's a snore at all. Within that, dB should determine intensity. Requiring high confidence for loud was collapsing the distribution.
+- **5 dB threshold shift:** Conservative adjustment based on user feedback that even high-sensitivity loud=-30 wasn't reachable. Combined with peak dB, this should make loud/epic realistic without over-lowering.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors.
+
+### Suggested Branch
+`feature/snore-intensity-classification-fix`
+
+### Suggested Commit
+`[F2] Snore intensity classification fix — peak dB + corrected thresholds`
+- Remove broken floor offsets in classifyWithSoundAnalysis
+- Use peak dB instead of RMS for intensity classification
+- Lower loud/epic thresholds by 5 dB across all sensitivities
+- Update snore-detection-algorithm.md documentation
+
+### Changes done
+```
+- classifyWithSoundAnalysis uses direct thresholds without -10/-5 offsets
+- Only epic requires highConfidenceGate; loud uses base confidenceGate
+- AudioRecorder tracks currentPeakDB via calculatePeakDB
+- SessionManager passes peakDB to classifier for intensity decisions
+- loud/epic thresholds lowered 5 dB (medium: loud=-20, epic=-10)
+- docs/snore-detection-algorithm.md updated
+```
+
+### Next Session
+- Test snore intensity classification end-to-end with loud snoring samples to verify loud/epic trigger correctly.
+- If still too strict, consider a calibration step or user-adjustable threshold offset.
+
+### Open Questions
+- Should we expose a per-user calibration step (e.g., "make a loud snore sound") to personalize thresholds?
+- Is the 5 dB shift enough, or do bedroom acoustics vary more than expected?
