@@ -33,8 +33,8 @@ Last updated: 2026-06-01 (Session 69)
 | Backlog | 2 |
 | Blocked | 0 |
 | — | — |
-| Total Tasks | 70 |
-| Tasks Done | 70 |
+| Total Tasks | 71 |
+| Tasks Done | 71 |
 | Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
 | Tasks Backlog | 0 |
@@ -50,7 +50,7 @@ Last updated: 2026-06-01 (Session 69)
 | F3 | Statistics Dashboard | P1 | Done | 3/3 | ██████████ 100% | [tracker](trackers/f3-statistics.md) |
 | F4 | Recordings | P1 | Done | 6/6 + polish | ██████████ 100% | [tracker](trackers/f4-recordings.md) |
 | F5 | Trends | P1 | Done | 2/2 | ██████████ 100% | [tracker](trackers/f5-trends.md) |
-| F6 | Settings | P2 | Done | 3/3 | ██████████ 100% | [tracker](trackers/f6-settings.md) |
+| F6 | Settings | P2 | Done | 4/4 | ██████████ 100% | [tracker](trackers/f6-settings.md) |
 | F7 | Audio Clip Export | P1 | Done | 2/2 | ██████████ 100% | [tracker](trackers/f7-audio-clip-export.md) |
 | F8 | PDF Sleep Report | P1 | Done | 2/2 | ██████████ 100% | [tracker](trackers/f8-pdf-sleep-report.md) |
 | F9 | Enhanced Detection | P2 | Done | 2/2 | ██████████ 100% | [tracker](trackers/f9-enhanced-detection.md) |
@@ -66,6 +66,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-06-01 | Settings Storage Limits | Completed | `UserPreferences` gained `limitStorageEnabled`, `storageLimitMB`, `limitDaysEnabled`, `maxDays`. `StorageLimitEnforcer` async service with off-MainActor file deletion. `SettingsStorageSection` UI with toggles + pickers. Triggers on app launch and session save. Preserves metadata, deletes only audio. DEBUG test button. 11 localized strings. Build succeeds |
 | 2026-06-01 | Snore Intensity Classification Fix | Completed | Fixed `classifyWithSoundAnalysis` removing broken floor offsets that collapsed all snoring into light. Added `calculatePeakDB` to AudioRecorder; intensity classification now uses peak dB (6–15 dB higher than RMS for impulsive snoring) instead of RMS over 23 ms buffers. Lowered loud/epic thresholds by 5 dB across all sensitivities. Updated docs/snore-detection-algorithm.md. Build succeeds |
 | 2026-06-01 | Direct Per-Event Recording | Completed | Eliminated full-session `.caf` in production. Per-event `.caf` written directly during session, compressed to `.m4a` + FFT on finalize, raw deleted. Full-session only when `preserveRawAudio` debug toggle is on. `PendingSessionStore.setPending` no longer hardcodes session filename. `AudioClipExtractor.analyzeSpectralFeatures` now public. Settings debug toggle with localized strings. Build succeeds |
 | 2026-06-01 | Incremental Background Clip Extraction | Completed | Each event's clip extracted immediately after finalization during the session, spreading `AVAssetExportSession` + FFT work across the night. `PendingSessionStore` tracks all files for unsaved sessions; cleans up on discard/force-close/relaunch. Save Session is nearly instantaneous. Build succeeds |
@@ -199,6 +200,21 @@ _Most recent first. The AI appends here after every task._
 | Task | Feature | Started | Assignee |
 |------|---------|---------|----------|
 | (none) | — | — | — |
+
+## Completed (last 10)
+
+| Task | Feature | Completed | Duration |
+|------|---------|-----------|----------|
+| Settings Storage Limits | F6 | 2026-06-01 | — |
+| Direct Per-Event Recording | F4 | 2026-06-01 | — |
+| Incremental Background Clip Extraction | F4 | 2026-06-01 | — |
+| F4 — Burst marker capsule spans + 4-color legend | F4 | 2026-05-29 | — |
+| F4 — Enhanced Audio playback `.dataPlayedBack` fix | F4 | 2026-05-29 | — |
+| F4 — Skeleton loading state in `PlayerSheetView` | F4 | 2026-05-29 | — |
+| F4 — Enhanced Audio playback feature | F4 | 2026-05-28 | — |
+| F9 — Temporal-context orphan-FP filter (attempted, reverted) | F9 | 2026-05-28 | — |
+| PDF generator polish + loading fix | F4 | 2026-05-28 | — |
+| PDF generator new stats | F4 | 2026-05-28 | — |
 
 ## Completed (last 10)
 

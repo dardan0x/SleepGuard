@@ -51,8 +51,12 @@ struct SleepGuardApp: App {
         soundAnalysisDetector: SoundAnalysisDetector.shared,
         soothingMelodyPlayer: SoothingMelodyPlayer.shared
       )
-      .onAppear {
+      .task {
         PendingSessionStore.shared.cleanupIfNeeded()
+        let context = ModelContext(sharedModelContainer)
+        await StorageLimitEnforcer.shared.enforceLimits(modelContext: context)
+      }
+      .onAppear {
         HealthKitSync.shared.checkAuthorizationStatus()
         if !userPreferences.hasExplicitlySetSyncToHealthKit {
           userPreferences.syncToHealthKit = HealthKitSync.shared.isAuthorized

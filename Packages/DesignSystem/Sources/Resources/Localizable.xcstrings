@@ -2933,6 +2933,127 @@
           }
         }
       }
+    },
+    "settings.limitDays": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete Old Audio"
+          }
+        }
+      }
+    },
+    "settings.limitDaysDescription": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove audio clips older than the selected number of days. Session data is kept."
+          }
+        }
+      }
+    },
+    "settings.limitStorage": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limit Storage"
+          }
+        }
+      }
+    },
+    "settings.limitStorageDescription": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatically delete oldest audio clips when total storage exceeds the limit. Session data is kept."
+          }
+        }
+      }
+    },
+    "settings.maxDays": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Max Age"
+          }
+        }
+      }
+    },
+    "settings.section.storage": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Storage"
+          }
+        }
+      }
+    },
+    "settings.storageLimitMB": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Max Size"
+          }
+        }
+      }
+    },
+    "settings.unit.days": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "days"
+          }
+        }
+      }
+    },
+    "settings.unit.mb": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MB"
+          }
+        }
+      }
+    },
+    "settings.testCleanup": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Test Storage Cleanup"
+          }
+        }
+      }
+    },
+    "settings.testCleanupResultFormat": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Removed %d file(s) (%lld MB total) from %d session(s).\nDay limit: %d | Size limit: %d"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

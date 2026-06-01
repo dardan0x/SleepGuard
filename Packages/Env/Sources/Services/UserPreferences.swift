@@ -228,6 +228,58 @@ public final class UserPreferences {
     }
   }
 
+  public var limitStorageEnabled: Bool {
+    get {
+      access(keyPath: \.limitStorageEnabled)
+      if defaults.object(forKey: "limitStorageEnabled") == nil { return true }
+      return defaults.bool(forKey: "limitStorageEnabled")
+    }
+    set {
+      withMutation(keyPath: \.limitStorageEnabled) {
+        defaults.set(newValue, forKey: "limitStorageEnabled")
+      }
+    }
+  }
+
+  public var storageLimitMB: Int {
+    get {
+      access(keyPath: \.storageLimitMB)
+      let raw = defaults.integer(forKey: "storageLimitMB")
+      return raw > 0 ? raw : 500
+    }
+    set {
+      withMutation(keyPath: \.storageLimitMB) {
+        defaults.set(newValue, forKey: "storageLimitMB")
+      }
+    }
+  }
+
+  public var limitDaysEnabled: Bool {
+    get {
+      access(keyPath: \.limitDaysEnabled)
+      if defaults.object(forKey: "limitDaysEnabled") == nil { return true }
+      return defaults.bool(forKey: "limitDaysEnabled")
+    }
+    set {
+      withMutation(keyPath: \.limitDaysEnabled) {
+        defaults.set(newValue, forKey: "limitDaysEnabled")
+      }
+    }
+  }
+
+  public var maxDays: Int {
+    get {
+      access(keyPath: \.maxDays)
+      let raw = defaults.integer(forKey: "maxDays")
+      return raw > 0 ? raw : 30
+    }
+    set {
+      withMutation(keyPath: \.maxDays) {
+        defaults.set(newValue, forKey: "maxDays")
+      }
+    }
+  }
+
   public enum SoothingMelodyMode: String, CaseIterable, Sendable {
     case never
     case always
