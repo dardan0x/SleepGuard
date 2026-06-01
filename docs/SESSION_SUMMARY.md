@@ -4546,3 +4546,55 @@ score = 100 - snoringPenalty - eventsPenalty - intensityPenalty
 
 ### Open Questions
 - Whether to re-apply the F9 temporal-context filter or leave the orphan-FP shape visible to users via the F4 capsule-span markers as the user's diagnostic tool (depends on whether users actually inspect events vs. trust totals). Defer until next-night reports come in.
+
+## 2026-06-01 — Session 67: Incremental Background Clip Extraction
+
+### Completed
+- Incremental clip extraction: each snore/speech event's audio clip is extracted immediately after finalization during the session, spreading the heavy `AVAssetExportSession` + FFT work across the full sleep duration instead of concentrating it at stop-time.
+- `PendingSessionStore` tracks all files belonging to the current unsaved session; on force-close/relaunch or Discard, all orphaned clips, raw audio, and logs are deleted automatically.
+- Save Session is now nearly instantaneous — it only inserts into SwiftData and clears the pending record.
+
+### Technical Details
+- `AudioClipExtractor.extractSingleClip` is now public with an overload that accepts `sessionDuration` directly, avoiding stale duration reads from a growing `.caf` file.
+- `SessionManager` serializes incremental extractions via a single `clipExtractionQueue` task to minimize CPU impact during recording.
+- `stopSession()` awaits the extraction queue, then extracts any events that still lack clips (e.g., events finalized at stop-time or earlier failures), then registers the raw log filename.
+- `startSession()` cleans up any previous pending session before registering the new one, preventing disk bloat when the user starts a new session without saving/discarding the old.
+- `SleepGuardApp.onAppear` calls `PendingSessionStore.cleanupIfNeeded()` so force-close → relaunch always deletes orphaned files.
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Env/Sources/Services/PendingSessionStore.swift` | +62 | New service: tracks unsaved session files in UserDefaults, deletes them on cleanup |
+| `Packages/AudioEngine/Sources/Engine/AudioClipExtractor.swift` | +13/-1 | Made `extractSingleClip` public; added overload with explicit `sessionDuration` |
+| `Packages/Env/Sources/Services/SessionManager.swift` | +57/-23 | Incremental extraction queue, pending tracking, cleanup on discard/stop, await queue in `stopSession` |
+| `Packages/SleepSession/Sources/Views/SessionSummaryView.swift` | +2 | `PendingSessionStore.clearPending()` after successful SwiftData save |
+| `SleepGuard/SleepGuardApp.swift` | +1 | `PendingSessionStore.cleanupIfNeeded()` on app launch |
+
+### Architecture Decisions
+- **Serialize extractions, don't parallelize**: A single task queue ensures only one `AVAssetExportSession` + FFT runs at a time, minimizing battery/thermal impact while the user sleeps. Each event is typically 5–30 s of audio, so FFT is fast.
+- **Track files, not session object**: `PendingSessionStore` persists only filenames, not the full `SleepSession` model. This avoids serialization complexity and works even when the app relaunches with no session in memory.
+- **Keep existing manual deletion in `discardCompletedSession`**: `PendingSessionStore.cleanupIfNeeded()` handles the primary cleanup, but the existing per-file deletion remains as a safety net.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors.
+
+### Suggested Branch
+`feature/incremental-clip-extraction`
+
+### Suggested Commit
+`[Perf] Incremental background clip extraction for fast session save`
+
+### Changes done
+```
+- Extract each event's clip immediately after finalization during the session
+- PendingSessionStore tracks files for unsaved sessions and cleans up on discard/force-close
+- AudioClipExtractor.extractSingleClip is now public
+- Save Session is nearly instant; stopSession spinner time reduced to ~last event only
+```
+
+### Next Session
+- (none — awaiting next task)
+
+### Open Questions
+- Should we add a subtle UI indicator that clips are being extracted in the background? Currently it's invisible to the user.
+- Should the incremental extraction task be wrapped in `beginBackgroundTask` so it can finish if the app goes to background mid-extraction?

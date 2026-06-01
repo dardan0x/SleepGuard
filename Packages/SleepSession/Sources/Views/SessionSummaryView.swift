@@ -209,6 +209,8 @@ public struct SessionSummaryView: View {
       return
     }
 
+    PendingSessionStore.shared.clearPending()
+
     if userPreferences.syncToHealthKit {
       Task {
         healthKitSync.checkAuthorizationStatus()
