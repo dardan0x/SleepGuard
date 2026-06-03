@@ -41,6 +41,12 @@ public final class ClipPlaybackController {
 
   private var audioFile: AVAudioFile?
   private var currentFileDuration: TimeInterval = 0
+  /// Algorithm-defined playback duration for the current clip.
+  /// Falls back to the actual file duration if the clip duration is missing.
+  private var currentClipDuration: TimeInterval {
+    guard clipDurations.indices.contains(currentEventIndex) else { return currentFileDuration }
+    return min(clipDurations[currentEventIndex], currentFileDuration)
+  }
   private var pausedAtClipTime: TimeInterval = 0
   private var playbackStartHostTime: TimeInterval = 0
   private var playbackStartClipTime: TimeInterval = 0
@@ -133,7 +139,9 @@ public final class ClipPlaybackController {
 
       let sampleRate = file.processingFormat.sampleRate
       let startFrame = AVAudioFramePosition(pausedAtClipTime * sampleRate)
-      let remaining = file.length - startFrame
+      let clipDurationFrames = AVAudioFramePosition(currentClipDuration * sampleRate)
+      let remainingInClip = max(0, clipDurationFrames - startFrame)
+      let remaining = min(file.length - startFrame, remainingInClip)
       guard remaining > 0 else {
         // Already at or past end — auto-advance.
         handlePlaybackFinished()
@@ -152,7 +160,7 @@ public final class ClipPlaybackController {
       playerNode.scheduleSegment(
         file,
         startingFrame: startFrame,
-        frameCount: AVAudioFrameCount(remaining),
+        frameCount: AVAudioFrameCount(max(0, remaining)),
         at: nil,
         completionCallbackType: .dataPlayedBack
       ) { [weak self] _ in
@@ -177,7 +185,7 @@ public final class ClipPlaybackController {
   public func pause() {
     guard isPlaying else { return }
     let now = ProcessInfo.processInfo.systemUptime
-    pausedAtClipTime = min(playbackStartClipTime + (now - playbackStartHostTime), currentFileDuration)
+    pausedAtClipTime = min(playbackStartClipTime + (now - playbackStartHostTime), currentClipDuration)
     currentClipTime = pausedAtClipTime
     playbackToken &+= 1 // invalidate the in-flight segment's completion
     playerNode.pause()
@@ -224,7 +232,7 @@ public final class ClipPlaybackController {
           currentEventIndex = index
           setupPlayerForCurrentEvent()
         }
-        pausedAtClipTime = max(0, min(clipOffset, currentFileDuration))
+        pausedAtClipTime = max(0, min(clipOffset, currentClipDuration))
         currentClipTime = pausedAtClipTime
         if wasPlaying { play() }
         return
@@ -234,17 +242,17 @@ public final class ClipPlaybackController {
     // Past the end
     currentEventIndex = max(0, clipDurations.count - 1)
     setupPlayerForCurrentEvent()
-    pausedAtClipTime = currentFileDuration
+    pausedAtClipTime = currentClipDuration
     currentClipTime = pausedAtClipTime
   }
 
   /// Seeks within the current clip (0–1).
   public func seekInCurrentClip(relative: Double) {
     guard audioFile != nil else { return }
-    let target = relative * currentFileDuration
+    let target = relative * currentClipDuration
     let wasPlaying = isPlaying
     if wasPlaying { pause() }
-    pausedAtClipTime = max(0, min(target, currentFileDuration))
+    pausedAtClipTime = max(0, min(target, currentClipDuration))
     currentClipTime = pausedAtClipTime
     if wasPlaying { play() }
   }
@@ -291,10 +299,6 @@ public final class ClipPlaybackController {
       let file = try AVAudioFile(forReading: url)
       audioFile = file
       currentFileDuration = TimeInterval(file.length) / file.processingFormat.sampleRate
-      if clipDurations.indices.contains(currentEventIndex) {
-        clipDurations[currentEventIndex] = currentFileDuration
-        totalClipsDuration = clipDurations.reduce(0, +)
-      }
       currentClipTime = 0
       pausedAtClipTime = 0
 
@@ -414,6 +418,6 @@ public final class ClipPlaybackController {
     guard isPlaying, audioFile != nil else { return }
     let now = ProcessInfo.processInfo.systemUptime
     let elapsed = now - playbackStartHostTime
-    currentClipTime = min(playbackStartClipTime + elapsed, currentFileDuration)
+    currentClipTime = min(playbackStartClipTime + elapsed, currentClipDuration)
   }
 }

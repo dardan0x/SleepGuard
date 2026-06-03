@@ -205,7 +205,7 @@ public struct PlayerSheetView: View {
     if let url = AudioFileURLResolver.resolve(event.audioFileURL) {
       isLoadingWaveform = true
       Task.detached(priority: .userInitiated) {
-        let samples = WaveformGenerator.generateSamples(from: url)
+        let samples = WaveformGenerator.generateSamples(from: url, maxDuration: event.snoreDuration)
         await MainActor.run {
           waveformSamples = samples
           isLoadingWaveform = false
