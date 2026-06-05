@@ -14,6 +14,8 @@ struct SettingsStorageSection: View {
 
   @State private var testReport: CleanupReport?
   @State private var showTestAlert = false
+  @State private var pendingStorageLimitMB: Int?
+  @State private var showLowerLimitConfirmation = false
 
   var body: some View {
     VStack(alignment: .leading, spacing: 2) {
@@ -51,6 +53,35 @@ struct SettingsStorageSection: View {
       Button(Strings.actionOk) {}
     } message: { report in
       Text(String(format: Strings.settingsTestCleanupResultFormat, report.filesRemoved, report.bytesRemoved / 1_024 / 1_024, report.sessionsAffected, report.dayLimitSessions, report.sizeLimitSessions))
+    }
+    .alert(Strings.settingsLowerStorageLimitTitle, isPresented: $showLowerLimitConfirmation) {
+      Button(Strings.actionCancel, role: .cancel) {
+        pendingStorageLimitMB = nil
+      }
+      Button(Strings.actionDelete, role: .destructive) {
+        if let pending = pendingStorageLimitMB {
+          userPreferences.storageLimitMB = pending
+          pendingStorageLimitMB = nil
+          runCleanup()
+        }
+      }
+    } message: {
+      Text(Strings.settingsLowerStorageLimitMessage)
+    }
+  }
+
+  private func handleStorageLimitChange(newValue: Int) {
+    guard newValue < userPreferences.storageLimitMB else {
+      userPreferences.storageLimitMB = newValue
+      return
+    }
+    pendingStorageLimitMB = newValue
+    showLowerLimitConfirmation = true
+  }
+
+  private func runCleanup() {
+    Task {
+      _ = await StorageLimitEnforcer.shared.enforceLimits(modelContext: modelContext)
     }
   }
 
@@ -101,7 +132,7 @@ struct SettingsStorageSection: View {
       Spacer()
       Picker("", selection: Binding(
         get: { userPreferences.storageLimitMB },
-        set: { userPreferences.storageLimitMB = $0 }
+        set: { handleStorageLimitChange(newValue: $0) }
       )) {
         ForEach(mbOptions, id: \.self) { mb in
           Text("\(mb) \(Strings.settingsUnitMb)")
