@@ -23,6 +23,7 @@
 		EA3B0BCFD10182B987547C8B /* AudioEngine in Frameworks */ = {isa = PBXBuildFile; productRef = 38CD50332392049638D060DF /* AudioEngine */; };
 		ED7B3283E6D3573708241C8E /* sounds in Resources */ = {isa = PBXBuildFile; fileRef = CE587D245C122AB22F7BD248 /* sounds */; };
 		FAED5AD98781D85AB7AFA7A5 /* SleepSession in Frameworks */ = {isa = PBXBuildFile; productRef = A6305AFA32B7A77ECFB0A19F /* SleepSession */; };
+		B7E5BB619CAC47AD866118B3 /* Personalization in Frameworks */ = {isa = PBXBuildFile; productRef = DE0D39C8817A44AB96DFE1F5 /* Personalization */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -79,6 +80,7 @@
 				1A2C26235B1C018F311D03EB /* Statistics in Frameworks */,
 				78DDF28BFD0525A9C32B1FE1 /* Recordings in Frameworks */,
 				7550A233A59B33AC7BC63FA5 /* Settings in Frameworks */,
+				B7E5BB619CAC47AD866118B3 /* Personalization in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -182,6 +184,7 @@
 				62657171C5FF70E51F817515 /* Statistics */,
 				7AA654EA1F14D9C6F15AB82A /* Recordings */,
 				167C10ECFE58FBF4929EF997 /* Settings */,
+				DE0D39C8817A44AB96DFE1F5 /* Personalization */,
 			);
 			productName = SleepGuard;
 			productReference = CE1588F82FAA9946001B61AA /* SleepGuard.app */;
@@ -221,6 +224,7 @@
 				7C63EEECC2537B5342FF4A75 /* XCLocalSwiftPackageReference "Packages/Statistics" */,
 				916ADDCB5CD8689275B837E3 /* XCLocalSwiftPackageReference "Packages/Recordings" */,
 				4A855F6D6797671D082B748B /* XCLocalSwiftPackageReference "Packages/Settings" */,
+				9032C9334E924D3398A48885 /* XCLocalSwiftPackageReference "Packages/Personalization" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = CE1588F92FAA9946001B61AA /* Products */;
@@ -590,6 +594,10 @@
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/DesignSystem;
 		};
+		9032C9334E924D3398A48885 /* XCLocalSwiftPackageReference "Packages/Personalization" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/Personalization;
+		};
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCRemoteSwiftPackageReference section */
@@ -686,6 +694,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 7A886DCB087D86E4AC2E7336 /* XCLocalSwiftPackageReference "Packages/DesignSystem" */;
 			productName = DesignSystem;
+		};
+		DE0D39C8817A44AB96DFE1F5 /* Personalization */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9032C9334E924D3398A48885 /* XCLocalSwiftPackageReference "Packages/Personalization" */;
+			productName = Personalization;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

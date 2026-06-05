@@ -34,12 +34,19 @@
 |---|---------|--------|-------|-------|
 | 14 | SleepGuard Rebrand & Multi-Sound | Done | 21/21 | Rebrand + sleep talking detection + sleep stage breakdown |
 
+## V4.0 — Personalization
+
+| # | Feature | Status | Tasks | Notes |
+|---|---------|--------|-------|-------|
+| 15 | Personalization & Sleep Briefing | Backlog | 0/16 | On-device profile + daily full-screen Sleep Briefing + lifestyle micro-surveys |
+
 ## Completed
 - [x] Project scaffold
 - [x] V1.0 MVP (F1–F6)
 - [x] V1.1 Export + PDF + CoreML (F7–F9)
 - [x] V2.0 Smart Alarm + Apple Watch + HealthKit (F10–F12)
 - [x] V3.0 SleepGuard Rebrand & Multi-Sound (F14)
+- [ ] V4.0 Personalization & Sleep Briefing (F15)
 
 ## Known Issues
 - [ ] None yet

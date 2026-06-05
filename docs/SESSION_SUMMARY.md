@@ -4808,3 +4808,57 @@ score = 100 - snoringPenalty - eventsPenalty - intensityPenalty
 
 ### Open Questions
 - Should speech events also get per-event audio clips that are subject to these limits? Currently speech events are metadata-only.
+
+
+---
+
+## 2026-06-06 — Session 71: F15 Personalization & Sleep Briefing — T1 Scaffold
+
+### Completed
+- F15-T1: Personalization package scaffold
+
+### Technical Details
+- New `Packages/Personalization/` feature package created following existing package patterns (Package.swift with deps on Models, Env, DesignSystem)
+- Directory structure: `Sources/Engine/` and `Sources/Views/` for the pure briefing engine and UI layers
+- Package added to `SleepGuard.xcodeproj` as `XCLocalSwiftPackageReference` with `relativePath = Packages/Personalization`
+- `Personalization` product linked in the `SleepGuard` app target's `PBXFrameworksBuildPhase`
+- Placeholder `BriefingEngine.swift` and `SleepBriefingView.swift` created so the package compiles cleanly
+- No runtime code changes yet; this is purely structural groundwork for T2–T16
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Personalization/Package.swift` | +22 | New feature package manifest depending on Models, Env, DesignSystem |
+| `Packages/Personalization/Sources/Engine/BriefingEngine.swift` | +5 | Placeholder struct for compilation |
+| `Packages/Personalization/Sources/Views/SleepBriefingView.swift` | +8 | Placeholder view for compilation |
+| `SleepGuard.xcodeproj/project.pbxproj` | +7 | Added `XCLocalSwiftPackageReference`, `XCSwiftPackageProductDependency`, `PBXBuildFile`, and linked to target |
+| `docs/trackers/f15-personalization.md` | +298 | New feature tracker with 16 tasks and full task detail sections |
+| `docs/FeatureTracker.md` | +1/-5 | Updated dashboard counts, activity log, currently active, up next |
+
+### Architecture Decisions
+- **Feature package isolation**: `Personalization` is a standalone feature package (deps: Models, Env, DesignSystem) following the existing module rules. It does not import other feature packages.
+- **Engine/Views split**: Pure rules engine lives in `Sources/Engine/`, UI lives in `Sources/Views/`. This mirrors the plan's requirement that `BriefingEngine` be fully testable with no UI dependencies.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors.
+
+`[F15-T1] Personalization package scaffold`
+- Create Packages/Personalization/Package.swift with deps Models/Env/DesignSystem
+- Create Sources/Engine/ and Sources/Views/ directory structure
+- Add Personalization as XCLocalSwiftPackageReference in SleepGuard.xcodeproj
+- Link Personalization product in app target Frameworks build phase
+- Add placeholder BriefingEngine.swift and SleepBriefingView.swift for compilation
+- Build succeeds with zero errors
+
+### Changes done
+- Created `Packages/Personalization/` feature package
+- Added package to Xcode project local references
+- Created feature tracker `docs/trackers/f15-personalization.md`
+- Updated `docs/FeatureTracker.md`
+
+### Next Session
+- F15-T2: `UserProfile` + `LifestyleLog` SwiftData models
+- F15-T3: `UserPreferences` flags (lastBriefingShownDate, hasCompletedProfile, profilePromptDismissCount, briefingEnabled)
+
+### Open Questions
+- (none)
