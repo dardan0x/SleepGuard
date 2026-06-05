@@ -2,7 +2,7 @@
 
 > Auto-updated by the AI after every task. This is the local source of truth.
 
-Last updated: 2026-06-01 (Session 69)
+Last updated: 2026-06-06 (Session 71)
 
 ---
 
@@ -33,13 +33,19 @@ Last updated: 2026-06-01 (Session 69)
 | Backlog | 2 |
 | Blocked | 0 |
 | — | — |
-| Total Tasks | 71 |
-| Tasks Done | 71 |
+| Features (V4) | 1 |
+| Done | 0 |
+| In Progress | 1 |
+| Backlog | 0 |
+| Blocked | 0 |
+| — | — |
+| Total Tasks | 87 |
+| Tasks Done | 72 |
 | Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
-| Tasks Backlog | 0 |
+| Tasks Backlog | 15 |
 | — | — |
-| **Progress** | **100%** |
+| **Progress** | **83%** |
 
 ## Features
 
@@ -59,6 +65,7 @@ Last updated: 2026-06-01 (Session 69)
 | F12 | HealthKit | P1 | Done | 3/3 | ██████████ 100% | [tracker](trackers/f12-healthkit.md) |
 | F13 | CloudKit Sync | P2 | Backlog | 0/3 | ░░░░░░░░░░ 0% | [tracker](trackers/f13-cloudkit-sync.md) |
 | F14 | SleepGuard Rebrand & Multi-Sound | P0 | Done | 27/27 | ██████████ 100% | [tracker](trackers/f14-sleepguard-rebrand.md) |
+| F15 | Personalization & Sleep Briefing | P1 | In Progress | 1/16 | █░░░░░░░░░ 6% | [tracker](trackers/f15-personalization.md) |
 
 ## Activity Log
 
@@ -66,6 +73,8 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-06-06 | F15-T1 | Completed | `Packages/Personalization` scaffolded with `Package.swift` (deps Models/Env/DesignSystem), `Sources/Engine/` and `Sources/Views/` dirs. Added to `SleepGuard.xcodeproj` as local package. Placeholder source files for compilation. Build succeeds |
+| 2026-06-05 | F15 Planning | Planned | F15 (Personalization & Sleep Briefing) defined; tracker + 16-task backlog created; new `Personalization` package spec (deps Models/Env/DesignSystem); `UserProfile`/`LifestyleLog` models, pure `BriefingEngine`, daily full-screen briefing, profile editor + lifestyle micro-surveys designed; on-device-only. No code yet — all tasks Backlog |
 | 2026-06-01 | Settings Storage Limits | Completed | `UserPreferences` gained `limitStorageEnabled`, `storageLimitMB`, `limitDaysEnabled`, `maxDays`. `StorageLimitEnforcer` async service with off-MainActor file deletion. `SettingsStorageSection` UI with toggles + pickers. Triggers on app launch and session save. Preserves metadata, deletes only audio. DEBUG test button. 11 localized strings. Build succeeds |
 | 2026-06-01 | Snore Intensity Classification Fix | Completed | Fixed `classifyWithSoundAnalysis` removing broken floor offsets that collapsed all snoring into light. Added `calculatePeakDB` to AudioRecorder; intensity classification now uses peak dB (6–15 dB higher than RMS for impulsive snoring) instead of RMS over 23 ms buffers. Lowered loud/epic thresholds by 5 dB across all sensitivities. Updated docs/snore-detection-algorithm.md. Build succeeds |
 | 2026-06-01 | Direct Per-Event Recording | Completed | Eliminated full-session `.caf` in production. Per-event `.caf` written directly during session, compressed to `.m4a` + FFT on finalize, raw deleted. Full-session only when `preserveRawAudio` debug toggle is on. `PendingSessionStore.setPending` no longer hardcodes session filename. `AudioClipExtractor.analyzeSpectralFeatures` now public. Settings debug toggle with localized strings. Build succeeds |
@@ -251,11 +260,12 @@ _Most recent first. The AI appends here after every task._
 
 ## Up Next
 
-_Unblocked tasks in priority order. F13 (CloudKit Sync) is intentionally skipped for now. F14 is the active focus._
+_Unblocked tasks in priority order. F13 (CloudKit Sync) is intentionally skipped for now. F15 (Personalization) is the next focus._
 
 | Task | Feature | Priority | Why Ready |
 |------|---------|----------|-----------|
-| (none) | — | — | — |
+| F15-T2 | F15 | P1 | No deps — UserProfile + LifestyleLog models |
+| F15-T3 | F15 | P1 | No deps — UserPreferences flags |
 
 ## Blocked
 
