@@ -171,6 +171,8 @@ public enum Strings {
   public static var settingsLimitDaysDescription: String { String(localized: "settings.limitDaysDescription", bundle: .module) }
   public static var settingsLimitStorage: String { String(localized: "settings.limitStorage", bundle: .module) }
   public static var settingsLimitStorageDescription: String { String(localized: "settings.limitStorageDescription", bundle: .module) }
+  public static var settingsLowerStorageLimitMessage: String { String(localized: "settings.lowerStorageLimit.message", bundle: .module) }
+  public static var settingsLowerStorageLimitTitle: String { String(localized: "settings.lowerStorageLimit.title", bundle: .module) }
   public static var settingsMaxClipLength: String { String(localized: "settings.maxClipLength", bundle: .module) }
   public static var settingsMaxClipLengthTitle: String { String(localized: "settings.maxClipLengthTitle", bundle: .module) }
   public static var settingsMaxDays: String { String(localized: "settings.maxDays", bundle: .module) }

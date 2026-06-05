@@ -2978,6 +2978,28 @@
         }
       }
     },
+    "settings.lowerStorageLimit.message": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lowering the limit will permanently delete old session audio files to stay within the new limit. Session summaries are kept."
+          }
+        }
+      }
+    },
+    "settings.lowerStorageLimit.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete Old Audio?"
+          }
+        }
+      }
+    },
     "settings.maxDays": {
       "extractionState": "manual",
       "localizations": {
