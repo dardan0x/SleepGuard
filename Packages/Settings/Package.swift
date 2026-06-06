@@ -11,6 +11,7 @@ let package = Package(
     .package(path: "../Models"),
     .package(path: "../Env"),
     .package(path: "../DesignSystem"),
+    .package(path: "../Personalization"),
   ],
   targets: [
     .target(
@@ -19,6 +20,7 @@ let package = Package(
         .product(name: "Models", package: "Models"),
         .product(name: "Env", package: "Env"),
         .product(name: "DesignSystem", package: "DesignSystem"),
+        .product(name: "Personalization", package: "Personalization"),
       ],
       path: "Sources"
     ),

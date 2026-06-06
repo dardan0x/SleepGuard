@@ -5313,3 +5313,61 @@ score = 100 - snoringPenalty - eventsPenalty - intensityPenalty
 
 ### Open Questions
 - (none)
+
+---
+
+## 2026-06-06 — Session 72: F15-T11/T12/T13 — Schema + Briefing Trigger + Localization Verification
+
+### Completed
+- F15-T11: SwiftData schema registration + app-level briefing trigger
+- F15-T12: Daily briefing trigger in MainTabView (merged into T11)
+- F15-T13: Localization strings verification (grep pass)
+
+### Technical Details
+- `SleepGuardApp.swift` already had `UserProfile.self` and `LifestyleLog.self` in SwiftData schema from earlier work
+- `MainTabView` gained `@Environment(\.modelContext)` and `@Environment(UserPreferences.self)` access
+- `generateBriefingIfNeeded()` method added:
+  - Gate: `briefingEnabled && lastBriefingShownDate not today && hasAnySession`
+  - Fetches `SleepSession` (sorted desc), `LifestyleLog`, and `UserProfile` via `FetchDescriptor`
+  - Calls `BriefingEngine.generate()` to produce `Briefing`
+  - Sets `currentBriefing` and `showBriefing = true`
+- `.fullScreenCover(isPresented:onDismiss:content:)` added to BOTH `systemTabView` and `customTabView` paths:
+  - `onDismiss` saves `lastBriefingShownDate = Date()`
+  - Content is `SleepBriefingView` with `onDismiss: { showBriefing = false }` and `onChipTap`
+- `saveLifestyleLog(chip:briefing:)` maps tapped chip text to `LifestyleLog` bool fields by comparing against localized `Strings.briefingSurveyChip*` keys
+  - Links log to latest `SleepSession` by `sessionID`
+- `Packages/Settings/Package.swift` fixed to explicitly declare `Personalization` dependency, eliminating build warning
+- Grep verification for T13: zero hardcoded capitalized strings in all F15 view files
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `SleepGuard/MainTabView.swift` | +67/-3 | Added imports (SwiftData, Models, Personalization); `@Environment(\.modelContext)`, `@Environment(UserPreferences.self)`, `@State showBriefing`, `@State currentBriefing`; `generateBriefingIfNeeded()`; `saveLifestyleLog()`; `.task` + `.fullScreenCover` on both tab view paths |
+| `Packages/Settings/Package.swift` | +2 | Added `Personalization` to dependencies and target deps |
+| `docs/trackers/f15-personalization.md` | +10/-10 | T11, T12, T13 status → Done; acceptance criteria checked; notes added |
+| `docs/FeatureTracker.md` | +10/-10 | Dashboard refreshed: 76 done, 11 backlog, 88% F15 progress |
+
+### Architecture Decisions
+- **Briefing trigger in MainTabView, not SleepGuardApp**: `SleepGuardApp` is an `App` struct without easy SwiftData query access; `MainTabView` is the root view after onboarding and has `.modelContext` in environment
+- **`.task` instead of `.onAppear`**: `.task` is the idiomatic async entry point per AGENTS.md concurrency rules
+- **Chip-to-log mapping by string comparison**: `BriefingEngine` generates chip labels as localized strings; `saveLifestyleLog` compares the tapped chip text against `Strings.*` keys. This is slightly fragile but avoids adding machine-readable identifiers to the briefing value type. Alternative would be an enum on `BriefingSurveyCard` chips — deferred to future refactor if needed.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors, zero new warnings.
+
+`[F15-T11] — App-level daily briefing trigger + schema wiring`
+
+### Changes done
+- Add `generateBriefingIfNeeded()` to MainTabView with `briefingEnabled`, `lastBriefingShownDate`, and `hasAnySession` gates
+- Add `.fullScreenCover` for `SleepBriefingView` on both iOS 26+ system TabView and legacy custom tab bar paths
+- Add `saveLifestyleLog()` to persist chip taps as `LifestyleLog` linked to latest session
+- Fix Settings Package.swift to declare Personalization dependency
+- Verify zero hardcoded strings in all F15 views (T13)
+
+### Next Session
+- F15-T14: Unit tests for BriefingEngine (ScoreTrend cases, greeting by time, survey gate, returning-after-gap)
+- F15-T15: Final build & simulator verification
+- F15-T16: Feature doc + tracker finalization
+
+### Open Questions
+- (none)

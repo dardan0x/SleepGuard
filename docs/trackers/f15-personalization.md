@@ -30,9 +30,9 @@ Make SleepGuard feel personal: daily "Sleep Briefing" greets the user by name, r
 | F15-T8 | ProfilePromptCard | UI | Done | F15-T7 | Personalization | 2026-06-06 | 2026-06-06 |
 | F15-T9 | Settings integration (Profile section + briefing toggle) | UI | Done | F15-T3, F15-T7 | Settings | 2026-06-06 | 2026-06-06 |
 | F15-T10 | Router wiring (SheetDestination.profileEditor) | Route | Done | F15-T7 | Env | 2026-06-06 | 2026-06-06 |
-| F15-T11 | SwiftData schema registration + app-level briefing trigger | App | Backlog | F15-T2, F15-T6 | SleepGuard | — | — |
-| F15-T12 | Daily briefing trigger in MainTabView/StatisticsTab | UI | Backlog | F15-T11 | SleepGuard | — | — |
-| F15-T13 | Localization strings for all UI | Localization | Backlog | — | DesignSystem | — | — |
+| F15-T11 | SwiftData schema registration + app-level briefing trigger | App | Done | F15-T2, F15-T6 | SleepGuard | 2026-06-06 | 2026-06-06 |
+| F15-T12 | Daily briefing trigger in MainTabView/StatisticsTab | UI | Done | F15-T11 | SleepGuard | 2026-06-06 | 2026-06-06 |
+| F15-T13 | Localization strings for all UI | Localization | Done | — | DesignSystem | 2026-06-06 | 2026-06-06 |
 | F15-T14 | Unit tests for BriefingEngine | Test | Backlog | F15-T4 | Personalization | — | — |
 | F15-T15 | Build & verify | Build | Backlog | F15-T1–F15-T14 | SleepGuard | — | — |
 | F15-T16 | Feature doc + tracker finalization | Docs | Backlog | F15-T15 | — | — | — |
@@ -276,20 +276,23 @@ _(filled after task completion)_
 | Field | Value |
 |-------|-------|
 | Arch Ref | `docs/architecture/state.md` |
-| Status | Backlog |
-| Started | — |
-| Completed | — |
+| Status | Done |
+| Started | 2026-06-06 |
+| Completed | 2026-06-06 |
 
 **Acceptance Criteria:**
-- [ ] `UserProfile` and `LifestyleLog` registered in SwiftData schema in `SleepGuardApp.swift`
-- [ ] App-level `fullScreenCover` for briefing wired in `MainTabView` or root
-- [ ] Briefing gate: `briefingEnabled && lastBriefingShownDate not today && hasAnySession`
-- [ ] Builds with zero errors
+- [x] `UserProfile` and `LifestyleLog` registered in SwiftData schema in `SleepGuardApp.swift`
+- [x] App-level `fullScreenCover` for briefing wired in `MainTabView` on both iOS 26+ and legacy paths
+- [x] Briefing gate: `briefingEnabled && lastBriefingShownDate not today && hasAnySession`
+- [x] Builds with zero errors
 
 **Prompt Used:**
-_(filled after task completion)_
+Implement F15-T11: Register `UserProfile.self` and `LifestyleLog.self` in SwiftData schema in `SleepGuardApp.swift`. Add `.fullScreenCover` to `MainTabView` (both system and custom tab paths) with briefing generation on `.task`. Gate: `briefingEnabled`, `lastBriefingShownDate` not today, at least one session exists. `onDismiss` saves the shown date. Chip tap creates and persists a `LifestyleLog` linked to the latest session.
 
 **Notes:**
+- `SleepGuardApp.swift` schema already had `UserProfile.self` and `LifestyleLog.self` from earlier (pre-registered).
+- Fixed `Packages/Settings/Package.swift` to explicitly declare `Personalization` dependency, eliminating build warning.
+- `saveLifestyleLog` maps chip text to bool fields by string comparison against localized keys.
 
 ---
 
@@ -298,21 +301,22 @@ _(filled after task completion)_
 | Field | Value |
 |-------|-------|
 | Arch Ref | `docs/architecture/views.md` |
-| Status | Backlog |
-| Started | — |
-| Completed | — |
+| Status | Done |
+| Started | 2026-06-06 |
+| Completed | 2026-06-06 |
 
 **Acceptance Criteria:**
-- [ ] Trigger check on `MainTabView` or `StatisticsTab` appear
-- [ ] Sets `lastBriefingShownDate = today` when shown
-- [ ] Welcome variant for no sessions / first session
-- [ ] Returning-after-gap variant (>3 days)
-- [ ] Builds with zero errors
+- [x] Trigger check on `MainTabView` appear (via `.task`)
+- [x] Sets `lastBriefingShownDate = today` when shown (via `fullScreenCover` `onDismiss`)
+- [x] Welcome variant for no sessions / first session (handled by `BriefingEngine` in T4)
+- [x] Returning-after-gap variant (>3 days) (handled by `BriefingEngine` in T4)
+- [x] Builds with zero errors
 
 **Prompt Used:**
-_(filled after task completion)_
+Merged into F15-T11 implementation.
 
 **Notes:**
+- `BriefingEngine` already handles `ScoreTrend.firstNight` and `ScoreTrend.returningAfterGap(days:)` from T4.
 
 ---
 
@@ -321,20 +325,21 @@ _(filled after task completion)_
 | Field | Value |
 |-------|-------|
 | Arch Ref | AGENTS.md Localization section |
-| Status | Backlog |
-| Started | — |
-| Completed | — |
+| Status | Done |
+| Started | 2026-06-06 |
+| Completed | 2026-06-06 |
 
 **Acceptance Criteria:**
-- [ ] All `briefing.*`, `profile.*`, `settings.profile.*` keys in `Localizable.xcstrings`
-- [ ] `Strings.swift` regenerated
-- [ ] Grep confirms zero hardcoded user-facing strings in changed views
-- [ ] Builds with zero errors
+- [x] All `briefing.*`, `profile.*`, `settings.profile.*` keys in `Localizable.xcstrings`
+- [x] `Strings.swift` regenerated
+- [x] Grep confirms zero hardcoded user-facing strings in changed views
+- [x] Builds with zero errors
 
 **Prompt Used:**
-_(filled after task completion)_
+Verification pass: grepped `Packages/Personalization/Sources/Views/`, `SleepGuard/StatisticsTab.swift`, `SleepGuard/SettingsTab.swift`, and `Packages/Settings/Sources/Views/SettingsProfileSection.swift` for `Text("[A-Z]` and `navigationTitle("` — zero hits. All user-facing strings trace to `Strings.*` accessors.
 
 **Notes:**
+- All 39+ briefing/profile strings were added in T5 and T7. No additional keys needed for T11/T12.
 
 ---
 
