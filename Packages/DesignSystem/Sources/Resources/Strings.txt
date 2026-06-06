@@ -1,3 +1,4 @@
+
 # Add new localization entries here.
 # Format options:
 #   key
@@ -32,3 +33,58 @@ stats.calendar.intensityEpic = Epic
 stats.calendar.legendEpic = Epic
 event.player.enhancedAudio.label = Enhanced Audio
 event.player.enhancedAudio.description = Boosts volume and reduces background noise
+
+# Briefing greetings
+briefing.greeting.morning = Good morning, %@.
+briefing.greeting.morning.noName = Good morning.
+briefing.greeting.afternoon = Good afternoon, %@.
+briefing.greeting.afternoon.noName = Good afternoon.
+briefing.greeting.evening = Good evening, %@.
+briefing.greeting.evening.noName = Good evening.
+briefing.greeting.night = Still up, %@?
+briefing.greeting.night.noName = Still up?
+
+# Briefing headlines
+briefing.headline.welcome = Record your first night and I'll start learning your sleep.
+briefing.headline.quiet = Last night you slept %@. A quiet night — nice work.
+briefing.headline.normal = Last night you slept %@ with %@ min of snoring. Score: %@.
+
+# Briefing insights
+briefing.insight.improving = Your score climbed to %@, up from a %@ recent average.
+briefing.insight.declining = %@ tonight — below your %@ recent average.
+briefing.insight.steady = Holding steady around %@ recently. Consistency is its own win.
+briefing.insight.goalShortfall = You're averaging about %@h %@m — about %@ min short of your %@h goal.
+
+# Briefing quotes
+briefing.quote.improving = Sleep is the best meditation. Keep the momentum.
+briefing.quote.declining = One rough night doesn't define your rest. Try winding down 30 min earlier tonight.
+briefing.quote.steady = Good sleep compounds. You're building something.
+briefing.quote.firstNight = Here's your first sleep recap. I'll keep learning as you record more nights.
+briefing.quote.noData = Record your first night and I'll start learning your sleep.
+briefing.quote.returningAfterGap = Welcome back. Let's pick up where you left off.
+
+# Briefing survey
+briefing.survey.positiveTitle = Nice jump tonight. What did you do differently?
+briefing.survey.negativeTitle = Tougher night. Anything unusual yesterday?
+
+# Briefing stats
+briefing.stat.sleep = Sleep
+briefing.stat.snoring = Snoring
+briefing.stat.score = Score
+
+# Profile
+profile.prompt.title = Make this yours
+profile.prompt.subtitle = Add your profile to get personalized insights.
+profile.prompt.action = Set Up Profile
+
+# Survey chips
+briefing.survey.chip.exercised = Exercised
+briefing.survey.chip.lessCaffeine = Less caffeine
+briefing.survey.chip.noAlcohol = No alcohol
+briefing.survey.chip.sleptEarlier = Slept earlier
+briefing.survey.chip.lessStress = Less stress
+briefing.survey.chip.lateCaffeine = Late caffeine
+briefing.survey.chip.alcohol = Alcohol
+briefing.survey.chip.stressfulDay = Stressful day
+briefing.survey.chip.lateMeal = Late meal
+briefing.survey.chip.screensInBed = Screens in bed

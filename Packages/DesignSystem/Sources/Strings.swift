@@ -25,6 +25,42 @@ public enum Strings {
   public static var actionTryAgain: String { String(localized: "action.tryAgain", bundle: .module) }
   public static var alwaysSoothingMelodyValueFormat: String { String(localized: "always.soothing.melody.value", bundle: .module) }
   public static var avgScoreCalendarStatCardLabel: String { String(localized: "avg.score.calendar.stat.card.label", bundle: .module) }
+  public static var briefingGreetingAfternoon: String { String(localized: "briefing.greeting.afternoon", bundle: .module) }
+  public static var briefingGreetingAfternoonNoName: String { String(localized: "briefing.greeting.afternoon.noName", bundle: .module) }
+  public static var briefingGreetingEvening: String { String(localized: "briefing.greeting.evening", bundle: .module) }
+  public static var briefingGreetingEveningNoName: String { String(localized: "briefing.greeting.evening.noName", bundle: .module) }
+  public static var briefingGreetingMorning: String { String(localized: "briefing.greeting.morning", bundle: .module) }
+  public static var briefingGreetingMorningNoName: String { String(localized: "briefing.greeting.morning.noName", bundle: .module) }
+  public static var briefingGreetingNight: String { String(localized: "briefing.greeting.night", bundle: .module) }
+  public static var briefingGreetingNightNoName: String { String(localized: "briefing.greeting.night.noName", bundle: .module) }
+  public static var briefingHeadlineNormal: String { String(localized: "briefing.headline.normal", bundle: .module) }
+  public static var briefingHeadlineQuiet: String { String(localized: "briefing.headline.quiet", bundle: .module) }
+  public static var briefingHeadlineWelcome: String { String(localized: "briefing.headline.welcome", bundle: .module) }
+  public static var briefingInsightDeclining: String { String(localized: "briefing.insight.declining", bundle: .module) }
+  public static var briefingInsightGoalShortfall: String { String(localized: "briefing.insight.goalShortfall", bundle: .module) }
+  public static var briefingInsightImproving: String { String(localized: "briefing.insight.improving", bundle: .module) }
+  public static var briefingInsightSteady: String { String(localized: "briefing.insight.steady", bundle: .module) }
+  public static var briefingQuoteDeclining: String { String(localized: "briefing.quote.declining", bundle: .module) }
+  public static var briefingQuoteFirstNight: String { String(localized: "briefing.quote.firstNight", bundle: .module) }
+  public static var briefingQuoteImproving: String { String(localized: "briefing.quote.improving", bundle: .module) }
+  public static var briefingQuoteNoData: String { String(localized: "briefing.quote.noData", bundle: .module) }
+  public static var briefingQuoteReturningAfterGap: String { String(localized: "briefing.quote.returningAfterGap", bundle: .module) }
+  public static var briefingQuoteSteady: String { String(localized: "briefing.quote.steady", bundle: .module) }
+  public static var briefingStatScore: String { String(localized: "briefing.stat.score", bundle: .module) }
+  public static var briefingStatSleep: String { String(localized: "briefing.stat.sleep", bundle: .module) }
+  public static var briefingStatSnoring: String { String(localized: "briefing.stat.snoring", bundle: .module) }
+  public static var briefingSurveyChipAlcohol: String { String(localized: "briefing.survey.chip.alcohol", bundle: .module) }
+  public static var briefingSurveyChipExercised: String { String(localized: "briefing.survey.chip.exercised", bundle: .module) }
+  public static var briefingSurveyChipLateCaffeine: String { String(localized: "briefing.survey.chip.lateCaffeine", bundle: .module) }
+  public static var briefingSurveyChipLateMeal: String { String(localized: "briefing.survey.chip.lateMeal", bundle: .module) }
+  public static var briefingSurveyChipLessCaffeine: String { String(localized: "briefing.survey.chip.lessCaffeine", bundle: .module) }
+  public static var briefingSurveyChipLessStress: String { String(localized: "briefing.survey.chip.lessStress", bundle: .module) }
+  public static var briefingSurveyChipNoAlcohol: String { String(localized: "briefing.survey.chip.noAlcohol", bundle: .module) }
+  public static var briefingSurveyChipScreensInBed: String { String(localized: "briefing.survey.chip.screensInBed", bundle: .module) }
+  public static var briefingSurveyChipSleptEarlier: String { String(localized: "briefing.survey.chip.sleptEarlier", bundle: .module) }
+  public static var briefingSurveyChipStressfulDay: String { String(localized: "briefing.survey.chip.stressfulDay", bundle: .module) }
+  public static var briefingSurveyNegativeTitle: String { String(localized: "briefing.survey.negativeTitle", bundle: .module) }
+  public static var briefingSurveyPositiveTitle: String { String(localized: "briefing.survey.positiveTitle", bundle: .module) }
   public static var commonOver: String { String(localized: "common.over", bundle: .module) }
   public static var durationPickerTitle: String { String(localized: "duration.picker.title", bundle: .module) }
   public static var epicIntensityLabel: String { String(localized: "epic.intensity.label", bundle: .module) }
@@ -91,6 +127,9 @@ public enum Strings {
   public static var playRecordCustomMelodySheet: String { String(localized: "play.record.custom.melody.sheet", bundle: .module) }
   public static var playingSoothingMelodyPlayer: String { String(localized: "playing.soothing.melody.player", bundle: .module) }
   public static var processingSession: String { String(localized: "processing.session", bundle: .module) }
+  public static var profilePromptAction: String { String(localized: "profile.prompt.action", bundle: .module) }
+  public static var profilePromptSubtitle: String { String(localized: "profile.prompt.subtitle", bundle: .module) }
+  public static var profilePromptTitle: String { String(localized: "profile.prompt.title", bundle: .module) }
   public static var quietIntensityLabel: String { String(localized: "quiet.intensity.label", bundle: .module) }
   public static var reRecordCustomMelodySheet: String { String(localized: "re.record.custom.melody.sheet", bundle: .module) }
   public static var recordMelodySheetNavHeader: String { String(localized: "record.melody.sheet.nav.header", bundle: .module) }

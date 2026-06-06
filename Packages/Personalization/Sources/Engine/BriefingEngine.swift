@@ -1,5 +1,6 @@
 import Foundation
 import Models
+import DesignSystem
 
 public enum BriefingEngine {
   public static func generate(
@@ -15,7 +16,7 @@ public enum BriefingEngine {
     guard let latestSession = sortedSessions.first else {
       return Briefing(
         greeting: greeting(for: now, name: profile?.firstName),
-        headline: "Record your first night and I'll start learning your sleep.",
+        headline: Strings.briefingHeadlineWelcome,
         stats: [],
         insight: nil,
         nudge: QuoteBank.quote(for: .noData),
@@ -59,19 +60,26 @@ public enum BriefingEngine {
 
   private static func greeting(for date: Date, name: String?) -> String {
     let hour = Calendar.current.component(.hour, from: date)
-    let timeGreeting: String
+    let hasName = name != nil && !name!.isEmpty
+
     switch hour {
     case 5..<12:
-      timeGreeting = "Good morning"
+      return hasName
+        ? String(format: Strings.briefingGreetingMorning, name!)
+        : Strings.briefingGreetingMorningNoName
     case 12..<18:
-      timeGreeting = "Good afternoon"
+      return hasName
+        ? String(format: Strings.briefingGreetingAfternoon, name!)
+        : Strings.briefingGreetingAfternoonNoName
     case 18..<23:
-      timeGreeting = "Good evening"
+      return hasName
+        ? String(format: Strings.briefingGreetingEvening, name!)
+        : Strings.briefingGreetingEveningNoName
     default:
-      timeGreeting = "Still up"
+      return hasName
+        ? String(format: Strings.briefingGreetingNight, name!)
+        : Strings.briefingGreetingNightNoName
     }
-    guard let name, !name.isEmpty else { return "\(timeGreeting)." }
-    return "\(timeGreeting), \(name)."
   }
 
   // MARK: - Score Context
@@ -120,10 +128,10 @@ public enum BriefingEngine {
     let score = session.sleepScore
 
     if snoringMinutes == 0 {
-      return "Last night you slept \(durationText). A quiet night — nice work."
+      return String(format: Strings.briefingHeadlineQuiet, durationText)
     }
 
-    return "Last night you slept \(durationText) with \(snoringMinutes) min of snoring. Score: \(score)."
+    return String(format: Strings.briefingHeadlineNormal, durationText, snoringMinutes, score)
   }
 
   // MARK: - Stats
@@ -135,9 +143,9 @@ public enum BriefingEngine {
     let durationText = hours > 0 ? "\(hours)h \(minutes)m" : "\(minutes)m"
 
     return [
-      BriefingStat(label: "Sleep", value: durationText),
-      BriefingStat(label: "Snoring", value: "\(Int(session.snoringDuration / 60))m"),
-      BriefingStat(label: "Score", value: "\(session.sleepScore)"),
+      BriefingStat(label: Strings.briefingStatSleep, value: durationText),
+      BriefingStat(label: Strings.briefingStatSnoring, value: "\(Int(session.snoringDuration / 60))m"),
+      BriefingStat(label: Strings.briefingStatScore, value: "\(session.sleepScore)"),
     ]
   }
 
@@ -159,22 +167,26 @@ public enum BriefingEngine {
     var parts: [String] = []
 
     if diff > 5 {
-      parts.append("Your score climbed to \(latestScore), up from a \(avg) recent average.")
+      parts.append(String(format: Strings.briefingInsightImproving, latestScore, avg))
     } else if diff < -5 {
-      parts.append("\(latestScore) tonight — below your \(avg) recent average.")
+      parts.append(String(format: Strings.briefingInsightDeclining, latestScore, avg))
     } else {
-      parts.append("Holding steady around \(avg) recently. Consistency is its own win.")
+      parts.append(String(format: Strings.briefingInsightSteady, avg))
     }
 
     if let target = profile?.targetSleepHours, target > 0 {
       let avgDuration = recentScores.count >= 3
         ? sessions.prefix(3).map(\.totalDuration).reduce(0, +) / Double(min(sessions.count, 3))
         : latest.totalDuration
-      let avgHours = avgDuration / 3600
-      let shortfall = target - avgHours
+      let avgHours = Int(avgDuration / 3600)
+      let avgMinutes = (Int(avgDuration) % 3600) / 60
+      let shortfall = target - (avgDuration / 3600)
       if shortfall > 0.25 {
         let shortMinutes = Int(shortfall * 60)
-        parts.append("You're averaging about \(Int(avgHours))h \(shortMinutes)m — about \(shortMinutes) min short of your \(Int(target))h goal.")
+        parts.append(
+          String(format: Strings.briefingInsightGoalShortfall,
+                 avgHours, avgMinutes, shortMinutes, Int(target))
+        )
       }
     }
 
@@ -208,14 +220,26 @@ public enum BriefingEngine {
     let isPositive = latestScore > avg
     if isPositive {
       return SurveyPrompt(
-        title: "Nice jump tonight. What did you do differently?",
-        chips: ["Exercised", "Less caffeine", "No alcohol", "Slept earlier", "Less stress"],
+        title: Strings.briefingSurveyPositiveTitle,
+        chips: [
+          Strings.briefingSurveyChipExercised,
+          Strings.briefingSurveyChipLessCaffeine,
+          Strings.briefingSurveyChipNoAlcohol,
+          Strings.briefingSurveyChipSleptEarlier,
+          Strings.briefingSurveyChipLessStress,
+        ],
         isPositiveSwing: true
       )
     } else {
       return SurveyPrompt(
-        title: "Tougher night. Anything unusual yesterday?",
-        chips: ["Late caffeine", "Alcohol", "Stressful day", "Late meal", "Screens in bed"],
+        title: Strings.briefingSurveyNegativeTitle,
+        chips: [
+          Strings.briefingSurveyChipLateCaffeine,
+          Strings.briefingSurveyChipAlcohol,
+          Strings.briefingSurveyChipStressfulDay,
+          Strings.briefingSurveyChipLateMeal,
+          Strings.briefingSurveyChipScreensInBed,
+        ],
         isPositiveSwing: false
       )
     }
