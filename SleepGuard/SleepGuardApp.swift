@@ -15,7 +15,7 @@ struct SleepGuardApp: App {
 
 
   var sharedModelContainer: ModelContainer = {
-    let schema = Schema([SleepSession.self, SnoreEvent.self])
+    let schema = Schema([SleepSession.self, SnoreEvent.self, UserProfile.self, LifestyleLog.self])
     let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
     do {
       let container = try ModelContainer(for: schema, configurations: [modelConfiguration])

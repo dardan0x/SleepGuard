@@ -21,7 +21,7 @@ Make SleepGuard feel personal: daily "Sleep Briefing" greets the user by name, r
 | ID | Task | Type | Status | Depends On | Package | Started | Completed |
 |----|------|------|--------|------------|---------|---------|-----------|
 | F15-T1 | Personalization package scaffold | Scaffold | Done | — | Personalization | 2026-06-06 | 2026-06-06 |
-| F15-T2 | UserProfile + LifestyleLog models | Model | Backlog | — | Models | — | — |
+| F15-T2 | UserProfile + LifestyleLog models | Model | Done | — | Models | 2026-06-06 | 2026-06-06 |
 | F15-T3 | UserPreferences flags | Service | Backlog | — | Env | — | — |
 | F15-T4 | BriefingEngine + value types | Engine | Backlog | F15-T2 | Personalization | — | — |
 | F15-T5 | QuoteBank + localized strings | Engine | Backlog | F15-T4 | Personalization | — | — |
@@ -73,11 +73,11 @@ _(decisions, issues, deviations)_
 | Completed | — |
 
 **Acceptance Criteria:**
-- [ ] `UserProfile` SwiftData `@Model` with all fields per plan
-- [ ] `LifestyleLog` SwiftData `@Model` with all fields per plan
-- [ ] Both models are `Sendable` with immutable `let` where possible
-- [ ] Enums defined (biological sex, primary goal, habit levels, occupation)
-- [ ] Builds with zero errors
+- [x] `UserProfile` SwiftData `@Model` with all fields per plan
+- [x] `LifestyleLog` SwiftData `@Model` with all fields per plan
+- [x] Both models are `Sendable` with immutable `let` where possible
+- [x] Enums defined (biological sex, primary goal, habit levels, occupation)
+- [x] Builds with zero errors
 
 **Prompt Used:**
 _(filled after task completion)_

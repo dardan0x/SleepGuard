@@ -4862,3 +4862,58 @@ score = 100 - snoringPenalty - eventsPenalty - intensityPenalty
 
 ### Open Questions
 - (none)
+
+
+---
+
+## 2026-06-06 — Session 71 (continued): F15-T2 UserProfile + LifestyleLog Models
+
+### Completed
+- F15-T2: UserProfile + LifestyleLog SwiftData models
+
+### Technical Details
+- `UserProfile` `@Model` with 4 field groups per plan:
+  - **Identity**: firstName, birthYear (derived `age`), biologicalSex, heightCm, weightKg
+  - **Goals**: targetBedtime (time-of-day Date), targetSleepHours, primaryGoal
+  - **Lifestyle baseline**: caffeineHabit, alcoholHabit, exerciseFrequency, typicalStress, screenBeforeBed
+  - **Personal touch**: hobbies ([String]), occupationType
+  - **Meta**: createdAt, updatedAt
+- `LifestyleLog` `@Model` captures per-night deviations: hadCaffeineLate, hadAlcohol, exercised, stressfulDay, lateMeal, screenBeforeBed, optional note, optional sessionID link
+- 8 enums defined, all `String, Codable, Sendable` for SwiftData compatibility: `BiologicalSex`, `PrimaryGoal`, `CaffeineHabit`, `AlcoholHabit`, `ExerciseFrequency`, `TypicalStress`, `ScreenBeforeBed`, `OccupationType`
+- All fields optional or have sensible defaults; nothing is mandatory
+- Both models registered in `Schema([SleepSession.self, SnoreEvent.self, UserProfile.self, LifestyleLog.self])` in `SleepGuardApp.swift`
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Models/Sources/Data/UserProfile.swift` | +141 | New SwiftData model with identity, goals, lifestyle baseline, personal touch fields, and 8 enums |
+| `Packages/Models/Sources/Data/LifestyleLog.swift` | +54 | New SwiftData model for per-night lifestyle deviation logging |
+| `SleepGuard/SleepGuardApp.swift` | +1/-1 | Added `UserProfile.self` and `LifestyleLog.self` to SwiftData schema |
+| `docs/trackers/f15-personalization.md` | +1/-1 | T2 status → Done, acceptance criteria checked |
+| `docs/FeatureTracker.md` | +2/-2 | Dashboard counts refreshed (73 done, 14 backlog, 12% F15 progress) |
+
+### Architecture Decisions
+- **birthYear over raw age**: Stored as `birthYear: Int?` so it doesn't drift; `age` is a computed property. Matches the plan's recommendation.
+- **All enums have defaults**: Every enum field has a safe default (e.g., `.unspecified`, `.medium`, `.other`) so the model is always valid even when the user skips every step.
+- **hobbies as [String]**: Simple string array for chip tags rather than a separate relation or complex type. Easy to query and display.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors.
+
+`[F15-T2] UserProfile and LifestyleLog SwiftData models`
+- Add UserProfile model with identity, goals, lifestyle, and personal touch fields
+- Add LifestyleLog model for per-night deviation tracking
+- Define 8 Sendable enums for profile fields
+- Register both models in SleepGuardApp SwiftData schema
+- Build succeeds with zero errors
+
+### Changes done
+- Created `Packages/Models/Sources/Data/UserProfile.swift`
+- Created `Packages/Models/Sources/Data/LifestyleLog.swift`
+- Updated `SleepGuard/SleepGuardApp.swift` schema registration
+
+### Next Session
+- F15-T3: UserPreferences flags (lastBriefingShownDate, hasCompletedProfile, profilePromptDismissCount, briefingEnabled)
+
+### Open Questions
+- (none)
