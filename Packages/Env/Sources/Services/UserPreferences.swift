@@ -280,6 +280,61 @@ public final class UserPreferences {
     }
   }
 
+  // MARK: - Personalization & Sleep Briefing
+
+  public var lastBriefingShownDate: Date? {
+    get {
+      access(keyPath: \.lastBriefingShownDate)
+      return defaults.object(forKey: "lastBriefingShownDate") as? Date
+    }
+    set {
+      withMutation(keyPath: \.lastBriefingShownDate) {
+        if let newValue {
+          defaults.set(newValue, forKey: "lastBriefingShownDate")
+        } else {
+          defaults.removeObject(forKey: "lastBriefingShownDate")
+        }
+      }
+    }
+  }
+
+  public var hasCompletedProfile: Bool {
+    get {
+      access(keyPath: \.hasCompletedProfile)
+      return defaults.bool(forKey: "hasCompletedProfile")
+    }
+    set {
+      withMutation(keyPath: \.hasCompletedProfile) {
+        defaults.set(newValue, forKey: "hasCompletedProfile")
+      }
+    }
+  }
+
+  public var profilePromptDismissCount: Int {
+    get {
+      access(keyPath: \.profilePromptDismissCount)
+      return defaults.integer(forKey: "profilePromptDismissCount")
+    }
+    set {
+      withMutation(keyPath: \.profilePromptDismissCount) {
+        defaults.set(newValue, forKey: "profilePromptDismissCount")
+      }
+    }
+  }
+
+  public var briefingEnabled: Bool {
+    get {
+      access(keyPath: \.briefingEnabled)
+      if defaults.object(forKey: "briefingEnabled") == nil { return true }
+      return defaults.bool(forKey: "briefingEnabled")
+    }
+    set {
+      withMutation(keyPath: \.briefingEnabled) {
+        defaults.set(newValue, forKey: "briefingEnabled")
+      }
+    }
+  }
+
   public enum SoothingMelodyMode: String, CaseIterable, Sendable {
     case never
     case always

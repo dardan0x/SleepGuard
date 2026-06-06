@@ -22,7 +22,7 @@ Make SleepGuard feel personal: daily "Sleep Briefing" greets the user by name, r
 |----|------|------|--------|------------|---------|---------|-----------|
 | F15-T1 | Personalization package scaffold | Scaffold | Done | — | Personalization | 2026-06-06 | 2026-06-06 |
 | F15-T2 | UserProfile + LifestyleLog models | Model | Done | — | Models | 2026-06-06 | 2026-06-06 |
-| F15-T3 | UserPreferences flags | Service | Backlog | — | Env | — | — |
+| F15-T3 | UserPreferences flags | Service | Done | — | Env | 2026-06-06 | 2026-06-06 |
 | F15-T4 | BriefingEngine + value types | Engine | Backlog | F15-T2 | Personalization | — | — |
 | F15-T5 | QuoteBank + localized strings | Engine | Backlog | F15-T4 | Personalization | — | — |
 | F15-T6 | SleepBriefingView + subviews | UI | Backlog | F15-T4, F15-T5 | Personalization | — | — |
@@ -96,12 +96,12 @@ _(filled after task completion)_
 | Completed | — |
 
 **Acceptance Criteria:**
-- [ ] `lastBriefingShownDate: Date?` added to `UserPreferences`
-- [ ] `hasCompletedProfile: Bool` added
-- [ ] `profilePromptDismissCount: Int` added
-- [ ] `briefingEnabled: Bool` added (default true)
-- [ ] Follows existing `access`/`withMutation` getter/setter pattern
-- [ ] Builds with zero errors
+- [x] `lastBriefingShownDate: Date?` added to `UserPreferences`
+- [x] `hasCompletedProfile: Bool` added
+- [x] `profilePromptDismissCount: Int` added
+- [x] `briefingEnabled: Bool` added (default true)
+- [x] Follows existing `access`/`withMutation` getter/setter pattern
+- [x] Builds with zero errors
 
 **Prompt Used:**
 _(filled after task completion)_
