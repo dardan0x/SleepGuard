@@ -250,6 +250,8 @@ public enum Strings {
   public static var sessionSummaryYouSleptFormat: String { String(localized: "session.summary.youSleptFormat", bundle: .module) }
   public static var sessionsCalendarStatCardLabel: String { String(localized: "sessions.calendar.stat.card.label", bundle: .module) }
   public static var sessionsDetailSessionsCountFormat: String { String(localized: "sessions.detail.sessionsCountFormat", bundle: .module) }
+  public static var settingsBriefing: String { String(localized: "settings.briefing", bundle: .module) }
+  public static var settingsBriefingDescription: String { String(localized: "settings.briefing.description", bundle: .module) }
   public static var settingsDeleteAll: String { String(localized: "settings.deleteAll", bundle: .module) }
   public static var settingsDeleteAllConfirmMessage: String { String(localized: "settings.deleteAll.confirmMessage", bundle: .module) }
   public static var settingsDeleteAllConfirmTitle: String { String(localized: "settings.deleteAll.confirmTitle", bundle: .module) }
@@ -272,6 +274,7 @@ public enum Strings {
   public static var settingsMinSnoreDuration: String { String(localized: "settings.minSnoreDuration", bundle: .module) }
   public static var settingsPreserveRawAudio: String { String(localized: "settings.preserveRawAudio", bundle: .module) }
   public static var settingsPreserveRawAudioDescription: String { String(localized: "settings.preserveRawAudio.description", bundle: .module) }
+  public static var settingsProfile: String { String(localized: "settings.profile", bundle: .module) }
   public static var settingsRateApp: String { String(localized: "settings.rateApp", bundle: .module) }
   public static var settingsSaveAudioClips: String { String(localized: "settings.saveAudioClips", bundle: .module) }
   public static var settingsSectionAbout: String { String(localized: "settings.section.about", bundle: .module) }
@@ -279,6 +282,7 @@ public enum Strings {
   public static var settingsSectionData: String { String(localized: "settings.section.data", bundle: .module) }
   public static var settingsSectionDetection: String { String(localized: "settings.section.detection", bundle: .module) }
   public static var settingsSectionPermissions: String { String(localized: "settings.section.permissions", bundle: .module) }
+  public static var settingsSectionProfile: String { String(localized: "settings.section.profile", bundle: .module) }
   public static var settingsSectionRecording: String { String(localized: "settings.section.recording", bundle: .module) }
   public static var settingsSectionStorage: String { String(localized: "settings.section.storage", bundle: .module) }
   public static var settingsSectionWatch: String { String(localized: "settings.section.watch", bundle: .module) }

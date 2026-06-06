@@ -28,7 +28,7 @@ Make SleepGuard feel personal: daily "Sleep Briefing" greets the user by name, r
 | F15-T6 | SleepBriefingView + subviews | UI | Done | F15-T4, F15-T5 | Personalization | 2026-06-06 | 2026-06-06 |
 | F15-T7 | Profile editor views (4 steps) | UI | Done | F15-T2 | Personalization | 2026-06-06 | 2026-06-06 |
 | F15-T8 | ProfilePromptCard | UI | Done | F15-T7 | Personalization | 2026-06-06 | 2026-06-06 |
-| F15-T9 | Settings integration (Profile section + briefing toggle) | UI | Backlog | F15-T3, F15-T7 | Settings | — | — |
+| F15-T9 | Settings integration (Profile section + briefing toggle) | UI | Done | F15-T3, F15-T7 | Settings | 2026-06-06 | 2026-06-06 |
 | F15-T10 | Router wiring (SheetDestination.profileEditor) | Route | Backlog | F15-T7 | Env | — | — |
 | F15-T11 | SwiftData schema registration + app-level briefing trigger | App | Backlog | F15-T2, F15-T6 | SleepGuard | — | — |
 | F15-T12 | Daily briefing trigger in MainTabView/StatisticsTab | UI | Backlog | F15-T11 | SleepGuard | — | — |
@@ -236,11 +236,11 @@ _(filled after task completion)_
 | Completed | — |
 
 **Acceptance Criteria:**
-- [ ] New "Profile" section in Settings with row to open editor
-- [ ] "Daily Sleep Briefing" toggle in Settings
-- [ ] Uses existing `SettingsSection`/`SettingsRow` patterns
-- [ ] All strings localized
-- [ ] Builds with zero errors
+- [x] New "Profile" section in Settings with row to open editor
+- [x] "Daily Sleep Briefing" toggle in Settings
+- [x] Uses existing `SettingsSection`/`SettingsRow` patterns
+- [x] All strings localized
+- [x] Builds with zero errors
 
 **Prompt Used:**
 _(filled after task completion)_

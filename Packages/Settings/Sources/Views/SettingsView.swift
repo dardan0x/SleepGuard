@@ -3,6 +3,7 @@ import SwiftData
 import Env
 import DesignSystem
 import Models
+import Personalization
 
 @MainActor
 public struct SettingsView: View {
@@ -15,6 +16,7 @@ public struct SettingsView: View {
 
   @State private var showDeleteConfirmation = false
   @State private var showThemePicker = false
+  @State private var showProfileEditor = false
 
   public init() {}
 
@@ -29,6 +31,7 @@ public struct SettingsView: View {
           SettingsPermissionsSection()
           SettingsRecordingSection()
           SettingsAppearanceSection()
+          SettingsProfileSection(onTapProfile: { showProfileEditor = true })
           SettingsWatchSection()
           SettingsStorageSection()
           SettingsDataSection(onShowDeleteConfirmation: { showDeleteConfirmation = true })
@@ -44,6 +47,14 @@ public struct SettingsView: View {
     .scrollContentBackground(.hidden)
     #endif
     .toolbar(.hidden, for: .navigationBar)
+    .sheet(isPresented: $showProfileEditor) {
+      if let profile = fetchOrCreateProfile() {
+        ProfileEditorView(profile: profile) {
+          showProfileEditor = false
+          UserPreferences.shared.hasCompletedProfile = true
+        }
+      }
+    }
     .alert(Strings.settingsDeleteAll, isPresented: $showDeleteConfirmation) {
       Button(Strings.actionCancel, role: .cancel) {}
       Button(Strings.actionDeleteAll, role: .destructive) {
@@ -98,6 +109,16 @@ public struct SettingsView: View {
     } catch {
       // Silent failure — no toast infrastructure in this app
     }
+  }
+
+  private func fetchOrCreateProfile() -> UserProfile? {
+    let descriptor = FetchDescriptor<UserProfile>()
+    if let existing = try? modelContext.fetch(descriptor).first {
+      return existing
+    }
+    let profile = UserProfile()
+    modelContext.insert(profile)
+    return profile
   }
 
   private func rateApp() {

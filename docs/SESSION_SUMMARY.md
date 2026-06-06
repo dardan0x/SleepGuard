@@ -5219,3 +5219,50 @@ score = 100 - snoringPenalty - eventsPenalty - intensityPenalty
 
 ### Open Questions
 - (none)
+
+
+---
+
+## 2026-06-06 — Session 71 (continued): F15-T9 Settings Integration
+
+### Completed
+- F15-T9: Settings Profile section + Daily Sleep Briefing toggle
+
+### Technical Details
+- `SettingsProfileSection` — 49-line view following existing section patterns:
+  - PROFILE section title via `SettingsSectionTitle`
+  - Profile row: person icon + "Profile" label + chevron, opens editor sheet
+  - Daily Sleep Briefing toggle: sunrise icon + label + description sublabel + green toggle
+  - Uses `SettingsIconBackground`, `ScaleButtonStyle`, `theme.bgCard` — consistent with existing sections
+- `SettingsView` updated:
+  - Imports `Personalization`
+  - Added `SettingsProfileSection` between Appearance and Watch sections
+  - Added `.sheet(isPresented: $showProfileEditor)` with `fetchOrCreateProfile()` helper
+  - Sets `hasCompletedProfile = true` on save
+- 4 new localized strings: `settings.section.profile`, `settings.profile`, `settings.briefing`, `settings.briefing.description`
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Settings/Sources/Views/SettingsProfileSection.swift` | +50 | New Profile section with editor row and briefing toggle |
+| `Packages/Settings/Sources/Views/SettingsView.swift` | +16 | Imports Personalization, embeds SettingsProfileSection, adds profile editor sheet |
+| `Packages/DesignSystem/Sources/Resources/Strings.txt` | +4 | Settings profile/briefing localization keys |
+| `Packages/DesignSystem/Sources/Resources/Localizable.xcstrings` | +40 | Merged settings keys |
+| `Packages/DesignSystem/Sources/Strings.swift` | +4 | Auto-regenerated accessors (386 total) |
+| `docs/trackers/f15-personalization.md` | +1/-1 | T9 status → Done |
+| `docs/FeatureTracker.md` | +2/-2 | Dashboard counts refreshed (80 done, 7 backlog, 56% F15 progress) |
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors.
+
+`[F15-T9] Settings Profile section and briefing toggle`
+- Add SettingsProfileSection with Profile row and Daily Sleep Briefing toggle
+- Wire Profile row to open ProfileEditorView sheet from SettingsView
+- Add 4 localized strings for settings labels
+- Build succeeds with zero errors
+
+### Next Session
+- F15-T10: Router wiring (SheetDestination.profileEditor)
+
+### Open Questions
+- (none)
