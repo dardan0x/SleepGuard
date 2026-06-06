@@ -4959,3 +4959,59 @@ score = 100 - snoringPenalty - eventsPenalty - intensityPenalty
 
 ### Open Questions
 - (none)
+
+
+---
+
+## 2026-06-06 — Session 71 (continued): F15-T4 BriefingEngine + Value Types
+
+### Completed
+- F15-T4: Pure BriefingEngine rules engine and value types
+
+### Technical Details
+- `Briefing` value type: greeting, headline, stats, insight, nudge, survey, scoreContext
+- `BriefingStat` label/value pairs for recap chips
+- `ScoreTrend` enum: .improving, .declining, .steady, .firstNight, .noData, .returningAfterGap(days:)
+- `SurveyPrompt` with title, chips, and swing direction
+- `BriefingEngine.generate(profile:recentSessions:lifestyleLogs:now:)` — fully pure, no UI, no side effects
+  - **Greeting**: time-of-day (morning/afternoon/evening/night) + optional firstName
+  - **Score context**: noData → firstNight → returningAfterGap (>3 days) → improving/declining/steady vs 7-day rolling average
+  - **Headline**: duration + snoring minutes + score, warmly phrased
+  - **Stats**: Sleep duration, Snoring minutes, Score
+  - **Insight**: trend diff + targetSleepHours shortfall (if profile has a goal)
+  - **Survey gate**: |Δscore| ≥ 15 from 7-day average AND no LifestyleLog for that night → positive/negative chip prompts
+- `QuoteBank` selects context-appropriate quote string by `ScoreTrend`
+- All types are `Sendable`; engine is a static func on an empty enum (no state, fully testable)
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Personalization/Sources/Engine/Briefing.swift` | +75 | New value types: `Briefing`, `BriefingStat`, `ScoreTrend`, `SurveyPrompt` |
+| `Packages/Personalization/Sources/Engine/BriefingEngine.swift` | +165 | Pure rules engine with greeting, score context, headline, stats, insight, survey gating |
+| `Packages/Personalization/Sources/Engine/QuoteBank.swift` | +25 | Context-based quote selection by `ScoreTrend` |
+| `docs/trackers/f15-personalization.md` | +1/-1 | T4 status → Done, acceptance criteria checked |
+| `docs/FeatureTracker.md` | +2/-2 | Dashboard counts refreshed (75 done, 12 backlog, 25% F15 progress) |
+
+### Architecture Decisions
+- **Pure static function**: `BriefingEngine` has no instance state; inputs → output. Makes unit testing trivial (feed synthetic sessions, assert output).
+- **Value types throughout**: `Briefing`, `BriefingStat`, `SurveyPrompt`, and `ScoreTrend` are all `Sendable`. No references to `@Model` objects escape the engine; it reads computed properties only.
+- **QuoteBank separate**: Keeps motivational copy isolated from logic. Will be migrated to localized keys in T5.
+- **7-day rolling average**: Uses the most recent 6 prior sessions (up to 7 days) as the baseline for trend detection. Simple and stable.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors.
+
+- Add Briefing, BriefingStat, ScoreTrend, SurveyPrompt value types
+- Add BriefingEngine.generate() pure rules engine
+- Greeting by time-of-day with optional name
+- Score context: improving/declining/steady/firstNight/noData/returningAfterGap
+- Recap headline, stats chips, trend insight, survey gate (|Δscore|≥15)
+- Add QuoteBank for context-based motivational quotes
+- Build succeeds with zero errors
+
+### Next Session
+- F15-T5: QuoteBank + localized strings for briefing
+- F15-T6: SleepBriefingView + subviews
+
+### Open Questions
+- (none)

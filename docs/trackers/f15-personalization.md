@@ -23,7 +23,7 @@ Make SleepGuard feel personal: daily "Sleep Briefing" greets the user by name, r
 | F15-T1 | Personalization package scaffold | Scaffold | Done | — | Personalization | 2026-06-06 | 2026-06-06 |
 | F15-T2 | UserProfile + LifestyleLog models | Model | Done | — | Models | 2026-06-06 | 2026-06-06 |
 | F15-T3 | UserPreferences flags | Service | Done | — | Env | 2026-06-06 | 2026-06-06 |
-| F15-T4 | BriefingEngine + value types | Engine | Backlog | F15-T2 | Personalization | — | — |
+| F15-T4 | BriefingEngine + value types | Engine | Done | F15-T2 | Personalization | 2026-06-06 | 2026-06-06 |
 | F15-T5 | QuoteBank + localized strings | Engine | Backlog | F15-T4 | Personalization | — | — |
 | F15-T6 | SleepBriefingView + subviews | UI | Backlog | F15-T4, F15-T5 | Personalization | — | — |
 | F15-T7 | Profile editor views (4 steps) | UI | Backlog | F15-T2 | Personalization | — | — |
@@ -120,12 +120,12 @@ _(filled after task completion)_
 | Completed | — |
 
 **Acceptance Criteria:**
-- [ ] `Briefing` struct with greeting, headline, stats, insight, nudge, survey, scoreContext
-- [ ] `BriefingStat`, `ScoreTrend`, `SurveyPrompt` value types
-- [ ] `BriefingEngine.generate(profile:recentSessions:lifestyleLogs:now:)` pure function
-- [ ] Greeting by time-of-day, recap from latest session, insight from trends
-- [ ] No UI code; fully unit-testable
-- [ ] Builds with zero errors
+- [x] `Briefing` struct with greeting, headline, stats, insight, nudge, survey, scoreContext
+- [x] `BriefingStat`, `ScoreTrend`, `SurveyPrompt` value types
+- [x] `BriefingEngine.generate(profile:recentSessions:lifestyleLogs:now:)` pure function
+- [x] Greeting by time-of-day, recap from latest session, insight from trends
+- [x] No UI code; fully unit-testable
+- [x] Builds with zero errors
 
 **Prompt Used:**
 _(filled after task completion)_
