@@ -2,7 +2,7 @@
 
 > Auto-updated by the AI after every task. This is the local source of truth.
 
-Last updated: 2026-06-06 (Session 71)
+Last updated: 2026-06-06 (Session 72)
 
 ---
 
@@ -65,7 +65,7 @@ Last updated: 2026-06-06 (Session 71)
 | F12 | HealthKit | P1 | Done | 3/3 | ██████████ 100% | [tracker](trackers/f12-healthkit.md) |
 | F13 | CloudKit Sync | P2 | Backlog | 0/3 | ░░░░░░░░░░ 0% | [tracker](trackers/f13-cloudkit-sync.md) |
 | F14 | SleepGuard Rebrand & Multi-Sound | P0 | Done | 27/27 | ██████████ 100% | [tracker](trackers/f14-sleepguard-rebrand.md) |
-| F15 | Personalization & Sleep Briefing | P1 | In Progress | 2/16 | ███░░░░░░░ 12% | [tracker](trackers/f15-personalization.md) |
+| F15 | Personalization & Sleep Briefing | P1 | In Progress | 14/16 | ████████░░ 88% | [tracker](trackers/f15-personalization.md) |
 
 ## Activity Log
 
@@ -73,8 +73,18 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-06-06 | F15-T11 | Completed | App-level daily briefing trigger: `generateBriefingIfNeeded()` in `MainTabView` (both iOS 26+ and custom tab paths), `fullScreenCover` presenting `SleepBriefingView`, gate checks `briefingEnabled`, `lastBriefingShownDate` not today, `hasAnySession`. `onDismiss` saves shown date. Chip tap persists `LifestyleLog`. Fixed `Settings/Package.swift` to declare `Personalization` dep removing build warning. Build succeeds |
+| 2026-06-06 | F15-T12 | Completed | Daily briefing trigger merged into T11; `.task` on `MainTabView` calls `generateBriefingIfNeeded()` on appear; returning-after-gap and first-night variants handled by `BriefingEngine` from T4 |
 | 2026-06-06 | F15-T2 | Completed | `UserProfile` and `LifestyleLog` SwiftData models with all enums (BiologicalSex, PrimaryGoal, CaffeineHabit, AlcoholHabit, ExerciseFrequency, TypicalStress, ScreenBeforeBed, OccupationType). Both registered in `SleepGuardApp.swift` schema. Build succeeds |
 | 2026-06-06 | F15-T1 | Completed | `Packages/Personalization` scaffolded with `Package.swift` (deps Models/Env/DesignSystem), `Sources/Engine/` and `Sources/Views/` dirs. Added to `SleepGuard.xcodeproj` as local package. Placeholder source files for compilation. Build succeeds |
+| 2026-06-06 | F15-T3 | Completed | `UserPreferences` gained `lastBriefingShownDate`, `hasCompletedProfile`, `profilePromptDismissCount`, `briefingEnabled` (default true). Follows existing `access`/`withMutation` pattern. Build succeeds |
+| 2026-06-06 | F15-T4 | Completed | `BriefingEngine.generate()` pure function producing `Briefing` with greeting by time, `ScoreTrend` (improving/declining/steady/firstNight/returningAfterGap/noData), insight, nudge, survey gate (|Δscore|≥15). Build succeeds |
+| 2026-06-06 | F15-T5 | Completed | `QuoteBank` selects quote by `ScoreTrend`. 39 briefing/profile localized keys added to `Localizable.xcstrings` and `Strings.swift` regenerated. No hardcoded strings. Build succeeds |
+| 2026-06-06 | F15-T6 | Completed | `SleepBriefingView` full-screen container with `BriefingGreetingHeader`, `BriefingRecapCard`, `BriefingInsightCard`, `BriefingSurveyCard`. All strings localized. Build succeeds |
+| 2026-06-06 | F15-T7 | Completed | `ProfileEditorView` 4-step TabView (Identity, Goals, Habits, Personal) with reusable `ProfileChipSelector`, `ProfileTextField`, `ProfilePicker`. Privacy banner. 49 new localized strings. Build succeeds |
+| 2026-06-06 | F15-T8 | Completed | `ProfilePromptCard` dismissible card in `StatisticsTab`; shows after ≥3 sessions && !hasCompletedProfile && dismissCount<3. Action opens profile editor sheet. Build succeeds |
+| 2026-06-06 | F15-T9 | Completed | `SettingsProfileSection` with Profile row and Daily Sleep Briefing toggle. Settings imports Personalization. Build succeeds |
+| 2026-06-06 | F15-T10 | Completed | `SheetDestination.profileEditor` added to `Router.swift`. Handled in `AppRegistry.withAppRouter()`. `StatisticsTab` and `SettingsTab` migrated to router-based sheet presentation with `.withEnvironments()`. Build succeeds |
 | 2026-06-05 | F15 Planning | Planned | F15 (Personalization & Sleep Briefing) defined; tracker + 16-task backlog created; new `Personalization` package spec (deps Models/Env/DesignSystem); `UserProfile`/`LifestyleLog` models, pure `BriefingEngine`, daily full-screen briefing, profile editor + lifestyle micro-surveys designed; on-device-only. No code yet — all tasks Backlog |
 | 2026-06-01 | Settings Storage Limits | Completed | `UserPreferences` gained `limitStorageEnabled`, `storageLimitMB`, `limitDaysEnabled`, `maxDays`. `StorageLimitEnforcer` async service with off-MainActor file deletion. `SettingsStorageSection` UI with toggles + pickers. Triggers on app launch and session save. Preserves metadata, deletes only audio. DEBUG test button. 11 localized strings. Build succeeds |
 | 2026-06-01 | Snore Intensity Classification Fix | Completed | Fixed `classifyWithSoundAnalysis` removing broken floor offsets that collapsed all snoring into light. Added `calculatePeakDB` to AudioRecorder; intensity classification now uses peak dB (6–15 dB higher than RMS for impulsive snoring) instead of RMS over 23 ms buffers. Lowered loud/epic thresholds by 5 dB across all sensitivities. Updated docs/snore-detection-algorithm.md. Build succeeds |
@@ -265,8 +275,10 @@ _Unblocked tasks in priority order. F13 (CloudKit Sync) is intentionally skipped
 
 | Task | Feature | Priority | Why Ready |
 |------|---------|----------|-----------|
-| F15-T2 | F15 | P1 | No deps — UserProfile + LifestyleLog models |
-| F15-T3 | F15 | P1 | No deps — UserPreferences flags |
+| F15-T13 | F15 | P1 | Strings verified with grep — zero hardcoded user-facing strings in all F15 views |
+| F15-T14 | F15 | P1 | BriefingEngine unit tests |
+| F15-T15 | F15 | P1 | Final build & simulator verification |
+| F15-T16 | F15 | P1 | Feature doc + tracker finalization |
 
 ## Blocked
 
