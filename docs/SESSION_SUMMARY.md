@@ -5116,3 +5116,60 @@ score = 100 - snoringPenalty - eventsPenalty - intensityPenalty
 
 ### Open Questions
 - (none)
+
+
+---
+
+## 2026-06-06 — Session 71 (continued): F15-T7 Profile Editor Views
+
+### Completed
+- F15-T7: Profile editor with 4-step TabView page style
+
+### Technical Details
+- `ProfileEditorView` — 97-line container following onboarding pattern:
+  - `TabView` with `.page(indexDisplayMode: .never)`
+  - Progress dots (animated spring)
+  - Persistent privacy banner with lock icon + green stroke capsule
+  - Skip button (top-right), Back/Continue/Save buttons (bottom)
+  - Saves `updatedAt` on complete
+- `ProfileStepIdentityView` — first name, birth year (number pad), biological sex (segmented picker), height/weight (decimal pad)
+- `ProfileStepGoalsView` — target bedtime (wheel time picker), target sleep hours (slider 4–12h), primary goal (segmented picker)
+- `ProfileStepHabitsView` — 5 `ProfileChipSelector` rows for caffeine, alcohol, exercise, stress, screens before bed
+  - Proper label↔enum bidirectional mapping for each habit
+- `ProfileStepPersonalView` — hobbies (comma-separated text field), occupation (segmented picker)
+- Reusable components:
+  - `ProfileChipSelector` — title + FlowLayout chip buttons with selected/unselected styling
+  - `ProfileTextField` — label + styled text field with configurable keyboard
+  - `ProfilePicker` — generic segmented picker for any `RawRepresentable` enum
+- 49 new localized strings for profile editor labels, options, and actions
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Personalization/Sources/Views/ProfileEditorView.swift` | +98 | New container with TabView, privacy banner, progress dots, navigation |
+| `Packages/Personalization/Sources/Views/ProfileStepIdentityView.swift` | +77 | Text fields + picker for identity fields |
+| `Packages/Personalization/Sources/Views/ProfileStepGoalsView.swift` | +71 | Time picker, slider, goal picker |
+| `Packages/Personalization/Sources/Views/ProfileStepHabitsView.swift` | +108 | 5 chip selectors with enum mapping |
+| `Packages/Personalization/Sources/Views/ProfileStepPersonalView.swift` | +42 | Hobbies text field + occupation picker |
+| `Packages/Personalization/Sources/Views/ProfileChipSelector.swift` | +78 | Reusable chip selector with FlowLayout |
+| `Packages/DesignSystem/Sources/Resources/Strings.txt` | +49 | Profile editor localization keys |
+| `Packages/DesignSystem/Sources/Resources/Localizable.xcstrings` | +520 | Merged profile keys |
+| `Packages/DesignSystem/Sources/Strings.swift` | +49 | Auto-regenerated accessors (382 total) |
+| `docs/trackers/f15-personalization.md` | +1/-1 | T7 status → Done |
+| `docs/FeatureTracker.md` | +2/-2 | Dashboard counts refreshed (78 done, 9 backlog, 44% F15 progress) |
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors.
+
+`[F15-T7] Profile editor with 4-step TabView`
+- Add ProfileEditorView container with privacy banner and progress dots
+- Add ProfileStepIdentityView, ProfileStepGoalsView, ProfileStepHabitsView, ProfileStepPersonalView
+- Add reusable ProfileChipSelector, ProfileTextField, ProfilePicker components
+- Add 49 localized strings for profile editor labels and options
+- Build succeeds with zero errors
+
+### Next Session
+- F15-T8: ProfilePromptCard (dismissible Statistics tab nudge)
+
+### Open Questions
+- (none)

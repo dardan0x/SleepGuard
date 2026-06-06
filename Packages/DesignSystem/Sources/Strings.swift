@@ -8,6 +8,7 @@ public enum Strings {
   public static var actionCancel: String { String(localized: "action.cancel", bundle: .module) }
   public static var actionClose: String { String(localized: "action.close", bundle: .module) }
   public static var actionCollapse: String { String(localized: "action.collapse", bundle: .module) }
+  public static var actionContinue: String { String(localized: "action.continue", bundle: .module) }
   public static var actionDelete: String { String(localized: "action.delete", bundle: .module) }
   public static var actionDeleteAll: String { String(localized: "action.deleteAll", bundle: .module) }
   public static var actionDiscard: String { String(localized: "action.discard", bundle: .module) }
@@ -127,9 +128,57 @@ public enum Strings {
   public static var playRecordCustomMelodySheet: String { String(localized: "play.record.custom.melody.sheet", bundle: .module) }
   public static var playingSoothingMelodyPlayer: String { String(localized: "playing.soothing.melody.player", bundle: .module) }
   public static var processingSession: String { String(localized: "processing.session", bundle: .module) }
+  public static var profileActionSaveProfile: String { String(localized: "profile.action.saveProfile", bundle: .module) }
+  public static var profileEditorPrivacyNotice: String { String(localized: "profile.editor.privacyNotice", bundle: .module) }
+  public static var profileEditorStepGoals: String { String(localized: "profile.editor.step.goals", bundle: .module) }
+  public static var profileEditorStepHabits: String { String(localized: "profile.editor.step.habits", bundle: .module) }
+  public static var profileEditorStepPersonal: String { String(localized: "profile.editor.step.personal", bundle: .module) }
+  public static var profileEditorStepYou: String { String(localized: "profile.editor.step.you", bundle: .module) }
+  public static var profileFieldAlcohol: String { String(localized: "profile.field.alcohol", bundle: .module) }
+  public static var profileFieldBiologicalSex: String { String(localized: "profile.field.biologicalSex", bundle: .module) }
+  public static var profileFieldBirthYear: String { String(localized: "profile.field.birthYear", bundle: .module) }
+  public static var profileFieldCaffeine: String { String(localized: "profile.field.caffeine", bundle: .module) }
+  public static var profileFieldExercise: String { String(localized: "profile.field.exercise", bundle: .module) }
+  public static var profileFieldFirstName: String { String(localized: "profile.field.firstName", bundle: .module) }
+  public static var profileFieldHeight: String { String(localized: "profile.field.height", bundle: .module) }
+  public static var profileFieldHobbies: String { String(localized: "profile.field.hobbies", bundle: .module) }
+  public static var profileFieldOccupation: String { String(localized: "profile.field.occupation", bundle: .module) }
+  public static var profileFieldPrimaryGoal: String { String(localized: "profile.field.primaryGoal", bundle: .module) }
+  public static var profileFieldScreens: String { String(localized: "profile.field.screens", bundle: .module) }
+  public static var profileFieldStress: String { String(localized: "profile.field.stress", bundle: .module) }
+  public static var profileFieldTargetBedtime: String { String(localized: "profile.field.targetBedtime", bundle: .module) }
+  public static var profileFieldTargetSleepHours: String { String(localized: "profile.field.targetSleepHours", bundle: .module) }
+  public static var profileFieldWeight: String { String(localized: "profile.field.weight", bundle: .module) }
+  public static var profileFrequencyOften: String { String(localized: "profile.frequency.often", bundle: .module) }
+  public static var profileFrequencyRarely: String { String(localized: "profile.frequency.rarely", bundle: .module) }
+  public static var profileFrequencySometimes: String { String(localized: "profile.frequency.sometimes", bundle: .module) }
+  public static var profileGoalMoreConsistent: String { String(localized: "profile.goal.moreConsistent", bundle: .module) }
+  public static var profileGoalSleepDeeper: String { String(localized: "profile.goal.sleepDeeper", bundle: .module) }
+  public static var profileGoalSnoreLess: String { String(localized: "profile.goal.snoreLess", bundle: .module) }
+  public static var profileGoalWakeRefreshed: String { String(localized: "profile.goal.wakeRefreshed", bundle: .module) }
+  public static var profileHabitAlcoholNone: String { String(localized: "profile.habit.alcoholNone", bundle: .module) }
+  public static var profileHabitAlcoholOccasional: String { String(localized: "profile.habit.alcoholOccasional", bundle: .module) }
+  public static var profileHabitAlcoholRegular: String { String(localized: "profile.habit.alcoholRegular", bundle: .module) }
+  public static var profileHabitCaffeineHeavy: String { String(localized: "profile.habit.caffeineHeavy", bundle: .module) }
+  public static var profileHabitCaffeineLight: String { String(localized: "profile.habit.caffeineLight", bundle: .module) }
+  public static var profileHabitCaffeineModerate: String { String(localized: "profile.habit.caffeineModerate", bundle: .module) }
+  public static var profileHabitCaffeineNone: String { String(localized: "profile.habit.caffeineNone", bundle: .module) }
+  public static var profileOccupationActive: String { String(localized: "profile.occupation.active", bundle: .module) }
+  public static var profileOccupationDesk: String { String(localized: "profile.occupation.desk", bundle: .module) }
+  public static var profileOccupationOther: String { String(localized: "profile.occupation.other", bundle: .module) }
+  public static var profileOccupationShift: String { String(localized: "profile.occupation.shift", bundle: .module) }
   public static var profilePromptAction: String { String(localized: "profile.prompt.action", bundle: .module) }
   public static var profilePromptSubtitle: String { String(localized: "profile.prompt.subtitle", bundle: .module) }
   public static var profilePromptTitle: String { String(localized: "profile.prompt.title", bundle: .module) }
+  public static var profileScreenOften: String { String(localized: "profile.screen.often", bundle: .module) }
+  public static var profileScreenRarely: String { String(localized: "profile.screen.rarely", bundle: .module) }
+  public static var profileScreenSometimes: String { String(localized: "profile.screen.sometimes", bundle: .module) }
+  public static var profileSexFemale: String { String(localized: "profile.sex.female", bundle: .module) }
+  public static var profileSexMale: String { String(localized: "profile.sex.male", bundle: .module) }
+  public static var profileSexUnspecified: String { String(localized: "profile.sex.unspecified", bundle: .module) }
+  public static var profileStressHigh: String { String(localized: "profile.stress.high", bundle: .module) }
+  public static var profileStressLow: String { String(localized: "profile.stress.low", bundle: .module) }
+  public static var profileStressMedium: String { String(localized: "profile.stress.medium", bundle: .module) }
   public static var quietIntensityLabel: String { String(localized: "quiet.intensity.label", bundle: .module) }
   public static var reRecordCustomMelodySheet: String { String(localized: "re.record.custom.melody.sheet", bundle: .module) }
   public static var recordMelodySheetNavHeader: String { String(localized: "record.melody.sheet.nav.header", bundle: .module) }
