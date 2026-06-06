@@ -25,7 +25,7 @@ Make SleepGuard feel personal: daily "Sleep Briefing" greets the user by name, r
 | F15-T3 | UserPreferences flags | Service | Done | — | Env | 2026-06-06 | 2026-06-06 |
 | F15-T4 | BriefingEngine + value types | Engine | Done | F15-T2 | Personalization | 2026-06-06 | 2026-06-06 |
 | F15-T5 | QuoteBank + localized strings | Engine | Done | F15-T4 | Personalization | 2026-06-06 | 2026-06-06 |
-| F15-T6 | SleepBriefingView + subviews | UI | Backlog | F15-T4, F15-T5 | Personalization | — | — |
+| F15-T6 | SleepBriefingView + subviews | UI | Done | F15-T4, F15-T5 | Personalization | 2026-06-06 | 2026-06-06 |
 | F15-T7 | Profile editor views (4 steps) | UI | Backlog | F15-T2 | Personalization | — | — |
 | F15-T8 | ProfilePromptCard | UI | Backlog | F15-T7 | Personalization | — | — |
 | F15-T9 | Settings integration (Profile section + briefing toggle) | UI | Backlog | F15-T3, F15-T7 | Settings | — | — |
@@ -167,11 +167,11 @@ _(filled after task completion)_
 | Completed | — |
 
 **Acceptance Criteria:**
-- [ ] `SleepBriefingView` container ≤100 lines with `ViewState` enum
-- [ ] `BriefingGreetingHeader`, `BriefingRecapCard`, `BriefingInsightCard`, `BriefingSurveyCard`
-- [ ] Full-screen cover design matching app theme
-- [ ] All strings localized via `Strings.`
-- [ ] Builds with zero errors
+- [x] `SleepBriefingView` container ≤100 lines with `ViewState` enum
+- [x] `BriefingGreetingHeader`, `BriefingRecapCard`, `BriefingInsightCard`, `BriefingSurveyCard`
+- [x] Full-screen cover design matching app theme
+- [x] All strings localized via `Strings.`
+- [x] Builds with zero errors
 
 **Prompt Used:**
 _(filled after task completion)_

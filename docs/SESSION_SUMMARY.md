@@ -5065,3 +5065,54 @@ score = 100 - snoringPenalty - eventsPenalty - intensityPenalty
 
 ### Open Questions
 - (none)
+
+
+---
+
+## 2026-06-06 — Session 71 (continued): F15-T6 SleepBriefingView + Subviews
+
+### Completed
+- F15-T6: Full-screen Sleep Briefing UI with 4 subviews
+
+### Technical Details
+- `SleepBriefingView` — 64-line container receiving `Briefing` + `onDismiss` + optional `onChipTap`
+  - Scrollable full-screen with `theme.bgPrimary` background
+  - Vertical stack: greeting → recap card → insight card → nudge → survey card → dismiss button
+  - Close button: white text on black pill at bottom
+- `BriefingGreetingHeader` — large bold greeting text, leading-aligned
+- `BriefingRecapCard` — headline + 3 `StatCard` chips (sleep duration, snoring minutes, score) in HStack
+  - Reuses existing `StatCard` component from DesignSystem
+  - Icons mapped by label: bed.double.fill, waveform, star.fill
+- `BriefingInsightCard` — sparkles icon + insight text on `bgCard` background
+- `BriefingSurveyCard` — title + chip buttons in a custom `FlowLayout` + Skip action
+  - `FlowLayout` is a simple `Layout` protocol implementation for wrapping chip rows
+  - Chips use `bgElevated` with `radiusSmall`; tap calls `onChipTap` then dismisses
+- All strings resolved via `Strings.*`; grep-verified zero hardcoded literals
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Personalization/Sources/Views/SleepBriefingView.swift` | +64 | Full-screen briefing container (replaced placeholder) |
+| `Packages/Personalization/Sources/Views/BriefingGreetingHeader.swift` | +21 | Greeting headline component |
+| `Packages/Personalization/Sources/Views/BriefingRecapCard.swift` | +49 | Headline + stat chips card |
+| `Packages/Personalization/Sources/Views/BriefingInsightCard.swift` | +29 | Insight text card with sparkles icon |
+| `Packages/Personalization/Sources/Views/BriefingSurveyCard.swift` | +92 | Survey card with FlowLayout chip buttons and Skip action |
+| `docs/trackers/f15-personalization.md` | +1/-1 | T6 status → Done, acceptance criteria checked |
+| `docs/FeatureTracker.md` | +2/-2 | Dashboard counts refreshed (77 done, 10 backlog, 38% F15 progress) |
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors.
+
+`[F15-T6] SleepBriefingView and subviews`
+- Add SleepBriefingView full-screen container (64 lines)
+- Add BriefingGreetingHeader, BriefingRecapCard, BriefingInsightCard, BriefingSurveyCard
+- Reuse StatCard component for recap stat chips
+- Add custom FlowLayout for survey chip wrapping
+- All strings via Strings.*; zero hardcoded literals
+- Build succeeds with zero errors
+
+### Next Session
+- F15-T7: Profile editor views (4 steps)
+
+### Open Questions
+- (none)
