@@ -5015,3 +5015,53 @@ score = 100 - snoringPenalty - eventsPenalty - intensityPenalty
 
 ### Open Questions
 - (none)
+
+
+---
+
+## 2026-06-06 — Session 71 (continued): F15-T5 QuoteBank + Localized Strings
+
+### Completed
+- F15-T5: Localized all briefing engine strings; regenerated Strings.swift
+
+### Technical Details
+- Added 39 localization keys to `Strings.txt`, merged into `Localizable.xcstrings` via `generate-xcstrings.py`:
+  - **Greetings**: morning/afternoon/evening/night × with-name + no-name variants
+  - **Headlines**: welcome, quiet night, normal night (with format args)
+  - **Insights**: improving, declining, steady, goal shortfall (with format args)
+  - **Quotes**: improving, declining, steady, firstNight, noData, returningAfterGap
+  - **Survey**: positive/negative titles + 10 chip labels (exercised, less caffeine, no alcohol, slept earlier, less stress, late caffeine, alcohol, stressful day, late meal, screens in bed)
+  - **Stats**: sleep, snoring, score labels
+  - **Profile prompt**: title, subtitle, action
+- `QuoteBank.swift` migrated from hardcoded English to `Strings.briefingQuote*`
+- `BriefingEngine.swift` migrated all user-facing text to `Strings.*` with `String(format:)` for dynamic interpolation
+- `Strings.swift` regenerated to 333 total accessors
+- Grep-verified: zero hardcoded capitalized strings remain in `Engine/*.swift`
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/DesignSystem/Sources/Resources/Strings.txt` | +49 | Added 39 briefing and profile localization keys |
+| `Packages/DesignSystem/Sources/Resources/Localizable.xcstrings` | +520 | Merged new keys with English translations |
+| `Packages/DesignSystem/Sources/Strings.swift` | +39 | Auto-regenerated accessors for new keys |
+| `Packages/Personalization/Sources/Engine/QuoteBank.swift` | +4/-4 | Migrated from hardcoded strings to `Strings.*` |
+| `Packages/Personalization/Sources/Engine/BriefingEngine.swift` | +15/-10 | Migrated all user-facing text to `Strings.*` with `String(format:)` |
+| `docs/trackers/f15-personalization.md` | +1/-1 | T5 status → Done, acceptance criteria checked |
+| `docs/FeatureTracker.md` | +2/-2 | Dashboard counts refreshed (76 done, 11 backlog, 31% F15 progress) |
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors.
+
+`[F15-T5] Localize BriefingEngine and QuoteBank strings`
+- Add 39 briefing/profile keys to Localizable.xcstrings
+- Migrate QuoteBank from hardcoded English to Strings.*
+- Migrate BriefingEngine headlines, insights, greetings, stats to localized format strings
+- Add 10 localized survey chip labels
+- Regenerate Strings.swift (333 total accessors)
+- Build succeeds with zero errors
+
+### Next Session
+- F15-T6: SleepBriefingView + subviews (full-screen container, greeting header, recap card, insight card, survey card)
+
+### Open Questions
+- (none)

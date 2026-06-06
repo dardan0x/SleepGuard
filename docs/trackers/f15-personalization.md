@@ -24,7 +24,7 @@ Make SleepGuard feel personal: daily "Sleep Briefing" greets the user by name, r
 | F15-T2 | UserProfile + LifestyleLog models | Model | Done | — | Models | 2026-06-06 | 2026-06-06 |
 | F15-T3 | UserPreferences flags | Service | Done | — | Env | 2026-06-06 | 2026-06-06 |
 | F15-T4 | BriefingEngine + value types | Engine | Done | F15-T2 | Personalization | 2026-06-06 | 2026-06-06 |
-| F15-T5 | QuoteBank + localized strings | Engine | Backlog | F15-T4 | Personalization | — | — |
+| F15-T5 | QuoteBank + localized strings | Engine | Done | F15-T4 | Personalization | 2026-06-06 | 2026-06-06 |
 | F15-T6 | SleepBriefingView + subviews | UI | Backlog | F15-T4, F15-T5 | Personalization | — | — |
 | F15-T7 | Profile editor views (4 steps) | UI | Backlog | F15-T2 | Personalization | — | — |
 | F15-T8 | ProfilePromptCard | UI | Backlog | F15-T7 | Personalization | — | — |
@@ -144,11 +144,11 @@ _(filled after task completion)_
 | Completed | — |
 
 **Acceptance Criteria:**
-- [ ] `QuoteBank` selects quote key by `ScoreTrend`
-- [ ] All keys added to `Localizable.xcstrings`
-- [ ] `Strings.swift` regenerated
-- [ ] No hardcoded strings in engine or views
-- [ ] Builds with zero errors
+- [x] `QuoteBank` selects quote key by `ScoreTrend`
+- [x] All keys added to `Localizable.xcstrings`
+- [x] `Strings.swift` regenerated
+- [x] No hardcoded strings in engine or views
+- [x] Builds with zero errors
 
 **Prompt Used:**
 _(filled after task completion)_
