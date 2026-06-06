@@ -4044,6 +4044,50 @@
           }
         }
       }
+    },
+    "settings.section.profile": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PROFILE"
+          }
+        }
+      }
+    },
+    "settings.profile": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Profile"
+          }
+        }
+      }
+    },
+    "settings.briefing": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Daily Sleep Briefing"
+          }
+        }
+      }
+    },
+    "settings.briefing.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show a daily recap when you open the app"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

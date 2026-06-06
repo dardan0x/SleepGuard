@@ -139,3 +139,9 @@ profile.occupation.active = Active
 profile.occupation.shift = Shift Work
 profile.occupation.other = Other
 action.continue = Continue
+
+# Settings — Profile
+settings.section.profile = PROFILE
+settings.profile = Profile
+settings.briefing = Daily Sleep Briefing
+settings.briefing.description = Show a daily recap when you open the app
