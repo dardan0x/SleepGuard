@@ -22,5 +22,13 @@ let package = Package(
       ],
       path: "Sources"
     ),
+    .testTarget(
+      name: "PersonalizationTests",
+      dependencies: [
+        "Personalization",
+        .product(name: "Models", package: "Models"),
+      ],
+      path: "Tests"
+    ),
   ]
 )
