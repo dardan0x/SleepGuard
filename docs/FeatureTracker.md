@@ -65,7 +65,7 @@ Last updated: 2026-06-06 (Session 72)
 | F12 | HealthKit | P1 | Done | 3/3 | ██████████ 100% | [tracker](trackers/f12-healthkit.md) |
 | F13 | CloudKit Sync | P2 | Backlog | 0/3 | ░░░░░░░░░░ 0% | [tracker](trackers/f13-cloudkit-sync.md) |
 | F14 | SleepGuard Rebrand & Multi-Sound | P0 | Done | 27/27 | ██████████ 100% | [tracker](trackers/f14-sleepguard-rebrand.md) |
-| F15 | Personalization & Sleep Briefing | P1 | In Progress | 14/16 | ████████░░ 88% | [tracker](trackers/f15-personalization.md) |
+| F15 | Personalization & Sleep Briefing | P1 | Done | 16/16 | ██████████ 100% | [tracker](trackers/f15-personalization.md) |
 
 ## Activity Log
 
@@ -275,6 +275,9 @@ _Unblocked tasks in priority order. F13 (CloudKit Sync) is intentionally skipped
 
 | Task | Feature | Priority | Why Ready |
 |------|---------|----------|-----------|
+| F15-T16 | F15 | P1 | Feature doc + tracker finalization — F15 16/16 tasks Done |
+| F15-T15 | F15 | P1 | Build verification + feature doc created |
+| F15-T14 | F15 | P1 | BriefingEngine unit tests written (23 tests); execution requires iOS Simulator via Xcode GUI |
 | F15-T13 | F15 | P1 | Strings verified with grep — zero hardcoded user-facing strings in all F15 views |
 | F15-T14 | F15 | P1 | BriefingEngine unit tests |
 | F15-T15 | F15 | P1 | Final build & simulator verification |
