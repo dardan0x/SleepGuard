@@ -40,10 +40,10 @@ Last updated: 2026-06-06 (Session 71)
 | Blocked | 0 |
 | — | — |
 | Total Tasks | 87 |
-| Tasks Done | 72 |
+| Tasks Done | 73 |
 | Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
-| Tasks Backlog | 15 |
+| Tasks Backlog | 14 |
 | — | — |
 | **Progress** | **83%** |
 
@@ -65,7 +65,7 @@ Last updated: 2026-06-06 (Session 71)
 | F12 | HealthKit | P1 | Done | 3/3 | ██████████ 100% | [tracker](trackers/f12-healthkit.md) |
 | F13 | CloudKit Sync | P2 | Backlog | 0/3 | ░░░░░░░░░░ 0% | [tracker](trackers/f13-cloudkit-sync.md) |
 | F14 | SleepGuard Rebrand & Multi-Sound | P0 | Done | 27/27 | ██████████ 100% | [tracker](trackers/f14-sleepguard-rebrand.md) |
-| F15 | Personalization & Sleep Briefing | P1 | In Progress | 1/16 | █░░░░░░░░░ 6% | [tracker](trackers/f15-personalization.md) |
+| F15 | Personalization & Sleep Briefing | P1 | In Progress | 2/16 | ███░░░░░░░ 12% | [tracker](trackers/f15-personalization.md) |
 
 ## Activity Log
 
@@ -73,6 +73,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-06-06 | F15-T2 | Completed | `UserProfile` and `LifestyleLog` SwiftData models with all enums (BiologicalSex, PrimaryGoal, CaffeineHabit, AlcoholHabit, ExerciseFrequency, TypicalStress, ScreenBeforeBed, OccupationType). Both registered in `SleepGuardApp.swift` schema. Build succeeds |
 | 2026-06-06 | F15-T1 | Completed | `Packages/Personalization` scaffolded with `Package.swift` (deps Models/Env/DesignSystem), `Sources/Engine/` and `Sources/Views/` dirs. Added to `SleepGuard.xcodeproj` as local package. Placeholder source files for compilation. Build succeeds |
 | 2026-06-05 | F15 Planning | Planned | F15 (Personalization & Sleep Briefing) defined; tracker + 16-task backlog created; new `Personalization` package spec (deps Models/Env/DesignSystem); `UserProfile`/`LifestyleLog` models, pure `BriefingEngine`, daily full-screen briefing, profile editor + lifestyle micro-surveys designed; on-device-only. No code yet — all tasks Backlog |
 | 2026-06-01 | Settings Storage Limits | Completed | `UserPreferences` gained `limitStorageEnabled`, `storageLimitMB`, `limitDaysEnabled`, `maxDays`. `StorageLimitEnforcer` async service with off-MainActor file deletion. `SettingsStorageSection` UI with toggles + pickers. Triggers on app launch and session save. Preserves metadata, deletes only audio. DEBUG test button. 11 localized strings. Build succeeds |
