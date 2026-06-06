@@ -2,6 +2,7 @@ import SwiftUI
 import SwiftData
 import Env
 import Models
+import Personalization
 import SleepSession
 import Statistics
 
@@ -12,14 +13,23 @@ struct StatisticsTab: View {
   @Environment(SessionManager.self) private var sessionManager
   @Environment(HealthKitSync.self) private var healthKitSync
   @Environment(\.modelContext) private var modelContext
+  @State private var showProfileEditor = false
 
   var body: some View {
     NavigationStack(path: Binding(
       get: { routerPath.path },
       set: { routerPath.path = $0 }
     )) {
-      StatisticsDashboardView()
-        .withAppRouter()
+      VStack(spacing: 0) {
+        ProfilePromptCard {
+          showProfileEditor = true
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 12)
+
+        StatisticsDashboardView()
+          .withAppRouter()
+      }
     }
     .sheet(
       item: Binding(
@@ -38,6 +48,15 @@ struct StatisticsTab: View {
           SessionSummaryView(session: session)
             .withEnvironments()
         }
+      }
+    }
+    .sheet(isPresented: $showProfileEditor) {
+      if let profile = fetchOrCreateProfile() {
+        ProfileEditorView(profile: profile) {
+          showProfileEditor = false
+          UserPreferences.shared.hasCompletedProfile = true
+        }
+        .withEnvironments()
       }
     }
     .onAppear {
@@ -62,6 +81,16 @@ struct StatisticsTab: View {
       }
     }
     .environment(routerPath)
+  }
+
+  private func fetchOrCreateProfile() -> UserProfile? {
+    let descriptor = FetchDescriptor<UserProfile>()
+    if let existing = try? modelContext.fetch(descriptor).first {
+      return existing
+    }
+    let profile = UserProfile()
+    modelContext.insert(profile)
+    return profile
   }
 
   private func autoSaveForceSavedSession(session: SleepSession) {

@@ -5173,3 +5173,49 @@ score = 100 - snoringPenalty - eventsPenalty - intensityPenalty
 
 ### Open Questions
 - (none)
+
+
+---
+
+## 2026-06-06 — Session 71 (continued): F15-T8 ProfilePromptCard
+
+### Completed
+- F15-T8: Dismissible profile prompt card in Statistics tab
+
+### Technical Details
+- `ProfilePromptCard` — 58-line view with `@Query` for sessions, gated by 3 conditions:
+  - ≥3 saved sessions (`totalDuration >= minimumSaveDuration`)
+  - `!hasCompletedProfile`
+  - `profilePromptDismissCount < 3`
+  - X dismiss button increments `profilePromptDismissCount`
+  - Action button calls `onSetupProfile()` callback
+- Embedded in `StatisticsTab` above `StatisticsDashboardView` with `.padding(.horizontal, 16)`
+- `StatisticsTab` gained a `.sheet(isPresented: $showProfileEditor)` with `fetchOrCreateProfile()` helper:
+  - Fetches existing `UserProfile` from SwiftData, or creates + inserts a new one
+  - Presents `ProfileEditorView` wrapped with `.withEnvironments()`
+  - Sets `hasCompletedProfile = true` on save completion
+- App target now imports `Personalization`
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Personalization/Sources/Views/ProfilePromptCard.swift` | +59 | New dismissible profile prompt card |
+| `SleepGuard/StatisticsTab.swift` | +27 | Added `import Personalization`, embedded `ProfilePromptCard`, added profile editor sheet with `fetchOrCreateProfile()` |
+| `docs/trackers/f15-personalization.md` | +1/-1 | T8 status → Done |
+| `docs/FeatureTracker.md` | +2/-2 | Dashboard counts refreshed (79 done, 8 backlog, 50% F15 progress) |
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors.
+
+`[F15-T8] Profile prompt card in Statistics tab`
+- Add ProfilePromptCard with session count gate and dismiss logic
+- Embed card in StatisticsTab above dashboard
+- Add profile editor sheet with fetch-or-create helper
+- Set hasCompletedProfile true on save
+- Build succeeds with zero errors
+
+### Next Session
+- F15-T9: Settings integration (Profile section + briefing toggle)
+
+### Open Questions
+- (none)
