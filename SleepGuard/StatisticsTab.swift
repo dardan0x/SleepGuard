@@ -13,7 +13,7 @@ struct StatisticsTab: View {
   @Environment(SessionManager.self) private var sessionManager
   @Environment(HealthKitSync.self) private var healthKitSync
   @Environment(\.modelContext) private var modelContext
-  @State private var showProfileEditor = false
+
 
   var body: some View {
     NavigationStack(path: Binding(
@@ -22,7 +22,7 @@ struct StatisticsTab: View {
     )) {
       VStack(spacing: 0) {
         ProfilePromptCard {
-          showProfileEditor = true
+          routerPath.presentedSheet = .profileEditor
         }
         .padding(.horizontal, 16)
         .padding(.top, 12)
@@ -48,15 +48,14 @@ struct StatisticsTab: View {
           SessionSummaryView(session: session)
             .withEnvironments()
         }
-      }
-    }
-    .sheet(isPresented: $showProfileEditor) {
-      if let profile = fetchOrCreateProfile() {
-        ProfileEditorView(profile: profile) {
-          showProfileEditor = false
-          UserPreferences.shared.hasCompletedProfile = true
+      case .profileEditor:
+        if let profile = fetchOrCreateProfile() {
+          ProfileEditorView(profile: profile) {
+            routerPath.presentedSheet = nil
+            UserPreferences.shared.hasCompletedProfile = true
+          }
+          .withEnvironments()
         }
-        .withEnvironments()
       }
     }
     .onAppear {

@@ -29,7 +29,7 @@ Make SleepGuard feel personal: daily "Sleep Briefing" greets the user by name, r
 | F15-T7 | Profile editor views (4 steps) | UI | Done | F15-T2 | Personalization | 2026-06-06 | 2026-06-06 |
 | F15-T8 | ProfilePromptCard | UI | Done | F15-T7 | Personalization | 2026-06-06 | 2026-06-06 |
 | F15-T9 | Settings integration (Profile section + briefing toggle) | UI | Done | F15-T3, F15-T7 | Settings | 2026-06-06 | 2026-06-06 |
-| F15-T10 | Router wiring (SheetDestination.profileEditor) | Route | Backlog | F15-T7 | Env | — | — |
+| F15-T10 | Router wiring (SheetDestination.profileEditor) | Route | Done | F15-T7 | Env | 2026-06-06 | 2026-06-06 |
 | F15-T11 | SwiftData schema registration + app-level briefing trigger | App | Backlog | F15-T2, F15-T6 | SleepGuard | — | — |
 | F15-T12 | Daily briefing trigger in MainTabView/StatisticsTab | UI | Backlog | F15-T11 | SleepGuard | — | — |
 | F15-T13 | Localization strings for all UI | Localization | Backlog | — | DesignSystem | — | — |
@@ -259,10 +259,10 @@ _(filled after task completion)_
 | Completed | — |
 
 **Acceptance Criteria:**
-- [ ] `SheetDestination.profileEditor` added to `Router.swift`
-- [ ] Handled in `AppRegistry.swift` `withAppRouter()`
-- [ ] Sheet wrapped with `.withEnvironments()`
-- [ ] Builds with zero errors
+- [x] `SheetDestination.profileEditor` added to `Router.swift`
+- [x] Handled in `AppRegistry.swift` `withAppRouter()`
+- [x] Sheet wrapped with `.withEnvironments()`
+- [x] Builds with zero errors
 
 **Prompt Used:**
 _(filled after task completion)_

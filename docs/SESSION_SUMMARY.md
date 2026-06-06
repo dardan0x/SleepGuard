@@ -5266,3 +5266,50 @@ score = 100 - snoringPenalty - eventsPenalty - intensityPenalty
 
 ### Open Questions
 - (none)
+
+
+---
+
+## 2026-06-06 — Session 71 (continued): F15-T10 Router Wiring
+
+### Completed
+- F15-T10: SheetDestination.profileEditor added to global router
+
+### Technical Details
+- `SheetDestination.profileEditor` added to `Router.swift` with id `"profileEditor"`
+- `StatisticsTab` migrated from local `showProfileEditor` state to `routerPath.presentedSheet = .profileEditor`
+  - Sheet switch now handles `.profileEditor` case
+  - `ProfilePromptCard` taps set `routerPath.presentedSheet = .profileEditor`
+- `SettingsTab` gained a `.sheet(item:)` modifier matching `StatisticsTab` pattern
+  - Handles `.profileEditor` with `fetchOrCreateProfile()` + `ProfileEditorView`
+  - Wrapped with `.withEnvironments()`
+- `SettingsView` migrated from local `showProfileEditor` state to `routerPath.presentedSheet = .profileEditor`
+  - Added `@Environment(RouterPath.self) private var routerPath`
+  - Removed local `fetchOrCreateProfile()` helper (now in `SettingsTab`)
+- Both tabs use consistent dismiss pattern: `routerPath.presentedSheet = nil`
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Env/Sources/Services/Router.swift` | +3 | Added `.profileEditor` to `SheetDestination` |
+| `SleepGuard/StatisticsTab.swift` | +4/-5 | Migrated profile editor from local state to `routerPath.presentedSheet` |
+| `SleepGuard/SettingsTab.swift` | +27 | Added sheet modifier with `.profileEditor` handling + `fetchOrCreateProfile()` |
+| `Packages/Settings/Sources/Views/SettingsView.swift` | +1/-10 | Uses `routerPath.presentedSheet`, removed local state and helper |
+| `docs/trackers/f15-personalization.md` | +1/-1 | T10 status → Done |
+| `docs/FeatureTracker.md` | +2/-2 | Dashboard counts refreshed (81 done, 6 backlog, 62% F15 progress) |
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors.
+
+`[F15-T10] Add profileEditor to SheetDestination router`
+- Add SheetDestination.profileEditor to Router.swift
+- Migrate StatisticsTab profile sheet to router-based presentation
+- Add sheet handler to SettingsTab with fetchOrCreateProfile
+- Migrate SettingsView to use routerPath.presentedSheet
+- Build succeeds with zero errors
+
+### Next Session
+- F15-T11: SwiftData schema registration + app-level briefing trigger
+
+### Open Questions
+- (none)
