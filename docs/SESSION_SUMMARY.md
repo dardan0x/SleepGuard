@@ -4917,3 +4917,45 @@ score = 100 - snoringPenalty - eventsPenalty - intensityPenalty
 
 ### Open Questions
 - (none)
+
+
+---
+
+## 2026-06-06 — Session 71 (continued): F15-T3 UserPreferences Flags
+
+### Completed
+- F15-T3: UserPreferences flags for Personalization & Sleep Briefing
+
+### Technical Details
+- Added 4 new properties to `UserPreferences` following the existing manual `access`/`withMutation` pattern:
+  - `lastBriefingShownDate: Date?` — gates the once-per-day briefing; nil means never shown
+  - `hasCompletedProfile: Bool` — suppresses the profile prompt once the user fills the editor
+  - `profilePromptDismissCount: Int` — backs off if user keeps dismissing (max 3)
+  - `briefingEnabled: Bool` — Settings toggle to disable daily briefing; defaults to `true` using `defaults.object(forKey:) == nil` check
+- All properties use `@Observable` registrar calls so SwiftUI re-renders when values change
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Env/Sources/Services/UserPreferences.swift` | +48 | Added `lastBriefingShownDate`, `hasCompletedProfile`, `profilePromptDismissCount`, `briefingEnabled` with `access`/`withMutation` |
+| `docs/trackers/f15-personalization.md` | +1/-1 | T3 status → Done, acceptance criteria checked |
+| `docs/FeatureTracker.md` | +2/-2 | Dashboard counts refreshed (74 done, 13 backlog, 19% F15 progress) |
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors.
+
+### Suggested Branch
+`feature/f15/t3-userpreferences-flags`
+
+### Suggested Commit
+`[F15-T3] UserPreferences flags for personalization and briefing`
+- Add lastBriefingShownDate, hasCompletedProfile, profilePromptDismissCount, briefingEnabled
+- All use manual access/withMutation pattern for @Observable change propagation
+- briefingEnabled defaults to true for new installs
+- Build succeeds with zero errors
+
+### Next Session
+- F15-T4: BriefingEngine + value types (pure rules engine, no UI)
+
+### Open Questions
+- (none)
