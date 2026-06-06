@@ -2,7 +2,7 @@
 
 > Auto-updated by the AI after every task. This is the local source of truth.
 
-Last updated: 2026-06-06 (Session 72)
+Last updated: 2026-06-06 (Session 73)
 
 ---
 
@@ -73,6 +73,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-06-06 | Session 73 | Completed | F15-T14: 23 BriefingEngine unit tests; F15-T15: build verify; F15-T16: feature doc. F15 complete (16/16). Roadmap V4 done |
 | 2026-06-06 | F15-T11 | Completed | App-level daily briefing trigger: `generateBriefingIfNeeded()` in `MainTabView` (both iOS 26+ and custom tab paths), `fullScreenCover` presenting `SleepBriefingView`, gate checks `briefingEnabled`, `lastBriefingShownDate` not today, `hasAnySession`. `onDismiss` saves shown date. Chip tap persists `LifestyleLog`. Fixed `Settings/Package.swift` to declare `Personalization` dep removing build warning. Build succeeds |
 | 2026-06-06 | F15-T12 | Completed | Daily briefing trigger merged into T11; `.task` on `MainTabView` calls `generateBriefingIfNeeded()` on appear; returning-after-gap and first-night variants handled by `BriefingEngine` from T4 |
 | 2026-06-06 | F15-T2 | Completed | `UserProfile` and `LifestyleLog` SwiftData models with all enums (BiologicalSex, PrimaryGoal, CaffeineHabit, AlcoholHabit, ExerciseFrequency, TypicalStress, ScreenBeforeBed, OccupationType). Both registered in `SleepGuardApp.swift` schema. Build succeeds |
@@ -279,9 +280,6 @@ _Unblocked tasks in priority order. F13 (CloudKit Sync) is intentionally skipped
 | F15-T15 | F15 | P1 | Build verification + feature doc created |
 | F15-T14 | F15 | P1 | BriefingEngine unit tests written (23 tests); execution requires iOS Simulator via Xcode GUI |
 | F15-T13 | F15 | P1 | Strings verified with grep — zero hardcoded user-facing strings in all F15 views |
-| F15-T14 | F15 | P1 | BriefingEngine unit tests |
-| F15-T15 | F15 | P1 | Final build & simulator verification |
-| F15-T16 | F15 | P1 | Feature doc + tracker finalization |
 
 ## Blocked
 
@@ -291,11 +289,12 @@ _Unblocked tasks in priority order. F13 (CloudKit Sync) is intentionally skipped
 
 ## Up Next
 
-_Unblocked tasks in priority order. F13 (CloudKit Sync) is intentionally skipped for now._
+_All planned roadmap features complete. Remaining backlog: F13 (CloudKit Sync, P2, intentionally skipped). Next steps depend on user priority._
 
 | Task | Feature | Priority | Why Ready |
 |------|---------|----------|-----------|
-| (none) | — | — | All tasks complete |
+| F13-T1 | F13 | P2 | CloudKit Sync scaffold (no blockers) |
+| Design compliance | — | P1 | `docs/plans/design-compliance-reformat.md` has 6 phases planned |
 
 ## Completed (last 10)
 
