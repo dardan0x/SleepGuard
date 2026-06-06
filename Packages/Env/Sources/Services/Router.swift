@@ -12,11 +12,14 @@ public enum RouterDestination: Hashable, Sendable {
 
 public enum SheetDestination: Identifiable, Hashable, Sendable {
   case sessionSummary
+  case profileEditor
 
   public var id: String {
     switch self {
     case .sessionSummary:
       return "sessionSummary"
+    case .profileEditor:
+      return "profileEditor"
     }
   }
 }
