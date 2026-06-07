@@ -62,7 +62,7 @@ struct MainTabView: View {
         .task {
           generateBriefingIfNeeded()
         }
-        .fullScreenCover(
+        .sheet(
           isPresented: $showBriefing,
           onDismiss: {
             userPreferences.lastBriefingShownDate = Date()
@@ -98,7 +98,7 @@ struct MainTabView: View {
         .task {
           generateBriefingIfNeeded()
         }
-        .fullScreenCover(
+        .sheet(
           isPresented: $showBriefing,
           onDismiss: {
             userPreferences.lastBriefingShownDate = Date()
@@ -185,10 +185,28 @@ struct MainTabView: View {
 
       let profileDescriptor = FetchDescriptor<UserProfile>()
       let profile = try? modelContext.fetch(profileDescriptor).first
+      let briefingProfile = profile.map {
+        BriefingProfile(
+          firstName: $0.firstName,
+          targetSleepHours: $0.targetSleepHours,
+          completionPercentage: $0.completionPercentage
+        )
+      } ?? BriefingProfile()
+
+      let briefingSessions = sessions.compactMap { session -> BriefingSession? in
+        guard session.hasCachedScore else { return nil }
+        return BriefingSession(
+          startDate: session.startDate,
+          endDate: session.endDate,
+          sleepScore: session.cachedSleepScore,
+          snoringDuration: session.cachedSnoringDuration,
+          totalDuration: session.totalDuration
+        )
+      }
 
       let briefing = BriefingEngine.generate(
-        profile: profile,
-        recentSessions: sessions,
+        profile: briefingProfile,
+        recentSessions: briefingSessions,
         lifestyleLogs: logs,
         now: Date()
       )

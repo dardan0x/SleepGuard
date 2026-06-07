@@ -7,41 +7,81 @@ struct ProfileStepIdentityView: View {
   @Bindable var profile: UserProfile
   @Environment(Theme.self) private var theme
 
+  // Local state to avoid writing to @Model on every keystroke
+  @State private var firstName: String
+  @State private var birthYear: String
+  @State private var height: String
+  @State private var weight: String
+
+  init(profile: UserProfile) {
+    self.profile = profile
+    _firstName = State(initialValue: profile.firstName ?? "")
+    _birthYear = State(initialValue: profile.birthYear.map(String.init) ?? "")
+    _height = State(initialValue: profile.heightCm.map { String(format: "%.0f", $0) } ?? "")
+    _weight = State(initialValue: profile.weightKg.map { String(format: "%.0f", $0) } ?? "")
+  }
+
   var body: some View {
-    VStack(alignment: .leading, spacing: 20) {
-      Text(Strings.profileEditorStepYou)
-        .font(.system(size: 28, weight: .bold))
-        .foregroundStyle(theme.textPrimary)
+    ScrollView {
+      VStack(alignment: .leading, spacing: 20) {
+        Text(Strings.profileEditorStepYou)
+          .font(.system(size: 28, weight: .bold))
+          .foregroundStyle(theme.textPrimary)
 
-      ProfileTextField(title: Strings.profileFieldFirstName, text: Binding(
-        get: { profile.firstName ?? "" },
-        set: { profile.firstName = $0.isEmpty ? nil : $0 }
-      ))
+        ProfileTextField(title: Strings.profileFieldFirstName, text: $firstName)
+          .onSubmit { syncFirstName() }
 
-      ProfileTextField(title: Strings.profileFieldBirthYear, text: Binding(
-        get: { profile.birthYear.map(String.init) ?? "" },
-        set: { profile.birthYear = Int($0) }
-      ), keyboard: .numberPad)
+        ProfileTextField(title: Strings.profileFieldBirthYear, text: $birthYear, keyboard: .numberPad)
+          .onSubmit { syncBirthYear() }
 
-      ProfilePicker(title: Strings.profileFieldBiologicalSex, selection: $profile.biologicalSex, options: [
-        (Strings.profileSexUnspecified, .unspecified),
-        (Strings.profileSexFemale, .female),
-        (Strings.profileSexMale, .male),
-      ])
+        ProfilePicker(title: Strings.profileFieldBiologicalSex, selection: $profile.biologicalSex, options: [
+          (Strings.profileSexUnspecified, .unspecified),
+          (Strings.profileSexFemale, .female),
+          (Strings.profileSexMale, .male),
+        ])
 
-      ProfileTextField(title: Strings.profileFieldHeight, text: Binding(
-        get: { profile.heightCm.map { String(format: "%.0f", $0) } ?? "" },
-        set: { profile.heightCm = Double($0) }
-      ), keyboard: .decimalPad)
+        ProfileTextField(title: Strings.profileFieldHeight, text: $height, keyboard: .decimalPad)
+          .onSubmit { syncHeight() }
 
-      ProfileTextField(title: Strings.profileFieldWeight, text: Binding(
-        get: { profile.weightKg.map { String(format: "%.0f", $0) } ?? "" },
-        set: { profile.weightKg = Double($0) }
-      ), keyboard: .decimalPad)
+        ProfileTextField(title: Strings.profileFieldWeight, text: $weight, keyboard: .decimalPad)
+          .onSubmit { syncWeight() }
 
-      Spacer()
+        Spacer(minLength: 40)
+      }
+      .padding(.horizontal, 20)
+      .padding(.top, 8)
+      .contentShape(Rectangle())
+      .onTapGesture {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+      }
     }
-    .padding(.horizontal, 20)
+    .scrollIndicators(.hidden)
+    .onDisappear {
+      syncAll()
+    }
+  }
+
+  private func syncAll() {
+    syncFirstName()
+    syncBirthYear()
+    syncHeight()
+    syncWeight()
+  }
+
+  private func syncFirstName() {
+    profile.firstName = firstName.isEmpty ? nil : firstName
+  }
+
+  private func syncBirthYear() {
+    profile.birthYear = Int(birthYear)
+  }
+
+  private func syncHeight() {
+    profile.heightCm = Double(height)
+  }
+
+  private func syncWeight() {
+    profile.weightKg = Double(weight)
   }
 }
 

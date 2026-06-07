@@ -8,18 +8,22 @@ struct ProfileStepGoalsView: View {
   @Environment(Theme.self) private var theme
 
   var body: some View {
-    VStack(alignment: .leading, spacing: 20) {
-      Text(Strings.profileEditorStepGoals)
-        .font(.system(size: 28, weight: .bold))
-        .foregroundStyle(theme.textPrimary)
+    ScrollView {
+      VStack(alignment: .leading, spacing: 20) {
+        Text(Strings.profileEditorStepGoals)
+          .font(.system(size: 28, weight: .bold))
+          .foregroundStyle(theme.textPrimary)
 
-      bedtimeSection
-      sleepHoursSection
-      goalSection
+        bedtimeSection
+        sleepHoursSection
+        goalSection
 
-      Spacer()
+        Spacer(minLength: 40)
+      }
+      .padding(.horizontal, 20)
+      .padding(.top, 8)
     }
-    .padding(.horizontal, 20)
+    .scrollIndicators(.hidden)
   }
 
   private var bedtimeSection: some View {

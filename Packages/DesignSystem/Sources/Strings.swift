@@ -34,22 +34,37 @@ public enum Strings {
   public static var briefingGreetingMorningNoName: String { String(localized: "briefing.greeting.morning.noName", bundle: .module) }
   public static var briefingGreetingNight: String { String(localized: "briefing.greeting.night", bundle: .module) }
   public static var briefingGreetingNightNoName: String { String(localized: "briefing.greeting.night.noName", bundle: .module) }
+  public static var briefingHeadlineCombinedDurationScore: String { String(localized: "briefing.headline.combinedDurationScore", bundle: .module) }
+  public static var briefingHeadlineCombinedScoreSnoring: String { String(localized: "briefing.headline.combinedScoreSnoring", bundle: .module) }
   public static var briefingHeadlineNormal: String { String(localized: "briefing.headline.normal", bundle: .module) }
   public static var briefingHeadlineQuiet: String { String(localized: "briefing.headline.quiet", bundle: .module) }
+  public static var briefingHeadlineWeeklyDuration: String { String(localized: "briefing.headline.weeklyDuration", bundle: .module) }
+  public static var briefingHeadlineWeeklyScore: String { String(localized: "briefing.headline.weeklyScore", bundle: .module) }
+  public static var briefingHeadlineWeeklySnoring: String { String(localized: "briefing.headline.weeklySnoring", bundle: .module) }
   public static var briefingHeadlineWelcome: String { String(localized: "briefing.headline.welcome", bundle: .module) }
   public static var briefingInsightDeclining: String { String(localized: "briefing.insight.declining", bundle: .module) }
   public static var briefingInsightGoalShortfall: String { String(localized: "briefing.insight.goalShortfall", bundle: .module) }
   public static var briefingInsightImproving: String { String(localized: "briefing.insight.improving", bundle: .module) }
   public static var briefingInsightSteady: String { String(localized: "briefing.insight.steady", bundle: .module) }
+  public static var briefingInsightWeeklyDurationDown: String { String(localized: "briefing.insight.weeklyDurationDown", bundle: .module) }
+  public static var briefingInsightWeeklyDurationUp: String { String(localized: "briefing.insight.weeklyDurationUp", bundle: .module) }
+  public static var briefingInsightWeeklyScoreDown: String { String(localized: "briefing.insight.weeklyScoreDown", bundle: .module) }
+  public static var briefingInsightWeeklyScoreUp: String { String(localized: "briefing.insight.weeklyScoreUp", bundle: .module) }
+  public static var briefingInsightWeeklySnoringDown: String { String(localized: "briefing.insight.weeklySnoringDown", bundle: .module) }
+  public static var briefingInsightWeeklySnoringUp: String { String(localized: "briefing.insight.weeklySnoringUp", bundle: .module) }
+  public static var briefingProfileNudge: String { String(localized: "briefing.profileNudge", bundle: .module) }
   public static var briefingQuoteDeclining: String { String(localized: "briefing.quote.declining", bundle: .module) }
   public static var briefingQuoteFirstNight: String { String(localized: "briefing.quote.firstNight", bundle: .module) }
   public static var briefingQuoteImproving: String { String(localized: "briefing.quote.improving", bundle: .module) }
   public static var briefingQuoteNoData: String { String(localized: "briefing.quote.noData", bundle: .module) }
   public static var briefingQuoteReturningAfterGap: String { String(localized: "briefing.quote.returningAfterGap", bundle: .module) }
   public static var briefingQuoteSteady: String { String(localized: "briefing.quote.steady", bundle: .module) }
+  public static var briefingStatLastNight: String { String(localized: "briefing.stat.lastNight", bundle: .module) }
   public static var briefingStatScore: String { String(localized: "briefing.stat.score", bundle: .module) }
   public static var briefingStatSleep: String { String(localized: "briefing.stat.sleep", bundle: .module) }
   public static var briefingStatSnoring: String { String(localized: "briefing.stat.snoring", bundle: .module) }
+  public static var briefingStatTrend: String { String(localized: "briefing.stat.trend", bundle: .module) }
+  public static var briefingStatWeeklyAvg: String { String(localized: "briefing.stat.weeklyAvg", bundle: .module) }
   public static var briefingSurveyChipAlcohol: String { String(localized: "briefing.survey.chip.alcohol", bundle: .module) }
   public static var briefingSurveyChipExercised: String { String(localized: "briefing.survey.chip.exercised", bundle: .module) }
   public static var briefingSurveyChipLateCaffeine: String { String(localized: "briefing.survey.chip.lateCaffeine", bundle: .module) }

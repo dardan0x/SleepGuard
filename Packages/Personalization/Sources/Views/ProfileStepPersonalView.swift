@@ -7,18 +7,37 @@ struct ProfileStepPersonalView: View {
   @Bindable var profile: UserProfile
   @Environment(Theme.self) private var theme
 
+  // Local state to avoid writing to @Model on every keystroke
+  @State private var hobbiesText: String
+
+  init(profile: UserProfile) {
+    self.profile = profile
+    _hobbiesText = State(initialValue: profile.hobbies.joined(separator: ", "))
+  }
+
   var body: some View {
-    VStack(alignment: .leading, spacing: 24) {
-      Text(Strings.profileEditorStepPersonal)
-        .font(.system(size: 28, weight: .bold))
-        .foregroundStyle(theme.textPrimary)
+    ScrollView {
+      VStack(alignment: .leading, spacing: 24) {
+        Text(Strings.profileEditorStepPersonal)
+          .font(.system(size: 28, weight: .bold))
+          .foregroundStyle(theme.textPrimary)
 
-      hobbiesSection
-      occupationSection
+        hobbiesSection
+        occupationSection
 
-      Spacer()
+        Spacer(minLength: 40)
+      }
+      .padding(.horizontal, 20)
+      .padding(.top, 8)
+      .contentShape(Rectangle())
+      .onTapGesture {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+      }
     }
-    .padding(.horizontal, 20)
+    .scrollIndicators(.hidden)
+    .onDisappear {
+      profile.hobbies = hobbiesText.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
+    }
   }
 
   private var hobbiesSection: some View {
@@ -28,15 +47,12 @@ struct ProfileStepPersonalView: View {
         .foregroundStyle(theme.textTertiary)
         .textCase(.uppercase)
 
-      TextField("", text: Binding(
-        get: { profile.hobbies.joined(separator: ", ") },
-        set: { profile.hobbies = $0.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty } }
-      ))
-      .font(.system(size: 17, weight: .medium))
-      .foregroundStyle(theme.textPrimary)
-      .padding(14)
-      .background(theme.bgCard)
-      .cornerRadius(theme.radiusSmall)
+      TextField("", text: $hobbiesText)
+        .font(.system(size: 17, weight: .medium))
+        .foregroundStyle(theme.textPrimary)
+        .padding(14)
+        .background(theme.bgCard)
+        .cornerRadius(theme.radiusSmall)
     }
   }
 

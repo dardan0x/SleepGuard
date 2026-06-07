@@ -21,8 +21,7 @@ struct SleepGuardApp: App {
       let container = try ModelContainer(for: schema, configurations: [modelConfiguration])
       #if DEBUG
       if ProcessInfo.processInfo.arguments.contains("-generateMockData") {
-        let context = ModelContext(container)
-        MockDataGenerator.generate(modelContext: context)
+        MockDataGenerator.generate(modelContext: container.mainContext)
       }
       #endif
       return container

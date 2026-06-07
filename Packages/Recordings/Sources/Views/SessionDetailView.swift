@@ -281,6 +281,8 @@ public struct SessionDetailView: View {
         if userPreferences.enhancedSleepTracking && (session.sleepStageSegments == nil || stagesEmptyAndOld) {
           let stages = await HealthKitSync.shared.fetchSleepStages(for: session)
           session.sleepStageSegments = stages.isEmpty ? [] : stages
+          // Recalculate cached score since sleep stages affect stagePenalty
+          session.cachedSleepScore = session.sleepScore
           try modelContext.save()
         }
 
@@ -336,6 +338,9 @@ public struct SessionDetailView: View {
           try modelContext.save()
         }
 
+        // Resolve transformable faults before deletion
+        _ = session.sleepStageSegments
+        _ = session.recordingGaps
         deleteSessionFiles(session)
         modelContext.delete(session)
         try modelContext.save()

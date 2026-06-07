@@ -20,7 +20,18 @@ public struct SleepBriefingView: View {
 
   public var body: some View {
     ScrollView {
-      VStack(spacing: 20) {
+      VStack(spacing: 12) {
+        HStack {
+          Spacer()
+          Button {
+            onDismiss()
+          } label: {
+            Image(systemName: "xmark.circle.fill")
+              .font(.system(size: 24))
+              .foregroundStyle(theme.textSecondary)
+          }
+        }
+
         BriefingGreetingHeader(greeting: briefing.greeting)
 
         BriefingRecapCard(
@@ -30,6 +41,14 @@ public struct SleepBriefingView: View {
 
         if let insight = briefing.insight {
           BriefingInsightCard(insight: insight)
+        }
+
+        if let profileNudge = briefing.profileNudge {
+          Text(profileNudge)
+            .font(.system(size: 15, weight: .medium))
+            .foregroundStyle(theme.accent)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 4)
         }
 
         Text(briefing.nudge)
@@ -50,7 +69,7 @@ public struct SleepBriefingView: View {
           )
         }
 
-        Spacer(minLength: 20)
+        Spacer(minLength: 8)
 
         Button {
           onDismiss()
@@ -59,14 +78,14 @@ public struct SleepBriefingView: View {
             .font(.system(size: 17, weight: .semibold))
             .foregroundStyle(theme.bgPrimary)
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 16)
+            .padding(.vertical, 12)
             .background(theme.textPrimary)
             .cornerRadius(theme.radiusCard)
         }
       }
       .padding(.horizontal, 20)
-      .padding(.top, 60)
-      .padding(.bottom, 32)
+      .padding(.top, 24)
+      .padding(.bottom, 20)
     }
     .background(theme.bgPrimary)
   }

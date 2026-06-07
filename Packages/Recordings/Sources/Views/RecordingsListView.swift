@@ -117,6 +117,9 @@ public struct RecordingsListView: View {
       try modelContext.save()
 
       for session in group.sessions {
+        // Resolve transformable faults before deletion
+        _ = session.sleepStageSegments
+        _ = session.recordingGaps
         deleteSessionFiles(session)
         modelContext.delete(session)
       }

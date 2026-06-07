@@ -94,6 +94,10 @@ public struct SettingsView: View {
 
       let sessions = try modelContext.fetch(FetchDescriptor<SleepSession>())
       for session in sessions {
+        // Resolve transformable faults before deletion to prevent
+        // "detached from a context without resolving attribute faults" crash.
+        _ = session.sleepStageSegments
+        _ = session.recordingGaps
         deleteSessionFiles(session)
         modelContext.delete(session)
       }

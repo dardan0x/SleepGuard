@@ -11,26 +11,17 @@ struct BriefingEngineTests {
 
   private func makeSession(
     startDate: Date,
+    endDate: Date? = nil,
     durationHours: Double = 1,
-    events: [SnoreEvent] = []
-  ) -> SleepSession {
-    let endDate = startDate.addingTimeInterval(durationHours * 3600)
-    let session = SleepSession(startDate: startDate, endDate: endDate)
-    session.events = events
-    return session
-  }
-
-  private func makeSnoreEvent(
-    timestamp: Date,
-    intensity: SnoreIntensity,
-    duration: TimeInterval
-  ) -> SnoreEvent {
-    SnoreEvent(
-      timestamp: timestamp,
-      intensity: intensity,
-      averageDB: -40,
-      peakDB: -30,
-      duration: duration
+    sleepScore: Int = 100,
+    snoringDuration: TimeInterval = 0
+  ) -> BriefingSession {
+    BriefingSession(
+      startDate: startDate,
+      endDate: endDate ?? startDate.addingTimeInterval(durationHours * 3600),
+      sleepScore: sleepScore,
+      snoringDuration: snoringDuration,
+      totalDuration: durationHours * 3600
     )
   }
 
@@ -103,14 +94,8 @@ struct BriefingEngineTests {
 
   @Test func improving_whenLatestScoreIsMuchHigher() {
     let now = date(hour: 8)
-    let s1 = makeSession(
-      startDate: date(hour: 23, dayOffset: -2),
-      events: [makeSnoreEvent(timestamp: date(hour: 23, dayOffset: -2), intensity: .epic, duration: 1800)]
-    )
-    let s2 = makeSession(
-      startDate: date(hour: 23, dayOffset: -1),
-      events: [makeSnoreEvent(timestamp: date(hour: 23, dayOffset: -1), intensity: .light, duration: 1800)]
-    )
+    let s1 = makeSession(startDate: date(hour: 23, dayOffset: -2), sleepScore: 60)
+    let s2 = makeSession(startDate: date(hour: 23, dayOffset: -1), sleepScore: 85)
 
     let briefing = BriefingEngine.generate(
       profile: nil,
@@ -124,14 +109,8 @@ struct BriefingEngineTests {
 
   @Test func declining_whenLatestScoreIsMuchLower() {
     let now = date(hour: 8)
-    let s1 = makeSession(
-      startDate: date(hour: 23, dayOffset: -2),
-      events: [makeSnoreEvent(timestamp: date(hour: 23, dayOffset: -2), intensity: .light, duration: 1800)]
-    )
-    let s2 = makeSession(
-      startDate: date(hour: 23, dayOffset: -1),
-      events: [makeSnoreEvent(timestamp: date(hour: 23, dayOffset: -1), intensity: .epic, duration: 1800)]
-    )
+    let s1 = makeSession(startDate: date(hour: 23, dayOffset: -2), sleepScore: 80)
+    let s2 = makeSession(startDate: date(hour: 23, dayOffset: -1), sleepScore: 55)
 
     let briefing = BriefingEngine.generate(
       profile: nil,
@@ -145,14 +124,8 @@ struct BriefingEngineTests {
 
   @Test func steady_whenScoresAreClose() {
     let now = date(hour: 8)
-    let s1 = makeSession(
-      startDate: date(hour: 23, dayOffset: -2),
-      events: [makeSnoreEvent(timestamp: date(hour: 23, dayOffset: -2), intensity: .light, duration: 1800)]
-    )
-    let s2 = makeSession(
-      startDate: date(hour: 23, dayOffset: -1),
-      events: [makeSnoreEvent(timestamp: date(hour: 23, dayOffset: -1), intensity: .light, duration: 1600)]
-    )
+    let s1 = makeSession(startDate: date(hour: 23, dayOffset: -2), sleepScore: 74)
+    let s2 = makeSession(startDate: date(hour: 23, dayOffset: -1), sleepScore: 76)
 
     let briefing = BriefingEngine.generate(
       profile: nil,
@@ -212,8 +185,7 @@ struct BriefingEngineTests {
 
   @Test func greetingWithName() {
     let now = date(hour: 8)
-    let profile = UserProfile()
-    profile.firstName = "Alex"
+    let profile = BriefingProfile(firstName: "Alex")
     let briefing = BriefingEngine.generate(
       profile: profile,
       recentSessions: [],
@@ -242,7 +214,7 @@ struct BriefingEngineTests {
     let session = makeSession(
       startDate: date(hour: 23, dayOffset: -1),
       durationHours: 8,
-      events: [makeSnoreEvent(timestamp: date(hour: 23, dayOffset: -1), intensity: .light, duration: 1800)]
+      snoringDuration: 1800
     )
     let briefing = BriefingEngine.generate(
       profile: nil,
@@ -260,7 +232,7 @@ struct BriefingEngineTests {
     let session = makeSession(
       startDate: date(hour: 23, dayOffset: -1),
       durationHours: 8,
-      events: [makeSnoreEvent(timestamp: date(hour: 23, dayOffset: -1), intensity: .light, duration: 1800)]
+      snoringDuration: 1800
     )
     let briefing = BriefingEngine.generate(
       profile: nil,
@@ -290,14 +262,8 @@ struct BriefingEngineTests {
 
   @Test func insightImproving() {
     let now = date(hour: 8)
-    let s1 = makeSession(
-      startDate: date(hour: 23, dayOffset: -2),
-      events: [makeSnoreEvent(timestamp: date(hour: 23, dayOffset: -2), intensity: .epic, duration: 1800)]
-    )
-    let s2 = makeSession(
-      startDate: date(hour: 23, dayOffset: -1),
-      events: [makeSnoreEvent(timestamp: date(hour: 23, dayOffset: -1), intensity: .light, duration: 1800)]
-    )
+    let s1 = makeSession(startDate: date(hour: 23, dayOffset: -2), sleepScore: 60)
+    let s2 = makeSession(startDate: date(hour: 23, dayOffset: -1), sleepScore: 85)
     let briefing = BriefingEngine.generate(
       profile: nil,
       recentSessions: [s2, s1],
@@ -309,18 +275,9 @@ struct BriefingEngineTests {
 
   @Test func insightIncludesGoalShortfall() {
     let now = date(hour: 8)
-    let s1 = makeSession(
-      startDate: date(hour: 23, dayOffset: -2),
-      durationHours: 5,
-      events: []
-    )
-    let s2 = makeSession(
-      startDate: date(hour: 23, dayOffset: -1),
-      durationHours: 5,
-      events: []
-    )
-    let profile = UserProfile()
-    profile.targetSleepHours = 8
+    let s1 = makeSession(startDate: date(hour: 23, dayOffset: -2), durationHours: 5)
+    let s2 = makeSession(startDate: date(hour: 23, dayOffset: -1), durationHours: 5)
+    let profile = BriefingProfile(targetSleepHours: 8)
 
     let briefing = BriefingEngine.generate(
       profile: profile,
@@ -348,14 +305,8 @@ struct BriefingEngineTests {
 
   @Test func noSurvey_whenScoreSwingIsSmall() {
     let now = date(hour: 8)
-    let s1 = makeSession(
-      startDate: date(hour: 23, dayOffset: -2),
-      events: [makeSnoreEvent(timestamp: date(hour: 23, dayOffset: -2), intensity: .light, duration: 1800)]
-    )
-    let s2 = makeSession(
-      startDate: date(hour: 23, dayOffset: -1),
-      events: [makeSnoreEvent(timestamp: date(hour: 23, dayOffset: -1), intensity: .light, duration: 1600)]
-    )
+    let s1 = makeSession(startDate: date(hour: 23, dayOffset: -2), sleepScore: 75)
+    let s2 = makeSession(startDate: date(hour: 23, dayOffset: -1), sleepScore: 78)
     let briefing = BriefingEngine.generate(
       profile: nil,
       recentSessions: [s2, s1],
@@ -367,15 +318,17 @@ struct BriefingEngineTests {
 
   @Test func noSurvey_whenLogAlreadyExists() {
     let now = date(hour: 8)
-    let s1 = makeSession(
-      startDate: date(hour: 23, dayOffset: -2),
-      events: [makeSnoreEvent(timestamp: date(hour: 23, dayOffset: -2), intensity: .epic, duration: 1800)]
+    let s1 = makeSession(startDate: date(hour: 23, dayOffset: -2), sleepScore: 60)
+    let s2 = makeSession(startDate: date(hour: 23, dayOffset: -1), sleepScore: 85)
+    let log = LifestyleLog(
+      date: s2.startDate,
+      hadCaffeineLate: false,
+      hadAlcohol: false,
+      exercised: false,
+      stressfulDay: false,
+      lateMeal: false,
+      screenBeforeBed: false
     )
-    let s2 = makeSession(
-      startDate: date(hour: 23, dayOffset: -1),
-      events: [makeSnoreEvent(timestamp: date(hour: 23, dayOffset: -1), intensity: .light, duration: 1800)]
-    )
-    let log = LifestyleLog(date: s2.startDate, hadCaffeineLate: false, hadAlcohol: false, exercised: false, stressfulDay: false, lateMeal: false, screenBeforeBed: false)
 
     let briefing = BriefingEngine.generate(
       profile: nil,
@@ -388,14 +341,8 @@ struct BriefingEngineTests {
 
   @Test func surveyPositive_whenScoreImprovedBy15Plus() {
     let now = date(hour: 8)
-    let s1 = makeSession(
-      startDate: date(hour: 23, dayOffset: -2),
-      events: [makeSnoreEvent(timestamp: date(hour: 23, dayOffset: -2), intensity: .epic, duration: 1800)]
-    )
-    let s2 = makeSession(
-      startDate: date(hour: 23, dayOffset: -1),
-      events: [makeSnoreEvent(timestamp: date(hour: 23, dayOffset: -1), intensity: .light, duration: 1800)]
-    )
+    let s1 = makeSession(startDate: date(hour: 23, dayOffset: -2), sleepScore: 60)
+    let s2 = makeSession(startDate: date(hour: 23, dayOffset: -1), sleepScore: 85)
     let briefing = BriefingEngine.generate(
       profile: nil,
       recentSessions: [s2, s1],
@@ -410,14 +357,8 @@ struct BriefingEngineTests {
 
   @Test func surveyNegative_whenScoreDeclinedBy15Plus() {
     let now = date(hour: 8)
-    let s1 = makeSession(
-      startDate: date(hour: 23, dayOffset: -2),
-      events: [makeSnoreEvent(timestamp: date(hour: 23, dayOffset: -2), intensity: .light, duration: 1800)]
-    )
-    let s2 = makeSession(
-      startDate: date(hour: 23, dayOffset: -1),
-      events: [makeSnoreEvent(timestamp: date(hour: 23, dayOffset: -1), intensity: .epic, duration: 1800)]
-    )
+    let s1 = makeSession(startDate: date(hour: 23, dayOffset: -2), sleepScore: 85)
+    let s2 = makeSession(startDate: date(hour: 23, dayOffset: -1), sleepScore: 55)
     let briefing = BriefingEngine.generate(
       profile: nil,
       recentSessions: [s2, s1],

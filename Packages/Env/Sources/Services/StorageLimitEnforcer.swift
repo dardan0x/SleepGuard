@@ -101,7 +101,7 @@ public final class StorageLimitEnforcer {
     var urls: [URL] = []
     var affected = 0
     for session in sessions {
-      let sessionURLs = collectAndClearURLs(for: session)
+      let sessionURLs = collectAndClearURLs(for: session, modelContext: modelContext)
       if !sessionURLs.isEmpty {
         urls.append(contentsOf: sessionURLs)
         affected += 1
@@ -125,7 +125,7 @@ public final class StorageLimitEnforcer {
       return CleanupPlan(fileURLs: [], sessionsAffected: 0)
     }
 
-    var totalSize = totalAudioSize(for: sessions)
+    var totalSize = totalAudioSize(for: sessions, modelContext: modelContext)
     guard totalSize > maxBytes else {
       return CleanupPlan(fileURLs: [], sessionsAffected: 0)
     }
@@ -134,8 +134,8 @@ public final class StorageLimitEnforcer {
     var affected = 0
     for session in sessions {
       if totalSize <= maxBytes { break }
-      let sessionSize = audioSize(for: session)
-      let sessionURLs = collectAndClearURLs(for: session)
+      let sessionSize = audioSize(for: session, modelContext: modelContext)
+      let sessionURLs = collectAndClearURLs(for: session, modelContext: modelContext)
       if !sessionURLs.isEmpty {
         urls.append(contentsOf: sessionURLs)
         affected += 1
@@ -149,19 +149,29 @@ public final class StorageLimitEnforcer {
     return CleanupPlan(fileURLs: urls, sessionsAffected: affected)
   }
 
+  // MARK: - Event fetching (avoids faulting corrupted relationships)
+
+  @MainActor
+  private func fetchEvents(for session: SleepSession, modelContext: ModelContext) -> [SnoreEvent] {
+    let sessionID = session.id
+    let descriptor = FetchDescriptor<SnoreEvent>(
+      predicate: #Predicate { $0.session?.id == sessionID }
+    )
+    return (try? modelContext.fetch(descriptor)) ?? []
+  }
+
   /// Collects all audio file URLs for a session/events and clears the model properties.
   /// Returns the collected URLs so they can be deleted later off the main actor.
   @MainActor
-  private func collectAndClearURLs(for session: SleepSession) -> [URL] {
+  private func collectAndClearURLs(for session: SleepSession, modelContext: ModelContext) -> [URL] {
     var urls: [URL] = []
 
-    if let events = session.events {
-      for event in events {
-        if let url = AudioFileURLResolver.resolve(event.audioFileURL) {
-          urls.append(url)
-        }
-        event.audioFileURL = nil
+    let events = fetchEvents(for: session, modelContext: modelContext)
+    for event in events {
+      if let url = AudioFileURLResolver.resolve(event.audioFileURL) {
+        urls.append(url)
       }
+      event.audioFileURL = nil
     }
 
     if let url = AudioFileURLResolver.resolve(session.audioFileURL) {
@@ -215,23 +225,22 @@ public final class StorageLimitEnforcer {
   // MARK: - Size helpers
 
   @MainActor
-  private func totalAudioSize(for sessions: [SleepSession]) -> Int64 {
+  private func totalAudioSize(for sessions: [SleepSession], modelContext: ModelContext) -> Int64 {
     var total: Int64 = 0
     for session in sessions {
-      total += audioSize(for: session)
+      total += audioSize(for: session, modelContext: modelContext)
     }
     return total
   }
 
   @MainActor
-  private func audioSize(for session: SleepSession) -> Int64 {
+  private func audioSize(for session: SleepSession, modelContext: ModelContext) -> Int64 {
     var size: Int64 = 0
 
-    if let events = session.events {
-      for event in events {
-        if let url = AudioFileURLResolver.resolve(event.audioFileURL) {
-          size += fileSize(at: url)
-        }
+    let events = fetchEvents(for: session, modelContext: modelContext)
+    for event in events {
+      if let url = AudioFileURLResolver.resolve(event.audioFileURL) {
+        size += fileSize(at: url)
       }
     }
 
