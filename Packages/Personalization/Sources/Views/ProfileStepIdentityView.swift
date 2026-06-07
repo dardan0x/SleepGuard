@@ -94,10 +94,10 @@ struct ProfileTextField: View {
 
   var body: some View {
     VStack(alignment: .leading, spacing: 8) {
-      Text(title)
+      Text(title.uppercased())
         .font(.system(size: 13, weight: .medium))
         .foregroundStyle(theme.textTertiary)
-        .textCase(.uppercase)
+        .lineLimit(1)
 
       TextField("", text: $text)
         .font(.system(size: 17, weight: .medium))
@@ -118,19 +118,27 @@ struct ProfilePicker<T: Hashable & RawRepresentable>: View where T.RawValue: Str
   @Environment(Theme.self) private var theme
 
   var body: some View {
-    VStack(alignment: .leading, spacing: 8) {
-      Text(title)
+    VStack(alignment: .leading, spacing: 10) {
+      Text(title.uppercased())
         .font(.system(size: 13, weight: .medium))
         .foregroundStyle(theme.textTertiary)
-        .textCase(.uppercase)
+        .lineLimit(1)
 
-      Picker("", selection: $selection) {
+      FlowLayout(spacing: 8) {
         ForEach(options, id: \.1) { label, value in
-          Text(label).tag(value)
+          Button {
+            selection = value
+          } label: {
+            Text(label)
+              .font(.system(size: 14, weight: .medium))
+              .foregroundStyle(selection == value ? theme.bgPrimary : theme.textPrimary)
+              .padding(.horizontal, 14)
+              .padding(.vertical, 8)
+              .background(selection == value ? theme.accent : theme.bgElevated)
+              .cornerRadius(theme.radiusSmall)
+          }
         }
       }
-      .pickerStyle(.segmented)
-      .colorMultiply(theme.accent)
     }
   }
 }

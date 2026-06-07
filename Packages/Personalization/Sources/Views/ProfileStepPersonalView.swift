@@ -45,7 +45,7 @@ struct ProfileStepPersonalView: View {
       Text(Strings.profileFieldHobbies)
         .font(.system(size: 13, weight: .medium))
         .foregroundStyle(theme.textTertiary)
-        .textCase(.uppercase)
+        .lineLimit(1)
 
       TextField("", text: $hobbiesText)
         .font(.system(size: 17, weight: .medium))

@@ -31,7 +31,7 @@ struct ProfileStepGoalsView: View {
       Text(Strings.profileFieldTargetBedtime)
         .font(.system(size: 13, weight: .medium))
         .foregroundStyle(theme.textTertiary)
-        .textCase(.uppercase)
+        .lineLimit(1)
 
       DatePicker(
         "",
@@ -53,7 +53,7 @@ struct ProfileStepGoalsView: View {
       Text(Strings.profileFieldTargetSleepHours)
         .font(.system(size: 13, weight: .medium))
         .foregroundStyle(theme.textTertiary)
-        .textCase(.uppercase)
+        .lineLimit(1)
 
       HStack {
         Slider(

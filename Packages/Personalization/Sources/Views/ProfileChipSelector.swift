@@ -10,10 +10,10 @@ struct ProfileChipSelector: View {
 
   var body: some View {
     VStack(alignment: .leading, spacing: 10) {
-      Text(title)
+      Text(title.uppercased())
         .font(.system(size: 13, weight: .medium))
         .foregroundStyle(theme.textTertiary)
-        .textCase(.uppercase)
+        .lineLimit(1)
 
       FlowLayout(spacing: 8) {
         ForEach(options, id: \.self) { option in
@@ -35,7 +35,7 @@ struct ProfileChipSelector: View {
 }
 
 // Reusing FlowLayout from BriefingSurveyCard
-private struct FlowLayout: Layout {
+struct FlowLayout: Layout {
   var spacing: CGFloat = 8
 
   func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
