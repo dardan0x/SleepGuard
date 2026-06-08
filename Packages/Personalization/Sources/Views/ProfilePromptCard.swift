@@ -13,6 +13,7 @@ public struct ProfilePromptCard: View {
   let onSetupProfile: () -> Void
   @State private var dragOffset: CGFloat = 0
   @State private var isDismissed = false
+  @State private var randomShow = Bool.random()
 
   public init(onSetupProfile: @escaping () -> Void) {
     self.onSetupProfile = onSetupProfile
@@ -93,9 +94,13 @@ public struct ProfilePromptCard: View {
   private var shouldShow: Bool {
     let completedCount = sessions.filter { $0.totalDuration >= SleepSession.minimumSaveDuration }.count
     let profileCompletion = profiles.first?.completionPercentage ?? 0
-    return completedCount >= 3
-      && profileCompletion < 0.5
-      && !userPreferences.hasCompletedProfile
-      && userPreferences.profilePromptDismissCount < 3
+    guard completedCount >= 3, profileCompletion < 0.5 else { return false }
+
+    let dismissCount = userPreferences.profilePromptDismissCount
+
+    // Random chance that decreases with each dismissal but never hits zero:
+    // 0 → 100%, 1 → 50%, 2 → 25%, 3 → 12.5%, 4 → 6.25% ...
+    let probability = 1.0 / pow(2.0, Double(dismissCount))
+    return randomShow && Double.random(in: 0...1) < probability
   }
 }
