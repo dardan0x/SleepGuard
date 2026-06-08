@@ -29,10 +29,16 @@ struct SettingsTab: View {
         EmptyView()
       case .profileEditor:
         if let profile = fetchOrCreateProfile() {
-          ProfileEditorView(profile: profile) {
-            routerPath.presentedSheet = nil
-            UserPreferences.shared.hasCompletedProfile = true
-          }
+          ProfileEditorView(
+            profile: profile,
+            onComplete: {
+              routerPath.presentedSheet = nil
+              UserPreferences.shared.hasCompletedProfile = true
+            },
+            onDismiss: {
+              routerPath.presentedSheet = nil
+            }
+          )
           .withEnvironments()
         }
       }

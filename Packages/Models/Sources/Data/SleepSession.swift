@@ -66,6 +66,12 @@ public final class SleepSession {
     /// nil when no Watch data is available for this session.
     public var sleepStageSegments: [SleepStageSegment]?
 
+    /// Cached values to avoid faulting the `events` relationship on app reopen.
+    /// Set when the session is saved; used by `sleepScore` and `snoringDuration`.
+    public var hasCachedScore: Bool = false
+    public var cachedSleepScore: Int = 0
+    public var cachedSnoringDuration: TimeInterval = 0
+
     public static let minimumSaveDuration: TimeInterval = 120
 
     public init(
@@ -99,7 +105,10 @@ public final class SleepSession {
     }
 
     public var snoringDuration: TimeInterval {
-        events?.filter { $0.category == .snoring }.reduce(0) { $0 + $1.snoreDuration } ?? 0
+        if hasCachedScore {
+            return cachedSnoringDuration
+        }
+        return events?.filter { $0.category == .snoring }.reduce(0) { $0 + $1.snoreDuration } ?? 0
     }
 
     /// Total duration of sleep talking events.
@@ -164,6 +173,10 @@ public final class SleepSession {
     }
 
     public var sleepScore: Int {
+        if hasCachedScore {
+            return cachedSleepScore
+        }
+        // Existing computation continues below...
         let events = self.events ?? []
         let snoringEvents = events.filter { $0.category == .snoring }
         let totalDuration = self.totalDuration

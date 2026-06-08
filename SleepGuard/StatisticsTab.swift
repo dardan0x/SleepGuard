@@ -50,10 +50,16 @@ struct StatisticsTab: View {
         }
       case .profileEditor:
         if let profile = fetchOrCreateProfile() {
-          ProfileEditorView(profile: profile) {
-            routerPath.presentedSheet = nil
-            UserPreferences.shared.hasCompletedProfile = true
-          }
+          ProfileEditorView(
+            profile: profile,
+            onComplete: {
+              routerPath.presentedSheet = nil
+              UserPreferences.shared.hasCompletedProfile = true
+            },
+            onDismiss: {
+              routerPath.presentedSheet = nil
+            }
+          )
           .withEnvironments()
         }
       }
@@ -99,6 +105,11 @@ struct StatisticsTab: View {
       }
     }
     modelContext.insert(session)
+
+    // Cache AFTER insertion so SwiftData tracks the mutations
+    session.cachedSleepScore = session.sleepScore
+    session.cachedSnoringDuration = session.snoringDuration
+    session.hasCachedScore = true
 
     do {
       try modelContext.save()

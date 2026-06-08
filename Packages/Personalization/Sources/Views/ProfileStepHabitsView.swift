@@ -8,59 +8,63 @@ struct ProfileStepHabitsView: View {
   @Environment(Theme.self) private var theme
 
   var body: some View {
-    VStack(alignment: .leading, spacing: 24) {
-      Text(Strings.profileEditorStepHabits)
-        .font(.system(size: 28, weight: .bold))
-        .foregroundStyle(theme.textPrimary)
+    ScrollView {
+      VStack(alignment: .leading, spacing: 24) {
+        Text(Strings.profileEditorStepHabits)
+          .font(.system(size: 28, weight: .bold))
+          .foregroundStyle(theme.textPrimary)
 
-      ProfileChipSelector(
-        title: Strings.profileFieldCaffeine,
-        options: caffeineLabels,
-        selection: Binding(
-          get: { caffeineLabels[safe: caffeineIndex] ?? caffeineLabels[2] },
-          set: { profile.caffeineHabit = caffeineValues[safe: caffeineLabels.firstIndex(of: $0) ?? 2] ?? .moderate }
+        ProfileChipSelector(
+          title: Strings.profileFieldCaffeine,
+          options: caffeineLabels,
+          selection: Binding(
+            get: { caffeineLabels[safe: caffeineIndex] ?? caffeineLabels[2] },
+            set: { profile.caffeineHabit = caffeineValues[safe: caffeineLabels.firstIndex(of: $0) ?? 2] ?? .moderate }
+          )
         )
-      )
 
-      ProfileChipSelector(
-        title: Strings.profileFieldAlcohol,
-        options: alcoholLabels,
-        selection: Binding(
-          get: { alcoholLabels[safe: alcoholIndex] ?? alcoholLabels[0] },
-          set: { profile.alcoholHabit = alcoholValues[safe: alcoholLabels.firstIndex(of: $0) ?? 0] ?? .none }
+        ProfileChipSelector(
+          title: Strings.profileFieldAlcohol,
+          options: alcoholLabels,
+          selection: Binding(
+            get: { alcoholLabels[safe: alcoholIndex] ?? alcoholLabels[0] },
+            set: { profile.alcoholHabit = alcoholValues[safe: alcoholLabels.firstIndex(of: $0) ?? 0] ?? .none }
+          )
         )
-      )
 
-      ProfileChipSelector(
-        title: Strings.profileFieldExercise,
-        options: frequencyLabels,
-        selection: Binding(
-          get: { frequencyLabels[safe: exerciseIndex] ?? frequencyLabels[1] },
-          set: { profile.exerciseFrequency = exerciseValues[safe: frequencyLabels.firstIndex(of: $0) ?? 1] ?? .sometimes }
+        ProfileChipSelector(
+          title: Strings.profileFieldExercise,
+          options: frequencyLabels,
+          selection: Binding(
+            get: { frequencyLabels[safe: exerciseIndex] ?? frequencyLabels[1] },
+            set: { profile.exerciseFrequency = exerciseValues[safe: frequencyLabels.firstIndex(of: $0) ?? 1] ?? .sometimes }
+          )
         )
-      )
 
-      ProfileChipSelector(
-        title: Strings.profileFieldStress,
-        options: stressLabels,
-        selection: Binding(
-          get: { stressLabels[safe: stressIndex] ?? stressLabels[1] },
-          set: { profile.typicalStress = stressValues[safe: stressLabels.firstIndex(of: $0) ?? 1] ?? .medium }
+        ProfileChipSelector(
+          title: Strings.profileFieldStress,
+          options: stressLabels,
+          selection: Binding(
+            get: { stressLabels[safe: stressIndex] ?? stressLabels[1] },
+            set: { profile.typicalStress = stressValues[safe: stressLabels.firstIndex(of: $0) ?? 1] ?? .medium }
+          )
         )
-      )
 
-      ProfileChipSelector(
-        title: Strings.profileFieldScreens,
-        options: screenLabels,
-        selection: Binding(
-          get: { screenLabels[safe: screenIndex] ?? screenLabels[1] },
-          set: { profile.screenBeforeBed = screenValues[safe: screenLabels.firstIndex(of: $0) ?? 1] ?? .sometimes }
+        ProfileChipSelector(
+          title: Strings.profileFieldScreens,
+          options: screenLabels,
+          selection: Binding(
+            get: { screenLabels[safe: screenIndex] ?? screenLabels[1] },
+            set: { profile.screenBeforeBed = screenValues[safe: screenLabels.firstIndex(of: $0) ?? 1] ?? .sometimes }
+          )
         )
-      )
 
-      Spacer()
+        Spacer(minLength: 40)
+      }
+      .padding(.horizontal, 20)
+      .padding(.top, 8)
     }
-    .padding(.horizontal, 20)
+    .scrollIndicators(.hidden)
   }
 
   // MARK: - Caffeine

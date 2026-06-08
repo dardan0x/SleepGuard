@@ -202,6 +202,11 @@ public struct SessionSummaryView: View {
     }
     modelContext.insert(session)
 
+    // Cache AFTER insertion so SwiftData tracks the mutations
+    session.cachedSleepScore = session.sleepScore
+    session.cachedSnoringDuration = session.snoringDuration
+    session.hasCachedScore = true
+
     do {
       try modelContext.save()
     } catch {

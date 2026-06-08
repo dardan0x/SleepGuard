@@ -40,6 +40,7 @@ public struct Briefing: Sendable {
   public let nudge: String
   public let survey: SurveyPrompt?
   public let scoreContext: ScoreTrend
+  public let profileNudge: String?
 
   public init(
     greeting: String,
@@ -48,7 +49,8 @@ public struct Briefing: Sendable {
     insight: String?,
     nudge: String,
     survey: SurveyPrompt?,
-    scoreContext: ScoreTrend
+    scoreContext: ScoreTrend,
+    profileNudge: String? = nil
   ) {
     self.greeting = greeting
     self.headline = headline
@@ -57,5 +59,6 @@ public struct Briefing: Sendable {
     self.nudge = nudge
     self.survey = survey
     self.scoreContext = scoreContext
+    self.profileNudge = profileNudge
   }
 }

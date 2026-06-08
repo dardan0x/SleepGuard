@@ -3242,6 +3242,171 @@
         }
       }
     },
+    "briefing.headline.weeklySnoring": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ min snoring last night vs %@ min weekly avg."
+          }
+        }
+      }
+    },
+    "briefing.headline.weeklyScore": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Score %@ last night. Weekly average: %@."
+          }
+        }
+      }
+    },
+    "briefing.headline.weeklyDuration": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slept %@ last night vs %@ weekly average."
+          }
+        }
+      }
+    },
+    "briefing.headline.combinedScoreSnoring": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Score %@ (avg %@) · Snoring %@m (avg %@m)"
+          }
+        }
+      }
+    },
+    "briefing.headline.combinedDurationScore": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slept %@ (avg %@) · Score %@ (avg %@)"
+          }
+        }
+      }
+    },
+    "briefing.insight.weeklySnoringUp": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Snoring was up %@ min from your weekly average."
+          }
+        }
+      }
+    },
+    "briefing.insight.weeklySnoringDown": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Snoring was down %@ min from your weekly average. Nice!"
+          }
+        }
+      }
+    },
+    "briefing.insight.weeklyScoreUp": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Score up %@ points from your weekly average."
+          }
+        }
+      }
+    },
+    "briefing.insight.weeklyScoreDown": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Score down %@ points from weekly average."
+          }
+        }
+      }
+    },
+    "briefing.insight.weeklyDurationUp": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You slept %@ more than your weekly average."
+          }
+        }
+      }
+    },
+    "briefing.insight.weeklyDurationDown": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You slept %@ less than your weekly average."
+          }
+        }
+      }
+    },
+    "briefing.profileNudge": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Complete your profile for more personalized insights."
+          }
+        }
+      }
+    },
+    "briefing.stat.weeklyAvg": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weekly Avg"
+          }
+        }
+      }
+    },
+    "briefing.stat.lastNight": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last Night"
+          }
+        }
+      }
+    },
+    "briefing.stat.trend": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trend"
+          }
+        }
+      }
+    },
     "briefing.quote.improving": {
       "extractionState": "manual",
       "localizations": {
