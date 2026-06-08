@@ -145,8 +145,65 @@ public final class SleepSession {
         totalDuration > 0 ? (snoringDuration / totalDuration) * 100 : 0
     }
 
+    /// Groups adjacent snoring events within a 5-minute gap into episodes.
+    /// This reduces visual clutter and false-positive event counts while
+    /// preserving total snoring duration.
+    public var snoringEpisodes: [SnoringEpisode] {
+        let snoringEvents = (events ?? [])
+            .filter { $0.category == .snoring }
+            .sorted(by: { $0.timestamp < $1.timestamp })
+
+        guard !snoringEvents.isEmpty else { return [] }
+
+        let mergeGap: TimeInterval = 300
+
+        var episodes: [SnoringEpisode] = []
+        var currentEvents: [SnoreEvent] = [snoringEvents[0]]
+        var currentEnd = snoringEvents[0].timestamp.addingTimeInterval(snoringEvents[0].snoreDuration)
+
+        for event in snoringEvents.dropFirst() {
+            let eventStart = event.timestamp
+            if eventStart.timeIntervalSince(currentEnd) <= mergeGap {
+                currentEvents.append(event)
+                currentEnd = max(currentEnd, eventStart.addingTimeInterval(event.snoreDuration))
+            } else {
+                let maxIntensity = currentEvents.map(\.intensity).max(by: { $0.rank < $1.rank }) ?? .quiet
+                episodes.append(SnoringEpisode(
+                    id: currentEvents[0].id,
+                    startTime: currentEvents[0].timestamp,
+                    duration: currentEnd.timeIntervalSince(currentEvents[0].timestamp),
+                    intensity: maxIntensity,
+                    events: currentEvents
+                ))
+                currentEvents = [event]
+                currentEnd = eventStart.addingTimeInterval(event.snoreDuration)
+            }
+        }
+
+        let maxIntensity = currentEvents.map(\.intensity).max(by: { $0.rank < $1.rank }) ?? .quiet
+        episodes.append(SnoringEpisode(
+            id: currentEvents[0].id,
+            startTime: currentEvents[0].timestamp,
+            duration: currentEnd.timeIntervalSince(currentEvents[0].timestamp),
+            intensity: maxIntensity,
+            events: currentEvents
+        ))
+
+        return episodes
+    }
+
+    /// Episodes with enough total snoring duration to be worth displaying.
+    /// Hides micro-episodes that are likely false positives while still
+    /// counting them in `snoringDuration`.
+    public var displayableSnoringEpisodes: [SnoringEpisode] {
+        snoringEpisodes.filter { $0.snoreDuration >= 3 }
+    }
+
+    /// Event count using displayable snoring episodes.
+    /// Non-snoring events are still counted individually.
     public var eventsCount: Int {
-        events?.count ?? 0
+        let otherEvents = (events ?? []).filter { $0.category != .snoring }.count
+        return displayableSnoringEpisodes.count + otherEvents
     }
 
     public var eventsPerHour: Double {
@@ -180,7 +237,7 @@ public final class SleepSession {
         let events = self.events ?? []
         let snoringEvents = events.filter { $0.category == .snoring }
         let totalDuration = self.totalDuration
-        let eventCount = snoringEvents.count
+        let eventCount = displayableSnoringEpisodes.count
 
         guard totalDuration > 0 else {
             return 100

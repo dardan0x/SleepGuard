@@ -10,6 +10,7 @@ import DesignSystem
 public struct EventsSheetView: View {
   let session: SleepSession
   let events: [SnoreEvent]
+  let displayDurations: [UUID: TimeInterval]?
   let isClipSession: Bool
   let onPlayEvent: (SnoreEvent) -> Void
 
@@ -27,6 +28,7 @@ public struct EventsSheetView: View {
           ForEach(events, id: \.id) { event in
             EventCard(
               event: event,
+              displayDuration: displayDurations?[event.id],
               session: session,
               theme: theme,
               onPlay: {
@@ -70,6 +72,7 @@ public struct EventsSheetView: View {
 @MainActor
 private struct EventCard: View {
   let event: SnoreEvent
+  let displayDuration: TimeInterval?
   let session: SleepSession
   let theme: Theme
   let onPlay: () -> Void
@@ -97,7 +100,7 @@ private struct EventCard: View {
           .fill(theme.intensityColor(event.intensity))
           .frame(width: 8, height: 8)
         // Duration
-        Text(durationString(event.snoreDuration))
+        Text(durationString(displayDuration ?? event.snoreDuration))
           .font(.system(size: 22, weight: .bold, design: .rounded))
           .foregroundStyle(theme.intensityColor(event.intensity))
       }

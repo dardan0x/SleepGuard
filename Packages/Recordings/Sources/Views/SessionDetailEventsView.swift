@@ -4,6 +4,7 @@ import DesignSystem
 
 struct SessionDetailEventsView: View {
   let events: [SnoreEvent]
+  let displayDurations: [UUID: TimeInterval]?
   let title: String
   let onShowAll: () -> Void
   let onPlayEvent: (SnoreEvent) -> Void
@@ -21,6 +22,7 @@ struct SessionDetailEventsView: View {
         ForEach(Array(events.prefix(4)), id: \.id) { event in
           EventRow(
             event: event,
+            displayDuration: displayDurations?[event.id],
             theme: theme,
             onPlay: { onPlayEvent(event) },
             onShare: { onShareEvent(event) }

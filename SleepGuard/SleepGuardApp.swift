@@ -26,7 +26,16 @@ struct SleepGuardApp: App {
       #endif
       return container
     } catch {
-      fatalError("Could not create ModelContainer: \(error)")
+      // If migration fails (e.g. from a dev schema change), delete the store
+      // and recreate rather than crashing. User data loss only in dev builds.
+      print("[SleepGuardApp] ModelContainer creation failed: \(error). Deleting store and retrying...")
+      let storeURL = modelConfiguration.url
+      try? FileManager.default.removeItem(at: storeURL)
+      do {
+        return try ModelContainer(for: schema, configurations: [modelConfiguration])
+      } catch {
+        fatalError("Could not create ModelContainer after store deletion: \(error)")
+      }
     }
   }()
 

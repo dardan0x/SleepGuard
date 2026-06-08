@@ -6,6 +6,7 @@ import DesignSystem
 @MainActor
 struct EventRow: View {
   let event: SnoreEvent
+  let displayDuration: TimeInterval?
   let theme: Theme
   let onPlay: () -> Void
   let onShare: () -> Void
@@ -20,7 +21,7 @@ struct EventRow: View {
           .foregroundStyle(theme.textPrimary)
           .monospacedDigit()
 
-        Text(durationString(event.snoreDuration))
+        Text(durationString(displayDuration ?? event.snoreDuration))
           .font(.system(size: 14, weight: .medium))
           .foregroundStyle(theme.textSecondary)
           .monospacedDigit()
@@ -88,3 +89,4 @@ struct EventRow: View {
     return String(format: "%d:%02d", minutes, seconds)
   }
 }
+
