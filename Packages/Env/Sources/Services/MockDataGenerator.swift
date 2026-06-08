@@ -9,7 +9,8 @@ import Models
 /// all parameters (event count, snoring percentage, intensity distribution) are
 /// derived to produce a coherent, visually consistent result across all views.
 public enum MockDataGenerator {
-  public static func generate(modelContext: ModelContext) {
+  @MainActor
+  public static func generate(modelContext: ModelContext, resetPersonalizationPrefs: Bool = true) {
     let timeZone = TimeZone(identifier: "Europe/Berlin")!
     var calendar = Calendar.current
     calendar.timeZone = timeZone
@@ -18,6 +19,14 @@ public enum MockDataGenerator {
     guard let startDate = calendar.date(byAdding: .day, value: -30, to: today) else {
       print("[MockDataGenerator] Failed to create start date")
       return
+    }
+
+    // Reset personalization prefs so briefing/profile features trigger
+    if resetPersonalizationPrefs {
+      UserPreferences.shared.hasCompletedProfile = false
+      UserPreferences.shared.profilePromptDismissCount = 0
+      UserPreferences.shared.lastBriefingShownDate = nil
+      UserPreferences.shared.briefingEnabled = true
     }
 
     // Clear existing data
@@ -39,6 +48,21 @@ public enum MockDataGenerator {
 
     // Skip 3 random days for realism (deterministic based on day offset)
     let skippedDays: Set<Int> = [7, 18, 25]
+
+    // Score spikes: specific days get big deviations from the trend to trigger
+    // BriefingEngine trends and survey prompts (|Δscore| ≥ 15).
+    // Format: dayOffset → score delta (added to the smooth trend).
+    let scoreSpikes: [Int: Int] = [
+      3: -28,   // bad night after decent start
+      8: +18,   // great recovery
+      12: -22,  // another bad night
+      15: +20,  // excellent night
+      19: -25,  // worst night
+      23: +16,  // good rebound
+      26: -20,  // late stumble
+    ]
+
+    var generatedSessions: [(session: SleepSession, dayOffset: Int)] = []
 
     for dayOffset in 0..<30 {
       guard !skippedDays.contains(dayOffset) else { continue }
@@ -66,9 +90,10 @@ public enum MockDataGenerator {
         let sessionDuration = durationHours * 3600
         let sessionEnd = sessionStart.addingTimeInterval(sessionDuration)
 
-        // Target score: early May = bad (35-50), late May = good (75-92)
+        // Target score: early = bad (35-50), late = good (75-92)
         let baseScore = Int(lerp(42.0, 86.0, dayFactor))
-        let targetScore = max(30, min(95, baseScore + Int.random(in: -6...6)))
+        let spike = scoreSpikes[dayOffset] ?? 0
+        let targetScore = max(30, min(95, baseScore + spike + Int.random(in: -4...4)))
 
         // Derive all parameters from target score
         let params = SessionParams.forScore(targetScore, duration: sessionDuration)
@@ -116,7 +141,6 @@ public enum MockDataGenerator {
             bursts: bursts,
             duration: eventDuration
           )
-          event.session = session
           events.append(event)
         }
 
@@ -128,23 +152,46 @@ public enum MockDataGenerator {
         )
         events.append(contentsOf: talkingEvents)
 
-        session.events = events
         session.averageDB = events.map(\.averageDB).reduce(0, +) / Double(events.count)
         session.peakDB = events.map(\.peakDB).max() ?? 0
         session.sleepStageSegments = generateSleepStages(duration: sessionDuration)
 
-        // Verify score is in expected range; log if significantly off
+        // Set relationships while objects are still unmanaged (clean in-memory setup)
+        session.events = events
+        for event in events {
+          event.session = session
+        }
+
+        // Compute values while unmanaged — avoids SwiftData interception
         let computedScore = session.sleepScore
+        let computedSnoring = session.snoringDuration
         if abs(computedScore - targetScore) > 12 {
           print("[MockDataGenerator] Score drift: target=\(targetScore), computed=\(computedScore), day=\(dayOffset)")
         }
 
+        // Insert so SwiftData tracks the objects
         for event in events {
           modelContext.insert(event)
         }
         modelContext.insert(session)
+
+        // Set cached properties AFTER insertion so SwiftData tracks them as changes
+        session.cachedSleepScore = computedScore
+        session.cachedSnoringDuration = computedSnoring
+        session.hasCachedScore = true
+
+        generatedSessions.append((session, dayOffset))
       }
     }
+
+    // Generate LifestyleLogs for ~30% of nights (mostly on spike days)
+    // This tests both "survey shown" and "survey suppressed" paths.
+    generateLifestyleLogs(
+      sessions: generatedSessions,
+      scoreSpikes: scoreSpikes,
+      calendar: calendar,
+      modelContext: modelContext
+    )
 
     do {
       try modelContext.save()
@@ -307,6 +354,50 @@ public enum MockDataGenerator {
     }
 
     return talkingEvents
+  }
+
+  // MARK: - Lifestyle Logs
+
+  /// Generates LifestyleLog entries for a subset of nights to test
+  /// the briefing survey gate (survey suppressed when log already exists).
+  private static func generateLifestyleLogs(
+    sessions: [(session: SleepSession, dayOffset: Int)],
+    scoreSpikes: [Int: Int],
+    calendar: Calendar,
+    modelContext: ModelContext
+  ) {
+    // Sort by dayOffset so we can deterministically pick nights
+    let sorted = sessions.sorted { $0.dayOffset < $1.dayOffset }
+
+    for (session, dayOffset) in sorted {
+      // Skip secondary sessions (same day)
+      guard calendar.component(.hour, from: session.startDate) < 12 else { continue }
+
+      // Generate logs for:
+      // - Most negative spike days (poor sleep → likely lifestyle cause)
+      // - A few random non-spike days
+      let isSpikeDay = scoreSpikes[dayOffset] != nil
+      let shouldCreateLog: Bool
+      if isSpikeDay {
+        shouldCreateLog = Double.random(in: 0...1) < 0.60
+      } else {
+        shouldCreateLog = Double.random(in: 0...1) < 0.15
+      }
+
+      guard shouldCreateLog else { continue }
+
+      let log = LifestyleLog(
+        date: session.startDate,
+        hadCaffeineLate: Bool.random(),
+        hadAlcohol: Bool.random(),
+        exercised: Bool.random(),
+        stressfulDay: Bool.random(),
+        lateMeal: Bool.random(),
+        screenBeforeBed: Bool.random(),
+        sessionID: session.id
+      )
+      modelContext.insert(log)
+    }
   }
 
   // MARK: - Sleep Stages

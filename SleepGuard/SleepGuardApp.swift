@@ -15,14 +15,13 @@ struct SleepGuardApp: App {
 
 
   var sharedModelContainer: ModelContainer = {
-    let schema = Schema([SleepSession.self, SnoreEvent.self])
+    let schema = Schema([SleepSession.self, SnoreEvent.self, UserProfile.self, LifestyleLog.self])
     let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
     do {
       let container = try ModelContainer(for: schema, configurations: [modelConfiguration])
       #if DEBUG
       if ProcessInfo.processInfo.arguments.contains("-generateMockData") {
-        let context = ModelContext(container)
-        MockDataGenerator.generate(modelContext: context)
+        MockDataGenerator.generate(modelContext: container.mainContext)
       }
       #endif
       return container

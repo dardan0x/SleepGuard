@@ -3076,6 +3076,1183 @@
           }
         }
       }
+    },
+    "briefing.greeting.morning": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Good morning, %@."
+          }
+        }
+      }
+    },
+    "briefing.greeting.morning.noName": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Good morning."
+          }
+        }
+      }
+    },
+    "briefing.greeting.afternoon": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Good afternoon, %@."
+          }
+        }
+      }
+    },
+    "briefing.greeting.afternoon.noName": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Good afternoon."
+          }
+        }
+      }
+    },
+    "briefing.greeting.evening": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Good evening, %@."
+          }
+        }
+      }
+    },
+    "briefing.greeting.evening.noName": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Good evening."
+          }
+        }
+      }
+    },
+    "briefing.greeting.night": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Still up, %@?"
+          }
+        }
+      }
+    },
+    "briefing.greeting.night.noName": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Still up?"
+          }
+        }
+      }
+    },
+    "briefing.headline.welcome": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Record your first night and I'll start learning your sleep."
+          }
+        }
+      }
+    },
+    "briefing.headline.quiet": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last night you slept %@. A quiet night — nice work."
+          }
+        }
+      }
+    },
+    "briefing.headline.normal": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last night you slept %@ with %@ min of snoring. Score: %@."
+          }
+        }
+      }
+    },
+    "briefing.insight.improving": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your score climbed to %@, up from a %@ recent average."
+          }
+        }
+      }
+    },
+    "briefing.insight.declining": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ tonight — below your %@ recent average."
+          }
+        }
+      }
+    },
+    "briefing.insight.steady": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Holding steady around %@ recently. Consistency is its own win."
+          }
+        }
+      }
+    },
+    "briefing.insight.goalShortfall": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You're averaging about %@h %@m — about %@ min short of your %@h goal."
+          }
+        }
+      }
+    },
+    "briefing.headline.weeklySnoring": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ min snoring last night vs %@ min weekly avg."
+          }
+        }
+      }
+    },
+    "briefing.headline.weeklyScore": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Score %@ last night. Weekly average: %@."
+          }
+        }
+      }
+    },
+    "briefing.headline.weeklyDuration": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slept %@ last night vs %@ weekly average."
+          }
+        }
+      }
+    },
+    "briefing.headline.combinedScoreSnoring": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Score %@ (avg %@) · Snoring %@m (avg %@m)"
+          }
+        }
+      }
+    },
+    "briefing.headline.combinedDurationScore": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slept %@ (avg %@) · Score %@ (avg %@)"
+          }
+        }
+      }
+    },
+    "briefing.insight.weeklySnoringUp": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Snoring was up %@ min from your weekly average."
+          }
+        }
+      }
+    },
+    "briefing.insight.weeklySnoringDown": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Snoring was down %@ min from your weekly average. Nice!"
+          }
+        }
+      }
+    },
+    "briefing.insight.weeklyScoreUp": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Score up %@ points from your weekly average."
+          }
+        }
+      }
+    },
+    "briefing.insight.weeklyScoreDown": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Score down %@ points from weekly average."
+          }
+        }
+      }
+    },
+    "briefing.insight.weeklyDurationUp": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You slept %@ more than your weekly average."
+          }
+        }
+      }
+    },
+    "briefing.insight.weeklyDurationDown": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You slept %@ less than your weekly average."
+          }
+        }
+      }
+    },
+    "briefing.profileNudge": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Complete your profile for more personalized insights."
+          }
+        }
+      }
+    },
+    "briefing.stat.weeklyAvg": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weekly Avg"
+          }
+        }
+      }
+    },
+    "briefing.stat.lastNight": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last Night"
+          }
+        }
+      }
+    },
+    "briefing.stat.trend": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trend"
+          }
+        }
+      }
+    },
+    "briefing.quote.improving": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sleep is the best meditation. Keep the momentum."
+          }
+        }
+      }
+    },
+    "briefing.quote.declining": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "One rough night doesn't define your rest. Try winding down 30 min earlier tonight."
+          }
+        }
+      }
+    },
+    "briefing.quote.steady": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Good sleep compounds. You're building something."
+          }
+        }
+      }
+    },
+    "briefing.quote.firstNight": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Here's your first sleep recap. I'll keep learning as you record more nights."
+          }
+        }
+      }
+    },
+    "briefing.quote.noData": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Record your first night and I'll start learning your sleep."
+          }
+        }
+      }
+    },
+    "briefing.quote.returningAfterGap": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Welcome back. Let's pick up where you left off."
+          }
+        }
+      }
+    },
+    "briefing.survey.positiveTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nice jump tonight. What did you do differently?"
+          }
+        }
+      }
+    },
+    "briefing.survey.negativeTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tougher night. Anything unusual yesterday?"
+          }
+        }
+      }
+    },
+    "briefing.stat.sleep": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sleep"
+          }
+        }
+      }
+    },
+    "briefing.stat.snoring": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Snoring"
+          }
+        }
+      }
+    },
+    "briefing.stat.score": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Score"
+          }
+        }
+      }
+    },
+    "profile.prompt.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Make this yours"
+          }
+        }
+      }
+    },
+    "profile.prompt.subtitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add your profile to get personalized insights."
+          }
+        }
+      }
+    },
+    "profile.prompt.action": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set Up Profile"
+          }
+        }
+      }
+    },
+    "briefing.survey.chip.exercised": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exercised"
+          }
+        }
+      }
+    },
+    "briefing.survey.chip.lessCaffeine": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Less caffeine"
+          }
+        }
+      }
+    },
+    "briefing.survey.chip.noAlcohol": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No alcohol"
+          }
+        }
+      }
+    },
+    "briefing.survey.chip.sleptEarlier": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slept earlier"
+          }
+        }
+      }
+    },
+    "briefing.survey.chip.lessStress": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Less stress"
+          }
+        }
+      }
+    },
+    "briefing.survey.chip.lateCaffeine": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Late caffeine"
+          }
+        }
+      }
+    },
+    "briefing.survey.chip.alcohol": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alcohol"
+          }
+        }
+      }
+    },
+    "briefing.survey.chip.stressfulDay": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stressful day"
+          }
+        }
+      }
+    },
+    "briefing.survey.chip.lateMeal": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Late meal"
+          }
+        }
+      }
+    },
+    "briefing.survey.chip.screensInBed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Screens in bed"
+          }
+        }
+      }
+    },
+    "profile.editor.privacyNotice": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Everything here stays on your iPhone. Never uploaded."
+          }
+        }
+      }
+    },
+    "profile.editor.step.you": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You"
+          }
+        }
+      }
+    },
+    "profile.editor.step.goals": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your Goals"
+          }
+        }
+      }
+    },
+    "profile.editor.step.habits": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Typical Habits"
+          }
+        }
+      }
+    },
+    "profile.editor.step.personal": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Personal Touch"
+          }
+        }
+      }
+    },
+    "profile.field.firstName": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "First Name"
+          }
+        }
+      }
+    },
+    "profile.field.birthYear": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Birth Year"
+          }
+        }
+      }
+    },
+    "profile.field.biologicalSex": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Biological Sex"
+          }
+        }
+      }
+    },
+    "profile.field.height": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Height (cm)"
+          }
+        }
+      }
+    },
+    "profile.field.weight": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weight (kg)"
+          }
+        }
+      }
+    },
+    "profile.field.targetBedtime": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Target Bedtime"
+          }
+        }
+      }
+    },
+    "profile.field.targetSleepHours": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Target Sleep Hours"
+          }
+        }
+      }
+    },
+    "profile.field.primaryGoal": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Primary Goal"
+          }
+        }
+      }
+    },
+    "profile.field.caffeine": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caffeine"
+          }
+        }
+      }
+    },
+    "profile.field.alcohol": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alcohol"
+          }
+        }
+      }
+    },
+    "profile.field.exercise": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exercise"
+          }
+        }
+      }
+    },
+    "profile.field.stress": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stress Level"
+          }
+        }
+      }
+    },
+    "profile.field.screens": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Screens Before Bed"
+          }
+        }
+      }
+    },
+    "profile.field.hobbies": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hobbies"
+          }
+        }
+      }
+    },
+    "profile.field.occupation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Occupation"
+          }
+        }
+      }
+    },
+    "profile.action.saveProfile": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save Profile"
+          }
+        }
+      }
+    },
+    "profile.sex.unspecified": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prefer not to say"
+          }
+        }
+      }
+    },
+    "profile.sex.female": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Female"
+          }
+        }
+      }
+    },
+    "profile.sex.male": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Male"
+          }
+        }
+      }
+    },
+    "profile.goal.snoreLess": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Snore Less"
+          }
+        }
+      }
+    },
+    "profile.goal.sleepDeeper": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sleep Deeper"
+          }
+        }
+      }
+    },
+    "profile.goal.moreConsistent": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "More Consistent"
+          }
+        }
+      }
+    },
+    "profile.goal.wakeRefreshed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wake Refreshed"
+          }
+        }
+      }
+    },
+    "profile.habit.caffeineNone": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "None"
+          }
+        }
+      }
+    },
+    "profile.habit.caffeineLight": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Light"
+          }
+        }
+      }
+    },
+    "profile.habit.caffeineModerate": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moderate"
+          }
+        }
+      }
+    },
+    "profile.habit.caffeineHeavy": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heavy"
+          }
+        }
+      }
+    },
+    "profile.habit.alcoholNone": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "None"
+          }
+        }
+      }
+    },
+    "profile.habit.alcoholOccasional": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Occasional"
+          }
+        }
+      }
+    },
+    "profile.habit.alcoholRegular": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regular"
+          }
+        }
+      }
+    },
+    "profile.frequency.rarely": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rarely"
+          }
+        }
+      }
+    },
+    "profile.frequency.sometimes": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sometimes"
+          }
+        }
+      }
+    },
+    "profile.frequency.often": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Often"
+          }
+        }
+      }
+    },
+    "profile.stress.low": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Low"
+          }
+        }
+      }
+    },
+    "profile.stress.medium": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Medium"
+          }
+        }
+      }
+    },
+    "profile.stress.high": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "High"
+          }
+        }
+      }
+    },
+    "profile.screen.rarely": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rarely"
+          }
+        }
+      }
+    },
+    "profile.screen.sometimes": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sometimes"
+          }
+        }
+      }
+    },
+    "profile.screen.often": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Often"
+          }
+        }
+      }
+    },
+    "profile.occupation.desk": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desk Job"
+          }
+        }
+      }
+    },
+    "profile.occupation.active": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Active"
+          }
+        }
+      }
+    },
+    "profile.occupation.shift": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shift Work"
+          }
+        }
+      }
+    },
+    "profile.occupation.other": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Other"
+          }
+        }
+      }
+    },
+    "action.continue": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continue"
+          }
+        }
+      }
+    },
+    "settings.section.profile": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PROFILE"
+          }
+        }
+      }
+    },
+    "settings.profile": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Profile"
+          }
+        }
+      }
+    },
+    "settings.briefing": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Daily Sleep Briefing"
+          }
+        }
+      }
+    },
+    "settings.briefing.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show a daily recap when you open the app"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

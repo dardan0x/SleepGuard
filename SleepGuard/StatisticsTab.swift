@@ -2,6 +2,7 @@ import SwiftUI
 import SwiftData
 import Env
 import Models
+import Personalization
 import SleepSession
 import Statistics
 
@@ -13,13 +14,22 @@ struct StatisticsTab: View {
   @Environment(HealthKitSync.self) private var healthKitSync
   @Environment(\.modelContext) private var modelContext
 
+
   var body: some View {
     NavigationStack(path: Binding(
       get: { routerPath.path },
       set: { routerPath.path = $0 }
     )) {
-      StatisticsDashboardView()
-        .withAppRouter()
+      VStack(spacing: 0) {
+        ProfilePromptCard {
+          routerPath.presentedSheet = .profileEditor
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 12)
+
+        StatisticsDashboardView()
+          .withAppRouter()
+      }
     }
     .sheet(
       item: Binding(
@@ -37,6 +47,20 @@ struct StatisticsTab: View {
         if let session = sessionManager.completedSession {
           SessionSummaryView(session: session)
             .withEnvironments()
+        }
+      case .profileEditor:
+        if let profile = fetchOrCreateProfile() {
+          ProfileEditorView(
+            profile: profile,
+            onComplete: {
+              routerPath.presentedSheet = nil
+              UserPreferences.shared.hasCompletedProfile = true
+            },
+            onDismiss: {
+              routerPath.presentedSheet = nil
+            }
+          )
+          .withEnvironments()
         }
       }
     }
@@ -64,6 +88,16 @@ struct StatisticsTab: View {
     .environment(routerPath)
   }
 
+  private func fetchOrCreateProfile() -> UserProfile? {
+    let descriptor = FetchDescriptor<UserProfile>()
+    if let existing = try? modelContext.fetch(descriptor).first {
+      return existing
+    }
+    let profile = UserProfile()
+    modelContext.insert(profile)
+    return profile
+  }
+
   private func autoSaveForceSavedSession(session: SleepSession) {
     if let events = session.events {
       for event in events {
@@ -71,6 +105,11 @@ struct StatisticsTab: View {
       }
     }
     modelContext.insert(session)
+
+    // Cache AFTER insertion so SwiftData tracks the mutations
+    session.cachedSleepScore = session.sleepScore
+    session.cachedSnoringDuration = session.snoringDuration
+    session.hasCachedScore = true
 
     do {
       try modelContext.save()

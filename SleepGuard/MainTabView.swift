@@ -1,6 +1,9 @@
 import SwiftUI
+import SwiftData
 import Env
 import DesignSystem
+import Models
+import Personalization
 import SleepSession
 import Statistics
 import Recordings
@@ -9,7 +12,11 @@ import Settings
 struct MainTabView: View {
     @Environment(Theme.self) private var theme
     @Environment(SessionManager.self) private var sessionManager
+    @Environment(\.modelContext) private var modelContext
+    @Environment(UserPreferences.self) private var userPreferences
     @State private var tabCoordinator = TabCoordinator()
+    @State private var showBriefing = false
+    @State private var currentBriefing: Briefing?
     @Namespace private var tabAnimation
     
     var body: some View {
@@ -52,6 +59,25 @@ struct MainTabView: View {
         .animation(nil, value: sessionManager.isLiveSessionVisible)
         .overlay(sessionProcessingOverlay)
         .environment(tabCoordinator)
+        .task {
+          generateBriefingIfNeeded()
+        }
+        .sheet(
+          isPresented: $showBriefing,
+          onDismiss: {
+            userPreferences.lastBriefingShownDate = Date()
+          }
+        ) {
+          if let briefing = currentBriefing {
+            SleepBriefingView(
+              briefing: briefing,
+              onDismiss: { showBriefing = false },
+              onChipTap: { chip in
+                saveLifestyleLog(chip: chip, briefing: briefing)
+              }
+            )
+          }
+        }
     }
     
     // MARK: - iOS < 26 (custom floating tab bar)
@@ -69,6 +95,25 @@ struct MainTabView: View {
         }
         .ignoresSafeArea(.keyboard)
         .environment(tabCoordinator)
+        .task {
+          generateBriefingIfNeeded()
+        }
+        .sheet(
+          isPresented: $showBriefing,
+          onDismiss: {
+            userPreferences.lastBriefingShownDate = Date()
+          }
+        ) {
+          if let briefing = currentBriefing {
+            SleepBriefingView(
+              briefing: briefing,
+              onDismiss: { showBriefing = false },
+              onChipTap: { chip in
+                saveLifestyleLog(chip: chip, briefing: briefing)
+              }
+            )
+          }
+        }
     }
     
     @ViewBuilder
@@ -123,6 +168,74 @@ struct MainTabView: View {
         .padding(.horizontal, 30)
     }
     
+    private func generateBriefingIfNeeded() {
+      guard userPreferences.briefingEnabled else { return }
+      if let lastDate = userPreferences.lastBriefingShownDate,
+         Calendar.current.isDateInToday(lastDate) {
+        return
+      }
+
+      let sessionDescriptor = FetchDescriptor<SleepSession>(
+        sortBy: [SortDescriptor(\.startDate, order: .reverse)]
+      )
+      guard let sessions = try? modelContext.fetch(sessionDescriptor), !sessions.isEmpty else { return }
+
+      let logDescriptor = FetchDescriptor<LifestyleLog>()
+      let logs = (try? modelContext.fetch(logDescriptor)) ?? []
+
+      let profileDescriptor = FetchDescriptor<UserProfile>()
+      let profile = try? modelContext.fetch(profileDescriptor).first
+      let briefingProfile = profile.map {
+        BriefingProfile(
+          firstName: $0.firstName,
+          targetSleepHours: $0.targetSleepHours,
+          completionPercentage: $0.completionPercentage
+        )
+      } ?? BriefingProfile()
+
+      let briefingSessions = sessions.compactMap { session -> BriefingSession? in
+        guard session.hasCachedScore else { return nil }
+        return BriefingSession(
+          startDate: session.startDate,
+          endDate: session.endDate,
+          sleepScore: session.cachedSleepScore,
+          snoringDuration: session.cachedSnoringDuration,
+          totalDuration: session.totalDuration
+        )
+      }
+
+      let briefing = BriefingEngine.generate(
+        profile: briefingProfile,
+        recentSessions: briefingSessions,
+        lifestyleLogs: logs,
+        now: Date()
+      )
+
+      currentBriefing = briefing
+      showBriefing = true
+    }
+
+    private func saveLifestyleLog(chip: String, briefing: Briefing) {
+      guard let latestSession = briefing.stats.first else { return }
+      // Find the actual latest session to link the log
+      let descriptor = FetchDescriptor<SleepSession>(
+        sortBy: [SortDescriptor(\.startDate, order: .reverse)]
+      )
+      guard let session = try? modelContext.fetch(descriptor).first else { return }
+
+      let log = LifestyleLog(
+        date: session.startDate,
+        hadCaffeineLate: chip == Strings.briefingSurveyChipLateCaffeine,
+        hadAlcohol: chip == Strings.briefingSurveyChipAlcohol,
+        exercised: chip == Strings.briefingSurveyChipExercised,
+        stressfulDay: chip == Strings.briefingSurveyChipStressfulDay,
+        lateMeal: chip == Strings.briefingSurveyChipLateMeal,
+        screenBeforeBed: chip == Strings.briefingSurveyChipScreensInBed,
+        sessionID: session.id
+      )
+      modelContext.insert(log)
+    }
+
     private var sessionProcessingOverlay: some View {
         ZStack {
             if sessionManager.isProcessingSession {

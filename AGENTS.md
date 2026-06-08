@@ -209,6 +209,43 @@ These thresholds prevent monolithic views. Enforce them during implementation an
 - One endpoint enum per API resource. One file per enum.
 - 2-space indentation. Enforced by `.swiftformat`.
 
+## SwiftData Schema Rules
+
+SwiftData lightweight migration is automatic for additive changes, but **removing or renaming properties will crash on launch** for existing users. Follow these rules to keep the schema future-proof without migration plans.
+
+### Safe changes (no migration needed)
+- **Add new stored properties with default values** — SwiftData auto-migrates
+- **Add new optional properties** — auto-migrates
+- **Add new model types** — auto-migrates
+- **Add new `@Relationship` properties** — auto-migrates
+
+### Breaking changes (will crash existing installs)
+- **Removing a property** from a `@Model` class
+- **Renaming a property**
+- **Changing a property's type** (e.g. `Int` → `Double`)
+- **Changing non-optional to optional** without a default
+- **Removing a model class entirely**
+
+### Defensive schema policy
+> **Never remove or rename a `@Model` property. Only add new ones with defaults. If a property is no longer needed, deprecate it in code but leave it in the schema.**
+
+SwiftData ignores unused columns in the persistent store. This is the only zero-migration way to evolve schemas.
+
+### Cached computed properties on `SleepSession`
+`SleepSession` carries three defensive cached properties to avoid relationship faulting crashes:
+
+```swift
+public var hasCachedScore: Bool = false
+public var cachedSleepScore: Int = 0
+public var cachedSnoringDuration: TimeInterval = 0
+```
+
+These are **necessary** — do not remove them. `sleepScore` and `snoringDuration` are computed from `events`, and faulting `session.events` has crashed in production. The cached values provide a zero-faulting read path.
+
+**Rules when modifying sessions:**
+- Set cached values **after** `modelContext.insert(session)`, never before. SwiftData snapshots at insertion time; pre-insertion mutations on `@Model` objects are **not tracked**.
+- Any code that modifies a session after its initial save (e.g. adding `sleepStageSegments` in `SessionDetailView`) must recalculate and update `cachedSleepScore` before calling `modelContext.save()`.
+
 ## Architecture Reference
 
 Read these docs when building features. Reference only what you need per prompt.

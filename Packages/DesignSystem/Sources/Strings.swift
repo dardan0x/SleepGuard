@@ -8,6 +8,7 @@ public enum Strings {
   public static var actionCancel: String { String(localized: "action.cancel", bundle: .module) }
   public static var actionClose: String { String(localized: "action.close", bundle: .module) }
   public static var actionCollapse: String { String(localized: "action.collapse", bundle: .module) }
+  public static var actionContinue: String { String(localized: "action.continue", bundle: .module) }
   public static var actionDelete: String { String(localized: "action.delete", bundle: .module) }
   public static var actionDeleteAll: String { String(localized: "action.deleteAll", bundle: .module) }
   public static var actionDiscard: String { String(localized: "action.discard", bundle: .module) }
@@ -25,6 +26,57 @@ public enum Strings {
   public static var actionTryAgain: String { String(localized: "action.tryAgain", bundle: .module) }
   public static var alwaysSoothingMelodyValueFormat: String { String(localized: "always.soothing.melody.value", bundle: .module) }
   public static var avgScoreCalendarStatCardLabel: String { String(localized: "avg.score.calendar.stat.card.label", bundle: .module) }
+  public static var briefingGreetingAfternoon: String { String(localized: "briefing.greeting.afternoon", bundle: .module) }
+  public static var briefingGreetingAfternoonNoName: String { String(localized: "briefing.greeting.afternoon.noName", bundle: .module) }
+  public static var briefingGreetingEvening: String { String(localized: "briefing.greeting.evening", bundle: .module) }
+  public static var briefingGreetingEveningNoName: String { String(localized: "briefing.greeting.evening.noName", bundle: .module) }
+  public static var briefingGreetingMorning: String { String(localized: "briefing.greeting.morning", bundle: .module) }
+  public static var briefingGreetingMorningNoName: String { String(localized: "briefing.greeting.morning.noName", bundle: .module) }
+  public static var briefingGreetingNight: String { String(localized: "briefing.greeting.night", bundle: .module) }
+  public static var briefingGreetingNightNoName: String { String(localized: "briefing.greeting.night.noName", bundle: .module) }
+  public static var briefingHeadlineCombinedDurationScore: String { String(localized: "briefing.headline.combinedDurationScore", bundle: .module) }
+  public static var briefingHeadlineCombinedScoreSnoring: String { String(localized: "briefing.headline.combinedScoreSnoring", bundle: .module) }
+  public static var briefingHeadlineNormal: String { String(localized: "briefing.headline.normal", bundle: .module) }
+  public static var briefingHeadlineQuiet: String { String(localized: "briefing.headline.quiet", bundle: .module) }
+  public static var briefingHeadlineWeeklyDuration: String { String(localized: "briefing.headline.weeklyDuration", bundle: .module) }
+  public static var briefingHeadlineWeeklyScore: String { String(localized: "briefing.headline.weeklyScore", bundle: .module) }
+  public static var briefingHeadlineWeeklySnoring: String { String(localized: "briefing.headline.weeklySnoring", bundle: .module) }
+  public static var briefingHeadlineWelcome: String { String(localized: "briefing.headline.welcome", bundle: .module) }
+  public static var briefingInsightDeclining: String { String(localized: "briefing.insight.declining", bundle: .module) }
+  public static var briefingInsightGoalShortfall: String { String(localized: "briefing.insight.goalShortfall", bundle: .module) }
+  public static var briefingInsightImproving: String { String(localized: "briefing.insight.improving", bundle: .module) }
+  public static var briefingInsightSteady: String { String(localized: "briefing.insight.steady", bundle: .module) }
+  public static var briefingInsightWeeklyDurationDown: String { String(localized: "briefing.insight.weeklyDurationDown", bundle: .module) }
+  public static var briefingInsightWeeklyDurationUp: String { String(localized: "briefing.insight.weeklyDurationUp", bundle: .module) }
+  public static var briefingInsightWeeklyScoreDown: String { String(localized: "briefing.insight.weeklyScoreDown", bundle: .module) }
+  public static var briefingInsightWeeklyScoreUp: String { String(localized: "briefing.insight.weeklyScoreUp", bundle: .module) }
+  public static var briefingInsightWeeklySnoringDown: String { String(localized: "briefing.insight.weeklySnoringDown", bundle: .module) }
+  public static var briefingInsightWeeklySnoringUp: String { String(localized: "briefing.insight.weeklySnoringUp", bundle: .module) }
+  public static var briefingProfileNudge: String { String(localized: "briefing.profileNudge", bundle: .module) }
+  public static var briefingQuoteDeclining: String { String(localized: "briefing.quote.declining", bundle: .module) }
+  public static var briefingQuoteFirstNight: String { String(localized: "briefing.quote.firstNight", bundle: .module) }
+  public static var briefingQuoteImproving: String { String(localized: "briefing.quote.improving", bundle: .module) }
+  public static var briefingQuoteNoData: String { String(localized: "briefing.quote.noData", bundle: .module) }
+  public static var briefingQuoteReturningAfterGap: String { String(localized: "briefing.quote.returningAfterGap", bundle: .module) }
+  public static var briefingQuoteSteady: String { String(localized: "briefing.quote.steady", bundle: .module) }
+  public static var briefingStatLastNight: String { String(localized: "briefing.stat.lastNight", bundle: .module) }
+  public static var briefingStatScore: String { String(localized: "briefing.stat.score", bundle: .module) }
+  public static var briefingStatSleep: String { String(localized: "briefing.stat.sleep", bundle: .module) }
+  public static var briefingStatSnoring: String { String(localized: "briefing.stat.snoring", bundle: .module) }
+  public static var briefingStatTrend: String { String(localized: "briefing.stat.trend", bundle: .module) }
+  public static var briefingStatWeeklyAvg: String { String(localized: "briefing.stat.weeklyAvg", bundle: .module) }
+  public static var briefingSurveyChipAlcohol: String { String(localized: "briefing.survey.chip.alcohol", bundle: .module) }
+  public static var briefingSurveyChipExercised: String { String(localized: "briefing.survey.chip.exercised", bundle: .module) }
+  public static var briefingSurveyChipLateCaffeine: String { String(localized: "briefing.survey.chip.lateCaffeine", bundle: .module) }
+  public static var briefingSurveyChipLateMeal: String { String(localized: "briefing.survey.chip.lateMeal", bundle: .module) }
+  public static var briefingSurveyChipLessCaffeine: String { String(localized: "briefing.survey.chip.lessCaffeine", bundle: .module) }
+  public static var briefingSurveyChipLessStress: String { String(localized: "briefing.survey.chip.lessStress", bundle: .module) }
+  public static var briefingSurveyChipNoAlcohol: String { String(localized: "briefing.survey.chip.noAlcohol", bundle: .module) }
+  public static var briefingSurveyChipScreensInBed: String { String(localized: "briefing.survey.chip.screensInBed", bundle: .module) }
+  public static var briefingSurveyChipSleptEarlier: String { String(localized: "briefing.survey.chip.sleptEarlier", bundle: .module) }
+  public static var briefingSurveyChipStressfulDay: String { String(localized: "briefing.survey.chip.stressfulDay", bundle: .module) }
+  public static var briefingSurveyNegativeTitle: String { String(localized: "briefing.survey.negativeTitle", bundle: .module) }
+  public static var briefingSurveyPositiveTitle: String { String(localized: "briefing.survey.positiveTitle", bundle: .module) }
   public static var commonOver: String { String(localized: "common.over", bundle: .module) }
   public static var durationPickerTitle: String { String(localized: "duration.picker.title", bundle: .module) }
   public static var epicIntensityLabel: String { String(localized: "epic.intensity.label", bundle: .module) }
@@ -91,6 +143,57 @@ public enum Strings {
   public static var playRecordCustomMelodySheet: String { String(localized: "play.record.custom.melody.sheet", bundle: .module) }
   public static var playingSoothingMelodyPlayer: String { String(localized: "playing.soothing.melody.player", bundle: .module) }
   public static var processingSession: String { String(localized: "processing.session", bundle: .module) }
+  public static var profileActionSaveProfile: String { String(localized: "profile.action.saveProfile", bundle: .module) }
+  public static var profileEditorPrivacyNotice: String { String(localized: "profile.editor.privacyNotice", bundle: .module) }
+  public static var profileEditorStepGoals: String { String(localized: "profile.editor.step.goals", bundle: .module) }
+  public static var profileEditorStepHabits: String { String(localized: "profile.editor.step.habits", bundle: .module) }
+  public static var profileEditorStepPersonal: String { String(localized: "profile.editor.step.personal", bundle: .module) }
+  public static var profileEditorStepYou: String { String(localized: "profile.editor.step.you", bundle: .module) }
+  public static var profileFieldAlcohol: String { String(localized: "profile.field.alcohol", bundle: .module) }
+  public static var profileFieldBiologicalSex: String { String(localized: "profile.field.biologicalSex", bundle: .module) }
+  public static var profileFieldBirthYear: String { String(localized: "profile.field.birthYear", bundle: .module) }
+  public static var profileFieldCaffeine: String { String(localized: "profile.field.caffeine", bundle: .module) }
+  public static var profileFieldExercise: String { String(localized: "profile.field.exercise", bundle: .module) }
+  public static var profileFieldFirstName: String { String(localized: "profile.field.firstName", bundle: .module) }
+  public static var profileFieldHeight: String { String(localized: "profile.field.height", bundle: .module) }
+  public static var profileFieldHobbies: String { String(localized: "profile.field.hobbies", bundle: .module) }
+  public static var profileFieldOccupation: String { String(localized: "profile.field.occupation", bundle: .module) }
+  public static var profileFieldPrimaryGoal: String { String(localized: "profile.field.primaryGoal", bundle: .module) }
+  public static var profileFieldScreens: String { String(localized: "profile.field.screens", bundle: .module) }
+  public static var profileFieldStress: String { String(localized: "profile.field.stress", bundle: .module) }
+  public static var profileFieldTargetBedtime: String { String(localized: "profile.field.targetBedtime", bundle: .module) }
+  public static var profileFieldTargetSleepHours: String { String(localized: "profile.field.targetSleepHours", bundle: .module) }
+  public static var profileFieldWeight: String { String(localized: "profile.field.weight", bundle: .module) }
+  public static var profileFrequencyOften: String { String(localized: "profile.frequency.often", bundle: .module) }
+  public static var profileFrequencyRarely: String { String(localized: "profile.frequency.rarely", bundle: .module) }
+  public static var profileFrequencySometimes: String { String(localized: "profile.frequency.sometimes", bundle: .module) }
+  public static var profileGoalMoreConsistent: String { String(localized: "profile.goal.moreConsistent", bundle: .module) }
+  public static var profileGoalSleepDeeper: String { String(localized: "profile.goal.sleepDeeper", bundle: .module) }
+  public static var profileGoalSnoreLess: String { String(localized: "profile.goal.snoreLess", bundle: .module) }
+  public static var profileGoalWakeRefreshed: String { String(localized: "profile.goal.wakeRefreshed", bundle: .module) }
+  public static var profileHabitAlcoholNone: String { String(localized: "profile.habit.alcoholNone", bundle: .module) }
+  public static var profileHabitAlcoholOccasional: String { String(localized: "profile.habit.alcoholOccasional", bundle: .module) }
+  public static var profileHabitAlcoholRegular: String { String(localized: "profile.habit.alcoholRegular", bundle: .module) }
+  public static var profileHabitCaffeineHeavy: String { String(localized: "profile.habit.caffeineHeavy", bundle: .module) }
+  public static var profileHabitCaffeineLight: String { String(localized: "profile.habit.caffeineLight", bundle: .module) }
+  public static var profileHabitCaffeineModerate: String { String(localized: "profile.habit.caffeineModerate", bundle: .module) }
+  public static var profileHabitCaffeineNone: String { String(localized: "profile.habit.caffeineNone", bundle: .module) }
+  public static var profileOccupationActive: String { String(localized: "profile.occupation.active", bundle: .module) }
+  public static var profileOccupationDesk: String { String(localized: "profile.occupation.desk", bundle: .module) }
+  public static var profileOccupationOther: String { String(localized: "profile.occupation.other", bundle: .module) }
+  public static var profileOccupationShift: String { String(localized: "profile.occupation.shift", bundle: .module) }
+  public static var profilePromptAction: String { String(localized: "profile.prompt.action", bundle: .module) }
+  public static var profilePromptSubtitle: String { String(localized: "profile.prompt.subtitle", bundle: .module) }
+  public static var profilePromptTitle: String { String(localized: "profile.prompt.title", bundle: .module) }
+  public static var profileScreenOften: String { String(localized: "profile.screen.often", bundle: .module) }
+  public static var profileScreenRarely: String { String(localized: "profile.screen.rarely", bundle: .module) }
+  public static var profileScreenSometimes: String { String(localized: "profile.screen.sometimes", bundle: .module) }
+  public static var profileSexFemale: String { String(localized: "profile.sex.female", bundle: .module) }
+  public static var profileSexMale: String { String(localized: "profile.sex.male", bundle: .module) }
+  public static var profileSexUnspecified: String { String(localized: "profile.sex.unspecified", bundle: .module) }
+  public static var profileStressHigh: String { String(localized: "profile.stress.high", bundle: .module) }
+  public static var profileStressLow: String { String(localized: "profile.stress.low", bundle: .module) }
+  public static var profileStressMedium: String { String(localized: "profile.stress.medium", bundle: .module) }
   public static var quietIntensityLabel: String { String(localized: "quiet.intensity.label", bundle: .module) }
   public static var reRecordCustomMelodySheet: String { String(localized: "re.record.custom.melody.sheet", bundle: .module) }
   public static var recordMelodySheetNavHeader: String { String(localized: "record.melody.sheet.nav.header", bundle: .module) }
@@ -162,6 +265,8 @@ public enum Strings {
   public static var sessionSummaryYouSleptFormat: String { String(localized: "session.summary.youSleptFormat", bundle: .module) }
   public static var sessionsCalendarStatCardLabel: String { String(localized: "sessions.calendar.stat.card.label", bundle: .module) }
   public static var sessionsDetailSessionsCountFormat: String { String(localized: "sessions.detail.sessionsCountFormat", bundle: .module) }
+  public static var settingsBriefing: String { String(localized: "settings.briefing", bundle: .module) }
+  public static var settingsBriefingDescription: String { String(localized: "settings.briefing.description", bundle: .module) }
   public static var settingsDeleteAll: String { String(localized: "settings.deleteAll", bundle: .module) }
   public static var settingsDeleteAllConfirmMessage: String { String(localized: "settings.deleteAll.confirmMessage", bundle: .module) }
   public static var settingsDeleteAllConfirmTitle: String { String(localized: "settings.deleteAll.confirmTitle", bundle: .module) }
@@ -184,6 +289,7 @@ public enum Strings {
   public static var settingsMinSnoreDuration: String { String(localized: "settings.minSnoreDuration", bundle: .module) }
   public static var settingsPreserveRawAudio: String { String(localized: "settings.preserveRawAudio", bundle: .module) }
   public static var settingsPreserveRawAudioDescription: String { String(localized: "settings.preserveRawAudio.description", bundle: .module) }
+  public static var settingsProfile: String { String(localized: "settings.profile", bundle: .module) }
   public static var settingsRateApp: String { String(localized: "settings.rateApp", bundle: .module) }
   public static var settingsSaveAudioClips: String { String(localized: "settings.saveAudioClips", bundle: .module) }
   public static var settingsSectionAbout: String { String(localized: "settings.section.about", bundle: .module) }
@@ -191,6 +297,7 @@ public enum Strings {
   public static var settingsSectionData: String { String(localized: "settings.section.data", bundle: .module) }
   public static var settingsSectionDetection: String { String(localized: "settings.section.detection", bundle: .module) }
   public static var settingsSectionPermissions: String { String(localized: "settings.section.permissions", bundle: .module) }
+  public static var settingsSectionProfile: String { String(localized: "settings.section.profile", bundle: .module) }
   public static var settingsSectionRecording: String { String(localized: "settings.section.recording", bundle: .module) }
   public static var settingsSectionStorage: String { String(localized: "settings.section.storage", bundle: .module) }
   public static var settingsSectionWatch: String { String(localized: "settings.section.watch", bundle: .module) }

@@ -3,6 +3,7 @@ import SwiftData
 import Env
 import DesignSystem
 import Models
+import Personalization
 
 @MainActor
 public struct SettingsView: View {
@@ -12,6 +13,7 @@ public struct SettingsView: View {
   @Environment(HealthKitSync.self) private var healthKitSync
   @Environment(\.modelContext) private var modelContext
   @Environment(\.openURL) private var openURL
+  @Environment(RouterPath.self) private var routerPath
 
   @State private var showDeleteConfirmation = false
   @State private var showThemePicker = false
@@ -29,6 +31,7 @@ public struct SettingsView: View {
           SettingsPermissionsSection()
           SettingsRecordingSection()
           SettingsAppearanceSection()
+          SettingsProfileSection(onTapProfile: { routerPath.presentedSheet = .profileEditor })
           SettingsWatchSection()
           SettingsStorageSection()
           SettingsDataSection(onShowDeleteConfirmation: { showDeleteConfirmation = true })
@@ -91,6 +94,10 @@ public struct SettingsView: View {
 
       let sessions = try modelContext.fetch(FetchDescriptor<SleepSession>())
       for session in sessions {
+        // Resolve transformable faults before deletion to prevent
+        // "detached from a context without resolving attribute faults" crash.
+        _ = session.sleepStageSegments
+        _ = session.recordingGaps
         deleteSessionFiles(session)
         modelContext.delete(session)
       }
