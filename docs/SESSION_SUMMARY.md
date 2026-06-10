@@ -5565,3 +5565,75 @@ score = 100 - snoringPenalty - eventsPenalty - intensityPenalty
 
 ### Open Questions
 - (none)
+
+
+---
+
+## 2026-06-08 — Session 77: Snoring Episode Merge, Short-Event Confidence Filtering & ModelContainer Recovery
+
+### Completed
+- **SnoringEpisode merge**: Adjacent snoring events within a 5-minute gap are now grouped into `SnoringEpisode` structs. Episode intensity = max event intensity (using new `SnoreIntensity.rank`). Episode duration = sum of event durations. Representative event = longest event (for playback).
+- **Displayable episode filtering**: `displayableSnoringEpisodes` hides episodes with total snoring duration < 3 seconds from UI. These events are still saved but not shown in main lists.
+- **Stats updated to use episodes**: `eventsCount`, `eventsPerHour`, and `sleepScore` now use `displayableSnoringEpisodes.count` instead of raw snoring event count. This reduces false-positive inflation.
+- **Timeline renders episodes**: `SnoringTimelineView` now draws merged episode bars instead of individual event bars, reducing visual clutter.
+- **Session detail layout**: Displayable episodes shown as familiar rows with episode duration (not just representative event duration). Short episodes (< 3s) grouped behind a "%d events under 3 sec" accent button that opens the multi-event player.
+- **Short-event player**: `PlayerSheetView` now shows a scrollable multi-event list (start time – end time, duration, intensity) when `sortedEvents.count > 1`. Tapping a row jumps playback to that event. Active event highlighted with accent background.
+- **Back-compat score recalc**: `SessionDetailView.loadSession()` unconditionally recalculates `cachedSleepScore` on open so existing sessions pick up the episode-based scoring formula.
+- **Confidence-based short-event filtering**: `SessionManager` now tracks per-event average `snoreConfidence` and `spectralScore`. Events < 3 seconds are discarded if confidence is too low (below `highConfidenceGate` for ML-classified events, below 0.65 for spectral-only). Discarded events are fully cleaned up (file deleted, never saved).
+- **ModelContainer crash fix**: Added `= 0` defaults to new `SnoreEvent` properties so SwiftData lightweight migration works. Replaced `fatalError` in `SleepGuardApp` with graceful store-deletion-and-retry on migration failure.
+
+### Technical Details
+- **Episode merge gap**: 300 seconds (5 min). Grounded in clinical definition of snoring epochs.
+- **Display threshold**: 3 seconds of total snoring duration within an episode. Episodes below this are hidden from UI but still counted in `snoringDuration`.
+- **Score formula update**: `sleepScore` penalty now uses `displayableSnoringEpisodes.count` instead of raw `snoringEvents.count`, reducing false-positive penalty.
+- **Short-event confidence gates** (sensitivity-dependent):
+  - Low: ML confidence ≥ 0.65
+  - Medium: ML confidence ≥ 0.55
+  - High: ML confidence ≥ 0.45
+  - Spectral-only fallback: average spectral score ≥ 0.65
+- **ModelContainer recovery**: On `ModelContainer` creation failure, deletes the old store URL and retries once before fatalError. Prevents dev schema changes from bricking the app.
+
+### Files Changed
+| File | Lines | What Changed |
+|------|-------|--------------|
+| `Packages/Models/Sources/Data/SnoreEpisode.swift` | +29/-0 | **New** — `SnoringEpisode` struct with id, startTime, duration, intensity, events, snoreDuration, representativeEvent, peakDB, averageDB |
+| `Packages/Models/Sources/Data/SnoreEvent.swift` | +15/-0 | Added `SnoreIntensity.rank`; added `averageConfidence` and `averageSpectralScore` with `= 0` defaults |
+| `Packages/Models/Sources/Data/SleepSession.swift` | +61/-2 | Added `snoringEpisodes` (300s merge gap), `displayableSnoringEpisodes` (≥3s filter), updated `eventsCount` and `sleepScore` to use episodes |
+| `Packages/DesignSystem/Sources/Components/SnoringTimelineView.swift` | +65/-17 | Renders `displayableSnoringEpisodes` as merged timeline bars; non-snoring events shown individually |
+| `Packages/Recordings/Sources/Views/SessionDetailView.swift` | +75/-12 | `filteredEvents` uses episodes for `.snoring`/`.all`; `shortEvents` for under-3-sec player; `displayDurations` map for episode durations; back-compat score recalc |
+| `Packages/Recordings/Sources/Views/PlayerSheetView.swift` | +92/-0 | Multi-event list section with start–end time, duration, intensity; tap to jump playback; active event highlight |
+| `Packages/Recordings/Sources/Views/HiddenEventsSection.swift` | +54/-0 | **New** — Collapsible "X events under 3 sec" section with `EventRow` children |
+| `Packages/Recordings/Sources/Views/EventsSheetView.swift` | +5/-1 | Accepts `displayDurations` for episode duration overrides |
+| `Packages/Recordings/Sources/Views/EventRow.swift` | +4/-2 | Uses `displayDuration` override when available |
+| `Packages/Recordings/Sources/Views/SessionDetailEventsView.swift` | +2/-0 | Accepts `displayDurations` parameter |
+| `Packages/DesignSystem/Sources/Resources/Localizable.xcstrings` | +11/-0 | `session.detail.hiddenEventsFormat` localized string |
+| `Packages/DesignSystem/Sources/Strings.swift` | +1/-0 | Generated accessor for hidden events format |
+| `Packages/Env/Sources/Services/SessionManager.swift` | +64/-0 | Confidence/spectral tracking during events; short-event confidence filter in `finalizeActiveEvent`; reset new tracking state |
+| `SleepGuard/SleepGuardApp.swift` | +11/-1 | Graceful ModelContainer recovery: catch error, delete store, retry |
+
+### Architecture Decisions
+- **Episode as value type**: `SnoringEpisode` is a `Sendable` struct computed on demand from `SleepSession.events`. No schema migration needed — purely a presentation-layer grouping.
+- **Hide vs discard**: Episodes < 3s are hidden from UI but still saved. Individual events < 3s with low confidence are fully discarded in `finalizeActiveEvent()`. Two different thresholds for different purposes.
+- **Representative event for playback**: Longest event in episode chosen as playback representative. Keeps audio file association without merging audio.
+
+### Build Status
+- **BUILD SUCCEEDED** — zero errors, zero warnings.
+
+`Session 77 — Snoring episode merge, short-event confidence filtering, and ModelContainer recovery`
+
+### Changes done
+- Add `SnoringEpisode` struct for merging adjacent snoring events (300s gap)
+- Add `displayableSnoringEpisodes` filter (≥3s) and update stats to use episodes
+- Add multi-event list to `PlayerSheetView` for short events playback
+- Add `HiddenEventsSection` collapsible UI for under-3-sec events
+- Add confidence/spectral tracking in `SessionManager` and discard short low-confidence events
+- Add `averageConfidence` and `averageSpectralScore` to `SnoreEvent` with safe defaults
+- Add graceful ModelContainer store-deletion recovery in `SleepGuardApp`
+- Update timeline, session detail, and events sheet to render episodes
+
+### Next Session
+- Monitor real-world false-positive rates with new confidence filtering
+- Consider exposing confidence values in session detail for power users
+
+### Open Questions
+- Is 0.65 spectral score threshold too aggressive for High sensitivity? Needs real-world validation.

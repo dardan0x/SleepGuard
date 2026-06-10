@@ -36,6 +36,10 @@ public final class SessionManager {
     private var activeEventDBSum: Double = 0
     private var activeEventDBCount: Int = 0
     private var activeEventPeakDB: Double = 0
+    private var activeEventConfidenceSum: Double = 0
+    private var activeEventConfidenceCount: Int = 0
+    private var activeEventSpectralSum: Double = 0
+    private var activeEventSpectralCount: Int = 0
     private var lastSnoringSampleTime: Date?
     private let eventGapThreshold: TimeInterval = 10.0
     /// Require 3 consecutive snoring samples (≈150 ms at 20 Hz) before starting an event.
@@ -416,6 +420,10 @@ public final class SessionManager {
                 activeEventDBSum = Double(db)
                 activeEventDBCount = 1
                 activeEventPeakDB = Double(db)
+                activeEventConfidenceSum = snoreConfidence > 0 ? Double(snoreConfidence) : 0
+                activeEventConfidenceCount = snoreConfidence > 0 ? 1 : 0
+                activeEventSpectralSum = spectralScore > 0 ? Double(spectralScore) : 0
+                activeEventSpectralCount = spectralScore > 0 ? 1 : 0
                 activeEventIntensity = intensity(from: state)
                 activeBurstStart = activeEventStart
 
@@ -452,6 +460,14 @@ public final class SessionManager {
                 activeEventDBCount += 1
                 if Double(db) > activeEventPeakDB {
                     activeEventPeakDB = Double(db)
+                }
+                if snoreConfidence > 0 {
+                    activeEventConfidenceSum += Double(snoreConfidence)
+                    activeEventConfidenceCount += 1
+                }
+                if spectralScore > 0 {
+                    activeEventSpectralSum += Double(spectralScore)
+                    activeEventSpectralCount += 1
                 }
                 let currentIntensity = intensity(from: state)
                 if intensityRank(currentIntensity) > intensityRank(activeEventIntensity ?? .quiet) {
@@ -546,6 +562,10 @@ public final class SessionManager {
         activeEventDBSum = 0
         activeEventDBCount = 0
         activeEventPeakDB = 0
+        activeEventConfidenceSum = 0
+        activeEventConfidenceCount = 0
+        activeEventSpectralSum = 0
+        activeEventSpectralCount = 0
         totalDBSum = 0
         totalDBCount = 0
         sessionSnoringDuration = 0
@@ -605,8 +625,46 @@ public final class SessionManager {
             activeEventDBSum = 0
             activeEventDBCount = 0
             activeEventPeakDB = 0
+            activeEventConfidenceSum = 0
+            activeEventConfidenceCount = 0
+            activeEventSpectralSum = 0
+            activeEventSpectralCount = 0
             completedBursts.removeAll()
             return
+        }
+
+        let averageConfidence = activeEventConfidenceCount > 0 ? activeEventConfidenceSum / Double(activeEventConfidenceCount) : 0
+        let averageSpectralScore = activeEventSpectralCount > 0 ? activeEventSpectralSum / Double(activeEventSpectralCount) : 0
+
+        // Short events (< 3 s) require high confidence to avoid false positives.
+        // ML-classified events must clear the sensitivity-specific high-confidence gate.
+        // Spectral-only events (no ML confidence) must have a stronger spectral score.
+        let shortEventThreshold: TimeInterval = 3.0
+        if eventSpan < shortEventThreshold {
+            let hasMLConfidence = activeEventConfidenceCount > 0
+            let passesConfidence = hasMLConfidence
+                ? averageConfidence >= Double(snoreDetector.highConfidenceGate)
+                : averageSpectralScore >= 0.65
+            if !passesConfidence {
+                print("[SessionManager] Short event discarded: span \(String(format: "%.2f", eventSpan))s < \(shortEventThreshold)s, avgConf=\(String(format: "%.2f", averageConfidence)), avgSpectral=\(String(format: "%.2f", averageSpectralScore))")
+                if let eventID = activeEventID {
+                    let fileURL = eventFileURL(eventID: eventID, sessionID: session.id)
+                    try? FileManager.default.removeItem(at: fileURL)
+                }
+                audioRecorder.finalizeEventFile()
+                activeEventStart = nil
+                activeEventID = nil
+                activeEventIntensity = nil
+                activeEventDBSum = 0
+                activeEventDBCount = 0
+                activeEventPeakDB = 0
+                activeEventConfidenceSum = 0
+                activeEventConfidenceCount = 0
+                activeEventSpectralSum = 0
+                activeEventSpectralCount = 0
+                completedBursts.removeAll()
+                return
+            }
         }
 
         let event = SnoreEvent(
@@ -616,6 +674,8 @@ public final class SessionManager {
             intensity: activeEventIntensity ?? .quiet,
             averageDB: activeEventDBCount > 0 ? activeEventDBSum / Double(activeEventDBCount) : 0,
             peakDB: activeEventPeakDB,
+            averageConfidence: averageConfidence,
+            averageSpectralScore: averageSpectralScore,
             bursts: bursts.isEmpty ? nil : bursts,
             duration: eventSpan
         )
@@ -652,6 +712,10 @@ public final class SessionManager {
         activeEventDBSum = 0
         activeEventDBCount = 0
         activeEventPeakDB = 0
+        activeEventConfidenceSum = 0
+        activeEventConfidenceCount = 0
+        activeEventSpectralSum = 0
+        activeEventSpectralCount = 0
         completedBursts.removeAll(keepingCapacity: false)
     }
 

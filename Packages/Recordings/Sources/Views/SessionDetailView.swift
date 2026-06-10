@@ -66,6 +66,7 @@ public struct SessionDetailView: View {
 
         SessionDetailEventsView(
           events: filteredEvents,
+          displayDurations: displayDurations,
           title: eventsTitle,
           onShowAll: { activeSheet = .events },
           onPlayEvent: { event in
@@ -81,6 +82,24 @@ public struct SessionDetailView: View {
             }
           }
         )
+
+        if !shortEvents.isEmpty {
+          Button {
+            activeSheet = .shortEventsPlayer
+          } label: {
+            HStack(spacing: 8) {
+              Image(systemName: "waveform")
+                .font(.system(size: 14, weight: .semibold))
+              Text(String(format: Strings.sessionDetailHiddenEventsFormat, shortEvents.count))
+                .font(.system(size: 15, weight: .medium))
+            }
+            .foregroundStyle(theme.accent)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 12)
+            .background(theme.accent.opacity(0.12))
+            .cornerRadius(theme.radiusCard)
+          }
+        }
 //          //TODO: Add mini player if we want in future
 //          if isClipSession || session.audioFileURL != nil {
 //              fakePlayerSection(session: session, sortedEvents: sortedEvents, isClipSession: isClipSession)
@@ -138,8 +157,16 @@ public struct SessionDetailView: View {
         EventsSheetView(
           session: session,
           events: filteredEvents,
+          displayDurations: displayDurations,
           isClipSession: isClipSession,
           onPlayEvent: { _ in }
+        )
+      case .shortEventsPlayer:
+        PlayerSheetView(
+          session: session,
+          sortedEvents: shortEvents,
+          isClipSession: isClipSession,
+          initialEvent: nil
         )
       }
     }
@@ -281,10 +308,14 @@ public struct SessionDetailView: View {
         if userPreferences.enhancedSleepTracking && (session.sleepStageSegments == nil || stagesEmptyAndOld) {
           let stages = await HealthKitSync.shared.fetchSleepStages(for: session)
           session.sleepStageSegments = stages.isEmpty ? [] : stages
-          // Recalculate cached score since sleep stages affect stagePenalty
-          session.cachedSleepScore = session.sleepScore
-          try modelContext.save()
         }
+
+        // Recalculate cached score to pick up scoring formula changes
+        // (e.g. episode merging) while the session relationship is hot.
+        session.hasCachedScore = false
+        session.cachedSleepScore = session.sleepScore
+        session.hasCachedScore = true
+        try modelContext.save()
 
         let sortedEvents = session.events?.sorted(by: { $0.timestamp < $1.timestamp }) ?? []
         let isClipSession = sortedEvents.contains(where: { AudioFileURLResolver.resolve($0.audioFileURL) != nil })
@@ -356,9 +387,40 @@ public struct SessionDetailView: View {
     return Set(sortedEvents.map(\.category)).count > 1
   }
 
+  /// Display duration overrides for episode representatives.
+  private var displayDurations: [UUID: TimeInterval] {
+    guard case .loaded(let session, _, _) = viewState else { return [:] }
+    var map: [UUID: TimeInterval] = [:]
+    for episode in session.displayableSnoringEpisodes {
+      if let rep = episode.representativeEvent {
+        map[rep.id] = episode.snoreDuration
+      }
+    }
+    return map
+  }
+
+  /// Short snoring episodes (under 3 sec) shown in the dedicated player.
+  private var shortEvents: [SnoreEvent] {
+    guard case .loaded(let session, _, _) = viewState else { return [] }
+    let shortEpisodes = session.snoringEpisodes.filter { $0.snoreDuration < 3 }
+    return shortEpisodes.compactMap(\.representativeEvent)
+      .sorted(by: { $0.timestamp < $1.timestamp })
+  }
+
+  /// Events for display: displayable snoring episodes + non-snoring events.
   private var filteredEvents: [SnoreEvent] {
-    guard case .loaded(_, let sortedEvents, _) = viewState else { return [] }
-    return sortedEvents.filter { selectedFilter.includes(event: $0) }
+    guard case .loaded(let session, let sortedEvents, _) = viewState else { return [] }
+
+    switch selectedFilter {
+    case .snoring:
+      return session.displayableSnoringEpisodes.compactMap(\.representativeEvent)
+    case .sleepTalking, .noise:
+      return sortedEvents.filter { selectedFilter.includes(event: $0) }
+    case .all:
+      let reps = session.displayableSnoringEpisodes.compactMap(\.representativeEvent)
+      let others = sortedEvents.filter { $0.category != .snoring }
+      return (reps + others).sorted(by: { $0.timestamp < $1.timestamp })
+    }
   }
 
   private var eventsTitle: String {
@@ -404,6 +466,7 @@ public struct SessionDetailView: View {
   private enum DetailSheet: Identifiable {
     case player(initialEvent: SnoreEvent?)
     case events
+    case shortEventsPlayer
 
     var id: String {
       switch self {
@@ -411,6 +474,8 @@ public struct SessionDetailView: View {
         return event.map { "player-\($0.id.uuidString)" } ?? "player"
       case .events:
         return "events"
+      case .shortEventsPlayer:
+        return "short-events-player"
       }
     }
   }

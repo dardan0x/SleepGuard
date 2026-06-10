@@ -6,6 +6,15 @@ public enum SnoreIntensity: String, Codable, Sendable {
   case light
   case loud
   case epic
+
+  public var rank: Int {
+    switch self {
+    case .quiet: return 0
+    case .light: return 1
+    case .loud: return 2
+    case .epic: return 3
+    }
+  }
 }
 
 public enum SoundCategory: String, Codable, Sendable {
@@ -30,6 +39,8 @@ public final class SnoreEvent {
   public var dominantFrequency: Double
   public var spectralCentroid: Double
   public var lowFreqRatio: Double
+  public var averageConfidence: Double = 0
+  public var averageSpectralScore: Double = 0
   public var audioFileURL: String?
 
   /// Total span of the snoring episode (from first to last detected snore).
@@ -53,6 +64,8 @@ public final class SnoreEvent {
     dominantFrequency: Double = 0,
     spectralCentroid: Double = 0,
     lowFreqRatio: Double = 0,
+    averageConfidence: Double = 0,
+    averageSpectralScore: Double = 0,
     audioFileURL: String? = nil,
     bursts: [SnoreBurst]? = nil,
     duration: TimeInterval = 0
@@ -66,6 +79,8 @@ public final class SnoreEvent {
     self.dominantFrequency = dominantFrequency
     self.spectralCentroid = spectralCentroid
     self.lowFreqRatio = lowFreqRatio
+    self.averageConfidence = averageConfidence
+    self.averageSpectralScore = averageSpectralScore
     self.audioFileURL = audioFileURL
     self.bursts = bursts
     self.duration = duration

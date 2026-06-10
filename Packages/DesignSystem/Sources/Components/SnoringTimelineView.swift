@@ -47,17 +47,36 @@ public struct SnoringTimelineView: View {
     .frame(height: 34)
   }
 
-  private var events: [SnoreEvent] {
-    let events = session.events ?? []
-    guard events.count > 1 else { return events }
-    var isSorted = true
-    for i in 1..<events.count {
-      if events[i].timestamp < events[i - 1].timestamp {
-        isSorted = false
-        break
-      }
+  /// Timeline items: snoring episodes merged, other categories raw.
+  private var timelineItems: [TimelineItem] {
+    var items: [TimelineItem] = []
+
+    // Add snoring episodes
+    for episode in session.displayableSnoringEpisodes {
+      items.append(TimelineItem(
+        id: episode.id,
+        timestamp: episode.startTime,
+        duration: episode.snoreDuration,
+        intensity: episode.intensity,
+        category: .snoring
+      ))
     }
-    return isSorted ? events : events.sorted { $0.timestamp < $1.timestamp }
+
+    // Add non-snoring events individually
+    let otherEvents = (session.events ?? [])
+      .filter { $0.category != .snoring }
+      .sorted(by: { $0.timestamp < $1.timestamp })
+    for event in otherEvents {
+      items.append(TimelineItem(
+        id: event.id,
+        timestamp: event.timestamp,
+        duration: event.snoreDuration,
+        intensity: event.intensity,
+        category: event.category
+      ))
+    }
+
+    return items.sorted(by: { $0.timestamp < $1.timestamp })
   }
 
   private func timelineSegments(in totalWidth: CGFloat) -> [TimelineSegment] {
@@ -65,23 +84,23 @@ public struct SnoringTimelineView: View {
     let sessionEnd = session.endDate?.timeIntervalSinceReferenceDate ?? (sessionStart + session.totalDuration)
     let totalDuration = max(sessionEnd - sessionStart, 1)
 
-    return events.map { event in
-      let eventStart = event.timestamp.timeIntervalSinceReferenceDate
-      let relativeStart = (eventStart - sessionStart) / totalDuration
-      let relativeDuration = max(event.snoreDuration / totalDuration, 0.002)
+    return timelineItems.map { item in
+      let itemStart = item.timestamp.timeIntervalSinceReferenceDate
+      let relativeStart = (itemStart - sessionStart) / totalDuration
+      let relativeDuration = max(item.duration / totalDuration, 0.002)
       return TimelineSegment(
-        id: event.id,
+        id: item.id,
         x: CGFloat(relativeStart) * totalWidth,
         width: max(CGFloat(relativeDuration) * totalWidth, 2),
-        color: eventColor(event)
+        color: itemColor(item)
       )
     }
   }
 
-  private func eventColor(_ event: SnoreEvent) -> Color {
-    switch event.category {
+  private func itemColor(_ item: TimelineItem) -> Color {
+    switch item.category {
     case .snoring:
-      return theme.intensityColor(event.intensity)
+      return theme.intensityColor(item.intensity)
     case .sleepTalking:
       return theme.sleepTalkingColor
     case .noise, .coughing, .other:
@@ -104,6 +123,14 @@ public struct SnoringTimelineView: View {
         color: .clear
       )
     } ?? []
+  }
+
+  private struct TimelineItem: Identifiable {
+    let id: UUID
+    let timestamp: Date
+    let duration: TimeInterval
+    let intensity: SnoreIntensity
+    let category: SoundCategory
   }
 
   private struct TimelineSegment: Identifiable {
