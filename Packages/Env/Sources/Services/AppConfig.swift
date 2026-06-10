@@ -30,12 +30,21 @@ public final class AppConfig {
   /// Last applied/cached remote values (raw, keyed by `FeatureFlag.rawValue`).
   private var remoteFlags: [String: Bool] = [:]
   public private(set) var tabs: [TabConfig] = TabConfig.defaults
-  public private(set) var updateGate: UpdateGate = .none
+  private var remoteUpdateGate: UpdateGate = .none
+
+  /// Update gate in effect, applying the debug override first.
+  public var updateGate: UpdateGate {
+    #if DEBUG
+    if let debugUpdateGate { return debugUpdateGate }
+    #endif
+    return remoteUpdateGate
+  }
 
   #if DEBUG
   /// Local-only overrides set from the debug panel. Consulted before remote/cache.
   private var debugFlags: [String: Bool] = [:]
   private var debugTabs: [TabConfig]?
+  private var debugUpdateGate: UpdateGate?
   #endif
 
   private init() {
@@ -72,7 +81,7 @@ public final class AppConfig {
   public func apply(flags: [String: Bool], tabs: [TabConfig], updateGate: UpdateGate) {
     self.remoteFlags = flags
     self.tabs = tabs.isEmpty ? TabConfig.defaults : tabs
-    self.updateGate = updateGate
+    self.remoteUpdateGate = updateGate
     persistCache()
   }
 
@@ -99,9 +108,15 @@ public final class AppConfig {
     persistDebugTabs(configs)
   }
 
+  /// Forces a specific update gate locally (for testing soft/hard prompts).
+  public func setUpdateGateOverride(_ gate: UpdateGate?) {
+    debugUpdateGate = gate
+  }
+
   public func clearOverrides() {
     debugFlags = [:]
     debugTabs = nil
+    debugUpdateGate = nil
     defaults.removeObject(forKey: Key.debugFlags)
     defaults.removeObject(forKey: Key.debugTabs)
   }
@@ -114,7 +129,7 @@ public final class AppConfig {
     if let data = try? JSONEncoder().encode(tabs) {
       defaults.set(data, forKey: Key.tabs)
     }
-    if let data = try? JSONEncoder().encode(updateGate) {
+    if let data = try? JSONEncoder().encode(remoteUpdateGate) {
       defaults.set(data, forKey: Key.updateGate)
     }
   }
@@ -130,7 +145,7 @@ public final class AppConfig {
     }
     if let data = defaults.data(forKey: Key.updateGate),
        let decoded = try? JSONDecoder().decode(UpdateGate.self, from: data) {
-      updateGate = decoded
+      remoteUpdateGate = decoded
     }
     #if DEBUG
     if let cached = defaults.dictionary(forKey: Key.debugFlags) as? [String: Bool] {

@@ -54,6 +54,25 @@ struct DebugConfigView: View {
         }
       }
 
+      Section("Update Gate") {
+        Text("Current app version compared against the gate. Mock values are 99.0.0.")
+          .font(.footnote)
+          .foregroundStyle(theme.textTertiary)
+        Button("Mock Soft Update") {
+          appConfig.setUpdateGateOverride(
+            UpdateGate(minimumVersion: "0.0.0", recommendedVersion: "99.0.0")
+          )
+        }
+        Button("Mock Hard Update") {
+          appConfig.setUpdateGateOverride(
+            UpdateGate(minimumVersion: "99.0.0", recommendedVersion: "99.0.0")
+          )
+        }
+        Button("Clear Update Gate") {
+          appConfig.setUpdateGateOverride(nil)
+        }
+      }
+
       Section {
         Button("Reset All Overrides", role: .destructive) {
           appConfig.clearOverrides()
