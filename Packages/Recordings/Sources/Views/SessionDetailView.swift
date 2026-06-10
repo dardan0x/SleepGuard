@@ -310,10 +310,12 @@ public struct SessionDetailView: View {
           session.sleepStageSegments = stages.isEmpty ? [] : stages
         }
 
-        // Recalculate cached score to pick up scoring formula changes
-        // (e.g. episode merging) while the session relationship is hot.
+        // Recalculate cached score and snoring duration to pick up scoring
+        // formula changes (e.g. episode merging, gap inclusion) while the
+        // session relationship is hot.
         session.hasCachedScore = false
         session.cachedSleepScore = session.sleepScore
+        session.cachedSnoringDuration = session.snoringDuration
         session.hasCachedScore = true
         try modelContext.save()
 
@@ -388,6 +390,8 @@ public struct SessionDetailView: View {
   }
 
   /// Display duration overrides for episode representatives.
+  /// Uses the episode's full snoring span so melody gaps where snoring
+  /// resumed are included, matching the stat calculation.
   private var displayDurations: [UUID: TimeInterval] {
     guard case .loaded(let session, _, _) = viewState else { return [:] }
     var map: [UUID: TimeInterval] = [:]

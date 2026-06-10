@@ -77,6 +77,7 @@ public enum Strings {
   public static var briefingSurveyChipStressfulDay: String { String(localized: "briefing.survey.chip.stressfulDay", bundle: .module) }
   public static var briefingSurveyNegativeTitle: String { String(localized: "briefing.survey.negativeTitle", bundle: .module) }
   public static var briefingSurveyPositiveTitle: String { String(localized: "briefing.survey.positiveTitle", bundle: .module) }
+  public static var commonAnd: String { String(localized: "common.and", bundle: .module) }
   public static var commonOver: String { String(localized: "common.over", bundle: .module) }
   public static var durationPickerTitle: String { String(localized: "duration.picker.title", bundle: .module) }
   public static var epicIntensityLabel: String { String(localized: "epic.intensity.label", bundle: .module) }
@@ -226,6 +227,7 @@ public enum Strings {
   public static var saveFailed: String { String(localized: "save.failed", bundle: .module) }
   public static var saveMelodyPickerSheet: String { String(localized: "save.melody.picker.sheet", bundle: .module) }
   public static var saveRecordCustomMelodySheet: String { String(localized: "save.record.custom.melody.sheet", bundle: .module) }
+  public static var sessionBedsideMelodyEnabled: String { String(localized: "session.bedside.melodyEnabled", bundle: .module) }
   public static var sessionBedsideSnoreEpic: String { String(localized: "session.bedside.snoreEpic", bundle: .module) }
   public static var sessionBedsideSnoreLight: String { String(localized: "session.bedside.snoreLight", bundle: .module) }
   public static var sessionBedsideSnoreLoud: String { String(localized: "session.bedside.snoreLoud", bundle: .module) }
@@ -257,6 +259,7 @@ public enum Strings {
   public static var sessionRecordingStatusFormat: String { String(localized: "session.recording.statusFormat", bundle: .module) }
   public static var sessionSummaryLowBatteryForceSaveInfo: String { String(localized: "session.summary.lowBattery.forceSave.info", bundle: .module) }
   public static var sessionSummaryMelodyGapsInfo: String { String(localized: "session.summary.melodyGapsInfo", bundle: .module) }
+  public static var sessionSummaryMelodyGapsTimeInfo: String { String(localized: "session.summary.melodyGapsTimeInfo", bundle: .module) }
   public static var sessionSummaryStatSnoreTime: String { String(localized: "session.summary.statSnoreTime", bundle: .module) }
   public static var sessionSummaryStatSnoring: String { String(localized: "session.summary.statSnoring", bundle: .module) }
   public static var sessionSummaryTitle: String { String(localized: "session.summary.title", bundle: .module) }

@@ -108,7 +108,32 @@ public final class SleepSession {
         if hasCachedScore {
             return cachedSnoringDuration
         }
-        return events?.filter { $0.category == .snoring }.reduce(0) { $0 + $1.snoreDuration } ?? 0
+        let snoringEvents = events?.filter { $0.category == .snoring } ?? []
+        let eventDuration = snoringEvents.reduce(0) { $0 + $1.snoreDuration }
+
+        // Only count gaps where snoring actually resumed. A paused microphone
+        // doesn't prove snoring continued — we verify it with a short breathing
+        // delay after the melody stops. Legacy gaps default to `snoringResumed`
+        // so existing sessions keep their previous behavior.
+        let countableGaps = (recordingGaps ?? []).filter(\.snoringResumed)
+        let countableGapDuration = countableGaps.reduce(0) { $0 + $1.duration }
+        guard countableGapDuration > 0 else { return eventDuration }
+
+        // New sessions: events span gaps (event duration includes melody time).
+        // Old sessions: events don't span gaps — add countable gap duration manually.
+        // Detect old sessions by checking if any countable gap is NOT fully covered.
+        let sessionStart = startDate.timeIntervalSinceReferenceDate
+        let hasUncoveredGap = countableGaps.contains { gap in
+            let gapStart = sessionStart + gap.startOffset
+            let gapEnd = gapStart + gap.duration
+            let covered = snoringEvents.contains { event in
+                let eventStart = event.timestamp.timeIntervalSinceReferenceDate
+                let eventEnd = eventStart + event.snoreDuration
+                return eventStart <= gapStart && eventEnd >= gapEnd
+            }
+            return !covered
+        }
+        return eventDuration + (hasUncoveredGap ? countableGapDuration : 0)
     }
 
     /// Total duration of sleep talking events.
@@ -194,7 +219,9 @@ public final class SleepSession {
 
     /// Episodes with enough total snoring duration to be worth displaying.
     /// Hides micro-episodes that are likely false positives while still
-    /// counting them in `snoringDuration`.
+    /// counting them in `snoringDuration`. Episodes finalized after the
+    /// post-melody breathing delay use pre-melody duration, so gap-only
+    /// episodes naturally fall below the threshold and stay hidden.
     public var displayableSnoringEpisodes: [SnoringEpisode] {
         snoringEpisodes.filter { $0.snoreDuration >= 3 }
     }
@@ -243,32 +270,24 @@ public final class SleepSession {
             return 100
         }
 
-        // If there are mic-paused gaps but no saved events, snoring was still
-        // inferred (melody only plays after detection). Score based on gaps alone.
-        if eventCount == 0 {
-            if gapsDuration > 0 {
-                let inferredSnoringPercentage = (gapsDuration / totalDuration) * 100
-                let snoringPenalty = min(Int(inferredSnoringPercentage * 0.7), 70)
-                return max(0, 100 - snoringPenalty)
-            }
-            return 100
-        }
-
         var detectedSnoringDuration: TimeInterval = 0
         var lightDuration: TimeInterval = 0
         var loudDuration: TimeInterval = 0
         var epicDuration: TimeInterval = 0
 
         for event in snoringEvents {
-            let duration = event.snoreDuration
-            detectedSnoringDuration += duration
+            // Use burst sum for intensity ratios, not the full event span.
+            // Event span includes melody gaps where no spectral data exists;
+            // we should not penalize intensity for time we couldn't measure.
+            let detectedDuration = event.bursts?.reduce(0) { $0 + $1.duration } ?? event.snoreDuration
+            detectedSnoringDuration += detectedDuration
             switch event.intensity {
             case .light:
-                lightDuration += duration
+                lightDuration += detectedDuration
             case .loud:
-                loudDuration += duration
+                loudDuration += detectedDuration
             case .epic:
-                epicDuration += duration
+                epicDuration += detectedDuration
             case .quiet:
                 break
             }
@@ -277,8 +296,9 @@ public final class SleepSession {
         let sessionDuration = totalDuration
         guard sessionDuration > 0 else { return 100 }
 
-        // Total snoring duration is the sum of detected snoring episode spans.
-        // Recording gaps are excluded — the soothing melody may have stopped the snoring.
+        // Total snoring duration includes both detected events and recording gaps.
+        // Gaps occur when the soothing melody plays after snoring detection;
+        // that time counts as snoring since the melody only triggers on confirmed samples.
         let totalSnoringDuration = snoringDuration
         let snoringPercentage = (totalSnoringDuration / sessionDuration) * 100
         let snoringPenalty = min(Int(snoringPercentage * 0.7), 70)

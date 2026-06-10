@@ -54,7 +54,12 @@ public final class SessionManager {
 
     /// Minimum time the soothing melody must play before it can be stopped by non-snore detection.
     private let melodyMinPlayDuration: TimeInterval = 4.0
+    /// After the melody stops, wait this long for snoring to resume before
+    /// deciding the gap should not count as snoring time.
+    private let postMelodyBreathingDelay: TimeInterval = 3.0
     private var melodyStartTime: Date?
+    private var melodyResumeTime: Date?
+    private var postMelodySnoringDetected: Bool = false
 
     // Burst tracking: continuous snoring segments within the active event
     private var activeBurstStart: Date?
@@ -98,25 +103,38 @@ public final class SessionManager {
     @objc private func handleMelodyDidStop() {
         guard let start = melodyStartTime else { return }
         let duration = Date().timeIntervalSince(start)
-        logRecordingGap(start: start, duration: duration)
+        logRecordingGap(start: start, duration: duration, snoringResumed: false)
         melodyStartTime = nil
-        // Prevent the active event from being discarded because lastSnoringSampleTime
-        // froze during the mic pause. Extend it to resume time so eventSpan is valid.
+        // Don't extend lastSnoringSampleTime yet. We wait for a short breathing
+        // delay after mic resume to verify snoring actually continued; only then
+        // does the gap count as snoring time.
         if activeEventStart != nil {
-            lastSnoringSampleTime = Date()
+            melodyResumeTime = Date()
+            postMelodySnoringDetected = false
         }
+        // Reset non-snore counter so stale data from the pause doesn't
+        // immediately trigger a melody stop when audio resumes.
+        consecutiveNonSnoreSamples = 0
     }
 
     /// Logs a recording gap directly on the session. Called whenever the soothing melody
     /// stops (mic resumes), ensuring gaps are counted even if notification delivery fails.
-    private func logRecordingGap(start: Date, duration: TimeInterval) {
+    private func logRecordingGap(start: Date, duration: TimeInterval, snoringResumed: Bool = true) {
         guard let session = currentSession, duration > 0 else { return }
         let startOffset = start.timeIntervalSince(session.startDate)
         guard startOffset >= 0 else { return }
         var gaps = session.recordingGaps ?? []
-        gaps.append(RecordingGap(startOffset: startOffset, duration: duration))
+        gaps.append(RecordingGap(startOffset: startOffset, duration: duration, snoringResumed: snoringResumed))
         session.recordingGaps = gaps
-        print("[SessionManager] Logged gap: startOffset=\(String(format: "%.1f", startOffset))s duration=\(String(format: "%.1f", duration))s")
+        print("[SessionManager] Logged gap: startOffset=\(String(format: "%.1f", startOffset))s duration=\(String(format: "%.1f", duration))s snoringResumed=\(snoringResumed)")
+    }
+
+    /// Marks the most recent recording gap as having confirmed snoring resumption.
+    /// Called when sustained snoring is detected within the post-melody breathing delay.
+    private func markLastGapSnoringResumed() {
+        guard let session = currentSession, var gaps = session.recordingGaps, !gaps.isEmpty else { return }
+        gaps[gaps.count - 1].snoringResumed = true
+        session.recordingGaps = gaps
     }
 
     // MARK: - Lifecycle
@@ -356,6 +374,11 @@ public final class SessionManager {
         let timeDelta = min(rawDelta, 0.5) // Cap to avoid spikes after background/resume
         lastUpdateTime = now
 
+        // Don't process stale audio data while the mic is paused for melody playback.
+        // The tap is removed during pause, so currentDB/spectralScore/snoreConfidence
+        // are stale. Processing them creates false events and prematurely stops the melody.
+        guard !audioRecorder.isPaused else { return }
+
         currentDB = db
 
         // Update running aggregates
@@ -407,7 +430,12 @@ public final class SessionManager {
 
             consecutiveSnoreSamples += 1
             consecutiveNonSnoreSamples = 0
-            lastSnoringSampleTime = now
+            // During post-melody breathing delay, don't extend the event span
+            // until sustained snoring is confirmed. Transient sounds shouldn't
+            // make the gap count as snoring time.
+            if melodyResumeTime == nil || postMelodySnoringDetected {
+                lastSnoringSampleTime = now
+            }
             guard consecutiveSnoreSamples >= requiredConsecutiveSamples else {
                 // Not yet sustained enough to start/extend an event
                 return
@@ -441,18 +469,25 @@ public final class SessionManager {
                 print("[SessionManager] 🔔 New snore event started, calling playIfNeeded()")
                 let wasPlaying = soothingMelodyPlayer.isPlaying
                 soothingMelodyPlayer.playIfNeeded()
-                // If the melody just started, the mic is about to pause. Force-finalize
-                // the active event so its burst doesn't span the dead-mic interval.
+                // If the melody just started, the mic is about to pause. Close the
+                // audio file and current burst so they don't span the dead-mic
+                // interval, but keep the event alive — snoring continues during
+                // melody playback and the event duration will span the gap.
                 if soothingMelodyPlayer.isPlaying && !wasPlaying {
                     melodyStartTime = now
-                    if activeEventStart != nil {
-                        finalizeActiveEvent(skipMinDuration: true)
+                    // Close the event audio file; a new one will be started if
+                    // snoring resumes after the melody.
+                    _ = audioRecorder.finalizeEventFile()
+                    // Close the current burst; post-melody snoring starts a new burst.
+                    if let burstStart = activeBurstStart {
+                        completedBursts.append((start: burstStart, end: lastSnoringSampleTime ?? now))
+                        activeBurstStart = nil
                     }
                     lastUpdateTime = nil
-                    lastSnoringSampleTime = nil
                     consecutiveSnoreSamples = 0
                     consecutiveNonSnoreSamples = 0
-                    activeBurstStart = nil
+                    // Intentionally NOT resetting activeEventStart/lastSnoringSampleTime
+                    // so the event span covers the melody gap.
                 }
             } else {
                 // Event already active
@@ -477,8 +512,52 @@ public final class SessionManager {
                 if activeBurstStart == nil {
                     activeBurstStart = now
                 }
+
+                // If we just resumed from a melody gap, confirm that snoring actually
+                // resumed within the breathing delay. Only then does the gap count
+                // as snoring time.
+                if let resumeTime = melodyResumeTime, !postMelodySnoringDetected {
+                    postMelodySnoringDetected = true
+                    lastSnoringSampleTime = now
+                    markLastGapSnoringResumed()
+                    print("[SessionManager] Snoring resumed within breathing delay (\(String(format: "%.2f", now.timeIntervalSince(resumeTime)))s) — gap counts as snoring")
+                }
+
+                // Re-trigger melody if snoring resumes after a previous melody stopped.
+                // The event stays open across melody gaps, so this is not a "new" event —
+                // but the melody should still play again on sustained post-melody snoring.
+                let wasPlaying = soothingMelodyPlayer.isPlaying
+                soothingMelodyPlayer.playIfNeeded()
+                if soothingMelodyPlayer.isPlaying && !wasPlaying {
+                    melodyStartTime = now
+                    // Close the event audio file; a new one will be started if
+                    // snoring resumes after this melody.
+                    _ = audioRecorder.finalizeEventFile()
+                    // Close the current burst; post-melody snoring starts a new burst.
+                    if let burstStart = activeBurstStart {
+                        completedBursts.append((start: burstStart, end: lastSnoringSampleTime ?? now))
+                        activeBurstStart = nil
+                    }
+                    lastUpdateTime = nil
+                    consecutiveSnoreSamples = 0
+                    consecutiveNonSnoreSamples = 0
+                }
             }
         } else {
+            // If the post-melody breathing delay expires without sustained snoring,
+            // finalize the event using the pre-melody lastSnoringSampleTime so the
+            // gap is not counted as snoring time.
+            if let resumeTime = melodyResumeTime,
+               activeEventStart != nil,
+               !postMelodySnoringDetected,
+               now.timeIntervalSince(resumeTime) >= postMelodyBreathingDelay
+            {
+                print("[SessionManager] Breathing delay expired without snoring resumption — finalizing pre-melody event")
+                melodyResumeTime = nil
+                finalizeActiveEvent()
+                return
+            }
+
             consecutiveSnoreSamples = 0
             consecutiveNonSnoreSamples += 1
             // Silence — close current burst if open
@@ -575,6 +654,8 @@ public final class SessionManager {
         consecutiveSnoreSamples = 0
         consecutiveNonSnoreSamples = 0
         melodyStartTime = nil
+        melodyResumeTime = nil
+        postMelodySnoringDetected = false
         currentSpeechDetected = false
         activeSpeechEventStart = nil
         activeSpeechEventDBSum = 0
@@ -611,7 +692,7 @@ public final class SessionManager {
         // 2 s on Low to filter out transients, 0.5 s on High to catch isolated
         // single snores). When the mic is paused by soothing melody we always
         // lower to 0.5 s so the truncated event still has meaningful duration.
-        let minDuration: TimeInterval = skipMinDuration ? 0.5 : minEventDuration
+        let minDuration: TimeInterval = skipMinDuration ? 0.0 : minEventDuration
         guard eventSpan >= minDuration else {
             // Clean up the event file if one was started
             if let eventID = activeEventID {
@@ -716,6 +797,8 @@ public final class SessionManager {
         activeEventConfidenceCount = 0
         activeEventSpectralSum = 0
         activeEventSpectralCount = 0
+        melodyResumeTime = nil
+        postMelodySnoringDetected = false
         completedBursts.removeAll(keepingCapacity: false)
     }
 

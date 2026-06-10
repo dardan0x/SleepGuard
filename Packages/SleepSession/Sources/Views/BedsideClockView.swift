@@ -47,13 +47,19 @@ struct BedsideClockView: View {
                 
                 Spacer()
                 
-                StopRecordingButton(height: 52) {
-                    if let session = sessionManager.currentSession,
-                       currentTime.timeIntervalSince(session.startDate) < SleepSession.minimumSaveDuration {
-                        showShortSessionAlert = true
-                    } else {
-                        Task {
-                            _ = await sessionManager.stopSession()
+                VStack(spacing: 8) {
+                    if isMelodyEnabled && !soothingMelodyPlayer.isMutedForSession {
+                        melodyDisclaimer
+                    }
+                    
+                    StopRecordingButton(height: 52) {
+                        if let session = sessionManager.currentSession,
+                           currentTime.timeIntervalSince(session.startDate) < SleepSession.minimumSaveDuration {
+                            showShortSessionAlert = true
+                        } else {
+                            Task {
+                                _ = await sessionManager.stopSession()
+                            }
                         }
                     }
                 }
@@ -135,6 +141,43 @@ struct BedsideClockView: View {
         case .loud: return Strings.sessionBedsideSnoreLoud
         case .epic: return Strings.sessionBedsideSnoreEpic
         }
+    }
+    
+    private var isMelodyEnabled: Bool {
+        UserPreferences.shared.soothingMelodyMode != .never
+    }
+    
+    // MARK: - Melody Disclaimer
+    
+    private var melodyDisclaimer: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "music.note")
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundStyle(theme.accent)
+            
+            Text(Strings.sessionBedsideMelodyEnabled)
+                .font(.system(size: 13, weight: .medium))
+                .foregroundStyle(theme.textSecondary)
+            
+            Text("·")
+                .font(.system(size: 13, weight: .medium))
+                .foregroundStyle(theme.textTertiary)
+            
+            Button {
+                soothingMelodyPlayer.muteForSession()
+            } label: {
+                Text(Strings.muteForSession)
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(theme.accent)
+            }
+            .buttonStyle(.plain)
+            
+            Spacer()
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .background(theme.bgCard)
+        .cornerRadius(theme.radiusSmall)
     }
     
     // MARK: - Melody Overlay

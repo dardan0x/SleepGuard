@@ -226,6 +226,17 @@
         }
       }
     },
+    "common.and": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "and"
+          }
+        }
+      }
+    },
     "common.over": {
       "extractionState": "manual",
       "localizations": {
@@ -1161,6 +1172,17 @@
         }
       }
     },
+    "session.bedside.melodyEnabled": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Soothing melody is enabled"
+          }
+        }
+      }
+    },
     "session.chargingAlert.message": {
       "extractionState": "manual",
       "localizations": {
@@ -1408,7 +1430,18 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Soothing melody paused detection for %@. Actual snoring may be higher than recorded."
+            "value": "Soothing melody stopped snoring for %@."
+          }
+        }
+      }
+    },
+    "session.summary.melodyGapsTimeInfo": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Soothing melody stopped snoring detection for %@."
           }
         }
       }
