@@ -14,6 +14,7 @@ struct MainTabView: View {
     @Environment(SessionManager.self) private var sessionManager
     @Environment(\.modelContext) private var modelContext
     @Environment(UserPreferences.self) private var userPreferences
+    @Environment(AppConfig.self) private var appConfig
     @State private var tabCoordinator = TabCoordinator()
     @State private var showBriefing = false
     @State private var currentBriefing: Briefing?
@@ -34,31 +35,22 @@ struct MainTabView: View {
             get: { tabCoordinator.selectedTab },
             set: { tabCoordinator.selectTab($0) }
         )) {
-            StatisticsTab()
-                .toolbar(sessionManager.isRecording || sessionManager.isLiveSessionVisible ? .hidden : .visible, for: .tabBar)
-                .tabItem {
-                    Label(Strings.tabStatistics, systemImage: "chart.bar.fill")
-                }
-                .tag(0)
-            
-            RecordingsTab()
-                .toolbar(sessionManager.isRecording || sessionManager.isLiveSessionVisible ? .hidden : .visible, for: .tabBar)
-                .tabItem {
-                    Label(Strings.tabMedia, systemImage: "waveform")
-                }
-                .tag(1)
-            
-            SettingsTab()
-                .toolbar(sessionManager.isRecording || sessionManager.isLiveSessionVisible ? .hidden : .visible, for: .tabBar)
-                .tabItem {
-                    Label(Strings.tabSettings, systemImage: "gearshape")
-                }
-                .tag(2)
+            ForEach(appConfig.visibleTabsInOrder, id: \.self) { tab in
+                view(for: tab)
+                    .toolbar(sessionManager.isRecording || sessionManager.isLiveSessionVisible ? .hidden : .visible, for: .tabBar)
+                    .tabItem {
+                        Label(title(for: tab), systemImage: tab.iconName)
+                    }
+                    .tag(tab)
+            }
         }
         .tint(theme.accent)
         .animation(nil, value: sessionManager.isLiveSessionVisible)
         .overlay(sessionProcessingOverlay)
         .environment(tabCoordinator)
+        .onChange(of: appConfig.visibleTabsInOrder) { _, tabs in
+            ensureValidSelection(among: tabs)
+        }
         .task {
           generateBriefingIfNeeded()
         }
@@ -95,6 +87,9 @@ struct MainTabView: View {
         }
         .ignoresSafeArea(.keyboard)
         .environment(tabCoordinator)
+        .onChange(of: appConfig.visibleTabsInOrder) { _, tabs in
+            ensureValidSelection(among: tabs)
+        }
         .task {
           generateBriefingIfNeeded()
         }
@@ -118,27 +113,21 @@ struct MainTabView: View {
     
     @ViewBuilder
     private var customContent: some View {
-        StatisticsTab()
-            .opacity(tabCoordinator.selectedTab == 0 ? 1 : 0)
-            .allowsHitTesting(tabCoordinator.selectedTab == 0)
-        
-        RecordingsTab()
-            .opacity(tabCoordinator.selectedTab == 1 ? 1 : 0)
-            .allowsHitTesting(tabCoordinator.selectedTab == 1)
-        
-        SettingsTab()
-            .opacity(tabCoordinator.selectedTab == 2 ? 1 : 0)
-            .allowsHitTesting(tabCoordinator.selectedTab == 2)
+        ForEach(appConfig.visibleTabsInOrder, id: \.self) { tab in
+            view(for: tab)
+                .opacity(tabCoordinator.selectedTab == tab ? 1 : 0)
+                .allowsHitTesting(tabCoordinator.selectedTab == tab)
+        }
     }
-    
+
     private var customTabBar: some View {
         VStack(spacing: 0) {
             Spacer()
-            
+
             HStack(spacing: 4) {
-                tabItem(index: 0, icon: "chart.bar.fill", label: Strings.tabStatistics.capitalized)
-                tabItem(index: 1, icon: "waveform", label: Strings.tabMedia.capitalized)
-                tabItem(index: 2, icon: "gearshape", label: Strings.tabSettings.capitalized)
+                ForEach(appConfig.visibleTabsInOrder, id: \.self) { tab in
+                    tabItem(tab: tab, icon: tab.iconName, label: title(for: tab).capitalized)
+                }
             }
             .padding(6)
             .background(
@@ -169,6 +158,7 @@ struct MainTabView: View {
     }
     
     private func generateBriefingIfNeeded() {
+      guard appConfig.isEnabled(.sleepBriefing) else { return }
       guard userPreferences.briefingEnabled else { return }
       if let lastDate = userPreferences.lastBriefingShownDate,
          Calendar.current.isDateInToday(lastDate) {
@@ -258,12 +248,39 @@ struct MainTabView: View {
         }
     }
     
-    private func tabItem(index: Int, icon: String, label: String) -> some View {
-        let isSelected = tabCoordinator.selectedTab == index
-        
+    // MARK: - Tab helpers
+
+    @ViewBuilder
+    private func view(for tab: AppTab) -> some View {
+        switch tab {
+        case .statistics: StatisticsTab()
+        case .media: RecordingsTab()
+        case .settings: SettingsTab()
+        }
+    }
+
+    private func title(for tab: AppTab) -> String {
+        switch tab {
+        case .statistics: return Strings.tabStatistics
+        case .media: return Strings.tabMedia
+        case .settings: return Strings.tabSettings
+        }
+    }
+
+    /// If the currently selected tab is no longer visible (remote config changed),
+    /// fall back to the first visible tab.
+    private func ensureValidSelection(among tabs: [AppTab]) {
+        if !tabs.contains(tabCoordinator.selectedTab) {
+            tabCoordinator.selectedTab = tabs.first ?? .statistics
+        }
+    }
+
+    private func tabItem(tab: AppTab, icon: String, label: String) -> some View {
+        let isSelected = tabCoordinator.selectedTab == tab
+
         return Button {
             withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
-                tabCoordinator.selectTab(index)
+                tabCoordinator.selectTab(tab)
             }
         } label: {
             VStack(spacing: 4) {

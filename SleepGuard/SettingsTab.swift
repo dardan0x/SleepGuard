@@ -44,7 +44,7 @@ struct SettingsTab: View {
       }
     }
     .onChange(of: tabCoordinator.resetSignal) { _, signal in
-      if let signal, signal.tab == 2 {
+      if let signal, signal.tab == .settings {
         routerPath.navigateToRoot()
       }
     }

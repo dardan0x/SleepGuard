@@ -1,5 +1,6 @@
 import SwiftUI
 import Env
+import Models
 import Recordings
 
 struct RecordingsTab: View {
@@ -15,7 +16,7 @@ struct RecordingsTab: View {
         .withAppRouter()
     }
     .onChange(of: tabCoordinator.resetSignal) { _, signal in
-      if let signal, signal.tab == 1 {
+      if let signal, signal.tab == .media {
         routerPath.navigateToRoot()
       }
     }
