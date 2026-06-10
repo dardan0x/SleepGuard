@@ -1,6 +1,6 @@
 # Snore Detection Algorithm & Architecture
 
-> Last updated: 2026-06-01 (Sessions 67–69)
+> Last updated: 2026-06-10 (Sessions 70–71: post-melody breathing delay, melody re-trigger, gap counting model)
 
 This document is the canonical reference for how SleepGuard detects, records, measures, and scores snoring. It covers the real-time detection pipeline, the event-tracking state machine, audio file architecture, duration calculation philosophy, and how Sessions 67–69 changed the recording model.
 
@@ -129,6 +129,7 @@ eventGapThreshold: TimeInterval = 10.0         // silence needed to close an eve
 requiredConsecutiveSamples: Int = 3            // ≈150 ms sustained snoring to start
 requiredNonSnoreSamplesToStop: Int = 3         // ≈150 ms silence to stop melody
 melodyMinPlayDuration: TimeInterval = 4.0      // minimum melody play time
+postMelodyBreathingDelay: TimeInterval = 3.0   // verify snoring resumed after melody
 ```
 
 ### 3.2 From Detection to Event
@@ -156,7 +157,14 @@ An event is finalized when:
 
 The 10-second gap is the **debounce threshold**. If snoring resumes within 10 seconds, the same event continues. This merges natural breathing pauses into a single snoring epoch.
 
-**Melody interaction:** When the melody starts, the mic pauses. The active event is force-finalized (`skipMinDuration: true`) before the pause so the event doesn't span a dead-mic interval. Post-melody snoring starts a **new event** with a new audio file.
+**Melody interaction:** When the melody starts, the mic pauses. The current burst and audio file are closed, but the **event stays open** — snoring is assumed to continue during the gap. When the melody stops:
+
+1. A `RecordingGap` is logged (`snoringResumed: false` initially).
+2. The system waits `postMelodyBreathingDelay` (3 s).
+3. **If sustained snoring resumes** within 3 s → `snoringResumed` is marked `true`, `lastSnoringSampleTime` is extended, and the gap counts as snoring time.
+4. **If 3 s of silence pass** → the event is finalized with its pre-melody span; the gap does **not** count.
+
+**Melody re-triggering:** The soothing melody plays every time sustained snoring is confirmed, not just once per event. During continuous snoring the melody may fire multiple times within the same open event.
 
 ### 3.3 `finalizeActiveEvent()`
 
@@ -203,8 +211,10 @@ SleepGuard uses **epoch time**, not net snore time.
 | **Epoch time** | First snore to last snore, including natural breathing pauses < 10 s | `SnoreEvent.duration` |
 
 `SnoreEvent.snoreDuration` returns:
-- **New data:** `duration` (epoch time, includes intra-event breathing gaps)
+- **New data:** `duration` (epoch time, includes intra-event breathing gaps and counted melody gaps)
 - **Legacy data (pre-May 22):** burst sum (net time) as fallback
+
+**Melody gaps and the epoch model:** When snoring resumes quickly after a melody gap, the gap is treated as a normal breathing pause within the epoch — the event span covers it. Only gaps where snoring did **not** resume within the breathing delay are excluded from the event span.
 
 ### 4.2 Why Epochs Are Clinically Correct
 
@@ -432,8 +442,18 @@ if state != .none {
 ```swift
 // SleepSession.snoringDuration
 public var snoringDuration: TimeInterval {
-    events?.filter { $0.category == .snoring }
-           .reduce(0) { $0 + $1.snoreDuration } ?? 0
+    let snoringEvents = events?.filter { $0.category == .snoring } ?? []
+    let eventDuration = snoringEvents.reduce(0) { $0 + $1.snoreDuration }
+
+    // Only count gaps where snoring actually resumed.
+    let countableGaps = (recordingGaps ?? []).filter(\.snoringResumed)
+    let countableGapDuration = countableGaps.reduce(0) { $0 + $1.duration }
+    guard countableGapDuration > 0 else { return eventDuration }
+
+    // Old sessions (events don't span gaps): add countable gap duration.
+    // New sessions (events span gaps): eventDuration already includes them.
+    let hasUncoveredGap = countableGaps.contains { /* ... */ }
+    return eventDuration + (hasUncoveredGap ? countableGapDuration : 0)
 }
 ```
 
@@ -444,8 +464,9 @@ public var snoreDuration: TimeInterval {
 }
 ```
 
-- `duration` is the epoch span (first→last snore, including breathing gaps < 10 s)
+- `duration` is the epoch span (first→last snore, including breathing gaps < 10 s and counted melody gaps)
 - Burst sum is the fallback for pre-May-22 legacy data
+- **Gap counting:** Only `RecordingGap`s with `snoringResumed == true` are included in stats. Legacy gaps default to `true` for backward compatibility.
 
 ### 9.3 Monitored Duration
 
@@ -476,11 +497,20 @@ score = max(0, 100
 | **Sleep Talking** | `min(Int(talkingPct*0.35 + talkingEventsPerHr*0.8), 15)` | 15 |
 | **Sleep Stage** | `min(Int(deepDeficit*0.6 + remDeficit*0.4 + awakeExcess*1.0), 15)` | 15 |
 
-**Intensity ratios** use only detected snoring as the denominator (not total session time). This conservatively reduces the intensity penalty because spectral data is missing during recording gaps.
+**Intensity ratios** use detected burst duration as the denominator (not total session time). This conservatively reduces the intensity penalty because spectral data is missing during recording gaps and melody pauses.
 
-**Gap-only inference:** If `eventCount == 0` but `gapsDuration > 0`, snoring is inferred from gaps alone:
 ```swift
-let inferredSnoringPercentage = (gapsDuration / totalDuration) * 100
+for event in snoringEvents {
+    let detectedDuration = event.bursts?.reduce(0) { $0 + $1.duration } ?? event.snoreDuration
+    detectedSnoringDuration += detectedDuration
+    // ... intensity buckets ...
+}
+let lightRatio = detectedSnoringDuration > 0 ? lightDuration / detectedSnoringDuration : 0
+```
+
+**Gap-only inference:** If `eventCount == 0` but `countableGapDuration > 0`, snoring is inferred from countable gaps alone:
+```swift
+let inferredSnoringPercentage = (countableGapDuration / totalDuration) * 100
 let snoringPenalty = min(Int(inferredSnoringPercentage * 0.7), 70)
 ```
 
@@ -640,17 +670,51 @@ The `SessionRawLogWriter` records every classification decision at 20 Hz. This m
 
 ---
 
-## 15. Open Questions
+## 15. Session 71: Post-Melody Verification Model
+
+> **When:** After fixing stale-data crashes during mic pause and melody single-play  
+> **Problem:** Melody gaps were blindly added to snoring duration, over-reporting when snoring had actually stopped  
+> **Solution:** Verify snoring resumption with a 3-second breathing delay; only confirmed gaps count
+
+### 15.1 What Changed
+
+| Before | After |
+|--------|-------|
+| Gaps always counted as snoring | Gaps counted only if snoring resumes within 3 s |
+| Melody played once per event | Melody re-triggers every time sustained snoring is confirmed |
+| `recordingGaps` had no metadata | `RecordingGap` now has `snoringResumed: Bool` |
+| Events finalized only by 10-s silence | Events can finalize early after melody if breathing delay expires |
+| `lastSnoringSampleTime` frozen during pause | Extended only after sustained post-melody snoring is confirmed |
+
+### 15.2 Why 3 Seconds?
+
+The breathing delay must be:
+- **Long enough** to catch natural breathing pauses after a melody (1–2 s)
+- **Short enough** to not merge genuinely separate snoring episodes
+- **Shorter than** the 10-second event gap to avoid interfering with normal debounce
+
+3 seconds sits comfortably between these bounds. It filters out brief post-melody silence without being aggressive.
+
+### 15.3 Legacy Compatibility
+
+- `RecordingGap.snoringResumed` defaults to `true` for old persisted data (custom `init(from:)` handles missing keys)
+- Old sessions where events don't span gaps still get `countableGapDuration` added
+- New sessions where events span gaps use the event duration directly; gaps are only excluded when `snoringResumed == false`
+
+---
+
+## 16. Open Questions
 
 1. **Should speech events get per-event audio clips?** Currently metadata-only.
 2. **Should the 10-second debounce be user-configurable?** Some users may want stricter splitting (3 s) or looser merging (15 s).
 3. **Should we detect apnea explicitly?** The 10-second gap is already the clinical boundary. We could flag epochs where the inter-burst gap approaches 10 s.
 4. **Should `beginBackgroundTask` wrap compression tasks?** If the app goes to background mid-compression, the task may be killed.
 5. **Net vs. epoch reporting:** Should the user be able to toggle between "total snoring time" (epoch) and "continuous snoring time" (net)?
+6. **Should `postMelodyBreathingDelay` be user-configurable?** Currently hard-coded at 3 s.
 
 ---
 
-## 16. Glossary
+## 17. Glossary
 
 | Term | Definition |
 |------|-----------|
@@ -661,4 +725,4 @@ The `SessionRawLogWriter` records every classification decision at 20 Hz. This m
 | **Net snore time** | Sum of burst durations only, excluding all gaps. |
 | **Spectral centroid** | Weighted average frequency of the audio spectrum. |
 | **Low-frequency ratio** | Energy in 100–500 Hz ÷ total energy. Snoring is concentrated here. |
-| **Melody gap** | Time when the soothing melody plays and the mic is paused. |
+| **Melody gap** | Time when the soothing melody plays and the mic is paused. Only counts as snoring if sustained snoring resumes within 3 s. |

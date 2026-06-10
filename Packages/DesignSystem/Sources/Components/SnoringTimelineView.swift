@@ -48,6 +48,9 @@ public struct SnoringTimelineView: View {
   }
 
   /// Timeline items: snoring episodes merged, other categories raw.
+  /// Episode spans include melody gaps when snoring resumed, so the timeline
+  /// reflects the assumed snoring time. Gaps are drawn separately as
+  /// semi-transparent overlays to indicate detection blind spots.
   private var timelineItems: [TimelineItem] {
     var items: [TimelineItem] = []
 

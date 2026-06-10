@@ -19,7 +19,7 @@ public struct MelodyGapsBannerView: View {
           .font(.system(size: 14))
           .foregroundStyle(theme.accent)
 
-        Text(String(format: Strings.sessionSummaryMelodyGapsInfo, durationString(totalGapDuration)))
+        Text(String(format: Strings.sessionSummaryMelodyGapsTimeInfo, durationString(totalGapDuration)))
           .font(.system(size: 13, weight: .medium))
           .foregroundStyle(theme.textSecondary)
           .fixedSize(horizontal: false, vertical: true)

@@ -10,9 +10,27 @@ public struct RecordingGap: Codable, Sendable {
   public let startOffset: TimeInterval
   /// Duration of the paused interval in seconds.
   public let duration: TimeInterval
+  /// Whether snoring resumed after this gap within the breathing delay.
+  /// Only gaps where snoring resumed count toward snoring duration.
+  /// Defaults to `true` for legacy gaps created before this field existed.
+  public var snoringResumed: Bool
 
-  public init(startOffset: TimeInterval, duration: TimeInterval) {
+  enum CodingKeys: String, CodingKey {
+    case startOffset
+    case duration
+    case snoringResumed
+  }
+
+  public init(startOffset: TimeInterval, duration: TimeInterval, snoringResumed: Bool = true) {
     self.startOffset = startOffset
     self.duration = duration
+    self.snoringResumed = snoringResumed
+  }
+
+  public init(from decoder: Decoder) throws {
+    let container = try decoder.container(keyedBy: CodingKeys.self)
+    self.startOffset = try container.decode(TimeInterval.self, forKey: .startOffset)
+    self.duration = try container.decode(TimeInterval.self, forKey: .duration)
+    self.snoringResumed = (try? container.decode(Bool.self, forKey: .snoringResumed)) ?? true
   }
 }
