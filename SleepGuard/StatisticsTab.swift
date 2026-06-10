@@ -81,7 +81,7 @@ struct StatisticsTab: View {
       }
     }
     .onChange(of: tabCoordinator.resetSignal) { _, signal in
-      if let signal, signal.tab == 0 {
+      if let signal, signal.tab == .statistics {
         routerPath.navigateToRoot()
       }
     }

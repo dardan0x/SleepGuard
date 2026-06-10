@@ -18,7 +18,8 @@ extension View {
     healthKitSync: HealthKitSync,
     watchConnectivityManager: WatchConnectivityManager,
     soundAnalysisDetector: SoundAnalysisDetector,
-    soothingMelodyPlayer: SoothingMelodyPlayer
+    soothingMelodyPlayer: SoothingMelodyPlayer,
+    appConfig: AppConfig
   ) -> some View {
     self
       .environment(userPreferences)
@@ -29,6 +30,7 @@ extension View {
       .environment(watchConnectivityManager)
       .environment(soundAnalysisDetector)
       .environment(soothingMelodyPlayer)
+      .environment(appConfig)
   }
 
   func withEnvironments() -> some View {
@@ -41,6 +43,7 @@ extension View {
       .environment(WatchConnectivityManager.shared)
       .environment(SoundAnalysisDetector.shared)
       .environment(SoothingMelodyPlayer.shared)
+      .environment(AppConfig.shared)
       .environment(RouterPath())
   }
 

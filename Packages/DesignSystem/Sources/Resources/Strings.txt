@@ -145,3 +145,11 @@ settings.section.profile = PROFILE
 settings.profile = Profile
 settings.briefing = Daily Sleep Briefing
 settings.briefing.description = Show a daily recap when you open the app
+
+# Update gating
+update.hard.title = Update Required
+update.hard.body = This version is no longer supported. Please update to keep using SleepGuard.
+update.soft.title = Update Available
+update.soft.body = A new version of SleepGuard is available with improvements and fixes.
+update.action.update = Update Now
+update.action.later = Not Now

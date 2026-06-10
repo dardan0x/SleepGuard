@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import FirebaseCore
 import Env
 import Models
 import AudioEngine
@@ -12,7 +13,11 @@ struct SleepGuardApp: App {
   @State private var userPreferences = UserPreferences.shared
   @State private var sessionManager = SessionManager.shared
   @State private var theme = Theme.shared
+  @State private var appConfig = AppConfig.shared
 
+  init() {
+    FirebaseApp.configure()
+  }
 
   var sharedModelContainer: ModelContainer = {
     let schema = Schema([SleepSession.self, SnoreEvent.self, UserProfile.self, LifestyleLog.self])
@@ -48,6 +53,9 @@ struct SleepGuardApp: App {
           OnboardingView()
         }
       }
+      .overlay {
+        UpdateGateView(updateGate: appConfig.updateGate, openAppStore: openAppStore)
+      }
       .preferredColorScheme(colorScheme(for: userPreferences.appearance))
       .withAppDependencyGraph(
         userPreferences: userPreferences,
@@ -57,8 +65,12 @@ struct SleepGuardApp: App {
         healthKitSync: HealthKitSync.shared,
         watchConnectivityManager: WatchConnectivityManager.shared,
         soundAnalysisDetector: SoundAnalysisDetector.shared,
-        soothingMelodyPlayer: SoothingMelodyPlayer.shared
+        soothingMelodyPlayer: SoothingMelodyPlayer.shared,
+        appConfig: appConfig
       )
+      .task {
+        await RemoteConfigLoader.shared.refresh()
+      }
       .onAppear {
         let container = sharedModelContainer
         Task.detached {
@@ -82,9 +94,19 @@ struct SleepGuardApp: App {
         if newPhase == .active && sessionManager.isRecording {
           UIApplication.shared.isIdleTimerDisabled = true
         }
+        if newPhase == .active {
+          Task { await RemoteConfigLoader.shared.refresh() }
+        }
       }
     }
     .modelContainer(sharedModelContainer)
+  }
+
+  /// Opens the App Store listing for updates. Replace the ID once the app ships.
+  private func openAppStore() {
+    // TODO: Replace with the real App Store ID when available.
+    guard let url = URL(string: "https://apps.apple.com/app/id000000000") else { return }
+    UIApplication.shared.open(url)
   }
 }
 

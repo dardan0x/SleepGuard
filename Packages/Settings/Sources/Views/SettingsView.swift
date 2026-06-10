@@ -8,6 +8,7 @@ import Personalization
 @MainActor
 public struct SettingsView: View {
   @Environment(Theme.self) private var theme
+  @Environment(AppConfig.self) private var appConfig
   @Environment(UserPreferences.self) private var userPreferences
   @Environment(WatchConnectivityManager.self) private var watchConnectivityManager
   @Environment(HealthKitSync.self) private var healthKitSync
@@ -17,6 +18,9 @@ public struct SettingsView: View {
 
   @State private var showDeleteConfirmation = false
   @State private var showThemePicker = false
+  #if DEBUG
+  @State private var showDebugConfig = false
+  #endif
 
   public init() {}
 
@@ -32,10 +36,16 @@ public struct SettingsView: View {
           SettingsRecordingSection()
           SettingsAppearanceSection()
           SettingsProfileSection(onTapProfile: { routerPath.presentedSheet = .profileEditor })
-          SettingsWatchSection()
+          if appConfig.isEnabled(.watchApp) {
+            SettingsWatchSection()
+          }
           SettingsStorageSection()
           SettingsDataSection(onShowDeleteConfirmation: { showDeleteConfirmation = true })
           SettingsAboutSection(onRateApp: rateApp)
+          #if DEBUG
+          Button("Debug Config") { showDebugConfig = true }
+            .foregroundStyle(theme.textSecondary)
+          #endif
         }
         .padding(.horizontal, 20)
         .padding(.top, 20)
@@ -45,6 +55,13 @@ public struct SettingsView: View {
     .background(theme.bgPrimary)
     #if !os(visionOS)
     .scrollContentBackground(.hidden)
+    #endif
+    #if DEBUG
+    .sheet(isPresented: $showDebugConfig) {
+      NavigationStack { DebugConfigView() }
+        .environment(AppConfig.shared)
+        .environment(Theme.shared)
+    }
     #endif
     .toolbar(.hidden, for: .navigationBar)
     .alert(Strings.settingsDeleteAll, isPresented: $showDeleteConfirmation) {

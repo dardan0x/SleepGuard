@@ -1,5 +1,6 @@
 import Foundation
 import SwiftUI
+import Models
 
 public enum RouterDestination: Hashable, Sendable {
   case recordingDetail(id: UUID)
@@ -52,26 +53,26 @@ public final class RouterPath {
 @MainActor
 @Observable
 public final class TabCoordinator {
-  public var selectedTab = 0
+  public var selectedTab: AppTab = AppConfig.shared.visibleTabsInOrder.first ?? .statistics
   public var resetSignal: TabResetSignal?
 
   public init() {}
 
-  public func selectTab(_ index: Int) {
-    if selectedTab == index {
-      resetSignal = TabResetSignal(tab: index)
+  public func selectTab(_ tab: AppTab) {
+    if selectedTab == tab {
+      resetSignal = TabResetSignal(tab: tab)
     } else {
-      selectedTab = index
+      selectedTab = tab
     }
   }
 }
 
 /// A unique signal indicating that a specific tab should pop to root.
 public struct TabResetSignal: Equatable, Sendable {
-  public let tab: Int
+  public let tab: AppTab
   public let id = UUID()
 
-  public init(tab: Int) {
+  public init(tab: AppTab) {
     self.tab = tab
   }
 }

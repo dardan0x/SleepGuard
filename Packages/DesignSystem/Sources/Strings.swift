@@ -404,6 +404,12 @@ public enum Strings {
   public static var timeMinuteSingular: String { String(localized: "time.minute.singular", bundle: .module) }
   public static var totalSnoringDurationColumn: String { String(localized: "total.snoring.duration.column", bundle: .module) }
   public static var unableToSaveTheSession: String { String(localized: "unable.to.save.the.session", bundle: .module) }
+  public static var updateActionLater: String { String(localized: "update.action.later", bundle: .module) }
+  public static var updateActionUpdate: String { String(localized: "update.action.update", bundle: .module) }
+  public static var updateHardBody: String { String(localized: "update.hard.body", bundle: .module) }
+  public static var updateHardTitle: String { String(localized: "update.hard.title", bundle: .module) }
+  public static var updateSoftBody: String { String(localized: "update.soft.body", bundle: .module) }
+  public static var updateSoftTitle: String { String(localized: "update.soft.title", bundle: .module) }
   public static var watchCalendar: String { String(localized: "watch.calendar", bundle: .module) }
   public static var watchStatusConnected: String { String(localized: "watch.status.connected", bundle: .module) }
   public static var watchStatusNotConnected: String { String(localized: "watch.status.notConnected", bundle: .module) }
