@@ -209,6 +209,43 @@ These thresholds prevent monolithic views. Enforce them during implementation an
 - One endpoint enum per API resource. One file per enum.
 - 2-space indentation. Enforced by `.swiftformat`.
 
+## SwiftData Schema Rules
+
+SwiftData lightweight migration is automatic for additive changes, but **removing or renaming properties will crash on launch** for existing users. Follow these rules to keep the schema future-proof without migration plans.
+
+### Safe changes (no migration needed)
+- **Add new stored properties with default values** — SwiftData auto-migrates
+- **Add new optional properties** — auto-migrates
+- **Add new model types** — auto-migrates
+- **Add new `@Relationship` properties** — auto-migrates
+
+### Breaking changes (will crash existing installs)
+- **Removing a property** from a `@Model` class
+- **Renaming a property**
+- **Changing a property's type** (e.g. `Int` → `Double`)
+- **Changing non-optional to optional** without a default
+- **Removing a model class entirely**
+
+### Defensive schema policy
+> **Never remove or rename a `@Model` property. Only add new ones with defaults. If a property is no longer needed, deprecate it in code but leave it in the schema.**
+
+SwiftData ignores unused columns in the persistent store. This is the only zero-migration way to evolve schemas.
+
+### Cached computed properties on `SleepSession`
+`SleepSession` carries three defensive cached properties to avoid relationship faulting crashes:
+
+```swift
+public var hasCachedScore: Bool = false
+public var cachedSleepScore: Int = 0
+public var cachedSnoringDuration: TimeInterval = 0
+```
+
+These are **necessary** — do not remove them. `sleepScore` and `snoringDuration` are computed from `events`, and faulting `session.events` has crashed in production. The cached values provide a zero-faulting read path.
+
+**Rules when modifying sessions:**
+- Set cached values **after** `modelContext.insert(session)`, never before. SwiftData snapshots at insertion time; pre-insertion mutations on `@Model` objects are **not tracked**.
+- Any code that modifies a session after its initial save (e.g. adding `sleepStageSegments` in `SessionDetailView`) must recalculate and update `cachedSleepScore` before calling `modelContext.save()`.
+
 ## Architecture Reference
 
 Read these docs when building features. Reference only what you need per prompt.
@@ -302,12 +339,27 @@ Include:
 
 > ⚠️ **Never omit Suggested branch and Suggested commit.** The user relies on these for git bookkeeping. This is part of the handoff.
 
-### 1. Update `docs/SESSION_SUMMARY.md`
+### 1. Write a new session fragment in `docs/sessions/`
 
-Append a new session entry with this structure:
+**Never append to a single shared file.** Create one new fragment file
+`docs/sessions/[Date]-[short-slug].md` (e.g. `docs/sessions/2026-06-10-snore-filter.md`).
+One session = one file. This is what keeps the log branch-proof: branches only
+ever add files, so session logs can never merge-conflict.
+
+**Do not write a session number.** Numbers are derived at compile time
+(`python3 scripts/compile-sessions.py` continues numbering from the frozen
+archive). The fragment only needs `date`, `feature`, `branch`, and `title` in
+frontmatter. See `docs/sessions/README.md` for the full convention.
+
+Use this structure:
 
 ```markdown
-## [Date] — Session [N]: [Feature/Topic]
+---
+date: [Date]
+feature: [f#]            # or "none" for a standalone fix
+branch: feature/[f#]/[t#]-short-description
+title: [Feature/Topic]
+---
 
 ### Completed
 - [Task ID]: [What was built, in technical detail]

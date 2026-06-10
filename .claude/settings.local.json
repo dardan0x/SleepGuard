@@ -4,14 +4,26 @@
       "Bash(npx -y @steipete/peekaboo --help)",
       "Bash(timeout 10 npx -y @steipete/peekaboo mcp)",
       "Bash(npx -y @steipete/peekaboo tools)",
-      "mcp__*",
+      "mcp__XcodeBuildMCP__*",
+      "mcp__xcodemcp__*",
+      "mcp__xcode-mcp-manager__*",
+      "mcp__ios-simulator__*",
+      "mcp__pencil__*",
+      "mcp__apple-docs__*",
+      "mcp__notionApi__*",
       "Read(//Users/user/Downloads/**)",
       "Bash(python3 -c \"import numpy\")",
       "Bash(pip3 install *)",
       "mcp__XcodeBuildMCP__session_show_defaults",
       "mcp__XcodeBuildMCP__build_sim",
       "Bash(xcodebuild -project SleepGuard.xcodeproj -scheme SleepGuard -destination 'platform=iOS Simulator,id=B65D6E9B-35AB-4AE7-B425-F8C9E3E35539' -configuration Debug build)",
-      "Bash(python3 scripts/generate-xcstrings.py)"
+      "Bash(python3 scripts/generate-xcstrings.py)",
+      "Bash(mkdir -p docs/sessions)",
+      "Bash(git mv *)",
+      "Bash(python3 scripts/compile-sessions.py)",
+      "Bash(git check-ignore *)",
+      "Bash(sed -n '200,214p' CLAUDE.md)",
+      "Bash(sed -n '205,250p' AGENTS.md)"
     ]
   }
 }

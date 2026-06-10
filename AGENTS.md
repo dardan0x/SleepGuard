@@ -339,12 +339,27 @@ Include:
 
 > ⚠️ **Never omit Suggested branch and Suggested commit.** The user relies on these for git bookkeeping. This is part of the handoff.
 
-### 1. Update `docs/SESSION_SUMMARY.md`
+### 1. Write a new session fragment in `docs/sessions/`
 
-Append a new session entry with this structure:
+**Never append to a single shared file.** Create one new fragment file
+`docs/sessions/[Date]-[short-slug].md` (e.g. `docs/sessions/2026-06-10-snore-filter.md`).
+One session = one file. This is what keeps the log branch-proof: branches only
+ever add files, so session logs can never merge-conflict.
+
+**Do not write a session number.** Numbers are derived at compile time
+(`python3 scripts/compile-sessions.py` continues numbering from the frozen
+archive). The fragment only needs `date`, `feature`, `branch`, and `title` in
+frontmatter. See `docs/sessions/README.md` for the full convention.
+
+Use this structure:
 
 ```markdown
-## [Date] — Session [N]: [Feature/Topic]
+---
+date: [Date]
+feature: [f#]            # or "none" for a standalone fix
+branch: feature/[f#]/[t#]-short-description
+title: [Feature/Topic]
+---
 
 ### Completed
 - [Task ID]: [What was built, in technical detail]
