@@ -1,10 +1,13 @@
 import AVFoundation
 import SwiftUI
+import Env
 import DesignSystem
+import UserNotifications
 
 @MainActor
 struct SettingsPermissionsSection: View {
   @Environment(Theme.self) private var theme
+  @Environment(NotificationPermissionManager.self) private var notifications
   @State private var permissionStatus: AVAudioSession.RecordPermission = .undetermined
 
   var body: some View {
@@ -25,6 +28,21 @@ struct SettingsPermissionsSection: View {
         }
         .buttonStyle(.plain)
         .disabled(permissionStatus == .granted)
+
+        Button {
+          handleNotificationTap()
+        } label: {
+          HStack(spacing: 10) {
+            SettingsIconBackground(systemName: "bell.fill", color: theme.accent)
+            Text(Strings.settingsNotificationsAccess)
+              .font(.system(size: 15))
+              .foregroundStyle(theme.textPrimary)
+            Spacer()
+            notificationStatusView
+          }
+        }
+        .buttonStyle(.plain)
+        .disabled(isNotificationGranted)
       }
       .padding(16)
       .background(theme.bgCard)
@@ -32,6 +50,9 @@ struct SettingsPermissionsSection: View {
     }
     .onAppear {
       checkPermission()
+    }
+    .task {
+      await notifications.refreshStatus()
     }
   }
 
@@ -72,10 +93,65 @@ struct SettingsPermissionsSection: View {
     }
   }
 
+  // MARK: - Notification status
+
+  private var isNotificationGranted: Bool {
+    switch notifications.authorizationStatus {
+    case .authorized, .provisional, .ephemeral: return true
+    default: return false
+    }
+  }
+
+  @ViewBuilder
+  private var notificationStatusView: some View {
+    switch notifications.authorizationStatus {
+    case .authorized, .provisional, .ephemeral:
+      HStack(spacing: 4) {
+        Circle()
+          .fill(theme.scoreGreen)
+          .frame(width: 6, height: 6)
+        Text(Strings.settingsMicrophoneStatusGranted)
+          .font(.system(size: 15))
+          .foregroundStyle(theme.scoreGreen)
+      }
+    case .denied:
+      HStack(spacing: 4) {
+        Text(Strings.settingsMicrophoneStatusDenied)
+          .font(.system(size: 15))
+          .foregroundStyle(theme.destructive)
+        Image(systemName: "chevron.right")
+          .font(.system(size: 13))
+          .foregroundStyle(theme.textTertiary)
+      }
+    default:
+      HStack(spacing: 4) {
+        Text(Strings.settingsMicrophoneEnable)
+          .font(.system(size: 15, weight: .medium))
+          .foregroundStyle(theme.accent)
+        Image(systemName: "chevron.right")
+          .font(.system(size: 13))
+          .foregroundStyle(theme.textTertiary)
+      }
+    }
+  }
+
   // MARK: - Actions
 
   private func checkPermission() {
     permissionStatus = AVAudioSession.sharedInstance().recordPermission
+  }
+
+  private func handleNotificationTap() {
+    switch notifications.authorizationStatus {
+    case .notDetermined:
+      Task { await notifications.requestAuthorization() }
+    case .denied:
+      if let url = URL(string: UIApplication.openSettingsURLString) {
+        UIApplication.shared.open(url)
+      }
+    default:
+      break
+    }
   }
 
   private func handleMicrophoneTap() {

@@ -335,6 +335,34 @@ public final class UserPreferences {
     }
   }
 
+  // MARK: - Notifications soft-ask
+
+  /// Number of app launches, used to gate the notification soft-ask.
+  public var appOpenCount: Int {
+    get {
+      access(keyPath: \.appOpenCount)
+      return defaults.integer(forKey: "appOpenCount")
+    }
+    set {
+      withMutation(keyPath: \.appOpenCount) {
+        defaults.set(newValue, forKey: "appOpenCount")
+      }
+    }
+  }
+
+  /// True once the user has acted on (or dismissed) the notification soft-ask.
+  public var notificationSoftAskDismissed: Bool {
+    get {
+      access(keyPath: \.notificationSoftAskDismissed)
+      return defaults.bool(forKey: "notificationSoftAskDismissed")
+    }
+    set {
+      withMutation(keyPath: \.notificationSoftAskDismissed) {
+        defaults.set(newValue, forKey: "notificationSoftAskDismissed")
+      }
+    }
+  }
+
   public enum SoothingMelodyMode: String, CaseIterable, Sendable {
     case never
     case always

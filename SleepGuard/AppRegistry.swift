@@ -19,7 +19,8 @@ extension View {
     watchConnectivityManager: WatchConnectivityManager,
     soundAnalysisDetector: SoundAnalysisDetector,
     soothingMelodyPlayer: SoothingMelodyPlayer,
-    appConfig: AppConfig
+    appConfig: AppConfig,
+    notificationPermissionManager: NotificationPermissionManager
   ) -> some View {
     self
       .environment(userPreferences)
@@ -31,6 +32,7 @@ extension View {
       .environment(soundAnalysisDetector)
       .environment(soothingMelodyPlayer)
       .environment(appConfig)
+      .environment(notificationPermissionManager)
   }
 
   func withEnvironments() -> some View {
@@ -44,6 +46,7 @@ extension View {
       .environment(SoundAnalysisDetector.shared)
       .environment(SoothingMelodyPlayer.shared)
       .environment(AppConfig.shared)
+      .environment(NotificationPermissionManager.shared)
       .environment(RouterPath())
   }
 

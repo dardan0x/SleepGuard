@@ -19,13 +19,9 @@
 		B7E5BB619CAC47AD866118B3 /* Personalization in Frameworks */ = {isa = PBXBuildFile; productRef = DE0D39C8817A44AB96DFE1F5 /* Personalization */; };
 		BBCD8AD5E1B9D0470A48BD85 /* Env in Frameworks */ = {isa = PBXBuildFile; productRef = D7A35E7D5BA7E75CF647C509 /* Env */; };
 		CE1563F32FDA136500A53611 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = CE1563F22FDA136500A53611 /* FirebaseAnalytics */; };
-		CE1563F52FDA136500A53611 /* FirebaseAppDistribution-Beta in Frameworks */ = {isa = PBXBuildFile; productRef = CE1563F42FDA136500A53611 /* FirebaseAppDistribution-Beta */; };
 		CE1563F72FDA136500A53611 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = CE1563F62FDA136500A53611 /* FirebaseCrashlytics */; };
-		CE1563F92FDA136500A53611 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = CE1563F82FDA136500A53611 /* FirebaseFirestore */; };
-		CE1563FB2FDA136500A53611 /* FirebaseInAppMessaging-Beta in Frameworks */ = {isa = PBXBuildFile; productRef = CE1563FA2FDA136500A53611 /* FirebaseInAppMessaging-Beta */; };
 		CE1563FD2FDA136500A53611 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = CE1563FC2FDA136500A53611 /* FirebaseMessaging */; };
 		CE1563FF2FDA136500A53611 /* FirebaseRemoteConfig in Frameworks */ = {isa = PBXBuildFile; productRef = CE1563FE2FDA136500A53611 /* FirebaseRemoteConfig */; };
-		CE1564012FDA136500A53611 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = CE1564002FDA136500A53611 /* FirebaseStorage */; };
 		CF758CAE5F2E6721317BC087 /* DesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = 938D66BD06A743B2F8B279C6 /* DesignSystem */; };
 		E6F1CF9BF2DDADE9A5619DB4 /* SleepSession in Frameworks */ = {isa = PBXBuildFile; productRef = AD548900091A83E69035BB78 /* SleepSession */; };
 		E962CD02720B46D347403017 /* Recordings in Frameworks */ = {isa = PBXBuildFile; productRef = 613CAAD887F993446993F409 /* Recordings */; };
@@ -37,6 +33,7 @@
 /* Begin PBXFileReference section */
 		CE1472B62FC47140009A5425 /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
 		CE1563D52FDA041100A53611 /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
+		CE15643C2FDA27BA00A53611 /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
 		CE1588F82FAA9946001B61AA /* SleepGuard.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SleepGuard.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE158A3C2FAB2EC7001B61AA /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
 		CE258F042FAC77A5004C0C0D /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
@@ -79,17 +76,14 @@
 				EA3B0BCFD10182B987547C8B /* AudioEngine in Frameworks */,
 				6C2B806DCE9A12B8503615FC /* DesignSystem in Frameworks */,
 				FAED5AD98781D85AB7AFA7A5 /* SleepSession in Frameworks */,
-				CE1564012FDA136500A53611 /* FirebaseStorage in Frameworks */,
 				E962CD02720B46D347403017 /* Recordings in Frameworks */,
 				CE1563F32FDA136500A53611 /* FirebaseAnalytics in Frameworks */,
 				3E6C34CBE4058605247D0A36 /* Models in Frameworks */,
-				CE1563FB2FDA136500A53611 /* FirebaseInAppMessaging-Beta in Frameworks */,
 				A28EDE8E5E58BE472E55038A /* AudioEngine in Frameworks */,
 				BBCD8AD5E1B9D0470A48BD85 /* Env in Frameworks */,
 				CF758CAE5F2E6721317BC087 /* DesignSystem in Frameworks */,
 				58136AE388B78A6E4D284F3E /* Onboarding in Frameworks */,
 				E6F1CF9BF2DDADE9A5619DB4 /* SleepSession in Frameworks */,
-				CE1563F92FDA136500A53611 /* FirebaseFirestore in Frameworks */,
 				1A2C26235B1C018F311D03EB /* Statistics in Frameworks */,
 				CE1563F72FDA136500A53611 /* FirebaseCrashlytics in Frameworks */,
 				78DDF28BFD0525A9C32B1FE1 /* Recordings in Frameworks */,
@@ -97,7 +91,6 @@
 				7550A233A59B33AC7BC63FA5 /* Settings in Frameworks */,
 				B7E5BB619CAC47AD866118B3 /* Personalization in Frameworks */,
 				CE1563FD2FDA136500A53611 /* FirebaseMessaging in Frameworks */,
-				CE1563F52FDA136500A53611 /* FirebaseAppDistribution-Beta in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -110,6 +103,11 @@
 			sourceTree = "<group>";
 		};
 		CE1563D82FDA041100A53611 /* Products */ = {
+			isa = PBXGroup;
+			name = Products;
+			sourceTree = "<group>";
+		};
+		CE15643F2FDA27BA00A53611 /* Products */ = {
 			isa = PBXGroup;
 			name = Products;
 			sourceTree = "<group>";
@@ -187,6 +185,7 @@
 				CE1588F42FAA9946001B61AA /* Sources */,
 				CE1588F52FAA9946001B61AA /* Frameworks */,
 				CE1588F62FAA9946001B61AA /* Resources */,
+				FBC3A11771C50000DEADBEEF /* Firebase Crashlytics */,
 			);
 			buildRules = (
 			);
@@ -208,13 +207,9 @@
 				167C10ECFE58FBF4929EF997 /* Settings */,
 				DE0D39C8817A44AB96DFE1F5 /* Personalization */,
 				CE1563F22FDA136500A53611 /* FirebaseAnalytics */,
-				CE1563F42FDA136500A53611 /* FirebaseAppDistribution-Beta */,
 				CE1563F62FDA136500A53611 /* FirebaseCrashlytics */,
-				CE1563F82FDA136500A53611 /* FirebaseFirestore */,
-				CE1563FA2FDA136500A53611 /* FirebaseInAppMessaging-Beta */,
 				CE1563FC2FDA136500A53611 /* FirebaseMessaging */,
 				CE1563FE2FDA136500A53611 /* FirebaseRemoteConfig */,
-				CE1564002FDA136500A53611 /* FirebaseStorage */,
 			);
 			productName = SleepGuard;
 			productReference = CE1588F82FAA9946001B61AA /* SleepGuard.app */;
@@ -278,6 +273,10 @@
 					ProjectRef = CE1563D52FDA041100A53611 /* SleepGuard.xcodeproj */;
 				},
 				{
+					ProductGroup = CE15643F2FDA27BA00A53611 /* Products */;
+					ProjectRef = CE15643C2FDA27BA00A53611 /* SleepGuard.xcodeproj */;
+				},
+				{
 					ProductGroup = CE2591312FAE9E98004C0C0D /* Products */;
 					ProjectRef = CE25912E2FAE9E98004C0C0D /* SleepGuard.xcodeproj */;
 				},
@@ -335,6 +334,27 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "if which python3 >/dev/null; then\n  python3 \"$SRCROOT/scripts/generate-strings.py\"\nelse\n  echo \"warning: python3 not found, skipping strings generation\"\nfi\n";
+		};
+		FBC3A11771C50000DEADBEEF /* Firebase Crashlytics */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${TARGET_NAME}",
+				"$(SRCROOT)/$(BUILT_PRODUCTS_DIR)/$(INFOPLIST_PATH)",
+			);
+			name = "Firebase Crashlytics";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -740,25 +760,10 @@
 			package = CE1563F12FDA136500A53611 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseAnalytics;
 		};
-		CE1563F42FDA136500A53611 /* FirebaseAppDistribution-Beta */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = CE1563F12FDA136500A53611 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = "FirebaseAppDistribution-Beta";
-		};
 		CE1563F62FDA136500A53611 /* FirebaseCrashlytics */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = CE1563F12FDA136500A53611 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseCrashlytics;
-		};
-		CE1563F82FDA136500A53611 /* FirebaseFirestore */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = CE1563F12FDA136500A53611 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseFirestore;
-		};
-		CE1563FA2FDA136500A53611 /* FirebaseInAppMessaging-Beta */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = CE1563F12FDA136500A53611 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = "FirebaseInAppMessaging-Beta";
 		};
 		CE1563FC2FDA136500A53611 /* FirebaseMessaging */ = {
 			isa = XCSwiftPackageProductDependency;
@@ -769,11 +774,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = CE1563F12FDA136500A53611 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseRemoteConfig;
-		};
-		CE1564002FDA136500A53611 /* FirebaseStorage */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = CE1563F12FDA136500A53611 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseStorage;
 		};
 		D7A35E7D5BA7E75CF647C509 /* Env */ = {
 			isa = XCSwiftPackageProductDependency;

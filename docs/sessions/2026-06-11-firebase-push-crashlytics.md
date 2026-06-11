@@ -8,6 +8,8 @@ title: Firebase Crashlytics + Push Notifications (FCM) with soft-ask
 ### Completed
 - **Crashlytics**: added the dSYM-upload run script as the last build phase; added a DEBUG "Force Test Crash" button. SDK/`FirebaseApp.configure()` already in place.
 - **Push (FCM)**: full remote-push plumbing + a soft-ask permission flow shown after the 3rd app open on the Statistics tab (not onboarding). Gated by the new `notifications` feature flag.
+- **Settings permission row**: added a Notifications row to Settings → Permissions (live status, request-on-tap, opens iOS Settings when denied) as the escape hatch for users who declined the soft-ask.
+- **Firebase dependency trim**: reduced linked Firebase products to exactly Analytics, Crashlytics, Messaging, RemoteConfig — removed Firestore, Storage, InAppMessaging-Beta, AppDistribution-Beta (smaller binary / faster builds).
 
 ### Technical Details
 - Crashlytics run script (SPM): `"${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run"`, inputs `${DWARF_DSYM_FOLDER_PATH}/.../${TARGET_NAME}` + `$(SRCROOT)/$(BUILT_PRODUCTS_DIR)/$(INFOPLIST_PATH)`. Release already `dwarf-with-dsym`; Debug stays `dwarf` (benign upload warning).
@@ -31,8 +33,16 @@ title: Firebase Crashlytics + Push Notifications (FCM) with soft-ask
 | `SleepGuard/AppRegistry.swift` | `NotificationPermissionManager` in both env funcs |
 | `SleepGuard/StatisticsTab.swift` | soft-ask trigger + sheet |
 | `Packages/Settings/Sources/Views/DebugConfigView.swift` | Force Test Crash button |
-| `Strings.txt` (+generated) | 4 soft-ask strings |
+| `Packages/Settings/Sources/Views/SettingsPermissionsSection.swift` | Notifications permission row (status + request + open-settings) |
+| `Strings.txt` (+generated) | 4 soft-ask strings + `settings.notificationsAccess` |
+| `SleepGuard.xcodeproj/project.pbxproj` | Crashlytics run script; removed 4 unused Firebase products |
 | `docs/remote-config-schema.md` | `notifications` flag |
+
+### Firebase products (final)
+Linked: **FirebaseAnalytics, FirebaseCrashlytics, FirebaseMessaging, FirebaseRemoteConfig**. The `firebase-ios-sdk` package reference stays (one repo, many products); only unused products were unlinked. Analytics kept for crash-free-users metrics, push conversion, and RC audience/A-B targeting.
+
+### App size (asked, not built)
+No ML model or custom fonts bundled; resources ≈ 2–2.5 MB (sounds 1.8 MB + icon). Estimated App Store download ~20–35 MB / install ~50–80 MB (Firebase-dominated). Exact figure only via Xcode Archive → App Thinning Size Report or App Store Connect.
 
 ### Build Status
 - **BUILD SUCCEEDED** — only pre-existing/benign warnings (`latestSession`, `PendingSessionStore` async, Debug dSYM note).
@@ -46,7 +56,7 @@ title: Firebase Crashlytics + Push Notifications (FCM) with soft-ask
 `feature/firebase/push-crashlytics`
 
 ### Suggested Commit
-`Firebase Crashlytics dSYM upload + FCM push with soft-ask permission`
+`Firebase Crashlytics + FCM push (soft-ask + settings row) + trim unused Firebase products`
 
 ### Open Questions
 - Re-engagement reminders + tips were chosen as purposes but no local-notification scheduling is built yet — wire when content/cadence is decided.

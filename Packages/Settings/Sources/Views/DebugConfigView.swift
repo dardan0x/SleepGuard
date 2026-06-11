@@ -73,6 +73,15 @@ struct DebugConfigView: View {
         }
       }
 
+      Section("Diagnostics") {
+        Text("Run without the Xcode debugger attached, then relaunch — Crashlytics uploads the report on next launch.")
+          .font(.footnote)
+          .foregroundStyle(theme.textTertiary)
+        Button("Force Test Crash", role: .destructive) {
+          fatalError("Crashlytics test crash")
+        }
+      }
+
       Section {
         Button("Reset All Overrides", role: .destructive) {
           appConfig.clearOverrides()

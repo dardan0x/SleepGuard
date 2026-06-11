@@ -107,6 +107,10 @@ public enum Strings {
   public static var melodyDisabledSoothingMelodySheet: String { String(localized: "melody.disabled.soothing.melody.sheet", bundle: .module) }
   public static var melodyEnabledSoothingMelodySheet: String { String(localized: "melody.enabled.soothing.melody.sheet", bundle: .module) }
   public static var muteForSession: String { String(localized: "mute.for.session", bundle: .module) }
+  public static var notificationsSoftAskBody: String { String(localized: "notifications.soft.ask.body", bundle: .module) }
+  public static var notificationsSoftAskEnable: String { String(localized: "notifications.soft.ask.enable", bundle: .module) }
+  public static var notificationsSoftAskLater: String { String(localized: "notifications.soft.ask.later", bundle: .module) }
+  public static var notificationsSoftAskTitle: String { String(localized: "notifications.soft.ask.title", bundle: .module) }
   public static var offSoothingMelodyValueFormat: String { String(localized: "off.soothing.melody.value", bundle: .module) }
   public static var onboardingHealthWatchBadge: String { String(localized: "onboarding.healthWatch.badge", bundle: .module) }
   public static var onboardingHealthWatchBody: String { String(localized: "onboarding.healthWatch.body", bundle: .module) }
@@ -291,6 +295,7 @@ public enum Strings {
   public static var settingsMicrophoneStatusGranted: String { String(localized: "settings.microphoneStatusGranted", bundle: .module) }
   public static var settingsMicrophoneStatusNotDetermined: String { String(localized: "settings.microphoneStatusNotDetermined", bundle: .module) }
   public static var settingsMinSnoreDuration: String { String(localized: "settings.minSnoreDuration", bundle: .module) }
+  public static var settingsNotificationsAccess: String { String(localized: "settings.notificationsAccess", bundle: .module) }
   public static var settingsPreserveRawAudio: String { String(localized: "settings.preserveRawAudio", bundle: .module) }
   public static var settingsPreserveRawAudioDescription: String { String(localized: "settings.preserveRawAudio.description", bundle: .module) }
   public static var settingsProfile: String { String(localized: "settings.profile", bundle: .module) }

@@ -146,6 +146,15 @@ settings.profile = Profile
 settings.briefing = Daily Sleep Briefing
 settings.briefing.description = Show a daily recap when you open the app
 
+# Notifications
+settings.notificationsAccess = Notifications
+
+# Notifications soft-ask
+notifications.soft.ask.title = Stay on track
+notifications.soft.ask.body = Get gentle reminders to track your sleep, plus tips and the occasional update.
+notifications.soft.ask.enable = Enable Notifications
+notifications.soft.ask.later = Not Now
+
 # Update gating
 update.hard.title = Update Required
 update.hard.body = This version is no longer supported. Please update to keep using SleepGuard.
