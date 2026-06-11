@@ -4363,6 +4363,61 @@
           }
         }
       }
+    },
+    "notifications.soft.ask.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stay on track"
+          }
+        }
+      }
+    },
+    "notifications.soft.ask.body": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Get gentle reminders to track your sleep, plus tips and the occasional update."
+          }
+        }
+      }
+    },
+    "notifications.soft.ask.enable": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enable Notifications"
+          }
+        }
+      }
+    },
+    "notifications.soft.ask.later": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not Now"
+          }
+        }
+      }
+    },
+    "settings.notificationsAccess": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notifications"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

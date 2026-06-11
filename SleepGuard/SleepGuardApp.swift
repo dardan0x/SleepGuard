@@ -9,11 +9,13 @@ import Onboarding
 
 @main
 struct SleepGuardApp: App {
+  @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
   @Environment(\.scenePhase) private var scenePhase
   @State private var userPreferences = UserPreferences.shared
   @State private var sessionManager = SessionManager.shared
   @State private var theme = Theme.shared
   @State private var appConfig = AppConfig.shared
+  @State private var notificationPermissionManager = NotificationPermissionManager.shared
 
   init() {
     FirebaseApp.configure()
@@ -66,10 +68,15 @@ struct SleepGuardApp: App {
         watchConnectivityManager: WatchConnectivityManager.shared,
         soundAnalysisDetector: SoundAnalysisDetector.shared,
         soothingMelodyPlayer: SoothingMelodyPlayer.shared,
-        appConfig: appConfig
+        appConfig: appConfig,
+        notificationPermissionManager: notificationPermissionManager
       )
       .task {
         await RemoteConfigLoader.shared.refresh()
+      }
+      .task {
+        userPreferences.appOpenCount += 1
+        await notificationPermissionManager.refreshStatus()
       }
       .onAppear {
         let container = sharedModelContainer

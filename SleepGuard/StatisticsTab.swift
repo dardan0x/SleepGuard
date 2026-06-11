@@ -8,10 +8,13 @@ import Statistics
 
 struct StatisticsTab: View {
   @State private var routerPath = RouterPath()
+  @State private var showNotificationSoftAsk = false
   @Environment(TabCoordinator.self) private var tabCoordinator
   @Environment(UserPreferences.self) private var userPreferences
   @Environment(SessionManager.self) private var sessionManager
   @Environment(HealthKitSync.self) private var healthKitSync
+  @Environment(AppConfig.self) private var appConfig
+  @Environment(NotificationPermissionManager.self) private var notificationPermissions
   @Environment(\.modelContext) private var modelContext
 
 
@@ -29,6 +32,13 @@ struct StatisticsTab: View {
 
         StatisticsDashboardView()
           .withAppRouter()
+      }
+      .task {
+        await evaluateNotificationSoftAsk()
+      }
+      .sheet(isPresented: $showNotificationSoftAsk) {
+        NotificationSoftAskView(onClose: { showNotificationSoftAsk = false })
+          .withEnvironments()
       }
     }
     .sheet(
@@ -86,6 +96,17 @@ struct StatisticsTab: View {
       }
     }
     .environment(routerPath)
+  }
+
+  /// Shows the notification soft-ask after a few app opens, once, if notifications
+  /// are remotely enabled and the user hasn't been asked yet.
+  private func evaluateNotificationSoftAsk() async {
+    guard appConfig.isEnabled(.notifications) else { return }
+    guard !userPreferences.notificationSoftAskDismissed else { return }
+    guard userPreferences.appOpenCount >= 3 else { return }
+    await notificationPermissions.refreshStatus()
+    guard notificationPermissions.authorizationStatus == .notDetermined else { return }
+    showNotificationSoftAsk = true
   }
 
   private func fetchOrCreateProfile() -> UserProfile? {

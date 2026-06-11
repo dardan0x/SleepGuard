@@ -20,9 +20,17 @@ struct BedsideClockView: View {
             theme.bgPrimary.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                BedsideClockBadgesView(
-                    eventsCount: sessionManager.eventsCount
-                )
+                VStack(spacing: 8) {
+                    BedsideClockBadgesView(
+                        eventsCount: sessionManager.eventsCount
+                    )
+                    
+                    if isMelodyEnabled && !soothingMelodyPlayer.isMutedForSession {
+                        melodyDisclaimer
+                            .padding(.top, 10)
+                            .padding(.horizontal, 20)
+                    }
+                }
                 
                 Spacer()
                 
@@ -40,6 +48,7 @@ struct BedsideClockView: View {
                 
                 Spacer()
                 
+                
                 BedsideClockStatusView(
                     statusLabel: statusLabel,
                     snoringColor: snoringColor
@@ -47,11 +56,6 @@ struct BedsideClockView: View {
                 
                 Spacer()
                 
-                VStack(spacing: 8) {
-                    if isMelodyEnabled && !soothingMelodyPlayer.isMutedForSession {
-                        melodyDisclaimer
-                    }
-                    
                     StopRecordingButton(height: 52) {
                         if let session = sessionManager.currentSession,
                            currentTime.timeIntervalSince(session.startDate) < SleepSession.minimumSaveDuration {
@@ -62,7 +66,6 @@ struct BedsideClockView: View {
                             }
                         }
                     }
-                }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 32)
             }
@@ -156,18 +159,18 @@ struct BedsideClockView: View {
                 .foregroundStyle(theme.accent)
             
             Text(Strings.sessionBedsideMelodyEnabled)
-                .font(.system(size: 13, weight: .medium))
+                .font(.system(size: 14, weight: .medium))
                 .foregroundStyle(theme.textSecondary)
             
             Text("·")
-                .font(.system(size: 13, weight: .medium))
+                .font(.system(size: 14, weight: .medium))
                 .foregroundStyle(theme.textTertiary)
             
             Button {
                 soothingMelodyPlayer.muteForSession()
             } label: {
                 Text(Strings.muteForSession)
-                    .font(.system(size: 13, weight: .semibold))
+                    .font(.system(size: 14, weight: .semibold))
                     .foregroundStyle(theme.accent)
             }
             .buttonStyle(.plain)
@@ -175,7 +178,7 @@ struct BedsideClockView: View {
             Spacer()
         }
         .padding(.horizontal, 16)
-        .padding(.vertical, 10)
+        .padding(.vertical, 15)
         .background(theme.bgCard)
         .cornerRadius(theme.radiusSmall)
     }

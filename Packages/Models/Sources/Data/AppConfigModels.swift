@@ -17,6 +17,7 @@ public enum FeatureFlag: String, CaseIterable, Sendable {
   case pdfReport
   case enhancedSleepTracking
   case sleepTalkingDetection
+  case notifications
 
   /// Baked-in default applied when neither a remote value nor a debug override exists.
   public var defaultValue: Bool { true }
