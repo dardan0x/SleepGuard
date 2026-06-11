@@ -857,22 +857,67 @@ public final class SessionManager {
     }
 
     /// Compresses a raw per-event .caf file to AAC .m4a.
+    ///
+    /// Encodes to mono 16 kHz / 24 kbps AAC rather than using
+    /// `AVAssetExportPresetAppleM4A`, which offers no bitrate/sample-rate
+    /// control and preserves the mic's native 44.1/48 kHz rate. Snore energy
+    /// is almost entirely below ~1.5 kHz, so 16 kHz (8 kHz Nyquist) at a low
+    /// bitrate keeps clips clearly recognizable while cutting file size 3–5×.
+    /// The reader output settings force downmix + resample to mono 16 kHz PCM
+    /// so the AAC encoder only has to compress.
     private func compressEventFile(from sourceURL: URL, to destinationURL: URL) async -> Bool {
         if FileManager.default.fileExists(atPath: destinationURL.path) {
             try? FileManager.default.removeItem(at: destinationURL)
         }
 
         let asset = AVURLAsset(url: sourceURL)
-        guard let exportSession = AVAssetExportSession(
-            asset: asset,
-            presetName: AVAssetExportPresetAppleM4A
-        ) else { return false }
+        guard let track = try? await asset.loadTracks(withMediaType: .audio).first,
+              let reader = try? AVAssetReader(asset: asset),
+              let writer = try? AVAssetWriter(outputURL: destinationURL, fileType: .m4a)
+        else { return false }
 
-        exportSession.outputURL = destinationURL
-        exportSession.outputFileType = .m4a
+        let readerOutput = AVAssetReaderTrackOutput(track: track, outputSettings: [
+            AVFormatIDKey: kAudioFormatLinearPCM,
+            AVSampleRateKey: 16_000,
+            AVNumberOfChannelsKey: 1,
+            AVLinearPCMBitDepthKey: 16,
+            AVLinearPCMIsFloatKey: false,
+            AVLinearPCMIsBigEndianKey: false,
+            AVLinearPCMIsNonInterleaved: false,
+        ])
+        guard reader.canAdd(readerOutput) else { return false }
+        reader.add(readerOutput)
 
-        await exportSession.export()
-        return exportSession.status == .completed
+        let writerInput = AVAssetWriterInput(mediaType: .audio, outputSettings: [
+            AVFormatIDKey: kAudioFormatMPEG4AAC,
+            AVSampleRateKey: 16_000,
+            AVNumberOfChannelsKey: 1,
+            AVEncoderBitRateKey: 24_000,
+        ])
+        writerInput.expectsMediaDataInRealTime = false
+        guard writer.canAdd(writerInput) else { return false }
+        writer.add(writerInput)
+
+        guard reader.startReading(), writer.startWriting() else { return false }
+        writer.startSession(atSourceTime: .zero)
+
+        let queue = DispatchQueue(label: "com.sleepguard.aac-encode")
+        return await withCheckedContinuation { continuation in
+            writerInput.requestMediaDataWhenReady(on: queue) {
+                while writerInput.isReadyForMoreMediaData {
+                    guard let buffer = readerOutput.copyNextSampleBuffer() else {
+                        writerInput.markAsFinished()
+                        writer.finishWriting {
+                            continuation.resume(
+                                returning: writer.status == .completed && reader.status == .completed
+                            )
+                        }
+                        return
+                    }
+                    writerInput.append(buffer)
+                }
+            }
+        }
     }
 
     /// Calibrated thresholds + SoundAnalysis confidence gates for the full-band
