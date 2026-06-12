@@ -858,13 +858,16 @@ public final class SessionManager {
 
     /// Compresses a raw per-event .caf file to AAC .m4a.
     ///
-    /// Encodes to mono 16 kHz / 24 kbps AAC rather than using
+    /// Encodes to mono 16 kHz HE-AAC at ~16 kbps rather than using
     /// `AVAssetExportPresetAppleM4A`, which offers no bitrate/sample-rate
     /// control and preserves the mic's native 44.1/48 kHz rate. Snore energy
-    /// is almost entirely below ~1.5 kHz, so 16 kHz (8 kHz Nyquist) at a low
-    /// bitrate keeps clips clearly recognizable while cutting file size 3–5×.
-    /// The reader output settings force downmix + resample to mono 16 kHz PCM
-    /// so the AAC encoder only has to compress.
+    /// is almost entirely below ~1.5 kHz, so 16 kHz (8 kHz Nyquist) is ample.
+    /// HE-AAC (SBR) stays clear at low bitrates where plain AAC-LC would smear,
+    /// and constrained-VBR spends near-zero bits on the breathing gaps between
+    /// bursts — together cutting clip size roughly in half vs. LC 24 kbps.
+    /// Falls back to AAC-LC 24 kbps if the encoder rejects HE-AAC, so a clip is
+    /// never silently dropped. The reader output forces downmix + resample to
+    /// mono 16 kHz PCM so the encoder only has to compress.
     private func compressEventFile(from sourceURL: URL, to destinationURL: URL) async -> Bool {
         if FileManager.default.fileExists(atPath: destinationURL.path) {
             try? FileManager.default.removeItem(at: destinationURL)
@@ -888,14 +891,27 @@ public final class SessionManager {
         guard reader.canAdd(readerOutput) else { return false }
         reader.add(readerOutput)
 
-        let writerInput = AVAssetWriterInput(mediaType: .audio, outputSettings: [
-            AVFormatIDKey: kAudioFormatMPEG4AAC,
-            AVSampleRateKey: 16_000,
-            AVNumberOfChannelsKey: 1,
-            AVEncoderBitRateKey: 24_000,
-        ])
-        writerInput.expectsMediaDataInRealTime = false
-        guard writer.canAdd(writerInput) else { return false }
+        func makeWriterInput(formatID: AudioFormatID, bitRate: Int) -> AVAssetWriterInput {
+            let input = AVAssetWriterInput(mediaType: .audio, outputSettings: [
+                AVFormatIDKey: formatID,
+                AVSampleRateKey: 16_000,
+                AVNumberOfChannelsKey: 1,
+                AVEncoderBitRateKey: bitRate,
+                AVEncoderBitRateStrategyKey: AVAudioBitRateStrategy_VariableConstrained,
+            ])
+            input.expectsMediaDataInRealTime = false
+            return input
+        }
+
+        let heInput = makeWriterInput(formatID: kAudioFormatMPEG4AAC_HE, bitRate: 16_000)
+        let writerInput: AVAssetWriterInput
+        if writer.canAdd(heInput) {
+            writerInput = heInput
+        } else {
+            let lcInput = makeWriterInput(formatID: kAudioFormatMPEG4AAC, bitRate: 24_000)
+            guard writer.canAdd(lcInput) else { return false }
+            writerInput = lcInput
+        }
         writer.add(writerInput)
 
         guard reader.startReading(), writer.startWriting() else { return false }
