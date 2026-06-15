@@ -215,6 +215,7 @@ public struct SessionSummaryView: View {
     }
 
     PendingSessionStore.shared.clearPending()
+    SessionCheckpointStore.shared.clear()
 
     Task {
       await StorageLimitEnforcer.shared.enforceLimits(modelContext: modelContext)

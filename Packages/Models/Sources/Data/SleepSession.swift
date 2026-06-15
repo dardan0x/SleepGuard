@@ -226,6 +226,23 @@ public final class SleepSession {
         snoringEpisodes.filter { $0.snoreDuration >= 3 }
     }
 
+    /// The events to play when a list row for `event` is tapped.
+    ///
+    /// Snoring rows represent a whole episode but are keyed by the episode's
+    /// single representative event, so loading only `[event]` plays just that
+    /// clip — making the player's total far shorter than the duration shown on
+    /// the row (which sums every clip in the episode). This returns the full
+    /// episode's events, time-ordered, so the player total matches the row.
+    /// Non-snoring events (sleep talking, noise) are standalone and return `[event]`.
+    public func episodePlaybackEvents(for event: SnoreEvent) -> [SnoreEvent] {
+        if let episode = displayableSnoringEpisodes.first(where: {
+            $0.representativeEvent?.id == event.id
+        }) {
+            return episode.events.sorted(by: { $0.timestamp < $1.timestamp })
+        }
+        return [event]
+    }
+
     /// Event count using displayable snoring episodes.
     /// Non-snoring events are still counted individually.
     public var eventsCount: Int {

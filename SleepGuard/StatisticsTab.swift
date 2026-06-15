@@ -79,16 +79,13 @@ struct StatisticsTab: View {
         userPreferences.presentRecordingAfterOnboarding = false
         routerPath.navigate(to: .liveSession)
       }
+      // Surface a session already set before this tab began observing — e.g. a
+      // crash-recovered session restored at launch.
+      presentCompletedSessionIfNeeded()
     }
     .onChange(of: sessionManager.completedSession) { _, newValue in
       guard newValue != nil else { return }
-      if let session = sessionManager.completedSession,
-         session.terminationReason != nil {
-        autoSaveForceSavedSession(session: session)
-      } else {
-        routerPath.navigateToRoot()
-        routerPath.presentedSheet = .sessionSummary
-      }
+      presentCompletedSessionIfNeeded()
     }
     .onChange(of: tabCoordinator.resetSignal) { _, signal in
       if let signal, signal.tab == .statistics {
@@ -117,6 +114,20 @@ struct StatisticsTab: View {
     let profile = UserProfile()
     modelContext.insert(profile)
     return profile
+  }
+
+  /// Routes a completed session to the summary sheet, or auto-saves it when it
+  /// was force-saved (e.g. low battery). Guards against re-presenting over an
+  /// existing sheet so it is safe to call from both `onAppear` and `onChange`.
+  private func presentCompletedSessionIfNeeded() {
+    guard let session = sessionManager.completedSession else { return }
+    guard routerPath.presentedSheet == nil else { return }
+    if session.terminationReason != nil {
+      autoSaveForceSavedSession(session: session)
+    } else {
+      routerPath.navigateToRoot()
+      routerPath.presentedSheet = .sessionSummary
+    }
   }
 
   private func autoSaveForceSavedSession(session: SleepSession) {
