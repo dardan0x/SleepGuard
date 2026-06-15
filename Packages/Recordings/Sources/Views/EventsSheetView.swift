@@ -57,11 +57,12 @@ public struct EventsSheetView: View {
       }
     }
     .sheet(item: $selectedEvent) { event in
+      let episodeEvents = session.episodePlaybackEvents(for: event)
       PlayerSheetView(
         session: session,
-        sortedEvents: [event],
+        sortedEvents: episodeEvents,
         isClipSession: isClipSession,
-        initialEvent: event
+        initialEvent: episodeEvents.first ?? event
       )
     }
   }

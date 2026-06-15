@@ -40,6 +40,7 @@
 		CE2590142FAD1D8E004C0C0D /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
 		CE2591162FAE9289004C0C0D /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
 		CE25912E2FAE9E98004C0C0D /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
+		CE49CB2E2FDC0BEA00BF16A5 /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
 		CE4A51A12FB625C6005BC562 /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
 		CE587D245C122AB22F7BD248 /* sounds */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = folder; path = sounds; sourceTree = "<group>"; };
 		CEA51B4D2FBFA95A0092AF44 /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
@@ -164,6 +165,11 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		CE49CB312FDC0BEA00BF16A5 /* Products */ = {
+			isa = PBXGroup;
+			name = Products;
+			sourceTree = "<group>";
+		};
 		CE4A51A42FB625C6005BC562 /* Products */ = {
 			isa = PBXGroup;
 			name = Products;
@@ -283,6 +289,10 @@
 				{
 					ProductGroup = CE4A51A42FB625C6005BC562 /* Products */;
 					ProjectRef = CE4A51A12FB625C6005BC562 /* SleepGuard.xcodeproj */;
+				},
+				{
+					ProductGroup = CE49CB312FDC0BEA00BF16A5 /* Products */;
+					ProjectRef = CE49CB2E2FDC0BEA00BF16A5 /* SleepGuard.xcodeproj */;
 				},
 				{
 					ProductGroup = CEA51B502FBFA95A0092AF44 /* Products */;
@@ -501,6 +511,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = K25AG97Z4V;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;

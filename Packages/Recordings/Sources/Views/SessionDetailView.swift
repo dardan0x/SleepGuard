@@ -147,11 +147,12 @@ public struct SessionDetailView: View {
     .sheet(item: $activeSheet) { sheet in
       switch sheet {
       case .player(let initialEvent):
+        let episodeEvents = initialEvent.map { session.episodePlaybackEvents(for: $0) } ?? filteredEvents
         PlayerSheetView(
           session: session,
-          sortedEvents: initialEvent.map { [$0] } ?? filteredEvents,
+          sortedEvents: episodeEvents,
           isClipSession: isClipSession,
-          initialEvent: initialEvent
+          initialEvent: episodeEvents.first ?? initialEvent
         )
       case .events:
         EventsSheetView(

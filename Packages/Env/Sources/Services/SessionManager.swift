@@ -1,4 +1,5 @@
 import AudioEngine
+import AudioToolbox
 import AVFoundation
 import Env
 import Foundation
@@ -83,6 +84,7 @@ public final class SessionManager {
     private var lastUpdateTime: Date?
     private var processingTask: Task<Void, Never>?
     private var batteryCheckCounter = 0
+    private var checkpointCounter = 0
 
     // MARK: - Per-event compression tasks
 
@@ -192,6 +194,14 @@ public final class SessionManager {
                 if batteryCheckCounter >= 600 {
                     batteryCheckCounter = 0
                     checkBatteryLevel()
+                }
+                // Periodic recovery checkpoint (~every 2 min) so session-level
+                // progress and gaps survive a crash even during long stretches
+                // without events. Event-driven checkpoints handle the rest.
+                checkpointCounter += 1
+                if checkpointCounter >= 2400 {
+                    checkpointCounter = 0
+                    checkpoint()
                 }
                 try? await Task.sleep(for: .milliseconds(50))
             }
@@ -304,6 +314,7 @@ public final class SessionManager {
             try? FileManager.default.removeItem(at: url)
         }
         PendingSessionStore.shared.cleanupIfNeeded()
+        SessionCheckpointStore.shared.clear()
         completedSession = nil
     }
 
@@ -353,6 +364,7 @@ public final class SessionManager {
             }
 
             PendingSessionStore.shared.cleanupIfNeeded()
+            SessionCheckpointStore.shared.clear()
             currentSession = nil
             resetTrackingState()
         }
@@ -665,6 +677,16 @@ public final class SessionManager {
         consecutiveSpeechSamples = 0
         completedBursts.removeAll(keepingCapacity: false)
         pendingEventTasks.removeAll(keepingCapacity: false)
+        checkpointCounter = 0
+    }
+
+    /// Writes a recovery snapshot of the in-progress session to disk so it can
+    /// be reconstructed after a crash. Called after each event finalizes (and
+    /// after its clip compresses) plus periodically from the processing loop.
+    private func checkpoint() {
+        guard let session = currentSession else { return }
+        let snapshot = SessionRecoverySnapshot(from: session, checkpointDate: Date())
+        SessionCheckpointStore.shared.write(snapshot)
     }
 
     private func finalizeActiveEvent(skipMinDuration: Bool = false) {
@@ -782,6 +804,8 @@ public final class SessionManager {
                     PendingSessionStore.shared.addFile(m4aURL.lastPathComponent)
                     // Delete raw .caf
                     try? FileManager.default.removeItem(at: rawFileURL)
+                    // Re-checkpoint now that the event's clip URL is set.
+                    self.checkpoint()
                 }
             }
             pendingEventTasks.append(task)
@@ -800,6 +824,10 @@ public final class SessionManager {
         melodyResumeTime = nil
         postMelodySnoringDetected = false
         completedBursts.removeAll(keepingCapacity: false)
+
+        // Capture this event's metadata immediately; the clip URL is added by a
+        // second checkpoint once compression finishes.
+        checkpoint()
     }
 
     private func finalizeActiveSpeechEvent(endTime: Date? = nil) {
@@ -842,6 +870,8 @@ public final class SessionManager {
         activeSpeechEventDBSum = 0
         activeSpeechEventDBCount = 0
         activeSpeechEventPeakDB = 0
+
+        checkpoint()
     }
 
     private func audioFileURL(for sessionID: UUID) -> URL {
@@ -856,18 +886,52 @@ public final class SessionManager {
             .appendingPathComponent("event_\(eventID.uuidString)_session_\(sessionID.uuidString).caf")
     }
 
+    /// Lowest encode sample rate ≥ `floor` supported by `formatID`, its highest
+    /// supported rate if none reach the floor, or `nil` if the codec is
+    /// unavailable. HE-AAC rejects many rates (e.g. 16 kHz), and
+    /// `AVAssetWriterInput` raises an *uncatchable* NSException when given an
+    /// invalid rate — so the rate must come from the codec's own enumerated list.
+    private static func encodeSampleRate(for formatID: AudioFormatID, atLeast floor: Double) -> Double? {
+        var fmt = formatID
+        var size: UInt32 = 0
+        guard AudioFormatGetPropertyInfo(
+            kAudioFormatProperty_AvailableEncodeSampleRates,
+            UInt32(MemoryLayout<AudioFormatID>.size), &fmt, &size) == noErr,
+            size > 0 else { return nil }
+
+        let count = Int(size) / MemoryLayout<AudioValueRange>.size
+        var ranges = [AudioValueRange](repeating: AudioValueRange(), count: count)
+        guard AudioFormatGetProperty(
+            kAudioFormatProperty_AvailableEncodeSampleRates,
+            UInt32(MemoryLayout<AudioFormatID>.size), &fmt, &size, &ranges) == noErr else { return nil }
+
+        let standardRates = [16_000.0, 22_050, 24_000, 32_000, 44_100, 48_000]
+        var supported: [Double] = []
+        for range in ranges {
+            if range.mMinimum == range.mMaximum {
+                if range.mMinimum > 0 { supported.append(range.mMinimum) }
+            } else {
+                supported.append(contentsOf: standardRates.filter { $0 >= range.mMinimum && $0 <= range.mMaximum })
+            }
+        }
+        supported.sort()
+        guard !supported.isEmpty else { return nil }
+        return supported.first(where: { $0 >= floor }) ?? supported.last
+    }
+
     /// Compresses a raw per-event .caf file to AAC .m4a.
     ///
-    /// Encodes to mono 16 kHz HE-AAC at ~16 kbps rather than using
+    /// Targets mono HE-AAC at ~12 kbps (constrained VBR) rather than
     /// `AVAssetExportPresetAppleM4A`, which offers no bitrate/sample-rate
-    /// control and preserves the mic's native 44.1/48 kHz rate. Snore energy
-    /// is almost entirely below ~1.5 kHz, so 16 kHz (8 kHz Nyquist) is ample.
-    /// HE-AAC (SBR) stays clear at low bitrates where plain AAC-LC would smear,
-    /// and constrained-VBR spends near-zero bits on the breathing gaps between
-    /// bursts — together cutting clip size roughly in half vs. LC 24 kbps.
-    /// Falls back to AAC-LC 24 kbps if the encoder rejects HE-AAC, so a clip is
-    /// never silently dropped. The reader output forces downmix + resample to
-    /// mono 16 kHz PCM so the encoder only has to compress.
+    /// control and preserves the mic's native 44.1/48 kHz rate. HE-AAC (SBR)
+    /// stays clear at low bitrates where AAC-LC would smear, and constrained-VBR
+    /// spends near-zero bits on the breathing gaps between bursts — roughly half
+    /// the size of LC 24 kbps. Snore energy is almost entirely below ~1.5 kHz,
+    /// so a low sample rate is ample, but HE-AAC rejects 16 kHz, so the encode
+    /// rate is chosen from the codec's enumerated `AvailableEncodeSampleRates`
+    /// (lowest ≥ 16 kHz). Falls back to AAC-LC 24 kbps if HE-AAC is unavailable.
+    /// The reader downmixes + resamples to mono PCM at the chosen rate so the
+    /// encoder only has to compress.
     private func compressEventFile(from sourceURL: URL, to destinationURL: URL) async -> Bool {
         if FileManager.default.fileExists(atPath: destinationURL.path) {
             try? FileManager.default.removeItem(at: destinationURL)
@@ -879,9 +943,29 @@ public final class SessionManager {
               let writer = try? AVAssetWriter(outputURL: destinationURL, fileType: .m4a)
         else { return false }
 
+        // Only ever pass a codec-enumerated sample rate to AVAssetWriterInput;
+        // an unsupported rate raises an NSException that Swift cannot catch.
+        let targetFloor = 16_000.0
+        let formatID: AudioFormatID
+        let sampleRate: Double
+        let bitRate: Int
+        if let heRate = Self.encodeSampleRate(for: kAudioFormatMPEG4AAC_HE, atLeast: targetFloor) {
+            formatID = kAudioFormatMPEG4AAC_HE
+            sampleRate = heRate
+            bitRate = 12_000
+        } else if let lcRate = Self.encodeSampleRate(for: kAudioFormatMPEG4AAC, atLeast: targetFloor) {
+            formatID = kAudioFormatMPEG4AAC
+            sampleRate = lcRate
+            bitRate = 24_000
+        } else {
+            formatID = kAudioFormatMPEG4AAC
+            sampleRate = 44_100
+            bitRate = 24_000
+        }
+
         let readerOutput = AVAssetReaderTrackOutput(track: track, outputSettings: [
             AVFormatIDKey: kAudioFormatLinearPCM,
-            AVSampleRateKey: 16_000,
+            AVSampleRateKey: sampleRate,
             AVNumberOfChannelsKey: 1,
             AVLinearPCMBitDepthKey: 16,
             AVLinearPCMIsFloatKey: false,
@@ -891,27 +975,15 @@ public final class SessionManager {
         guard reader.canAdd(readerOutput) else { return false }
         reader.add(readerOutput)
 
-        func makeWriterInput(formatID: AudioFormatID, bitRate: Int) -> AVAssetWriterInput {
-            let input = AVAssetWriterInput(mediaType: .audio, outputSettings: [
-                AVFormatIDKey: formatID,
-                AVSampleRateKey: 16_000,
-                AVNumberOfChannelsKey: 1,
-                AVEncoderBitRateKey: bitRate,
-                AVEncoderBitRateStrategyKey: AVAudioBitRateStrategy_VariableConstrained,
-            ])
-            input.expectsMediaDataInRealTime = false
-            return input
-        }
-
-        let heInput = makeWriterInput(formatID: kAudioFormatMPEG4AAC_HE, bitRate: 16_000)
-        let writerInput: AVAssetWriterInput
-        if writer.canAdd(heInput) {
-            writerInput = heInput
-        } else {
-            let lcInput = makeWriterInput(formatID: kAudioFormatMPEG4AAC, bitRate: 24_000)
-            guard writer.canAdd(lcInput) else { return false }
-            writerInput = lcInput
-        }
+        let writerInput = AVAssetWriterInput(mediaType: .audio, outputSettings: [
+            AVFormatIDKey: formatID,
+            AVSampleRateKey: sampleRate,
+            AVNumberOfChannelsKey: 1,
+            AVEncoderBitRateKey: bitRate,
+            AVEncoderBitRateStrategyKey: AVAudioBitRateStrategy_VariableConstrained,
+        ])
+        writerInput.expectsMediaDataInRealTime = false
+        guard writer.canAdd(writerInput) else { return false }
         writer.add(writerInput)
 
         guard reader.startReading(), writer.startWriting() else { return false }

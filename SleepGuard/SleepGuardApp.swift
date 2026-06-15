@@ -80,8 +80,21 @@ struct SleepGuardApp: App {
       }
       .onAppear {
         let container = sharedModelContainer
-        Task.detached {
+
+        // Recover a session left behind by a crash / OOM / background kill:
+        // reconstruct it and surface it through the normal summary flow so the
+        // user can Save or Discard. Only clean up orphaned files when there is
+        // nothing to recover. Deferred to the next tick so the tab observers are
+        // registered before `completedSession` changes (which drives the sheet).
+        if let snapshot = SessionCheckpointStore.shared.loadIfPresent() {
+          Task { @MainActor in
+            sessionManager.completedSession = snapshot.makeSession()
+          }
+        } else {
           PendingSessionStore.shared.cleanupIfNeeded()
+        }
+
+        Task.detached {
           let context = ModelContext(container)
           await StorageLimitEnforcer.shared.enforceLimits(modelContext: context)
         }
