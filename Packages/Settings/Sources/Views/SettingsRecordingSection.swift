@@ -1,11 +1,13 @@
 import SwiftUI
 import Env
 import DesignSystem
+import Models
 
 @MainActor
 struct SettingsRecordingSection: View {
   @Environment(Theme.self) private var theme
   @Environment(UserPreferences.self) private var userPreferences
+  @Environment(AppConfig.self) private var appConfig
 
   private var sensitivityBinding: Binding<UserPreferences.DetectionSensitivity> {
     Binding(
@@ -32,18 +34,20 @@ struct SettingsRecordingSection: View {
           .pickerStyle(.segmented)
           .frame(width: 180)
         }
-        HStack(spacing: 10) {
-          SettingsIconBackground(systemName: "bubble.left.fill", color: theme.accent)
-          Text(Strings.settingsDetectSleepTalking)
-            .font(.system(size: 15))
-            .foregroundStyle(theme.textPrimary)
-          Spacer()
-          Toggle("", isOn: Binding(
-            get: { userPreferences.detectSleepTalking },
-            set: { userPreferences.detectSleepTalking = $0 }
-          ))
-          .labelsHidden()
-          .tint(theme.scoreGreen)
+        if appConfig.isEnabled(.sleepTalkingDetection) {
+          HStack(spacing: 10) {
+            SettingsIconBackground(systemName: "bubble.left.fill", color: theme.accent)
+            Text(Strings.settingsDetectSleepTalking)
+              .font(.system(size: 15))
+              .foregroundStyle(theme.textPrimary)
+            Spacer()
+            Toggle("", isOn: Binding(
+              get: { userPreferences.detectSleepTalking },
+              set: { userPreferences.detectSleepTalking = $0 }
+            ))
+            .labelsHidden()
+            .tint(theme.scoreGreen)
+          }
         }
 
         #if DEBUG

@@ -1,6 +1,7 @@
 import AudioEngine
 import DesignSystem
 import Env
+import Models
 import SwiftUI
 import UIKit
 
@@ -10,6 +11,7 @@ struct RecordingPrestartView: View {
     @Environment(SessionManager.self) private var sessionManager
     @Environment(RouterPath.self) private var routerPath
     @Environment(UserPreferences.self) private var userPreferences
+    @Environment(AppConfig.self) private var appConfig
     private let audioRecorder = AudioRecorder.shared
     
     private let delayOptions = [0, 15, 30, 45, 60]
@@ -33,17 +35,21 @@ struct RecordingPrestartView: View {
                     VStack(spacing: 12) {
                         VStack(alignment: .leading, spacing: 8) {
                             delaySection
-                            soothingMelodyRow(
-                                icon: "timer",
-                                title: Strings.soothingMelodyRecordingPrestartViewTitle,
-                                value: soothingMelodyValue,
-                                subtitle: Strings.soothingMelodyLockscreenNote
-                            ) {
-                                showSoothingMelodySheet = true
+                            if appConfig.isEnabled(.soothingMelody) {
+                                soothingMelodyRow(
+                                    icon: "timer",
+                                    title: Strings.soothingMelodyRecordingPrestartViewTitle,
+                                    value: soothingMelodyValue,
+                                    subtitle: Strings.soothingMelodyLockscreenNote
+                                ) {
+                                    showSoothingMelodySheet = true
+                                }
+                                .padding(.top, 8)
                             }
-                            .padding(.top, 8)
                         }
-                        helperText
+                        if appConfig.isEnabled(.soothingMelody) {
+                            helperText
+                        }
                     }
                     .padding(.top, DeviceSize.isCompactHeight ? 20 : 24)
                     

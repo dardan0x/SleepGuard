@@ -1,11 +1,13 @@
 import SwiftUI
 import Env
 import DesignSystem
+import Models
 
 @MainActor
 struct SettingsWatchSection: View {
   @Environment(Theme.self) private var theme
   @Environment(UserPreferences.self) private var userPreferences
+  @Environment(AppConfig.self) private var appConfig
   @Environment(WatchConnectivityManager.self) private var watchConnectivityManager
   @Environment(HealthKitSync.self) private var healthKitSync
 
@@ -28,28 +30,30 @@ struct SettingsWatchSection: View {
               .foregroundStyle(watchConnectivityManager.isWatchReachable ? theme.scoreGreen : theme.textTertiary)
           }
         }
-        HStack(spacing: 10) {
-          SettingsIconBackground(systemName: "bed.double.fill", color: theme.accent)
-          Text(Strings.settingsEnhancedSleepTracking)
-            .font(.system(size: 15))
-            .foregroundStyle(theme.textPrimary)
-          Spacer()
-          Toggle("", isOn: Binding(
-            get: { userPreferences.enhancedSleepTracking },
-            set: { newValue in
-              userPreferences.hasExplicitlySetEnhancedSleepTracking = true
-              if newValue {
-                Task {
-                  let granted = await healthKitSync.requestAuthorization()
-                  userPreferences.enhancedSleepTracking = granted
+        if appConfig.isEnabled(.enhancedSleepTracking) {
+          HStack(spacing: 10) {
+            SettingsIconBackground(systemName: "bed.double.fill", color: theme.accent)
+            Text(Strings.settingsEnhancedSleepTracking)
+              .font(.system(size: 15))
+              .foregroundStyle(theme.textPrimary)
+            Spacer()
+            Toggle("", isOn: Binding(
+              get: { userPreferences.enhancedSleepTracking },
+              set: { newValue in
+                userPreferences.hasExplicitlySetEnhancedSleepTracking = true
+                if newValue {
+                  Task {
+                    let granted = await healthKitSync.requestAuthorization()
+                    userPreferences.enhancedSleepTracking = granted
+                  }
+                } else {
+                  userPreferences.enhancedSleepTracking = false
                 }
-              } else {
-                userPreferences.enhancedSleepTracking = false
               }
-            }
-          ))
-          .labelsHidden()
-          .tint(theme.scoreGreen)
+            ))
+            .labelsHidden()
+            .tint(theme.scoreGreen)
+          }
         }
       }
       .padding(16)

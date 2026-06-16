@@ -12,6 +12,7 @@ public struct SessionDetailView: View {
 
   @Environment(Theme.self) private var theme
   @Environment(UserPreferences.self) private var userPreferences
+  @Environment(AppConfig.self) private var appConfig
   @Environment(\.modelContext) private var modelContext
   @Environment(\.dismiss) private var dismiss
 
@@ -57,7 +58,7 @@ public struct SessionDetailView: View {
 
         if shouldShowFilter {
           Picker("", selection: $selectedFilter) {
-            ForEach(EventCategoryFilter.allCases, id: \.self) { filter in
+            ForEach(availableFilters, id: \.self) { filter in
               Text(filter.displayName).tag(filter)
             }
           }
@@ -117,14 +118,16 @@ public struct SessionDetailView: View {
       }
       ToolbarItem(placement: .topBarTrailing) {
         HStack(spacing: 16) {
-          Button {
-            exportReport(session: session)
-          } label: {
-            Image(systemName: isGeneratingPDF ? "clock" : "doc.text")
-              .font(.system(size: 17))
-              .foregroundStyle(isGeneratingPDF ? theme.textTertiary : theme.accent)
+          if appConfig.isEnabled(.pdfReport) {
+            Button {
+              exportReport(session: session)
+            } label: {
+              Image(systemName: isGeneratingPDF ? "clock" : "doc.text")
+                .font(.system(size: 17))
+                .foregroundStyle(isGeneratingPDF ? theme.textTertiary : theme.accent)
+            }
+            .disabled(isGeneratingPDF)
           }
-          .disabled(isGeneratingPDF)
           if !isClipSession, session.audioFileURL != nil {
             Button {
               shareFullSession(session: session)
@@ -306,7 +309,9 @@ public struct SessionDetailView: View {
       if let session = try modelContext.fetch(descriptor).first {
         let stagesEmptyAndOld = (session.sleepStageSegments?.isEmpty == true)
           && (session.endDate?.timeIntervalSinceNow ?? 0) < -3600
-        if userPreferences.enhancedSleepTracking && (session.sleepStageSegments == nil || stagesEmptyAndOld) {
+        if appConfig.isEnabled(.enhancedSleepTracking),
+           userPreferences.enhancedSleepTracking,
+           (session.sleepStageSegments == nil || stagesEmptyAndOld) {
           let stages = await HealthKitSync.shared.fetchSleepStages(for: session)
           session.sleepStageSegments = stages.isEmpty ? [] : stages
         }
@@ -385,9 +390,23 @@ public struct SessionDetailView: View {
     }
   }
 
+  private var availableFilters: [EventCategoryFilter] {
+    if appConfig.isEnabled(.sleepTalkingDetection) {
+      return EventCategoryFilter.allCases
+    }
+    return EventCategoryFilter.allCases.filter { $0 != .sleepTalking }
+  }
+
   private var shouldShowFilter: Bool {
     guard case .loaded(_, let sortedEvents, _) = viewState else { return false }
-    return Set(sortedEvents.map(\.category)).count > 1
+    let relevantCategories = sortedEvents.compactMap { event -> EventCategoryFilter? in
+      switch event.category {
+      case .snoring: return .snoring
+      case .sleepTalking: return appConfig.isEnabled(.sleepTalkingDetection) ? .sleepTalking : nil
+      case .noise, .coughing, .other: return .noise
+      }
+    }
+    return Set(relevantCategories).count > 1
   }
 
   /// Display duration overrides for episode representatives.

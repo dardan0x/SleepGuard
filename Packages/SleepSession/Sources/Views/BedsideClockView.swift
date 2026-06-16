@@ -10,6 +10,7 @@ struct BedsideClockView: View {
     @Environment(AudioRecorder.self) private var audioRecorder
     @Environment(SoundAnalysisDetector.self) private var soundAnalysisDetector
     @Environment(SoothingMelodyPlayer.self) private var soothingMelodyPlayer
+    @Environment(AppConfig.self) private var appConfig
     @Environment(Theme.self) private var theme
     
     @State private var currentTime = Date()
@@ -70,7 +71,7 @@ struct BedsideClockView: View {
                 .padding(.bottom, 32)
             }
             .overlay(alignment: .top) {
-                if soothingMelodyPlayer.isPlaying {
+                if isMelodyEnabled && soothingMelodyPlayer.isPlaying {
                     melodyOverlay
                 }
             }
@@ -147,7 +148,7 @@ struct BedsideClockView: View {
     }
     
     private var isMelodyEnabled: Bool {
-        UserPreferences.shared.soothingMelodyMode != .never
+        appConfig.isEnabled(.soothingMelody) && UserPreferences.shared.soothingMelodyMode != .never
     }
     
     // MARK: - Melody Disclaimer
