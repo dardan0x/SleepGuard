@@ -174,8 +174,13 @@ public final class SessionManager {
         currentSpeechDetected = false
         eventsCount = 0
 
-        Task {
-            await SessionRawLogWriter.shared.start(sessionID: session.id)
+        // Raw classification log is a debug re-processing aid (~48 MB/night of
+        // JSON for a full night, nothing reads it in production yet), so it is
+        // gated behind the same flag as the full raw audio.
+        if UserPreferences.shared.preserveRawAudio {
+            Task {
+                await SessionRawLogWriter.shared.start(sessionID: session.id)
+            }
         }
 
         // Drive processAudioLevel from SessionManager so it survives background.
@@ -418,14 +423,16 @@ public final class SessionManager {
         speechDetector.update(db: db, speechConfidence: speechConfidence)
         currentSpeechDetected = speechDetector.isSpeechDetected
 
-        // Append to raw classification log for future re-processing
-        Task {
-            await SessionRawLogWriter.shared.append(
-                db: db,
-                spectralScore: spectralScore,
-                snoreConfidence: snoreConfidence,
-                state: state
-            )
+        // Append to raw classification log for future re-processing (debug only).
+        if UserPreferences.shared.preserveRawAudio {
+            Task {
+                await SessionRawLogWriter.shared.append(
+                    db: db,
+                    spectralScore: spectralScore,
+                    snoreConfidence: snoreConfidence,
+                    state: state
+                )
+            }
         }
 
         // Accumulate snoring duration
