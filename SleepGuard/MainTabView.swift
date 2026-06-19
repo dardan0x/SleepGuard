@@ -16,7 +16,6 @@ struct MainTabView: View {
     @Environment(UserPreferences.self) private var userPreferences
     @Environment(AppConfig.self) private var appConfig
     @State private var tabCoordinator = TabCoordinator()
-    @State private var showBriefing = false
     @State private var currentBriefing: Briefing?
     @Namespace private var tabAnimation
     
@@ -55,20 +54,18 @@ struct MainTabView: View {
           generateBriefingIfNeeded()
         }
         .sheet(
-          isPresented: $showBriefing,
+          item: $currentBriefing,
           onDismiss: {
             userPreferences.lastBriefingShownDate = Date()
           }
-        ) {
-          if let briefing = currentBriefing {
-            SleepBriefingView(
-              briefing: briefing,
-              onDismiss: { showBriefing = false },
-              onChipTap: { chip in
-                saveLifestyleLog(chip: chip, briefing: briefing)
-              }
-            )
-          }
+        ) { briefing in
+          SleepBriefingView(
+            briefing: briefing,
+            onDismiss: { currentBriefing = nil },
+            onChipTap: { chip in
+              saveLifestyleLog(chip: chip, briefing: briefing)
+            }
+          )
         }
     }
     
@@ -94,20 +91,18 @@ struct MainTabView: View {
           generateBriefingIfNeeded()
         }
         .sheet(
-          isPresented: $showBriefing,
+          item: $currentBriefing,
           onDismiss: {
             userPreferences.lastBriefingShownDate = Date()
           }
-        ) {
-          if let briefing = currentBriefing {
-            SleepBriefingView(
-              briefing: briefing,
-              onDismiss: { showBriefing = false },
-              onChipTap: { chip in
-                saveLifestyleLog(chip: chip, briefing: briefing)
-              }
-            )
-          }
+        ) { briefing in
+          SleepBriefingView(
+            briefing: briefing,
+            onDismiss: { currentBriefing = nil },
+            onChipTap: { chip in
+              saveLifestyleLog(chip: chip, briefing: briefing)
+            }
+          )
         }
     }
     
@@ -170,6 +165,20 @@ struct MainTabView: View {
       )
       guard let sessions = try? modelContext.fetch(sessionDescriptor), !sessions.isEmpty else { return }
 
+      let briefingSessions = sessions.compactMap { session -> BriefingSession? in
+        guard session.hasCachedScore else { return nil }
+        return BriefingSession(
+          startDate: session.startDate,
+          endDate: session.endDate,
+          sleepScore: session.cachedSleepScore,
+          snoringDuration: session.cachedSnoringDuration,
+          totalDuration: session.totalDuration
+        )
+      }
+
+      guard let latestSession = briefingSessions.first else { return }
+      guard !Calendar.current.isDateInToday(latestSession.startDate) else { return }
+
       let logDescriptor = FetchDescriptor<LifestyleLog>()
       let logs = (try? modelContext.fetch(logDescriptor)) ?? []
 
@@ -183,17 +192,6 @@ struct MainTabView: View {
         )
       } ?? BriefingProfile()
 
-      let briefingSessions = sessions.compactMap { session -> BriefingSession? in
-        guard session.hasCachedScore else { return nil }
-        return BriefingSession(
-          startDate: session.startDate,
-          endDate: session.endDate,
-          sleepScore: session.cachedSleepScore,
-          snoringDuration: session.cachedSnoringDuration,
-          totalDuration: session.totalDuration
-        )
-      }
-
       let briefing = BriefingEngine.generate(
         profile: briefingProfile,
         recentSessions: briefingSessions,
@@ -202,7 +200,6 @@ struct MainTabView: View {
       )
 
       currentBriefing = briefing
-      showBriefing = true
     }
 
     private func saveLifestyleLog(chip: String, briefing: Briefing) {

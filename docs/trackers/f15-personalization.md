@@ -36,6 +36,7 @@ Make SleepGuard feel personal: daily "Sleep Briefing" greets the user by name, r
 | F15-T14 | Unit tests for BriefingEngine | Test | Done | F15-T4 | Personalization | 2026-06-06 | 2026-06-06 |
 | F15-T15 | Build & verify | Build | Backlog | F15-T1–F15-T14 | SleepGuard | — | — |
 | F15-T16 | Feature doc + tracker finalization | Docs | Backlog | F15-T15 | — | — | — |
+| F15-T17 | Fix same-day empty briefing modal | Bugfix | Done | — | SleepGuard | 2026-06-16 | 2026-06-16 |
 
 ## Task Details
 
@@ -412,6 +413,30 @@ _(filled after task completion)_
 _(filled after task completion)_
 
 **Notes:**
+
+---
+
+### F15-T17 — Fix Same-Day Empty Briefing Modal
+
+| Field | Value |
+|-------|-------|
+| Status | Done |
+| Started | 2026-06-16 |
+| Completed | 2026-06-16 |
+
+**Acceptance Criteria:**
+- [x] Briefing only triggers when the latest cached session started on a previous calendar day
+- [x] Modal uses `sheet(item:)` so a `nil` briefing can never present an empty sheet
+- [x] `Briefing` conforms to `Identifiable` for item-based sheet presentation
+- [x] `lastBriefingShownDate` still updated on dismiss
+- [x] Build succeeds with zero errors
+
+**Prompt Used:**
+User reported an empty modal sometimes appearing when opening the app the same day a session was saved. Investigate the briefing trigger in `MainTabView`, switch to item-based sheet presentation, and gate the briefing so it only opens for sessions that started before today.
+
+**Notes:**
+- Root cause: `generateBriefingIfNeeded()` had no guard against a same-day latest session, and the `isPresented` sheet could theoretically present while `currentBriefing` was `nil`.
+- Fix: `Briefing` now has `id: UUID` and `Identifiable`; `MainTabView` uses `.sheet(item: $currentBriefing)`. The trigger skips when `briefingSessions` is empty or the latest cached session started today.
 
 ---
 
