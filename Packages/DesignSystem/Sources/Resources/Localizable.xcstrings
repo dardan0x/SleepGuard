@@ -2398,6 +2398,28 @@
         }
       }
     },
+    "tab.learn": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Learn"
+          }
+        }
+      }
+    },
+    "learn.error.noContent": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No content available."
+          }
+        }
+      }
+    },
     "thirty.seconds.soothing.melody.value": {
       "extractionState": "manual",
       "localizations": {

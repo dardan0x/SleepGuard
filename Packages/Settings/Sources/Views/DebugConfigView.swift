@@ -12,6 +12,9 @@ struct DebugConfigView: View {
   @Environment(AppConfig.self) private var appConfig
 
   @State private var tabConfigs: [TabConfig] = []
+  @State private var learnIsVisible: Bool = false
+  @State private var learnURL: String = ""
+  @State private var learnOrder: Int = 2
 
   var body: some View {
     List {
@@ -54,6 +57,22 @@ struct DebugConfigView: View {
         }
       }
 
+      Section("Learn") {
+        Toggle("Visible", isOn: $learnIsVisible)
+        TextField("URL", text: $learnURL)
+          .textInputAutocapitalization(.never)
+          .autocorrectionDisabled()
+        Stepper("Order: \(learnOrder)", value: $learnOrder, in: 0...10)
+        Button("Apply Learn Changes") {
+          let config = LearnTabConfig(
+            isVisible: learnIsVisible,
+            url: learnURL.isEmpty ? nil : learnURL,
+            order: learnOrder
+          )
+          appConfig.setLearnTabOverride(config)
+        }
+      }
+
       Section("Update Gate") {
         Text("Current app version compared against the gate. Mock values are 99.0.0.")
           .font(.footnote)
@@ -86,11 +105,22 @@ struct DebugConfigView: View {
         Button("Reset All Overrides", role: .destructive) {
           appConfig.clearOverrides()
           tabConfigs = appConfig.effectiveTabs
+          loadLearnConfig()
         }
       }
     }
     .navigationTitle("Debug Config")
-    .onAppear { tabConfigs = appConfig.effectiveTabs }
+    .onAppear {
+      tabConfigs = appConfig.effectiveTabs
+      loadLearnConfig()
+    }
+  }
+
+  private func loadLearnConfig() {
+    let config = appConfig.effectiveLearnTab
+    learnIsVisible = config.isVisible
+    learnURL = config.url ?? ""
+    learnOrder = config.order
   }
 }
 #endif

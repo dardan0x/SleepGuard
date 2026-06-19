@@ -8,6 +8,7 @@ import SleepSession
 import Statistics
 import Recordings
 import Settings
+import Learn
 
 struct MainTabView: View {
     @Environment(Theme.self) private var theme
@@ -253,6 +254,7 @@ struct MainTabView: View {
         case .statistics: StatisticsTab()
         case .media: RecordingsTab()
         case .settings: SettingsTab()
+        case .learn: LearnTab()
         }
     }
 
@@ -261,6 +263,7 @@ struct MainTabView: View {
         case .statistics: return Strings.tabStatistics
         case .media: return Strings.tabMedia
         case .settings: return Strings.tabSettings
+        case .learn: return Strings.tabLearn
         }
     }
 

@@ -28,6 +28,7 @@
 		EA3B0BCFD10182B987547C8B /* AudioEngine in Frameworks */ = {isa = PBXBuildFile; productRef = 38CD50332392049638D060DF /* AudioEngine */; };
 		ED7B3283E6D3573708241C8E /* sounds in Resources */ = {isa = PBXBuildFile; fileRef = CE587D245C122AB22F7BD248 /* sounds */; };
 		FAED5AD98781D85AB7AFA7A5 /* SleepSession in Frameworks */ = {isa = PBXBuildFile; productRef = A6305AFA32B7A77ECFB0A19F /* SleepSession */; };
+		9C2D15AA3B584C0D8BA311FD /* Learn in Frameworks */ = {isa = PBXBuildFile; productRef = 2DFC87C0B35B483EB635F03D /* Learn */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -91,6 +92,7 @@
 				CE1563FF2FDA136500A53611 /* FirebaseRemoteConfig in Frameworks */,
 				7550A233A59B33AC7BC63FA5 /* Settings in Frameworks */,
 				B7E5BB619CAC47AD866118B3 /* Personalization in Frameworks */,
+				9C2D15AA3B584C0D8BA311FD /* Learn in Frameworks */,
 				CE1563FD2FDA136500A53611 /* FirebaseMessaging in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -212,6 +214,7 @@
 				7AA654EA1F14D9C6F15AB82A /* Recordings */,
 				167C10ECFE58FBF4929EF997 /* Settings */,
 				DE0D39C8817A44AB96DFE1F5 /* Personalization */,
+				2DFC87C0B35B483EB635F03D /* Learn */,
 				CE1563F22FDA136500A53611 /* FirebaseAnalytics */,
 				CE1563F62FDA136500A53611 /* FirebaseCrashlytics */,
 				CE1563FC2FDA136500A53611 /* FirebaseMessaging */,
@@ -256,6 +259,7 @@
 				916ADDCB5CD8689275B837E3 /* XCLocalSwiftPackageReference "Packages/Recordings" */,
 				4A855F6D6797671D082B748B /* XCLocalSwiftPackageReference "Packages/Settings" */,
 				9032C9334E924D3398A48885 /* XCLocalSwiftPackageReference "Packages/Personalization" */,
+				A124231B05434FFFB1548919 /* XCLocalSwiftPackageReference "Packages/Learn" */,
 				CE1563F12FDA136500A53611 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
@@ -671,6 +675,10 @@
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/DesignSystem;
 		};
+		A124231B05434FFFB1548919 /* XCLocalSwiftPackageReference "Packages/Learn" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/Learn;
+		};
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCRemoteSwiftPackageReference section */
@@ -800,6 +808,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 7A886DCB087D86E4AC2E7336 /* XCLocalSwiftPackageReference "Packages/DesignSystem" */;
 			productName = DesignSystem;
+		};
+		2DFC87C0B35B483EB635F03D /* Learn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A124231B05434FFFB1548919 /* XCLocalSwiftPackageReference "Packages/Learn" */;
+			productName = Learn;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

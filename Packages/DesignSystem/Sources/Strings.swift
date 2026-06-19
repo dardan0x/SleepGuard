@@ -97,6 +97,7 @@ public enum Strings {
   public static var filterSleepTalking: String { String(localized: "filter.sleepTalking", bundle: .module) }
   public static var filterSnoring: String { String(localized: "filter.snoring", bundle: .module) }
   public static var lastNightStatisticsLoadedView: String { String(localized: "last.night.statistics.loaded.view", bundle: .module) }
+  public static var learnErrorNoContent: String { String(localized: "learn.error.noContent", bundle: .module) }
   public static var lightIntensityLabelEventPlayerView: String { String(localized: "light.intensity.label.event.player.view", bundle: .module) }
   public static var lightSnoreEventPlayerView: String { String(localized: "light.snore.event.player.view", bundle: .module) }
   public static var loadingAudioEventPlayerView: String { String(localized: "loading.audio.event.player.view", bundle: .module) }
@@ -399,6 +400,7 @@ public enum Strings {
   public static var stopRecordCustomMelodySheet: String { String(localized: "stop.record.custom.melody.sheet", bundle: .module) }
   public static var stopSoothingMelodyPlayer: String { String(localized: "stop.soothing.melody.player", bundle: .module) }
   public static var stringUnit: String { String(localized: "stringUnit", bundle: .module) }
+  public static var tabLearn: String { String(localized: "tab.learn", bundle: .module) }
   public static var tabMedia: String { String(localized: "tab.media", bundle: .module) }
   public static var tabSettings: String { String(localized: "tab.settings", bundle: .module) }
   public static var tabStatistics: String { String(localized: "tab.statistics", bundle: .module) }
