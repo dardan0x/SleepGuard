@@ -32,7 +32,8 @@ public struct SurveyPrompt: Sendable {
   }
 }
 
-public struct Briefing: Sendable {
+public struct Briefing: Sendable, Identifiable {
+  public let id: UUID
   public let greeting: String
   public let headline: String
   public let stats: [BriefingStat]
@@ -43,6 +44,7 @@ public struct Briefing: Sendable {
   public let profileNudge: String?
 
   public init(
+    id: UUID = UUID(),
     greeting: String,
     headline: String,
     stats: [BriefingStat],
@@ -52,6 +54,7 @@ public struct Briefing: Sendable {
     scoreContext: ScoreTrend,
     profileNudge: String? = nil
   ) {
+    self.id = id
     self.greeting = greeting
     self.headline = headline
     self.stats = stats
