@@ -23,13 +23,16 @@ public final class AppConfig {
     static let flags = "appconfig.flags"
     static let tabs = "appconfig.tabs"
     static let updateGate = "appconfig.updateGate"
+    static let learnTab = "appconfig.learnTab"
     static let debugFlags = "appconfig.debug.flags"
     static let debugTabs = "appconfig.debug.tabs"
+    static let debugLearnTab = "appconfig.debug.learnTab"
   }
 
   /// Last applied/cached remote values (raw, keyed by `FeatureFlag.rawValue`).
   private var remoteFlags: [String: Bool] = [:]
   public private(set) var tabs: [TabConfig] = TabConfig.defaults
+  private var remoteLearnTab: LearnTabConfig?
   private var remoteUpdateGate: UpdateGate = .none
 
   /// Update gate in effect, applying the debug override first.
@@ -44,6 +47,7 @@ public final class AppConfig {
   /// Local-only overrides set from the debug panel. Consulted before remote/cache.
   private var debugFlags: [String: Bool] = [:]
   private var debugTabs: [TabConfig]?
+  private var debugLearnTab: LearnTabConfig?
   private var debugUpdateGate: UpdateGate?
   #endif
 
@@ -62,6 +66,15 @@ public final class AppConfig {
     return flag.defaultValue
   }
 
+  /// Resolved Learn tab configuration, applying debug overrides first.
+  public var learnTabConfig: LearnTabConfig? {
+    #if DEBUG
+    return debugLearnTab ?? remoteLearnTab
+    #else
+    return remoteLearnTab
+    #endif
+  }
+
   /// Visible tabs in display order. Falls back to all tabs in canonical order
   /// if the resolved configuration is empty or hides everything.
   public var visibleTabsInOrder: [AppTab] {
@@ -71,16 +84,28 @@ public final class AppConfig {
     #else
     source = tabs
     #endif
-    let visible = source.filter(\.isVisible).sorted { $0.order < $1.order }.map(\.tab)
+    var visible = source.filter(\.isVisible).sorted { $0.order < $1.order }.map(\.tab)
+
+    if let learnConfig = learnTabConfig, learnConfig.isVisible {
+      let insertIndex = min(max(learnConfig.order, 0), visible.count)
+      visible.insert(.learn, at: insertIndex)
+    }
+
     return visible.isEmpty ? AppTab.allCases : visible
   }
 
   // MARK: - Apply (called by RemoteConfigLoader)
 
   /// Applies a fresh set of remote values and persists them as the cache.
-  public func apply(flags: [String: Bool], tabs: [TabConfig], updateGate: UpdateGate) {
+  public func apply(
+    flags: [String: Bool],
+    tabs: [TabConfig],
+    learnTab: LearnTabConfig?,
+    updateGate: UpdateGate
+  ) {
     self.remoteFlags = flags
     self.tabs = tabs.isEmpty ? TabConfig.defaults : tabs
+    self.remoteLearnTab = learnTab
     self.remoteUpdateGate = updateGate
     persistCache()
   }
@@ -108,6 +133,22 @@ public final class AppConfig {
     persistDebugTabs(configs)
   }
 
+  /// Current effective Learn tab configuration for editing in the debug panel.
+  public var effectiveLearnTab: LearnTabConfig {
+    debugLearnTab ?? learnTabConfig ?? LearnTabConfig(isVisible: false, url: nil)
+  }
+
+  public func setLearnTabOverride(_ config: LearnTabConfig?) {
+    debugLearnTab = config
+    if let config {
+      if let data = try? JSONEncoder().encode(config) {
+        defaults.set(data, forKey: Key.debugLearnTab)
+      }
+    } else {
+      defaults.removeObject(forKey: Key.debugLearnTab)
+    }
+  }
+
   /// Forces a specific update gate locally (for testing soft/hard prompts).
   public func setUpdateGateOverride(_ gate: UpdateGate?) {
     debugUpdateGate = gate
@@ -116,9 +157,11 @@ public final class AppConfig {
   public func clearOverrides() {
     debugFlags = [:]
     debugTabs = nil
+    debugLearnTab = nil
     debugUpdateGate = nil
     defaults.removeObject(forKey: Key.debugFlags)
     defaults.removeObject(forKey: Key.debugTabs)
+    defaults.removeObject(forKey: Key.debugLearnTab)
   }
   #endif
 
@@ -128,6 +171,9 @@ public final class AppConfig {
     defaults.set(remoteFlags, forKey: Key.flags)
     if let data = try? JSONEncoder().encode(tabs) {
       defaults.set(data, forKey: Key.tabs)
+    }
+    if let data = try? JSONEncoder().encode(remoteLearnTab) {
+      defaults.set(data, forKey: Key.learnTab)
     }
     if let data = try? JSONEncoder().encode(remoteUpdateGate) {
       defaults.set(data, forKey: Key.updateGate)
@@ -143,6 +189,10 @@ public final class AppConfig {
        !decoded.isEmpty {
       tabs = decoded
     }
+    if let data = defaults.data(forKey: Key.learnTab),
+       let decoded = try? JSONDecoder().decode(LearnTabConfig.self, from: data) {
+      remoteLearnTab = decoded
+    }
     if let data = defaults.data(forKey: Key.updateGate),
        let decoded = try? JSONDecoder().decode(UpdateGate.self, from: data) {
       remoteUpdateGate = decoded
@@ -154,6 +204,10 @@ public final class AppConfig {
     if let data = defaults.data(forKey: Key.debugTabs),
        let decoded = try? JSONDecoder().decode([TabConfig].self, from: data) {
       debugTabs = decoded
+    }
+    if let data = defaults.data(forKey: Key.debugLearnTab),
+       let decoded = try? JSONDecoder().decode(LearnTabConfig.self, from: data) {
+      debugLearnTab = decoded
     }
     #endif
   }

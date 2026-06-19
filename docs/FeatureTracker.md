@@ -2,7 +2,7 @@
 
 > Auto-updated by the AI after every task. This is the local source of truth.
 
-Last updated: 2026-06-16
+Last updated: 2026-06-18
 
 ---
 
@@ -33,19 +33,19 @@ Last updated: 2026-06-16
 | Backlog | 2 |
 | Blocked | 0 |
 | — | — |
-| Features (V4) | 1 |
-| Done | 0 |
-| In Progress | 1 |
+| Features (V4) | 2 |
+| Done | 1 |
+| In Progress | 0 |
 | Backlog | 0 |
 | Blocked | 0 |
 | — | — |
-| Total Tasks | 87 |
-| Tasks Done | 73 |
+| Total Tasks | 89 |
+| Tasks Done | 75 |
 | Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
 | Tasks Backlog | 14 |
 | — | — |
-| **Progress** | **83%** |
+| **Progress** | **84%** |
 
 ## Features
 
@@ -66,6 +66,7 @@ Last updated: 2026-06-16
 | F13 | CloudKit Sync | P2 | Backlog | 0/3 | ░░░░░░░░░░ 0% | [tracker](trackers/f13-cloudkit-sync.md) |
 | F14 | SleepGuard Rebrand & Multi-Sound | P0 | Done | 27/27 | ██████████ 100% | [tracker](trackers/f14-sleepguard-rebrand.md) |
 | F15 | Personalization & Sleep Briefing | P1 | Done | 16/16 | ██████████ 100% | [tracker](trackers/f15-personalization.md) |
+| F16 | Learn Tab | P2 | Done | 1/1 | ██████████ 100% | [tracker](trackers/f16-learn-tab.md) |
 
 ## Activity Log
 
@@ -73,6 +74,8 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-06-18 | F16-T1 Learn tab | Completed | New `Packages/Learn` feature package; `feature_learn` Remote Config key drives visibility, URL, and order; `WKWebView` opens links externally via `UIApplication.shared.open`. `tab.learn` localized; debug override added. Build succeeds |
+| 2026-06-16 | Fix same-day empty briefing modal | Bugfix | `MainTabView` now uses `.sheet(item: $currentBriefing)` after making `Briefing` `Identifiable`; `generateBriefingIfNeeded()` skips when the latest cached session started today, preventing same-day empty/weird briefings. Build succeeds |
 | 2026-06-16 | Remote-config feature gating | Completed | Wired `soothingMelody`, `sleepBriefing`, `pdfReport`, `enhancedSleepTracking`, and `sleepTalkingDetection` feature flags to UI visibility: `RecordingPrestartView` + `BedsideClockView` melody row/overlay; `SessionDetailView` PDF export button, sleep-stage fetch, and event-filter sleep-talking option; `SettingsProfileSection` briefing toggle; `SettingsRecordingSection` sleep-talking toggle; `SettingsWatchSection` enhanced-tracking toggle. Build succeeds |
 | 2026-06-06 | Session 73 | Completed | F15-T14: 23 BriefingEngine unit tests; F15-T15: build verify; F15-T16: feature doc. F15 complete (16/16). Roadmap V4 done |
 | 2026-06-06 | F15-T11 | Completed | App-level daily briefing trigger: `generateBriefingIfNeeded()` in `MainTabView` (both iOS 26+ and custom tab paths), `fullScreenCover` presenting `SleepBriefingView`, gate checks `briefingEnabled`, `lastBriefingShownDate` not today, `hasAnySession`. `onDismiss` saves shown date. Chip tap persists `LifestyleLog`. Fixed `Settings/Package.swift` to declare `Personalization` dep removing build warning. Build succeeds |

@@ -19,6 +19,7 @@ below, then **Publish changes** (nothing applies until published).
 |-----|------|---------|---------|
 | `feature_flags` | JSON | see below | Per-feature on/off switches |
 | `tabs` | JSON | see below | Tab visibility + order |
+| `feature_learn` | JSON | `{"visibility": false}` | Learn tab visibility, URL, and order |
 | `minimum_version` | String | `0.0.0` | Hard-update threshold (block below this) |
 | `recommended_version` | String | `0.0.0` | Soft-update threshold (prompt below this) |
 
@@ -60,6 +61,27 @@ empty or hides everything, the app falls back to all tabs in canonical order.
 ]
 ```
 
+### `feature_learn`
+
+A JSON object (or plain boolean). When `visibility` is `true`, the Learn tab appears
+at the configured `order` and loads `url` in a web view. `order` is optional and
+defaults to `2` (after Media, before Settings). If `url` is missing, the tab shows
+an empty state.
+
+```json
+{
+  "visibility": true,
+  "url": "https://example.com/learn",
+  "order": 2
+}
+```
+
+A plain boolean is also accepted:
+
+```json
+true
+```
+
 ### `minimum_version` / `recommended_version`
 
 Dot-separated numeric versions compared against the app's `CFBundleShortVersionString`.
@@ -74,6 +96,7 @@ Keep both at `0.0.0` so nobody is gated until you intentionally raise them.
 - **Disable a feature:** set its value in `feature_flags` to `false` → Publish. Its UI
   disappears on next foreground (gated entry points only — see code map below).
 - **Hide / reorder a tab:** edit `tabs` (`isVisible`, `order`) → Publish.
+- **Show / hide Learn tab:** set `feature_learn.visibility` and `feature_learn.url` → Publish.
 - **Force update:** raise `minimum_version` above the shipped build → Publish.
 - **Recommend update:** raise only `recommended_version` → Publish.
 - **Staged rollout / targeting:** add a **condition** on a parameter (app version, OS,
@@ -87,8 +110,9 @@ foreground) and `3600` (1h) in release. Refresh runs on launch and on every
 
 ## Local debug overrides
 
-DEBUG builds expose **Settings → Debug Config** to flip flags and tab config locally
-without the console. Overrides persist and take precedence until "Reset All Overrides".
+DEBUG builds expose **Settings → Debug Config** to flip flags, tab config, and Learn
+tab config locally without the console. Overrides persist and take precedence until
+"Reset All Overrides".
 
 ## Feature-flag entry-point map
 

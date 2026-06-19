@@ -30,6 +30,7 @@ public enum AppTab: String, CaseIterable, Sendable, Codable {
   case statistics
   case media
   case settings
+  case learn
 
   /// SF Symbol used in the tab bar.
   public var iconName: String {
@@ -37,6 +38,7 @@ public enum AppTab: String, CaseIterable, Sendable, Codable {
     case .statistics: return "chart.bar.fill"
     case .media: return "waveform"
     case .settings: return "gearshape"
+    case .learn: return "book.fill"
     }
   }
 }
@@ -58,6 +60,25 @@ public struct TabConfig: Sendable, Codable, Equatable {
     AppTab.allCases.enumerated().map { index, tab in
       TabConfig(tab: tab, isVisible: true, order: index)
     }
+  }
+}
+
+/// Visibility, URL, and ordering for the Learn tab, driven by Remote Config.
+public struct LearnTabConfig: Sendable, Codable, Equatable {
+  public let isVisible: Bool
+  public let url: String?
+  public let order: Int
+
+  public init(isVisible: Bool, url: String?, order: Int = 2) {
+    self.isVisible = isVisible
+    self.url = url
+    self.order = order
+  }
+
+  private enum CodingKeys: String, CodingKey {
+    case isVisible = "visibility"
+    case url
+    case order
   }
 }
 
