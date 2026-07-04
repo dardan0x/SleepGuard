@@ -277,14 +277,22 @@ public final class SleepSession {
         if hasCachedScore {
             return cachedSleepScore
         }
-        // Existing computation continues below...
+        return sleepScore(using: .default)
+    }
+
+    /// Computes the sleep score using the supplied configuration.
+    ///
+    /// This method always reads events and recomputes; it does not use the
+    /// cached score. Callers that iterate many sessions should use the
+    /// `sleepScore` property instead to avoid SwiftData relationship faulting.
+    public func sleepScore(using config: SleepScoreConfig) -> Int {
         let events = self.events ?? []
         let snoringEvents = events.filter { $0.category == .snoring }
         let totalDuration = self.totalDuration
         let eventCount = displayableSnoringEpisodes.count
 
         guard totalDuration > 0 else {
-            return 100
+            return config.maxScore
         }
 
         var detectedSnoringDuration: TimeInterval = 0
@@ -311,30 +319,33 @@ public final class SleepSession {
         }
 
         let sessionDuration = totalDuration
-        guard sessionDuration > 0 else { return 100 }
 
         // Total snoring duration includes both detected events and recording gaps.
         // Gaps occur when the soothing melody plays after snoring detection;
         // that time counts as snoring since the melody only triggers on confirmed samples.
         let totalSnoringDuration = snoringDuration
         let snoringPercentage = (totalSnoringDuration / sessionDuration) * 100
-        let snoringPenalty = min(Int(snoringPercentage * 0.7), 70)
-        let eventsPenalty = min(Int(Double(eventCount) / (sessionDuration / 3600) * 2), 20)
+        let snoringPenalty = min(Int(snoringPercentage * config.snoringMultiplier), config.snoringPenaltyCap)
+        let eventsPenalty = min(Int(Double(eventCount) / (sessionDuration / 3600) * config.eventsPerHourMultiplier), config.eventsPenaltyCap)
 
         // Intensity ratios use only detected snoring as the denominator because we have no
         // spectral data during gaps. This conservatively reduces the intensity penalty.
         let lightRatio = detectedSnoringDuration > 0 ? lightDuration / detectedSnoringDuration : 0
         let loudRatio = detectedSnoringDuration > 0 ? loudDuration / detectedSnoringDuration : 0
         let epicRatio = detectedSnoringDuration > 0 ? epicDuration / detectedSnoringDuration : 0
-        let intensityPenalty = min(Int(lightRatio * 10 + loudRatio * 20 + epicRatio * 30), 30)
+        let intensityPenalty = min(Int(
+            lightRatio * config.lightIntensityMultiplier
+                + loudRatio * config.loudIntensityMultiplier
+                + epicRatio * config.epicIntensityMultiplier
+        ), config.intensityPenaltyCap)
 
         // Sleep talking penalty — only applies when sleep talking events exist.
         // Weighted ~half of snoring: less severe but still a genuine fragmentation event.
         let sleepTalkingPenalty: Int
         if sleepTalkingEvents > 0 {
-            let talkingPctPenalty = sleepTalkingPercentage * 0.35
-            let talkingFreqPenalty = sleepTalkingEventsPerHour * 0.8
-            sleepTalkingPenalty = min(Int(talkingPctPenalty + talkingFreqPenalty), 15)
+            let talkingPctPenalty = sleepTalkingPercentage * config.sleepTalkingPercentageMultiplier
+            let talkingFreqPenalty = sleepTalkingEventsPerHour * config.sleepTalkingFrequencyMultiplier
+            sleepTalkingPenalty = min(Int(talkingPctPenalty + talkingFreqPenalty), config.sleepTalkingPenaltyCap)
         } else {
             sleepTalkingPenalty = 0
         }
@@ -343,15 +354,28 @@ public final class SleepSession {
         // Evidence-based thresholds: deep ≥15%, REM ≥18%, awake ≤8%.
         let stagePenalty: Int
         if let stats = stageStats {
-            let deepDeficit = max(0, (15 - stats.deepPct) * 0.6)
-            let remDeficit = max(0, (18 - stats.remPct) * 0.4)
-            let awakeExcess = max(0, (stats.awakePct - 8) * 1.0)
-            stagePenalty = min(Int(deepDeficit + remDeficit + awakeExcess), 15)
+            let deepDeficit = max(0, (config.deepPctTarget - stats.deepPct) * config.deepDeficitMultiplier)
+            let remDeficit = max(0, (config.remPctTarget - stats.remPct) * config.remDeficitMultiplier)
+            let awakeExcess = max(0, (stats.awakePct - config.awakePctTarget) * config.awakeExcessMultiplier)
+            stagePenalty = min(Int(deepDeficit + remDeficit + awakeExcess), config.stagePenaltyCap)
         } else {
             stagePenalty = 0
         }
 
-        return max(0, 100 - snoringPenalty - eventsPenalty - intensityPenalty
-                   - sleepTalkingPenalty - stagePenalty)
+        // Sleep duration penalty — very short or very long nights both reduce quality.
+        let sleepHours = totalDuration / 3600
+        let shortSleepPenalty: Int
+        if sleepHours >= config.shortSleepMinimumSessionHours {
+            let shortSleepDeficit = max(0, config.shortSleepThresholdHours - sleepHours)
+            shortSleepPenalty = min(Int(shortSleepDeficit * config.shortSleepMultiplier), config.shortSleepPenaltyCap)
+        } else {
+            shortSleepPenalty = 0
+        }
+
+        let longSleepExcess = max(0, sleepHours - config.longSleepThresholdHours)
+        let longSleepPenalty = min(Int(longSleepExcess * config.longSleepMultiplier), config.longSleepPenaltyCap)
+
+        return max(config.minScore, config.maxScore - snoringPenalty - eventsPenalty - intensityPenalty
+                   - sleepTalkingPenalty - stagePenalty - shortSleepPenalty - longSleepPenalty)
     }
 }

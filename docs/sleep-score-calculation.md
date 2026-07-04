@@ -15,10 +15,12 @@ score = max(0, 100
     - eventsPenalty
     - intensityPenalty
     - sleepTalkingPenalty
-    - stagePenalty)
+    - stagePenalty
+    - shortSleepPenalty
+    - longSleepPenalty)
 ```
 
-Each penalty is capped independently, so the theoretical maximum total deduction is `150`, but the score floors at `0`.
+Each penalty is capped independently, so the theoretical maximum total deduction is `185`, but the score floors at `0`.
 
 ---
 
@@ -41,26 +43,26 @@ Each penalty is capped independently, so the theoretical maximum total deduction
 
 ```swift
 let snoringPercentage = (snoringDuration / totalDuration) * 100
-snoringPenalty = min(Int(snoringPercentage * 0.7), 70)
+snoringPenalty = min(Int(snoringPercentage * 0.85), 75)
 ```
 
 | Snoring % of session | Penalty |
 |---------------------|---------|
-| 10% | 7 |
-| 30% | 21 |
-| 50% | 35 |
-| 100% | 70 (cap) |
+| 10% | 8 |
+| 30% | 25 |
+| 50% | 42 |
+| 75%+ | 75 (cap) |
 
 ### 3.2 Events-per-hour penalty
 
 ```swift
-eventsPenalty = min(Int(Double(eventCount) / (totalDuration / 3600) * 2), 20)
+eventsPenalty = min(Int(Double(eventCount) / (totalDuration / 3600) * 2.5), 25)
 ```
 
 | Events / hour | Penalty |
 |---------------|---------|
-| 5 | 10 |
-| 10 | 20 (cap) |
+| 5 | 12 |
+| 10 | 25 (cap) |
 
 ### 3.3 Intensity penalty
 
@@ -71,7 +73,7 @@ lightRatio  = lightDuration  / detectedSnoringDuration
 loudRatio   = loudDuration   / detectedSnoringDuration
 epicRatio   = epicDuration   / detectedSnoringDuration
 
-intensityPenalty = min(Int(lightRatio * 10 + loudRatio * 20 + epicRatio * 30), 30)
+intensityPenalty = min(Int(lightRatio * 10 + loudRatio * 20 + epicRatio * 40), 30)
 ```
 
 | Intensity mix | Penalty |
@@ -114,6 +116,7 @@ stagePenalty = min(Int(deepDeficit + remDeficit + awakeExcess), 15)
 | No Watch stage data | `stagePenalty` is `0` |
 | `hasCachedScore == true` | Returns `cachedSleepScore` without recomputation |
 | Gap-only inferred snoring | Uses `countableGapDuration / totalDuration` for the snoring penalty |
+| Session < 3 hours | Short-sleep penalty is skipped to avoid punishing naps/test sessions |
 
 ---
 
@@ -127,13 +130,15 @@ A 8-hour session:
 - Watch stages: deep 12%, REM 15%, awake 6%
 
 ```
-snoringPenalty  = min(20 * 0.7, 70)              = 14
-eventsPenalty   = min(4 / 8 * 2, 20)             = 1
+snoringPenalty  = min(20 * 0.85, 75)             = 17
+eventsPenalty   = min(4 / 8 * 2.5, 25)           = 1
 intensityPenalty= min(0.5*10 + 0.5*20, 30)       = 15
 sleepTalkPenalty= min((10/480)*100*0.35 + 0.75*0.8, 15) ≈ 1
 stagePenalty    = min((15-12)*0.6 + (18-15)*0.4 + 0, 15) = 3
+shortSleepPenalty = 0  // 8 h is within 6–9 h window
+longSleepPenalty  = 0
 
-score = 100 - 14 - 1 - 15 - 1 - 3 = 66
+score = 100 - 17 - 1 - 15 - 1 - 3 = 63
 ```
 
 ---
@@ -144,3 +149,44 @@ score = 100 - 14 - 1 - 15 - 1 - 3 = 66
 - Recording/melody gaps count toward snoring only when `RecordingGap.snoringResumed == true`.
 - `SleepSession.snoringDuration` is the canonical snoring duration used by the score.
 - For the live detection pipeline that produces these events, see `docs/snore-detection-algorithm.md`.
+
+---
+
+## 7. Sleep Duration Penalty
+
+Very short or very long nights both reduce sleep quality:
+
+| Scenario | Calculation | Cap |
+|----------|-------------|-----|
+| Scenario | Calculation | Cap |
+|----------|-------------|-----|
+| **Short sleep** (< 6 h, session ≥ 3 h) | `min(Int((6 - sleepHours) * 2.0), 8)` | 8 |
+| **Long sleep** (> 9 h) | `min(Int((sleepHours - 9) * 1.0), 5)` | 5 |
+| **Session < 3 h** | penalty skipped | 0 |
+
+This prevents a 4-hour nap with light snoring from scoring better than a healthy 8-hour night with moderate snoring, while avoiding a large penalty for short test sessions or naps.
+
+---
+
+## 8. Remote Config
+
+All coefficients, caps, thresholds, and duration penalties can be tuned from Firebase Remote Config via the `sleep_score_config` parameter (see `docs/remote-config-schema.md`).
+
+### How it works
+
+- `SleepScoreConfig` lives in the `Models` package with baked-in defaults.
+- `AppConfig` resolves the current config from remote/cache/default and exposes it to the UI.
+- `SleepSession.sleepScore(using: SleepScoreConfig)` recomputes the score using the supplied config.
+- The `sleepScore` property uses the cached score if available, otherwise computes with `.default`.
+
+### Cache behavior
+
+Because `SleepSession.events` can fault and crash when accessed across many sessions, list/statistics views show `cachedSleepScore`. That cache is refreshed in three places where events are guaranteed to be loaded:
+
+1. `SessionSummaryView.saveSession()`
+2. `SessionDetailView.loadSession()`
+3. `StatisticsTab.autoSaveForceSavedSession()`
+
+Each refresh computes with `appConfig.sleepScoreConfig`, so new sessions and opened sessions use the current remote config. Sessions shown only in lists keep showing the score cached the last time one of the above actions ran.
+
+If you want every historical session to update the moment remote config changes, you need a bulk recalculation pass; that is intentionally avoided because it risks the same faulting crashes the cache prevents.

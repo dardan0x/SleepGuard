@@ -20,6 +20,7 @@ below, then **Publish changes** (nothing applies until published).
 | `feature_flags` | JSON | see below | Per-feature on/off switches |
 | `tabs` | JSON | see below | Tab visibility + order |
 | `feature_learn` | JSON | `{"visibility": false}` | Learn tab visibility, URL, and order |
+| `sleep_score_config` | JSON | see below | Sleep score formula coefficients and caps |
 | `minimum_version` | String | `0.0.0` | Hard-update threshold (block below this) |
 | `recommended_version` | String | `0.0.0` | Soft-update threshold (prompt below this) |
 
@@ -82,6 +83,52 @@ A plain boolean is also accepted:
 true
 ```
 
+### `sleep_score_config`
+
+A single JSON object containing every tunable value in the sleep score formula. Missing keys fall back to their baked-in default, so you only need to include the values you want to change.
+
+```json
+{
+  "awakeExcessMultiplier": 1.0,
+  "awakePctTarget": 8.0,
+  "deepDeficitMultiplier": 0.6,
+  "deepPctTarget": 15.0,
+  "epicIntensityMultiplier": 40.0,
+  "eventsPenaltyCap": 25,
+  "eventsPerHourMultiplier": 2.5,
+  "intensityPenaltyCap": 30,
+  "lightIntensityMultiplier": 10.0,
+  "longSleepMultiplier": 1.0,
+  "longSleepPenaltyCap": 5,
+  "longSleepThresholdHours": 9.0,
+  "loudIntensityMultiplier": 20.0,
+  "maxScore": 100,
+  "minScore": 0,
+  "remDeficitMultiplier": 0.4,
+  "remPctTarget": 18.0,
+  "shortSleepMinimumSessionHours": 3.0,
+  "shortSleepMultiplier": 2.0,
+  "shortSleepPenaltyCap": 8,
+  "shortSleepThresholdHours": 6.0,
+  "sleepTalkingFrequencyMultiplier": 0.8,
+  "sleepTalkingPenaltyCap": 15,
+  "sleepTalkingPercentageMultiplier": 0.35,
+  "snoringMultiplier": 0.85,
+  "snoringPenaltyCap": 75,
+  "stagePenaltyCap": 15
+}
+```
+
+**Common tweaks:**
+
+| Goal | Change |
+|------|--------|
+| Make snoring punish more/less | Raise/lower `snoringMultiplier` |
+| Cap how much snoring can deduct | Adjust `snoringPenaltyCap` |
+| Make loud/epic snores count more | Raise `loudIntensityMultiplier` / `epicIntensityMultiplier` |
+| Tighten/relax stage thresholds | Adjust `deepPctTarget`, `remPctTarget`, `awakePctTarget` |
+| Adjust short/long sleep thresholds | Change `shortSleepThresholdHours` / `longSleepThresholdHours` |
+
 ### `minimum_version` / `recommended_version`
 
 Dot-separated numeric versions compared against the app's `CFBundleShortVersionString`.
@@ -97,6 +144,7 @@ Keep both at `0.0.0` so nobody is gated until you intentionally raise them.
   disappears on next foreground (gated entry points only — see code map below).
 - **Hide / reorder a tab:** edit `tabs` (`isVisible`, `order`) → Publish.
 - **Show / hide Learn tab:** set `feature_learn.visibility` and `feature_learn.url` → Publish.
+- **Tune sleep score formula:** edit `sleep_score_config` → Publish. New sessions and sessions opened in detail use the new formula immediately. List/statistics views show the cached score until the session is re-saved or reopened.
 - **Force update:** raise `minimum_version` above the shipped build → Publish.
 - **Recommend update:** raise only `recommended_version` → Publish.
 - **Staged rollout / targeting:** add a **condition** on a parameter (app version, OS,
