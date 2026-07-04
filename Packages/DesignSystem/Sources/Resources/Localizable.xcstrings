@@ -4440,6 +4440,83 @@
           }
         }
       }
+    },
+    "briefing.stat.lastTime": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last Time"
+          }
+        }
+      }
+    },
+    "briefing.headline.quiet.lastTime": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last time you slept %@. A quiet night — nice work."
+          }
+        }
+      }
+    },
+    "briefing.headline.normal.lastTime": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last time you slept %@ with %@ min of snoring. Score: %@."
+          }
+        }
+      }
+    },
+    "briefing.headline.weeklySnoring.lastTime": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ min snoring last time vs %@ min weekly avg."
+          }
+        }
+      }
+    },
+    "briefing.headline.weeklyScore.lastTime": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Score %@ last time. Weekly average: %@."
+          }
+        }
+      }
+    },
+    "briefing.headline.weeklyDuration.lastTime": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slept %@ last time vs %@ weekly average."
+          }
+        }
+      }
+    },
+    "last.time.statistics.loaded.view": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LAST TIME"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

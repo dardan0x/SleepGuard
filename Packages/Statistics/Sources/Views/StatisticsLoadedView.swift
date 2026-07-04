@@ -28,7 +28,7 @@ struct StatisticsLoadedView: View {
                     SleepScoreGauge(score: dayScore, theme: theme, size: 120)
                     
                     VStack(spacing: 4) {
-                        Text(daySessionCount > 1 ? "\(daySessionCount) \(Strings.recordingsStatisticsLoadedView)" : "\(Strings.lastNightStatisticsLoadedView)")
+                        Text(summaryLabel)
                             .font(.system(size: 12, weight: .semibold))
                             .foregroundStyle(theme.textTertiary)
                             .tracking(1)
@@ -62,6 +62,19 @@ struct StatisticsLoadedView: View {
         .toolbar(.hidden, for: .navigationBar)
     }
     
+    private var summaryLabel: String {
+        if daySessionCount > 1 {
+            return "\(daySessionCount) \(Strings.recordingsStatisticsLoadedView)"
+        }
+        return isLastNight
+            ? Strings.lastNightStatisticsLoadedView
+            : Strings.lastTimeStatisticsLoadedView
+    }
+
+    private var isLastNight: Bool {
+        Calendar.current.isDateInYesterday(session.startDate)
+    }
+
     private var dateString: String {
         DateFormatters.monthDay.string(from: session.startDate)
     }

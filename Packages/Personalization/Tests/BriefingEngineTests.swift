@@ -225,6 +225,32 @@ struct BriefingEngineTests {
     #expect(!briefing.headline.contains("quiet"))
   }
 
+  @Test func headlineSaysLastNight_whenLatestSessionIsYesterday() {
+    let now = date(hour: 8)
+    let session = makeSession(startDate: date(hour: 23, dayOffset: -1), durationHours: 8)
+    let briefing = BriefingEngine.generate(
+      profile: nil,
+      recentSessions: [session],
+      lifestyleLogs: [],
+      now: now
+    )
+
+    #expect(briefing.headline.contains("Last night"))
+  }
+
+  @Test func headlineSaysLastTime_whenLatestSessionIsOlder() {
+    let now = date(hour: 8)
+    let session = makeSession(startDate: date(hour: 23, dayOffset: -3), durationHours: 8)
+    let briefing = BriefingEngine.generate(
+      profile: nil,
+      recentSessions: [session],
+      lifestyleLogs: [],
+      now: now
+    )
+
+    #expect(briefing.headline.contains("Last time"))
+  }
+
   // MARK: - Stats
 
   @Test func statsIncludeSleepSnoringScore() {

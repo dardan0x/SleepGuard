@@ -71,6 +71,17 @@ briefing.survey.negativeTitle = Tougher night. Anything unusual yesterday?
 briefing.stat.sleep = Sleep
 briefing.stat.snoring = Snoring
 briefing.stat.score = Score
+briefing.stat.lastTime = Last Time
+
+# Last-time variants for when the latest session is not from last night
+briefing.headline.quiet.lastTime = Last time you slept %@. A quiet night — nice work.
+briefing.headline.normal.lastTime = Last time you slept %@ with %@ min of snoring. Score: %@.
+briefing.headline.weeklySnoring.lastTime = %@ min snoring last time vs %@ min weekly avg.
+briefing.headline.weeklyScore.lastTime = Score %@ last time. Weekly average: %@.
+briefing.headline.weeklyDuration.lastTime = Slept %@ last time vs %@ weekly average.
+
+# Statistics loaded view last-time label
+last.time.statistics.loaded.view = LAST TIME
 
 # Profile
 profile.prompt.title = Make this yours
