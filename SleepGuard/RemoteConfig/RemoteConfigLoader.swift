@@ -59,7 +59,12 @@ final class RemoteConfigLoader {
       minimumVersion: remoteConfig[Key.minimumVersion].stringValue,
       recommendedVersion: remoteConfig[Key.recommendedVersion].stringValue
     )
-    AppConfig.shared.apply(flags: flags, tabs: tabs, learnTab: learnTab, updateGate: gate)
+    AppConfig.shared.apply(
+      flags: flags,
+      tabs: tabs,
+      learnTab: learnTab,
+      updateGate: gate
+    )
   }
 
   // MARK: - Decoding

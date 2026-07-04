@@ -17,6 +17,7 @@ public struct SessionSummaryView: View {
   @Environment(SessionManager.self) private var sessionManager
   @Environment(HealthKitSync.self) private var healthKitSync
   @Environment(UserPreferences.self) private var userPreferences
+  @Environment(AppConfig.self) private var appConfig
   @Environment(\.dismiss) private var dismiss
   @Environment(\.modelContext) private var modelContext
 
@@ -70,7 +71,7 @@ public struct SessionSummaryView: View {
   }
 
   private var scoreSection: some View {
-    SleepScoreGauge(score: session.sleepScore, theme: theme, size: 160)
+    SleepScoreGauge(score: session.sleepScore(using: appConfig.sleepScoreConfig), theme: theme, size: 160)
   }
 
   private var statsGrid: some View {
@@ -202,8 +203,10 @@ public struct SessionSummaryView: View {
     }
     modelContext.insert(session)
 
-    // Cache AFTER insertion so SwiftData tracks the mutations
-    session.cachedSleepScore = session.sleepScore
+    // Cache AFTER insertion so SwiftData tracks the mutations.
+    // Use the current remote config so the cached score reflects the
+    // active formula if the session is later shown in a list view.
+    session.cachedSleepScore = session.sleepScore(using: appConfig.sleepScoreConfig)
     session.cachedSnoringDuration = session.snoringDuration
     session.hasCachedScore = true
 

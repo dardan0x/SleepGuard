@@ -48,7 +48,7 @@ public struct SessionDetailView: View {
   private func loadedBody(session: SleepSession, isClipSession: Bool) -> some View {
     ScrollView {
       VStack(spacing: 24) {
-        SessionDetailHeaderView(session: session, score: session.sleepScore)
+        SessionDetailHeaderView(session: session, score: session.sleepScore(using: appConfig.sleepScoreConfig))
 
         SessionDetailTimelineView(session: session)
 
@@ -317,10 +317,10 @@ public struct SessionDetailView: View {
         }
 
         // Recalculate cached score and snoring duration to pick up scoring
-        // formula changes (e.g. episode merging, gap inclusion) while the
-        // session relationship is hot.
+        // formula changes (e.g. episode merging, gap inclusion, remote config
+        // penalty updates) while the session relationship is hot.
         session.hasCachedScore = false
-        session.cachedSleepScore = session.sleepScore
+        session.cachedSleepScore = session.sleepScore(using: appConfig.sleepScoreConfig)
         session.cachedSnoringDuration = session.snoringDuration
         session.hasCachedScore = true
         try modelContext.save()

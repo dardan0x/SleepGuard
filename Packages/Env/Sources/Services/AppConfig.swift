@@ -27,6 +27,7 @@ public final class AppConfig {
     static let debugFlags = "appconfig.debug.flags"
     static let debugTabs = "appconfig.debug.tabs"
     static let debugLearnTab = "appconfig.debug.learnTab"
+    static let debugSleepScoreConfig = "appconfig.debug.sleepScoreConfig"
   }
 
   /// Last applied/cached remote values (raw, keyed by `FeatureFlag.rawValue`).
@@ -43,12 +44,23 @@ public final class AppConfig {
     return remoteUpdateGate
   }
 
+  /// Resolved sleep score configuration.
+  /// In DEBUG builds a local override can be set for testing; release builds always
+  /// use the baked-in `SleepScoreConfig.default`.
+  public var sleepScoreConfig: SleepScoreConfig {
+    #if DEBUG
+    if let debugSleepScoreConfig { return debugSleepScoreConfig }
+    #endif
+    return .default
+  }
+
   #if DEBUG
   /// Local-only overrides set from the debug panel. Consulted before remote/cache.
   private var debugFlags: [String: Bool] = [:]
   private var debugTabs: [TabConfig]?
   private var debugLearnTab: LearnTabConfig?
   private var debugUpdateGate: UpdateGate?
+  private var debugSleepScoreConfig: SleepScoreConfig?
   #endif
 
   private init() {
@@ -154,14 +166,28 @@ public final class AppConfig {
     debugUpdateGate = gate
   }
 
+  /// Forces a specific sleep score config locally (for testing scoring changes).
+  public func setSleepScoreConfigOverride(_ config: SleepScoreConfig?) {
+    debugSleepScoreConfig = config
+    if let config {
+      if let data = try? JSONEncoder().encode(config) {
+        defaults.set(data, forKey: Key.debugSleepScoreConfig)
+      }
+    } else {
+      defaults.removeObject(forKey: Key.debugSleepScoreConfig)
+    }
+  }
+
   public func clearOverrides() {
     debugFlags = [:]
     debugTabs = nil
     debugLearnTab = nil
     debugUpdateGate = nil
+    debugSleepScoreConfig = nil
     defaults.removeObject(forKey: Key.debugFlags)
     defaults.removeObject(forKey: Key.debugTabs)
     defaults.removeObject(forKey: Key.debugLearnTab)
+    defaults.removeObject(forKey: Key.debugSleepScoreConfig)
   }
   #endif
 
@@ -208,6 +234,10 @@ public final class AppConfig {
     if let data = defaults.data(forKey: Key.debugLearnTab),
        let decoded = try? JSONDecoder().decode(LearnTabConfig.self, from: data) {
       debugLearnTab = decoded
+    }
+    if let data = defaults.data(forKey: Key.debugSleepScoreConfig),
+       let decoded = try? JSONDecoder().decode(SleepScoreConfig.self, from: data) {
+      debugSleepScoreConfig = decoded
     }
     #endif
   }
