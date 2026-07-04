@@ -24,7 +24,6 @@ public final class AppConfig {
     static let tabs = "appconfig.tabs"
     static let updateGate = "appconfig.updateGate"
     static let learnTab = "appconfig.learnTab"
-    static let sleepScoreConfig = "appconfig.sleepScoreConfig"
     static let debugFlags = "appconfig.debug.flags"
     static let debugTabs = "appconfig.debug.tabs"
     static let debugLearnTab = "appconfig.debug.learnTab"
@@ -36,7 +35,6 @@ public final class AppConfig {
   public private(set) var tabs: [TabConfig] = TabConfig.defaults
   private var remoteLearnTab: LearnTabConfig?
   private var remoteUpdateGate: UpdateGate = .none
-  private var remoteSleepScoreConfig: SleepScoreConfig = .default
 
   /// Update gate in effect, applying the debug override first.
   public var updateGate: UpdateGate {
@@ -46,12 +44,14 @@ public final class AppConfig {
     return remoteUpdateGate
   }
 
-  /// Resolved sleep score configuration, applying debug overrides first.
+  /// Resolved sleep score configuration.
+  /// In DEBUG builds a local override can be set for testing; release builds always
+  /// use the baked-in `SleepScoreConfig.default`.
   public var sleepScoreConfig: SleepScoreConfig {
     #if DEBUG
     if let debugSleepScoreConfig { return debugSleepScoreConfig }
     #endif
-    return remoteSleepScoreConfig
+    return .default
   }
 
   #if DEBUG
@@ -113,14 +113,12 @@ public final class AppConfig {
     flags: [String: Bool],
     tabs: [TabConfig],
     learnTab: LearnTabConfig?,
-    updateGate: UpdateGate,
-    sleepScoreConfig: SleepScoreConfig
+    updateGate: UpdateGate
   ) {
     self.remoteFlags = flags
     self.tabs = tabs.isEmpty ? TabConfig.defaults : tabs
     self.remoteLearnTab = learnTab
     self.remoteUpdateGate = updateGate
-    self.remoteSleepScoreConfig = sleepScoreConfig
     persistCache()
   }
 
@@ -206,9 +204,6 @@ public final class AppConfig {
     if let data = try? JSONEncoder().encode(remoteUpdateGate) {
       defaults.set(data, forKey: Key.updateGate)
     }
-    if let data = try? JSONEncoder().encode(remoteSleepScoreConfig) {
-      defaults.set(data, forKey: Key.sleepScoreConfig)
-    }
   }
 
   private func loadCache() {
@@ -227,10 +222,6 @@ public final class AppConfig {
     if let data = defaults.data(forKey: Key.updateGate),
        let decoded = try? JSONDecoder().decode(UpdateGate.self, from: data) {
       remoteUpdateGate = decoded
-    }
-    if let data = defaults.data(forKey: Key.sleepScoreConfig),
-       let decoded = try? JSONDecoder().decode(SleepScoreConfig.self, from: data) {
-      remoteSleepScoreConfig = decoded
     }
     #if DEBUG
     if let cached = defaults.dictionary(forKey: Key.debugFlags) as? [String: Bool] {

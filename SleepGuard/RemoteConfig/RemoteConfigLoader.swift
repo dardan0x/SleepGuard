@@ -18,7 +18,6 @@ final class RemoteConfigLoader {
     static let featureLearn = "feature_learn"
     static let minimumVersion = "minimum_version"
     static let recommendedVersion = "recommended_version"
-    static let sleepScoreConfig = "sleep_score_config"
   }
 
   private init() {
@@ -38,7 +37,6 @@ final class RemoteConfigLoader {
       Key.featureLearn: Self.defaultLearnTabJSON() as NSObject,
       Key.minimumVersion: UpdateGate.none.minimumVersion as NSObject,
       Key.recommendedVersion: UpdateGate.none.recommendedVersion as NSObject,
-      Key.sleepScoreConfig: Self.defaultSleepScoreConfigJSON() as NSObject,
     ])
   }
 
@@ -61,13 +59,11 @@ final class RemoteConfigLoader {
       minimumVersion: remoteConfig[Key.minimumVersion].stringValue,
       recommendedVersion: remoteConfig[Key.recommendedVersion].stringValue
     )
-    let sleepScoreConfig = Self.decodeSleepScoreConfig(remoteConfig[Key.sleepScoreConfig].stringValue)
     AppConfig.shared.apply(
       flags: flags,
       tabs: tabs,
       learnTab: learnTab,
-      updateGate: gate,
-      sleepScoreConfig: sleepScoreConfig
+      updateGate: gate
     )
   }
 
@@ -103,14 +99,6 @@ final class RemoteConfigLoader {
     return nil
   }
 
-  private static func decodeSleepScoreConfig(_ json: String) -> SleepScoreConfig {
-    guard let data = json.data(using: .utf8),
-          let config = try? JSONDecoder().decode(SleepScoreConfig.self, from: data) else {
-      return .default
-    }
-    return config
-  }
-
   // MARK: - Defaults (mirror the baked-in AppConfig defaults)
 
   private static func defaultFlagsJSON() -> String {
@@ -129,15 +117,6 @@ final class RemoteConfigLoader {
   private static func defaultLearnTabJSON() -> String {
     let config = LearnTabConfig(isVisible: false, url: nil)
     guard let data = try? JSONEncoder().encode(config),
-          let json = String(data: data, encoding: .utf8) else { return "{}" }
-    return json
-  }
-
-  private static func defaultSleepScoreConfigJSON() -> String {
-    let config = SleepScoreConfig.default
-    let encoder = JSONEncoder()
-    encoder.outputFormatting = .sortedKeys
-    guard let data = try? encoder.encode(config),
           let json = String(data: data, encoding: .utf8) else { return "{}" }
     return json
   }

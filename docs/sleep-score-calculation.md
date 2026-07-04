@@ -168,14 +168,14 @@ This prevents a 4-hour nap with light snoring from scoring better than a healthy
 
 ---
 
-## 8. Remote Config
+## 8. Configuration
 
-All coefficients, caps, thresholds, and duration penalties can be tuned from Firebase Remote Config via the `sleep_score_config` parameter (see `docs/remote-config-schema.md`).
+All coefficients, caps, thresholds, and duration penalties are baked into `SleepScoreConfig.default` in `Packages/Models/Sources/Data/SleepScoreConfig.swift`. Release builds always use these defaults; DEBUG builds can override them locally via `AppConfig.setSleepScoreConfigOverride(_:)` for testing.
 
 ### How it works
 
 - `SleepScoreConfig` lives in the `Models` package with baked-in defaults.
-- `AppConfig` resolves the current config from remote/cache/default and exposes it to the UI.
+- `AppConfig.sleepScoreConfig` returns `SleepScoreConfig.default` (or the DEBUG override).
 - `SleepSession.sleepScore(using: SleepScoreConfig)` recomputes the score using the supplied config.
 - The `sleepScore` property uses the cached score if available, otherwise computes with `.default`.
 
@@ -187,6 +187,6 @@ Because `SleepSession.events` can fault and crash when accessed across many sess
 2. `SessionDetailView.loadSession()`
 3. `StatisticsTab.autoSaveForceSavedSession()`
 
-Each refresh computes with `appConfig.sleepScoreConfig`, so new sessions and opened sessions use the current remote config. Sessions shown only in lists keep showing the score cached the last time one of the above actions ran.
+Each refresh computes with `appConfig.sleepScoreConfig`, so new sessions and opened sessions always use the current local config. Sessions shown only in lists keep showing the score cached the last time one of the above actions ran.
 
-If you want every historical session to update the moment remote config changes, you need a bulk recalculation pass; that is intentionally avoided because it risks the same faulting crashes the cache prevents.
+If you want every historical session to update after changing `SleepScoreConfig.default`, you need a bulk recalculation pass; that is intentionally avoided because it risks the same faulting crashes the cache prevents.
