@@ -440,6 +440,33 @@ User reported an empty modal sometimes appearing when opening the app the same d
 
 ---
 
+### F15-T18 — "Last night" wording only for next-day opens
+
+| Field | Value |
+|-------|-------|
+| Status | Done |
+| Started | 2026-07-04 |
+| Completed | 2026-07-04 |
+
+**Acceptance Criteria:**
+- [x] `BriefingEngine` detects whether the latest session started on the previous calendar day relative to `now`
+- [x] Recap and weekly-mode headlines use "Last night" only when true; otherwise "Last time"
+- [x] Weekly-mode stat label uses "Last Night" only when true; otherwise "Last Time"
+- [x] New localized keys added for all "last time" variants
+- [x] `Strings.swift` regenerated
+- [x] Build succeeds with zero errors
+
+**Prompt Used:**
+User asked: "Show last night brief summary only if app is open the next day otherwise dont say last night but last time". Apply to the Sleep Briefing wording and the Statistics "LAST NIGHT" label.
+
+**Notes:**
+- Added `isLastNight(session:now:calendar:)` helper in `BriefingEngine` comparing `startDate` to the day before `now`.
+- Added last-time variants: `briefing.headline.quiet.lastTime`, `briefing.headline.normal.lastTime`, `briefing.headline.weeklySnoring.lastTime`, `briefing.headline.weeklyScore.lastTime`, `briefing.headline.weeklyDuration.lastTime`, `briefing.stat.lastTime`.
+- Updated `StatisticsLoadedView` label to use `last.time.statistics.loaded.view` when the selected session is not from last night.
+- Added two unit tests verifying "Last night" vs "Last time" headline phrasing.
+
+---
+
 ## Update Rules (for the AI)
 
 After completing a task in this feature:

@@ -84,11 +84,13 @@ public enum BriefingEngine {
     )
 
     let mode = selectMode(sessions: sortedSessions, now: now, calendar: calendar)
+    let isLastNight = isLastNight(session: latestSession, now: now, calendar: calendar)
     let (headline, stats, insight) = buildContent(
       mode: mode,
       latestSession: latestSession,
       sessions: sortedSessions,
-      profile: profile
+      profile: profile,
+      isLastNight: isLastNight
     )
     let survey = buildSurvey(
       latestSession: latestSession,
@@ -137,26 +139,38 @@ public enum BriefingEngine {
     mode: ContentMode,
     latestSession: BriefingSession,
     sessions: [BriefingSession],
-    profile: BriefingProfile?
+    profile: BriefingProfile?,
+    isLastNight: Bool
   ) -> (headline: String, stats: [BriefingStat], insight: String?) {
     switch mode {
     case .lastNightRecap:
       return (
-        buildHeadline(for: latestSession),
+        buildHeadline(for: latestSession, isLastNight: isLastNight),
         buildStats(for: latestSession),
         buildInsight(sessions: sessions, profile: profile)
       )
     case .weeklySnoring:
-      return buildWeeklySnoringContent(latest: latestSession, sessions: sessions)
+      return buildWeeklySnoringContent(latest: latestSession, sessions: sessions, isLastNight: isLastNight)
     case .weeklyScore:
-      return buildWeeklyScoreContent(latest: latestSession, sessions: sessions)
+      return buildWeeklyScoreContent(latest: latestSession, sessions: sessions, isLastNight: isLastNight)
     case .weeklyDuration:
-      return buildWeeklyDurationContent(latest: latestSession, sessions: sessions)
+      return buildWeeklyDurationContent(latest: latestSession, sessions: sessions, isLastNight: isLastNight)
     case .combinedScoreSnoring:
       return buildCombinedScoreSnoringContent(latest: latestSession, sessions: sessions)
     case .combinedDurationScore:
       return buildCombinedDurationScoreContent(latest: latestSession, sessions: sessions)
     }
+  }
+
+  private static func isLastNight(
+    session: BriefingSession,
+    now: Date,
+    calendar: Calendar
+  ) -> Bool {
+    guard let yesterday = calendar.date(byAdding: .day, value: -1, to: calendar.startOfDay(for: now)) else {
+      return false
+    }
+    return calendar.isDate(session.startDate, inSameDayAs: yesterday)
   }
 
   // MARK: - Safe String Formatting
@@ -235,7 +249,7 @@ public enum BriefingEngine {
 
   // MARK: - Headline
 
-  private static func buildHeadline(for session: BriefingSession) -> String {
+  private static func buildHeadline(for session: BriefingSession, isLastNight: Bool) -> String {
     let duration = session.totalDuration
     let hours = Int(duration) / 3600
     let minutes = (Int(duration) % 3600) / 60
@@ -244,12 +258,18 @@ public enum BriefingEngine {
     let snoringMinutes = Int(session.snoringDuration / 60)
     let score = session.sleepScore
 
+    let template = if snoringMinutes == 0 {
+      isLastNight ? Strings.briefingHeadlineQuiet : Strings.briefingHeadlineQuietLastTime
+    } else {
+      isLastNight ? Strings.briefingHeadlineNormal : Strings.briefingHeadlineNormalLastTime
+    }
+
     if snoringMinutes == 0 {
-      return formatTemplate(Strings.briefingHeadlineQuiet, durationText)
+      return formatTemplate(template, durationText)
     }
 
     return formatTemplate(
-      Strings.briefingHeadlineNormal,
+      template,
       durationText,
       String(snoringMinutes),
       String(score)
@@ -323,7 +343,8 @@ public enum BriefingEngine {
 
   private static func buildWeeklySnoringContent(
     latest: BriefingSession,
-    sessions: [BriefingSession]
+    sessions: [BriefingSession],
+    isLastNight: Bool
   ) -> (headline: String, stats: [BriefingStat], insight: String?) {
     let previous = sessions.dropFirst().prefix(6)
     let avgSnoring = previous.map(\.snoringDuration).reduce(0, +) / Double(max(previous.count, 1))
@@ -332,12 +353,12 @@ public enum BriefingEngine {
     let diff = latestMin - avgMin
 
     let headline = formatTemplate(
-      Strings.briefingHeadlineWeeklySnoring,
+      isLastNight ? Strings.briefingHeadlineWeeklySnoring : Strings.briefingHeadlineWeeklySnoringLastTime,
       String(latestMin),
       String(avgMin)
     )
     let stats = [
-      BriefingStat(label: Strings.briefingStatLastNight, value: "\(latestMin)m"),
+      BriefingStat(label: isLastNight ? Strings.briefingStatLastNight : Strings.briefingStatLastTime, value: "\(latestMin)m"),
       BriefingStat(label: Strings.briefingStatWeeklyAvg, value: "\(avgMin)m"),
       BriefingStat(label: Strings.briefingStatTrend, value: diff > 0 ? "+\(diff)m" : "\(diff)m"),
     ]
@@ -350,19 +371,20 @@ public enum BriefingEngine {
 
   private static func buildWeeklyScoreContent(
     latest: BriefingSession,
-    sessions: [BriefingSession]
+    sessions: [BriefingSession],
+    isLastNight: Bool
   ) -> (headline: String, stats: [BriefingStat], insight: String?) {
     let previous = sessions.dropFirst().prefix(6)
     let avgScore = previous.map(\.sleepScore).reduce(0, +) / max(previous.count, 1)
     let diff = latest.sleepScore - avgScore
 
     let headline = formatTemplate(
-      Strings.briefingHeadlineWeeklyScore,
+      isLastNight ? Strings.briefingHeadlineWeeklyScore : Strings.briefingHeadlineWeeklyScoreLastTime,
       String(latest.sleepScore),
       String(avgScore)
     )
     let stats = [
-      BriefingStat(label: Strings.briefingStatLastNight, value: "\(latest.sleepScore)"),
+      BriefingStat(label: isLastNight ? Strings.briefingStatLastNight : Strings.briefingStatLastTime, value: "\(latest.sleepScore)"),
       BriefingStat(label: Strings.briefingStatWeeklyAvg, value: "\(avgScore)"),
       BriefingStat(label: Strings.briefingStatTrend, value: diff > 0 ? "+\(diff)" : "\(diff)"),
     ]
@@ -375,7 +397,8 @@ public enum BriefingEngine {
 
   private static func buildWeeklyDurationContent(
     latest: BriefingSession,
-    sessions: [BriefingSession]
+    sessions: [BriefingSession],
+    isLastNight: Bool
   ) -> (headline: String, stats: [BriefingStat], insight: String?) {
     let previous = sessions.dropFirst().prefix(6)
     let avgDuration = previous.map(\.totalDuration).reduce(0, +) / Double(max(previous.count, 1))
@@ -391,12 +414,12 @@ public enum BriefingEngine {
     let diffMin = Int((latest.totalDuration - avgDuration) / 60)
 
     let headline = formatTemplate(
-      Strings.briefingHeadlineWeeklyDuration,
+      isLastNight ? Strings.briefingHeadlineWeeklyDuration : Strings.briefingHeadlineWeeklyDurationLastTime,
       latestText,
       avgText
     )
     let stats = [
-      BriefingStat(label: Strings.briefingStatLastNight, value: latestText),
+      BriefingStat(label: isLastNight ? Strings.briefingStatLastNight : Strings.briefingStatLastTime, value: latestText),
       BriefingStat(label: Strings.briefingStatWeeklyAvg, value: avgText),
       BriefingStat(label: Strings.briefingStatTrend, value: diffMin > 0 ? "+\(diffMin)m" : "\(diffMin)m"),
     ]

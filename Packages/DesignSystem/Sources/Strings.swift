@@ -37,10 +37,15 @@ public enum Strings {
   public static var briefingHeadlineCombinedDurationScore: String { String(localized: "briefing.headline.combinedDurationScore", bundle: .module) }
   public static var briefingHeadlineCombinedScoreSnoring: String { String(localized: "briefing.headline.combinedScoreSnoring", bundle: .module) }
   public static var briefingHeadlineNormal: String { String(localized: "briefing.headline.normal", bundle: .module) }
+  public static var briefingHeadlineNormalLastTime: String { String(localized: "briefing.headline.normal.lastTime", bundle: .module) }
   public static var briefingHeadlineQuiet: String { String(localized: "briefing.headline.quiet", bundle: .module) }
+  public static var briefingHeadlineQuietLastTime: String { String(localized: "briefing.headline.quiet.lastTime", bundle: .module) }
   public static var briefingHeadlineWeeklyDuration: String { String(localized: "briefing.headline.weeklyDuration", bundle: .module) }
+  public static var briefingHeadlineWeeklyDurationLastTime: String { String(localized: "briefing.headline.weeklyDuration.lastTime", bundle: .module) }
   public static var briefingHeadlineWeeklyScore: String { String(localized: "briefing.headline.weeklyScore", bundle: .module) }
+  public static var briefingHeadlineWeeklyScoreLastTime: String { String(localized: "briefing.headline.weeklyScore.lastTime", bundle: .module) }
   public static var briefingHeadlineWeeklySnoring: String { String(localized: "briefing.headline.weeklySnoring", bundle: .module) }
+  public static var briefingHeadlineWeeklySnoringLastTime: String { String(localized: "briefing.headline.weeklySnoring.lastTime", bundle: .module) }
   public static var briefingHeadlineWelcome: String { String(localized: "briefing.headline.welcome", bundle: .module) }
   public static var briefingInsightDeclining: String { String(localized: "briefing.insight.declining", bundle: .module) }
   public static var briefingInsightGoalShortfall: String { String(localized: "briefing.insight.goalShortfall", bundle: .module) }
@@ -60,6 +65,7 @@ public enum Strings {
   public static var briefingQuoteReturningAfterGap: String { String(localized: "briefing.quote.returningAfterGap", bundle: .module) }
   public static var briefingQuoteSteady: String { String(localized: "briefing.quote.steady", bundle: .module) }
   public static var briefingStatLastNight: String { String(localized: "briefing.stat.lastNight", bundle: .module) }
+  public static var briefingStatLastTime: String { String(localized: "briefing.stat.lastTime", bundle: .module) }
   public static var briefingStatScore: String { String(localized: "briefing.stat.score", bundle: .module) }
   public static var briefingStatSleep: String { String(localized: "briefing.stat.sleep", bundle: .module) }
   public static var briefingStatSnoring: String { String(localized: "briefing.stat.snoring", bundle: .module) }
@@ -97,6 +103,7 @@ public enum Strings {
   public static var filterSleepTalking: String { String(localized: "filter.sleepTalking", bundle: .module) }
   public static var filterSnoring: String { String(localized: "filter.snoring", bundle: .module) }
   public static var lastNightStatisticsLoadedView: String { String(localized: "last.night.statistics.loaded.view", bundle: .module) }
+  public static var lastTimeStatisticsLoadedView: String { String(localized: "last.time.statistics.loaded.view", bundle: .module) }
   public static var learnErrorNoContent: String { String(localized: "learn.error.noContent", bundle: .module) }
   public static var lightIntensityLabelEventPlayerView: String { String(localized: "light.intensity.label.event.player.view", bundle: .module) }
   public static var lightSnoreEventPlayerView: String { String(localized: "light.snore.event.player.view", bundle: .module) }

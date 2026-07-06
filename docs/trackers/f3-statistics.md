@@ -121,6 +121,10 @@ Resume SleepGuard. Read AGENTS.md, docs/FeatureTracker.md, docs/SESSION_SUMMARY.
 - **"Last 7 Nights" chart grouped by day**: Chart now groups `recentSessions` by calendar day, averages scores per day, and renders one bar per night instead of one bar per recording.
 - **Removed dB stat cards**: Peak dB and Avg Level cards removed from `StatisticsLoadedView` and `SleepReportPDFGenerator` because negative dBFS values are confusing to users.
 
+### 2026-07-04 Refinements
+
+- **"Last night" label gate**: `StatisticsLoadedView` now shows `LAST NIGHT` only when the selected session started on the previous calendar day; otherwise it shows `LAST TIME`. This prevents inaccurate wording when reopening the app after a gap.
+
 ### Session 57 Refinements (2026-05-24)
 
 - **Duration format unification**: `Last7NightsStatGrid` and `Last7NightsRow` now use shared `DurationFormatter.hoursAndMinutes` instead of private `durationString` wrappers. Total sleep duration and snoring duration both render as `X h Y min` / `X min`.
