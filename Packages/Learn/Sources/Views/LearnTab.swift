@@ -9,6 +9,7 @@ public struct LearnTab: View {
   @State private var routerPath = RouterPath()
   @Environment(TabCoordinator.self) private var tabCoordinator
   @Environment(AppConfig.self) private var appConfig
+  @Environment(Theme.self) private var theme
 
   public init() {}
 
@@ -17,8 +18,15 @@ public struct LearnTab: View {
       get: { routerPath.path },
       set: { routerPath.path = $0 }
     )) {
-      content
-        .navigationTitle(Strings.tabLearn)
+      VStack(spacing: 0) {
+        titleRow
+          .padding(.horizontal, 20)
+          .padding(.top, 10)
+
+        content
+      }
+      .background(theme.bgPrimary)
+      .toolbar(.hidden, for: .navigationBar)
     }
     .onChange(of: tabCoordinator.resetSignal) { _, signal in
       if let signal, signal.tab == .learn {
@@ -51,5 +59,22 @@ public struct LearnTab: View {
     }
   }
 
-  @Environment(Theme.self) private var theme
+  private var titleRow: some View {
+    HStack {
+      Text(Strings.tabLearn)
+        .font(.system(size: 34, weight: .bold))
+        .foregroundStyle(theme.textPrimary)
+
+      Spacer()
+
+      ZStack {
+        RoundedRectangle(cornerRadius: 15)
+          .fill(theme.accent)
+          .frame(width: 30, height: 30)
+        Image(systemName: "book.fill")
+          .font(.system(size: 16))
+          .foregroundStyle(.white)
+      }
+    }
+  }
 }
