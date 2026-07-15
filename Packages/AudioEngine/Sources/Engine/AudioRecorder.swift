@@ -28,6 +28,7 @@ public final class AudioRecorder {
 
   public var isRecording = false
   public var isPaused = false
+  public var isWarmedUp = false
   public var currentDB: Float = -160.0
   /// Peak dB of the current buffer (0 dBFS = digital full scale). Tracks impulsive
   /// peaks better than RMS `currentDB`, which is used for intensity classification.
@@ -42,6 +43,7 @@ public final class AudioRecorder {
   public private(set) var currentEventID: UUID?
 
   private var audioEngine: AVAudioEngine?
+  private var warmupEngine: AVAudioEngine?
   private var audioFile: AVAudioFile?
   private let fftAnalyzer = FFTAnalyzer(bufferSize: 1024)
   private let soundAnalyzer = SoundAnalysisDetector.shared
@@ -379,6 +381,58 @@ public final class AudioRecorder {
     spectralScore = 0
 
     try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+  }
+
+  // MARK: - Warmup (keeps audio I/O alive during a delayed-start countdown)
+
+  /// Activates the audio session and starts a minimal input engine so the app
+  /// remains eligible for background audio execution while the user-configured
+  /// recording delay counts down. Buffers are discarded; no file is written and
+  /// no detection is run.
+  public func startWarmup() throws {
+    guard hasPermission else { return }
+    guard !isWarmedUp, warmupEngine == nil else { return }
+
+    let session = AVAudioSession.sharedInstance()
+    try session.setCategory(.playAndRecord, mode: .measurement, options: [.defaultToSpeaker, .allowBluetooth, .mixWithOthers])
+    try session.setActive(true)
+
+    #if !targetEnvironment(simulator)
+    guard !session.currentRoute.inputs.isEmpty else {
+      throw RecordingError.noMicrophoneInput
+    }
+    #endif
+
+    let engine = AVAudioEngine()
+    let input = engine.inputNode
+    let format = input.outputFormat(forBus: 0)
+
+    guard format.channelCount > 0, format.sampleRate > 0 else {
+      throw RecordingError.invalidAudioFormat
+    }
+
+    // Tap the input to keep I/O alive, but discard every buffer. No analysis,
+    // no file writes — the countdown view handles the timer.
+    input.installTap(onBus: 0, bufferSize: 1024, format: format) { _, _ in
+      // Intentionally empty.
+    }
+
+    try engine.start()
+    warmupEngine = engine
+    isWarmedUp = true
+  }
+
+  /// Stops the warmup engine and tears down the input tap. Deactivates the
+  /// audio session only if a real recording is not currently in progress.
+  public func stopWarmup() {
+    guard isWarmedUp else { return }
+    warmupEngine?.stop()
+    warmupEngine?.inputNode.removeTap(onBus: 0)
+    warmupEngine = nil
+    isWarmedUp = false
+    if !isRecording {
+      try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+    }
   }
 
   private func calculateDB(from buffer: AVAudioPCMBuffer) -> Float {

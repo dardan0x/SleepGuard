@@ -1,3 +1,4 @@
+import Env
 import UIKit
 import UserNotifications
 import FirebaseMessaging
@@ -49,6 +50,11 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     _ center: UNUserNotificationCenter,
     didReceive response: UNNotificationResponse
   ) async {
-    // Handle notification taps here if needed.
+    await MainActor.run {
+      guard response.notification.request.identifier == RecordingDelayManager.shared.notificationId,
+            RecordingDelayManager.shared.isActive else { return }
+      RecordingDelayManager.shared.cancel()
+      try? SessionManager.shared.startSession()
+    }
   }
 }
