@@ -3,7 +3,6 @@ import Foundation
 /// Auto-generated from Localizable.xcstrings — do not edit manually.
 /// Run: python3 scripts/generate-strings.py
 public enum Strings {
-  public static var fiveSecondsSoothingMelodyValueFormat: String { String(localized: "5.seconds.soothing.melody.value", bundle: .module) }
   public static var actionBack: String { String(localized: "action.back", bundle: .module) }
   public static var actionCancel: String { String(localized: "action.cancel", bundle: .module) }
   public static var actionClose: String { String(localized: "action.close", bundle: .module) }
@@ -24,7 +23,6 @@ public enum Strings {
   public static var actionStartRecording: String { String(localized: "action.startRecording", bundle: .module) }
   public static var actionStopAnyway: String { String(localized: "action.stopAnyway", bundle: .module) }
   public static var actionTryAgain: String { String(localized: "action.tryAgain", bundle: .module) }
-  public static var alwaysSoothingMelodyValueFormat: String { String(localized: "always.soothing.melody.value", bundle: .module) }
   public static var avgScoreCalendarStatCardLabel: String { String(localized: "avg.score.calendar.stat.card.label", bundle: .module) }
   public static var briefingGreetingAfternoon: String { String(localized: "briefing.greeting.afternoon", bundle: .module) }
   public static var briefingGreetingAfternoonNoName: String { String(localized: "briefing.greeting.afternoon.noName", bundle: .module) }
@@ -97,7 +95,6 @@ public enum Strings {
   public static var eventPlayerNoiseTitle: String { String(localized: "event.player.noise.title", bundle: .module) }
   public static var eventPlayerSleepTalkingTitle: String { String(localized: "event.player.sleepTalking.title", bundle: .module) }
   public static var eventsHourPdfGenerator: String { String(localized: "events.hour.pdf.generator", bundle: .module) }
-  public static var fifteenSecondsSoothingMelodyValueFormat: String { String(localized: "fifteen.seconds.soothing.melody.value", bundle: .module) }
   public static var filterAll: String { String(localized: "filter.all", bundle: .module) }
   public static var filterNoise: String { String(localized: "filter.noise", bundle: .module) }
   public static var filterSleepTalking: String { String(localized: "filter.sleepTalking", bundle: .module) }
@@ -112,14 +109,11 @@ public enum Strings {
   public static var loudIntensityLabelEventPlayerView: String { String(localized: "loud.intensity.label.event.player.view", bundle: .module) }
   public static var loudNightsCalendarStatCardLabel: String { String(localized: "loud.nights.calendar.stat.card.label", bundle: .module) }
   public static var loudSnoreEventPlayerView: String { String(localized: "loud.snore.event.player.view", bundle: .module) }
-  public static var melodyDisabledSoothingMelodySheet: String { String(localized: "melody.disabled.soothing.melody.sheet", bundle: .module) }
-  public static var melodyEnabledSoothingMelodySheet: String { String(localized: "melody.enabled.soothing.melody.sheet", bundle: .module) }
   public static var muteForSession: String { String(localized: "mute.for.session", bundle: .module) }
   public static var notificationsSoftAskBody: String { String(localized: "notifications.soft.ask.body", bundle: .module) }
   public static var notificationsSoftAskEnable: String { String(localized: "notifications.soft.ask.enable", bundle: .module) }
   public static var notificationsSoftAskLater: String { String(localized: "notifications.soft.ask.later", bundle: .module) }
   public static var notificationsSoftAskTitle: String { String(localized: "notifications.soft.ask.title", bundle: .module) }
-  public static var offSoothingMelodyValueFormat: String { String(localized: "off.soothing.melody.value", bundle: .module) }
   public static var onboardingHealthWatchBadge: String { String(localized: "onboarding.healthWatch.badge", bundle: .module) }
   public static var onboardingHealthWatchBody: String { String(localized: "onboarding.healthWatch.body", bundle: .module) }
   public static var onboardingHealthWatchButtonPrimary: String { String(localized: "onboarding.healthWatch.buttonPrimary", bundle: .module) }
@@ -154,7 +148,7 @@ public enum Strings {
   public static var pdfAvgDb: String { String(localized: "pdf.avgDB", bundle: .module) }
   public static var pdfPeakDb: String { String(localized: "pdf.peakDB", bundle: .module) }
   public static var playRecordCustomMelodySheet: String { String(localized: "play.record.custom.melody.sheet", bundle: .module) }
-  public static var playingSoothingMelodyPlayer: String { String(localized: "playing.soothing.melody.player", bundle: .module) }
+  public static var playingSnoreInterrupterPlayer: String { String(localized: "playing.snore.interrupter.player", bundle: .module) }
   public static var processingSession: String { String(localized: "processing.session", bundle: .module) }
   public static var profileActionSaveProfile: String { String(localized: "profile.action.saveProfile", bundle: .module) }
   public static var profileEditorPrivacyNotice: String { String(localized: "profile.editor.privacyNotice", bundle: .module) }
@@ -337,7 +331,6 @@ public enum Strings {
   public static var settingsUnitSeconds: String { String(localized: "settings.unit.seconds", bundle: .module) }
   public static var settingsUnitSecondsShort: String { String(localized: "settings.unit.seconds.short", bundle: .module) }
   public static var settingsVersion: String { String(localized: "settings.version", bundle: .module) }
-  public static var sixtySecondsSoothingMelodyValueFormat: String { String(localized: "sixty.seconds.soothing.melody.value", bundle: .module) }
   public static var sleepStageAwake: String { String(localized: "sleepStage.awake", bundle: .module) }
   public static var sleepStageDeep: String { String(localized: "sleepStage.deep", bundle: .module) }
   public static var sleepStageDeepSleep: String { String(localized: "sleepStage.deepSleep", bundle: .module) }
@@ -362,13 +355,21 @@ public enum Strings {
   public static var sleepStagesInfoStageStatusLow: String { String(localized: "sleepStagesInfo.stageStatus.low", bundle: .module) }
   public static var sleepStagesInfoTitle: String { String(localized: "sleepStagesInfo.title", bundle: .module) }
   public static var sleepStagesInfoYourStages: String { String(localized: "sleepStagesInfo.yourStages", bundle: .module) }
+  public static var snoreInterrupterFiveSecondsValueFormat: String { String(localized: "snore.interrupter.5.seconds.value", bundle: .module) }
+  public static var snoreInterrupterAlwaysValueFormat: String { String(localized: "snore.interrupter.always.value", bundle: .module) }
+  public static var snoreInterrupterFifteenSecondsValueFormat: String { String(localized: "snore.interrupter.fifteen.seconds.value", bundle: .module) }
+  public static var snoreInterrupterLockscreenNote: String { String(localized: "snore.interrupter.lockscreen.note", bundle: .module) }
+  public static var snoreInterrupterOffValueFormat: String { String(localized: "snore.interrupter.off.value", bundle: .module) }
+  public static var snoreInterrupterRecordingPrestartViewTitle: String { String(localized: "snore.interrupter.recording.prestart.view.title", bundle: .module) }
+  public static var snoreInterrupterRowHelperText: String { String(localized: "snore.interrupter.row.helper.text", bundle: .module) }
+  public static var snoreInterrupterSheetDescSectionSubtitle: String { String(localized: "snore.interrupter.sheet.desc.section.subtitle", bundle: .module) }
+  public static var snoreInterrupterSheetDescSectionTitle: String { String(localized: "snore.interrupter.sheet.desc.section.title", bundle: .module) }
+  public static var snoreInterrupterSixtySecondsValueFormat: String { String(localized: "snore.interrupter.sixty.seconds.value", bundle: .module) }
+  public static var snoreInterrupterSoundSheet: String { String(localized: "snore.interrupter.sound.sheet", bundle: .module) }
+  public static var snoreInterrupterThirtySecondsValueFormat: String { String(localized: "snore.interrupter.thirty.seconds.value", bundle: .module) }
   public static var snoringEventHeaderPlayerView: String { String(localized: "snoring.event.header.player.view", bundle: .module) }
-  public static var soothingMelodyLockscreenNote: String { String(localized: "soothing.melody.lockscreen.note", bundle: .module) }
-  public static var soothingMelodyRecordingPrestartViewTitle: String { String(localized: "soothing.melody.recording.prestart.view.title", bundle: .module) }
-  public static var soothingMelodyRowHelperText: String { String(localized: "soothing.melody.row.helper.text", bundle: .module) }
-  public static var soothingMelodySheetDescSectionSubtitle: String { String(localized: "soothing.melody.sheet.desc.section.subtitle", bundle: .module) }
-  public static var soothingMelodySheetDescSectionTitle: String { String(localized: "soothing.melody.sheet.desc.section.title", bundle: .module) }
-  public static var soothingTuneMelodySheet: String { String(localized: "soothing.tune.melody.sheet", bundle: .module) }
+  public static var soundDisabledSnoreInterrupterSheet: String { String(localized: "sound.disabled.snore.interrupter.sheet", bundle: .module) }
+  public static var soundEnabledSnoreInterrupterSheet: String { String(localized: "sound.enabled.snore.interrupter.sheet", bundle: .module) }
   public static var startTimeEventCard: String { String(localized: "start.time.event.card", bundle: .module) }
   public static var statisticsSleepStagesLabel: String { String(localized: "statistics.sleepStagesLabel", bundle: .module) }
   public static var statsCalendarIntensityEpic: String { String(localized: "stats.calendar.intensityEpic", bundle: .module) }
@@ -405,13 +406,12 @@ public enum Strings {
   public static var statsTrendsViewMonth: String { String(localized: "stats.trends.viewMonth", bundle: .module) }
   public static var statsTrendsWeek: String { String(localized: "stats.trends.week", bundle: .module) }
   public static var stopRecordCustomMelodySheet: String { String(localized: "stop.record.custom.melody.sheet", bundle: .module) }
-  public static var stopSoothingMelodyPlayer: String { String(localized: "stop.soothing.melody.player", bundle: .module) }
+  public static var stopSnoreInterrupterPlayer: String { String(localized: "stop.snore.interrupter.player", bundle: .module) }
   public static var stringUnit: String { String(localized: "stringUnit", bundle: .module) }
   public static var tabLearn: String { String(localized: "tab.learn", bundle: .module) }
   public static var tabMedia: String { String(localized: "tab.media", bundle: .module) }
   public static var tabSettings: String { String(localized: "tab.settings", bundle: .module) }
   public static var tabStatistics: String { String(localized: "tab.statistics", bundle: .module) }
-  public static var thirtySecondsSoothingMelodyValueFormat: String { String(localized: "thirty.seconds.soothing.melody.value", bundle: .module) }
   public static var timeHourPlural: String { String(localized: "time.hour.plural", bundle: .module) }
   public static var timeHourSingular: String { String(localized: "time.hour.singular", bundle: .module) }
   public static var timeMinutePlural: String { String(localized: "time.minute.plural", bundle: .module) }

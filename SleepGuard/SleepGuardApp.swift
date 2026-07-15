@@ -67,7 +67,7 @@ struct SleepGuardApp: App {
         healthKitSync: HealthKitSync.shared,
         watchConnectivityManager: WatchConnectivityManager.shared,
         soundAnalysisDetector: SoundAnalysisDetector.shared,
-        soothingMelodyPlayer: SoothingMelodyPlayer.shared,
+        snoreInterrupterPlayer: SnoreInterrupterPlayer.shared,
         appConfig: appConfig,
         notificationPermissionManager: notificationPermissionManager
       )

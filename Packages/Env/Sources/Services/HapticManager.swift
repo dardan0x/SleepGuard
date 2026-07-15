@@ -15,7 +15,7 @@ public final class HapticManager {
     lightImpactGenerator.prepare()
   }
 
-  /// Fires a strong impact nudge (used during soothing melody playback).
+  /// Fires a strong impact nudge (used during Snore Interrupter playback).
   public func nudge() {
     impactGenerator.impactOccurred(intensity: 1.0)
   }

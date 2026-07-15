@@ -1,7 +1,7 @@
 import Foundation
 
 /// Represents an interval during a sleep session when the microphone was paused,
-/// typically because soothing melody playback took over the audio session.
+/// typically because Snore Interrupter playback took over the audio session.
 /// Tracking these gaps allows stats to be calculated over "monitored duration"
 /// rather than total session duration, and lets the UI be transparent about
 /// detection blind spots.

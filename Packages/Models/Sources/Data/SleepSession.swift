@@ -54,7 +54,7 @@ public final class SleepSession {
     @Relationship(deleteRule: .cascade, inverse: \SnoreEvent.session)
     public var events: [SnoreEvent]?
 
-    /// Intervals when the microphone was paused (e.g. during soothing melody playback).
+    /// Intervals when the microphone was paused (e.g. during Snore Interrupter playback).
     /// Used to compute monitoredDuration and surface detection blind spots in the UI.
     public var recordingGaps: [RecordingGap]?
 
@@ -321,7 +321,7 @@ public final class SleepSession {
         let sessionDuration = totalDuration
 
         // Total snoring duration includes both detected events and recording gaps.
-        // Gaps occur when the soothing melody plays after snoring detection;
+        // Gaps occur when the Snore Interrupter plays after snoring detection;
         // that time counts as snoring since the melody only triggers on confirmed samples.
         let totalSnoringDuration = snoringDuration
         let snoringPercentage = (totalSnoringDuration / sessionDuration) * 100

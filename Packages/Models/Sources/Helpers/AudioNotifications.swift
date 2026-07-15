@@ -1,6 +1,6 @@
 import Foundation
 
 public extension Notification.Name {
-  static let soothingMelodyWillPlay = Notification.Name("soothingMelodyWillPlay")
-  static let soothingMelodyDidStop = Notification.Name("soothingMelodyDidStop")
+  static let snoreInterrupterWillPlay = Notification.Name("snoreInterrupterWillPlay")
+  static let snoreInterrupterDidStop = Notification.Name("snoreInterrupterDidStop")
 }

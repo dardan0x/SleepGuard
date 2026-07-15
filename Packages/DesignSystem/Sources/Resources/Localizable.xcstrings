@@ -1,7 +1,7 @@
 {
   "sourceLanguage": "en",
   "strings": {
-    "5.seconds.soothing.melody.value": {
+    "snore.interrupter.5.seconds.value": {
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -204,7 +204,7 @@
         }
       }
     },
-    "always.soothing.melody.value": {
+    "snore.interrupter.always.value": {
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -391,7 +391,7 @@
         }
       }
     },
-    "fifteen.seconds.soothing.melody.value": {
+    "snore.interrupter.fifteen.seconds.value": {
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -487,24 +487,24 @@
         }
       }
     },
-    "melody.disabled.soothing.melody.sheet": {
+    "sound.disabled.snore.interrupter.sheet": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Melody disabled"
+            "value": "Sound disabled"
           }
         }
       }
     },
-    "melody.enabled.soothing.melody.sheet": {
+    "sound.enabled.snore.interrupter.sheet": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Melody enabled"
+            "value": "Sound enabled"
           }
         }
       }
@@ -520,7 +520,7 @@
         }
       }
     },
-    "off.soothing.melody.value": {
+    "snore.interrupter.off.value": {
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -792,7 +792,7 @@
         }
       }
     },
-    "playing.soothing.melody.player": {
+    "playing.snore.interrupter.player": {
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -842,7 +842,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "RECORD MELODY"
+            "value": "RECORD SOUND"
           }
         }
       }
@@ -1178,7 +1178,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Soothing melody is enabled"
+            "value": "Snore Interrupter is enabled"
           }
         }
       }
@@ -1430,7 +1430,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Soothing melody stopped snoring for %@."
+            "value": "Snore Interrupter stopped snoring for %@."
           }
         }
       }
@@ -1441,7 +1441,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Soothing melody stopped snoring detection for %@."
+            "value": "Snore Interrupter stopped snoring detection for %@."
           }
         }
       }
@@ -1928,7 +1928,7 @@
         }
       }
     },
-    "sixty.seconds.soothing.melody.value": {
+    "snore.interrupter.sixty.seconds.value": {
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -1950,7 +1950,7 @@
         }
       }
     },
-    "soothing.melody.lockscreen.note": {
+    "snore.interrupter.lockscreen.note": {
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -1961,18 +1961,18 @@
         }
       }
     },
-    "soothing.melody.recording.prestart.view.title": {
+    "snore.interrupter.recording.prestart.view.title": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Soothing melody"
+            "value": "Snore Interrupter"
           }
         }
       }
     },
-    "soothing.melody.row.helper.text": {
+    "snore.interrupter.row.helper.text": {
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -1983,7 +1983,7 @@
         }
       }
     },
-    "soothing.melody.sheet.desc.section.subtitle": {
+    "snore.interrupter.sheet.desc.section.subtitle": {
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -1994,7 +1994,7 @@
         }
       }
     },
-    "soothing.melody.sheet.desc.section.title": {
+    "snore.interrupter.sheet.desc.section.title": {
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -2005,13 +2005,13 @@
         }
       }
     },
-    "soothing.tune.melody.sheet": {
+    "snore.interrupter.sound.sheet": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Soothing tune"
+            "value": "Interrupter sound"
           }
         }
       }
@@ -2353,7 +2353,7 @@
         }
       }
     },
-    "stop.soothing.melody.player": {
+    "stop.snore.interrupter.player": {
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -2420,7 +2420,7 @@
         }
       }
     },
-    "thirty.seconds.soothing.melody.value": {
+    "snore.interrupter.thirty.seconds.value": {
       "extractionState": "manual",
       "localizations": {
         "en": {

@@ -2,12 +2,12 @@ import AVFoundation
 import Observation
 import Models
 
-/// Plays the selected soothing melody when snoring is detected.
+/// Plays the selected Snore Interrupter when snoring is detected.
 /// Respects the user's duration preference and exposes `isPlaying` for UI observation.
 @MainActor
 @Observable
-public final class SoothingMelodyPlayer: NSObject {
-  public static let shared = SoothingMelodyPlayer()
+public final class SnoreInterrupterPlayer: NSObject {
+  public static let shared = SnoreInterrupterPlayer()
 
   public var isPlaying = false
   public var currentMelodyName: String?
@@ -25,33 +25,33 @@ public final class SoothingMelodyPlayer: NSObject {
   /// Call when a new snore event is detected. Checks preferences and starts playback
   /// if a melody is configured and nothing is already playing.
   public func playIfNeeded() {
-    print("[SoothingMelodyPlayer] playIfNeeded() called — isMutedForSession=\(isMutedForSession), isPlaying=\(isPlaying)")
+    print("[SnoreInterrupterPlayer] playIfNeeded() called — isMutedForSession=\(isMutedForSession), isPlaying=\(isPlaying)")
 
     guard !isMutedForSession else {
-      print("[SoothingMelodyPlayer] Muted for this session, skipping")
+      print("[SnoreInterrupterPlayer] Muted for this session, skipping")
       return
     }
 
     guard !isPlaying else {
-      print("[SoothingMelodyPlayer] Already playing, skipping re-trigger")
+      print("[SnoreInterrupterPlayer] Already playing, skipping re-trigger")
       return
     }
 
-    let mode = UserPreferences.shared.soothingMelodyMode
-    print("[SoothingMelodyPlayer] Mode: \(mode)")
+    let mode = UserPreferences.shared.snoreInterrupterMode
+    print("[SnoreInterrupterPlayer] Mode: \(mode)")
     guard mode != .never else {
-      print("[SoothingMelodyPlayer] Mode is .never, skipping")
+      print("[SnoreInterrupterPlayer] Mode is .never, skipping")
       return
     }
 
     let melodyID = UserPreferences.shared.selectedMelodyID
-    print("[SoothingMelodyPlayer] Selected melody ID: \(melodyID)")
+    print("[SnoreInterrupterPlayer] Selected melody ID: \(melodyID)")
 
     let melody = Melody.melody(id: melodyID)
       ?? CustomMelodyStorage.shared.melody(id: melodyID)
 
     guard let melody else {
-      print("[SoothingMelodyPlayer] No melody found for ID \(melodyID)")
+      print("[SnoreInterrupterPlayer] No melody found for ID \(melodyID)")
       return
     }
 
@@ -64,27 +64,27 @@ public final class SoothingMelodyPlayer: NSObject {
     }
 
     guard let fileURL = url else {
-      print("[SoothingMelodyPlayer] Sound file not found: \(melody.filename).mp3")
+      print("[SnoreInterrupterPlayer] Sound file not found: \(melody.filename).mp3")
       let bundlePath = Bundle.main.bundlePath
       let soundsPath = (bundlePath as NSString).appendingPathComponent("sounds")
       if FileManager.default.fileExists(atPath: soundsPath) {
         let files = (try? FileManager.default.contentsOfDirectory(atPath: soundsPath)) ?? []
-        print("[SoothingMelodyPlayer] Available sounds: \(files)")
+        print("[SnoreInterrupterPlayer] Available sounds: \(files)")
       } else {
-        print("[SoothingMelodyPlayer] sounds/ directory does not exist at \(soundsPath)")
+        print("[SnoreInterrupterPlayer] sounds/ directory does not exist at \(soundsPath)")
       }
       return
     }
 
-    print("[SoothingMelodyPlayer] Found sound at \(fileURL.path)")
+    print("[SnoreInterrupterPlayer] Found sound at \(fileURL.path)")
 
-    NotificationCenter.default.post(name: .soothingMelodyWillPlay, object: nil)
+    NotificationCenter.default.post(name: .snoreInterrupterWillPlay, object: nil)
 
     do {
       let session = AVAudioSession.sharedInstance()
       try session.setCategory(.playback, mode: .default)
       try session.setActive(true)
-      print("[SoothingMelodyPlayer] Audio session activated with .playback")
+      print("[SnoreInterrupterPlayer] Audio session activated with .playback")
 
       let player = try AVAudioPlayer(contentsOf: fileURL)
       player.volume = 1.0
@@ -92,24 +92,24 @@ public final class SoothingMelodyPlayer: NSObject {
       player.delegate = self
       audioPlayer = player
       currentMelodyName = melody.name
-      print("[SoothingMelodyPlayer] AVAudioPlayer created, delegate set")
+      print("[SnoreInterrupterPlayer] AVAudioPlayer created, delegate set")
 
       guard player.prepareToPlay() else {
-        print("[SoothingMelodyPlayer] prepareToPlay() returned false")
-        NotificationCenter.default.post(name: .soothingMelodyDidStop, object: nil)
+        print("[SnoreInterrupterPlayer] prepareToPlay() returned false")
+        NotificationCenter.default.post(name: .snoreInterrupterDidStop, object: nil)
         return
       }
-      print("[SoothingMelodyPlayer] prepareToPlay() succeeded")
+      print("[SnoreInterrupterPlayer] prepareToPlay() succeeded")
 
       let didPlay = player.play()
-      print("[SoothingMelodyPlayer] play() returned \(didPlay)")
+      print("[SnoreInterrupterPlayer] play() returned \(didPlay)")
       guard didPlay else {
-        NotificationCenter.default.post(name: .soothingMelodyDidStop, object: nil)
+        NotificationCenter.default.post(name: .snoreInterrupterDidStop, object: nil)
         return
       }
 
       isPlaying = true
-      print("[SoothingMelodyPlayer] ✅ Started playing '\(melody.name)' for \(mode.displayLabel)")
+      print("[SnoreInterrupterPlayer] ✅ Started playing '\(melody.name)' for \(mode.displayLabel)")
 
       HapticManager.shared.prepare()
       HapticManager.shared.nudge()
@@ -126,14 +126,14 @@ public final class SoothingMelodyPlayer: NSObject {
         }
       }
     } catch {
-      print("[SoothingMelodyPlayer] ❌ Failed to play: \(error)")
-      NotificationCenter.default.post(name: .soothingMelodyDidStop, object: nil)
+      print("[SnoreInterrupterPlayer] ❌ Failed to play: \(error)")
+      NotificationCenter.default.post(name: .snoreInterrupterDidStop, object: nil)
     }
   }
 
   /// Stops playback immediately and cleans up.
   public func stop() {
-    print("[SoothingMelodyPlayer] stop() called — isPlaying was \(isPlaying)")
+    print("[SnoreInterrupterPlayer] stop() called — isPlaying was \(isPlaying)")
     audioPlayer?.stop()
     audioPlayer?.delegate = nil
     audioPlayer = nil
@@ -143,26 +143,26 @@ public final class SoothingMelodyPlayer: NSObject {
     nudgeTimer = nil
     isPlaying = false
     currentMelodyName = nil
-    print("[SoothingMelodyPlayer] ✅ Stopped — isPlaying now \(isPlaying)")
+    print("[SnoreInterrupterPlayer] ✅ Stopped — isPlaying now \(isPlaying)")
 
-    NotificationCenter.default.post(name: .soothingMelodyDidStop, object: nil)
+    NotificationCenter.default.post(name: .snoreInterrupterDidStop, object: nil)
   }
 
   /// Stops the current melody and prevents any further playback during this recording session.
   public func muteForSession() {
     stop()
     isMutedForSession = true
-    print("[SoothingMelodyPlayer] Muted for remainder of session")
+    print("[SnoreInterrupterPlayer] Muted for remainder of session")
   }
 
   /// Resets the session mute flag. Called when a new recording session starts.
   public func resetSessionMute() {
     isMutedForSession = false
-    print("[SoothingMelodyPlayer] Session mute reset")
+    print("[SnoreInterrupterPlayer] Session mute reset")
   }
 }
 
-extension SoothingMelodyPlayer: AVAudioPlayerDelegate {
+extension SnoreInterrupterPlayer: AVAudioPlayerDelegate {
   nonisolated public func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
     Task { @MainActor in
       self.stop()
@@ -170,7 +170,7 @@ extension SoothingMelodyPlayer: AVAudioPlayerDelegate {
   }
 }
 
-private extension UserPreferences.SoothingMelodyMode {
+private extension UserPreferences.SnoreInterrupterMode {
   var duration: TimeInterval {
     switch self {
     case .never, .always: return 0
