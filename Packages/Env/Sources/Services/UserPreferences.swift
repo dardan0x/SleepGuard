@@ -202,14 +202,14 @@ public final class UserPreferences {
     case system
   }
 
-  public var soothingMelodyMode: SoothingMelodyMode {
+  public var snoreInterrupterMode: SnoreInterrupterMode {
     get {
-      access(keyPath: \.soothingMelodyMode)
+      access(keyPath: \.snoreInterrupterMode)
       let raw = defaults.string(forKey: "soothingMelodyMode") ?? "never"
-      return SoothingMelodyMode(rawValue: raw) ?? .never
+      return SnoreInterrupterMode(rawValue: raw) ?? .never
     }
     set {
-      withMutation(keyPath: \.soothingMelodyMode) {
+      withMutation(keyPath: \.snoreInterrupterMode) {
         defaults.set(newValue.rawValue, forKey: "soothingMelodyMode")
       }
     }
@@ -363,7 +363,7 @@ public final class UserPreferences {
     }
   }
 
-  public enum SoothingMelodyMode: String, CaseIterable, Sendable {
+  public enum SnoreInterrupterMode: String, CaseIterable, Sendable {
     case never
     case always
     case fiveSeconds

@@ -70,13 +70,13 @@ public final class AudioRecorder {
     NotificationCenter.default.addObserver(
       self,
       selector: #selector(handleMelodyWillPlay),
-      name: .soothingMelodyWillPlay,
+      name: .snoreInterrupterWillPlay,
       object: nil
     )
     NotificationCenter.default.addObserver(
       self,
       selector: #selector(handleMelodyDidStop),
-      name: .soothingMelodyDidStop,
+      name: .snoreInterrupterDidStop,
       object: nil
     )
     NotificationCenter.default.addObserver(

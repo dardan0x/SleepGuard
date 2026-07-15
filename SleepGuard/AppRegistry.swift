@@ -18,7 +18,7 @@ extension View {
     healthKitSync: HealthKitSync,
     watchConnectivityManager: WatchConnectivityManager,
     soundAnalysisDetector: SoundAnalysisDetector,
-    soothingMelodyPlayer: SoothingMelodyPlayer,
+    snoreInterrupterPlayer: SnoreInterrupterPlayer,
     appConfig: AppConfig,
     notificationPermissionManager: NotificationPermissionManager
   ) -> some View {
@@ -30,7 +30,7 @@ extension View {
       .environment(healthKitSync)
       .environment(watchConnectivityManager)
       .environment(soundAnalysisDetector)
-      .environment(soothingMelodyPlayer)
+      .environment(snoreInterrupterPlayer)
       .environment(appConfig)
       .environment(notificationPermissionManager)
   }
@@ -44,7 +44,7 @@ extension View {
       .environment(HealthKitSync.shared)
       .environment(WatchConnectivityManager.shared)
       .environment(SoundAnalysisDetector.shared)
-      .environment(SoothingMelodyPlayer.shared)
+      .environment(SnoreInterrupterPlayer.shared)
       .environment(AppConfig.shared)
       .environment(NotificationPermissionManager.shared)
       .environment(RouterPath())

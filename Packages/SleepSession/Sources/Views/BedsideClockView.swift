@@ -9,7 +9,7 @@ struct BedsideClockView: View {
     @Environment(SessionManager.self) private var sessionManager
     @Environment(AudioRecorder.self) private var audioRecorder
     @Environment(SoundAnalysisDetector.self) private var soundAnalysisDetector
-    @Environment(SoothingMelodyPlayer.self) private var soothingMelodyPlayer
+    @Environment(SnoreInterrupterPlayer.self) private var snoreInterrupterPlayer
     @Environment(AppConfig.self) private var appConfig
     @Environment(Theme.self) private var theme
     
@@ -26,7 +26,7 @@ struct BedsideClockView: View {
                         eventsCount: sessionManager.eventsCount
                     )
                     
-                    if isMelodyEnabled && !soothingMelodyPlayer.isMutedForSession {
+                    if isMelodyEnabled && !snoreInterrupterPlayer.isMutedForSession {
                         melodyDisclaimer
                             .padding(.top, 10)
                             .padding(.horizontal, 20)
@@ -71,7 +71,7 @@ struct BedsideClockView: View {
                 .padding(.bottom, 32)
             }
             .overlay(alignment: .top) {
-                if isMelodyEnabled && soothingMelodyPlayer.isPlaying {
+                if isMelodyEnabled && snoreInterrupterPlayer.isPlaying {
                     melodyOverlay
                 }
             }
@@ -148,7 +148,7 @@ struct BedsideClockView: View {
     }
     
     private var isMelodyEnabled: Bool {
-        appConfig.isEnabled(.soothingMelody) && UserPreferences.shared.soothingMelodyMode != .never
+        appConfig.isEnabled(.snoreInterrupter) && UserPreferences.shared.snoreInterrupterMode != .never
     }
     
     // MARK: - Melody Disclaimer
@@ -168,7 +168,7 @@ struct BedsideClockView: View {
                 .foregroundStyle(theme.textTertiary)
             
             Button {
-                soothingMelodyPlayer.muteForSession()
+                snoreInterrupterPlayer.muteForSession()
             } label: {
                 Text(Strings.muteForSession)
                     .font(.system(size: 14, weight: .semibold))
@@ -194,7 +194,7 @@ struct BedsideClockView: View {
                     .foregroundStyle(theme.accent)
                     .symbolEffect(.pulse, options: .repeating)
                 
-                Text("\(Strings.playingSoothingMelodyPlayer) \(soothingMelodyPlayer.currentMelodyName ?? "Melody")")
+                Text("\(Strings.playingSnoreInterrupterPlayer) \(snoreInterrupterPlayer.currentMelodyName ?? "Melody")")
                     .font(.system(size: 14, weight: .medium))
                     .foregroundStyle(theme.textPrimary)
                     .lineLimit(1)
@@ -204,7 +204,7 @@ struct BedsideClockView: View {
             
             HStack(spacing: 12) {
                 Button {
-                    soothingMelodyPlayer.muteForSession()
+                    snoreInterrupterPlayer.muteForSession()
                 } label: {
                     Text(Strings.muteForSession)
                         .font(.system(size: 13, weight: .semibold))
@@ -219,9 +219,9 @@ struct BedsideClockView: View {
                 .buttonStyle(.plain)
                 
                 Button {
-                    soothingMelodyPlayer.stop()
+                    snoreInterrupterPlayer.stop()
                 } label: {
-                    Text(Strings.stopSoothingMelodyPlayer)
+                    Text(Strings.stopSnoreInterrupterPlayer)
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundStyle(theme.accent)
                         .frame(maxWidth: .infinity)

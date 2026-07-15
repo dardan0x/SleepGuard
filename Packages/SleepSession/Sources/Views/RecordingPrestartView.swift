@@ -15,7 +15,7 @@ struct RecordingPrestartView: View {
     private let audioRecorder = AudioRecorder.shared
     
     private let delayOptions = [0, 15, 30, 45, 60]
-    @State private var showSoothingMelodySheet = false
+    @State private var showSnoreInterrupterSheet = false
     @State private var showChargingAlert = false
     @State private var showMicrophoneAlert = false
     
@@ -35,19 +35,19 @@ struct RecordingPrestartView: View {
                     VStack(spacing: 12) {
                         VStack(alignment: .leading, spacing: 8) {
                             delaySection
-                            if appConfig.isEnabled(.soothingMelody) {
-                                soothingMelodyRow(
+                            if appConfig.isEnabled(.snoreInterrupter) {
+                                snoreInterrupterRow(
                                     icon: "timer",
-                                    title: Strings.soothingMelodyRecordingPrestartViewTitle,
-                                    value: soothingMelodyValue,
-                                    subtitle: Strings.soothingMelodyLockscreenNote
+                                    title: Strings.snoreInterrupterRecordingPrestartViewTitle,
+                                    value: snoreInterrupterValue,
+                                    subtitle: Strings.snoreInterrupterLockscreenNote
                                 ) {
-                                    showSoothingMelodySheet = true
+                                    showSnoreInterrupterSheet = true
                                 }
                                 .padding(.top, 8)
                             }
                         }
-                        if appConfig.isEnabled(.soothingMelody) {
+                        if appConfig.isEnabled(.snoreInterrupter) {
                             helperText
                         }
                     }
@@ -88,8 +88,8 @@ struct RecordingPrestartView: View {
             .background(theme.bgPrimary.ignoresSafeArea(edges: .bottom))
         }
         .background(theme.bgPrimary.ignoresSafeArea())
-        .sheet(isPresented: $showSoothingMelodySheet) {
-            SoothingMelodySheet()
+        .sheet(isPresented: $showSnoreInterrupterSheet) {
+            SnoreInterrupterSheet()
         }
         .alert(Strings.sessionChargingAlertTitle, isPresented: $showChargingAlert) {
             Button(Strings.actionCancel, role: .cancel) {}
@@ -135,20 +135,20 @@ struct RecordingPrestartView: View {
 #endif
     }
     
-    private var soothingMelodyValue: String {
-        switch userPreferences.soothingMelodyMode {
+    private var snoreInterrupterValue: String {
+        switch userPreferences.snoreInterrupterMode {
         case .never:
-            return Strings.offSoothingMelodyValueFormat
+            return Strings.snoreInterrupterOffValueFormat
         case .always:
-            return Strings.alwaysSoothingMelodyValueFormat
+            return Strings.snoreInterrupterAlwaysValueFormat
         case .fiveSeconds:
-            return Strings.fiveSecondsSoothingMelodyValueFormat
+            return Strings.snoreInterrupterFiveSecondsValueFormat
         case .fifteenSeconds:
-            return Strings.fifteenSecondsSoothingMelodyValueFormat
+            return Strings.snoreInterrupterFifteenSecondsValueFormat
         case .thirtySeconds:
-            return Strings.thirtySecondsSoothingMelodyValueFormat
+            return Strings.snoreInterrupterThirtySecondsValueFormat
         case .sixtySeconds:
-            return Strings.sixtySecondsSoothingMelodyValueFormat
+            return Strings.snoreInterrupterSixtySecondsValueFormat
         }
     }
     
@@ -234,7 +234,7 @@ struct RecordingPrestartView: View {
         .padding(.vertical, 14)
     }
     
-    private func soothingMelodyRow(icon: String, title: String, value: String, subtitle: String? = nil, action: @escaping () -> Void) -> some View {
+    private func snoreInterrupterRow(icon: String, title: String, value: String, subtitle: String? = nil, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             VStack(spacing: 4) {
                 HStack(spacing: 12) {
@@ -317,7 +317,7 @@ struct RecordingPrestartView: View {
     }
     
     private var helperText: some View {
-        Text(Strings.soothingMelodyRowHelperText)
+        Text(Strings.snoreInterrupterRowHelperText)
             .font(.system(size: 14))
             .foregroundStyle(theme.textTertiary)
             .multilineTextAlignment(.center)

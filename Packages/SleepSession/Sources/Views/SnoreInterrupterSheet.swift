@@ -4,12 +4,12 @@ import Models
 import SwiftUI
 
 @MainActor
-struct SoothingMelodySheet: View {
+struct SnoreInterrupterSheet: View {
     @Environment(Theme.self) private var theme
     @Environment(UserPreferences.self) private var userPreferences
     @Environment(\.dismiss) private var dismiss
     
-    @State private var draftMode: UserPreferences.SoothingMelodyMode = .never
+    @State private var draftMode: UserPreferences.SnoreInterrupterMode = .never
     @State private var draftMelodyID: Int = 6
     @State private var showMelodyPicker = false
     
@@ -27,7 +27,7 @@ struct SoothingMelodySheet: View {
             SheetHandle()
             
             SheetNavHeader(
-                title: Strings.soothingMelodyRecordingPrestartViewTitle.uppercased(),
+                title: Strings.snoreInterrupterRecordingPrestartViewTitle.uppercased(),
                 onBack: { dismiss() }
             )
             
@@ -54,7 +54,7 @@ struct SoothingMelodySheet: View {
         }
         .background(theme.bgPrimary.ignoresSafeArea())
         .onAppear {
-            draftMode = userPreferences.soothingMelodyMode
+            draftMode = userPreferences.snoreInterrupterMode
             draftMelodyID = userPreferences.selectedMelodyID
         }
         .sheet(isPresented: $showMelodyPicker) {
@@ -66,12 +66,12 @@ struct SoothingMelodySheet: View {
     
     private var descriptionSection: some View {
         VStack(spacing: 2) {
-            Text(Strings.soothingMelodySheetDescSectionTitle)
+            Text(Strings.snoreInterrupterSheetDescSectionTitle)
                 .font(.system(size: 15))
                 .foregroundStyle(theme.textPrimary)
                 .multilineTextAlignment(.center)
             
-            Text(Strings.soothingMelodySheetDescSectionSubtitle)
+            Text(Strings.snoreInterrupterSheetDescSectionSubtitle)
                 .font(.system(size: 15))
                 .foregroundStyle(theme.textDim)
                 .multilineTextAlignment(.center)
@@ -80,7 +80,7 @@ struct SoothingMelodySheet: View {
     
     private var durationPicker: some View {
         Picker(Strings.durationPickerTitle, selection: $draftMode) {
-            ForEach(UserPreferences.SoothingMelodyMode.allCases, id: \.self) { mode in
+            ForEach(UserPreferences.SnoreInterrupterMode.allCases, id: \.self) { mode in
                 Text(mode.displayLabel)
                     .tag(mode)
             }
@@ -107,7 +107,7 @@ struct SoothingMelodySheet: View {
                 }
                 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(Strings.soothingTuneMelodySheet)
+                    Text(Strings.snoreInterrupterSoundSheet)
                         .font(.system(size: 17))
                         .foregroundStyle(theme.textPrimary)
                     
@@ -135,7 +135,7 @@ struct SoothingMelodySheet: View {
                 .fill(theme.accent)
                 .frame(width: 6, height: 6)
             
-            Text(isMelodyEnabled ? Strings.melodyEnabledSoothingMelodySheet : Strings.melodyDisabledSoothingMelodySheet)
+            Text(isMelodyEnabled ? Strings.soundEnabledSnoreInterrupterSheet : Strings.soundDisabledSnoreInterrupterSheet)
                 .font(.system(size: 12))
                 .foregroundStyle(theme.accent)
         }
@@ -152,7 +152,7 @@ struct SoothingMelodySheet: View {
     private var buttonsArea: some View {
         VStack(spacing: 8) {
             Button {
-                userPreferences.soothingMelodyMode = draftMode
+                userPreferences.snoreInterrupterMode = draftMode
                 userPreferences.selectedMelodyID = draftMelodyID
                 dismiss()
             } label: {

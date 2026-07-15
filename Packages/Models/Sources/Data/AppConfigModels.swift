@@ -8,7 +8,8 @@ public enum FeatureFlag: String, CaseIterable, Sendable {
   case sleepScore
   case trends
   case calendar
-  case soothingMelody
+  // Raw value pinned to the original "soothingMelody" key so existing Remote Config stays compatible.
+  case snoreInterrupter = "soothingMelody"
   case healthSync
   case watchApp
   case lifestyleLogging
