@@ -1,3 +1,4 @@
+import AudioEngine
 import Foundation
 import UserNotifications
 import Observation
@@ -16,7 +17,7 @@ public final class RecordingDelayManager {
   public var currentRemainingSeconds: Int = 0
 
   private var timer: Timer?
-  private let notificationId = "sleepguard-delayed-recording"
+  public let notificationId = "sleepguard-delayed-recording"
 
   private init() {}
 
@@ -29,6 +30,7 @@ public final class RecordingDelayManager {
     isActive = true
     updateCurrentRemainingSeconds()
     scheduleNotification(minutes: minutes)
+    startWarmup()
     startTimer()
   }
 
@@ -38,6 +40,7 @@ public final class RecordingDelayManager {
     currentRemainingSeconds = 0
     timer?.invalidate()
     timer = nil
+    stopWarmup()
     cancelNotification()
   }
 
@@ -80,6 +83,18 @@ public final class RecordingDelayManager {
       return
     }
     currentRemainingSeconds = max(0, Int(targetDate.timeIntervalSinceNow))
+  }
+
+  private func startWarmup() {
+    do {
+      try AudioRecorder.shared.startWarmup()
+    } catch {
+      print("[RecordingDelayManager] Failed to start audio warmup: \(error)")
+    }
+  }
+
+  private func stopWarmup() {
+    AudioRecorder.shared.stopWarmup()
   }
 
   // MARK: - Notifications
