@@ -72,7 +72,13 @@ public final class SleepSession {
     public var cachedSleepScore: Int = 0
     public var cachedSnoringDuration: TimeInterval = 0
 
-    public static let minimumSaveDuration: TimeInterval = 120
+    public static var minimumSaveDuration: TimeInterval {
+        #if DEBUG
+        return 120
+        #else
+        return 1800
+        #endif
+    }
 
     public init(
         id: UUID = UUID(),
