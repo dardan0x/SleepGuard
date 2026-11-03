@@ -70,10 +70,10 @@ facing behavior changes — this is an infrastructure hardening feature.
 | F17-T3 | AudioEngine → Swift 6 (tools 6.2, v6) | Migration | Done | F17-T2 | AudioEngine | 2026-11-03 | 2026-11-03 |
 | F17-T4 | Env → Swift 6 (tools 6.2, v6) | Migration | Done | F17-T2, F17-T3 | Env | 2026-11-03 | 2026-11-03 |
 | F17-T5 | DesignSystem → v6 + .defaultIsolation(MainActor) | Migration | Done | F17-T4 | DesignSystem | 2026-11-03 | 2026-11-03 |
-| F17-T6 | Onboarding → v6 + .defaultIsolation(MainActor) | Migration | Backlog | F17-T5 | Onboarding | — | — |
-| F17-T7 | SleepSession → v6 + .defaultIsolation(MainActor) | Migration | Backlog | F17-T5 | SleepSession | — | — |
-| F17-T8 | Statistics → v6 + .defaultIsolation(MainActor) | Migration | Backlog | F17-T5 | Statistics | — | — |
-| F17-T9 | Recordings → v6 + .defaultIsolation(MainActor) | Migration | Backlog | F17-T5 | Recordings | — | — |
+| F17-T6 | Onboarding → v6 + .defaultIsolation(MainActor) | Migration | Done | F17-T5 | Onboarding | 2026-11-04 | 2026-11-04 |
+| F17-T7 | SleepSession → v6 + .defaultIsolation(MainActor) | Migration | Done | F17-T5 | SleepSession | 2026-11-04 | 2026-11-04 |
+| F17-T8 | Statistics → v6 + .defaultIsolation(MainActor) | Migration | Done | F17-T5 | Statistics | 2026-11-04 | 2026-11-04 |
+| F17-T9 | Recordings → v6 + .defaultIsolation(MainActor) | Migration | In Progress | F17-T5 | Recordings | 2026-11-04 | — |
 | F17-T10 | Personalization → v6 + .defaultIsolation(MainActor) | Migration | Backlog | F17-T5 | Personalization | — | — |
 | F17-T11 | Settings → v6 + .defaultIsolation(MainActor) | Migration | Backlog | F17-T10 | Settings | — | — |
 | F17-T12 | Learn → v6 + .defaultIsolation(MainActor) | Migration | Backlog | F17-T5 | Learn | — | — |
@@ -223,19 +223,19 @@ Migrate DesignSystem to Swift 6 with `.defaultIsolation(MainActor.self)`; fix al
 | Field | Value |
 |-------|-------|
 | Arch Ref | `docs/architecture/views.md` |
-| Status | Backlog |
-| Started | — |
-| Completed | — |
+| Status | Done |
+| Started | 2026-11-04 |
+| Completed | 2026-11-04 |
 
 **Acceptance Criteria:**
-- [ ] `Package.swift`: tools 6.2 + v6 + `.defaultIsolation(MainActor.self)`
-- [ ] Package builds standalone with zero errors
+- [x] `Package.swift`: tools 6.2 + v6 + `.defaultIsolation(MainActor.self)`
+- [x] Package builds standalone with zero errors
 
 **Prompt Used:**
-_(filled after task completion)_
+Migrate Onboarding to Swift 6 with `.defaultIsolation(MainActor.self)`; fix any surfaced errors.
 
 **Notes:**
-_—_
+- Zero source changes required — manifest-only flip. First UI package that needed no consumer annotations. Branch `feature/f17/t6-onboarding-swift6`, merged via PR #66.
 
 ---
 
@@ -244,19 +244,21 @@ _—_
 | Field | Value |
 |-------|-------|
 | Arch Ref | `docs/architecture/views.md` |
-| Status | Backlog |
-| Started | — |
-| Completed | — |
+| Status | Done |
+| Started | 2026-11-04 |
+| Completed | 2026-11-04 |
 
 **Acceptance Criteria:**
-- [ ] `Package.swift`: tools 6.2 + v6 + `.defaultIsolation(MainActor.self)`
-- [ ] Package builds standalone with zero errors
+- [x] `Package.swift`: tools 6.2 + v6 + `.defaultIsolation(MainActor.self)`
+- [x] Package builds standalone with zero errors
 
 **Prompt Used:**
-_(filled after task completion)_
+Migrate SleepSession to Swift 6 with `.defaultIsolation(MainActor.self)`; fix any surfaced errors.
 
 **Notes:**
-_—_
+- New error class surfaced: **conformance availability**. Swift 6 enforces protocol-conformance availability — `BounceSymbolEffect: IndefiniteSymbolEffect` is annotated iOS 18+ while the package targets iOS 17. Swift 5 mode silently allowed it.
+- Fix: extracted `PreviewSpeakerIcon` in `MelodyPickerSheet`; `.bounce.repeating` gated behind `if #available(iOS 18, *)`, `.pulse` fallback on iOS 17 (`PulseSymbolEffect`'s indefinite conformance IS iOS 17-annotated — `BedsideClockView` compiles untouched). Discrete `.bounce` also resolves to the iOS 18 conformance, so it couldn't serve as the fallback.
+- Runtime impact: on iOS 17 the melody-preview icon pulses instead of bounces. iOS 18+ unchanged. Flagged for T14 smoke test on a 17-device if available. Branch `feature/f17/t7-sleepsession-swift6`, merged PR #67.
 
 ---
 
@@ -265,19 +267,19 @@ _—_
 | Field | Value |
 |-------|-------|
 | Arch Ref | `docs/architecture/views.md` |
-| Status | Backlog |
-| Started | — |
-| Completed | — |
+| Status | Done |
+| Started | 2026-11-04 |
+| Completed | 2026-11-04 |
 
 **Acceptance Criteria:**
-- [ ] `Package.swift`: tools 6.2 + v6 + `.defaultIsolation(MainActor.self)`
-- [ ] Package builds standalone with zero errors
+- [x] `Package.swift`: tools 6.2 + v6 + `.defaultIsolation(MainActor.self)`
+- [x] Package builds standalone with zero errors
 
 **Prompt Used:**
-_(filled after task completion)_
+Migrate Statistics to Swift 6 with `.defaultIsolation(MainActor.self)`; fix any surfaced errors.
 
 **Notes:**
-_—_
+- Manifest-only flip — zero source changes. The `TimeRange` `@MainActor` annotation from T5 already satisfied the Strings isolation. Branch `feature/f17/t8-statistics-swift6`, merged PR #68.
 
 ---
 
