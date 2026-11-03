@@ -75,8 +75,8 @@ facing behavior changes — this is an infrastructure hardening feature.
 | F17-T8 | Statistics → v6 + .defaultIsolation(MainActor) | Migration | Done | F17-T5 | Statistics | 2026-11-04 | 2026-11-04 |
 | F17-T9 | Recordings → v6 + .defaultIsolation(MainActor) | Migration | Done | F17-T5 | Recordings | 2026-11-04 | 2026-11-04 |
 | F17-T10 | Personalization → v6 + .defaultIsolation(MainActor) | Migration | Done | F17-T5 | Personalization | 2026-11-04 | 2026-11-04 |
-| F17-T11 | Settings → v6 + .defaultIsolation(MainActor) | Migration | In Progress | F17-T10 | Settings | 2026-11-04 | — |
-| F17-T12 | Learn → v6 + .defaultIsolation(MainActor) | Migration | Backlog | F17-T5 | Learn | — | — |
+| F17-T11 | Settings → v6 + .defaultIsolation(MainActor) | Migration | Done | F17-T10 | Settings | 2026-11-04 | 2026-11-04 |
+| F17-T12 | Learn → v6 + .defaultIsolation(MainActor) | Migration | In Progress | F17-T5 | Learn | 2026-11-04 | — |
 | F17-T13 | App target → Swift 6 + strict concurrency complete | Migration | Backlog | F17-T2–F17-T12 | App | — | — |
 | F17-T14 | Full verification: build + tests + simulator smoke test | Verify | Backlog | F17-T13 | repo | — | — |
 | F17-T15 | Docs sync: architecture docs + AGENTS/CLAUDE concurrency rules | Docs | Backlog | F17-T13 | docs | — | — |
@@ -334,19 +334,19 @@ Migrate Personalization to Swift 6 with `.defaultIsolation(MainActor.self)`; fix
 | Field | Value |
 |-------|-------|
 | Arch Ref | `docs/architecture/views.md` |
-| Status | Backlog |
-| Started | — |
-| Completed | — |
+| Status | Done |
+| Started | 2026-11-04 |
+| Completed | 2026-11-04 |
 
 **Acceptance Criteria:**
-- [ ] `Package.swift`: tools 6.2 + v6 + `.defaultIsolation(MainActor.self)`
-- [ ] Package builds standalone with zero errors (depends on Personalization from F17-T10)
+- [x] `Package.swift`: tools 6.2 + v6 + `.defaultIsolation(MainActor.self)`
+- [x] Package builds standalone with zero errors (depends on Personalization from F17-T10)
 
 **Prompt Used:**
-_(filled after task completion)_
+Migrate Settings to Swift 6 with `.defaultIsolation(MainActor.self)`; fix any surfaced errors.
 
 **Notes:**
-_—_
+- Manifest-only flip — zero source changes. **All 11 packages now on Swift 6.** Branch `feature/f17/t11-settings-swift6`, merged PR #71 (user merged on GitHub).
 
 ---
 
