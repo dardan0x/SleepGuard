@@ -456,6 +456,7 @@ public struct SessionDetailView: View {
     }
   }
 
+  @MainActor
   private enum EventCategoryFilter: String, CaseIterable {
     case all
     case snoring

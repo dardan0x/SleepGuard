@@ -161,6 +161,7 @@ public struct TrendsView: View {
     }
 }
 
+@MainActor
 private enum TimeRange: String, CaseIterable, Identifiable {
     case week = "Week"
     case month = "Month"
