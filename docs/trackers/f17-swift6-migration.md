@@ -73,9 +73,9 @@ facing behavior changes — this is an infrastructure hardening feature.
 | F17-T6 | Onboarding → v6 + .defaultIsolation(MainActor) | Migration | Done | F17-T5 | Onboarding | 2026-11-04 | 2026-11-04 |
 | F17-T7 | SleepSession → v6 + .defaultIsolation(MainActor) | Migration | Done | F17-T5 | SleepSession | 2026-11-04 | 2026-11-04 |
 | F17-T8 | Statistics → v6 + .defaultIsolation(MainActor) | Migration | Done | F17-T5 | Statistics | 2026-11-04 | 2026-11-04 |
-| F17-T9 | Recordings → v6 + .defaultIsolation(MainActor) | Migration | In Progress | F17-T5 | Recordings | 2026-11-04 | — |
-| F17-T10 | Personalization → v6 + .defaultIsolation(MainActor) | Migration | Backlog | F17-T5 | Personalization | — | — |
-| F17-T11 | Settings → v6 + .defaultIsolation(MainActor) | Migration | Backlog | F17-T10 | Settings | — | — |
+| F17-T9 | Recordings → v6 + .defaultIsolation(MainActor) | Migration | Done | F17-T5 | Recordings | 2026-11-04 | 2026-11-04 |
+| F17-T10 | Personalization → v6 + .defaultIsolation(MainActor) | Migration | Done | F17-T5 | Personalization | 2026-11-04 | 2026-11-04 |
+| F17-T11 | Settings → v6 + .defaultIsolation(MainActor) | Migration | In Progress | F17-T10 | Settings | 2026-11-04 | — |
 | F17-T12 | Learn → v6 + .defaultIsolation(MainActor) | Migration | Backlog | F17-T5 | Learn | — | — |
 | F17-T13 | App target → Swift 6 + strict concurrency complete | Migration | Backlog | F17-T2–F17-T12 | App | — | — |
 | F17-T14 | Full verification: build + tests + simulator smoke test | Verify | Backlog | F17-T13 | repo | — | — |
@@ -288,22 +288,22 @@ Migrate Statistics to Swift 6 with `.defaultIsolation(MainActor.self)`; fix any 
 | Field | Value |
 |-------|-------|
 | Arch Ref | `docs/architecture/views.md` |
-| Status | Backlog |
-| Started | — |
-| Completed | — |
+| Status | Done |
+| Started | 2026-11-04 |
+| Completed | 2026-11-04 |
 
 **Acceptance Criteria:**
-- [ ] `Package.swift`: tools 6.2 + v6 + `.defaultIsolation(MainActor.self)`
-- [ ] `Task.detached` in `PlayerSheetView` audited
-- [ ] `@escaping` playback callbacks in `SessionDetailMiniPlayerView` compile under v6
-- [ ] Zero `@unchecked Sendable` introduced
-- [ ] Package builds standalone with zero errors
+- [x] `Package.swift`: tools 6.2 + v6 + `.defaultIsolation(MainActor.self)`
+- [x] `Task.detached` in `PlayerSheetView` audited
+- [x] `@escaping` playback callbacks in `SessionDetailMiniPlayerView` compile under v6
+- [x] Zero `@unchecked Sendable` introduced
+- [x] Package builds standalone with zero errors
 
 **Prompt Used:**
-_(filled after task completion)_
+Migrate Recordings to Swift 6 with `.defaultIsolation(MainActor.self)`; fix any surfaced errors.
 
 **Notes:**
-_—_
+- One error: `Task.detached` called MainActor-isolated `WaveformGenerator.generateSamples` (package default isolation made the pure utility actor-isolated). Fix: both static methods marked `nonisolated`; `event.snoreDuration` hoisted to a Sendable local so the detached task no longer captures the non-Sendable `SnoreEvent`. Branch `feature/f17/t9-recordings-swift6`, merged PR #69.
 
 ---
 
@@ -312,20 +312,20 @@ _—_
 | Field | Value |
 |-------|-------|
 | Arch Ref | `docs/architecture/views.md` |
-| Status | Backlog |
-| Started | — |
-| Completed | — |
+| Status | Done |
+| Started | 2026-11-04 |
+| Completed | 2026-11-04 |
 
 **Acceptance Criteria:**
-- [ ] `Package.swift`: tools 6.2 + v6 + `.defaultIsolation(MainActor.self)`
-- [ ] `@escaping` callbacks in `BriefingSurveyCard`, `ProfilePromptCard`, `ProfileEditorView`, `SleepBriefingView` compile under v6
-- [ ] Package builds standalone with zero errors
+- [x] `Package.swift`: tools 6.2 + v6 + `.defaultIsolation(MainActor.self)`
+- [x] `@escaping` callbacks in `BriefingSurveyCard`, `ProfilePromptCard`, `ProfileEditorView`, `SleepBriefingView` compile under v6
+- [x] Package builds standalone with zero errors
 
 **Prompt Used:**
-_(filled after task completion)_
+Migrate Personalization to Swift 6 with `.defaultIsolation(MainActor.self)`; fix any surfaced errors.
 
 **Notes:**
-_—_
+- Manifest-only flip — zero source changes; `@escaping` view callbacks compile fine under package default isolation. Noted: this package has the project's only test target (`PersonalizationTests`, 23 BriefingEngine tests) — flipped to v6 + default isolation too; builds clean. Running the tests needs a test action wired into a scheme (out of scope here; flagged for T14). Branch `feature/f17/t10-personalization-swift6`, merged PR #70.
 
 ---
 
