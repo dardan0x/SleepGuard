@@ -46,12 +46,12 @@ Last updated: 2026-11-03
 | Blocked | 0 |
 | — | — |
 | Total Tasks | 105 |
-| Tasks Done | 85 |
+| Tasks Done | 86 |
 | Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
-| Tasks Backlog | 20 |
+| Tasks Backlog | 19 |
 | — | — |
-| **Progress** | **81%** |
+| **Progress** | **82%** |
 
 ## Features
 
@@ -73,7 +73,7 @@ Last updated: 2026-11-03
 | F14 | SleepGuard Rebrand & Multi-Sound | P0 | Done | 27/27 | ██████████ 100% | [tracker](trackers/f14-sleepguard-rebrand.md) |
 | F15 | Personalization & Sleep Briefing | P1 | Done | 16/16 | ██████████ 100% | [tracker](trackers/f15-personalization.md) |
 | F16 | Learn Tab | P2 | Done | 1/1 | ██████████ 100% | [tracker](trackers/f16-learn-tab.md) |
-| F17 | Swift 6 Migration | P1 | In Progress | 11/16 | ███████████ 69% | [tracker](trackers/f17-swift6-migration.md) |
+| F17 | Swift 6 Migration | P1 | In Progress | 12/16 | ████████████ 75% | [tracker](trackers/f17-swift6-migration.md) |
 
 ## Activity Log
 
@@ -81,6 +81,8 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-11-04 | F17-T13 | Completed | App target → `SWIFT_VERSION = 6.0` + `SWIFT_STRICT_CONCURRENCY = complete` (Debug+Release). Compiled clean FIRST try — all 9 app files zero changes. **Entire codebase now Swift 6.** Merged PR #72 |
+| 2026-11-04 | F17-T12 | Completed | Learn → Swift 6 + `.defaultIsolation(MainActor)`: manifest-only flip, zero source changes (`decidePolicy` handler not Sendable-checked by SDK). Merged locally per small-change rule |
 | 2026-11-04 | F17-T11 | Completed | Settings → Swift 6 + `.defaultIsolation(MainActor)`: manifest-only flip, zero source changes. **All 11 packages now Swift 6.** Merged PR #71 |
 | 2026-11-04 | F17-T10 | Completed | Personalization → Swift 6 + `.defaultIsolation(MainActor)`: manifest-only flip (library + PersonalizationTests targets). Zero source changes. Merged PR #70 |
 | 2026-11-04 | F17-T9 | Completed | Recordings → Swift 6 + `.defaultIsolation(MainActor)`. Fix: `WaveformGenerator` statics `nonisolated`; `event.snoreDuration` hoisted out of `Task.detached` capture. Merged PR #69 |

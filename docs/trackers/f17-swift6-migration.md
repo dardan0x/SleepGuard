@@ -76,9 +76,9 @@ facing behavior changes — this is an infrastructure hardening feature.
 | F17-T9 | Recordings → v6 + .defaultIsolation(MainActor) | Migration | Done | F17-T5 | Recordings | 2026-11-04 | 2026-11-04 |
 | F17-T10 | Personalization → v6 + .defaultIsolation(MainActor) | Migration | Done | F17-T5 | Personalization | 2026-11-04 | 2026-11-04 |
 | F17-T11 | Settings → v6 + .defaultIsolation(MainActor) | Migration | Done | F17-T10 | Settings | 2026-11-04 | 2026-11-04 |
-| F17-T12 | Learn → v6 + .defaultIsolation(MainActor) | Migration | In Progress | F17-T5 | Learn | 2026-11-04 | — |
-| F17-T13 | App target → Swift 6 + strict concurrency complete | Migration | Backlog | F17-T2–F17-T12 | App | — | — |
-| F17-T14 | Full verification: build + tests + simulator smoke test | Verify | Backlog | F17-T13 | repo | — | — |
+| F17-T12 | Learn → v6 + .defaultIsolation(MainActor) | Migration | Done | F17-T5 | Learn | 2026-11-04 | 2026-11-04 |
+| F17-T13 | App target → Swift 6 + strict concurrency complete | Migration | Done | F17-T2–F17-T12 | App | 2026-11-04 | 2026-11-04 |
+| F17-T14 | Full verification: build + tests + simulator smoke test | Verify | In Progress | F17-T13 | repo | 2026-11-04 | — |
 | F17-T15 | Docs sync: architecture docs + AGENTS/CLAUDE concurrency rules | Docs | Backlog | F17-T13 | docs | — | — |
 | F17-T16 | Feature doc + session fragment | Docs | Backlog | F17-T14, F17-T15 | docs | — | — |
 
@@ -355,20 +355,20 @@ Migrate Settings to Swift 6 with `.defaultIsolation(MainActor.self)`; fix any su
 | Field | Value |
 |-------|-------|
 | Arch Ref | `docs/architecture/views.md` |
-| Status | Backlog |
-| Started | — |
-| Completed | — |
+| Status | Done |
+| Started | 2026-11-04 |
+| Completed | 2026-11-04 |
 
 **Acceptance Criteria:**
-- [ ] `Package.swift`: tools 6.2 + v6 + `.defaultIsolation(MainActor.self)`
-- [ ] `WKNavigationDelegate` `decisionHandler` in `LearnView` compiles under v6 (nonisolated pattern as in AudioEngine delegates)
-- [ ] Package builds standalone with zero errors
+- [x] `Package.swift`: tools 6.2 + v6 + `.defaultIsolation(MainActor.self)`
+- [x] `WKNavigationDelegate` `decisionHandler` in `LearnView` compiles under v6 (nonisolated pattern as in AudioEngine delegates)
+- [x] Package builds standalone with zero errors
 
 **Prompt Used:**
-_(filled after task completion)_
+Migrate Learn to Swift 6 with `.defaultIsolation(MainActor.self)`; fix any surfaced errors.
 
 **Notes:**
-_—_
+- Manifest-only flip — zero source changes. The `decidePolicy` completion handler is not Sendable/sending-checked in the iOS 26 SDK (same as AVFoundation delegate patterns). Flagged for T14 smoke test (Learn tab browsing). Merged locally into integration per the small-change rule.
 
 ---
 
@@ -377,24 +377,24 @@ _—_
 | Field | Value |
 |-------|-------|
 | Arch Ref | `docs/architecture/overview.md`, `docs/architecture/concurrency.md` |
-| Status | Backlog |
-| Started | — |
-| Completed | — |
+| Status | Done |
+| Started | 2026-11-04 |
+| Completed | 2026-11-04 |
 
 **Acceptance Criteria:**
-- [ ] `SWIFT_VERSION` 5.0 → 6.0 (app target)
-- [ ] `SWIFT_STRICT_CONCURRENCY = complete` set (project + app target)
-- [ ] `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor` and `SWIFT_APPROACHABLE_CONCURRENCY = YES` preserved
-- [ ] All 9 app-target Swift files compile under v6
-- [ ] No new Combine/GCD introduced
-- [ ] Zero `@unchecked Sendable` introduced
-- [ ] Full app build succeeds with zero errors
+- [x] `SWIFT_VERSION` 5.0 → 6.0 (app target, Debug + Release)
+- [x] `SWIFT_STRICT_CONCURRENCY = complete` set (both configs)
+- [x] `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor` and `SWIFT_APPROACHABLE_CONCURRENCY = YES` preserved
+- [x] All 9 app-target Swift files compile under v6
+- [x] No new Combine/GCD introduced
+- [x] Zero `@unchecked Sendable` introduced
+- [x] Full app build succeeds with zero errors
 
 **Prompt Used:**
-_(filled after task completion)_
+Flip the app target to Swift 6 with strict concurrency complete; fix any surfaced errors.
 
 **Notes:**
-_—_
+- **Compiled clean on the first try** — all 9 app files needed zero changes. Validates the project's IceCubes-style discipline (views already `@MainActor`, env-based DI, no Combine/GCD). Project-level SWIFT_VERSION intentionally left blank (only the 2 app configs carry it). Branch `feature/f17/t13-app-target-swift6`, merged PR #72. **Entire codebase now Swift 6.**
 
 ---
 
