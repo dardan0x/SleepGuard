@@ -46,12 +46,12 @@ Last updated: 2026-11-03
 | Blocked | 0 |
 | — | — |
 | Total Tasks | 105 |
-| Tasks Done | 80 |
+| Tasks Done | 82 |
 | Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
-| Tasks Backlog | 25 |
+| Tasks Backlog | 23 |
 | — | — |
-| **Progress** | **76%** |
+| **Progress** | **78%** |
 
 ## Features
 
@@ -73,7 +73,7 @@ Last updated: 2026-11-03
 | F14 | SleepGuard Rebrand & Multi-Sound | P0 | Done | 27/27 | ██████████ 100% | [tracker](trackers/f14-sleepguard-rebrand.md) |
 | F15 | Personalization & Sleep Briefing | P1 | Done | 16/16 | ██████████ 100% | [tracker](trackers/f15-personalization.md) |
 | F16 | Learn Tab | P2 | Done | 1/1 | ██████████ 100% | [tracker](trackers/f16-learn-tab.md) |
-| F17 | Swift 6 Migration | P1 | In Progress | 5/16 | █████░░░░░ 31% | [tracker](trackers/f17-swift6-migration.md) |
+| F17 | Swift 6 Migration | P1 | In Progress | 8/16 | ████████░░ 50% | [tracker](trackers/f17-swift6-migration.md) |
 
 ## Activity Log
 
@@ -81,6 +81,9 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-11-04 | F17-T8 | Completed | Statistics → Swift 6 + `.defaultIsolation(MainActor)`: manifest-only flip, zero source changes (T5's TimeRange annotation covered Strings isolation). Merged PR #68 |
+| 2026-11-04 | F17-T7 | Completed | SleepSession → Swift 6 + `.defaultIsolation(MainActor)`. New error class: conformance availability (`BounceSymbolEffect: IndefiniteSymbolEffect` is iOS 18+, target is iOS 17). Fix: `PreviewSpeakerIcon` with `#available(iOS 18, *)` bounce.repeating + `.pulse` fallback on 17. Merged PR #67 |
+| 2026-11-04 | F17-T6 | Completed | Onboarding → Swift 6 + `.defaultIsolation(MainActor)`: manifest-only flip, zero source changes. Build succeeds. Merged PR #66 |
 | 2026-11-03 | F17-T5 | Completed | DesignSystem → Swift 6 + `.defaultIsolation(MainActor)`. DesignSystem clean first try; consumer fallout in still-v5 packages: `TimeRange` (Statistics) and `EventCategoryFilter` (Recordings) annotated `@MainActor` (nonisolated enums referencing now-MainActor `Strings`). Build succeeds. Branch `feature/f17/t5-designsystem-swift6` |
 | 2026-11-03 | F17-T4 | Completed | Env → Swift 6: tools 6.2 + v6. Three fixes: `StorageLimitEnforcer` → `Sendable` + `@MainActor` (removed `MainActor.run` wrapper that sent `ModelContext`); `WatchConnectivityManager` → `nonisolated` WCSessionDelegate methods with MainActor hops (2 iterations). Build succeeds |
 | 2026-11-03 | F17-T3 | Completed | AudioEngine → Swift 6: tools 6.2 + v6. Two fixes: `ClipResult: Sendable` (withTaskGroup); `extractSingleClip` refactored to Sendable params (no longer captures non-Sendable `SnoreEvent` @Model in `addTask`). Build succeeds |
