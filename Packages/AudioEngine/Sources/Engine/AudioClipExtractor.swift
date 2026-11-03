@@ -8,7 +8,7 @@ import Models
 /// (from the first burst start to the last burst end) so breathing gaps
 /// between bursts remain in the playback audio.
 public enum AudioClipExtractor {
-  public struct ClipResult {
+  public struct ClipResult: Sendable {
     public let eventID: UUID
     public let clipURL: URL
     public let dominantFrequency: Double
@@ -43,9 +43,16 @@ public enum AudioClipExtractor {
 
       let batchResults = await withTaskGroup(of: ClipResult?.self) { group in
         for event in batch {
+          let eventID = event.id
+          let eventTimestamp = event.timestamp
+          let eventSnoreDuration = event.snoreDuration
+          let eventBursts = event.bursts
           group.addTask {
             return await extractSingleClip(
-              for: event,
+              eventID: eventID,
+              eventTimestamp: eventTimestamp,
+              eventSnoreDuration: eventSnoreDuration,
+              bursts: eventBursts,
               sessionURL: sessionURL,
               sessionStart: sessionStart,
               totalDuration: totalDuration,
@@ -72,16 +79,19 @@ public enum AudioClipExtractor {
   }
 
   public static func extractSingleClip(
-    for event: SnoreEvent,
+    eventID: UUID,
+    eventTimestamp: Date,
+    eventSnoreDuration: TimeInterval,
+    bursts: [SnoreBurst]?,
     sessionURL: URL,
     sessionStart: Date,
     totalDuration: TimeInterval,
     padding: TimeInterval,
     outputDirectory: URL
   ) async -> ClipResult? {
-    let eventTime = event.timestamp.timeIntervalSince(sessionStart)
+    let eventTime = eventTimestamp.timeIntervalSince(sessionStart)
     let clipURL = outputDirectory
-      .appendingPathComponent("event_\(event.id.uuidString).m4a")
+      .appendingPathComponent("event_\(eventID.uuidString).m4a")
 
     // Remove existing file
     if FileManager.default.fileExists(atPath: clipURL.path) {
@@ -91,7 +101,7 @@ public enum AudioClipExtractor {
     let exportAsset: AVAsset
     let exportTimeRange: CMTimeRange?
 
-    if let bursts = event.bursts, !bursts.isEmpty {
+    if let bursts, !bursts.isEmpty {
       // Preserve full event span including breathing gaps between bursts.
       let firstBurstStart = eventTime + bursts.first!.startOffset
       let lastBurstEnd = eventTime + bursts.last!.endOffset
@@ -106,7 +116,7 @@ public enum AudioClipExtractor {
     } else {
       // Legacy: single range export
       let startTime = max(0, eventTime - padding)
-      let endTime = min(totalDuration, eventTime + event.snoreDuration + padding)
+      let endTime = min(totalDuration, eventTime + eventSnoreDuration + padding)
       guard endTime > startTime else { return nil }
       exportAsset = AVURLAsset(url: sessionURL)
       exportTimeRange = CMTimeRange(
@@ -133,7 +143,7 @@ public enum AudioClipExtractor {
     let spectral = await analyzeSpectralFeatures(of: clipURL)
 
     return ClipResult(
-      eventID: event.id,
+      eventID: eventID,
       clipURL: clipURL,
       dominantFrequency: spectral.dominantFrequency,
       spectralCentroid: spectral.spectralCentroid,
@@ -160,7 +170,10 @@ public enum AudioClipExtractor {
   ) async -> ClipResult? {
     let totalDuration = await AVURLAsset(url: sessionURL).duration.seconds
     return await extractSingleClip(
-      for: event,
+      eventID: event.id,
+      eventTimestamp: event.timestamp,
+      eventSnoreDuration: event.snoreDuration,
+      bursts: event.bursts,
       sessionURL: sessionURL,
       sessionStart: sessionStart,
       totalDuration: totalDuration,
