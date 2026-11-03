@@ -1,4 +1,4 @@
-// swift-tools-version: 5.9
+// swift-tools-version: 6.2
 import PackageDescription
 
 let package = Package(
@@ -22,7 +22,11 @@ let package = Package(
         .product(name: "DesignSystem", package: "DesignSystem"),
         .product(name: "Personalization", package: "Personalization"),
       ],
-      path: "Sources"
+      path: "Sources",
+      swiftSettings: [
+        .swiftLanguageMode(.v6),
+        .defaultIsolation(MainActor.self),
+      ]
     ),
   ]
 )
