@@ -52,6 +52,6 @@ Create a new Learn tab whose visibility and URL are driven by Firebase Remote Co
 
 **Notes:**
 - `feature_learn` supports both `{"visibility": true, "url": "...", "order": 2}` and plain `true`/`false`.
-- Default order is `2` (after Media, before Settings).
+- Default order is `2` (after Sessions, before Settings).
 - Learn tab is hidden by default when the key is missing or malformed.
 - Package follows project rule: depends only on Models, Env, DesignSystem.

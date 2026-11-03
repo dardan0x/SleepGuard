@@ -49,14 +49,14 @@ keys fall back to their baked-in default (all `true`).
 
 ### `tabs`
 
-A JSON array. `tab` is an `AppTab.rawValue` (`statistics` | `media` | `settings`).
+A JSON array. `tab` is an `AppTab.rawValue` (`statistics` | `sessions` | `settings`).
 `isVisible` hides the tab when `false`; `order` sorts ascending. If the resolved set is
 empty or hides everything, the app falls back to all tabs in canonical order.
 
 ```json
 [
   { "tab": "statistics", "isVisible": true, "order": 0 },
-  { "tab": "media",      "isVisible": true, "order": 1 },
+  { "tab": "sessions",   "isVisible": true, "order": 1 },
   { "tab": "settings",   "isVisible": true, "order": 2 }
 ]
 ```
@@ -65,7 +65,7 @@ empty or hides everything, the app falls back to all tabs in canonical order.
 
 A JSON object (or plain boolean). When `visibility` is `true`, the Learn tab appears
 at the configured `order` and loads `url` in a web view. `order` is optional and
-defaults to `2` (after Media, before Settings). If `url` is missing, the tab shows
+defaults to `2` (after Sessions, before Settings). If `url` is missing, the tab shows
 an empty state.
 
 ```json

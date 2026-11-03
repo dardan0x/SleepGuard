@@ -409,7 +409,7 @@ public enum Strings {
   public static var stopSnoreInterrupterPlayer: String { String(localized: "stop.snore.interrupter.player", bundle: .module) }
   public static var stringUnit: String { String(localized: "stringUnit", bundle: .module) }
   public static var tabLearn: String { String(localized: "tab.learn", bundle: .module) }
-  public static var tabMedia: String { String(localized: "tab.media", bundle: .module) }
+  public static var tabSessions: String { String(localized: "tab.sessions", bundle: .module) }
   public static var tabSettings: String { String(localized: "tab.settings", bundle: .module) }
   public static var tabStatistics: String { String(localized: "tab.statistics", bundle: .module) }
   public static var timeHourPlural: String { String(localized: "time.hour.plural", bundle: .module) }

@@ -2,7 +2,7 @@
 
 > Auto-updated by the AI after every task. This is the local source of truth.
 
-Last updated: 2026-07-04
+Last updated: 2026-07-16
 
 ---
 
@@ -74,6 +74,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-07-16 | Rename Media/Results tab to Sessions | Refactor | `AppTab.sessions`; `tab.sessions` localized title "Sessions"; `RecordingsTab`/`ResultsTab` → `SessionsTab`; custom `AppTab` decoder maps legacy `"media"` and `"results"` raw values to `.sessions`; design file and Remote Config schema updated. Build succeeds |
 | 2026-07-04 | Remove Remote Config from sleep score | Refactor | `RemoteConfigLoader` no longer fetches `sleep_score_config`; `AppConfig.sleepScoreConfig` now resolves to `SleepScoreConfig.default` (DEBUG override preserved); removed remote/cache keys and `apply(...)` parameter. Updated `docs/remote-config-schema.md` and `docs/sleep-score-calculation.md`. Call sites unchanged. Build succeeds |
 | 2026-06-18 | F16-T1 Learn tab | Completed | New `Packages/Learn` feature package; `feature_learn` Remote Config key drives visibility, URL, and order; `WKWebView` opens links externally via `UIApplication.shared.open`. `tab.learn` localized; debug override added. Build succeeds |
 | 2026-06-16 | Fix same-day empty briefing modal | Bugfix | `MainTabView` now uses `.sheet(item: $currentBriefing)` after making `Briefing` `Identifiable`; `generateBriefingIfNeeded()` skips when the latest cached session started today, preventing same-day empty/weird briefings. Build succeeds |

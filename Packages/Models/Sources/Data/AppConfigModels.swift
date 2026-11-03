@@ -29,7 +29,7 @@ public enum FeatureFlag: String, CaseIterable, Sendable {
 /// (so this stays free of a DesignSystem dependency and usable from watchOS).
 public enum AppTab: String, CaseIterable, Sendable, Codable {
   case statistics
-  case media
+  case sessions
   case settings
   case learn
 
@@ -37,10 +37,31 @@ public enum AppTab: String, CaseIterable, Sendable, Codable {
   public var iconName: String {
     switch self {
     case .statistics: return "chart.bar.fill"
-    case .media: return "waveform"
+    case .sessions: return "waveform"
     case .settings: return "gearshape"
     case .learn: return "book.fill"
     }
+  }
+
+  public init(from decoder: Decoder) throws {
+    let container = try decoder.singleValueContainer()
+    let rawValue = try container.decode(String.self)
+    switch rawValue {
+    case "statistics": self = .statistics
+    case "sessions", "results", "media": self = .sessions
+    case "settings": self = .settings
+    case "learn": self = .learn
+    default:
+      throw DecodingError.dataCorruptedError(
+        in: container,
+        debugDescription: "Unknown AppTab raw value: \(rawValue)"
+      )
+    }
+  }
+
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.singleValueContainer()
+    try container.encode(rawValue)
   }
 }
 

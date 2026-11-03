@@ -14,6 +14,7 @@
 		6C2B806DCE9A12B8503615FC /* DesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = E553575F91A447F10F3BDF08 /* DesignSystem */; };
 		7550A233A59B33AC7BC63FA5 /* Settings in Frameworks */ = {isa = PBXBuildFile; productRef = 167C10ECFE58FBF4929EF997 /* Settings */; };
 		78DDF28BFD0525A9C32B1FE1 /* Recordings in Frameworks */ = {isa = PBXBuildFile; productRef = 7AA654EA1F14D9C6F15AB82A /* Recordings */; };
+		9C2D15AA3B584C0D8BA311FD /* Learn in Frameworks */ = {isa = PBXBuildFile; productRef = 2DFC87C0B35B483EB635F03D /* Learn */; };
 		A28EDE8E5E58BE472E55038A /* AudioEngine in Frameworks */ = {isa = PBXBuildFile; productRef = 3E369988AA3966E99F3F6D29 /* AudioEngine */; };
 		A81CE8384C963A2C24507F4F /* Recordings in Frameworks */ = {isa = PBXBuildFile; productRef = 1C4F985595ED007BA103E405 /* Recordings */; };
 		B7E5BB619CAC47AD866118B3 /* Personalization in Frameworks */ = {isa = PBXBuildFile; productRef = DE0D39C8817A44AB96DFE1F5 /* Personalization */; };
@@ -28,7 +29,6 @@
 		EA3B0BCFD10182B987547C8B /* AudioEngine in Frameworks */ = {isa = PBXBuildFile; productRef = 38CD50332392049638D060DF /* AudioEngine */; };
 		ED7B3283E6D3573708241C8E /* sounds in Resources */ = {isa = PBXBuildFile; fileRef = CE587D245C122AB22F7BD248 /* sounds */; };
 		FAED5AD98781D85AB7AFA7A5 /* SleepSession in Frameworks */ = {isa = PBXBuildFile; productRef = A6305AFA32B7A77ECFB0A19F /* SleepSession */; };
-		9C2D15AA3B584C0D8BA311FD /* Learn in Frameworks */ = {isa = PBXBuildFile; productRef = 2DFC87C0B35B483EB635F03D /* Learn */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -45,6 +45,7 @@
 		CE4A51A12FB625C6005BC562 /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
 		CE587D245C122AB22F7BD248 /* sounds */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = folder; path = sounds; sourceTree = "<group>"; };
 		CEA51B4D2FBFA95A0092AF44 /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
+		CEE00B2430084787005EBD43 /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -182,6 +183,11 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		CEE00B2730084787005EBD43 /* Products */ = {
+			isa = PBXGroup;
+			name = Products;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -281,6 +287,10 @@
 				{
 					ProductGroup = CE1563D82FDA041100A53611 /* Products */;
 					ProjectRef = CE1563D52FDA041100A53611 /* SleepGuard.xcodeproj */;
+				},
+				{
+					ProductGroup = CEE00B2730084787005EBD43 /* Products */;
+					ProjectRef = CEE00B2430084787005EBD43 /* SleepGuard.xcodeproj */;
 				},
 				{
 					ProductGroup = CE15643F2FDA27BA00A53611 /* Products */;
@@ -663,6 +673,10 @@
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/Recordings;
 		};
+		A124231B05434FFFB1548919 /* XCLocalSwiftPackageReference "Packages/Learn" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/Learn;
+		};
 		AE5AF359D280CFA7C94A7CF4 /* XCLocalSwiftPackageReference "Packages/Onboarding" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/Onboarding;
@@ -674,10 +688,6 @@
 		C1ABFA1084CFC1B1142A5354 /* XCLocalSwiftPackageReference "Packages/DesignSystem" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/DesignSystem;
-		};
-		A124231B05434FFFB1548919 /* XCLocalSwiftPackageReference "Packages/Learn" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/Learn;
 		};
 /* End XCLocalSwiftPackageReference section */
 
@@ -718,6 +728,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 47447378A1132717B2E05DE4 /* XCRemoteSwiftPackageReference "Recordings" */;
 			productName = Recordings;
+		};
+		2DFC87C0B35B483EB635F03D /* Learn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A124231B05434FFFB1548919 /* XCLocalSwiftPackageReference "Packages/Learn" */;
+			productName = Learn;
 		};
 		38CD50332392049638D060DF /* AudioEngine */ = {
 			isa = XCSwiftPackageProductDependency;
@@ -808,11 +823,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 7A886DCB087D86E4AC2E7336 /* XCLocalSwiftPackageReference "Packages/DesignSystem" */;
 			productName = DesignSystem;
-		};
-		2DFC87C0B35B483EB635F03D /* Learn */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = A124231B05434FFFB1548919 /* XCLocalSwiftPackageReference "Packages/Learn" */;
-			productName = Learn;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

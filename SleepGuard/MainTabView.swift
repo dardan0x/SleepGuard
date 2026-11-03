@@ -252,7 +252,7 @@ struct MainTabView: View {
     private func view(for tab: AppTab) -> some View {
         switch tab {
         case .statistics: StatisticsTab()
-        case .media: RecordingsTab()
+        case .sessions: SessionsTab()
         case .settings: SettingsTab()
         case .learn: LearnTab()
         }
@@ -261,7 +261,7 @@ struct MainTabView: View {
     private func title(for tab: AppTab) -> String {
         switch tab {
         case .statistics: return Strings.tabStatistics
-        case .media: return Strings.tabMedia
+        case .sessions: return Strings.tabSessions
         case .settings: return Strings.tabSettings
         case .learn: return Strings.tabLearn
         }

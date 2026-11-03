@@ -2368,12 +2368,12 @@
       "state": "translated",
       "value": "5 seconds"
     },
-    "tab.media": {
+    "tab.sessions": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Media"
+            "value": "Sessions"
           }
         }
       }

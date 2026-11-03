@@ -103,5 +103,5 @@ clicks, walks up to the nearest `<a>` tag, and checks for the attribute
 ## Notes
 
 - `feature_learn` schema: `{"visibility": true, "url": "https://...", "order": 2}`.
-- `order` is optional and defaults to `2` (after Media, before Settings).
+- `order` is optional and defaults to `2` (after Sessions, before Settings).
 - The `Learn` package only imports `Models`, `Env`, and `DesignSystem`, following the project module rules.
