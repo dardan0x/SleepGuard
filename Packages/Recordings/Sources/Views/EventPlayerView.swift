@@ -37,8 +37,7 @@ struct EventPlayerView: View {
           totalEvents: totalEvents,
           totalDuration: totalDuration,
           intensityColor: intensityColor,
-          intensityLabel: intensityLabel
-        )
+          intensityLabel: intensityLabel)
         EventWaveformView(
           event: event,
           intensityColor: intensityColor,
@@ -46,14 +45,12 @@ struct EventPlayerView: View {
           currentTime: currentTime,
           totalDuration: totalDuration,
           isLoadingWaveform: isLoadingWaveform,
-          onScrub: onScrub
-        )
+          onScrub: onScrub)
         EventPlayerControlsView(
           isPlaying: isPlaying,
           onTogglePlayback: onTogglePlayback,
           onSkipBack: onSkipBack,
-          onSkipForward: onSkipForward
-        )
+          onSkipForward: onSkipForward)
         EventIntensityLegendView()
       }
       .padding(20)
@@ -82,10 +79,10 @@ struct EventPlayerView: View {
 
   private var intensityLabel: String {
     switch event.intensity {
-    case .quiet: return Strings.quietIntensityLabel
-    case .light: return Strings.lightIntensityLabelEventPlayerView
-    case .loud: return Strings.loudIntensityLabelEventPlayerView
-    case .epic: return Strings.epicIntensityLabelEventPlayerView
+    case .quiet: Strings.quietIntensityLabel
+    case .light: Strings.lightIntensityLabelEventPlayerView
+    case .loud: Strings.loudIntensityLabelEventPlayerView
+    case .epic: Strings.epicIntensityLabelEventPlayerView
     }
   }
 }

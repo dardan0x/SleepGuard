@@ -23,11 +23,10 @@ final class MelodyPreviewPlayer {
 
     stop()
 
-    let url: URL?
-    if melody.isCustom {
-      url = CustomMelodyStorage.shared.fileURL(for: melody)
+    let url: URL? = if melody.isCustom {
+      CustomMelodyStorage.shared.fileURL(for: melody)
     } else {
-      url = Bundle.main.url(forResource: melody.filename, withExtension: "mp3", subdirectory: "sounds")
+      Bundle.main.url(forResource: melody.filename, withExtension: "mp3", subdirectory: "sounds")
         ?? Bundle.main.url(forResource: melody.filename, withExtension: "mp3")
     }
 

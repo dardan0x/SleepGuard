@@ -1,8 +1,8 @@
-import SwiftUI
-import SwiftData
-import Models
-import Env
 import DesignSystem
+import Env
+import Models
+import SwiftData
+import SwiftUI
 
 /// Loaded state of the session detail screen: session header, timeline,
 /// banners, event filter + list, share/delete toolbar, sheets, and the
@@ -52,8 +52,7 @@ struct SessionDetailLoadedView: View {
           },
           onShareEvent: { event in
             shareCoordinator.shareEvent(event, in: session)
-          }
-        )
+          })
 
         if !model.shortEvents.isEmpty {
           Button {
@@ -118,29 +117,26 @@ struct SessionDetailLoadedView: View {
     }
     .sheet(item: $activeSheet) { sheet in
       switch sheet {
-      case .player(let initialEvent):
+      case let .player(initialEvent):
         let episodeEvents = initialEvent.map { session.episodePlaybackEvents(for: $0) } ?? model.filteredEvents
         PlayerSheetView(
           session: session,
           sortedEvents: episodeEvents,
           isClipSession: isClipSession,
-          initialEvent: episodeEvents.first ?? initialEvent
-        )
+          initialEvent: episodeEvents.first ?? initialEvent)
       case .events:
         EventsSheetView(
           session: session,
           events: model.filteredEvents,
           displayDurations: model.displayDurations,
           isClipSession: isClipSession,
-          onPlayEvent: { _ in }
-        )
+          onPlayEvent: { _ in })
       case .shortEventsPlayer:
         PlayerSheetView(
           session: session,
           sortedEvents: model.shortEvents,
           isClipSession: isClipSession,
-          initialEvent: nil
-        )
+          initialEvent: nil)
       }
     }
     .overlay {
@@ -160,10 +156,10 @@ struct SessionDetailLoadedView: View {
   /// selected filter (see the MARK note at the bottom of this file).
   private var eventsTitle: String {
     switch model.selectedFilter {
-    case .all: return Strings.sessionRecordingEventsFormatAll
-    case .snoring: return Strings.sessionRecordingEventsFormatSnoring
-    case .sleepTalking: return Strings.sessionRecordingEventsFormatSleepTalking
-    case .noise: return Strings.sessionRecordingEventsFormatNoise
+    case .all: Strings.sessionRecordingEventsFormatAll
+    case .snoring: Strings.sessionRecordingEventsFormatSnoring
+    case .sleepTalking: Strings.sessionRecordingEventsFormatSleepTalking
+    case .noise: Strings.sessionRecordingEventsFormatNoise
     }
   }
 }
@@ -175,17 +171,18 @@ enum SessionDetailSheet: Identifiable {
 
   var id: String {
     switch self {
-    case .player(let event):
-      return event.map { "player-\($0.id.uuidString)" } ?? "player"
+    case let .player(event):
+      event.map { "player-\($0.id.uuidString)" } ?? "player"
     case .events:
-      return "events"
+      "events"
     case .shortEventsPlayer:
-      return "short-events-player"
+      "short-events-player"
     }
   }
 }
 
 // MARK: - Presentation mappings
+
 //
 // Label text lives in the view layer (see AGENTS.md "UI Dependencies in
 // Non-View Code"): the filter enum and its selection logic stay in
@@ -194,10 +191,10 @@ enum SessionDetailSheet: Identifiable {
 extension SessionDetailModel.EventCategoryFilter {
   var displayName: String {
     switch self {
-    case .all: return Strings.filterAll
-    case .snoring: return Strings.filterSnoring
-    case .sleepTalking: return Strings.filterSleepTalking
-    case .noise: return Strings.filterNoise
+    case .all: Strings.filterAll
+    case .snoring: Strings.filterSnoring
+    case .sleepTalking: Strings.filterSleepTalking
+    case .noise: Strings.filterNoise
     }
   }
 }

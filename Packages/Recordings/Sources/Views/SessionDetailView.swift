@@ -1,8 +1,8 @@
-import SwiftUI
-import SwiftData
-import Models
-import Env
 import DesignSystem
+import Env
+import Models
+import SwiftData
+import SwiftUI
 
 @MainActor
 public struct SessionDetailView: View {
@@ -31,13 +31,12 @@ public struct SessionDetailView: View {
             .task {
               await model.load(modelContext: modelContext)
             }
-        case .loaded(let session, _, let isClipSession):
+        case let .loaded(session, _, isClipSession):
           SessionDetailLoadedView(
             session: session,
             isClipSession: isClipSession,
             model: model,
-            shareCoordinator: shareCoordinator
-          )
+            shareCoordinator: shareCoordinator)
         case .error:
           errorBody
         }
@@ -47,8 +46,7 @@ public struct SessionDetailView: View {
             model = SessionDetailModel(
               sessionID: sessionID,
               appConfig: appConfig,
-              userPreferences: userPreferences
-            )
+              userPreferences: userPreferences)
           }
       }
     }
@@ -68,6 +66,7 @@ public struct SessionDetailView: View {
   }
 
   // MARK: - Fake Player Placeholder
+
   //
   // NOTE: `fakePlayerSection` and the marker helpers below are only referenced
   // from the commented-out mini player call site in the loaded body. Kept
@@ -76,7 +75,7 @@ public struct SessionDetailView: View {
 
   private func fakePlayerSection(session: SleepSession, sortedEvents: [SnoreEvent], isClipSession: Bool) -> some View {
     let totalDuration: TimeInterval = isClipSession
-      ? sortedEvents.map { $0.snoreDuration }.reduce(0, +)
+      ? sortedEvents.map(\.snoreDuration).reduce(0, +)
       : session.totalDuration
     let markers = isClipSession
       ? clipEventMarkers(events: sortedEvents, totalDuration: totalDuration)
@@ -100,8 +99,7 @@ public struct SessionDetailView: View {
         showsPlaybackButton: false,
         onTogglePlayback: {},
         onScrub: { _ in },
-        onExpand: {}
-      )
+        onExpand: {})
     }
   }
 

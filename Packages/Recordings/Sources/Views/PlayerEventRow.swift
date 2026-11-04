@@ -38,7 +38,7 @@ struct PlayerEventRow: View {
 
       Spacer()
 
-      if isActive && isPlaying {
+      if isActive, isPlaying {
         Image(systemName: "waveform")
           .font(.system(size: 14))
           .foregroundStyle(theme.accent)

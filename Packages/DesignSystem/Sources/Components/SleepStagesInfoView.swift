@@ -1,5 +1,5 @@
-import SwiftUI
 import Models
+import SwiftUI
 
 /// Educational sheet explaining sleep stages: per-stage cards, the score
 /// formula, and deep/REM/awake thresholds. Composes three section views.

@@ -25,8 +25,7 @@ struct PlayerEventListSection: View {
             event: event,
             isActive: currentEventIndex == index,
             isPlaying: isPlaying,
-            onTap: { onSelect(index) }
-          )
+            onTap: { onSelect(index) })
         }
       }
     }

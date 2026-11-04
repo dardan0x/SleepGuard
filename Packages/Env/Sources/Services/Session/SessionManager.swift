@@ -30,6 +30,7 @@ public final class SessionManager {
     get { recording.completedSession }
     set { recording.completedSession = newValue }
   }
+
   public var isProcessingSession: Bool { recording.isProcessingSession }
   public var isLiveSessionVisible: Bool {
     get { recording.isLiveSessionVisible }
@@ -77,7 +78,6 @@ public final class SessionManager {
       peakDB: peakDB,
       spectralScore: spectralScore,
       snoreConfidence: snoreConfidence,
-      speechConfidence: speechConfidence
-    )
+      speechConfidence: speechConfidence)
   }
 }

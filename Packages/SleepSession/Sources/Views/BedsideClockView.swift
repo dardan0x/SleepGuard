@@ -1,8 +1,8 @@
-import SwiftUI
 import AudioEngine
+import DesignSystem
 import Env
 import Models
-import DesignSystem
+import SwiftUI
 
 @MainActor
 struct BedsideClockView: View {
@@ -25,7 +25,7 @@ struct BedsideClockView: View {
             eventsCount: sessionManager.eventsCount
           )
 
-          if isMelodyEnabled && !snoreInterrupterPlayer.isMutedForSession {
+          if isMelodyEnabled, !snoreInterrupterPlayer.isMutedForSession {
             BedsideMelodyDisclaimer {
               snoreInterrupterPlayer.muteForSession()
             }
@@ -38,28 +38,26 @@ struct BedsideClockView: View {
 
         BedsideClockClockView(
           timeString: timeString,
-          dateString: dateString
-        )
+          dateString: dateString)
 
         Spacer()
 
         BedsideClockWaveformView(
           durationString: durationString,
-          levels: simulatedWaveform
-        )
+          levels: simulatedWaveform)
 
         Spacer()
 
         BedsideClockStatusView(
           statusLabel: statusLabel,
-          snoringColor: snoringColor
-        )
+          snoringColor: snoringColor)
 
         Spacer()
 
         StopRecordingButton(height: 52) {
           if let session = sessionManager.currentSession,
-             currentTime.timeIntervalSince(session.startDate) < SleepSession.minimumSaveDuration {
+             currentTime.timeIntervalSince(session.startDate) < SleepSession.minimumSaveDuration
+          {
             showShortSessionAlert = true
           } else {
             Task {
@@ -71,16 +69,15 @@ struct BedsideClockView: View {
         .padding(.bottom, 32)
       }
       .overlay(alignment: .top) {
-        if isMelodyEnabled && snoreInterrupterPlayer.isPlaying {
+        if isMelodyEnabled, snoreInterrupterPlayer.isPlaying {
           BedsideMelodyOverlay(
             melodyName: snoreInterrupterPlayer.currentMelodyName ?? Strings.snoreInterrupterDefaultMelodyName,
             onMute: { snoreInterrupterPlayer.muteForSession() },
-            onStop: { snoreInterrupterPlayer.stop() }
-          )
+            onStop: { snoreInterrupterPlayer.stop() })
         }
       }
       .alert(Strings.sessionSummaryTooShortTitle, isPresented: $showShortSessionAlert) {
-        Button(Strings.actionKeepRecording, role: .cancel) { }
+        Button(Strings.actionKeepRecording, role: .cancel) {}
         Button(Strings.actionStopAnyway) {
           sessionManager.stopAndDiscardSession()
         }
@@ -132,21 +129,21 @@ struct BedsideClockView: View {
 
   private var snoringColor: Color {
     switch sessionManager.currentDetectionState {
-    case .none: return theme.textTertiary
-    case .quiet: return theme.snoreQuiet
-    case .light: return theme.snoreLight
-    case .loud: return theme.snoreLoud
-    case .epic: return theme.snoreEpic
+    case .none: theme.textTertiary
+    case .quiet: theme.snoreQuiet
+    case .light: theme.snoreLight
+    case .loud: theme.snoreLoud
+    case .epic: theme.snoreEpic
     }
   }
 
   private var statusLabel: String {
     switch sessionManager.currentDetectionState {
-    case .none: return Strings.statsCalendarIntensityQuiet
-    case .quiet: return Strings.sessionBedsideSnoreQuiet
-    case .light: return Strings.sessionBedsideSnoreLight
-    case .loud: return Strings.sessionBedsideSnoreLoud
-    case .epic: return Strings.sessionBedsideSnoreEpic
+    case .none: Strings.statsCalendarIntensityQuiet
+    case .quiet: Strings.sessionBedsideSnoreQuiet
+    case .light: Strings.sessionBedsideSnoreLight
+    case .loud: Strings.sessionBedsideSnoreLoud
+    case .epic: Strings.sessionBedsideSnoreEpic
     }
   }
 

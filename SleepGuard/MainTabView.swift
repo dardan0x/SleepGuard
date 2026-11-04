@@ -1,14 +1,14 @@
-import SwiftUI
-import SwiftData
-import Env
 import DesignSystem
+import Env
+import Learn
 import Models
 import Personalization
-import SleepSession
-import Statistics
 import Recordings
 import Settings
-import Learn
+import SleepSession
+import Statistics
+import SwiftData
+import SwiftUI
 
 struct MainTabView: View {
   @Environment(Theme.self) private var theme
@@ -37,8 +37,7 @@ struct MainTabView: View {
       if briefingController == nil {
         briefingController = AppBriefingController(
           appConfig: appConfig,
-          userPreferences: userPreferences
-        )
+          userPreferences: userPreferences)
       }
       briefingController?.generateBriefingIfNeeded(modelContext: modelContext)
     }
@@ -46,15 +45,13 @@ struct MainTabView: View {
       item: briefingBinding,
       onDismiss: {
         briefingController?.markBriefingShown()
-      }
-    ) { briefing in
-      SleepBriefingView(
-        briefing: briefing,
-        onDismiss: { briefingController?.dismissBriefing() },
-        onChipTap: { chip in
-          briefingController?.saveLifestyleLog(chip: chip, briefing: briefing, modelContext: modelContext)
-        }
-      )
+      }) { briefing in
+        SleepBriefingView(
+          briefing: briefing,
+          onDismiss: { briefingController?.dismissBriefing() },
+          onChipTap: { chip in
+            briefingController?.saveLifestyleLog(chip: chip, briefing: briefing, modelContext: modelContext)
+          })
     }
     .overlay {
       SessionProcessingOverlay(isVisible: sessionManager.isProcessingSession)
@@ -68,8 +65,7 @@ struct MainTabView: View {
         if newValue == nil {
           briefingController?.dismissBriefing()
         }
-      }
-    )
+      })
   }
 
   // MARK: - iOS 26+ (system TabView)
@@ -77,8 +73,8 @@ struct MainTabView: View {
   private var systemTabView: some View {
     TabView(selection: Binding(
       get: { tabCoordinator.selectedTab },
-      set: { tabCoordinator.selectTab($0) }
-    )) {
+      set: { tabCoordinator.selectTab($0) }))
+    {
       ForEach(appConfig.visibleTabsInOrder, id: \.self) { tab in
         view(for: tab)
           .toolbar(sessionManager.isRecording || sessionManager.isLiveSessionVisible ? .hidden : .visible, for: .tabBar)
@@ -99,7 +95,7 @@ struct MainTabView: View {
       customContent
         .padding(.bottom, 60)
 
-      if !sessionManager.isRecording && !sessionManager.isLiveSessionVisible {
+      if !sessionManager.isRecording, !sessionManager.isLiveSessionVisible {
         CustomTabBarView(
           tabs: appConfig.visibleTabsInOrder,
           selectedTab: tabCoordinator.selectedTab,
@@ -108,8 +104,7 @@ struct MainTabView: View {
             withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
               tabCoordinator.selectTab(tab)
             }
-          }
-        )
+          })
       }
     }
     .ignoresSafeArea(.keyboard)
@@ -138,10 +133,10 @@ struct MainTabView: View {
 
   private func title(for tab: AppTab) -> String {
     switch tab {
-    case .statistics: return Strings.tabStatistics
-    case .sessions: return Strings.tabSessions
-    case .settings: return Strings.tabSettings
-    case .learn: return Strings.tabLearn
+    case .statistics: Strings.tabStatistics
+    case .sessions: Strings.tabSessions
+    case .settings: Strings.tabSettings
+    case .learn: Strings.tabLearn
     }
   }
 

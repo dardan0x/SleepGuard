@@ -120,8 +120,7 @@ struct RecordingCountdownView: View {
         if !isActive {
           activeAlert = nil
         }
-      }
-    )
+      })
   }
 
   private func startSession() {

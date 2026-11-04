@@ -31,8 +31,7 @@ struct EventWaveformView: View {
                 let isPlayed = Double(index) / Double(barCount) <= progress
                 waveformBar(
                   height: barHeight(at: index, maxHeight: geometry.size.height),
-                  isPlayed: isPlayed
-                )
+                  isPlayed: isPlayed)
               }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)

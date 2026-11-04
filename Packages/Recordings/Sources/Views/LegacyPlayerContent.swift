@@ -26,7 +26,6 @@ struct LegacyPlayerContent: View {
       onSkipForward: { player.skip(by: 15) },
       onScrub: { relative in player.scrubTo(relative: relative) },
       isReady: isReady,
-      isLoadingWaveform: isLoadingWaveform
-    )
+      isLoadingWaveform: isLoadingWaveform)
   }
 }

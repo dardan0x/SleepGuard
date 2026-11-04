@@ -10,7 +10,7 @@ struct SnoreInterrupterSheet: View {
   @Environment(\.dismiss) private var dismiss
 
   @State private var draftMode: UserPreferences.SnoreInterrupterMode = .never
-  @State private var draftMelodyID: Int = 6
+  @State private var draftMelodyID = 6
   @State private var showMelodyPicker = false
 
   private var selectedMelody: Melody? {
@@ -24,8 +24,7 @@ struct SnoreInterrupterSheet: View {
 
       SheetNavHeader(
         title: Strings.snoreInterrupterRecordingPrestartViewTitle.uppercased(),
-        onBack: { dismiss() }
-      )
+        onBack: { dismiss() })
 
       Divider()
         .background(theme.border)
@@ -54,8 +53,7 @@ struct SnoreInterrupterSheet: View {
           userPreferences.selectedMelodyID = draftMelodyID
           dismiss()
         },
-        onCancel: { dismiss() }
-      )
+        onCancel: { dismiss() })
     }
     .background(theme.bgPrimary.ignoresSafeArea())
     .onAppear {

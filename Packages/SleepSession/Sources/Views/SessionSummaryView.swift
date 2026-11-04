@@ -1,9 +1,9 @@
-import SwiftUI
-import SwiftData
 import AudioEngine
-import Models
-import Env
 import DesignSystem
+import Env
+import Models
+import SwiftData
+import SwiftUI
 
 @MainActor
 public struct SessionSummaryView: View {
@@ -40,12 +40,12 @@ public struct SessionSummaryView: View {
     }
     .background(theme.bgPrimary.ignoresSafeArea())
     .alert(Strings.sessionSummaryTooShortTitle, isPresented: isPresented(.tooShort)) {
-      Button(Strings.actionOk, role: .cancel) { }
+      Button(Strings.actionOk, role: .cancel) {}
     } message: {
       Text(String(format: Strings.sessionSummaryTooShortInfoFormat, Int(SleepSession.minimumSaveDuration / 60)))
     }
     .alert(Strings.saveFailed, isPresented: isPresented(.saveFailed)) {
-      Button(Strings.actionOk, role: .cancel) { }
+      Button(Strings.actionOk, role: .cancel) {}
     } message: {
       Text(Strings.unableToSaveTheSession)
     }
@@ -60,8 +60,7 @@ public struct SessionSummaryView: View {
         if !isActive {
           activeAlert = nil
         }
-      }
-    )
+      })
   }
 
   // MARK: - Save / discard

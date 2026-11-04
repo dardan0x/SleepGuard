@@ -1,8 +1,8 @@
-import SwiftUI
 import AudioEngine
-import Models
-import Env
 import DesignSystem
+import Env
+import Models
+import SwiftUI
 
 /// Plays individual snore-event audio clips presented as a bottom sheet.
 /// Always opens in expanded mode — shows the full event player with waveform
@@ -53,7 +53,7 @@ public struct PlayerSheetView: View {
             PlayerLoadingSkeleton()
           case .ready:
             readyContent
-          case .noAudio(let event):
+          case let .noAudio(event):
             if let event {
               NoAudioView(event: event)
             }
@@ -102,16 +102,14 @@ public struct PlayerSheetView: View {
         onSelectEvent: { event, index in
           playbackController.playEvent(at: index)
           waveformLoader.load(for: event, sessionAudioURL: sessionAudioURL, sessionStart: session.startDate)
-        }
-      )
+        })
     } else if let initialEvent {
       LegacyPlayerContent(
         player: legacyPlayer,
         event: initialEvent,
         waveformSamples: waveformLoader.samples,
         isReady: isReady,
-        isLoadingWaveform: waveformLoader.isLoading
-      )
+        isLoadingWaveform: waveformLoader.isLoading)
     }
   }
 
@@ -157,8 +155,7 @@ public struct PlayerSheetView: View {
       await legacyPlayer.prepare(
         event: initialEvent,
         sessionURL: sessionAudioURL,
-        sessionStart: session.startDate
-      )
+        sessionStart: session.startDate)
       waveformLoader.load(for: initialEvent, sessionAudioURL: sessionAudioURL, sessionStart: session.startDate)
       loadState = legacyPlayer.duration > 0 ? .ready : .noAudio(initialEvent)
     } else {

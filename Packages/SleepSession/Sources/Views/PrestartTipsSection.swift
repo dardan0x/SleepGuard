@@ -21,8 +21,7 @@ struct PrestartTipsSection: View {
           LinearGradient(
             colors: [Color(hex: "#FF453A").opacity(0.25), Color(hex: "#FF453A").opacity(0.0)],
             startPoint: .top,
-            endPoint: .bottom
-          )
+            endPoint: .bottom)
         )
         .blur(radius: 8)
         .offset(y: 6)

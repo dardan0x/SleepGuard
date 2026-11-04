@@ -82,8 +82,7 @@ struct MelodyPickerSheet: View {
         if selectedMelodyID == melody.id {
           selectedMelodyID = 6
         }
-      }
-    )
+      })
   }
 
   // MARK: - Bottom Area

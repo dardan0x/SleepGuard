@@ -1,5 +1,5 @@
-import Env
 import DesignSystem
+import Env
 import Models
 import SwiftUI
 
@@ -33,8 +33,7 @@ struct CustomTabBarView: View {
               LinearGradient(
                 colors: [.white.opacity(0.07), .clear],
                 startPoint: .top,
-                endPoint: .bottom
-              )
+                endPoint: .bottom)
             )
         }
       )
@@ -47,7 +46,7 @@ struct CustomTabBarView: View {
         ZStack {
           Color.clear
         }
-          .ignoresSafeArea(edges: .all)
+        .ignoresSafeArea(edges: .all)
       )
     }
     .padding(.horizontal, 30)
@@ -82,8 +81,7 @@ struct CustomTabBarView: View {
                   LinearGradient(
                     colors: [.white.opacity(0.06), .clear],
                     startPoint: .top,
-                    endPoint: .bottom
-                  )
+                    endPoint: .bottom)
                 )
             )
             .matchedGeometryEffect(id: "activeTab", in: tabAnimation)

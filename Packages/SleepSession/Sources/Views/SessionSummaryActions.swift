@@ -26,8 +26,7 @@ struct SessionSummaryActions: View {
             LinearGradient(
               colors: [theme.accent.opacity(0.35), theme.accent.opacity(0.0)],
               startPoint: .top,
-              endPoint: .bottom
-            )
+              endPoint: .bottom)
           )
           .frame(maxWidth: .infinity)
           .frame(height: 76)
@@ -48,10 +47,8 @@ struct SessionSummaryActions: View {
                     LinearGradient(
                       colors: [Color.white.opacity(0.25), Color.white.opacity(0.05)],
                       startPoint: .leading,
-                      endPoint: .trailing
-                    ),
-                    lineWidth: 1
-                  )
+                      endPoint: .trailing),
+                    lineWidth: 1)
               }
             )
             .clipShape(Capsule())

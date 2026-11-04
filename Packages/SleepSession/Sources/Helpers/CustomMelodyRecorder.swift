@@ -82,7 +82,7 @@ final class CustomMelodyRecorder {
 
       timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak rec] _ in
         Task { @MainActor in
-          guard let rec = rec, rec.isRecording else { return }
+          guard let rec, rec.isRecording else { return }
           self.elapsed = rec.currentTime
           if rec.currentTime >= self.maxDuration {
             self.stopRecording()

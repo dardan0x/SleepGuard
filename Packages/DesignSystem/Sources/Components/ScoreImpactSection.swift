@@ -38,22 +38,19 @@ struct ScoreImpactSection: View {
               value: stats.deepPct,
               target: 15,
               mode: .minimum,
-              color: theme.stageDeepColor
-            )
+              color: theme.stageDeepColor)
             thresholdBar(
               label: Strings.sleepStageRem,
               value: stats.remPct,
               target: 18,
               mode: .minimum,
-              color: theme.stageREMColor
-            )
+              color: theme.stageREMColor)
             thresholdBar(
               label: Strings.sleepStageAwake,
               value: stats.awakePct,
               target: 8,
               mode: .maximum,
-              color: theme.stageAwakeColor
-            )
+              color: theme.stageAwakeColor)
           }
           .padding(.top, 4)
         }
@@ -74,8 +71,8 @@ struct ScoreImpactSection: View {
     value: Double,
     target: Double,
     mode: ThresholdMode,
-    color: Color
-  ) -> some View {
+    color: Color) -> some View
+  {
     let isGood = mode == .minimum ? value >= target : value <= target
 
     return VStack(alignment: .leading, spacing: 4) {

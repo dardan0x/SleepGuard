@@ -34,8 +34,8 @@ struct RecordingPrestartView: View {
                   icon: "timer",
                   title: Strings.snoreInterrupterRecordingPrestartViewTitle,
                   value: snoreInterrupterValue,
-                  subtitle: Strings.snoreInterrupterLockscreenNote
-                ) {
+                  subtitle: Strings.snoreInterrupterLockscreenNote)
+                {
                   activePresentation = .snoreInterrupter
                 }
                 .padding(.top, 8)
@@ -123,8 +123,7 @@ struct RecordingPrestartView: View {
         if !isActive {
           activePresentation = nil
         }
-      }
-    )
+      })
   }
 
   private func beginSession() {
@@ -141,28 +140,28 @@ struct RecordingPrestartView: View {
   }
 
   private var isCharging: Bool {
-#if targetEnvironment(simulator)
+    #if targetEnvironment(simulator)
     return true
-#else
+    #else
     UIDevice.current.isBatteryMonitoringEnabled = true
     return UIDevice.current.batteryState == .charging || UIDevice.current.batteryState == .full
-#endif
+    #endif
   }
 
   private var snoreInterrupterValue: String {
     switch userPreferences.snoreInterrupterMode {
     case .never:
-      return Strings.snoreInterrupterOffValueFormat
+      Strings.snoreInterrupterOffValueFormat
     case .always:
-      return Strings.snoreInterrupterAlwaysValueFormat
+      Strings.snoreInterrupterAlwaysValueFormat
     case .fiveSeconds:
-      return Strings.snoreInterrupterFiveSecondsValueFormat
+      Strings.snoreInterrupterFiveSecondsValueFormat
     case .fifteenSeconds:
-      return Strings.snoreInterrupterFifteenSecondsValueFormat
+      Strings.snoreInterrupterFifteenSecondsValueFormat
     case .thirtySeconds:
-      return Strings.snoreInterrupterThirtySecondsValueFormat
+      Strings.snoreInterrupterThirtySecondsValueFormat
     case .sixtySeconds:
-      return Strings.snoreInterrupterSixtySecondsValueFormat
+      Strings.snoreInterrupterSixtySecondsValueFormat
     }
   }
 }

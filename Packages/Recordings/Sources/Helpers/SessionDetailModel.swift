@@ -1,7 +1,7 @@
-import Foundation
-import SwiftData
 import Env
+import Foundation
 import Models
+import SwiftData
 
 /// State owner for the session detail screen: loads the session (with the
 /// defensive cached-score refresh), owns the event category filter and its
@@ -24,10 +24,10 @@ final class SessionDetailModel {
 
     func includes(event: SnoreEvent) -> Bool {
       switch self {
-      case .all: return true
-      case .snoring: return event.category == .snoring
-      case .sleepTalking: return event.category == .sleepTalking
-      case .noise: return event.category == .noise || event.category == .coughing || event.category == .other
+      case .all: true
+      case .snoring: event.category == .snoring
+      case .sleepTalking: event.category == .sleepTalking
+      case .noise: event.category == .noise || event.category == .coughing || event.category == .other
       }
     }
   }
@@ -55,7 +55,8 @@ final class SessionDetailModel {
           && (session.endDate?.timeIntervalSinceNow ?? 0) < -3600
         if appConfig.isEnabled(.enhancedSleepTracking),
            userPreferences.enhancedSleepTracking,
-           (session.sleepStageSegments == nil || stagesEmptyAndOld) {
+           session.sleepStageSegments == nil || stagesEmptyAndOld
+        {
           let stages = await HealthKitSync.shared.fetchSleepStages(for: session)
           session.sleepStageSegments = stages.isEmpty ? [] : stages
         }
@@ -123,7 +124,7 @@ final class SessionDetailModel {
   }
 
   var shouldShowFilter: Bool {
-    guard case .loaded(_, let sortedEvents, _) = viewState else { return false }
+    guard case let .loaded(_, sortedEvents, _) = viewState else { return false }
     let relevantCategories = sortedEvents.compactMap { event -> EventCategoryFilter? in
       switch event.category {
       case .snoring: return .snoring
@@ -138,7 +139,7 @@ final class SessionDetailModel {
   /// Uses the episode's full snoring span so melody gaps where snoring
   /// resumed are included, matching the stat calculation.
   var displayDurations: [UUID: TimeInterval] {
-    guard case .loaded(let session, _, _) = viewState else { return [:] }
+    guard case let .loaded(session, _, _) = viewState else { return [:] }
     var map: [UUID: TimeInterval] = [:]
     for episode in session.displayableSnoringEpisodes {
       if let rep = episode.representativeEvent {
@@ -150,7 +151,7 @@ final class SessionDetailModel {
 
   /// Short snoring episodes (under 3 sec) shown in the dedicated player.
   var shortEvents: [SnoreEvent] {
-    guard case .loaded(let session, _, _) = viewState else { return [] }
+    guard case let .loaded(session, _, _) = viewState else { return [] }
     let shortEpisodes = session.snoringEpisodes.filter { $0.snoreDuration < 3 }
     return shortEpisodes.compactMap(\.representativeEvent)
       .sorted(by: { $0.timestamp < $1.timestamp })
@@ -158,7 +159,7 @@ final class SessionDetailModel {
 
   /// Events for display: displayable snoring episodes + non-snoring events.
   var filteredEvents: [SnoreEvent] {
-    guard case .loaded(let session, let sortedEvents, _) = viewState else { return [] }
+    guard case let .loaded(session, sortedEvents, _) = viewState else { return [] }
 
     switch selectedFilter {
     case .snoring:

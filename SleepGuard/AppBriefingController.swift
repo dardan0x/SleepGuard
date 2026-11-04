@@ -1,9 +1,9 @@
-import Foundation
-import SwiftData
 import DesignSystem
 import Env
+import Foundation
 import Models
 import Personalization
+import SwiftData
 
 /// Generates the morning sleep briefing and persists its survey responses.
 /// Owns the `currentBriefing` presentation state so `MainTabView` stays a
@@ -26,7 +26,8 @@ final class AppBriefingController {
     guard appConfig.isEnabled(.sleepBriefing) else { return }
     guard userPreferences.briefingEnabled else { return }
     if let lastDate = userPreferences.lastBriefingShownDate,
-       Calendar.current.isDateInToday(lastDate) {
+       Calendar.current.isDateInToday(lastDate)
+    {
       return
     }
 
@@ -42,8 +43,7 @@ final class AppBriefingController {
         endDate: session.endDate,
         sleepScore: session.cachedSleepScore,
         snoringDuration: session.cachedSnoringDuration,
-        totalDuration: session.totalDuration
-      )
+        totalDuration: session.totalDuration)
     }
 
     guard let latestSession = briefingSessions.first else { return }
@@ -58,16 +58,14 @@ final class AppBriefingController {
       BriefingProfile(
         firstName: $0.firstName,
         targetSleepHours: $0.targetSleepHours,
-        completionPercentage: $0.completionPercentage
-      )
+        completionPercentage: $0.completionPercentage)
     } ?? BriefingProfile()
 
     let briefing = BriefingEngine.generate(
       profile: briefingProfile,
       recentSessions: briefingSessions,
       lifestyleLogs: logs,
-      now: Date()
-    )
+      now: Date())
 
     currentBriefing = briefing
   }
@@ -88,8 +86,7 @@ final class AppBriefingController {
       stressfulDay: chip == Strings.briefingSurveyChipStressfulDay,
       lateMeal: chip == Strings.briefingSurveyChipLateMeal,
       screenBeforeBed: chip == Strings.briefingSurveyChipScreensInBed,
-      sessionID: session.id
-    )
+      sessionID: session.id)
     modelContext.insert(log)
   }
 

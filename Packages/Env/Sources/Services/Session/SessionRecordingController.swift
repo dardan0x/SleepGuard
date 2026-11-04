@@ -89,8 +89,7 @@ final class SessionRecordingController {
           peakDB: self.audioRecorder.currentPeakDB,
           spectralScore: self.audioRecorder.spectralScore,
           snoreConfidence: saConf,
-          speechConfidence: saSpeechConf
-        )
+          speechConfidence: saSpeechConf)
         self.batteryCheckCounter += 1
         if self.batteryCheckCounter >= 600 {
           self.batteryCheckCounter = 0
@@ -153,7 +152,7 @@ final class SessionRecordingController {
     let now = Date()
 
     session.endDate = now
-    session.averageDB = detection.map { $0.totalAverageDB } ?? session.averageDB
+    session.averageDB = detection.map(\.totalAverageDB) ?? session.averageDB
     detection?.syncEventsCount(with: session)
 
     // In debug mode with raw audio preserved, move the full session file to rawAudioFileURL

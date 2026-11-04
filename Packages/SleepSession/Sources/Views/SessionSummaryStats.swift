@@ -33,15 +33,13 @@ struct SessionSummaryStats: View {
           title: Strings.sessionSummaryStatSnoring,
           value: String(format: "%.0f%%", session.snoringPercentage),
           theme: theme,
-          iconColor: theme.scoreAmber
-        )
+          iconColor: theme.scoreAmber)
         StatCard(
           icon: "bolt.fill",
           title: Strings.recordingsDetailEventsLabel,
           value: "\(session.eventsCount)",
           theme: theme,
-          iconColor: theme.scoreAmber
-        )
+          iconColor: theme.scoreAmber)
       }
     }
   }

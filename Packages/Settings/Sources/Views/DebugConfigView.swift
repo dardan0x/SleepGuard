@@ -1,8 +1,8 @@
 #if DEBUG
-import SwiftUI
+import DesignSystem
 import Env
 import Models
-import DesignSystem
+import SwiftUI
 
 /// Developer-only panel for overriding Remote Config values locally, without
 /// touching the Firebase console. Overrides take precedence over remote/cached
@@ -12,9 +12,9 @@ struct DebugConfigView: View {
   @Environment(AppConfig.self) private var appConfig
 
   @State private var tabConfigs: [TabConfig] = []
-  @State private var learnIsVisible: Bool = false
-  @State private var learnURL: String = ""
-  @State private var learnOrder: Int = 2
+  @State private var learnIsVisible = false
+  @State private var learnURL = ""
+  @State private var learnOrder = 2
 
   var body: some View {
     List {
@@ -22,8 +22,7 @@ struct DebugConfigView: View {
         ForEach(FeatureFlag.allCases, id: \.self) { flag in
           Toggle(flag.rawValue, isOn: Binding(
             get: { appConfig.overrideValue(for: flag) },
-            set: { appConfig.setOverride(flag, $0) }
-          ))
+            set: { appConfig.setOverride(flag, $0) }))
         }
       }
 
@@ -36,18 +35,15 @@ struct DebugConfigView: View {
                 tabConfigs[index] = TabConfig(
                   tab: config.tab,
                   isVisible: newValue,
-                  order: config.order
-                )
-              }
-            ))
+                  order: config.order)
+              }))
             Stepper("Order: \(tabConfigs[index].order)", value: Binding(
               get: { tabConfigs[index].order },
               set: { newValue in
                 tabConfigs[index] = TabConfig(
                   tab: tabConfigs[index].tab,
                   isVisible: tabConfigs[index].isVisible,
-                  order: newValue
-                )
+                  order: newValue)
               }
             ), in: 0...10)
           }
@@ -67,8 +63,7 @@ struct DebugConfigView: View {
           let config = LearnTabConfig(
             isVisible: learnIsVisible,
             url: learnURL.isEmpty ? nil : learnURL,
-            order: learnOrder
-          )
+            order: learnOrder)
           appConfig.setLearnTabOverride(config)
         }
       }

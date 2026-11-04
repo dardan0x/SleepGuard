@@ -55,8 +55,7 @@ final class WaveformLoader {
         sessionStart: sessionStart,
         totalDuration: totalDuration,
         padding: 0,
-        outputDirectory: FileManager.default.temporaryDirectory
-      )
+        outputDirectory: FileManager.default.temporaryDirectory)
       guard let result else {
         await MainActor.run {
           self.samples = []

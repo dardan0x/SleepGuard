@@ -29,16 +29,14 @@ struct ClipPlayerContent: View {
         onSkipForward: { skip(by: 15) },
         onScrub: { relative in controller.seek(to: relative) },
         isReady: isReady,
-        isLoadingWaveform: isLoadingWaveform
-      )
+        isLoadingWaveform: isLoadingWaveform)
       EnhancedAudioToggleSection(isOn: enhancedAudioBinding)
       if sortedEvents.count > 1 {
         PlayerEventListSection(
           events: sortedEvents,
           currentEventIndex: controller.currentEventIndex,
           isPlaying: controller.isPlaying,
-          onSelect: { index in onSelectEvent(sortedEvents[index], index) }
-        )
+          onSelect: { index in onSelectEvent(sortedEvents[index], index) })
       }
     }
   }
@@ -49,8 +47,7 @@ struct ClipPlayerContent: View {
       set: { newValue in
         controller.enhancedAudioEnabled = newValue
         UserPreferences.shared.enhancedAudioPlayback = newValue
-      }
-    )
+      })
   }
 
   private func skip(by seconds: TimeInterval) {

@@ -19,7 +19,7 @@ final class RealtimeDetectionTracker {
   private(set) var currentDB: Float = -160.0
   private(set) var currentDetectionState: DetectionState = .none
   private(set) var currentSpeechDetected = false
-  private(set) var eventsCount: Int = 0
+  private(set) var eventsCount = 0
 
   weak var recording: SessionRecordingController?
 
@@ -42,23 +42,23 @@ final class RealtimeDetectionTracker {
   private var activeEventID: UUID?
   private var activeEventIntensity: SnoreIntensity?
   private var activeEventDBSum: Double = 0
-  private var activeEventDBCount: Int = 0
+  private var activeEventDBCount = 0
   private var activeEventPeakDB: Double = 0
   private var activeEventConfidenceSum: Double = 0
-  private var activeEventConfidenceCount: Int = 0
+  private var activeEventConfidenceCount = 0
   private var activeEventSpectralSum: Double = 0
-  private var activeEventSpectralCount: Int = 0
+  private var activeEventSpectralCount = 0
   private var lastSnoringSampleTime: Date?
   private let eventGapThreshold: TimeInterval = 10.0
   /// Require 3 consecutive snoring samples (≈150 ms at 20 Hz) before starting an event.
   /// Filters out brief transient sounds (bed creaks, taps, notifications).
-  private var consecutiveSnoreSamples: Int = 0
-  private let requiredConsecutiveSamples: Int = 3
+  private var consecutiveSnoreSamples = 0
+  private let requiredConsecutiveSamples = 3
 
   /// Require 3 consecutive non-snoring samples before stopping the melody.
   /// Keeps melody playing through brief breathing gaps.
-  private var consecutiveNonSnoreSamples: Int = 0
-  private let requiredNonSnoreSamplesToStop: Int = 3
+  private var consecutiveNonSnoreSamples = 0
+  private let requiredNonSnoreSamplesToStop = 3
 
   /// Minimum time the Snore Interrupter must play before it can be stopped by non-snore detection.
   private let melodyMinPlayDuration: TimeInterval = 4.0
@@ -67,7 +67,7 @@ final class RealtimeDetectionTracker {
   private let postMelodyBreathingDelay: TimeInterval = 3.0
   private var melodyStartTime: Date?
   private var melodyResumeTime: Date?
-  private var postMelodySnoringDetected: Bool = false
+  private var postMelodySnoringDetected = false
 
   // Burst tracking: continuous snoring segments within the active event
   private var activeBurstStart: Date?
@@ -77,16 +77,16 @@ final class RealtimeDetectionTracker {
 
   private var activeSpeechEventStart: Date?
   private var activeSpeechEventDBSum: Double = 0
-  private var activeSpeechEventDBCount: Int = 0
+  private var activeSpeechEventDBCount = 0
   private var activeSpeechEventPeakDB: Double = 0
   private var lastSpeechSampleTime: Date?
-  private var consecutiveSpeechSamples: Int = 0
-  private let requiredConsecutiveSpeechSamples: Int = 3
+  private var consecutiveSpeechSamples = 0
+  private let requiredConsecutiveSpeechSamples = 3
 
   // MARK: - Session aggregate state
 
   private var totalDBSum: Double = 0
-  private var totalDBCount: Int = 0
+  private var totalDBCount = 0
   private var sessionSnoringDuration: TimeInterval = 0
   private var lastUpdateTime: Date?
 
@@ -99,8 +99,7 @@ final class RealtimeDetectionTracker {
       self,
       selector: #selector(handleMelodyDidStop),
       name: .snoreInterrupterDidStop,
-      object: nil
-    )
+      object: nil)
   }
 
   // MARK: - Lifecycle hooks (called by SessionRecordingController)
@@ -242,8 +241,7 @@ final class RealtimeDetectionTracker {
           db: db,
           spectralScore: spectralScore,
           snoreConfidence: snoreConfidence,
-          state: state
-        )
+          state: state)
       }
     }
 
@@ -304,7 +302,7 @@ final class RealtimeDetectionTracker {
         // audio file and current burst so they don't span the dead-mic
         // interval, but keep the event alive — snoring continues during
         // melody playback and the event duration will span the gap.
-        if snoreInterrupterPlayer.isPlaying && !wasPlaying {
+        if snoreInterrupterPlayer.isPlaying, !wasPlaying {
           melodyStartTime = now
           // Close the event audio file; a new one will be started if
           // snoring resumes after the melody.
@@ -359,7 +357,7 @@ final class RealtimeDetectionTracker {
         // but the melody should still play again on sustained post-melody snoring.
         let wasPlaying = snoreInterrupterPlayer.isPlaying
         snoreInterrupterPlayer.playIfNeeded()
-        if snoreInterrupterPlayer.isPlaying && !wasPlaying {
+        if snoreInterrupterPlayer.isPlaying, !wasPlaying {
           melodyStartTime = now
           // Close the event audio file; a new one will be started if
           // snoring resumes after this melody.
@@ -555,8 +553,7 @@ final class RealtimeDetectionTracker {
     // Build burst models with offsets relative to event start
     let bursts = completedBursts.map { SnoreBurst(
       startOffset: $0.start.timeIntervalSince(startTime),
-      endOffset: $0.end.timeIntervalSince(startTime)
-    ) }
+      endOffset: $0.end.timeIntervalSince(startTime)) }
 
     let eventSpan = (lastSnoringSampleTime ?? Date()).timeIntervalSince(startTime)
 
@@ -610,8 +607,7 @@ final class RealtimeDetectionTracker {
       averageConfidence: averageConfidence,
       averageSpectralScore: averageSpectralScore,
       bursts: bursts.isEmpty ? nil : bursts,
-      duration: eventSpan
-    )
+      duration: eventSpan)
     event.session = session
 
     if session.events == nil {
@@ -622,7 +618,7 @@ final class RealtimeDetectionTracker {
 
     // Close the event audio file and compress to .m4a
     let rawFileURL = audioRecorder.finalizeEventFile()
-    if let rawFileURL = rawFileURL {
+    if let rawFileURL {
       let task = Task { @MainActor in
         let m4aURL = rawFileURL.deletingPathExtension().appendingPathExtension("m4a")
         if await EventClipCompressor.compress(from: rawFileURL, to: m4aURL) {
@@ -674,8 +670,7 @@ final class RealtimeDetectionTracker {
       intensity: .quiet,
       averageDB: activeSpeechEventDBCount > 0 ? activeSpeechEventDBSum / Double(activeSpeechEventDBCount) : 0,
       peakDB: activeSpeechEventPeakDB,
-      duration: eventSpan
-    )
+      duration: eventSpan)
     event.session = session
 
     if session.events == nil {
@@ -722,28 +717,28 @@ final class RealtimeDetectionTracker {
   /// transient sounds. Ground-truthed against bedroom recordings.
   private var minEventDuration: TimeInterval {
     switch UserPreferences.shared.detectionSensitivity {
-    case .low: return 2.0
-    case .medium: return 1.0
-    case .high: return 0.5
+    case .low: 2.0
+    case .medium: 1.0
+    case .high: 0.5
     }
   }
 
   private func intensity(from state: DetectionState) -> SnoreIntensity {
     switch state {
-    case .quiet: return .quiet
-    case .light: return .light
-    case .loud: return .loud
-    case .epic: return .epic
-    case .none: return .quiet
+    case .quiet: .quiet
+    case .light: .light
+    case .loud: .loud
+    case .epic: .epic
+    case .none: .quiet
     }
   }
 
   private func intensityRank(_ intensity: SnoreIntensity) -> Int {
     switch intensity {
-    case .quiet: return 0
-    case .light: return 1
-    case .loud: return 2
-    case .epic: return 3
+    case .quiet: 0
+    case .light: 1
+    case .loud: 2
+    case .epic: 3
     }
   }
 }

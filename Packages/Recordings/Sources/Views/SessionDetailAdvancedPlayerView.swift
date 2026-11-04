@@ -1,6 +1,6 @@
-import SwiftUI
-import Models
 import DesignSystem
+import Models
+import SwiftUI
 
 /// Expandable advanced player showing waveform, frequency spectrum, and spectral stats for a snore event clip.
 struct SessionDetailAdvancedPlayerView: View {
@@ -15,8 +15,7 @@ struct SessionDetailAdvancedPlayerView: View {
       AdvancedWaveformSection(
         samples: waveformSamples,
         intensityColor: theme.intensityColor(event.intensity),
-        onWaveformTap: onWaveformTap
-      )
+        onWaveformTap: onWaveformTap)
       AdvancedSpectrumSection(bars: spectrumBars)
       AdvancedStatsSection(event: event)
     }

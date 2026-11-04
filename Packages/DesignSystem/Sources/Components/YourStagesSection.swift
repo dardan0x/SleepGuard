@@ -107,45 +107,44 @@ struct YourStagesSection: View {
 
   private func statusLabel(_ status: StageStatus) -> String {
     switch status {
-    case .good: return Strings.sleepStagesInfoStageStatusGood
-    case .low: return Strings.sleepStagesInfoStageStatusLow
-    case .high: return Strings.sleepStagesInfoStageStatusHigh
+    case .good: Strings.sleepStagesInfoStageStatusGood
+    case .low: Strings.sleepStagesInfoStageStatusLow
+    case .high: Strings.sleepStagesInfoStageStatusHigh
     }
   }
 
   private func statusColor(_ status: StageStatus) -> Color {
     switch status {
-    case .good: return theme.scoreGreen
-    case .low: return theme.scoreAmber
-    case .high: return theme.scoreRed
+    case .good: theme.scoreGreen
+    case .low: theme.scoreAmber
+    case .high: theme.scoreRed
     }
   }
 
   private func stageName(_ stage: SleepStage) -> String {
     switch stage {
-    case .awake: return Strings.sleepStageAwake
-    case .rem: return Strings.sleepStageRem
-    case .light: return Strings.sleepStageLightSleep
-    case .deep: return Strings.sleepStageDeepSleep
+    case .awake: Strings.sleepStageAwake
+    case .rem: Strings.sleepStageRem
+    case .light: Strings.sleepStageLightSleep
+    case .deep: Strings.sleepStageDeepSleep
     }
   }
 
   private func stageDescription(_ stage: SleepStage) -> String {
     switch stage {
-    case .awake: return Strings.sleepStagesInfoAwakeDescription
-    case .rem: return Strings.sleepStagesInfoRemDescription
-    case .light: return Strings.sleepStagesInfoLightDescription
-    case .deep: return Strings.sleepStagesInfoDeepDescription
+    case .awake: Strings.sleepStagesInfoAwakeDescription
+    case .rem: Strings.sleepStagesInfoRemDescription
+    case .light: Strings.sleepStagesInfoLightDescription
+    case .deep: Strings.sleepStagesInfoDeepDescription
     }
   }
 
   private func recommendedLabel(_ stage: SleepStage) -> String {
-    let recommendation: String
-    switch stage {
-    case .awake: recommendation = Strings.sleepStagesInfoRecommendedAwake
-    case .rem: recommendation = Strings.sleepStagesInfoRecommendedRem
-    case .light: recommendation = Strings.sleepStagesInfoRecommendedLight
-    case .deep: recommendation = Strings.sleepStagesInfoRecommendedDeep
+    let recommendation: String = switch stage {
+    case .awake: Strings.sleepStagesInfoRecommendedAwake
+    case .rem: Strings.sleepStagesInfoRecommendedRem
+    case .light: Strings.sleepStagesInfoRecommendedLight
+    case .deep: Strings.sleepStagesInfoRecommendedDeep
     }
     return String(format: Strings.sleepStagesInfoRecommended, recommendation)
   }

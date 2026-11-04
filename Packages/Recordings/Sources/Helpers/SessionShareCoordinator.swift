@@ -1,7 +1,7 @@
-import UIKit
 import AudioEngine
 import AVFoundation
 import Models
+import UIKit
 
 /// Orchestrates sharing from the session detail screen: PDF reports, the
 /// full session recording, and individual event clips (shared directly when
@@ -30,7 +30,8 @@ final class SessionShareCoordinator {
 
   func shareEvent(_ event: SnoreEvent, in session: SleepSession) {
     if let url = AudioFileURLResolver.resolve(event.audioFileURL),
-       FileManager.default.fileExists(atPath: url.path) {
+       FileManager.default.fileExists(atPath: url.path)
+    {
       presentShareSheet(items: [url])
     } else {
       Task {
@@ -63,8 +64,7 @@ final class SessionShareCoordinator {
       sessionStart: session.startDate,
       totalDuration: totalDuration,
       padding: 0,
-      outputDirectory: FileManager.default.temporaryDirectory
-    )
+      outputDirectory: FileManager.default.temporaryDirectory)
     guard let result else { return }
 
     // Verify the exported file exists and has content before presenting

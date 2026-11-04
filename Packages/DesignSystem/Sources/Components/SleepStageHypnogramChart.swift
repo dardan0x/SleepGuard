@@ -25,8 +25,7 @@ public struct SleepStageHypnogramChart: View {
         let bgRect = CGRect(x: 0, y: 0, width: size.width, height: chartHeight)
         context.fill(
           Path(roundedRect: bgRect, cornerRadius: 8),
-          with: .color(Color.clear)
-        )
+          with: .color(Color.clear))
 
         // Horizontal grid lines
         for i in 1..<4 {
@@ -44,12 +43,10 @@ public struct SleepStageHypnogramChart: View {
             x: segment.x,
             y: segment.y,
             width: max(segment.width, 1),
-            height: bandHeight
-          )
+            height: bandHeight)
           context.fill(
             Path(roundedRect: rect, cornerRadius: 2),
-            with: .color(segment.color)
-          )
+            with: .color(segment.color))
         }
 
         // Time labels
@@ -81,17 +78,16 @@ public struct SleepStageHypnogramChart: View {
         x: CGFloat(relativeStart) * width,
         y: yPosition(for: stage.stage, bandHeight: bandHeight),
         width: CGFloat(relativeDuration) * width,
-        color: theme.stageColor(stage.stage)
-      )
+        color: theme.stageColor(stage.stage))
     }
   }
 
   private func yPosition(for stage: SleepStage, bandHeight: CGFloat) -> CGFloat {
     switch stage {
-    case .awake: return 0
-    case .rem: return bandHeight
-    case .light: return bandHeight * 2
-    case .deep: return bandHeight * 3
+    case .awake: 0
+    case .rem: bandHeight
+    case .light: bandHeight * 2
+    case .deep: bandHeight * 3
     }
   }
 
