@@ -7,7 +7,7 @@ public enum WaveformGenerator {
   /// When `maxDuration` is provided, only the first `maxDuration` seconds are
   /// sampled. This keeps the waveform aligned with the algorithm-defined event
   /// duration even when the underlying audio file contains trailing silence.
-  public static func generateSamples(from url: URL, pointCount: Int = 300, maxDuration: TimeInterval? = nil) -> [Float] {
+  nonisolated public static func generateSamples(from url: URL, pointCount: Int = 300, maxDuration: TimeInterval? = nil) -> [Float] {
     guard let audioFile = try? AVAudioFile(forReading: url) else {
       return []
     }
@@ -68,7 +68,7 @@ public enum WaveformGenerator {
   }
 
   /// Reads an audio clip and returns averaged FFT magnitude bars for visualization.
-  public static func spectrumSamples(from url: URL, barCount: Int = 32) -> [Float] {
+  nonisolated public static func spectrumSamples(from url: URL, barCount: Int = 32) -> [Float] {
     guard let audioFile = try? AVAudioFile(forReading: url) else {
       return Array(repeating: 0, count: barCount)
     }

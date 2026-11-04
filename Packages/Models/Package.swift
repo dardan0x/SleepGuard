@@ -1,4 +1,4 @@
-// swift-tools-version: 5.9
+// swift-tools-version: 6.2
 import PackageDescription
 
 let package = Package(
@@ -9,7 +9,10 @@ let package = Package(
   ],
   targets: [
     .target(
-      name: "Models"
+      name: "Models",
+      swiftSettings: [
+        .swiftLanguageMode(.v6),
+      ]
     ),
   ]
 )

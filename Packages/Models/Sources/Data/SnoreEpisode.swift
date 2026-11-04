@@ -2,7 +2,7 @@ import Foundation
 
 /// A group of adjacent snoring events that are close enough in time
 /// to be considered a single snoring episode.
-public struct SnoringEpisode: Identifiable, Sendable {
+public struct SnoringEpisode: Identifiable {
   public let id: UUID
   public let startTime: Date
   public let duration: TimeInterval

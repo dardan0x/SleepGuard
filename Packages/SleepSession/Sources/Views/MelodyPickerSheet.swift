@@ -128,10 +128,7 @@ struct MelodyPickerSheet: View {
               .frame(width: 36, height: 36)
 
             if isPreviewing {
-              Image(systemName: "speaker.wave.2")
-                .font(.system(size: 16))
-                .foregroundStyle(.white)
-                .symbolEffect(.bounce, options: .repeating)
+              PreviewSpeakerIcon(size: 16, color: .white)
             } else {
               Image(systemName: "music.note")
                 .font(.system(size: 16))
@@ -139,11 +136,8 @@ struct MelodyPickerSheet: View {
             }
           } else {
             if isPreviewing {
-              Image(systemName: "speaker.wave.2")
-                .font(.system(size: 18))
-                .foregroundStyle(theme.accent)
+              PreviewSpeakerIcon(size: 18, color: theme.accent)
                 .frame(width: 36, height: 36)
-                .symbolEffect(.bounce, options: .repeating)
             } else {
               Image(systemName: "music.note")
                 .font(.system(size: 18))
@@ -279,6 +273,25 @@ struct MelodyPickerSheet: View {
         .fill(theme.textPrimary)
         .frame(width: 134, height: 5)
         .padding(.bottom, 8)
+    }
+  }
+}
+
+private struct PreviewSpeakerIcon: View {
+  let size: CGFloat
+  let color: Color
+
+  var body: some View {
+    if #available(iOS 18, *) {
+      Image(systemName: "speaker.wave.2")
+        .font(.system(size: size))
+        .foregroundStyle(color)
+        .symbolEffect(.bounce, options: .repeating)
+    } else {
+      Image(systemName: "speaker.wave.2")
+        .font(.system(size: size))
+        .foregroundStyle(color)
+        .symbolEffect(.pulse)
     }
   }
 }

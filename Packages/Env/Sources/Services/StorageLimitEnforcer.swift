@@ -35,36 +35,33 @@ private struct CleanupPlan: Sendable {
 /// while preserving session metadata in SwiftData.
 ///
 /// File I/O is performed off the main actor so launch and save are not blocked.
-public final class StorageLimitEnforcer {
+public final class StorageLimitEnforcer: Sendable {
   public static let shared = StorageLimitEnforcer()
 
   private init() {}
 
   /// Runs both size-based and day-based cleanup according to user preferences.
   /// Returns a report describing what was removed.
+  @MainActor
   @discardableResult
   public func enforceLimits(modelContext: ModelContext) async -> CleanupReport {
-    let (dayPlan, sizePlan) = await MainActor.run {
-      let prefs = UserPreferences.shared
-      var dayPlan: CleanupPlan?
-      var sizePlan: CleanupPlan?
+    let prefs = UserPreferences.shared
+    var dayPlan: CleanupPlan?
+    var sizePlan: CleanupPlan?
 
-      if prefs.limitDaysEnabled {
-        dayPlan = buildDayPlan(maxDays: prefs.maxDays, modelContext: modelContext)
-      }
-      if prefs.limitStorageEnabled {
-        sizePlan = buildSizePlan(maxMB: prefs.storageLimitMB, modelContext: modelContext)
-      }
+    if prefs.limitDaysEnabled {
+      dayPlan = buildDayPlan(maxDays: prefs.maxDays, modelContext: modelContext)
+    }
+    if prefs.limitStorageEnabled {
+      sizePlan = buildSizePlan(maxMB: prefs.storageLimitMB, modelContext: modelContext)
+    }
 
-      // Save URL clears immediately so the model is consistent even if
-      // background file deletion is slow or fails.
-      do {
-        try modelContext.save()
-      } catch {
-        print("[StorageLimitEnforcer] Failed to save context after clearing URLs: \(error)")
-      }
-
-      return (dayPlan, sizePlan)
+    // Save URL clears immediately so the model is consistent even if
+    // background file deletion is slow or fails.
+    do {
+      try modelContext.save()
+    } catch {
+      print("[StorageLimitEnforcer] Failed to save context after clearing URLs: \(error)")
     }
 
     // Perform all file deletions off the main actor.
