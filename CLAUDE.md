@@ -169,8 +169,10 @@ These are non-negotiable. They come from production patterns in apps like IceCub
 - `.task { }` for data loading. `.task(id:)` when load depends on a changing value.
 - `Task { }` only in event handlers (`onChange`, button actions).
 - Always check `Task.isCancelled` before setting error state.
-- All views and `@Observable` classes are `@MainActor`.
-- All models are `Sendable` with immutable `let` properties.
+- **Swift 6 everywhere**: language mode v6 + strict concurrency complete. Sendable/isolation violations are compile errors — fix them properly (value types, `let`, `nonisolated`), never `@unchecked Sendable`.
+- **Isolation split**: explicit `@MainActor` on all `@Observable` classes in Models/Env/AudioEngine (load-bearing — no package default isolation); the 8 UI packages declare `.defaultIsolation(MainActor.self)` and the app target sets `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`.
+- Value types are `Sendable` with immutable `let` properties. SwiftData `@Model` classes are never Sendable — destructure their Sendable fields (`id`, `Date`, bursts) before crossing into `@Sendable`/detached closures.
+- Apple delegates (WCSession, SNResultsObserving, AVAudioPlayerDelegate) are nonisolated: mark methods `nonisolated`, parse payloads synchronously, `Task { @MainActor in }` for state mutation. See `docs/architecture/concurrency.md`.
 
 ### Views
 
@@ -204,7 +206,7 @@ These thresholds prevent monolithic views. Enforce them during implementation an
 
 ### Packages
 
-- Feature packages never import other feature packages. Only: Models, Network, Env, DesignSystem.
+- Feature packages never import other feature packages. Only: Models, AudioEngine, Env, DesignSystem (the one existing edge: Settings → Personalization).
 - The app target is the only place that imports everything.
 - One endpoint enum per API resource. One file per enum.
 - 2-space indentation. Enforced by `.swiftformat`.
@@ -252,16 +254,16 @@ Read these docs when building features. Reference only what you need per prompt.
 
 | Doc | When to Read | Lines |
 |-----|-------------|-------|
-| `docs/architecture/INDEX.md` | Quick orientation | 28 |
-| `docs/architecture/feature-template.md` | Building any new feature | 242 |
+| `docs/architecture/INDEX.md` | Quick orientation | 30 |
+| `docs/architecture/feature-template.md` | Building any new feature | 244 |
 | `docs/architecture/navigation.md` | Adding routes, sheets, deep links | 137 |
 | `docs/architecture/state.md` | State management questions | 116 |
-| `docs/architecture/networking.md` | Models, endpoints, API calls | 154 |
+| `docs/architecture/networking.md` | Data model conventions | 154 |
 | `docs/architecture/dependencies.md` | DI, shared services, environment | 114 |
 | `docs/architecture/views.md` | UI composition, styling | 121 |
-| `docs/architecture/concurrency.md` | Async patterns, cancellation | 95 |
-| `docs/architecture/modules.md` | Package structure, isolation | 60 |
-| `docs/architecture/rules.md` | Audit code against rules | 52 |
+| `docs/architecture/concurrency.md` | Swift 6 isolation, async patterns, cancellation | 120 |
+| `docs/architecture/modules.md` | Package structure, isolation | 54 |
+| `docs/architecture/rules.md` | Audit code against rules | 48 |
 
 ## Workflow
 

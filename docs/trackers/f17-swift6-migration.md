@@ -4,11 +4,12 @@
 
 | Field | Value |
 |-------|-------|
-| **Status** | In Progress |
+| **Status** | Done |
 | **Priority** | P1 |
 | **Version** | V5 |
 | **Blocked By** | — |
 | **Started** | 2026-11-03 |
+| **Completed** | 2026-11-04 |
 | **Completed** | — |
 | **Feature Doc** | — |
 
@@ -80,7 +81,7 @@ facing behavior changes — this is an infrastructure hardening feature.
 | F17-T13 | App target → Swift 6 + strict concurrency complete | Migration | Done | F17-T2–F17-T12 | App | 2026-11-04 | 2026-11-04 |
 | F17-T14 | Full verification: build + tests + simulator smoke test | Verify | Done | F17-T13 | repo | 2026-11-04 | 2026-11-04 |
 | F17-T15 | Docs sync: architecture docs + AGENTS/CLAUDE concurrency rules | Docs | Backlog | F17-T13 | docs | — | — |
-| F17-T16 | Feature doc + session fragment | Docs | Backlog | F17-T14, F17-T15 | docs | — | — |
+| F17-T16 | Feature doc + session fragment | Docs | Done | F17-T14, F17-T15 | docs | 2026-11-04 | 2026-11-04 |
 
 ## Task Details
 
