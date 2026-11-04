@@ -1,7 +1,7 @@
 ---
 date: 2026-11-04
 feature: none
-branch: main
+branch: chore/ci-quality-workflows (merged to main)
 title: CI quality workflows — SwiftFormat lint, hardcoded-string gate, Strings.sync
 ---
 
@@ -13,6 +13,20 @@ title: CI quality workflows — SwiftFormat lint, hardcoded-string gate, Strings
   SwiftFormat 0.55.5 (the installed version) — every `swiftformat` run errored
   out. Repo then formatted in full (160 files).
 - CI-3: Whole-repo SwiftFormat pass: 160/180 files reformatted, lint now clean.
+- CI-4: Merged `origin/main` (40 F18 commits: view restructuring, SessionManager
+  decomposition) into the branch. 15 conflicts (14 content + 1 modify/delete)
+  resolved by taking origin/main and re-applying formatting mechanically after;
+  38 newly-merged files formatted in a follow-up commit. Build green after merge.
+
+### Merge Details
+- Conflict resolution strategy: F18 restructuring is semantic, ours was
+  formatting-only → theirs always wins; formatting is re-runnable, so after
+  the merge `swiftformat .` re-normalized everything (lint exit 0).
+- `SessionManager.swift` accepted deleted (origin/main split it into a facade
+  + 3 types); our formatting-only edit to it discarded.
+- User's uncommitted AGENTS.md/CLAUDE.md "AI Skills" sections were stashed
+  during the merge and popped back cleanly (no overlap with incoming F18 doc
+  edits). Left uncommitted — they are the user's to commit.
 
 ### Technical Details
 - `.swiftformat` fixes for 0.55.5: `--yodaconditions preserve` →
@@ -58,26 +72,17 @@ title: CI quality workflows — SwiftFormat lint, hardcoded-string gate, Strings
 - **Diff-based string check**: matches AGENTS.md "grep the changed files"
   verification rule and avoids a big-bang cleanup of legacy literals.
 
+### Final History (on main)
+```
+ac31230 [CI] — Format files introduced by origin/main merge (38 files)
+81ecd06 Merge origin/main into CI quality branch
+432a3f3 [CI] — Repo-wide SwiftFormat pass (160 files)
+ea1ba28 [CI] — Add quality gates: swiftformat lint, hardcoded-string check, strings sync
+```
+
 ### Build Status
-- **BUILD SUCCEEDED** (XcodeBuildMCP build_sim, 52.9s, iPhone 16e iOS 26.2
-  simulator) — proves the mass reformat broke nothing. One pre-existing
-  warning: `latestSession` defined-but-unused in `MainTabView.swift:200`
-  (untouched by this change; flagged, not fixed, per surgical-changes rule).
-
-### Suggested Branch
-`chore/ci-quality-workflows` (standalone infra — no feature number; branched
-from `main`. User directed this land on `main`.)
-
-### Suggested Commit
-`[CI] — Add quality.yml gates (swiftformat lint, hardcoded strings, strings sync) + repo-wide format`
-
-### Changes done
-```
-- Add .github/workflows/quality.yml (3 jobs, pinned SwiftFormat 0.55.5)
-- Add scripts/check-hardcoded-strings.py (diff-based, #if DEBUG-aware)
-- Fix 4 dead .swiftformat options for 0.55.5 + pin --swiftversion 6.0
-- swiftformat whole repo (160 files)
-```
+- **BUILD SUCCEEDED** before merge (52.9s) and **after merge** (38.1s,
+  zero warnings) — F18 restructuring compiled with the format pass applied.
 
 ### Next Session
 - Optional follow-ups from the original suggestion list: build+test CI job
@@ -91,6 +96,7 @@ from `main`. User directed this land on `main`.)
   documented in AGENTS.md or left as the workflow comment?
 - Notion/FeatureTracker were not updated for this task (no feature number).
   Add an infra row to the tracker if you want CI work tracked there.
-- Note: mid-session, work was re-anchored from `feature/f18/t12-shared-viewstate`
-  to `main` per user instruction; all changes are currently uncommitted on
-  `main`.
+- `main` is 4 commits ahead of `origin/main` and ready to push; pushing will
+  trigger the new quality workflow for the first time (live fire test).
+- The user's uncommitted AGENTS.md/CLAUDE.md "AI Skills" sections are in the
+  working tree — commit them separately when ready.
