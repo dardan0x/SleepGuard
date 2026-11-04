@@ -45,7 +45,7 @@ struct SessionDetailLoadedView: View {
         SessionDetailEventsView(
           events: model.filteredEvents,
           displayDurations: model.displayDurations,
-          title: model.eventsTitle,
+          title: eventsTitle,
           onShowAll: { activeSheet = .events },
           onPlayEvent: { event in
             activeSheet = .player(initialEvent: event)
@@ -155,6 +155,17 @@ struct SessionDetailLoadedView: View {
       }
     }
   }
+
+  /// Localized events-section header — view-layer mapping of the model's
+  /// selected filter (see the MARK note at the bottom of this file).
+  private var eventsTitle: String {
+    switch model.selectedFilter {
+    case .all: return Strings.sessionRecordingEventsFormatAll
+    case .snoring: return Strings.sessionRecordingEventsFormatSnoring
+    case .sleepTalking: return Strings.sessionRecordingEventsFormatSleepTalking
+    case .noise: return Strings.sessionRecordingEventsFormatNoise
+    }
+  }
 }
 
 enum SessionDetailSheet: Identifiable {
@@ -170,6 +181,23 @@ enum SessionDetailSheet: Identifiable {
       return "events"
     case .shortEventsPlayer:
       return "short-events-player"
+    }
+  }
+}
+
+// MARK: - Presentation mappings
+//
+// Label text lives in the view layer (see AGENTS.md "UI Dependencies in
+// Non-View Code"): the filter enum and its selection logic stay in
+// SessionDetailModel; only the display strings are mapped here.
+
+extension SessionDetailModel.EventCategoryFilter {
+  var displayName: String {
+    switch self {
+    case .all: return Strings.filterAll
+    case .snoring: return Strings.filterSnoring
+    case .sleepTalking: return Strings.filterSleepTalking
+    case .noise: return Strings.filterNoise
     }
   }
 }

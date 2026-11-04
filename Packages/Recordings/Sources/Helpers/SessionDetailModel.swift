@@ -1,6 +1,5 @@
 import Foundation
 import SwiftData
-import DesignSystem
 import Env
 import Models
 
@@ -22,15 +21,6 @@ final class SessionDetailModel {
     case snoring
     case sleepTalking
     case noise
-
-    var displayName: String {
-      switch self {
-      case .all: return Strings.filterAll
-      case .snoring: return Strings.filterSnoring
-      case .sleepTalking: return Strings.filterSleepTalking
-      case .noise: return Strings.filterNoise
-      }
-    }
 
     func includes(event: SnoreEvent) -> Bool {
       switch self {
@@ -179,15 +169,6 @@ final class SessionDetailModel {
       let reps = session.displayableSnoringEpisodes.compactMap(\.representativeEvent)
       let others = sortedEvents.filter { $0.category != .snoring }
       return (reps + others).sorted(by: { $0.timestamp < $1.timestamp })
-    }
-  }
-
-  var eventsTitle: String {
-    switch selectedFilter {
-    case .all: return Strings.sessionRecordingEventsFormatAll
-    case .snoring: return Strings.sessionRecordingEventsFormatSnoring
-    case .sleepTalking: return Strings.sessionRecordingEventsFormatSleepTalking
-    case .noise: return Strings.sessionRecordingEventsFormatNoise
     }
   }
 }
