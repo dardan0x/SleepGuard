@@ -79,3 +79,16 @@ title: F18-T2 SessionDetailView Split
 - Approve deletion of the dead fakePlayerSection + marker helpers? (mini
   player revival would need them rethought anyway — markers are cheap to
   recompute)
+
+### Follow-up (same session, commit 4d00b8b)
+- User flagged `SessionDetailModel` importing DesignSystem — correct: it was
+  the only non-view, non-content-engine importer in the codebase. Fixed:
+  `displayName`/`eventsTitle` moved to `SessionDetailLoadedView`.
+- New permanent rule in AGENTS.md/CLAUDE.md: **UI Dependencies in Non-View
+  Code** — state owners/helpers/services/models must not import
+  `DesignSystem`; core packages (Models/AudioEngine) must not import
+  SwiftUI/DesignSystem; exceptions: BriefingEngine/QuoteBank (content),
+  Router (SwiftUI), AudioRecorder (UIKit, `#if canImport`).
+- Enforced by `scripts/check-layering.py` + `.github/workflows/layering.yml`
+  (runs on every push/PR). Verified: passes on the real tree (182 files),
+  fails on a synthetic probe.
