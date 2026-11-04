@@ -5,14 +5,28 @@ on: [push, pull_request, workflow_dispatch]
 jobs:
   swiftformat:
     runs-on: ubuntu-latest
+    # Prebuilt SwiftFormat 0.55.x Linux binaries segfault on GitHub runners
+    # (swiftlang/swift#77841, nicklockwood/SwiftFormat#1930), so we build from
+    # source in a Swift container instead of downloading the release binary.
+    container: swift:6.0.3
+    env:
+      # Keep in sync with the version developers run locally (swiftformat --version).
+      SWIFTFORMAT_VERSION: 0.55.5
     steps:
       - uses: actions/checkout@v4
-      - name: Install SwiftFormat 0.55.5
-        # Keep in sync with the version developers run locally (swiftformat --version).
+      - name: Cache SwiftFormat build
+        uses: actions/cache@v4
+        with:
+          path: /tmp/swiftformat-build
+          key: swiftformat-build-${{ env.SWIFTFORMAT_VERSION }}
+      - name: Build SwiftFormat from source
         run: |
-          curl -fsSL -o /tmp/swiftformat.zip https://github.com/nicklockwood/SwiftFormat/releases/download/0.55.5/swiftformat_linux.zip
-          unzip -q /tmp/swiftformat.zip -d /tmp/swiftformat-bin
-          sudo install -m 755 /tmp/swiftformat-bin/swiftformat_linux /usr/local/bin/swiftformat
+          if [ ! -x /tmp/swiftformat-build/release/swiftformat ]; then
+            curl -fsSL "https://github.com/nicklockwood/SwiftFormat/archive/refs/tags/${SWIFTFORMAT_VERSION}.tar.gz" | tar -xz -C /tmp
+            swift build --package-path "/tmp/SwiftFormat-${SWIFTFORMAT_VERSION}" --build-path /tmp/swiftformat-build --product swiftformat --configuration release -Xlinker -s
+          fi
+          install -m 755 /tmp/swiftformat-build/release/swiftformat /usr/local/bin/swiftformat
+          swiftformat --version
       - name: Lint
         run: swiftformat --lint .
 
