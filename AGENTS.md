@@ -211,6 +211,26 @@ These thresholds prevent monolithic views. Enforce them during implementation an
 - One endpoint enum per API resource. One file per enum.
 - 2-space indentation. Enforced by `.swiftformat`.
 
+### UI Dependencies in Non-View Code
+
+View files (`Sources/Views/`, `Sources/Components/`) own everything visual:
+`Theme`, `Strings` label mappings, colors, fonts. Non-view code must not.
+
+- State owners, helpers, services, and models must NOT import `DesignSystem`
+  for UI chrome. Helpers expose logic (enums, predicates, state); the view
+  maps to `Strings`/`Theme`.
+- Core packages (`Models`, `AudioEngine`) must not import `SwiftUI`/`UIKit`/
+  `DesignSystem` at all.
+- Allowed exceptions: content engines whose output IS user-facing text
+  (`Personalization/Engine/BriefingEngine.swift`, `QuoteBank.swift`) may use
+  `Strings`; navigation infrastructure (`Env/Sources/Services/Router.swift`)
+  may import `SwiftUI`; audio infrastructure
+  (`AudioEngine/Sources/Engine/AudioRecorder.swift`) may import `UIKit` for
+  session-interruption observation.
+- Enforced by `scripts/check-layering.py` on every push/PR
+  (`.github/workflows/layering.yml`). Run locally before committing non-view
+  code: `python3 scripts/check-layering.py`.
+
 ## SwiftData Schema Rules
 
 SwiftData lightweight migration is automatic for additive changes, but **removing or renaming properties will crash on launch** for existing users. Follow these rules to keep the schema future-proof without migration plans.
