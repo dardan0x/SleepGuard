@@ -28,15 +28,15 @@ struct DebugConfigView: View {
       }
 
       Section("Tabs") {
-        ForEach(tabConfigs.indices, id: \.self) { index in
+        ForEach(Array(tabConfigs.enumerated()), id: \.offset) { index, config in
           VStack(alignment: .leading, spacing: 8) {
-            Toggle(tabConfigs[index].tab.rawValue, isOn: Binding(
-              get: { tabConfigs[index].isVisible },
+            Toggle(config.tab.rawValue, isOn: Binding(
+              get: { config.isVisible },
               set: { newValue in
                 tabConfigs[index] = TabConfig(
-                  tab: tabConfigs[index].tab,
+                  tab: config.tab,
                   isVisible: newValue,
-                  order: tabConfigs[index].order
+                  order: config.order
                 )
               }
             ))
