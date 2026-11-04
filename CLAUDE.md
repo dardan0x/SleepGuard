@@ -201,6 +201,11 @@ These thresholds prevent monolithic views. Enforce them during implementation an
 - One-off buttons that are not reused
 - Private helper formatting functions
 
+**Computed `some View` boundaries (review rule):**
+- A computed `some View` property shares its parent's invalidation boundary — it reorganizes code but does not reduce re-evaluation cost. Prefer a dedicated `View` struct when the section is complex (> ~20 lines), reads `@State`/`@Observable`/environment values, or is built per-item inside a `ForEach` (changing parameters per call).
+- Small, static sections (no state reads, no parameters) may stay as computed properties.
+- During review, run: `grep -rnE '^\s+(private )?var \w+: some View' Packages --include='*.swift'` and check new/changed hits against this rule.
+
 **Duplication rule:**
 - If the same view struct appears in 2+ files, extract it to `DesignSystem` immediately. Do not copy-paste view code.
 
@@ -210,6 +215,26 @@ These thresholds prevent monolithic views. Enforce them during implementation an
 - The app target is the only place that imports everything.
 - One endpoint enum per API resource. One file per enum.
 - 2-space indentation. Enforced by `.swiftformat`.
+
+### UI Dependencies in Non-View Code
+
+View files (`Sources/Views/`, `Sources/Components/`) own everything visual:
+`Theme`, `Strings` label mappings, colors, fonts. Non-view code must not.
+
+- State owners, helpers, services, and models must NOT import `DesignSystem`
+  for UI chrome. Helpers expose logic (enums, predicates, state); the view
+  maps to `Strings`/`Theme`.
+- Core packages (`Models`, `AudioEngine`) must not import `SwiftUI`/`UIKit`/
+  `DesignSystem` at all.
+- Allowed exceptions: content engines whose output IS user-facing text
+  (`Personalization/Engine/BriefingEngine.swift`, `QuoteBank.swift`) may use
+  `Strings`; navigation infrastructure (`Env/Sources/Services/Router.swift`)
+  may import `SwiftUI`; audio infrastructure
+  (`AudioEngine/Sources/Engine/AudioRecorder.swift`) may import `UIKit` for
+  session-interruption observation.
+- Enforced by `scripts/check-layering.py` on every push/PR
+  (`.github/workflows/layering.yml`). Run locally before committing non-view
+  code: `python3 scripts/check-layering.py`.
 
 ## SwiftData Schema Rules
 

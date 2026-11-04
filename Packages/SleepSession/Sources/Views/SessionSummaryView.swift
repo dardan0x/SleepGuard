@@ -21,178 +21,54 @@ public struct SessionSummaryView: View {
   @Environment(\.dismiss) private var dismiss
   @Environment(\.modelContext) private var modelContext
 
-  @State private var showShortSessionAlert = false
-  @State private var showSaveErrorAlert = false
+  @State private var activeAlert: SummaryAlert?
 
   public var body: some View {
     ScrollView {
       VStack(spacing: 32) {
-        completionHeader
-
-        scoreSection
-
-        statsGrid
+        SessionSummaryStats(session: session)
 
         MelodyGapsBannerView(session: session)
 
         LowBatteryBannerView(session: session)
 
-        timelineSection
+        SessionSummaryTimeline(session: session)
 
-        actionButtons
+        SessionSummaryActions(onSave: saveSession, onDiscard: discardSession)
       }
       .padding(24)
     }
     .background(theme.bgPrimary.ignoresSafeArea())
-    .alert(Strings.sessionSummaryTooShortTitle, isPresented: $showShortSessionAlert) {
+    .alert(Strings.sessionSummaryTooShortTitle, isPresented: isPresented(.tooShort)) {
       Button(Strings.actionOk, role: .cancel) { }
     } message: {
       Text(String(format: Strings.sessionSummaryTooShortInfoFormat, Int(SleepSession.minimumSaveDuration / 60)))
     }
-    .alert(Strings.saveFailed, isPresented: $showSaveErrorAlert) {
+    .alert(Strings.saveFailed, isPresented: isPresented(.saveFailed)) {
       Button(Strings.actionOk, role: .cancel) { }
     } message: {
       Text(Strings.unableToSaveTheSession)
     }
   }
 
-  private var completionHeader: some View {
-    VStack(spacing: 8) {
-      Text(Strings.sessionSummaryTitle)
-        .font(.system(size: 13, weight: .semibold))
-        .foregroundStyle(theme.scoreGreen)
-        .tracking(2)
-
-      Text(String(format: Strings.sessionSummaryYouSleptFormat, durationString))
-        .font(.system(size: 28, weight: .bold))
-        .foregroundStyle(theme.textPrimary)
-    }
-    .padding(.top, 16)
-  }
-
-  private var scoreSection: some View {
-    SleepScoreGauge(score: session.sleepScore(using: appConfig.sleepScoreConfig), theme: theme, size: 160)
-  }
-
-  private var statsGrid: some View {
-    HStack(spacing: 12) {
-      StatCard(
-        icon: "percent",
-        title: Strings.sessionSummaryStatSnoring,
-        value: String(format: "%.0f%%", session.snoringPercentage),
-        theme: theme,
-        iconColor: theme.scoreAmber
-      )
-      StatCard(
-        icon: "bolt.fill",
-        title: Strings.recordingsDetailEventsLabel,
-        value: "\(session.eventsCount)",
-        theme: theme,
-        iconColor: theme.scoreAmber
-      )
-    }
-  }
-
-  private var timelineSection: some View {
-    VStack(alignment: .leading, spacing: 12) {
-      SnoringTimelineView(session: session, theme: theme)
-
-      HStack {
-        Text(timeString(session.startDate))
-          .font(.caption2)
-          .foregroundStyle(theme.textTertiary)
-
-        Spacer()
-
-        if let endDate = session.endDate {
-          Text(timeString(endDate))
-            .font(.caption2)
-            .foregroundStyle(theme.textTertiary)
+  /// Binding for the alert modifiers, derived from the enum state so the
+  /// modifier forms (and their rendering) are unchanged.
+  private func isPresented(_ alert: SummaryAlert) -> Binding<Bool> {
+    Binding(
+      get: { activeAlert == alert },
+      set: { isActive in
+        if !isActive {
+          activeAlert = nil
         }
       }
-    }
+    )
   }
 
-  private var actionButtons: some View {
-    VStack(spacing: 12) {
-      ZStack {
-        // Outer soft halo
-        Capsule()
-          .fill(theme.accent.opacity(0.12))
-          .frame(maxWidth: .infinity)
-          .frame(height: 96)
-          .blur(radius: 20)
-          .offset(y: 6)
-
-        // Inner concentrated glow
-        Capsule()
-          .fill(
-            LinearGradient(
-              colors: [theme.accent.opacity(0.35), theme.accent.opacity(0.0)],
-              startPoint: .top,
-              endPoint: .bottom
-            )
-          )
-          .frame(maxWidth: .infinity)
-          .frame(height: 76)
-          .blur(radius: 10)
-          .offset(y: 8)
-
-        Button {
-          saveSession()
-        } label: {
-          Text(Strings.actionSaveSession)
-            .font(.system(size: 17, weight: .semibold))
-            .foregroundStyle(.white)
-            .frame(maxWidth: .infinity)
-            .frame(height: 56)
-            .background(
-              ZStack {
-                Color(hex: "#1E1D1E")
-                Capsule()
-                  .stroke(
-                    LinearGradient(
-                      colors: [Color.white.opacity(0.25), Color.white.opacity(0.05)],
-                      startPoint: .leading,
-                      endPoint: .trailing
-                    ),
-                    lineWidth: 1
-                  )
-              }
-            )
-            .clipShape(Capsule())
-        }
-      }
-
-      Button {
-        discardSession()
-      } label: {
-        Text(Strings.actionDiscard)
-          .font(.system(size: 17, weight: .medium))
-          .foregroundStyle(theme.textSecondary)
-      }
-    }
-  }
-
-  // MARK: - Helpers
-
-  private var durationString: String {
-    let total = Int(session.totalDuration)
-    let hours = total / 3600
-    let minutes = (total % 3600) / 60
-    if hours > 0 {
-      return String(format: "%d h %d min", hours, minutes)
-    }
-    return String(format: "%d min", minutes)
-  }
-
-  private func timeString(_ date: Date) -> String {
-    DateFormatters.timeWithPeriod.string(from: date)
-  }
+  // MARK: - Save / discard
 
   private func saveSession() {
     if session.totalDuration < SleepSession.minimumSaveDuration {
-      showShortSessionAlert = true
+      activeAlert = .tooShort
       return
     }
 
@@ -213,7 +89,7 @@ public struct SessionSummaryView: View {
     do {
       try modelContext.save()
     } catch {
-      showSaveErrorAlert = true
+      activeAlert = .saveFailed
       return
     }
 
@@ -238,4 +114,9 @@ public struct SessionSummaryView: View {
     sessionManager.discardCompletedSession()
     dismiss()
   }
+}
+
+enum SummaryAlert {
+  case tooShort
+  case saveFailed
 }

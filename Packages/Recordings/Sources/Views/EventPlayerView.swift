@@ -1,9 +1,11 @@
-import SwiftUI
-import Models
 import DesignSystem
+import Models
+import SwiftUI
 
 /// Single-event audio player matching the SleepGuard design.
 /// Shows event info, bar waveform with progress, and centered playback controls.
+/// Composes `EventPlayerHeaderView`, `EventWaveformView`,
+/// `EventPlayerControlsView` and `EventIntensityLegendView`.
 @MainActor
 struct EventPlayerView: View {
   let event: SnoreEvent
@@ -21,15 +23,38 @@ struct EventPlayerView: View {
   let isLoadingWaveform: Bool
 
   @Environment(Theme.self) private var theme
-  @State private var pulsePhase = false
+
+  private var intensityColor: Color {
+    theme.intensityColor(event.intensity)
+  }
 
   var body: some View {
     ZStack {
       VStack(spacing: 24) {
-        headerSection
-        waveformSection
-        controlsSection
-        legendSection
+        EventPlayerHeaderView(
+          event: event,
+          eventNumber: eventNumber,
+          totalEvents: totalEvents,
+          totalDuration: totalDuration,
+          intensityColor: intensityColor,
+          intensityLabel: intensityLabel
+        )
+        EventWaveformView(
+          event: event,
+          intensityColor: intensityColor,
+          waveformSamples: waveformSamples,
+          currentTime: currentTime,
+          totalDuration: totalDuration,
+          isLoadingWaveform: isLoadingWaveform,
+          onScrub: onScrub
+        )
+        EventPlayerControlsView(
+          isPlaying: isPlaying,
+          onTogglePlayback: onTogglePlayback,
+          onSkipBack: onSkipBack,
+          onSkipForward: onSkipForward
+        )
+        EventIntensityLegendView()
       }
       .padding(20)
       .background(theme.bgCard)
@@ -39,15 +64,6 @@ struct EventPlayerView: View {
         loadingOverlay
       }
     }
-    .task(id: isLoadingWaveform) {
-      guard isLoadingWaveform else { return }
-      while !Task.isCancelled {
-        withAnimation(.easeInOut(duration: 0.7)) {
-          pulsePhase.toggle()
-        }
-        try? await Task.sleep(for: .seconds(0.7))
-      }
-    }
   }
 
   private var loadingOverlay: some View {
@@ -55,252 +71,13 @@ struct EventPlayerView: View {
       ProgressView()
         .scaleEffect(1.2)
         .tint(theme.accent)
-        Text(Strings.loadingAudioEventPlayerView)
+      Text(Strings.loadingAudioEventPlayerView)
         .font(.system(size: 14, weight: .medium))
         .foregroundStyle(theme.textSecondary)
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity)
     .background(theme.bgCard.opacity(0.95))
     .cornerRadius(theme.radiusCard)
-  }
-
-  // MARK: - Header
-
-  private var headerSection: some View {
-    VStack(alignment: .leading, spacing: 6) {
-      Text(eventTimeString)
-        .font(.system(size: 13, weight: .medium))
-        .foregroundStyle(theme.textSecondary)
-
-        Text(Strings.snoringEventHeaderPlayerView.uppercased())
-        .font(.system(size: 11, weight: .semibold))
-        .foregroundStyle(theme.textTertiary)
-        .tracking(1.5)
-
-      HStack(spacing: 8) {
-        Text(durationString(totalDuration))
-          .font(.system(size: 22, weight: .bold, design: .rounded))
-          .foregroundStyle(theme.textPrimary)
-
-        Text("·")
-          .font(.system(size: 22, weight: .bold))
-          .foregroundStyle(theme.textSecondary)
-
-        Text(intensityLabel)
-          .font(.system(size: 22, weight: .bold, design: .rounded))
-          .foregroundStyle(intensityColor)
-      }
-
-      if totalEvents > 1 {
-          Text("\(Strings.eventHeaderSectionTotalEvents) \(eventNumber) of \(totalEvents)")
-          .font(.system(size: 12, weight: .medium))
-          .foregroundStyle(theme.textTertiary)
-      }
-    }
-    .frame(maxWidth: .infinity, alignment: .leading)
-  }
-
-  private var eventTimeString: String {
-    let calendar = Calendar.current
-    let hour = calendar.component(.hour, from: event.timestamp)
-    let minute = calendar.component(.minute, from: event.timestamp)
-    let period = hour >= 12 ? "pm" : "am"
-    let displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour)
-    return String(format: "%d:%02d %@", displayHour, minute, period)
-  }
-
-  // MARK: - Waveform
-
-  private var waveformSection: some View {
-    VStack(spacing: 12) {
-      // Dots above waveform
-//      waveformMarkers
-
-      // Bar waveform with progress indicator
-      GeometryReader { geometry in
-        ZStack(alignment: .leading) {
-          if isLoadingWaveform {
-            waveformPlaceholder(maxHeight: geometry.size.height)
-          } else {
-            HStack(alignment: .center, spacing: 2) {
-              ForEach(0..<barCount, id: \.self) { index in
-                let isPlayed = Double(index) / Double(barCount) <= progress
-                waveformBar(
-                  height: barHeight(at: index, maxHeight: geometry.size.height),
-                  isPlayed: isPlayed
-                )
-              }
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-
-            // Current time indicator line
-            Rectangle()
-              .fill(Color.white)
-              .frame(width: 2, height: geometry.size.height + 8)
-              .offset(x: CGFloat(progress) * geometry.size.width - 1, y: 0)
-          }
-        }
-        .contentShape(Rectangle())
-        .onTapGesture { location in
-          guard !isLoadingWaveform else { return }
-          let relative = Double(location.x / geometry.size.width)
-          onScrub(relative)
-        }
-      }
-      .frame(height: 80)
-
-      // Time labels
-      HStack {
-        Text(timeString(0))
-        Spacer()
-        Text("\(timeString(currentTime)) / \(timeString(totalDuration))")
-        Spacer()
-        Text(timeString(totalDuration))
-      }
-      .font(.system(size: 12, weight: .medium, design: .monospaced))
-      .foregroundStyle(theme.textSecondary)
-      .monospacedDigit()
-    }
-  }
-
-  private var waveformMarkers: some View {
-    GeometryReader { geometry in
-      ZStack(alignment: .leading) {
-        // Burst-span markers: each capsule spans the burst's actual start→end
-        // duration so users can directly read which segments of the waveform
-        // the detector classified as snoring (vs. just where it began).
-        // Burst offsets are relative to THIS event's start — divide by
-        // `event.snoreDuration`, NOT `totalDuration` (which is the whole
-        // session in multi-event mode and would cluster spans at the left).
-        // Falls back to a single dot at the start when burst data is missing
-        // (legacy events recorded before the burst model existed).
-        if let bursts = event.bursts, !bursts.isEmpty, event.snoreDuration > 0 {
-          ForEach(bursts.indices, id: \.self) { index in
-            let burst = bursts[index]
-            let startPos = burst.startOffset / event.snoreDuration
-            let endPos = min(burst.endOffset / event.snoreDuration, 1.0)
-            let startX = CGFloat(startPos) * geometry.size.width
-            // Minimum 6 pt wide so very short bursts stay visible at all sizes.
-            let widthPx = max(CGFloat(endPos - startPos) * geometry.size.width, 6)
-            Capsule()
-              .fill(intensityColor)
-              .frame(width: widthPx, height: 6)
-              .position(x: startX + widthPx / 2, y: geometry.size.height / 2)
-          }
-        } else {
-          Circle()
-            .fill(intensityColor)
-            .frame(width: 8, height: 8)
-            .position(x: 0, y: geometry.size.height / 2)
-        }
-      }
-    }
-    .frame(height: 12)
-  }
-
-  private var barCount: Int {
-    max(min(waveformSamples.count, 80), 40)
-  }
-
-  private func barHeight(at index: Int, maxHeight: CGFloat) -> CGFloat {
-    guard !waveformSamples.isEmpty else { return 2 }
-    let sampleIndex = Int(Double(index) / Double(barCount) * Double(waveformSamples.count))
-    guard waveformSamples.indices.contains(sampleIndex) else { return 2 }
-    let sample = waveformSamples[sampleIndex]
-    return max(CGFloat(sample) * maxHeight * 0.9, 3)
-  }
-
-  private func waveformPlaceholder(maxHeight: CGFloat) -> some View {
-    HStack(alignment: .center, spacing: 2) {
-      ForEach(0..<barCount, id: \.self) { index in
-        // Use a deterministic pseudo-random height based on index so bars don't flicker
-        let pseudoRandom = CGFloat((index * 7 + 13) % 17) / 16.0
-        let height = max(pseudoRandom * maxHeight * 0.55, 4)
-        waveformBar(height: height, isPlayed: false)
-      }
-    }
-    .frame(maxWidth: .infinity, maxHeight: .infinity)
-    .opacity(pulsePhase ? 0.25 : 0.55)
-  }
-
-  private func waveformBar(height: CGFloat, isPlayed: Bool) -> some View {
-    RoundedRectangle(cornerRadius: 1.5)
-      .fill(isPlayed ? theme.accent : theme.bgElevated)
-      .frame(maxWidth: .infinity)
-      .frame(height: height)
-  }
-
-  private var progress: Double {
-    guard totalDuration > 0 else { return 0 }
-    return currentTime / totalDuration
-  }
-
-  // MARK: - Controls
-
-  private var controlsSection: some View {
-    HStack(spacing: 40) {
-      // Skip back 15s
-      Button {
-        onSkipBack()
-      } label: {
-        Image(systemName: "gobackward.15")
-          .font(.system(size: 28, weight: .medium))
-          .foregroundStyle(theme.textPrimary)
-      }
-
-      // Play/Pause
-      Button {
-        onTogglePlayback()
-      } label: {
-        Image(systemName: isPlaying ? "pause.fill" : "play.fill")
-          .font(.system(size: 28, weight: .bold))
-          .foregroundStyle(theme.bgPrimary)
-          .frame(width: 72, height: 72)
-          .background(Color.white)
-          .clipShape(Circle())
-      }
-
-      // Skip forward 15s
-      Button {
-        onSkipForward()
-      } label: {
-        Image(systemName: "goforward.15")
-          .font(.system(size: 28, weight: .medium))
-          .foregroundStyle(theme.textPrimary)
-      }
-    }
-    .frame(maxWidth: .infinity)
-  }
-
-  // MARK: - Legend
-
-  /// Four-intensity legend so users can read what dot/text color means anywhere
-  /// in the app. Pulls colors via `theme.intensityColor(_:)` — the same source
-  /// the burst-dots and header use — so the legend never drifts out of sync.
-  private var legendSection: some View {
-    HStack(spacing: 14) {
-      legendItem(intensity: .quiet, label: Strings.quietIntensityLabel)
-      legendItem(intensity: .light, label: Strings.lightIntensityLabelEventPlayerView)
-      legendItem(intensity: .loud, label: Strings.loudIntensityLabelEventPlayerView)
-      legendItem(intensity: .epic, label: Strings.epicIntensityLabelEventPlayerView)
-    }
-  }
-
-  private func legendItem(intensity: SnoreIntensity, label: String) -> some View {
-    HStack(spacing: 4) {
-      Circle()
-        .fill(theme.intensityColor(intensity))
-        .frame(width: 8, height: 8)
-      Text(label)
-        .font(.system(size: 12, weight: .medium))
-        .foregroundStyle(theme.textSecondary)
-    }
-  }
-
-  // MARK: - Helpers
-
-  private var intensityColor: Color {
-    theme.intensityColor(event.intensity)
   }
 
   private var intensityLabel: String {
@@ -310,21 +87,5 @@ struct EventPlayerView: View {
     case .loud: return Strings.loudIntensityLabelEventPlayerView
     case .epic: return Strings.epicIntensityLabelEventPlayerView
     }
-  }
-
-  private func durationString(_ total: TimeInterval) -> String {
-    let minutes = Int(total) / 60
-    let seconds = Int(total) % 60
-    if minutes > 0 {
-      return "\(minutes)m \(seconds)s"
-    }
-    return "\(seconds)s"
-  }
-
-  private func timeString(_ total: TimeInterval) -> String {
-    let seconds = Int(total)
-    let mins = seconds / 60
-    let secs = seconds % 60
-    return String(format: "%d:%02d", mins, secs)
   }
 }
