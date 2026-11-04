@@ -1,0 +1,47 @@
+name: quality
+
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  swiftformat:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install SwiftFormat 0.55.5
+        # Keep in sync with the version developers run locally (swiftformat --version).
+        run: |
+          curl -fsSL -o /tmp/swiftformat.zip https://github.com/nicklockwood/SwiftFormat/releases/download/0.55.5/swiftformat_linux.zip
+          unzip -q /tmp/swiftformat.zip -d /tmp/swiftformat-bin
+          sudo install -m 755 /tmp/swiftformat-bin/swiftformat_linux /usr/local/bin/swiftformat
+      - name: Lint
+        run: swiftformat --lint .
+
+  hardcoded-strings:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Resolve diff base
+        id: base
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch origin "${{ github.base_ref }}"
+            echo "ref=origin/${{ github.base_ref }}" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+            echo "ref=${{ github.event.before }}" >> "$GITHUB_OUTPUT"
+          else
+            git fetch origin main
+            echo "ref=origin/main" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Check hardcoded strings
+        run: python3 scripts/check-hardcoded-strings.py --base "${{ steps.base.outputs.ref }}"
+
+  strings-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Regenerate Strings.swift
+        run: python3 scripts/generate-strings.py
+      - name: Check Strings.swift is in sync with Localizable.xcstrings
+        run: git diff --exit-code -- Packages/DesignSystem/Sources/Strings.swift

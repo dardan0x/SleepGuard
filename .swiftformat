@@ -1,4 +1,5 @@
 --indent 2
+--swiftversion 6.0
 --indentcase false
 --trimwhitespace always
 --insertlines true
@@ -19,12 +20,12 @@
 --hexgrouping ignore
 --binarygrouping ignore
 --octalgrouping ignore
---fractiongrouping ignore
---exponentgrouping ignore
+--fractiongrouping disabled
+--exponentgrouping disabled
 --patternlet hoist
---redundanttype infer
+--redundanttype inferred
 --semicolons inline
 --shortoptionals always
 --stripunusedargs always
 --trailingclosures
---yodaconditions preserve
+--disable yodaConditions
