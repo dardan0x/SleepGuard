@@ -138,6 +138,21 @@ Before marking any UI task complete, grep the changed files for hardcoded string
 - Flag uncertainty about facts, libraries, or technical details before proceeding.
 - Before any destructive action (deleting files, overwriting code, dropping data), list what will be affected and wait for explicit yes — prior mentions are not confirmation.
 
+## AI Skills (Installed)
+
+Vendored agent skills live in `.claude/skills/` (MIT licensed, LICENSE files included). Read before trusting; project rules in this file win on any conflict.
+
+| Skill | Source | Use for |
+|-------|--------|---------|
+| `swiftui-expert-skill` | [AvdLee/SwiftUI-Agent-Skill](https://github.com/AvdLee/SwiftUI-Agent-Skill) @ `204dba7` | SwiftUI correctness: state, composition, modifiers, lists, sheets, deprecated-API migration. Topic-routed references; hard correctness checklist in its SKILL.md. |
+| `swiftui-view-refactor` | [Dimillian/Skills](https://github.com/Dimillian/Skills) @ `05ba982` | Splitting views: dedicated subview types over computed `some View` helpers, stable view trees, MV-over-MVVM (matches our no-ViewModels rule). |
+| `swiftui-performance-audit` | [Dimillian/Skills](https://github.com/Dimillian/Skills) @ `05ba982` | Render/scroll/CPU audits: code-smell catalog first, profiling intake second. |
+
+Notes:
+- The skills are advisory and non-opinionated by design; where a skill's style suggestion (e.g., view property ordering) conflicts with project conventions, project conventions apply.
+- `swiftui-expert-skill` bundles Instruments trace tooling (`scripts/`). Consent rules: prefer app-scoped `--attach`/`--launch`; system-wide recording requires explicit user approval; treat traces as sensitive.
+- To refresh: re-clone upstream at a new commit and re-copy, updating the pinned hashes here.
+
 ## SwiftUI Rules
 
 These are non-negotiable. They come from production patterns in apps like IceCubesApp.
