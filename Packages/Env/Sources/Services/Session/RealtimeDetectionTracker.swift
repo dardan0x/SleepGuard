@@ -1,33 +1,40 @@
 import AudioEngine
-import AudioToolbox
-import AVFoundation
-import Env
 import Foundation
 import Models
-import Observation
 import UIKit
 
+/// Real-time snore/speech detection engine for an in-progress session.
+/// Consumed by `SessionRecordingController`'s processing loop on a 50 ms
+/// tick: classifies each audio sample, maintains the active snore/speech
+/// event state machines (debounce gaps, bursts, melody interplay), appends
+/// finalized events to the session, and tracks the per-event clip
+/// compression tasks.
+///
+/// Session ownership stays with the controller; the tracker reaches it (and
+/// the recording flag) through `recording`.
 @MainActor
 @Observable
-public final class SessionManager {
-  public static let shared = SessionManager()
+final class RealtimeDetectionTracker {
+  /// Real-time state for UI observation
+  private(set) var currentDB: Float = -160.0
+  private(set) var currentDetectionState: DetectionState = .none
+  private(set) var currentSpeechDetected = false
+  private(set) var eventsCount: Int = 0
 
-  public var currentSession: SleepSession?
-  public var isRecording = false
-  public var completedSession: SleepSession?
-  public var isProcessingSession = false
-  public var isLiveSessionVisible = false
+  weak var recording: SessionRecordingController?
 
-  /// Real-time audio level for UI observation
-  public var currentDB: Float = -160.0
-  public var currentDetectionState: DetectionState = .none
-  public var currentSpeechDetected = false
-  public var eventsCount = 0
+  /// Running-session average dB (aggregate of every processed sample).
+  var totalAverageDB: Double {
+    totalDBCount > 0 ? totalDBSum / Double(totalDBCount) : 0
+  }
 
   private let audioRecorder = AudioRecorder.shared
   private let snoreDetector = SnoreDetector.shared
   private let speechDetector = SpeechDetector.shared
   private let snoreInterrupterPlayer = SnoreInterrupterPlayer.shared
+
+  /// Set by the controller while a session is recording.
+  private var isActive = false
 
   // MARK: - Event tracking state
 
@@ -35,23 +42,23 @@ public final class SessionManager {
   private var activeEventID: UUID?
   private var activeEventIntensity: SnoreIntensity?
   private var activeEventDBSum: Double = 0
-  private var activeEventDBCount = 0
+  private var activeEventDBCount: Int = 0
   private var activeEventPeakDB: Double = 0
   private var activeEventConfidenceSum: Double = 0
-  private var activeEventConfidenceCount = 0
+  private var activeEventConfidenceCount: Int = 0
   private var activeEventSpectralSum: Double = 0
-  private var activeEventSpectralCount = 0
+  private var activeEventSpectralCount: Int = 0
   private var lastSnoringSampleTime: Date?
   private let eventGapThreshold: TimeInterval = 10.0
   /// Require 3 consecutive snoring samples (≈150 ms at 20 Hz) before starting an event.
   /// Filters out brief transient sounds (bed creaks, taps, notifications).
-  private var consecutiveSnoreSamples = 0
-  private let requiredConsecutiveSamples = 3
+  private var consecutiveSnoreSamples: Int = 0
+  private let requiredConsecutiveSamples: Int = 3
 
   /// Require 3 consecutive non-snoring samples before stopping the melody.
   /// Keeps melody playing through brief breathing gaps.
-  private var consecutiveNonSnoreSamples = 0
-  private let requiredNonSnoreSamplesToStop = 3
+  private var consecutiveNonSnoreSamples: Int = 0
+  private let requiredNonSnoreSamplesToStop: Int = 3
 
   /// Minimum time the Snore Interrupter must play before it can be stopped by non-snore detection.
   private let melodyMinPlayDuration: TimeInterval = 4.0
@@ -60,7 +67,7 @@ public final class SessionManager {
   private let postMelodyBreathingDelay: TimeInterval = 3.0
   private var melodyStartTime: Date?
   private var melodyResumeTime: Date?
-  private var postMelodySnoringDetected = false
+  private var postMelodySnoringDetected: Bool = false
 
   // Burst tracking: continuous snoring segments within the active event
   private var activeBurstStart: Date?
@@ -70,319 +77,126 @@ public final class SessionManager {
 
   private var activeSpeechEventStart: Date?
   private var activeSpeechEventDBSum: Double = 0
-  private var activeSpeechEventDBCount = 0
+  private var activeSpeechEventDBCount: Int = 0
   private var activeSpeechEventPeakDB: Double = 0
   private var lastSpeechSampleTime: Date?
-  private var consecutiveSpeechSamples = 0
-  private let requiredConsecutiveSpeechSamples = 3
+  private var consecutiveSpeechSamples: Int = 0
+  private let requiredConsecutiveSpeechSamples: Int = 3
 
   // MARK: - Session aggregate state
 
   private var totalDBSum: Double = 0
-  private var totalDBCount = 0
+  private var totalDBCount: Int = 0
   private var sessionSnoringDuration: TimeInterval = 0
   private var lastUpdateTime: Date?
-  private var processingTask: Task<Void, Never>?
-  private var batteryCheckCounter = 0
-  private var checkpointCounter = 0
 
   // MARK: - Per-event compression tasks
 
   private var pendingEventTasks: [Task<Void, Never>] = []
 
-  private init() {
+  init() {
     NotificationCenter.default.addObserver(
       self,
       selector: #selector(handleMelodyDidStop),
       name: .snoreInterrupterDidStop,
-      object: nil)
-    #if !targetEnvironment(simulator)
-    UIDevice.current.isBatteryMonitoringEnabled = true
-    #endif
+      object: nil
+    )
   }
 
-  @objc private func handleMelodyDidStop() {
-    guard let start = melodyStartTime else { return }
-    let duration = Date().timeIntervalSince(start)
-    logRecordingGap(start: start, duration: duration, snoringResumed: false)
-    melodyStartTime = nil
-    // Don't extend lastSnoringSampleTime yet. We wait for a short breathing
-    // delay after mic resume to verify snoring actually continued; only then
-    // does the gap count as snoring time.
-    if activeEventStart != nil {
-      melodyResumeTime = Date()
-      postMelodySnoringDetected = false
-    }
-    // Reset non-snore counter so stale data from the pause doesn't
-    // immediately trigger a melody stop when audio resumes.
-    consecutiveNonSnoreSamples = 0
+  // MARK: - Lifecycle hooks (called by SessionRecordingController)
+
+  func setActive(_ active: Bool) {
+    isActive = active
   }
 
-  /// Logs a recording gap directly on the session. Called whenever the Snore Interrupter
-  /// stops (mic resumes), ensuring gaps are counted even if notification delivery fails.
-  private func logRecordingGap(start: Date, duration: TimeInterval, snoringResumed: Bool = true) {
-    guard let session = currentSession, duration > 0 else { return }
-    let startOffset = start.timeIntervalSince(session.startDate)
-    guard startOffset >= 0 else { return }
-    var gaps = session.recordingGaps ?? []
-    gaps.append(RecordingGap(startOffset: startOffset, duration: duration, snoringResumed: snoringResumed))
-    session.recordingGaps = gaps
-    print("[SessionManager] Logged gap: startOffset=\(String(format: "%.1f", startOffset))s duration=\(String(format: "%.1f", duration))s snoringResumed=\(snoringResumed)")
-  }
-
-  /// Marks the most recent recording gap as having confirmed snoring resumption.
-  /// Called when sustained snoring is detected within the post-melody breathing delay.
-  private func markLastGapSnoringResumed() {
-    guard let session = currentSession, var gaps = session.recordingGaps, !gaps.isEmpty else { return }
-    gaps[gaps.count - 1].snoringResumed = true
-    session.recordingGaps = gaps
-  }
-
-  // MARK: - Lifecycle
-
-  public func startSession() throws {
-    resetTrackingState()
-    processingTask?.cancel()
-    snoreInterrupterPlayer.resetSessionMute()
-
-    // Clean up any orphaned files from a previous force-closed session.
-    PendingSessionStore.shared.cleanupIfNeeded()
-
-    let session = SleepSession(startDate: Date())
-    session.recordingGaps = []
-    currentSession = session
-    let sessionAudioFilename = UserPreferences.shared.preserveRawAudio ? "session_\(session.id.uuidString).caf" : nil
-    PendingSessionStore.shared.setPending(sessionID: session.id, sessionAudioFilename: sessionAudioFilename)
-
-    // Apply detection sensitivity thresholds before starting
-    applyDetectionSensitivity()
-
-    // Full-session raw audio is only recorded in debug mode for algorithm testing.
-    let audioURL: URL?
-    if UserPreferences.shared.preserveRawAudio {
-      audioURL = audioFileURL(for: session.id)
-      session.audioFileURL = AudioFileURLResolver.filename(from: audioURL!)
-    } else {
-      audioURL = nil
-    }
-
-    try audioRecorder.startRecording(audioFileURL: audioURL)
-    isRecording = true
+  func resetDisplayState() {
     currentDB = -160.0
     currentDetectionState = .none
     currentSpeechDetected = false
     eventsCount = 0
-
-    // Raw classification log is a debug re-processing aid (~48 MB/night of
-    // JSON for a full night, nothing reads it in production yet), so it is
-    // gated behind the same flag as the full raw audio.
-    if UserPreferences.shared.preserveRawAudio {
-      Task {
-        await SessionRawLogWriter.shared.start(sessionID: session.id)
-      }
-    }
-
-    // Drive processAudioLevel from SessionManager so it survives background.
-    processingTask = Task { @MainActor in
-      while !Task.isCancelled {
-        let saConf = SoundAnalysisDetector.shared.snoreConfidence
-        let saSpeechConf = SoundAnalysisDetector.shared.speechConfidence
-        processAudioLevel(
-          db: audioRecorder.currentDB,
-          peakDB: audioRecorder.currentPeakDB,
-          spectralScore: audioRecorder.spectralScore,
-          snoreConfidence: saConf,
-          speechConfidence: saSpeechConf)
-        batteryCheckCounter += 1
-        if batteryCheckCounter >= 600 {
-          batteryCheckCounter = 0
-          checkBatteryLevel()
-        }
-        // Periodic recovery checkpoint (~every 2 min) so session-level
-        // progress and gaps survive a crash even during long stretches
-        // without events. Event-driven checkpoints handle the rest.
-        checkpointCounter += 1
-        if checkpointCounter >= 2400 {
-          checkpointCounter = 0
-          checkpoint()
-        }
-        try? await Task.sleep(for: .milliseconds(50))
-      }
-    }
   }
 
-  private func checkBatteryLevel() {
-    #if targetEnvironment(simulator)
-    return
-    #else
-    let level = UIDevice.current.batteryLevel
-    guard level >= 0, level <= 0.02 else { return }
-    print("[SessionManager] Battery level at \(Int(level * 100))% — force saving session")
-    forceSaveDueToLowBattery()
-    #endif
+  func syncEventsCount(with session: SleepSession) {
+    eventsCount = session.eventsCount
   }
 
-  public func forceSaveDueToLowBattery() {
-    Task { @MainActor in
-      guard isRecording else { return }
-      currentSession?.terminationReason = "low_battery"
-      _ = await stopSession()
-    }
-  }
-
-  public func stopSession() async -> SleepSession? {
-    isProcessingSession = true
-    defer { isProcessingSession = false }
-
-    processingTask?.cancel()
-    processingTask = nil
-
-    snoreInterrupterPlayer.stop()
-    isRecording = false
-
-    // Finalize any in-progress events BEFORE stopping the audio engine.
-    // finalizeActiveEvent() calls finalizeEventFile() to capture the raw
-    // .caf URL; if stopRecording() runs first, currentEventFile is nilled
-    // and the event's audio is lost forever.
+  /// Finalizes any in-progress snore/speech events. Call BEFORE stopping the
+  /// audio engine: finalization captures the raw .caf URL; if stopRecording()
+  /// runs first, currentEventFile is nilled and the event's audio is lost.
+  func finalizeActiveEventsIfNeeded() {
     if activeEventStart != nil {
       finalizeActiveEvent()
     }
     if activeSpeechEventStart != nil {
       finalizeActiveSpeechEvent()
     }
+  }
 
-    audioRecorder.stopRecording()
-
-    // Wait for any in-flight per-event compression tasks to finish.
+  /// Waits for any in-flight per-event compression tasks to finish.
+  func awaitPendingCompression() async {
     for task in pendingEventTasks {
       await task.value
     }
     pendingEventTasks.removeAll()
-
-    guard let session = currentSession else { return nil }
-
-    let now = Date()
-
-    session.endDate = now
-    session.averageDB = totalDBCount > 0 ? totalDBSum / Double(totalDBCount) : 0
-    eventsCount = session.eventsCount
-
-    // In debug mode with raw audio preserved, move the full session file to rawAudioFileURL
-    // so event clips remain the primary playback source.
-    if UserPreferences.shared.preserveRawAudio,
-       let events = session.events, !events.isEmpty,
-       session.rawAudioFileURL == nil,
-       session.audioFileURL != nil
-    {
-      let hasClips = events.contains { $0.audioFileURL != nil }
-      if hasClips {
-        session.rawAudioFileURL = session.audioFileURL
-        session.audioFileURL = nil
-      }
-    }
-
-    // Save raw classification log
-    let logFilename = await SessionRawLogWriter.shared.stop()
-    session.rawLogFileURL = logFilename
-    if let logFilename {
-      PendingSessionStore.shared.addFile(logFilename)
-    }
-
-    let result = session
-    completedSession = result
-    currentSession = nil
-    resetTrackingState()
-    return result
   }
 
-  public func discardCompletedSession() {
-    // Delete event clips
-    if let events = completedSession?.events {
-      for event in events {
-        if let url = AudioFileURLResolver.resolve(event.audioFileURL) {
-          try? FileManager.default.removeItem(at: url)
-        }
-      }
-    }
-    // Delete legacy full session file if present (pre-raw-audio sessions)
-    if let url = AudioFileURLResolver.resolve(completedSession?.audioFileURL) {
-      try? FileManager.default.removeItem(at: url)
-    }
-    // Delete raw full session archive
-    if let url = AudioFileURLResolver.resolve(completedSession?.rawAudioFileURL) {
-      try? FileManager.default.removeItem(at: url)
-    }
-    // Delete raw classification log
-    if let url = AudioFileURLResolver.resolve(completedSession?.rawLogFileURL) {
-      try? FileManager.default.removeItem(at: url)
-    }
-    PendingSessionStore.shared.cleanupIfNeeded()
-    SessionCheckpointStore.shared.clear()
-    completedSession = nil
+  /// Writes a recovery snapshot of the in-progress session to disk so it can
+  /// be reconstructed after a crash. Called after each event finalizes (and
+  /// after its clip compresses) plus periodically from the processing loop.
+  func checkpoint() {
+    guard let session = recording?.currentSession else { return }
+    let snapshot = SessionRecoverySnapshot(from: session, checkpointDate: Date())
+    SessionCheckpointStore.shared.write(snapshot)
   }
 
-  /// Stops the current recording and discards the session without presenting the summary.
-  /// Used when the user explicitly chooses to stop a session that is below the minimum duration.
-  public func stopAndDiscardSession() {
-    Task { @MainActor in
-      processingTask?.cancel()
-      processingTask = nil
-
-      snoreInterrupterPlayer.stop()
-      isRecording = false
-
-      // Finalize events BEFORE stopping audio engine so file URLs are
-      // captured while currentEventFile still exists.
-      if activeEventStart != nil {
-        finalizeActiveEvent()
-      }
-      if activeSpeechEventStart != nil {
-        finalizeActiveSpeechEvent()
-      }
-
-      audioRecorder.stopRecording()
-
-      // Wait for any in-flight compression tasks before deleting files.
-      for task in pendingEventTasks {
-        await task.value
-      }
-      pendingEventTasks.removeAll()
-
-      // Delete the session's audio files and clean up
-      if let session = currentSession {
-        if let url = AudioFileURLResolver.resolve(session.audioFileURL) {
-          try? FileManager.default.removeItem(at: url)
-        }
-        if let url = AudioFileURLResolver.resolve(session.rawAudioFileURL) {
-          try? FileManager.default.removeItem(at: url)
-        }
-        // Delete per-event files
-        if let events = session.events {
-          for event in events {
-            if let url = AudioFileURLResolver.resolve(event.audioFileURL) {
-              try? FileManager.default.removeItem(at: url)
-            }
-          }
-        }
-      }
-
-      PendingSessionStore.shared.cleanupIfNeeded()
-      SessionCheckpointStore.shared.clear()
-      currentSession = nil
-      resetTrackingState()
+  /// Calibrated thresholds + SoundAnalysis confidence gates for the full-band
+  /// capture path. Low = noisier rooms / stricter filtering;
+  /// Medium = typical quiet bedroom (default); High = very quiet rooms.
+  ///
+  /// loud/epic lowered by 5 dB (2026-06-01) because RMS over 23 ms buffers
+  /// under-reports impulsive snoring peaks. Peak-dB classification now
+  /// compensates, but the thresholds were still sitting above real captured
+  /// levels for loud snoring at typical bedside distances.
+  func applyDetectionSensitivity() {
+    let sensitivity = UserPreferences.shared.detectionSensitivity
+    switch sensitivity {
+    case .low:
+      snoreDetector.quietThreshold = -45.0
+      snoreDetector.lightThreshold = -35.0
+      snoreDetector.loudThreshold = -15.0
+      snoreDetector.epicThreshold = -5.0
+      snoreDetector.confidenceGate = 0.45
+      snoreDetector.highConfidenceGate = 0.65
+      snoreDetector.quietFallbackGate = 0.55
+    case .medium:
+      snoreDetector.quietThreshold = -50.0
+      snoreDetector.lightThreshold = -40.0
+      snoreDetector.loudThreshold = -20.0
+      snoreDetector.epicThreshold = -10.0
+      snoreDetector.confidenceGate = 0.35
+      snoreDetector.highConfidenceGate = 0.55
+      snoreDetector.quietFallbackGate = 0.45
+    case .high:
+      snoreDetector.quietThreshold = -55.0
+      snoreDetector.lightThreshold = -45.0
+      snoreDetector.loudThreshold = -25.0
+      snoreDetector.epicThreshold = -15.0
+      snoreDetector.confidenceGate = 0.25
+      snoreDetector.highConfidenceGate = 0.45
+      snoreDetector.quietFallbackGate = 0.35
     }
   }
 
   // MARK: - Real-time audio processing
 
   /// Call this from the view when `audioRecorder.currentDB` changes.
-  public func processAudioLevel(db: Float) {
+  func processAudioLevel(db: Float) {
     processAudioLevel(db: db, peakDB: nil, spectralScore: 0, snoreConfidence: 0, speechConfidence: 0)
   }
 
   /// Call this from the view when audio features are available.
-  public func processAudioLevel(db: Float, peakDB: Float? = nil, spectralScore: Float = 0, snoreConfidence: Float = 0, speechConfidence: Float = 0) {
-    guard isRecording, let session = currentSession else { return }
+  func processAudioLevel(db: Float, peakDB: Float? = nil, spectralScore: Float = 0, snoreConfidence: Float = 0, speechConfidence: Float = 0) {
+    guard isActive, let session = recording?.currentSession else { return }
 
     let now = Date()
     let rawDelta = lastUpdateTime.map { now.timeIntervalSince($0) } ?? 0
@@ -428,7 +242,8 @@ public final class SessionManager {
           db: db,
           spectralScore: spectralScore,
           snoreConfidence: snoreConfidence,
-          state: state)
+          state: state
+        )
       }
     }
 
@@ -489,7 +304,7 @@ public final class SessionManager {
         // audio file and current burst so they don't span the dead-mic
         // interval, but keep the event alive — snoring continues during
         // melody playback and the event duration will span the gap.
-        if snoreInterrupterPlayer.isPlaying, !wasPlaying {
+        if snoreInterrupterPlayer.isPlaying && !wasPlaying {
           melodyStartTime = now
           // Close the event audio file; a new one will be started if
           // snoring resumes after the melody.
@@ -544,7 +359,7 @@ public final class SessionManager {
         // but the melody should still play again on sustained post-melody snoring.
         let wasPlaying = snoreInterrupterPlayer.isPlaying
         snoreInterrupterPlayer.playIfNeeded()
-        if snoreInterrupterPlayer.isPlaying, !wasPlaying {
+        if snoreInterrupterPlayer.isPlaying && !wasPlaying {
           melodyStartTime = now
           // Close the event audio file; a new one will be started if
           // snoring resumes after this melody.
@@ -648,9 +463,9 @@ public final class SessionManager {
     }
   }
 
-  // MARK: - Private helpers
+  // MARK: - Reset
 
-  private func resetTrackingState() {
+  func reset() {
     activeEventStart = nil
     activeEventID = nil
     activeEventIntensity = nil
@@ -681,20 +496,51 @@ public final class SessionManager {
     consecutiveSpeechSamples = 0
     completedBursts.removeAll(keepingCapacity: false)
     pendingEventTasks.removeAll(keepingCapacity: false)
-    checkpointCounter = 0
   }
 
-  /// Writes a recovery snapshot of the in-progress session to disk so it can
-  /// be reconstructed after a crash. Called after each event finalizes (and
-  /// after its clip compresses) plus periodically from the processing loop.
-  private func checkpoint() {
-    guard let session = currentSession else { return }
-    let snapshot = SessionRecoverySnapshot(from: session, checkpointDate: Date())
-    SessionCheckpointStore.shared.write(snapshot)
+  // MARK: - Melody gap handling
+
+  @objc private func handleMelodyDidStop() {
+    guard let start = melodyStartTime else { return }
+    let duration = Date().timeIntervalSince(start)
+    logRecordingGap(start: start, duration: duration, snoringResumed: false)
+    melodyStartTime = nil
+    // Don't extend lastSnoringSampleTime yet. We wait for a short breathing
+    // delay after mic resume to verify snoring actually continued; only then
+    // does the gap count as snoring time.
+    if activeEventStart != nil {
+      melodyResumeTime = Date()
+      postMelodySnoringDetected = false
+    }
+    // Reset non-snore counter so stale data from the pause doesn't
+    // immediately trigger a melody stop when audio resumes.
+    consecutiveNonSnoreSamples = 0
   }
+
+  /// Logs a recording gap directly on the session. Called whenever the Snore Interrupter
+  /// stops (mic resumes), ensuring gaps are counted even if notification delivery fails.
+  private func logRecordingGap(start: Date, duration: TimeInterval, snoringResumed: Bool = true) {
+    guard let session = recording?.currentSession, duration > 0 else { return }
+    let startOffset = start.timeIntervalSince(session.startDate)
+    guard startOffset >= 0 else { return }
+    var gaps = session.recordingGaps ?? []
+    gaps.append(RecordingGap(startOffset: startOffset, duration: duration, snoringResumed: snoringResumed))
+    session.recordingGaps = gaps
+    print("[SessionManager] Logged gap: startOffset=\(String(format: "%.1f", startOffset))s duration=\(String(format: "%.1f", duration))s snoringResumed=\(snoringResumed)")
+  }
+
+  /// Marks the most recent recording gap as having confirmed snoring resumption.
+  /// Called when sustained snoring is detected within the post-melody breathing delay.
+  private func markLastGapSnoringResumed() {
+    guard let session = recording?.currentSession, var gaps = session.recordingGaps, !gaps.isEmpty else { return }
+    gaps[gaps.count - 1].snoringResumed = true
+    session.recordingGaps = gaps
+  }
+
+  // MARK: - Event finalization
 
   private func finalizeActiveEvent(skipMinDuration: Bool = false) {
-    guard let startTime = activeEventStart, let session = currentSession else {
+    guard let startTime = activeEventStart, let session = recording?.currentSession else {
       print("[SessionManager] finalizeActiveEvent() — no active event or session")
       return
     }
@@ -709,7 +555,8 @@ public final class SessionManager {
     // Build burst models with offsets relative to event start
     let bursts = completedBursts.map { SnoreBurst(
       startOffset: $0.start.timeIntervalSince(startTime),
-      endOffset: $0.end.timeIntervalSince(startTime)) }
+      endOffset: $0.end.timeIntervalSince(startTime)
+    ) }
 
     let eventSpan = (lastSnoringSampleTime ?? Date()).timeIntervalSince(startTime)
 
@@ -725,17 +572,7 @@ public final class SessionManager {
         try? FileManager.default.removeItem(at: fileURL)
       }
       audioRecorder.finalizeEventFile()
-      activeEventStart = nil
-      activeEventID = nil
-      activeEventIntensity = nil
-      activeEventDBSum = 0
-      activeEventDBCount = 0
-      activeEventPeakDB = 0
-      activeEventConfidenceSum = 0
-      activeEventConfidenceCount = 0
-      activeEventSpectralSum = 0
-      activeEventSpectralCount = 0
-      completedBursts.removeAll()
+      clearActiveEventAccumulators()
       return
     }
 
@@ -758,17 +595,7 @@ public final class SessionManager {
           try? FileManager.default.removeItem(at: fileURL)
         }
         audioRecorder.finalizeEventFile()
-        activeEventStart = nil
-        activeEventID = nil
-        activeEventIntensity = nil
-        activeEventDBSum = 0
-        activeEventDBCount = 0
-        activeEventPeakDB = 0
-        activeEventConfidenceSum = 0
-        activeEventConfidenceCount = 0
-        activeEventSpectralSum = 0
-        activeEventSpectralCount = 0
-        completedBursts.removeAll()
+        clearActiveEventAccumulators()
         return
       }
     }
@@ -783,7 +610,8 @@ public final class SessionManager {
       averageConfidence: averageConfidence,
       averageSpectralScore: averageSpectralScore,
       bursts: bursts.isEmpty ? nil : bursts,
-      duration: eventSpan)
+      duration: eventSpan
+    )
     event.session = session
 
     if session.events == nil {
@@ -794,10 +622,10 @@ public final class SessionManager {
 
     // Close the event audio file and compress to .m4a
     let rawFileURL = audioRecorder.finalizeEventFile()
-    if let rawFileURL {
+    if let rawFileURL = rawFileURL {
       let task = Task { @MainActor in
         let m4aURL = rawFileURL.deletingPathExtension().appendingPathExtension("m4a")
-        if await self.compressEventFile(from: rawFileURL, to: m4aURL) {
+        if await EventClipCompressor.compress(from: rawFileURL, to: m4aURL) {
           let spectral = await AudioClipExtractor.analyzeSpectralFeatures(of: m4aURL)
           event.audioFileURL = AudioFileURLResolver.filename(from: m4aURL)
           event.dominantFrequency = spectral.dominantFrequency
@@ -813,16 +641,7 @@ public final class SessionManager {
       pendingEventTasks.append(task)
     }
 
-    activeEventStart = nil
-    activeEventID = nil
-    activeEventIntensity = nil
-    activeEventDBSum = 0
-    activeEventDBCount = 0
-    activeEventPeakDB = 0
-    activeEventConfidenceSum = 0
-    activeEventConfidenceCount = 0
-    activeEventSpectralSum = 0
-    activeEventSpectralCount = 0
+    clearActiveEventAccumulators()
     melodyResumeTime = nil
     postMelodySnoringDetected = false
     completedBursts.removeAll(keepingCapacity: false)
@@ -833,7 +652,7 @@ public final class SessionManager {
   }
 
   private func finalizeActiveSpeechEvent(endTime: Date? = nil) {
-    guard let startTime = activeSpeechEventStart, let session = currentSession else {
+    guard let startTime = activeSpeechEventStart, let session = recording?.currentSession else {
       return
     }
     print("[SessionManager] Finalizing speech event at \(startTime)")
@@ -845,10 +664,7 @@ public final class SessionManager {
     // mumbles, groans) are typically 0.5–2 s, much shorter than snoring epochs.
     guard eventSpan >= 0.5 else {
       print("[SessionManager] Speech event discarded: span \(String(format: "%.2f", eventSpan))s < 0.5s minimum")
-      activeSpeechEventStart = nil
-      activeSpeechEventDBSum = 0
-      activeSpeechEventDBCount = 0
-      activeSpeechEventPeakDB = 0
+      clearActiveSpeechAccumulators()
       return
     }
 
@@ -858,7 +674,8 @@ public final class SessionManager {
       intensity: .quiet,
       averageDB: activeSpeechEventDBCount > 0 ? activeSpeechEventDBSum / Double(activeSpeechEventDBCount) : 0,
       peakDB: activeSpeechEventPeakDB,
-      duration: eventSpan)
+      duration: eventSpan
+    )
     event.session = session
 
     if session.events == nil {
@@ -867,18 +684,31 @@ public final class SessionManager {
     session.events?.append(event)
     eventsCount = session.events?.count ?? 0
 
+    clearActiveSpeechAccumulators()
+    checkpoint()
+  }
+
+  // MARK: - Private helpers
+
+  private func clearActiveEventAccumulators() {
+    activeEventStart = nil
+    activeEventID = nil
+    activeEventIntensity = nil
+    activeEventDBSum = 0
+    activeEventDBCount = 0
+    activeEventPeakDB = 0
+    activeEventConfidenceSum = 0
+    activeEventConfidenceCount = 0
+    activeEventSpectralSum = 0
+    activeEventSpectralCount = 0
+    completedBursts.removeAll()
+  }
+
+  private func clearActiveSpeechAccumulators() {
     activeSpeechEventStart = nil
     activeSpeechEventDBSum = 0
     activeSpeechEventDBCount = 0
     activeSpeechEventPeakDB = 0
-
-    checkpoint()
-  }
-
-  private func audioFileURL(for sessionID: UUID) -> URL {
-    FileManager.default
-      .urls(for: .documentDirectory, in: .userDomainMask)[0]
-      .appendingPathComponent("session_\(sessionID.uuidString).caf")
   }
 
   private func eventFileURL(eventID: UUID, sessionID: UUID) -> URL {
@@ -887,193 +717,33 @@ public final class SessionManager {
       .appendingPathComponent("event_\(eventID.uuidString)_session_\(sessionID.uuidString).caf")
   }
 
-  /// Lowest encode sample rate ≥ `floor` supported by `formatID`, its highest
-  /// supported rate if none reach the floor, or `nil` if the codec is
-  /// unavailable. HE-AAC rejects many rates (e.g. 16 kHz), and
-  /// `AVAssetWriterInput` raises an *uncatchable* NSException when given an
-  /// invalid rate — so the rate must come from the codec's own enumerated list.
-  private static func encodeSampleRate(for formatID: AudioFormatID, atLeast floor: Double) -> Double? {
-    var fmt = formatID
-    var size: UInt32 = 0
-    guard AudioFormatGetPropertyInfo(
-      kAudioFormatProperty_AvailableEncodeSampleRates,
-      UInt32(MemoryLayout<AudioFormatID>.size), &fmt, &size) == noErr,
-      size > 0 else { return nil }
-
-    let count = Int(size) / MemoryLayout<AudioValueRange>.size
-    var ranges = [AudioValueRange](repeating: AudioValueRange(), count: count)
-    guard AudioFormatGetProperty(
-      kAudioFormatProperty_AvailableEncodeSampleRates,
-      UInt32(MemoryLayout<AudioFormatID>.size), &fmt, &size, &ranges) == noErr else { return nil }
-
-    let standardRates = [16_000.0, 22_050, 24_000, 32_000, 44_100, 48_000]
-    var supported: [Double] = []
-    for range in ranges {
-      if range.mMinimum == range.mMaximum {
-        if range.mMinimum > 0 { supported.append(range.mMinimum) }
-      } else {
-        supported.append(contentsOf: standardRates.filter { $0 >= range.mMinimum && $0 <= range.mMaximum })
-      }
-    }
-    supported.sort()
-    guard !supported.isEmpty else { return nil }
-    return supported.first(where: { $0 >= floor }) ?? supported.last
-  }
-
-  /// Compresses a raw per-event .caf file to AAC .m4a.
-  ///
-  /// Targets mono HE-AAC at ~12 kbps (constrained VBR) rather than
-  /// `AVAssetExportPresetAppleM4A`, which offers no bitrate/sample-rate
-  /// control and preserves the mic's native 44.1/48 kHz rate. HE-AAC (SBR)
-  /// stays clear at low bitrates where AAC-LC would smear, and constrained-VBR
-  /// spends near-zero bits on the breathing gaps between bursts — roughly half
-  /// the size of LC 24 kbps. Snore energy is almost entirely below ~1.5 kHz,
-  /// so a low sample rate is ample, but HE-AAC rejects 16 kHz, so the encode
-  /// rate is chosen from the codec's enumerated `AvailableEncodeSampleRates`
-  /// (lowest ≥ 16 kHz). Falls back to AAC-LC 24 kbps if HE-AAC is unavailable.
-  /// The reader downmixes + resamples to mono PCM at the chosen rate so the
-  /// encoder only has to compress.
-  private func compressEventFile(from sourceURL: URL, to destinationURL: URL) async -> Bool {
-    if FileManager.default.fileExists(atPath: destinationURL.path) {
-      try? FileManager.default.removeItem(at: destinationURL)
-    }
-
-    let asset = AVURLAsset(url: sourceURL)
-    guard let track = try? await asset.loadTracks(withMediaType: .audio).first,
-          let reader = try? AVAssetReader(asset: asset),
-          let writer = try? AVAssetWriter(outputURL: destinationURL, fileType: .m4a)
-    else { return false }
-
-    // Only ever pass a codec-enumerated sample rate to AVAssetWriterInput;
-    // an unsupported rate raises an NSException that Swift cannot catch.
-    let targetFloor = 16_000.0
-    let formatID: AudioFormatID
-    let sampleRate: Double
-    let bitRate: Int
-    if let heRate = Self.encodeSampleRate(for: kAudioFormatMPEG4AAC_HE, atLeast: targetFloor) {
-      formatID = kAudioFormatMPEG4AAC_HE
-      sampleRate = heRate
-      bitRate = 12_000
-    } else if let lcRate = Self.encodeSampleRate(for: kAudioFormatMPEG4AAC, atLeast: targetFloor) {
-      formatID = kAudioFormatMPEG4AAC
-      sampleRate = lcRate
-      bitRate = 24_000
-    } else {
-      formatID = kAudioFormatMPEG4AAC
-      sampleRate = 44_100
-      bitRate = 24_000
-    }
-
-    let readerOutput = AVAssetReaderTrackOutput(track: track, outputSettings: [
-      AVFormatIDKey: kAudioFormatLinearPCM,
-      AVSampleRateKey: sampleRate,
-      AVNumberOfChannelsKey: 1,
-      AVLinearPCMBitDepthKey: 16,
-      AVLinearPCMIsFloatKey: false,
-      AVLinearPCMIsBigEndianKey: false,
-      AVLinearPCMIsNonInterleaved: false,
-    ])
-    guard reader.canAdd(readerOutput) else { return false }
-    reader.add(readerOutput)
-
-    let writerInput = AVAssetWriterInput(mediaType: .audio, outputSettings: [
-      AVFormatIDKey: formatID,
-      AVSampleRateKey: sampleRate,
-      AVNumberOfChannelsKey: 1,
-      AVEncoderBitRateKey: bitRate,
-      AVEncoderBitRateStrategyKey: AVAudioBitRateStrategy_VariableConstrained,
-    ])
-    writerInput.expectsMediaDataInRealTime = false
-    guard writer.canAdd(writerInput) else { return false }
-    writer.add(writerInput)
-
-    guard reader.startReading(), writer.startWriting() else { return false }
-    writer.startSession(atSourceTime: .zero)
-
-    let queue = DispatchQueue(label: "com.sleepguard.aac-encode")
-    return await withCheckedContinuation { continuation in
-      writerInput.requestMediaDataWhenReady(on: queue) {
-        while writerInput.isReadyForMoreMediaData {
-          guard let buffer = readerOutput.copyNextSampleBuffer() else {
-            writerInput.markAsFinished()
-            writer.finishWriting {
-              continuation.resume(
-                returning: writer.status == .completed && reader.status == .completed
-              )
-            }
-            return
-          }
-          writerInput.append(buffer)
-        }
-      }
-    }
-  }
-
-  /// Calibrated thresholds + SoundAnalysis confidence gates for the full-band
-  /// capture path. Low = noisier rooms / stricter filtering;
-  /// Medium = typical quiet bedroom (default); High = very quiet rooms.
-  ///
-  /// loud/epic lowered by 5 dB (2026-06-01) because RMS over 23 ms buffers
-  /// under-reports impulsive snoring peaks. Peak-dB classification now
-  /// compensates, but the thresholds were still sitting above real captured
-  /// levels for loud snoring at typical bedside distances.
-  private func applyDetectionSensitivity() {
-    let sensitivity = UserPreferences.shared.detectionSensitivity
-    switch sensitivity {
-    case .low:
-      snoreDetector.quietThreshold = -45.0
-      snoreDetector.lightThreshold = -35.0
-      snoreDetector.loudThreshold = -15.0
-      snoreDetector.epicThreshold = -5.0
-      snoreDetector.confidenceGate = 0.45
-      snoreDetector.highConfidenceGate = 0.65
-      snoreDetector.quietFallbackGate = 0.55
-    case .medium:
-      snoreDetector.quietThreshold = -50.0
-      snoreDetector.lightThreshold = -40.0
-      snoreDetector.loudThreshold = -20.0
-      snoreDetector.epicThreshold = -10.0
-      snoreDetector.confidenceGate = 0.35
-      snoreDetector.highConfidenceGate = 0.55
-      snoreDetector.quietFallbackGate = 0.45
-    case .high:
-      snoreDetector.quietThreshold = -55.0
-      snoreDetector.lightThreshold = -45.0
-      snoreDetector.loudThreshold = -25.0
-      snoreDetector.epicThreshold = -15.0
-      snoreDetector.confidenceGate = 0.25
-      snoreDetector.highConfidenceGate = 0.45
-      snoreDetector.quietFallbackGate = 0.35
-    }
-  }
-
   /// Minimum snore-event duration. Sensitivity-dependent so isolated single
   /// snores (~1 s) are retained on Medium/High while Low still filters
   /// transient sounds. Ground-truthed against bedroom recordings.
   private var minEventDuration: TimeInterval {
     switch UserPreferences.shared.detectionSensitivity {
-    case .low: 2.0
-    case .medium: 1.0
-    case .high: 0.5
+    case .low: return 2.0
+    case .medium: return 1.0
+    case .high: return 0.5
     }
   }
 
   private func intensity(from state: DetectionState) -> SnoreIntensity {
     switch state {
-    case .quiet: .quiet
-    case .light: .light
-    case .loud: .loud
-    case .epic: .epic
-    case .none: .quiet
+    case .quiet: return .quiet
+    case .light: return .light
+    case .loud: return .loud
+    case .epic: return .epic
+    case .none: return .quiet
     }
   }
 
   private func intensityRank(_ intensity: SnoreIntensity) -> Int {
     switch intensity {
-    case .quiet: 0
-    case .light: 1
-    case .loud: 2
-    case .epic: 3
+    case .quiet: return 0
+    case .light: return 1
+    case .loud: return 2
+    case .epic: return 3
     }
   }
 }

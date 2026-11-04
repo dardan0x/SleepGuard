@@ -17,7 +17,6 @@ public struct SettingsView: View {
   @Environment(RouterPath.self) private var routerPath
 
   @State private var showDeleteConfirmation = false
-  @State private var showThemePicker = false
   #if DEBUG
   @State private var showDebugConfig = false
   #endif

@@ -1,14 +1,13 @@
+import SwiftUI
 import AudioEngine
-import DesignSystem
 import Env
 import Models
-import SwiftUI
+import DesignSystem
 
 @MainActor
 struct BedsideClockView: View {
   @Environment(SessionManager.self) private var sessionManager
   @Environment(AudioRecorder.self) private var audioRecorder
-  @Environment(SoundAnalysisDetector.self) private var soundAnalysisDetector
   @Environment(SnoreInterrupterPlayer.self) private var snoreInterrupterPlayer
   @Environment(AppConfig.self) private var appConfig
   @Environment(Theme.self) private var theme
@@ -26,10 +25,12 @@ struct BedsideClockView: View {
             eventsCount: sessionManager.eventsCount
           )
 
-          if isMelodyEnabled, !snoreInterrupterPlayer.isMutedForSession {
-            melodyDisclaimer
-              .padding(.top, 10)
-              .padding(.horizontal, 20)
+          if isMelodyEnabled && !snoreInterrupterPlayer.isMutedForSession {
+            BedsideMelodyDisclaimer {
+              snoreInterrupterPlayer.muteForSession()
+            }
+            .padding(.top, 10)
+            .padding(.horizontal, 20)
           }
         }
 
@@ -37,26 +38,28 @@ struct BedsideClockView: View {
 
         BedsideClockClockView(
           timeString: timeString,
-          dateString: dateString)
+          dateString: dateString
+        )
 
         Spacer()
 
         BedsideClockWaveformView(
           durationString: durationString,
-          levels: simulatedWaveform)
+          levels: simulatedWaveform
+        )
 
         Spacer()
 
         BedsideClockStatusView(
           statusLabel: statusLabel,
-          snoringColor: snoringColor)
+          snoringColor: snoringColor
+        )
 
         Spacer()
 
         StopRecordingButton(height: 52) {
           if let session = sessionManager.currentSession,
-             currentTime.timeIntervalSince(session.startDate) < SleepSession.minimumSaveDuration
-          {
+             currentTime.timeIntervalSince(session.startDate) < SleepSession.minimumSaveDuration {
             showShortSessionAlert = true
           } else {
             Task {
@@ -68,12 +71,16 @@ struct BedsideClockView: View {
         .padding(.bottom, 32)
       }
       .overlay(alignment: .top) {
-        if isMelodyEnabled, snoreInterrupterPlayer.isPlaying {
-          melodyOverlay
+        if isMelodyEnabled && snoreInterrupterPlayer.isPlaying {
+          BedsideMelodyOverlay(
+            melodyName: snoreInterrupterPlayer.currentMelodyName ?? Strings.snoreInterrupterDefaultMelodyName,
+            onMute: { snoreInterrupterPlayer.muteForSession() },
+            onStop: { snoreInterrupterPlayer.stop() }
+          )
         }
       }
       .alert(Strings.sessionSummaryTooShortTitle, isPresented: $showShortSessionAlert) {
-        Button(Strings.actionKeepRecording, role: .cancel) {}
+        Button(Strings.actionKeepRecording, role: .cancel) { }
         Button(Strings.actionStopAnyway) {
           sessionManager.stopAndDiscardSession()
         }
@@ -125,123 +132,25 @@ struct BedsideClockView: View {
 
   private var snoringColor: Color {
     switch sessionManager.currentDetectionState {
-    case .none: theme.textTertiary
-    case .quiet: theme.snoreQuiet
-    case .light: theme.snoreLight
-    case .loud: theme.snoreLoud
-    case .epic: theme.snoreEpic
+    case .none: return theme.textTertiary
+    case .quiet: return theme.snoreQuiet
+    case .light: return theme.snoreLight
+    case .loud: return theme.snoreLoud
+    case .epic: return theme.snoreEpic
     }
   }
 
   private var statusLabel: String {
     switch sessionManager.currentDetectionState {
-    case .none: Strings.statsCalendarIntensityQuiet
-    case .quiet: Strings.sessionBedsideSnoreQuiet
-    case .light: Strings.sessionBedsideSnoreLight
-    case .loud: Strings.sessionBedsideSnoreLoud
-    case .epic: Strings.sessionBedsideSnoreEpic
+    case .none: return Strings.statsCalendarIntensityQuiet
+    case .quiet: return Strings.sessionBedsideSnoreQuiet
+    case .light: return Strings.sessionBedsideSnoreLight
+    case .loud: return Strings.sessionBedsideSnoreLoud
+    case .epic: return Strings.sessionBedsideSnoreEpic
     }
   }
 
   private var isMelodyEnabled: Bool {
     appConfig.isEnabled(.snoreInterrupter) && UserPreferences.shared.snoreInterrupterMode != .never
-  }
-
-  // MARK: - Melody Disclaimer
-
-  private var melodyDisclaimer: some View {
-    HStack(spacing: 6) {
-      Image(systemName: "music.note")
-        .font(.system(size: 11, weight: .semibold))
-        .foregroundStyle(theme.accent)
-
-      Text(Strings.sessionBedsideMelodyEnabled)
-        .font(.system(size: 14, weight: .medium))
-        .foregroundStyle(theme.textSecondary)
-
-      Text("·")
-        .font(.system(size: 14, weight: .medium))
-        .foregroundStyle(theme.textTertiary)
-
-      Button {
-        snoreInterrupterPlayer.muteForSession()
-      } label: {
-        Text(Strings.muteForSession)
-          .font(.system(size: 14, weight: .semibold))
-          .foregroundStyle(theme.accent)
-      }
-      .buttonStyle(.plain)
-
-      Spacer()
-    }
-    .padding(.horizontal, 16)
-    .padding(.vertical, 15)
-    .background(theme.bgCard)
-    .cornerRadius(theme.radiusSmall)
-  }
-
-  // MARK: - Melody Overlay
-
-  private var melodyOverlay: some View {
-    VStack(spacing: 10) {
-      HStack(spacing: 12) {
-        Image(systemName: "music.note")
-          .font(.system(size: 14, weight: .semibold))
-          .foregroundStyle(theme.accent)
-          .symbolEffect(.pulse, options: .repeating)
-
-        Text("\(Strings.playingSnoreInterrupterPlayer) \(snoreInterrupterPlayer.currentMelodyName ?? "Melody")")
-          .font(.system(size: 14, weight: .medium))
-          .foregroundStyle(theme.textPrimary)
-          .lineLimit(1)
-
-        Spacer()
-      }
-
-      HStack(spacing: 12) {
-        Button {
-          snoreInterrupterPlayer.muteForSession()
-        } label: {
-          Text(Strings.muteForSession)
-            .font(.system(size: 13, weight: .semibold))
-            .foregroundStyle(theme.textSecondary)
-            .frame(maxWidth: .infinity)
-            .frame(height: 36)
-            .background(
-              RoundedRectangle(cornerRadius: 8)
-                .stroke(theme.border, lineWidth: 1)
-            )
-        }
-        .buttonStyle(.plain)
-
-        Button {
-          snoreInterrupterPlayer.stop()
-        } label: {
-          Text(Strings.stopSnoreInterrupterPlayer)
-            .font(.system(size: 13, weight: .semibold))
-            .foregroundStyle(theme.accent)
-            .frame(maxWidth: .infinity)
-            .frame(height: 36)
-            .background(
-              RoundedRectangle(cornerRadius: 8)
-                .stroke(theme.accent, lineWidth: 1)
-            )
-        }
-        .buttonStyle(.plain)
-      }
-    }
-    .padding(.horizontal, 16)
-    .padding(.vertical, 12)
-    .background(
-      RoundedRectangle(cornerRadius: 16)
-        .fill(theme.bgCard)
-        .overlay(
-          RoundedRectangle(cornerRadius: 16)
-            .stroke(theme.accent.opacity(0.4), lineWidth: 1)
-        )
-    )
-    .padding(.horizontal, 24)
-    .padding(.top, 16)
-    .transition(.move(edge: .top).combined(with: .opacity))
   }
 }

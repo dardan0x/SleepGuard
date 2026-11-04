@@ -14,41 +14,41 @@ struct RecordingPrestartView: View {
   @Environment(AppConfig.self) private var appConfig
   private let audioRecorder = AudioRecorder.shared
 
-  private let delayOptions = [0, 15, 30, 45, 60]
-  @State private var showSnoreInterrupterSheet = false
-  @State private var showChargingAlert = false
-  @State private var showMicrophoneAlert = false
+  @State private var activePresentation: PrestartPresentation?
 
   var body: some View {
     ZStack(alignment: .bottom) {
       ScrollView {
         VStack(spacing: 0) {
-          iconSection
+          PrestartHeaderView()
             .padding(.top, DeviceSize.isCompactHeight ? 20 : 24)
 
-          headlineSection
-            .padding(.top, DeviceSize.isCompactHeight ? 20 : 24)
-
-          tipsSection
+          PrestartTipsSection()
             .padding(.top, DeviceSize.isCompactHeight ? 20 : 24)
 
           VStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 8) {
-              delaySection
+              PrestartDelaySection()
               if appConfig.isEnabled(.snoreInterrupter) {
-                snoreInterrupterRow(
+                PrestartSnoreInterrupterRow(
                   icon: "timer",
                   title: Strings.snoreInterrupterRecordingPrestartViewTitle,
                   value: snoreInterrupterValue,
-                  subtitle: Strings.snoreInterrupterLockscreenNote)
-                {
-                  showSnoreInterrupterSheet = true
+                  subtitle: Strings.snoreInterrupterLockscreenNote
+                ) {
+                  activePresentation = .snoreInterrupter
                 }
                 .padding(.top, 8)
               }
             }
             if appConfig.isEnabled(.snoreInterrupter) {
-              helperText
+              Text(Strings.snoreInterrupterRowHelperText)
+                .font(.system(size: 14))
+                .foregroundStyle(theme.textTertiary)
+                .multilineTextAlignment(.center)
+                .lineLimit(nil)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity)
             }
           }
           .padding(.top, DeviceSize.isCompactHeight ? 20 : 24)
@@ -64,12 +64,12 @@ struct RecordingPrestartView: View {
             if !audioRecorder.hasPermission {
               let granted = await audioRecorder.requestPermission()
               guard granted else {
-                showMicrophoneAlert = true
+                activePresentation = .microphoneAlert
                 return
               }
             }
             guard isCharging else {
-              showChargingAlert = true
+              activePresentation = .chargingAlert
               return
             }
             beginSession()
@@ -88,10 +88,10 @@ struct RecordingPrestartView: View {
       .background(theme.bgPrimary.ignoresSafeArea(edges: .bottom))
     }
     .background(theme.bgPrimary.ignoresSafeArea())
-    .sheet(isPresented: $showSnoreInterrupterSheet) {
+    .sheet(isPresented: isPresented(.snoreInterrupter)) {
       SnoreInterrupterSheet()
     }
-    .alert(Strings.sessionChargingAlertTitle, isPresented: $showChargingAlert) {
+    .alert(Strings.sessionChargingAlertTitle, isPresented: isPresented(.chargingAlert)) {
       Button(Strings.actionCancel, role: .cancel) {}
       Button(Strings.sessionChargingAlertStartAnyway) {
         Task { @MainActor in
@@ -101,7 +101,7 @@ struct RecordingPrestartView: View {
     } message: {
       Text(Strings.sessionChargingAlertMessage)
     }
-    .alert(Strings.sessionMicrophoneAlertTitle, isPresented: $showMicrophoneAlert) {
+    .alert(Strings.sessionMicrophoneAlertTitle, isPresented: isPresented(.microphoneAlert)) {
       Button(Strings.actionCancel, role: .cancel) {}
       Button(Strings.sessionMicrophoneAlertOpenSettings) {
         if let url = URL(string: UIApplication.openSettingsURLString) {
@@ -111,6 +111,20 @@ struct RecordingPrestartView: View {
     } message: {
       Text(Strings.sessionMicrophoneAlertMessage)
     }
+  }
+
+  /// Binding for the alert/sheet modifiers, derived from the enum state so
+  /// the presentation machinery stays in one place (the modifier forms, and
+  /// therefore their rendering, are unchanged).
+  private func isPresented(_ presentation: PrestartPresentation) -> Binding<Bool> {
+    Binding(
+      get: { activePresentation == presentation },
+      set: { isActive in
+        if !isActive {
+          activePresentation = nil
+        }
+      }
+    )
   }
 
   private func beginSession() {
@@ -127,201 +141,34 @@ struct RecordingPrestartView: View {
   }
 
   private var isCharging: Bool {
-    #if targetEnvironment(simulator)
+#if targetEnvironment(simulator)
     return true
-    #else
+#else
     UIDevice.current.isBatteryMonitoringEnabled = true
     return UIDevice.current.batteryState == .charging || UIDevice.current.batteryState == .full
-    #endif
+#endif
   }
 
   private var snoreInterrupterValue: String {
     switch userPreferences.snoreInterrupterMode {
     case .never:
-      Strings.snoreInterrupterOffValueFormat
+      return Strings.snoreInterrupterOffValueFormat
     case .always:
-      Strings.snoreInterrupterAlwaysValueFormat
+      return Strings.snoreInterrupterAlwaysValueFormat
     case .fiveSeconds:
-      Strings.snoreInterrupterFiveSecondsValueFormat
+      return Strings.snoreInterrupterFiveSecondsValueFormat
     case .fifteenSeconds:
-      Strings.snoreInterrupterFifteenSecondsValueFormat
+      return Strings.snoreInterrupterFifteenSecondsValueFormat
     case .thirtySeconds:
-      Strings.snoreInterrupterThirtySecondsValueFormat
+      return Strings.snoreInterrupterThirtySecondsValueFormat
     case .sixtySeconds:
-      Strings.snoreInterrupterSixtySecondsValueFormat
+      return Strings.snoreInterrupterSixtySecondsValueFormat
     }
   }
+}
 
-  private var iconSection: some View {
-    RoundedRectangle(cornerRadius: DeviceSize.isCompactHeight ? 20 : 24)
-      .fill(theme.bgCard)
-      .frame(width: DeviceSize.isCompactHeight ? 80 : 100, height: DeviceSize.isCompactHeight ? 80 : 100)
-      .overlay(
-        Image(systemName: "moon.fill")
-          .font(.system(size: DeviceSize.isCompactHeight ? 36 : 44))
-          .foregroundStyle(theme.accent)
-      )
-  }
-
-  private var headlineSection: some View {
-    VStack(spacing: 8) {
-      Text(Strings.statsEmptyTitle)
-        .font(.system(size: DeviceSize.isCompactHeight ? 22 : 28, weight: .bold))
-        .foregroundStyle(theme.textPrimary)
-        .multilineTextAlignment(.center)
-
-      Text(Strings.sessionPrestartBody)
-        .font(.system(size: DeviceSize.isCompactHeight ? 14 : 16))
-        .foregroundStyle(theme.textSecondary)
-        .multilineTextAlignment(.center)
-        .lineLimit(nil)
-        .fixedSize(horizontal: false, vertical: true)
-    }
-  }
-
-  private var tipsSection: some View {
-    ZStack {
-      // Outer soft glow
-      RoundedRectangle(cornerRadius: theme.radiusCard)
-        .fill(Color(hex: "#FF453A").opacity(0.12))
-        .blur(radius: 12)
-        .offset(y: 4)
-        .padding(.horizontal, -4)
-
-      // Inner concentrated glow
-      RoundedRectangle(cornerRadius: theme.radiusCard)
-        .fill(
-          LinearGradient(
-            colors: [Color(hex: "#FF453A").opacity(0.25), Color(hex: "#FF453A").opacity(0.0)],
-            startPoint: .top,
-            endPoint: .bottom)
-        )
-        .blur(radius: 8)
-        .offset(y: 6)
-        .padding(.horizontal, -2)
-
-      VStack(spacing: 0) {
-        tipRow(icon: "iphone", text: Strings.sessionPrestartTipPhone)
-        Divider()
-          .background(theme.border)
-          .padding(.leading, 52)
-        tipRow(icon: "bolt.fill", text: Strings.sessionPrestartTipPluggedIn)
-      }
-      .background(
-        ZStack {
-          theme.bgCard
-        }
-      )
-      .cornerRadius(theme.radiusCard)
-    }
-  }
-
-  private func tipRow(icon: String, text: String) -> some View {
-    HStack(spacing: 12) {
-      Image(systemName: icon)
-        .font(.system(size: 18))
-        .foregroundStyle(theme.accent)
-        .frame(width: 24)
-
-      Text(text)
-        .font(.system(size: 16))
-        .foregroundStyle(theme.textSecondary)
-
-      Spacer()
-    }
-    .padding(.horizontal, 16)
-    .padding(.vertical, 14)
-  }
-
-  private func snoreInterrupterRow(icon: String, title: String, value: String, subtitle: String? = nil, action: @escaping () -> Void) -> some View {
-    Button(action: action) {
-      VStack(spacing: 4) {
-        HStack(spacing: 12) {
-          Image(systemName: icon)
-            .font(.system(size: 18))
-            .foregroundStyle(theme.accent)
-            .frame(width: 24)
-
-          Text(title)
-            .font(.system(size: 16))
-            .foregroundStyle(theme.textPrimary)
-
-          Spacer()
-
-          Text(value)
-            .font(.system(size: 16))
-            .foregroundStyle(theme.textSecondary)
-
-          Image(systemName: "chevron.right")
-            .font(.system(size: 14, weight: .semibold))
-            .foregroundStyle(theme.textTertiary)
-        }
-
-        if let subtitle {
-          HStack(spacing: 6) {
-            Image(systemName: "lock.open.fill")
-              .font(.system(size: 12))
-            Text(subtitle)
-              .font(.system(size: 13))
-            Spacer()
-          }
-          .foregroundStyle(theme.textTertiary)
-          .padding(.top, 4)
-          .padding(.leading, 6)
-        }
-      }
-      .padding(.horizontal, 16)
-      .padding(.vertical, subtitle == nil ? 14 : 12)
-      .background(theme.bgCard)
-      .cornerRadius(theme.radiusCard)
-    }
-    .buttonStyle(.plain)
-  }
-
-  private var delaySection: some View {
-    VStack(alignment: .leading, spacing: 12) {
-      Text(Strings.sessionPrestartDelayLabel)
-        .font(.system(size: 15, weight: .semibold))
-        .foregroundStyle(theme.textPrimary)
-
-      HStack(spacing: 8) {
-        ForEach(delayOptions, id: \.self) { minutes in
-          delayButton(minutes: minutes)
-        }
-      }
-    }
-    .padding(16)
-    .background(theme.bgCard)
-    .cornerRadius(theme.radiusCard)
-  }
-
-  private func delayButton(minutes: Int) -> some View {
-    let isSelected = userPreferences.recordingDelayMinutes == minutes
-    let label = minutes == 0 ? Strings.sessionPrestartDelayOff : (minutes == 60 ? "1h" : "\(minutes)m")
-
-    return Button {
-      withAnimation(.spring(duration: 0.25)) {
-        userPreferences.recordingDelayMinutes = minutes
-      }
-    } label: {
-      Text(label)
-        .font(.system(size: 15, weight: isSelected ? .semibold : .medium))
-        .foregroundStyle(isSelected ? theme.textPrimary : theme.textSecondary)
-        .frame(maxWidth: .infinity)
-        .frame(height: 44)
-        .background(isSelected ? theme.accent : theme.bgElevated)
-        .cornerRadius(12)
-    }
-    .buttonStyle(.plain)
-  }
-
-  private var helperText: some View {
-    Text(Strings.snoreInterrupterRowHelperText)
-      .font(.system(size: 14))
-      .foregroundStyle(theme.textTertiary)
-      .multilineTextAlignment(.center)
-      .lineLimit(nil)
-      .fixedSize(horizontal: false, vertical: true)
-      .frame(maxWidth: .infinity)
-  }
+enum PrestartPresentation {
+  case snoreInterrupter
+  case chargingAlert
+  case microphoneAlert
 }
