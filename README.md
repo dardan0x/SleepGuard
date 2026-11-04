@@ -5,7 +5,7 @@
 **100% on-device.** All audio analysis runs locally on your iPhone using Apple's `SoundAnalysis` framework. No accounts, no servers, no audio ever leaves your phone.
 
 ![Platform](https://img.shields.io/badge/platform-iOS%2017%2B-blue)
-![Language](https://img.shields.io/badge/Swift-5.9-orange)
+![Language](https://img.shields.io/badge/Swift-6.2-orange)
 ![Architecture](https://img.shields.io/badge/architecture-SPM%20%C2%B7%20SwiftData%20%C2%B7%20SwiftUI-green)
 ![Privacy](https://img.shields.io/badge/privacy-on--device-brightgreen)
 
@@ -60,7 +60,7 @@ amplitude / FFT detector                              │
 
 ## Architecture
 
-A modular Swift Package layout with strict isolation: **feature packages never import each other** — they depend only on `Models`, `Env`, and `DesignSystem`. The app target is the only place that wires everything together.
+A modular Swift Package layout with strict isolation: **feature packages never import each other** — they depend only on `Models`, `AudioEngine`, `Env`, and `DesignSystem`. The app target is the only place that wires everything together.
 
 | Package | Responsibility |
 |---------|----------------|
@@ -73,12 +73,17 @@ A modular Swift Package layout with strict isolation: **feature packages never i
 | `Statistics` | Dashboard, calendar, trends, Last-7-Nights |
 | `Recordings` | Session history, detail view, audio player, PDF export |
 | `Settings` | Sensitivity, appearance, HealthKit sync, melodies, data management |
+| `Personalization` | Briefing engine and quote bank — the content that personalizes the app |
+| `Learn` | Learn tab — educational content about sleep and snoring |
 
 **Patterns enforced project-wide:**
 - `@State` + a `ViewState` enum per data-loading view — **no ViewModels**, no boolean soup.
 - Dependencies flow through `@Environment`; shared services are `.shared` singletons.
 - All navigation goes through `RouterPath` (`RouterDestination` for push, `SheetDestination` for modals); each tab owns its own path.
 - `async/await` everywhere — no Combine, no GCD, no completion handlers.
+- **Swift 6 with strict concurrency everywhere** — language mode v6 in all packages, `SWIFT_STRICT_CONCURRENCY = complete` in the app target. `Sendable`/isolation violations are compile errors, fixed properly (never `@unchecked Sendable`). Core packages (`Models`, `Env`, `AudioEngine`) use explicit `@MainActor` annotations; the UI packages declare `MainActor` default isolation.
+- **Small views, enforced** — no view file over 200 lines, containers under 100; sections are extracted as dedicated view structs (not computed `some View` properties), and sheets/alerts are enum-driven, not boolean flags.
+- **UI layering** — only view files import `DesignSystem` for UI chrome; enforced by `scripts/check-layering.py` in CI.
 - Every user-facing string is localized through a generated `Strings` enum.
 
 ---
@@ -86,8 +91,8 @@ A modular Swift Package layout with strict isolation: **feature packages never i
 ## Requirements
 
 - iOS 17.0+
-- Xcode 16+
-- Swift 5.9
+- Xcode 26+ (Swift 6.2 toolchain)
+- Swift 6 language mode with strict concurrency (all packages + app target)
 - A physical device for real recording (the simulator has no microphone input)
 
 ## Build & run
@@ -95,7 +100,7 @@ A modular Swift Package layout with strict isolation: **feature packages never i
 ```bash
 xcodebuild -project SleepGuard.xcodeproj \
   -scheme SleepGuard \
-  -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
+  -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2' \
   build
 ```
 
@@ -109,13 +114,13 @@ Or open `SleepGuard.xcodeproj` in Xcode, select the **SleepGuard** scheme, and r
 SleepGuard/
 ├── SleepGuard/              # App target — entry point, tabs, dependency graph, route registry
 ├── SleepGuard.xcodeproj/
-├── Packages/                # 9 feature & support packages (see Architecture)
+├── Packages/                # 11 feature & support packages (see Architecture)
 ├── WatchApp/                # watchOS companion
 ├── designs/
 │   ├── SleepGuard.pen       # Pencil design source — single source of truth for UI
 │   └── screenshots/         # Reference screenshots
 ├── sounds/                  # Soothing melody assets
-├── scripts/                 # Localization codegen (generate-strings, generate-xcstrings)
+├── scripts/                 # Localization codegen (generate-strings, generate-xcstrings) + layering CI check
 └── docs/                    # Architecture docs, feature trackers, session summaries
 ```
 
