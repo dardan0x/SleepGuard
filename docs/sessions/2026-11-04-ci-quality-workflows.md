@@ -17,6 +17,10 @@ title: CI quality workflows — SwiftFormat lint, hardcoded-string gate, Strings
   decomposition) into the branch. 15 conflicts (14 content + 1 modify/delete)
   resolved by taking origin/main and re-applying formatting mechanically after;
   38 newly-merged files formatted in a follow-up commit. Build green after merge.
+- CI-5: Pre-commit hook (`.githooks/pre-commit`) auto-formats staged Swift files
+  and re-stages them so the commit carries the formatted code; fires for any
+  commit tool (Xcode included). Installed via `scripts/install-hooks.sh`
+  (`git config core.hooksPath .githooks`). CI lint remains the backstop.
 
 ### Merge Details
 - Conflict resolution strategy: F18 restructuring is semantic, ours was
@@ -57,6 +61,8 @@ title: CI quality workflows — SwiftFormat lint, hardcoded-string gate, Strings
 | File | Lines | What Changed |
 |------|-------|--------------|
 | `.github/workflows/quality.yml` | +47 | New workflow: swiftformat / hardcoded-strings / strings-sync jobs |
+| `.githooks/pre-commit` | +21 | New hook: auto-format staged Swift files, re-stage, no-op without swiftformat |
+| `scripts/install-hooks.sh` | +8 | New: one-time core.hooksPath setup |
 | `scripts/check-hardcoded-strings.py` | +158 | New diff-based localization gate script |
 | `.swiftformat` | ~9 | Four dead options fixed for 0.55.5; `--swiftversion 6.0` added |
 | 160 `.swift` files across Packages/, SleepGuard/, WatchApp/ | +4489/−4568 | Whole-repo swiftformat pass (whitespace/wrapping only; zero semantic change) |
