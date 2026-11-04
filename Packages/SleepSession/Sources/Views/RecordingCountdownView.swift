@@ -8,8 +8,7 @@ import UIKit
 struct RecordingCountdownView: View {
   @Environment(SessionManager.self) private var sessionManager
   @Environment(Theme.self) private var theme
-  @State private var showChargingAlert = false
-  @State private var showMicrophoneAlert = false
+  @State private var activeAlert: CountdownAlert?
 
   var body: some View {
     ZStack {
@@ -57,12 +56,12 @@ struct RecordingCountdownView: View {
               if !AudioRecorder.shared.hasPermission {
                 let granted = await AudioRecorder.shared.requestPermission()
                 guard granted else {
-                  showMicrophoneAlert = true
+                  activeAlert = .microphone
                   return
                 }
               }
               guard isCharging else {
-                showChargingAlert = true
+                activeAlert = .charging
                 return
               }
               startSession()
@@ -90,7 +89,7 @@ struct RecordingCountdownView: View {
     .onReceive(NotificationCenter.default.publisher(for: .recordingDelayDidComplete)) { _ in
       try? sessionManager.startSession()
     }
-    .alert(Strings.sessionChargingAlertTitle, isPresented: $showChargingAlert) {
+    .alert(Strings.sessionChargingAlertTitle, isPresented: isPresented(.charging)) {
       Button(Strings.actionCancel, role: .cancel) {}
       Button(Strings.sessionChargingAlertStartAnyway) {
         Task { @MainActor in
@@ -100,7 +99,7 @@ struct RecordingCountdownView: View {
     } message: {
       Text(Strings.sessionChargingAlertMessage)
     }
-    .alert(Strings.sessionMicrophoneAlertTitle, isPresented: $showMicrophoneAlert) {
+    .alert(Strings.sessionMicrophoneAlertTitle, isPresented: isPresented(.microphone)) {
       Button(Strings.actionCancel, role: .cancel) {}
       Button(Strings.sessionMicrophoneAlertOpenSettings) {
         if let url = URL(string: UIApplication.openSettingsURLString) {
@@ -110,6 +109,19 @@ struct RecordingCountdownView: View {
     } message: {
       Text(Strings.sessionMicrophoneAlertMessage)
     }
+  }
+
+  /// Binding for the alert modifiers, derived from the enum state so the
+  /// modifier forms (and their rendering) are unchanged.
+  private func isPresented(_ alert: CountdownAlert) -> Binding<Bool> {
+    Binding(
+      get: { activeAlert == alert },
+      set: { isActive in
+        if !isActive {
+          activeAlert = nil
+        }
+      }
+    )
   }
 
   private func startSession() {
@@ -129,4 +141,9 @@ struct RecordingCountdownView: View {
     return UIDevice.current.batteryState == .charging || UIDevice.current.batteryState == .full
     #endif
   }
+}
+
+enum CountdownAlert {
+  case charging
+  case microphone
 }

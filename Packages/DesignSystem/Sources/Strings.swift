@@ -357,6 +357,7 @@ public enum Strings {
   public static var sleepStagesInfoYourStages: String { String(localized: "sleepStagesInfo.yourStages", bundle: .module) }
   public static var snoreInterrupterFiveSecondsValueFormat: String { String(localized: "snore.interrupter.5.seconds.value", bundle: .module) }
   public static var snoreInterrupterAlwaysValueFormat: String { String(localized: "snore.interrupter.always.value", bundle: .module) }
+  public static var snoreInterrupterDefaultMelodyName: String { String(localized: "snore.interrupter.defaultMelodyName", bundle: .module) }
   public static var snoreInterrupterFifteenSecondsValueFormat: String { String(localized: "snore.interrupter.fifteen.seconds.value", bundle: .module) }
   public static var snoreInterrupterLockscreenNote: String { String(localized: "snore.interrupter.lockscreen.note", bundle: .module) }
   public static var snoreInterrupterOffValueFormat: String { String(localized: "snore.interrupter.off.value", bundle: .module) }

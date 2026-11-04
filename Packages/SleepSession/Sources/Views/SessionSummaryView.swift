@@ -21,8 +21,7 @@ public struct SessionSummaryView: View {
   @Environment(\.dismiss) private var dismiss
   @Environment(\.modelContext) private var modelContext
 
-  @State private var showShortSessionAlert = false
-  @State private var showSaveErrorAlert = false
+  @State private var activeAlert: SummaryAlert?
 
   public var body: some View {
     ScrollView {
@@ -40,23 +39,36 @@ public struct SessionSummaryView: View {
       .padding(24)
     }
     .background(theme.bgPrimary.ignoresSafeArea())
-    .alert(Strings.sessionSummaryTooShortTitle, isPresented: $showShortSessionAlert) {
+    .alert(Strings.sessionSummaryTooShortTitle, isPresented: isPresented(.tooShort)) {
       Button(Strings.actionOk, role: .cancel) { }
     } message: {
       Text(String(format: Strings.sessionSummaryTooShortInfoFormat, Int(SleepSession.minimumSaveDuration / 60)))
     }
-    .alert(Strings.saveFailed, isPresented: $showSaveErrorAlert) {
+    .alert(Strings.saveFailed, isPresented: isPresented(.saveFailed)) {
       Button(Strings.actionOk, role: .cancel) { }
     } message: {
       Text(Strings.unableToSaveTheSession)
     }
   }
 
+  /// Binding for the alert modifiers, derived from the enum state so the
+  /// modifier forms (and their rendering) are unchanged.
+  private func isPresented(_ alert: SummaryAlert) -> Binding<Bool> {
+    Binding(
+      get: { activeAlert == alert },
+      set: { isActive in
+        if !isActive {
+          activeAlert = nil
+        }
+      }
+    )
+  }
+
   // MARK: - Save / discard
 
   private func saveSession() {
     if session.totalDuration < SleepSession.minimumSaveDuration {
-      showShortSessionAlert = true
+      activeAlert = .tooShort
       return
     }
 
@@ -77,7 +89,7 @@ public struct SessionSummaryView: View {
     do {
       try modelContext.save()
     } catch {
-      showSaveErrorAlert = true
+      activeAlert = .saveFailed
       return
     }
 
@@ -102,4 +114,9 @@ public struct SessionSummaryView: View {
     sessionManager.discardCompletedSession()
     dismiss()
   }
+}
+
+enum SummaryAlert {
+  case tooShort
+  case saveFailed
 }

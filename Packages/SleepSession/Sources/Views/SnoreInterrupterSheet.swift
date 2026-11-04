@@ -36,7 +36,7 @@ struct SnoreInterrupterSheet: View {
 
           SnoreInterrupterDurationPicker(selection: $draftMode)
 
-          SnoreInterrupterSongRow(melodyName: selectedMelody?.name ?? "Melody 12") {
+          SnoreInterrupterSongRow(melodyName: selectedMelody?.name ?? Strings.snoreInterrupterDefaultMelodyName) {
             showMelodyPicker = true
           }
 
