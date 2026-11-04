@@ -4517,6 +4517,17 @@
           }
         }
       }
+    },
+    "snore.interrupter.defaultMelodyName": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Melody"
+          }
+        }
+      }
     }
   },
   "version": "1.0"
