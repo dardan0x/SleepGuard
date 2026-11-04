@@ -103,8 +103,8 @@ public final class UserProfile {
     hobbies: [String] = [],
     occupationType: OccupationType = .other,
     createdAt: Date = Date(),
-    updatedAt: Date = Date()
-  ) {
+    updatedAt: Date = Date())
+  {
     self.id = id
     self.firstName = firstName
     self.birthYear = birthYear
@@ -127,7 +127,7 @@ public final class UserProfile {
 
   /// Derived age from birthYear, nil if birthYear is nil.
   public var age: Int? {
-    guard let birthYear = birthYear else { return nil }
+    guard let birthYear else { return nil }
     let calendar = Calendar.current
     let currentYear = calendar.component(.year, from: Date())
     return currentYear - birthYear
@@ -149,7 +149,7 @@ public final class UserProfile {
       !hobbies.isEmpty,
       occupationType != .other,
     ]
-    let filled = fields.filter { $0 }.count
+    let filled = fields.filter(\.self).count
     return Double(filled) / Double(fields.count)
   }
 }

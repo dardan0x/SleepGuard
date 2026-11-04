@@ -1,6 +1,6 @@
-import SwiftUI
-import Models
 import DesignSystem
+import Models
+import SwiftUI
 
 /// Single-event audio player matching the SleepGuard design.
 /// Shows event info, bar waveform with progress, and centered playback controls.
@@ -55,7 +55,7 @@ struct EventPlayerView: View {
       ProgressView()
         .scaleEffect(1.2)
         .tint(theme.accent)
-        Text(Strings.loadingAudioEventPlayerView)
+      Text(Strings.loadingAudioEventPlayerView)
         .font(.system(size: 14, weight: .medium))
         .foregroundStyle(theme.textSecondary)
     }
@@ -72,7 +72,7 @@ struct EventPlayerView: View {
         .font(.system(size: 13, weight: .medium))
         .foregroundStyle(theme.textSecondary)
 
-        Text(Strings.snoringEventHeaderPlayerView.uppercased())
+      Text(Strings.snoringEventHeaderPlayerView.uppercased())
         .font(.system(size: 11, weight: .semibold))
         .foregroundStyle(theme.textTertiary)
         .tracking(1.5)
@@ -92,7 +92,7 @@ struct EventPlayerView: View {
       }
 
       if totalEvents > 1 {
-          Text("\(Strings.eventHeaderSectionTotalEvents) \(eventNumber) of \(totalEvents)")
+        Text("\(Strings.eventHeaderSectionTotalEvents) \(eventNumber) of \(totalEvents)")
           .font(.system(size: 12, weight: .medium))
           .foregroundStyle(theme.textTertiary)
       }
@@ -127,8 +127,7 @@ struct EventPlayerView: View {
                 let isPlayed = Double(index) / Double(barCount) <= progress
                 waveformBar(
                   height: barHeight(at: index, maxHeight: geometry.size.height),
-                  isPlayed: isPlayed
-                )
+                  isPlayed: isPlayed)
               }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -305,10 +304,10 @@ struct EventPlayerView: View {
 
   private var intensityLabel: String {
     switch event.intensity {
-    case .quiet: return Strings.quietIntensityLabel
-    case .light: return Strings.lightIntensityLabelEventPlayerView
-    case .loud: return Strings.loudIntensityLabelEventPlayerView
-    case .epic: return Strings.epicIntensityLabelEventPlayerView
+    case .quiet: Strings.quietIntensityLabel
+    case .light: Strings.lightIntensityLabelEventPlayerView
+    case .loud: Strings.loudIntensityLabelEventPlayerView
+    case .epic: Strings.epicIntensityLabelEventPlayerView
     }
   }
 

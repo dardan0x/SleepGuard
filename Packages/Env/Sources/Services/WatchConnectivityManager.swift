@@ -1,16 +1,16 @@
 import Foundation
-import WatchConnectivity
 import Observation
+import WatchConnectivity
 
 @MainActor
 @Observable
 public final class WatchConnectivityManager: NSObject {
   public static let shared = WatchConnectivityManager()
 
-  public var isWatchReachable: Bool = false
+  public var isWatchReachable = false
   public var lastSyncedSession: Date?
 
-  private override init() {
+  override private init() {
     super.init()
     if WCSession.isSupported() {
       WCSession.default.delegate = self
@@ -24,35 +24,35 @@ public final class WatchConnectivityManager: NSObject {
 }
 
 extension WatchConnectivityManager: WCSessionDelegate {
-  nonisolated public func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
+  public nonisolated func session(_ session: WCSession, activationDidCompleteWith _: WCSessionActivationState, error _: Error?) {
     let reachable = session.isReachable
     Task { @MainActor in
       isWatchReachable = reachable
     }
   }
 
-  nonisolated public func sessionDidBecomeInactive(_ session: WCSession) {}
+  public nonisolated func sessionDidBecomeInactive(_: WCSession) {}
 
-  nonisolated public func sessionDidDeactivate(_ session: WCSession) {
+  public nonisolated func sessionDidDeactivate(_: WCSession) {
     WCSession.default.activate()
   }
 
-  nonisolated public func sessionWatchStateDidChange(_ session: WCSession) {
+  public nonisolated func sessionWatchStateDidChange(_ session: WCSession) {
     let reachable = session.isReachable
     Task { @MainActor in
       isWatchReachable = reachable
     }
   }
 
-  nonisolated public func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
+  public nonisolated func session(_: WCSession, didReceiveMessage message: [String: Any]) {
     handleMessage(message)
   }
 
-  nonisolated public func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
+  public nonisolated func session(_: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
     handleMessage(applicationContext)
   }
 
-  nonisolated private func handleMessage(_ message: [String: Any]) {
+  private nonisolated func handleMessage(_ message: [String: Any]) {
     guard let type = message["type"] as? String, type == "session" else { return }
     Task { @MainActor in
       self.lastSyncedSession = Date()

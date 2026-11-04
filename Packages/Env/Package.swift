@@ -25,7 +25,5 @@ let package = Package(
       linkerSettings: [
         .linkedFramework("HealthKit"),
         .linkedFramework("WatchConnectivity"),
-      ]
-    ),
-  ]
-)
+      ]),
+  ])

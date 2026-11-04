@@ -1,7 +1,7 @@
-import SwiftUI
+import DesignSystem
 import Env
 import Models
-import DesignSystem
+import SwiftUI
 
 struct StatisticsMiniChartSection: View {
   let recentSessions: [SleepSession]
@@ -42,8 +42,7 @@ struct StatisticsMiniChartSection: View {
         return MiniBarChart.DataPoint(
           label: String(label),
           value: Double(day.score),
-          color: theme.scoreColor(day.score)
-        )
+          color: theme.scoreColor(day.score))
       }
 
       MiniBarChart(data: data, theme: theme)

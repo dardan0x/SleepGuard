@@ -1,5 +1,5 @@
-import SwiftUI
 import DesignSystem
+import SwiftUI
 
 @MainActor
 public struct BriefingSurveyCard: View {
@@ -11,8 +11,8 @@ public struct BriefingSurveyCard: View {
   public init(
     survey: SurveyPrompt,
     onChipTap: @escaping (String) -> Void,
-    onSkip: @escaping () -> Void
-  ) {
+    onSkip: @escaping () -> Void)
+  {
     self.survey = survey
     self.onChipTap = onChipTap
     self.onSkip = onSkip
@@ -54,4 +54,3 @@ public struct BriefingSurveyCard: View {
     .cornerRadius(theme.radiusCard)
   }
 }
-

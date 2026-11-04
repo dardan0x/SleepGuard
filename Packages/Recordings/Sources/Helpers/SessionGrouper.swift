@@ -30,15 +30,13 @@ public enum SessionGrouper {
         NightGroup(
           id: ISO8601DateFormatter.string(from: dayDate, timeZone: calendar.timeZone, formatOptions: [.withFullDate]),
           date: dayDate,
-          sessions: daySessions.sorted { $0.startDate > $1.startDate }
-        )
+          sessions: daySessions.sorted { $0.startDate > $1.startDate })
       }.sorted { $0.date > $1.date }
 
       return MonthSection(
         id: title,
         title: title,
-        groups: groups
-      )
+        groups: groups)
     }
   }
 }

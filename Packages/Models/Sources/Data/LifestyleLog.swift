@@ -35,8 +35,8 @@ public final class LifestyleLog {
     lateMeal: Bool = false,
     screenBeforeBed: Bool = false,
     note: String? = nil,
-    sessionID: UUID? = nil
-  ) {
+    sessionID: UUID? = nil)
+  {
     self.id = id
     self.date = date
     self.hadCaffeineLate = hadCaffeineLate

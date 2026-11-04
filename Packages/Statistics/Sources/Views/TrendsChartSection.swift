@@ -1,7 +1,7 @@
-import SwiftUI
 import Charts
-import Models
 import DesignSystem
+import Models
+import SwiftUI
 
 struct TrendsChartSection: View {
   let data: [TrendBarData]
@@ -12,10 +12,9 @@ struct TrendsChartSection: View {
       Chart(data) { item in
         BarMark(
           x: .value("Day", item.label),
-          y: .value("Minutes", item.minutes)
-        )
-        .foregroundStyle(item.color)
-        .cornerRadius(4)
+          y: .value("Minutes", item.minutes))
+          .foregroundStyle(item.color)
+          .cornerRadius(4)
       }
       .frame(height: 120)
       .chartYAxis(.hidden)
@@ -33,8 +32,8 @@ struct TrendsChartSection: View {
     }
     .padding(16)
     .overlay(
-        RoundedRectangle(cornerRadius: theme.radiusCard)
-            .stroke(theme.bgCard, lineWidth: 1)
+      RoundedRectangle(cornerRadius: theme.radiusCard)
+        .stroke(theme.bgCard, lineWidth: 1)
     )
   }
 }

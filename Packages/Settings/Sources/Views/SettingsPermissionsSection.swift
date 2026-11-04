@@ -1,7 +1,7 @@
 import AVFoundation
-import SwiftUI
-import Env
 import DesignSystem
+import Env
+import SwiftUI
 import UserNotifications
 
 @MainActor
@@ -97,8 +97,8 @@ struct SettingsPermissionsSection: View {
 
   private var isNotificationGranted: Bool {
     switch notifications.authorizationStatus {
-    case .authorized, .provisional, .ephemeral: return true
-    default: return false
+    case .authorized, .provisional, .ephemeral: true
+    default: false
     }
   }
 

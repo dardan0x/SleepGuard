@@ -1,7 +1,7 @@
 import AudioEngine
 import Foundation
-import UserNotifications
 import Observation
+import UserNotifications
 
 public extension Notification.Name {
   static let recordingDelayDidComplete = Notification.Name("recordingDelayDidComplete")
@@ -14,7 +14,7 @@ public final class RecordingDelayManager {
 
   public var isActive = false
   public var targetDate: Date?
-  public var currentRemainingSeconds: Int = 0
+  public var currentRemainingSeconds = 0
 
   private var timer: Timer?
   public let notificationId = "sleepguard-delayed-recording"
@@ -68,9 +68,9 @@ public final class RecordingDelayManager {
   private func startTimer() {
     timer?.invalidate()
     timer = Timer(timeInterval: 1.0, repeats: true) { [weak self] _ in
-      guard let self, self.isActive else { return }
-      self.updateCurrentRemainingSeconds()
-      if self.checkIfComplete() {
+      guard let self, isActive else { return }
+      updateCurrentRemainingSeconds()
+      if checkIfComplete() {
         NotificationCenter.default.post(name: .recordingDelayDidComplete, object: nil)
       }
     }

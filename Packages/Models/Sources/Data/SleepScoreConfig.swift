@@ -101,8 +101,8 @@ public struct SleepScoreConfig: Codable, Sendable, Hashable {
     shortSleepPenaltyCap: Int = 8,
     longSleepThresholdHours: Double = 9.0,
     longSleepMultiplier: Double = 1.0,
-    longSleepPenaltyCap: Int = 5
-  ) {
+    longSleepPenaltyCap: Int = 5)
+  {
     self.maxScore = maxScore
     self.minScore = minScore
     self.snoringMultiplier = snoringMultiplier

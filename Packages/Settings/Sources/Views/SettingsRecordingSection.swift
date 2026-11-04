@@ -1,7 +1,7 @@
-import SwiftUI
-import Env
 import DesignSystem
+import Env
 import Models
+import SwiftUI
 
 @MainActor
 struct SettingsRecordingSection: View {
@@ -12,8 +12,7 @@ struct SettingsRecordingSection: View {
   private var sensitivityBinding: Binding<UserPreferences.DetectionSensitivity> {
     Binding(
       get: { userPreferences.detectionSensitivity },
-      set: { userPreferences.detectionSensitivity = $0 }
-    )
+      set: { userPreferences.detectionSensitivity = $0 })
   }
 
   var body: some View {

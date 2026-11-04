@@ -27,11 +27,11 @@ public struct AudioLevelMeter: View {
 
   private func barColor(for level: Double) -> Color {
     if level > 0.7 {
-      return theme.snoreLoud
+      theme.snoreLoud
     } else if level > 0.4 {
-      return theme.snoreLight
+      theme.snoreLight
     } else {
-      return theme.snoreQuiet
+      theme.snoreQuiet
     }
   }
 }

@@ -1,7 +1,7 @@
-import SwiftUI
-import Models
-import Env
 import DesignSystem
+import Env
+import Models
+import SwiftUI
 
 /// Bottom sheet showing all snore events as a horizontally-scrolling list of compact cards.
 /// Tapping a card’s Play button presents the full event player for that single recording
@@ -34,8 +34,7 @@ public struct EventsSheetView: View {
               onPlay: {
                 selectedEvent = event
                 onPlayEvent(event)
-              }
-            )
+              })
           }
         }
         .padding(.horizontal, 16)
@@ -62,8 +61,7 @@ public struct EventsSheetView: View {
         session: session,
         sortedEvents: episodeEvents,
         isClipSession: isClipSession,
-        initialEvent: episodeEvents.first ?? event
-      )
+        initialEvent: episodeEvents.first ?? event)
     }
   }
 }

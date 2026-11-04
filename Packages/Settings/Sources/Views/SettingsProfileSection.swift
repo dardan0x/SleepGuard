@@ -1,7 +1,7 @@
-import SwiftUI
-import Env
 import DesignSystem
+import Env
 import Models
+import SwiftUI
 
 @MainActor
 struct SettingsProfileSection: View {

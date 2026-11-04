@@ -1,6 +1,6 @@
-import SwiftUI
-import Models
 import DesignSystem
+import Models
+import SwiftUI
 
 @MainActor
 struct ProfileStepGoalsView: View {
@@ -37,14 +37,12 @@ struct ProfileStepGoalsView: View {
         "",
         selection: Binding(
           get: { profile.targetBedtime ?? Date.from(hour: 22, minute: 30) },
-          set: { profile.targetBedtime = $0 }
-        ),
-        displayedComponents: .hourAndMinute
-      )
-      .datePickerStyle(.wheel)
-      .colorMultiply(theme.accent)
-      .frame(maxHeight: 120)
-      .clipped()
+          set: { profile.targetBedtime = $0 }),
+        displayedComponents: .hourAndMinute)
+        .datePickerStyle(.wheel)
+        .colorMultiply(theme.accent)
+        .frame(maxHeight: 120)
+        .clipped()
     }
   }
 
@@ -59,12 +57,10 @@ struct ProfileStepGoalsView: View {
         Slider(
           value: Binding(
             get: { profile.targetSleepHours ?? 7.0 },
-            set: { profile.targetSleepHours = $0 }
-          ),
+            set: { profile.targetSleepHours = $0 }),
           in: 4...12,
-          step: 0.5
-        )
-        .tint(theme.accent)
+          step: 0.5)
+          .tint(theme.accent)
 
         Text(String(format: "%.1fh", profile.targetSleepHours ?? 7.0))
           .font(.system(size: 17, weight: .semibold))

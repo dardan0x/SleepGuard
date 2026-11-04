@@ -22,14 +22,15 @@ public struct FFTAnalyzer {
 
   public init(bufferSize: Int = 1024) {
     self.bufferSize = bufferSize
-    self.log2n = vDSP_Length(log2(Float(bufferSize)))
-    self.fftSetup = vDSP_DFT_zop_CreateSetup(nil, log2n, .FORWARD)
+    log2n = vDSP_Length(log2(Float(bufferSize)))
+    fftSetup = vDSP_DFT_zop_CreateSetup(nil, log2n, .FORWARD)
   }
 
   /// Analyzes an audio buffer and returns spectral features.
   public func analyze(buffer: AVAudioPCMBuffer, sampleRate: Double) -> SpectralFeatures {
     guard let channelData = buffer.floatChannelData?[0],
-          bufferSize >= 64 else {
+          bufferSize >= 64
+    else {
       return SpectralFeatures(lowFreqRatio: 0, spectralCentroid: 0, dominantFrequency: 0, spectralScore: 0)
     }
 
@@ -57,7 +58,7 @@ public struct FFTAnalyzer {
     let freqResolution = Float(sampleRate) / Float(frameLength)
 
     // Bin indices for frequency bands.
-    let lowBin = max(1, Int(100.0 / Double(freqResolution)))    // 100 Hz
+    let lowBin = max(1, Int(100.0 / Double(freqResolution))) // 100 Hz
     let highBin = min(halfSize, Int(500.0 / Double(freqResolution))) // 500 Hz
 
     // Energy in snore-relevant band (100–500 Hz).
@@ -79,7 +80,7 @@ public struct FFTAnalyzer {
     // Spectral centroid (weighted average frequency).
     var weightedSum: Float = 0
     var maxMag: Float = 0
-    var maxMagIndex: Int = 0
+    var maxMagIndex = 0
     for i in 1..<halfSize {
       let freq = Float(i) * freqResolution
       let magSq = magnitudes[i] * magnitudes[i]
@@ -102,15 +103,15 @@ public struct FFTAnalyzer {
       lowFreqRatio: lowFreqRatio,
       spectralCentroid: spectralCentroid,
       dominantFrequency: dominantFrequency,
-      spectralScore: spectralScore
-    )
+      spectralScore: spectralScore)
   }
 
   /// Returns magnitude spectrum grouped into `barCount` frequency bins (0–1000 Hz).
   public func spectrumBars(buffer: AVAudioPCMBuffer, sampleRate: Double, barCount: Int = 32) -> [Float] {
     guard let channelData = buffer.floatChannelData?[0],
           bufferSize >= 64,
-          let fftSetup else {
+          let fftSetup
+    else {
       return [Float](repeating: 0, count: barCount)
     }
 

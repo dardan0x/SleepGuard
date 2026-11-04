@@ -23,7 +23,5 @@ let package = Package(
       linkerSettings: [
         .linkedFramework("Accelerate"),
         .linkedFramework("SoundAnalysis"),
-      ]
-    ),
-  ]
-)
+      ]),
+  ])

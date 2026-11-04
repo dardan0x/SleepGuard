@@ -1,5 +1,5 @@
-import SwiftUI
 import DesignSystem
+import SwiftUI
 
 struct StatisticsLoadedHeaderView: View {
   let onViewCalendar: () -> Void

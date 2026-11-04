@@ -1,6 +1,6 @@
-import SwiftUI
-import Models
 import DesignSystem
+import Models
+import SwiftUI
 
 struct StatisticsStatsGrid: View {
   let session: SleepSession

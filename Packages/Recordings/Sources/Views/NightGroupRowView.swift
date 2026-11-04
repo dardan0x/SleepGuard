@@ -1,7 +1,7 @@
-import SwiftUI
+import DesignSystem
 import Env
 import Models
-import DesignSystem
+import SwiftUI
 
 @MainActor
 public struct NightGroupRowView: View {
@@ -16,8 +16,8 @@ public struct NightGroupRowView: View {
   public init(
     group: NightGroup,
     theme: Theme,
-    onDeleteRequest: (() -> Void)? = nil
-  ) {
+    onDeleteRequest: (() -> Void)? = nil)
+  {
     self.group = group
     self.theme = theme
     self.onDeleteRequest = onDeleteRequest
@@ -166,6 +166,4 @@ public struct NightGroupRowView: View {
     }
     return start
   }
-
-
 }

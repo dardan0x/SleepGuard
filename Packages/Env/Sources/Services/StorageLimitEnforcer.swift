@@ -15,8 +15,8 @@ public struct CleanupReport: Sendable {
     bytesRemoved: Int64 = 0,
     sessionsAffected: Int = 0,
     dayLimitSessions: Int = 0,
-    sizeLimitSessions: Int = 0
-  ) {
+    sizeLimitSessions: Int = 0)
+  {
     self.filesRemoved = filesRemoved
     self.bytesRemoved = bytesRemoved
     self.sessionsAffected = sessionsAffected
@@ -73,8 +73,7 @@ public final class StorageLimitEnforcer: Sendable {
       bytesRemoved: dayReport.bytesRemoved + sizeReport.bytesRemoved,
       sessionsAffected: dayReport.sessionsAffected + sizeReport.sessionsAffected,
       dayLimitSessions: dayReport.sessionsAffected,
-      sizeLimitSessions: sizeReport.sessionsAffected
-    )
+      sizeLimitSessions: sizeReport.sessionsAffected)
 
     print("[StorageLimitEnforcer] Cleanup complete — \(report.filesRemoved) file(s), \(report.bytesRemoved / 1_024 / 1_024) MB, \(report.sessionsAffected) session(s)")
     return report
@@ -214,8 +213,7 @@ public final class StorageLimitEnforcer: Sendable {
       return CleanupReport(
         filesRemoved: files,
         bytesRemoved: bytes,
-        sessionsAffected: plan.sessionsAffected
-      )
+        sessionsAffected: plan.sessionsAffected)
     }.value
   }
 
@@ -292,8 +290,7 @@ public final class StorageLimitEnforcer: Sendable {
         intensity: .quiet,
         averageDB: -40,
         peakDB: -30,
-        duration: 1.0
-      )
+        duration: 1.0)
       event.audioFileURL = filename
       event.session = session
       if session.events == nil { session.events = [] }

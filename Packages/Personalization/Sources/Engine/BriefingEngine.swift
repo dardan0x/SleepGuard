@@ -1,6 +1,6 @@
+import DesignSystem
 import Foundation
 import Models
-import DesignSystem
 
 /// Lightweight value type representing a session for briefing generation.
 /// Extracted from `SleepSession` so the engine never touches `@Model` objects.
@@ -16,8 +16,8 @@ public struct BriefingSession: Sendable {
     endDate: Date? = nil,
     sleepScore: Int,
     snoringDuration: TimeInterval,
-    totalDuration: TimeInterval
-  ) {
+    totalDuration: TimeInterval)
+  {
     self.startDate = startDate
     self.endDate = endDate
     self.sleepScore = sleepScore
@@ -35,8 +35,8 @@ public struct BriefingProfile: Sendable {
   public init(
     firstName: String? = nil,
     targetSleepHours: Double? = nil,
-    completionPercentage: Double = 0
-  ) {
+    completionPercentage: Double = 0)
+  {
     self.firstName = firstName
     self.targetSleepHours = targetSleepHours
     self.completionPercentage = completionPercentage
@@ -44,7 +44,6 @@ public struct BriefingProfile: Sendable {
 }
 
 public enum BriefingEngine {
-
   private enum ContentMode {
     case lastNightRecap
     case weeklySnoring
@@ -58,8 +57,8 @@ public enum BriefingEngine {
     profile: BriefingProfile?,
     recentSessions: [BriefingSession],
     lifestyleLogs: [LifestyleLog],
-    now: Date
-  ) -> Briefing {
+    now: Date) -> Briefing
+  {
     let calendar = Calendar.current
     let sortedSessions = recentSessions.sorted { $0.startDate > $1.startDate }
 
@@ -73,15 +72,13 @@ public enum BriefingEngine {
         nudge: QuoteBank.quote(for: .noData),
         survey: nil,
         scoreContext: .noData,
-        profileNudge: profileNudge(for: profile)
-      )
+        profileNudge: profileNudge(for: profile))
     }
 
     let scoreContext = determineScoreContext(
       sessions: sortedSessions,
       now: now,
-      calendar: calendar
-    )
+      calendar: calendar)
 
     let mode = selectMode(sessions: sortedSessions, now: now, calendar: calendar)
     let isLastNight = isLastNight(session: latestSession, now: now, calendar: calendar)
@@ -90,14 +87,12 @@ public enum BriefingEngine {
       latestSession: latestSession,
       sessions: sortedSessions,
       profile: profile,
-      isLastNight: isLastNight
-    )
+      isLastNight: isLastNight)
     let survey = buildSurvey(
       latestSession: latestSession,
       sessions: sortedSessions,
       lifestyleLogs: lifestyleLogs,
-      calendar: calendar
-    )
+      calendar: calendar)
 
     return Briefing(
       greeting: greeting(for: now, name: profile?.firstName),
@@ -107,15 +102,14 @@ public enum BriefingEngine {
       nudge: QuoteBank.quote(for: scoreContext),
       survey: survey,
       scoreContext: scoreContext,
-      profileNudge: profileNudge(for: profile)
-    )
+      profileNudge: profileNudge(for: profile))
   }
 
   private static func selectMode(
     sessions: [BriefingSession],
-    now: Date,
-    calendar: Calendar
-  ) -> ContentMode {
+    now _: Date,
+    calendar _: Calendar) -> ContentMode
+  {
     guard sessions.count >= 2 else { return .lastNightRecap }
 
     let availableModes: [ContentMode] = [
@@ -140,33 +134,32 @@ public enum BriefingEngine {
     latestSession: BriefingSession,
     sessions: [BriefingSession],
     profile: BriefingProfile?,
-    isLastNight: Bool
-  ) -> (headline: String, stats: [BriefingStat], insight: String?) {
+    isLastNight: Bool) -> (headline: String, stats: [BriefingStat], insight: String?)
+  {
     switch mode {
     case .lastNightRecap:
-      return (
+      (
         buildHeadline(for: latestSession, isLastNight: isLastNight),
         buildStats(for: latestSession),
-        buildInsight(sessions: sessions, profile: profile)
-      )
+        buildInsight(sessions: sessions, profile: profile))
     case .weeklySnoring:
-      return buildWeeklySnoringContent(latest: latestSession, sessions: sessions, isLastNight: isLastNight)
+      buildWeeklySnoringContent(latest: latestSession, sessions: sessions, isLastNight: isLastNight)
     case .weeklyScore:
-      return buildWeeklyScoreContent(latest: latestSession, sessions: sessions, isLastNight: isLastNight)
+      buildWeeklyScoreContent(latest: latestSession, sessions: sessions, isLastNight: isLastNight)
     case .weeklyDuration:
-      return buildWeeklyDurationContent(latest: latestSession, sessions: sessions, isLastNight: isLastNight)
+      buildWeeklyDurationContent(latest: latestSession, sessions: sessions, isLastNight: isLastNight)
     case .combinedScoreSnoring:
-      return buildCombinedScoreSnoringContent(latest: latestSession, sessions: sessions)
+      buildCombinedScoreSnoringContent(latest: latestSession, sessions: sessions)
     case .combinedDurationScore:
-      return buildCombinedDurationScoreContent(latest: latestSession, sessions: sessions)
+      buildCombinedDurationScoreContent(latest: latestSession, sessions: sessions)
     }
   }
 
   private static func isLastNight(
     session: BriefingSession,
     now: Date,
-    calendar: Calendar
-  ) -> Bool {
+    calendar: Calendar) -> Bool
+  {
     guard let yesterday = calendar.date(byAdding: .day, value: -1, to: calendar.startOfDay(for: now)) else {
       return false
     }
@@ -218,8 +211,8 @@ public enum BriefingEngine {
   private static func determineScoreContext(
     sessions: [BriefingSession],
     now: Date,
-    calendar: Calendar
-  ) -> ScoreTrend {
+    calendar: Calendar) -> ScoreTrend
+  {
     guard sessions.count >= 1 else { return .noData }
     guard sessions.count > 1 else { return .firstNight }
 
@@ -227,8 +220,7 @@ public enum BriefingEngine {
     let daysSinceLatest = calendar.dateComponents(
       [.day],
       from: calendar.startOfDay(for: latest.startDate),
-      to: calendar.startOfDay(for: now)
-    ).day ?? 0
+      to: calendar.startOfDay(for: now)).day ?? 0
 
     if daysSinceLatest > 3 {
       return .returningAfterGap(days: daysSinceLatest)
@@ -272,8 +264,7 @@ public enum BriefingEngine {
       template,
       durationText,
       String(snoringMinutes),
-      String(score)
-    )
+      String(score))
   }
 
   // MARK: - Stats
@@ -295,8 +286,8 @@ public enum BriefingEngine {
 
   private static func buildInsight(
     sessions: [BriefingSession],
-    profile: BriefingProfile?
-  ) -> String? {
+    profile: BriefingProfile?) -> String?
+  {
     guard sessions.count >= 2 else { return nil }
 
     let latest = sessions[0]
@@ -330,8 +321,7 @@ public enum BriefingEngine {
             String(avgHours),
             String(avgMinutes),
             String(shortMinutes),
-            String(Int(target))
-          )
+            String(Int(target)))
         )
       }
     }
@@ -344,8 +334,8 @@ public enum BriefingEngine {
   private static func buildWeeklySnoringContent(
     latest: BriefingSession,
     sessions: [BriefingSession],
-    isLastNight: Bool
-  ) -> (headline: String, stats: [BriefingStat], insight: String?) {
+    isLastNight: Bool) -> (headline: String, stats: [BriefingStat], insight: String?)
+  {
     let previous = sessions.dropFirst().prefix(6)
     let avgSnoring = previous.map(\.snoringDuration).reduce(0, +) / Double(max(previous.count, 1))
     let latestMin = Int(latest.snoringDuration / 60)
@@ -355,8 +345,7 @@ public enum BriefingEngine {
     let headline = formatTemplate(
       isLastNight ? Strings.briefingHeadlineWeeklySnoring : Strings.briefingHeadlineWeeklySnoringLastTime,
       String(latestMin),
-      String(avgMin)
-    )
+      String(avgMin))
     let stats = [
       BriefingStat(label: isLastNight ? Strings.briefingStatLastNight : Strings.briefingStatLastTime, value: "\(latestMin)m"),
       BriefingStat(label: Strings.briefingStatWeeklyAvg, value: "\(avgMin)m"),
@@ -372,8 +361,8 @@ public enum BriefingEngine {
   private static func buildWeeklyScoreContent(
     latest: BriefingSession,
     sessions: [BriefingSession],
-    isLastNight: Bool
-  ) -> (headline: String, stats: [BriefingStat], insight: String?) {
+    isLastNight: Bool) -> (headline: String, stats: [BriefingStat], insight: String?)
+  {
     let previous = sessions.dropFirst().prefix(6)
     let avgScore = previous.map(\.sleepScore).reduce(0, +) / max(previous.count, 1)
     let diff = latest.sleepScore - avgScore
@@ -381,8 +370,7 @@ public enum BriefingEngine {
     let headline = formatTemplate(
       isLastNight ? Strings.briefingHeadlineWeeklyScore : Strings.briefingHeadlineWeeklyScoreLastTime,
       String(latest.sleepScore),
-      String(avgScore)
-    )
+      String(avgScore))
     let stats = [
       BriefingStat(label: isLastNight ? Strings.briefingStatLastNight : Strings.briefingStatLastTime, value: "\(latest.sleepScore)"),
       BriefingStat(label: Strings.briefingStatWeeklyAvg, value: "\(avgScore)"),
@@ -398,8 +386,8 @@ public enum BriefingEngine {
   private static func buildWeeklyDurationContent(
     latest: BriefingSession,
     sessions: [BriefingSession],
-    isLastNight: Bool
-  ) -> (headline: String, stats: [BriefingStat], insight: String?) {
+    isLastNight: Bool) -> (headline: String, stats: [BriefingStat], insight: String?)
+  {
     let previous = sessions.dropFirst().prefix(6)
     let avgDuration = previous.map(\.totalDuration).reduce(0, +) / Double(max(previous.count, 1))
 
@@ -416,8 +404,7 @@ public enum BriefingEngine {
     let headline = formatTemplate(
       isLastNight ? Strings.briefingHeadlineWeeklyDuration : Strings.briefingHeadlineWeeklyDurationLastTime,
       latestText,
-      avgText
-    )
+      avgText)
     let stats = [
       BriefingStat(label: isLastNight ? Strings.briefingStatLastNight : Strings.briefingStatLastTime, value: latestText),
       BriefingStat(label: Strings.briefingStatWeeklyAvg, value: avgText),
@@ -432,8 +419,8 @@ public enum BriefingEngine {
 
   private static func buildCombinedScoreSnoringContent(
     latest: BriefingSession,
-    sessions: [BriefingSession]
-  ) -> (headline: String, stats: [BriefingStat], insight: String?) {
+    sessions: [BriefingSession]) -> (headline: String, stats: [BriefingStat], insight: String?)
+  {
     let previous = sessions.dropFirst().prefix(6)
     let avgScore = previous.map(\.sleepScore).reduce(0, +) / max(previous.count, 1)
     let avgSnoring = previous.map(\.snoringDuration).reduce(0, +) / Double(max(previous.count, 1))
@@ -446,8 +433,7 @@ public enum BriefingEngine {
       String(latest.sleepScore),
       String(avgScore),
       String(latestSnoringMin),
-      String(avgSnoringMin)
-    )
+      String(avgSnoringMin))
 
     let scoreDiff = latest.sleepScore - avgScore
     let stats = [
@@ -462,8 +448,8 @@ public enum BriefingEngine {
 
   private static func buildCombinedDurationScoreContent(
     latest: BriefingSession,
-    sessions: [BriefingSession]
-  ) -> (headline: String, stats: [BriefingStat], insight: String?) {
+    sessions: [BriefingSession]) -> (headline: String, stats: [BriefingStat], insight: String?)
+  {
     let previous = sessions.dropFirst().prefix(6)
     let avgScore = previous.map(\.sleepScore).reduce(0, +) / max(previous.count, 1)
     let avgDuration = previous.map(\.totalDuration).reduce(0, +) / Double(max(previous.count, 1))
@@ -481,8 +467,7 @@ public enum BriefingEngine {
       latestText,
       avgText,
       String(latest.sleepScore),
-      String(avgScore)
-    )
+      String(avgScore))
 
     let durationDiffMin = Int((latest.totalDuration - avgDuration) / 60)
     let stats = [
@@ -501,8 +486,8 @@ public enum BriefingEngine {
     latestSession: BriefingSession,
     sessions: [BriefingSession],
     lifestyleLogs: [LifestyleLog],
-    calendar: Calendar
-  ) -> SurveyPrompt? {
+    calendar: Calendar) -> SurveyPrompt?
+  {
     guard sessions.count >= 1 else { return nil }
 
     let latestScore = latestSession.sleepScore
@@ -527,8 +512,7 @@ public enum BriefingEngine {
           Strings.briefingSurveyChipSleptEarlier,
           Strings.briefingSurveyChipLessStress,
         ],
-        isPositiveSwing: true
-      )
+        isPositiveSwing: true)
     } else {
       return SurveyPrompt(
         title: Strings.briefingSurveyNegativeTitle,
@@ -539,8 +523,7 @@ public enum BriefingEngine {
           Strings.briefingSurveyChipLateMeal,
           Strings.briefingSurveyChipScreensInBed,
         ],
-        isPositiveSwing: false
-      )
+        isPositiveSwing: false)
     }
   }
 }

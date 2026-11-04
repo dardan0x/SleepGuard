@@ -27,7 +27,5 @@ let package = Package(
       ],
       linkerSettings: [
         .linkedFramework("Charts"),
-      ]
-    ),
-  ]
-)
+      ]),
+  ])

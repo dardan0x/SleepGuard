@@ -1,8 +1,8 @@
-import SwiftUI
-import SwiftData
+import DesignSystem
 import Env
 import Models
-import DesignSystem
+import SwiftData
+import SwiftUI
 
 @MainActor
 public struct StatisticsDashboardView: View {
@@ -29,9 +29,8 @@ public struct StatisticsDashboardView: View {
           },
           onViewCalendar: {
             routerPath.navigate(to: .calendar)
-          }
-        )
-      case .loaded(let session, let dayScore, let daySessionCount, let recentSessions):
+          })
+      case let .loaded(session, dayScore, daySessionCount, recentSessions):
         StatisticsLoadedView(
           session: session,
           dayScore: dayScore,
@@ -46,8 +45,7 @@ public struct StatisticsDashboardView: View {
           },
           onViewCalendar: {
             routerPath.navigate(to: .calendar)
-          }
-        )
+          })
       case .error:
         StatisticsErrorView(theme: theme) {
           loadState()

@@ -36,10 +36,10 @@ public enum AppTab: String, CaseIterable, Sendable, Codable {
   /// SF Symbol used in the tab bar.
   public var iconName: String {
     switch self {
-    case .statistics: return "chart.bar.fill"
-    case .sessions: return "waveform"
-    case .settings: return "gearshape"
-    case .learn: return "book.fill"
+    case .statistics: "chart.bar.fill"
+    case .sessions: "waveform"
+    case .settings: "gearshape"
+    case .learn: "book.fill"
     }
   }
 
@@ -54,8 +54,7 @@ public enum AppTab: String, CaseIterable, Sendable, Codable {
     default:
       throw DecodingError.dataCorruptedError(
         in: container,
-        debugDescription: "Unknown AppTab raw value: \(rawValue)"
-      )
+        debugDescription: "Unknown AppTab raw value: \(rawValue)")
     }
   }
 

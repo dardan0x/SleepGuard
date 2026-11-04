@@ -15,8 +15,8 @@ public struct SessionRow: View {
     duration: String,
     events: String,
     intensityColor: Color,
-    theme: Theme
-  ) {
+    theme: Theme)
+  {
     self.dayNumber = dayNumber
     self.weekday = weekday
     self.duration = duration

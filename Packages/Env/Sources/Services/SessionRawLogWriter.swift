@@ -1,5 +1,5 @@
-import Foundation
 import AudioEngine
+import Foundation
 
 /// Buffers snore classification samples during a session and writes them to disk
 /// as a JSON file on stop. The log becomes the ground truth for future re-processing
@@ -28,8 +28,7 @@ public actor SessionRawLogWriter {
       db: db,
       spectralScore: spectralScore,
       snoreConfidence: snoreConfidence,
-      state: state
-    )
+      state: state)
     buffer.append(sample)
   }
 

@@ -88,7 +88,7 @@ public final class SnoreDetector {
     // Intensity is primarily amplitude-based. ML confidence already gated
     // entry above, so dB alone determines tier. Only epic requires extra
     // confidence to avoid false positives at the extreme end.
-    if db >= epicThreshold && snoreConfidence >= highConfidenceGate {
+    if db >= epicThreshold, snoreConfidence >= highConfidenceGate {
       return .epic
     } else if db >= loudThreshold {
       return .loud

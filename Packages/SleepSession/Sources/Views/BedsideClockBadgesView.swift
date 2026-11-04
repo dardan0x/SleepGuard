@@ -1,5 +1,5 @@
-import SwiftUI
 import DesignSystem
+import SwiftUI
 
 struct BedsideClockBadgesView: View {
   let eventsCount: Int
@@ -31,5 +31,4 @@ struct BedsideClockBadgesView: View {
         .stroke(theme.scoreGreen, lineWidth: 1)
     )
   }
-
 }

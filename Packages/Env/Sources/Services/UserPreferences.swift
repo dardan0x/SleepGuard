@@ -373,12 +373,12 @@ public final class UserPreferences {
 
     public var displayLabel: String {
       switch self {
-      case .never: return "Never"
-      case .always: return "Always"
-      case .fiveSeconds: return "5 seconds"
-      case .fifteenSeconds: return "15 seconds"
-      case .thirtySeconds: return "30 seconds"
-      case .sixtySeconds: return "60 seconds"
+      case .never: "Never"
+      case .always: "Always"
+      case .fiveSeconds: "5 seconds"
+      case .fifteenSeconds: "15 seconds"
+      case .thirtySeconds: "30 seconds"
+      case .sixtySeconds: "60 seconds"
       }
     }
   }

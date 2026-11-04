@@ -1,9 +1,9 @@
-import SwiftUI
-import SwiftData
 import Env
 import Models
 import Personalization
 import Settings
+import SwiftData
+import SwiftUI
 
 struct SettingsTab: View {
   @State private var routerPath = RouterPath()
@@ -13,16 +13,15 @@ struct SettingsTab: View {
   var body: some View {
     NavigationStack(path: Binding(
       get: { routerPath.path },
-      set: { routerPath.path = $0 }
-    )) {
+      set: { routerPath.path = $0 }))
+    {
       SettingsView()
         .withAppRouter()
     }
     .sheet(
       item: Binding(
         get: { routerPath.presentedSheet },
-        set: { routerPath.presentedSheet = $0 }
-      )
+        set: { routerPath.presentedSheet = $0 })
     ) { destination in
       switch destination {
       case .sessionSummary:
@@ -37,9 +36,8 @@ struct SettingsTab: View {
             },
             onDismiss: {
               routerPath.presentedSheet = nil
-            }
-          )
-          .withEnvironments()
+            })
+            .withEnvironments()
         }
       }
     }

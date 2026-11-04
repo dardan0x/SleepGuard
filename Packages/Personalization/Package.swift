@@ -24,8 +24,7 @@ let package = Package(
       swiftSettings: [
         .swiftLanguageMode(.v6),
         .defaultIsolation(MainActor.self),
-      ]
-    ),
+      ]),
     .testTarget(
       name: "PersonalizationTests",
       dependencies: [
@@ -36,7 +35,5 @@ let package = Package(
       swiftSettings: [
         .swiftLanguageMode(.v6),
         .defaultIsolation(MainActor.self),
-      ]
-    ),
-  ]
-)
+      ]),
+  ])

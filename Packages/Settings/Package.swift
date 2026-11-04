@@ -26,7 +26,5 @@ let package = Package(
       swiftSettings: [
         .swiftLanguageMode(.v6),
         .defaultIsolation(MainActor.self),
-      ]
-    ),
-  ]
-)
+      ]),
+  ])

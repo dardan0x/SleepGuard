@@ -1,8 +1,8 @@
-import SwiftUI
-import SwiftData
+import DesignSystem
 import Env
 import Models
-import DesignSystem
+import SwiftData
+import SwiftUI
 
 @MainActor
 public struct RecordingsListView: View {
@@ -26,7 +26,7 @@ public struct RecordingsListView: View {
           .task { loadState() }
       case .empty:
         RecordingsEmptyView(theme: theme)
-      case .loaded(let sections):
+      case let .loaded(sections):
         loadedBody(sections: sections)
       case .error:
         RecordingsErrorView(theme: theme) {
@@ -51,18 +51,17 @@ public struct RecordingsListView: View {
               onDeleteRequest: {
                 groupToDelete = group
                 showDeleteAlert = true
+              })
+              .padding(.vertical, 8)
+              .swipeActions(edge: .trailing) {
+                Button(role: .destructive) {
+                  groupToDelete = group
+                  showDeleteAlert = true
+                } label: {
+                  Label(Strings.actionDelete, systemImage: "trash")
+                }
               }
-            )
-            .padding(.vertical, 8)
-            .swipeActions(edge: .trailing) {
-              Button(role: .destructive) {
-                groupToDelete = group
-                showDeleteAlert = true
-              } label: {
-                Label(Strings.actionDelete, systemImage: "trash")
-              }
-            }
-            .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
+              .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
           }
         } header: {
           Text(section.title)

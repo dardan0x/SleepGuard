@@ -13,9 +13,9 @@ public struct NightGroup: Identifiable {
     self.id = id
     self.date = date
     self.sessions = sessions
-    self.averageScore = sessions.map(\.sleepScore).reduce(0, +) / max(sessions.count, 1)
-    self.totalDuration = sessions.map(\.totalDuration).reduce(0, +)
-    self.totalEvents = sessions.map(\.eventsCount).reduce(0, +)
+    averageScore = sessions.map(\.sleepScore).reduce(0, +) / max(sessions.count, 1)
+    totalDuration = sessions.map(\.totalDuration).reduce(0, +)
+    totalEvents = sessions.map(\.eventsCount).reduce(0, +)
   }
 
   public var recordingCount: Int { sessions.count }

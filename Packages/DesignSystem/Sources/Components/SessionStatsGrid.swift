@@ -1,5 +1,5 @@
-import SwiftUI
 import Models
+import SwiftUI
 
 /// Reusable 2×2 stat grid for a sleep session.
 @MainActor
@@ -20,29 +20,25 @@ public struct SessionStatsGrid: View {
         title: Strings.recordingsPlayerStatDuration,
         value: durationString(session.totalDuration),
         theme: theme,
-        iconColor: theme.accent
-      )
+        iconColor: theme.accent)
       StatCard(
         icon: "percent",
         title: Strings.sessionSummaryStatSnoring,
         value: String(format: "%.0f%%", session.snoringPercentage),
         theme: theme,
-        iconColor: theme.scoreAmber
-      )
+        iconColor: theme.scoreAmber)
       StatCard(
         icon: "waveform",
         title: Strings.sessionSummaryStatSnoreTime,
         value: durationString(session.snoringDuration),
         theme: theme,
-        iconColor: theme.scoreRed
-      )
+        iconColor: theme.scoreRed)
       StatCard(
         icon: "bolt.fill",
         title: Strings.recordingsDetailEventsLabel,
         value: "\(session.eventsCount)",
         theme: theme,
-        iconColor: theme.scoreAmber
-      )
+        iconColor: theme.scoreAmber)
     }
   }
 

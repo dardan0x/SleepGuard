@@ -1,5 +1,5 @@
-import AVFoundation
 import Accelerate
+import AVFoundation
 import Models
 
 /// Extracts individual snore-event audio clips from a full session recording
@@ -29,8 +29,8 @@ public enum AudioClipExtractor {
     events: [SnoreEvent],
     sessionStart: Date,
     padding: TimeInterval = 0.0,
-    outputDirectory: URL
-  ) async -> [ClipResult] {
+    outputDirectory: URL) async -> [ClipResult]
+  {
     let totalDuration = await AVURLAsset(url: sessionURL).duration.seconds
     let batchSize = 4
 
@@ -48,7 +48,7 @@ public enum AudioClipExtractor {
           let eventSnoreDuration = event.snoreDuration
           let eventBursts = event.bursts
           group.addTask {
-            return await extractSingleClip(
+            await extractSingleClip(
               eventID: eventID,
               eventTimestamp: eventTimestamp,
               eventSnoreDuration: eventSnoreDuration,
@@ -57,14 +57,13 @@ public enum AudioClipExtractor {
               sessionStart: sessionStart,
               totalDuration: totalDuration,
               padding: padding,
-              outputDirectory: outputDirectory
-            )
+              outputDirectory: outputDirectory)
           }
         }
 
         var batchResults: [ClipResult] = []
         for await result in group {
-          if let result = result {
+          if let result {
             batchResults.append(result)
           }
         }
@@ -87,8 +86,8 @@ public enum AudioClipExtractor {
     sessionStart: Date,
     totalDuration: TimeInterval,
     padding: TimeInterval,
-    outputDirectory: URL
-  ) async -> ClipResult? {
+    outputDirectory: URL) async -> ClipResult?
+  {
     let eventTime = eventTimestamp.timeIntervalSince(sessionStart)
     let clipURL = outputDirectory
       .appendingPathComponent("event_\(eventID.uuidString).m4a")
@@ -111,8 +110,7 @@ public enum AudioClipExtractor {
       exportAsset = AVURLAsset(url: sessionURL)
       exportTimeRange = CMTimeRange(
         start: CMTime(seconds: startTime, preferredTimescale: 600),
-        duration: CMTime(seconds: endTime - startTime, preferredTimescale: 600)
-      )
+        duration: CMTime(seconds: endTime - startTime, preferredTimescale: 600))
     } else {
       // Legacy: single range export
       let startTime = max(0, eventTime - padding)
@@ -121,14 +119,12 @@ public enum AudioClipExtractor {
       exportAsset = AVURLAsset(url: sessionURL)
       exportTimeRange = CMTimeRange(
         start: CMTime(seconds: startTime, preferredTimescale: 600),
-        duration: CMTime(seconds: endTime - startTime, preferredTimescale: 600)
-      )
+        duration: CMTime(seconds: endTime - startTime, preferredTimescale: 600))
     }
 
     guard let exportSession = AVAssetExportSession(
       asset: exportAsset,
-      presetName: AVAssetExportPresetAppleM4A
-    ) else { return nil }
+      presetName: AVAssetExportPresetAppleM4A) else { return nil }
 
     if let timeRange = exportTimeRange {
       exportSession.timeRange = timeRange
@@ -147,8 +143,7 @@ public enum AudioClipExtractor {
       clipURL: clipURL,
       dominantFrequency: spectral.dominantFrequency,
       spectralCentroid: spectral.spectralCentroid,
-      lowFreqRatio: spectral.lowFreqRatio
-    )
+      lowFreqRatio: spectral.lowFreqRatio)
   }
 
   // MARK: - Private
@@ -166,8 +161,8 @@ public enum AudioClipExtractor {
     sessionURL: URL,
     sessionStart: Date,
     padding: TimeInterval = 0.0,
-    outputDirectory: URL
-  ) async -> ClipResult? {
+    outputDirectory: URL) async -> ClipResult?
+  {
     let totalDuration = await AVURLAsset(url: sessionURL).duration.seconds
     return await extractSingleClip(
       eventID: event.id,
@@ -178,8 +173,7 @@ public enum AudioClipExtractor {
       sessionStart: sessionStart,
       totalDuration: totalDuration,
       padding: padding,
-      outputDirectory: outputDirectory
-    )
+      outputDirectory: outputDirectory)
   }
 
   public static func analyzeSpectralFeatures(of url: URL) async -> SpectralData {
@@ -212,7 +206,6 @@ public enum AudioClipExtractor {
     return SpectralData(
       dominantFrequency: dominantFrequencies.reduce(0, +) / Double(count),
       spectralCentroid: spectralCentroids.reduce(0, +) / Double(count),
-      lowFreqRatio: lowFreqRatios.reduce(0, +) / Double(count)
-    )
+      lowFreqRatio: lowFreqRatios.reduce(0, +) / Double(count))
   }
 }

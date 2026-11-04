@@ -1,7 +1,7 @@
-import SwiftUI
 import Env
 import Models
 import Recordings
+import SwiftUI
 
 struct SessionsTab: View {
   @State private var routerPath = RouterPath()
@@ -10,8 +10,8 @@ struct SessionsTab: View {
   var body: some View {
     NavigationStack(path: Binding(
       get: { routerPath.path },
-      set: { routerPath.path = $0 }
-    )) {
+      set: { routerPath.path = $0 }))
+    {
       RecordingsListView()
         .withAppRouter()
     }

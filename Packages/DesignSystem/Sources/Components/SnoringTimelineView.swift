@@ -1,6 +1,6 @@
-import SwiftUI
-import Models
 import Env
+import Models
+import SwiftUI
 
 @MainActor
 public struct SnoringTimelineView: View {
@@ -17,16 +17,14 @@ public struct SnoringTimelineView: View {
       let bgRect = CGRect(x: 0, y: 0, width: size.width, height: 32)
       context.fill(
         Path(roundedRect: bgRect, cornerRadius: 8),
-        with: .color(theme.bgCard)
-      )
+        with: .color(theme.bgCard))
 
       let segments = timelineSegments(in: size.width)
       for segment in segments {
         let rect = CGRect(x: segment.x, y: 6, width: segment.width, height: 20)
         context.fill(
           Path(roundedRect: rect, cornerRadius: 2),
-          with: .color(segment.color)
-        )
+          with: .color(segment.color))
       }
 
       // Draw gaps as semi-transparent overlay to indicate detection blind spots
@@ -35,13 +33,11 @@ public struct SnoringTimelineView: View {
         let rect = CGRect(x: gap.x, y: 6, width: gap.width, height: 20)
         context.fill(
           Path(roundedRect: rect, cornerRadius: 2),
-          with: .color(theme.textTertiary.opacity(0.18))
-        )
+          with: .color(theme.textTertiary.opacity(0.18)))
         context.stroke(
           Path(roundedRect: rect, cornerRadius: 2),
           with: .color(theme.textTertiary.opacity(0.35)),
-          lineWidth: 1
-        )
+          lineWidth: 1)
       }
     }
     .frame(height: 34)
@@ -61,8 +57,7 @@ public struct SnoringTimelineView: View {
         timestamp: episode.startTime,
         duration: episode.snoreDuration,
         intensity: episode.intensity,
-        category: .snoring
-      ))
+        category: .snoring))
     }
 
     // Add non-snoring events individually
@@ -75,8 +70,7 @@ public struct SnoringTimelineView: View {
         timestamp: event.timestamp,
         duration: event.snoreDuration,
         intensity: event.intensity,
-        category: event.category
-      ))
+        category: event.category))
     }
 
     return items.sorted(by: { $0.timestamp < $1.timestamp })
@@ -95,19 +89,18 @@ public struct SnoringTimelineView: View {
         id: item.id,
         x: CGFloat(relativeStart) * totalWidth,
         width: max(CGFloat(relativeDuration) * totalWidth, 2),
-        color: itemColor(item)
-      )
+        color: itemColor(item))
     }
   }
 
   private func itemColor(_ item: TimelineItem) -> Color {
     switch item.category {
     case .snoring:
-      return theme.intensityColor(item.intensity)
+      theme.intensityColor(item.intensity)
     case .sleepTalking:
-      return theme.sleepTalkingColor
+      theme.sleepTalkingColor
     case .noise, .coughing, .other:
-      return theme.noiseColor
+      theme.noiseColor
     }
   }
 
@@ -123,8 +116,7 @@ public struct SnoringTimelineView: View {
         id: UUID(),
         x: CGFloat(relativeStart) * totalWidth,
         width: max(CGFloat(relativeDuration) * totalWidth, 2),
-        color: .clear
-      )
+        color: .clear)
     } ?? []
   }
 

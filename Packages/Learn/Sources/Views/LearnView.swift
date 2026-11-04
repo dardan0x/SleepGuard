@@ -1,6 +1,6 @@
+import DesignSystem
 import SwiftUI
 import WebKit
-import DesignSystem
 
 /// A full-screen web view that loads the configured Learn URL. Links marked with
 /// `data-open-external="true"` are opened via `UIApplication.shared.open(_:)`;
@@ -40,7 +40,7 @@ private struct WebView: UIViewRepresentable {
     return webView
   }
 
-  func updateUIView(_ webView: WKWebView, context: Context) {
+  func updateUIView(_ webView: WKWebView, context _: Context) {
     webView.load(URLRequest(url: url))
   }
 
@@ -52,8 +52,7 @@ private struct WebView: UIViewRepresentable {
     WKUserScript(
       source: Self.clickInterceptorScript,
       injectionTime: .atDocumentStart,
-      forMainFrameOnly: false
-    )
+      forMainFrameOnly: false)
   }
 
   private enum ScriptMessageHandlerName {
@@ -61,27 +60,27 @@ private struct WebView: UIViewRepresentable {
   }
 
   private static let clickInterceptorScript = """
-    (function() {
-      document.addEventListener('click', function(event) {
-        var target = event.target;
-        while (target && target.tagName !== 'A') {
-          target = target.parentElement;
-        }
-        if (!target || target.tagName !== 'A') { return; }
-        if (target.getAttribute('data-open-external') !== 'true') { return; }
+  (function() {
+    document.addEventListener('click', function(event) {
+      var target = event.target;
+      while (target && target.tagName !== 'A') {
+        target = target.parentElement;
+      }
+      if (!target || target.tagName !== 'A') { return; }
+      if (target.getAttribute('data-open-external') !== 'true') { return; }
 
-        var href = target.href;
-        if (!href) { return; }
+      var href = target.href;
+      if (!href) { return; }
 
-        event.preventDefault();
-        event.stopPropagation();
+      event.preventDefault();
+      event.stopPropagation();
 
-        if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.openExternal) {
-          window.webkit.messageHandlers.openExternal.postMessage(href);
-        }
-      }, true);
-    })();
-    """
+      if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.openExternal) {
+        window.webkit.messageHandlers.openExternal.postMessage(href);
+      }
+    }, true);
+  })();
+  """
 
   final class Coordinator: NSObject, WKNavigationDelegate, WKScriptMessageHandler {
     let onExternalLink: (URL) -> Void
@@ -91,9 +90,9 @@ private struct WebView: UIViewRepresentable {
     }
 
     func userContentController(
-      _ userContentController: WKUserContentController,
-      didReceive message: WKScriptMessage
-    ) {
+      _: WKUserContentController,
+      didReceive message: WKScriptMessage)
+    {
       guard message.name == ScriptMessageHandlerName.openExternal,
             let urlString = message.body as? String,
             let url = URL(string: urlString) else { return }
@@ -101,10 +100,10 @@ private struct WebView: UIViewRepresentable {
     }
 
     func webView(
-      _ webView: WKWebView,
-      decidePolicyFor navigationAction: WKNavigationAction,
-      decisionHandler: @escaping (WKNavigationActionPolicy) -> Void
-    ) {
+      _: WKWebView,
+      decidePolicyFor _: WKNavigationAction,
+      decisionHandler: @escaping (WKNavigationActionPolicy) -> Void)
+    {
       decisionHandler(.allow)
     }
   }

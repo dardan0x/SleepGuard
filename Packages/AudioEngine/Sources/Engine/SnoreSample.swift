@@ -16,8 +16,8 @@ public struct SnoreSample: Codable, Sendable {
     db: Float,
     spectralScore: Float,
     snoreConfidence: Float,
-    state: DetectionState
-  ) {
+    state: DetectionState)
+  {
     self.elapsed = elapsed
     self.db = db
     self.spectralScore = spectralScore

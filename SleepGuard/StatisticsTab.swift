@@ -1,10 +1,10 @@
-import SwiftUI
-import SwiftData
 import Env
 import Models
 import Personalization
 import SleepSession
 import Statistics
+import SwiftData
+import SwiftUI
 
 struct StatisticsTab: View {
   @State private var routerPath = RouterPath()
@@ -17,12 +17,11 @@ struct StatisticsTab: View {
   @Environment(NotificationPermissionManager.self) private var notificationPermissions
   @Environment(\.modelContext) private var modelContext
 
-
   var body: some View {
     NavigationStack(path: Binding(
       get: { routerPath.path },
-      set: { routerPath.path = $0 }
-    )) {
+      set: { routerPath.path = $0 }))
+    {
       VStack(spacing: 0) {
         ProfilePromptCard {
           routerPath.presentedSheet = .profileEditor
@@ -44,35 +43,32 @@ struct StatisticsTab: View {
     .sheet(
       item: Binding(
         get: { routerPath.presentedSheet },
-        set: { routerPath.presentedSheet = $0 }
-      ),
+        set: { routerPath.presentedSheet = $0 }),
       onDismiss: {
         if sessionManager.completedSession != nil {
           sessionManager.completedSession = nil
         }
-      }
-    ) { destination in
-      switch destination {
-      case .sessionSummary:
-        if let session = sessionManager.completedSession {
-          SessionSummaryView(session: session)
-            .withEnvironments()
+      }) { destination in
+        switch destination {
+        case .sessionSummary:
+          if let session = sessionManager.completedSession {
+            SessionSummaryView(session: session)
+              .withEnvironments()
+          }
+        case .profileEditor:
+          if let profile = fetchOrCreateProfile() {
+            ProfileEditorView(
+              profile: profile,
+              onComplete: {
+                routerPath.presentedSheet = nil
+                UserPreferences.shared.hasCompletedProfile = true
+              },
+              onDismiss: {
+                routerPath.presentedSheet = nil
+              })
+              .withEnvironments()
+          }
         }
-      case .profileEditor:
-        if let profile = fetchOrCreateProfile() {
-          ProfileEditorView(
-            profile: profile,
-            onComplete: {
-              routerPath.presentedSheet = nil
-              UserPreferences.shared.hasCompletedProfile = true
-            },
-            onDismiss: {
-              routerPath.presentedSheet = nil
-            }
-          )
-          .withEnvironments()
-        }
-      }
     }
     .onAppear {
       if userPreferences.presentRecordingAfterOnboarding {

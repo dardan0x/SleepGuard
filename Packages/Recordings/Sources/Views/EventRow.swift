@@ -1,7 +1,7 @@
-import SwiftUI
-import Models
-import Env
 import DesignSystem
+import Env
+import Models
+import SwiftUI
 
 @MainActor
 struct EventRow: View {
@@ -89,4 +89,3 @@ struct EventRow: View {
     return String(format: "%d:%02d", minutes, seconds)
   }
 }
-

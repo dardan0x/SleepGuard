@@ -1,11 +1,11 @@
-import SwiftUI
-import SwiftData
-import FirebaseCore
-import Env
-import Models
 import AudioEngine
 import DesignSystem
+import Env
+import FirebaseCore
+import Models
 import Onboarding
+import SwiftData
+import SwiftUI
 
 @main
 struct SleepGuardApp: App {
@@ -69,8 +69,7 @@ struct SleepGuardApp: App {
         soundAnalysisDetector: SoundAnalysisDetector.shared,
         snoreInterrupterPlayer: SnoreInterrupterPlayer.shared,
         appConfig: appConfig,
-        notificationPermissionManager: notificationPermissionManager
-      )
+        notificationPermissionManager: notificationPermissionManager)
       .task {
         await RemoteConfigLoader.shared.refresh()
       }
@@ -111,7 +110,7 @@ struct SleepGuardApp: App {
         UIApplication.shared.isIdleTimerDisabled = isRecording
       }
       .onChange(of: scenePhase) { _, newPhase in
-        if newPhase == .active && sessionManager.isRecording {
+        if newPhase == .active, sessionManager.isRecording {
           UIApplication.shared.isIdleTimerDisabled = true
         }
         if newPhase == .active {

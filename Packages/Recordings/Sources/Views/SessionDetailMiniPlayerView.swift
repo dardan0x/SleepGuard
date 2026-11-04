@@ -1,6 +1,6 @@
-import SwiftUI
-import Models
 import DesignSystem
+import Models
+import SwiftUI
 
 struct SessionDetailMiniPlayerView: View {
   let session: SleepSession
@@ -27,8 +27,8 @@ struct SessionDetailMiniPlayerView: View {
     showsPlaybackButton: Bool = true,
     onTogglePlayback: @escaping () -> Void,
     onScrub: @escaping (Double) -> Void,
-    onExpand: @escaping () -> Void
-  ) {
+    onExpand: @escaping () -> Void)
+  {
     self.session = session
     self.isPlaying = isPlaying
     self.progress = progress
@@ -77,8 +77,7 @@ struct SessionDetailMiniPlayerView: View {
                 .frame(width: 6, height: 6)
                 .position(
                   x: CGFloat(eventMarkers[index]) * geometry.size.width,
-                  y: 2
-                )
+                  y: 2)
             }
           }
           .contentShape(Rectangle())

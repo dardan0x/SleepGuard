@@ -1,6 +1,6 @@
-import SwiftUI
-import Models
 import DesignSystem
+import Models
+import SwiftUI
 
 @MainActor
 struct DaySummary: Identifiable {
@@ -28,19 +28,19 @@ struct DaySummary: Identifiable {
 
   init(date: Date, sessions: [SleepSession]) {
     self.date = date
-    self.avgScore = sessions.map(\.sleepScore).reduce(0, +) / max(sessions.count, 1)
-    self.totalSnoringMinutes = Int(sessions.map(\.snoringDuration).reduce(0, +) / 60)
-    self.totalEvents = sessions.map(\.eventsCount).reduce(0, +)
-    self.totalDuration = sessions.map(\.totalDuration).reduce(0, +)
-    self.maxIntensity = DaySummary.maxIntensity(for: sessions)
-    self.label = String(DateFormatters.dayOfWeekShort.string(from: date).prefix(1).uppercased())
-    self.weekday = DateFormatters.dayOfWeekShort.string(from: date)
-    self.dateString = DateFormatters.monthDay.string(from: date)
-    self.primarySessionId = sessions.first?.id
+    avgScore = sessions.map(\.sleepScore).reduce(0, +) / max(sessions.count, 1)
+    totalSnoringMinutes = Int(sessions.map(\.snoringDuration).reduce(0, +) / 60)
+    totalEvents = sessions.map(\.eventsCount).reduce(0, +)
+    totalDuration = sessions.map(\.totalDuration).reduce(0, +)
+    maxIntensity = DaySummary.maxIntensity(for: sessions)
+    label = String(DateFormatters.dayOfWeekShort.string(from: date).prefix(1).uppercased())
+    weekday = DateFormatters.dayOfWeekShort.string(from: date)
+    dateString = DateFormatters.monthDay.string(from: date)
+    primarySessionId = sessions.first?.id
   }
 
   private static func maxIntensity(for sessions: [SleepSession]) -> SnoreIntensity {
-    let allEvents = sessions.compactMap(\.events).flatMap { $0 }
+    let allEvents = sessions.compactMap(\.events).flatMap(\.self)
     let intensities = allEvents.map(\.intensity)
     if intensities.contains(.epic) { return .epic }
     if intensities.contains(.loud) { return .loud }

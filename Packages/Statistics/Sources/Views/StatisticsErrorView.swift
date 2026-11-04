@@ -1,6 +1,6 @@
-import SwiftUI
-import Env
 import DesignSystem
+import Env
+import SwiftUI
 
 @MainActor
 struct StatisticsErrorView: View {

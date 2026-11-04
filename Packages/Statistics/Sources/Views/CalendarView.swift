@@ -1,8 +1,8 @@
-import SwiftUI
-import SwiftData
-import Models
-import Env
 import DesignSystem
+import Env
+import Models
+import SwiftData
+import SwiftUI
 
 @MainActor
 public struct CalendarView: View {
@@ -11,7 +11,7 @@ public struct CalendarView: View {
   @Query(sort: \SleepSession.startDate, order: .reverse)
   private var sessions: [SleepSession]
 
-  @State private var selectedMonth: Date = Date()
+  @State private var selectedMonth = Date()
   @State private var selectedDate: Date? = nil
 
   private let calendar = Calendar.current
@@ -29,8 +29,7 @@ public struct CalendarView: View {
         CalendarMonthSelector(
           monthYearString: monthYearString,
           onPrevious: { selectedMonth = previousMonth },
-          onNext: { selectedMonth = nextMonth }
-        )
+          onNext: { selectedMonth = nextMonth })
 
         CalendarDayHeaders(symbols: weekdaySymbols)
 
@@ -40,16 +39,14 @@ public struct CalendarView: View {
           selectedMonth: selectedMonth,
           sessionForDate: sessionFor(date:),
           intensityColorForSession: intensityColor(for:),
-          onSelectDate: { selectedDate = $0 }
-        )
+          onSelectDate: { selectedDate = $0 })
 
         CalendarMonthStatsView(monthSessions: sessionsInSelectedMonth)
 
         if let selected = selectedDate, let session = sessionFor(date: selected) {
           CalendarSelectedNightView(
             session: session,
-            selectedDateString: selectedDateString
-          )
+            selectedDateString: selectedDateString)
         }
 
         SnoringLegendView()
@@ -118,7 +115,7 @@ public struct CalendarView: View {
   }
 
   private func intensityColor(for session: SleepSession?) -> Color {
-    guard let session = session, let events = session.events, !events.isEmpty else {
+    guard let session, let events = session.events, !events.isEmpty else {
       return Color.clear
     }
     let intensities = events.map(\.intensity)

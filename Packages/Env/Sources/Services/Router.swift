@@ -1,6 +1,6 @@
 import Foundation
-import SwiftUI
 import Models
+import SwiftUI
 
 public enum RouterDestination: Hashable, Sendable {
   case recordingDetail(id: UUID)
@@ -18,9 +18,9 @@ public enum SheetDestination: Identifiable, Hashable, Sendable {
   public var id: String {
     switch self {
     case .sessionSummary:
-      return "sessionSummary"
+      "sessionSummary"
     case .profileEditor:
-      return "profileEditor"
+      "profileEditor"
     }
   }
 }

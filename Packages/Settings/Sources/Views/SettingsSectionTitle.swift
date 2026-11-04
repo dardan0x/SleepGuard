@@ -1,5 +1,5 @@
-import SwiftUI
 import DesignSystem
+import SwiftUI
 
 @MainActor
 struct SettingsSectionTitle: View {

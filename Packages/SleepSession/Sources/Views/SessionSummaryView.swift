@@ -1,9 +1,9 @@
-import SwiftUI
-import SwiftData
 import AudioEngine
-import Models
-import Env
 import DesignSystem
+import Env
+import Models
+import SwiftData
+import SwiftUI
 
 @MainActor
 public struct SessionSummaryView: View {
@@ -45,12 +45,12 @@ public struct SessionSummaryView: View {
     }
     .background(theme.bgPrimary.ignoresSafeArea())
     .alert(Strings.sessionSummaryTooShortTitle, isPresented: $showShortSessionAlert) {
-      Button(Strings.actionOk, role: .cancel) { }
+      Button(Strings.actionOk, role: .cancel) {}
     } message: {
       Text(String(format: Strings.sessionSummaryTooShortInfoFormat, Int(SleepSession.minimumSaveDuration / 60)))
     }
     .alert(Strings.saveFailed, isPresented: $showSaveErrorAlert) {
-      Button(Strings.actionOk, role: .cancel) { }
+      Button(Strings.actionOk, role: .cancel) {}
     } message: {
       Text(Strings.unableToSaveTheSession)
     }
@@ -81,15 +81,13 @@ public struct SessionSummaryView: View {
         title: Strings.sessionSummaryStatSnoring,
         value: String(format: "%.0f%%", session.snoringPercentage),
         theme: theme,
-        iconColor: theme.scoreAmber
-      )
+        iconColor: theme.scoreAmber)
       StatCard(
         icon: "bolt.fill",
         title: Strings.recordingsDetailEventsLabel,
         value: "\(session.eventsCount)",
         theme: theme,
-        iconColor: theme.scoreAmber
-      )
+        iconColor: theme.scoreAmber)
     }
   }
 
@@ -130,8 +128,7 @@ public struct SessionSummaryView: View {
             LinearGradient(
               colors: [theme.accent.opacity(0.35), theme.accent.opacity(0.0)],
               startPoint: .top,
-              endPoint: .bottom
-            )
+              endPoint: .bottom)
           )
           .frame(maxWidth: .infinity)
           .frame(height: 76)
@@ -154,10 +151,8 @@ public struct SessionSummaryView: View {
                     LinearGradient(
                       colors: [Color.white.opacity(0.25), Color.white.opacity(0.05)],
                       startPoint: .leading,
-                      endPoint: .trailing
-                    ),
-                    lineWidth: 1
-                  )
+                      endPoint: .trailing),
+                    lineWidth: 1)
               }
             )
             .clipShape(Capsule())

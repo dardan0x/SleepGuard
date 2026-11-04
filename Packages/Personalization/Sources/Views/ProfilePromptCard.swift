@@ -1,8 +1,8 @@
-import SwiftData
-import SwiftUI
+import DesignSystem
 import Env
 import Models
-import DesignSystem
+import SwiftData
+import SwiftUI
 
 @MainActor
 public struct ProfilePromptCard: View {
@@ -20,7 +20,7 @@ public struct ProfilePromptCard: View {
   }
 
   public var body: some View {
-    if shouldShow && !isDismissed {
+    if shouldShow, !isDismissed {
       HStack(spacing: 14) {
         VStack(alignment: .leading, spacing: 6) {
           HStack {

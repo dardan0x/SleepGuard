@@ -1,9 +1,9 @@
-import SwiftUI
-import AVFoundation
 import AudioEngine
-import Models
-import Env
+import AVFoundation
 import DesignSystem
+import Env
+import Models
+import SwiftUI
 
 /// Plays individual snore-event audio clips presented as a bottom sheet.
 /// Always opens in expanded mode — shows the full event player with waveform and controls.
@@ -18,16 +18,19 @@ public struct PlayerSheetView: View {
   @Environment(\.dismiss) private var dismiss
 
   // MARK: - Clip Playback
+
   @State private var playbackController = ClipPlaybackController()
   @State private var waveformSamples: [Float] = []
 
   // MARK: - Legacy Single-Event Playback
+
   @State private var legacyPlayer: AVAudioPlayer?
   @State private var legacyIsPlaying = false
   @State private var legacyCurrentTime: TimeInterval = 0
   @State private var legacyEventDuration: TimeInterval = 0
 
   // MARK: - Loading
+
   @State private var isReady = false
   @State private var isLoadingWaveform = false
   /// Becomes true once the initial `.task` finishes (or the safety timeout
@@ -66,7 +69,8 @@ public struct PlayerSheetView: View {
         VStack(spacing: 24) {
           if isClipSession,
              let currentEvent = playbackController.currentEvent,
-             playbackController.hasAudioForCurrentEvent {
+             playbackController.hasAudioForCurrentEvent
+          {
             EventPlayerView(
               event: currentEvent,
               waveformSamples: waveformSamples,
@@ -80,8 +84,7 @@ public struct PlayerSheetView: View {
               onSkipForward: { skipClipPlayback(by: 15) },
               onScrub: { relative in playbackController.seek(to: relative) },
               isReady: isReady,
-              isLoadingWaveform: isLoadingWaveform
-            )
+              isLoadingWaveform: isLoadingWaveform)
             enhancedAudioToggle
             if sortedEvents.count > 1 {
               eventListSection
@@ -100,8 +103,7 @@ public struct PlayerSheetView: View {
               onSkipForward: { skipLegacyPlayback(by: 15) },
               onScrub: { relative in scrubLegacyTo(relative: relative) },
               isReady: isReady,
-              isLoadingWaveform: isLoadingWaveform
-            )
+              isLoadingWaveform: isLoadingWaveform)
           } else if didFinishInitialLoad || hasLoadingTimedOut {
             // Loading is over (either completed or hit the 10 s safety net)
             // and we still don't have audio — show the unavailable state.
@@ -164,7 +166,8 @@ public struct PlayerSheetView: View {
       if isClipSession {
         playbackController.loadEvents(sortedEvents)
         if let initialEvent,
-           let index = sortedEvents.firstIndex(where: { $0.id == initialEvent.id }) {
+           let index = sortedEvents.firstIndex(where: { $0.id == initialEvent.id })
+        {
           loadVisualization(for: initialEvent)
           if playbackController.hasAudioForCurrentEvent {
             playbackController.playEvent(at: index)
@@ -242,7 +245,7 @@ public struct PlayerSheetView: View {
 
       Spacer()
 
-      if isActive && playbackController.isPlaying {
+      if isActive, playbackController.isPlaying {
         Image(systemName: "waveform")
           .font(.system(size: 14))
           .foregroundStyle(theme.accent)
@@ -336,8 +339,7 @@ public struct PlayerSheetView: View {
 
     exportSession.timeRange = CMTimeRange(
       start: CMTime(seconds: startTime, preferredTimescale: 600),
-      duration: CMTime(seconds: endTime - startTime, preferredTimescale: 600)
-    )
+      duration: CMTime(seconds: endTime - startTime, preferredTimescale: 600))
 
     let tempDir = FileManager.default.temporaryDirectory
     let clipURL = tempDir.appendingPathComponent("waveform_\(event.id.uuidString).m4a")
@@ -492,8 +494,7 @@ public struct PlayerSheetView: View {
 
     exportSession.timeRange = CMTimeRange(
       start: CMTime(seconds: startTime, preferredTimescale: 600),
-      duration: CMTime(seconds: endTime - startTime, preferredTimescale: 600)
-    )
+      duration: CMTime(seconds: endTime - startTime, preferredTimescale: 600))
 
     let tempDir = FileManager.default.temporaryDirectory
     let clipURL = tempDir.appendingPathComponent("snore_player_\(event.id.uuidString).m4a")

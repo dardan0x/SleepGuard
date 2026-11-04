@@ -1,6 +1,6 @@
-import SwiftUI
 import AudioEngine
 import DesignSystem
+import SwiftUI
 
 struct OnboardingPage4View: View {
   let onContinue: () -> Void
@@ -8,8 +8,8 @@ struct OnboardingPage4View: View {
   @Environment(Theme.self) private var theme
   @State private var ringScale1: CGFloat = 1.0
   @State private var ringScale2: CGFloat = 1.0
-  @State private var ringOpacity1: Double = 0.6
-  @State private var ringOpacity2: Double = 0.3
+  @State private var ringOpacity1 = 0.6
+  @State private var ringOpacity2 = 0.3
   @State private var isRequesting = false
   @State private var showGranted = false
 

@@ -10,7 +10,7 @@ public final class HealthKitSync {
 
   private let healthStore = HKHealthStore()
 
-  public var isAuthorized: Bool = false
+  public var isAuthorized = false
 
   private init() {}
 
@@ -37,7 +37,8 @@ public final class HealthKitSync {
 
   public func checkAuthorizationStatus() {
     guard HKHealthStore.isHealthDataAvailable(),
-          let sleepType = HKObjectType.categoryType(forIdentifier: .sleepAnalysis) else {
+          let sleepType = HKObjectType.categoryType(forIdentifier: .sleepAnalysis)
+    else {
       isAuthorized = false
       return
     }
@@ -60,8 +61,8 @@ public final class HealthKitSync {
         sampleType: sleepType,
         predicate: predicate,
         limit: HKObjectQueryNoLimit,
-        sortDescriptors: [sortDescriptor]
-      ) { [weak self] _, samples, error in
+        sortDescriptors: [sortDescriptor])
+      { [weak self] _, samples, error in
         guard let self, let samples = samples as? [HKCategorySample], error == nil else {
           continuation.resume(returning: [])
           return
@@ -81,11 +82,11 @@ public final class HealthKitSync {
 
   private func mapSleepStage(_ value: Int) -> SleepStage? {
     switch value {
-    case HKCategoryValueSleepAnalysis.asleepCore.rawValue: return .light
-    case HKCategoryValueSleepAnalysis.asleepDeep.rawValue: return .deep
-    case HKCategoryValueSleepAnalysis.asleepREM.rawValue: return .rem
-    case HKCategoryValueSleepAnalysis.awake.rawValue: return .awake
-    default: return nil
+    case HKCategoryValueSleepAnalysis.asleepCore.rawValue: .light
+    case HKCategoryValueSleepAnalysis.asleepDeep.rawValue: .deep
+    case HKCategoryValueSleepAnalysis.asleepREM.rawValue: .rem
+    case HKCategoryValueSleepAnalysis.awake.rawValue: .awake
+    default: nil
     }
   }
 
@@ -111,8 +112,7 @@ public final class HealthKitSync {
       value: HKCategoryValueSleepAnalysis.asleep.rawValue,
       start: startDate,
       end: endDate,
-      metadata: metadata
-    )
+      metadata: metadata)
 
     do {
       try await healthStore.save(sample)

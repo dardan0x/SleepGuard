@@ -1,5 +1,5 @@
-import Foundation
 import AVFoundation
+import Foundation
 
 @MainActor
 final class WatchAudioRecorder: ObservableObject {
@@ -21,7 +21,7 @@ final class WatchAudioRecorder: ObservableObject {
 
     input.installTap(onBus: 0, bufferSize: 1024, format: format) { [weak self] buffer, _ in
       guard let self else { return }
-      let level = self.calculateDB(buffer: buffer)
+      let level = calculateDB(buffer: buffer)
       Task { @MainActor in
         self.currentDB = level
       }

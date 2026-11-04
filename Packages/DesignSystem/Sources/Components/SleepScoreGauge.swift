@@ -30,10 +30,8 @@ public struct SleepScoreGauge: View {
             ]),
             center: .center,
             startAngle: .degrees(-90),
-            endAngle: .degrees(270)
-          ),
-          style: StrokeStyle(lineWidth: size * 0.08, lineCap: .round)
-        )
+            endAngle: .degrees(270)),
+          style: StrokeStyle(lineWidth: size * 0.08, lineCap: .round))
         .rotationEffect(.degrees(-90))
         .animation(.easeOut(duration: 0.8), value: animatedProgress)
 

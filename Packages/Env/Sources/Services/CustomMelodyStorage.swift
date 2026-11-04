@@ -12,7 +12,7 @@ public final class CustomMelodyStorage {
 
   private let defaultsKey = "customMelodiesMetadata"
   private let directoryName = "CustomMelodies"
-  private var nextID: Int = 100
+  private var nextID = 100
 
   private init() {
     load()

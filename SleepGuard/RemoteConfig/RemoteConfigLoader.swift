@@ -1,6 +1,6 @@
-import Foundation
-import FirebaseRemoteConfig
 import Env
+import FirebaseRemoteConfig
+import Foundation
 import Models
 
 /// Bridges Firebase Remote Config into the Firebase-free `AppConfig` store.
@@ -57,21 +57,20 @@ final class RemoteConfigLoader {
     let learnTab = Self.decodeLearnTab(remoteConfig[Key.featureLearn].stringValue)
     let gate = UpdateGate(
       minimumVersion: remoteConfig[Key.minimumVersion].stringValue,
-      recommendedVersion: remoteConfig[Key.recommendedVersion].stringValue
-    )
+      recommendedVersion: remoteConfig[Key.recommendedVersion].stringValue)
     AppConfig.shared.apply(
       flags: flags,
       tabs: tabs,
       learnTab: learnTab,
-      updateGate: gate
-    )
+      updateGate: gate)
   }
 
   // MARK: - Decoding
 
   private static func decodeFlags(_ json: String) -> [String: Bool] {
     guard let data = json.data(using: .utf8),
-          let dict = try? JSONDecoder().decode([String: Bool].self, from: data) else {
+          let dict = try? JSONDecoder().decode([String: Bool].self, from: data)
+    else {
       return [:]
     }
     return dict
@@ -79,7 +78,8 @@ final class RemoteConfigLoader {
 
   private static func decodeTabs(_ json: String) -> [TabConfig] {
     guard let data = json.data(using: .utf8),
-          let tabs = try? JSONDecoder().decode([TabConfig].self, from: data) else {
+          let tabs = try? JSONDecoder().decode([TabConfig].self, from: data)
+    else {
       return []
     }
     return tabs

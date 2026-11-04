@@ -1,6 +1,6 @@
-import SwiftUI
-import Models
 import DesignSystem
+import Models
+import SwiftUI
 
 struct Last7NightsRow: View {
   let day: DaySummary
@@ -26,9 +26,9 @@ struct Last7NightsRow: View {
       }
       .padding(16)
       .overlay(
-          RoundedRectangle(cornerRadius: theme.radiusCard)
-            .stroke(theme.bgCard, lineWidth: 1)
-        )
+        RoundedRectangle(cornerRadius: theme.radiusCard)
+          .stroke(theme.bgCard, lineWidth: 1)
+      )
     }
     .buttonStyle(.plain)
   }
@@ -68,6 +68,4 @@ struct Last7NightsRow: View {
         .foregroundStyle(day.intensityColor)
     }
   }
-
-
 }

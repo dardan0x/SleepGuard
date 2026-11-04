@@ -9,9 +9,9 @@ public struct ActivityView: UIViewControllerRepresentable {
     self.applicationActivities = applicationActivities
   }
 
-  public func makeUIViewController(context: Context) -> UIActivityViewController {
+  public func makeUIViewController(context _: Context) -> UIActivityViewController {
     UIActivityViewController(activityItems: activityItems, applicationActivities: applicationActivities)
   }
 
-  public func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
+  public func updateUIViewController(_: UIActivityViewController, context _: Context) {}
 }

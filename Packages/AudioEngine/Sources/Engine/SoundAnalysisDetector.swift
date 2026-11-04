@@ -1,6 +1,6 @@
-import SoundAnalysis
 import AVFoundation
 import Observation
+import SoundAnalysis
 
 /// Wraps Apple's built-in SNAudioStreamAnalyzer to detect snoring
 /// using the pre-trained 300-class sound classifier shipped with iOS.
@@ -26,11 +26,11 @@ public final class SoundAnalysisDetector: NSObject, SNResultsObserving {
     "whisper", "mumble", "mutter", "stutter",
     "groan", "moan", "sigh", "grunt", "grumble",
     "exclaim", "gasp", "yell", "scream", "shout",
-    "laugh", "giggle", "whimper"
+    "laugh", "giggle", "whimper",
   ]
   private let babyIdentifiers = ["baby_crying", "baby_laughter", "babble"]
 
-  private override init() {
+  override private init() {
     super.init()
     setupRequest()
   }
@@ -90,10 +90,10 @@ public final class SoundAnalysisDetector: NSObject, SNResultsObserving {
 
   // MARK: - SNResultsObserving
 
-  nonisolated public func request(
-    _ request: SNRequest,
-    didProduce result: SNResult
-  ) {
+  public nonisolated func request(
+    _: SNRequest,
+    didProduce result: SNResult)
+  {
     guard let result = result as? SNClassificationResult else { return }
 
     // Print top 3 classifications for diagnostics.
@@ -131,12 +131,12 @@ public final class SoundAnalysisDetector: NSObject, SNResultsObserving {
     }
   }
 
-  nonisolated public func request(
-    _ request: SNRequest,
-    didFailWithError error: Error
-  ) {
+  public nonisolated func request(
+    _: SNRequest,
+    didFailWithError error: Error)
+  {
     print("[SoundAnalysis] Request failed: \(error.localizedDescription)")
   }
 
-  nonisolated public func requestDidComplete(_ request: SNRequest) {}
+  public nonisolated func requestDidComplete(_: SNRequest) {}
 }

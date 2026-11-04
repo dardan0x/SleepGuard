@@ -1,5 +1,5 @@
-import SwiftUI
 import DesignSystem
+import SwiftUI
 
 struct BedsideClockWaveformView: View {
   let durationString: String
@@ -20,8 +20,7 @@ struct BedsideClockWaveformView: View {
 
       AudioLevelMeter(
         levels: levels,
-        theme: theme
-      )
+        theme: theme)
     }
   }
 }

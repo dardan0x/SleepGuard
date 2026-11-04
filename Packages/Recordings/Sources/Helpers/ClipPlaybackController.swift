@@ -13,15 +13,15 @@ import Observation
 @Observable
 public final class ClipPlaybackController {
   public var events: [SnoreEvent] = []
-  public var currentEventIndex: Int = 0
-  public var isPlaying: Bool = false
+  public var currentEventIndex = 0
+  public var isPlaying = false
   public var currentClipTime: TimeInterval = 0
   public var totalClipsDuration: TimeInterval = 0
 
   /// When `true`, clips play through band-pass (80 Hz–1.5 kHz) + per-clip
   /// peak normalization (target −3 dBFS, capped at +24 dB EQ headroom).
   /// When `false`, raw playback.
-  public var enhancedAudioEnabled: Bool = true {
+  public var enhancedAudioEnabled = true {
     didSet {
       guard oldValue != enhancedAudioEnabled else { return }
       applyEnhancementToggle()
@@ -47,12 +47,13 @@ public final class ClipPlaybackController {
     guard clipDurations.indices.contains(currentEventIndex) else { return currentFileDuration }
     return min(clipDurations[currentEventIndex], currentFileDuration)
   }
+
   private var pausedAtClipTime: TimeInterval = 0
   private var playbackStartHostTime: TimeInterval = 0
   private var playbackStartClipTime: TimeInterval = 0
   /// Monotonic token to discard stale `scheduleSegment` completions when we
   /// stop or re-schedule before the prior segment finished.
-  private var playbackToken: Int = 0
+  private var playbackToken = 0
 
   // MARK: - Aggregate state
 
@@ -108,7 +109,7 @@ public final class ClipPlaybackController {
 
   public func loadEvents(_ events: [SnoreEvent]) {
     self.events = events
-    clipDurations = events.map { $0.snoreDuration }
+    clipDurations = events.map(\.snoreDuration)
     totalClipsDuration = clipDurations.reduce(0, +)
     currentEventIndex = 0
     currentClipTime = 0
@@ -162,8 +163,8 @@ public final class ClipPlaybackController {
         startingFrame: startFrame,
         frameCount: AVAudioFrameCount(max(0, remaining)),
         at: nil,
-        completionCallbackType: .dataPlayedBack
-      ) { [weak self] _ in
+        completionCallbackType: .dataPlayedBack)
+      { [weak self] _ in
         Task { @MainActor in
           guard let self else { return }
           guard self.playbackToken == token else { return } // stale completion
@@ -310,8 +311,8 @@ public final class ClipPlaybackController {
       notificationObserver = NotificationCenter.default.addObserver(
         forName: AVAudioSession.interruptionNotification,
         object: nil,
-        queue: .main
-      ) { [weak self] _ in
+        queue: .main)
+      { [weak self] _ in
         Task { @MainActor in
           self?.isPlaying = false
           self?.stopProgressTimer()

@@ -1,6 +1,6 @@
-import SwiftUI
-import Env
 import DesignSystem
+import Env
+import SwiftUI
 
 public struct OnboardingView: View {
   @Environment(UserPreferences.self) private var userPreferences

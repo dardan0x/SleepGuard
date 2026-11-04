@@ -1,7 +1,7 @@
-import SwiftUI
+import DesignSystem
 import Env
 import Models
-import DesignSystem
+import SwiftUI
 
 /// Tab wrapper for the Learn screen. Reads the remote-configured URL from
 /// `AppConfig` and falls back to an empty state when none is configured.
@@ -16,8 +16,8 @@ public struct LearnTab: View {
   public var body: some View {
     NavigationStack(path: Binding(
       get: { routerPath.path },
-      set: { routerPath.path = $0 }
-    )) {
+      set: { routerPath.path = $0 }))
+    {
       VStack(spacing: 0) {
         titleRow
           .padding(.horizontal, 20)
@@ -40,7 +40,8 @@ public struct LearnTab: View {
   private var content: some View {
     if let config = appConfig.learnTabConfig,
        let urlString = config.url,
-       let url = URL(string: urlString) {
+       let url = URL(string: urlString)
+    {
       LearnView(url: url)
     } else {
       VStack(spacing: 12) {

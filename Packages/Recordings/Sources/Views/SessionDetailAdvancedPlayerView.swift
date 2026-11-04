@@ -1,6 +1,6 @@
-import SwiftUI
-import Models
 import DesignSystem
+import Models
+import SwiftUI
 
 /// Expandable advanced player showing waveform, frequency spectrum, and spectral stats for a snore event clip.
 struct SessionDetailAdvancedPlayerView: View {
@@ -61,11 +61,11 @@ struct SessionDetailAdvancedPlayerView: View {
       .frame(height: 60)
 
       HStack {
-      Text(Strings.recordingsPlayerFreq0)
+        Text(Strings.recordingsPlayerFreq0)
         Spacer()
-      Text(Strings.recordingsPlayerFreq500)
+        Text(Strings.recordingsPlayerFreq500)
         Spacer()
-      Text(Strings.recordingsPlayerFreq1k)
+        Text(Strings.recordingsPlayerFreq1k)
       }
       .font(.system(size: 9, weight: .medium))
       .foregroundStyle(theme.textTertiary)

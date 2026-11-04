@@ -1,22 +1,22 @@
-import Foundation
 import DesignSystem
+import Foundation
 
 /// Selects a motivational quote by score context.
 public enum QuoteBank {
   public static func quote(for trend: ScoreTrend) -> String {
     switch trend {
     case .improving:
-      return Strings.briefingQuoteImproving
+      Strings.briefingQuoteImproving
     case .declining:
-      return Strings.briefingQuoteDeclining
+      Strings.briefingQuoteDeclining
     case .steady:
-      return Strings.briefingQuoteSteady
+      Strings.briefingQuoteSteady
     case .firstNight:
-      return Strings.briefingQuoteFirstNight
+      Strings.briefingQuoteFirstNight
     case .noData:
-      return Strings.briefingQuoteNoData
+      Strings.briefingQuoteNoData
     case .returningAfterGap:
-      return Strings.briefingQuoteReturningAfterGap
+      Strings.briefingQuoteReturningAfterGap
     }
   }
 }

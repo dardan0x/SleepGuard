@@ -13,8 +13,8 @@ public struct StatCard: View {
     title: String,
     value: String,
     theme: Theme,
-    iconColor: Color? = nil
-  ) {
+    iconColor: Color? = nil)
+  {
     self.icon = icon
     self.title = title
     self.value = value

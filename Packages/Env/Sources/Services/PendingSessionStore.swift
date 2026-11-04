@@ -20,7 +20,7 @@ public final class PendingSessionStore {
   public func setPending(sessionID: UUID, sessionAudioFilename: String? = nil) {
     cleanupIfNeeded()
     var fileNames: [String] = []
-    if let sessionAudioFilename = sessionAudioFilename {
+    if let sessionAudioFilename {
       fileNames.append(sessionAudioFilename)
     }
     let record = PendingSessionRecord(sessionID: sessionID, fileNames: fileNames)

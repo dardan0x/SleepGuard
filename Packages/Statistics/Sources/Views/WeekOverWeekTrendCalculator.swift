@@ -33,7 +33,6 @@ enum WeekOverWeekTrendCalculator {
 
     return Trend(
       label: "\(diff > 0 ? "+" : "")\(diff) vs prev wk",
-      isPositive: diff > 0
-    )
+      isPositive: diff > 0)
   }
 }

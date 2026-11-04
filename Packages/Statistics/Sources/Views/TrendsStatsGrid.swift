@@ -1,5 +1,5 @@
-import SwiftUI
 import DesignSystem
+import SwiftUI
 
 struct TrendsStatsGrid: View {
   let averageScore: Int
@@ -17,29 +17,25 @@ struct TrendsStatsGrid: View {
         iconColor: theme.accent,
         label: Strings.statsTrendsStatCardAvgScore,
         value: "\(averageScore)",
-        theme: theme
-      )
+        theme: theme)
       TrendStatCard(
         icon: "star.fill",
         iconColor: theme.scoreGreen,
         label: Strings.statsTrendsStatCardBestNight,
         value: "\(bestScore)",
-        theme: theme
-      )
+        theme: theme)
       TrendStatCard(
         icon: "bolt.fill",
         iconColor: theme.snoreLoud,
         label: Strings.statsTrendsStatCardWorstNight,
         value: "\(worstScore)",
-        theme: theme
-      )
+        theme: theme)
       TrendStatCard(
         icon: "number",
         iconColor: theme.textTertiary,
         label: Strings.statsTrendsStatCardTotalEvents,
         value: "\(totalEvents)",
-        theme: theme
-      )
+        theme: theme)
     }
   }
 }

@@ -52,8 +52,8 @@ public struct Briefing: Sendable, Identifiable {
     nudge: String,
     survey: SurveyPrompt?,
     scoreContext: ScoreTrend,
-    profileNudge: String? = nil
-  ) {
+    profileNudge: String? = nil)
+  {
     self.id = id
     self.greeting = greeting
     self.headline = headline

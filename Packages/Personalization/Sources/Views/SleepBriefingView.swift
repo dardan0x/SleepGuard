@@ -1,5 +1,5 @@
-import SwiftUI
 import DesignSystem
+import SwiftUI
 
 @MainActor
 public struct SleepBriefingView: View {
@@ -11,8 +11,8 @@ public struct SleepBriefingView: View {
   public init(
     briefing: Briefing,
     onDismiss: @escaping () -> Void,
-    onChipTap: ((String) -> Void)? = nil
-  ) {
+    onChipTap: ((String) -> Void)? = nil)
+  {
     self.briefing = briefing
     self.onDismiss = onDismiss
     self.onChipTap = onChipTap
@@ -36,8 +36,7 @@ public struct SleepBriefingView: View {
 
         BriefingRecapCard(
           headline: briefing.headline,
-          stats: briefing.stats
-        )
+          stats: briefing.stats)
 
         if let insight = briefing.insight {
           BriefingInsightCard(insight: insight)
@@ -65,8 +64,7 @@ public struct SleepBriefingView: View {
               onChipTap?(chip)
               onDismiss()
             },
-            onSkip: onDismiss
-          )
+            onSkip: onDismiss)
         }
 
         Spacer(minLength: 8)

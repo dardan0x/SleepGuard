@@ -1,6 +1,6 @@
 import Foundation
-import SwiftData
 import Models
+import SwiftData
 
 /// Generates realistic mock sleep session data for App Store screenshots.
 /// Creates SleepSession + SnoreEvent instances and persists them via SwiftData.
@@ -53,13 +53,13 @@ public enum MockDataGenerator {
     // BriefingEngine trends and survey prompts (|Δscore| ≥ 15).
     // Format: dayOffset → score delta (added to the smooth trend).
     let scoreSpikes: [Int: Int] = [
-      3: -28,   // bad night after decent start
-      8: +18,   // great recovery
-      12: -22,  // another bad night
-      15: +20,  // excellent night
-      19: -25,  // worst night
-      23: +16,  // good rebound
-      26: -20,  // late stumble
+      3: -28, // bad night after decent start
+      8: +18, // great recovery
+      12: -22, // another bad night
+      15: +20, // excellent night
+      19: -25, // worst night
+      23: +16, // good rebound
+      26: -20, // late stumble
     ]
 
     var generatedSessions: [(session: SleepSession, dayOffset: Int)] = []
@@ -116,7 +116,7 @@ public enum MockDataGenerator {
 
           // 1-2 bursts
           let bursts: [SnoreBurst]
-          if eventDuration > 50 && Bool.random() {
+          if eventDuration > 50, Bool.random() {
             let split = eventDuration * Double.random(in: 0.45...0.55)
             let gap = Double.random(in: 0.8...2.5)
             bursts = [
@@ -139,8 +139,7 @@ public enum MockDataGenerator {
             averageDB: avgDB,
             peakDB: peakDB,
             bursts: bursts,
-            duration: eventDuration
-          )
+            duration: eventDuration)
           events.append(event)
         }
 
@@ -148,8 +147,7 @@ public enum MockDataGenerator {
         let talkingEvents = generateSleepTalkingEvents(
           targetScore: targetScore,
           sessionStart: sessionStart,
-          sessionDuration: sessionDuration
-        )
+          sessionDuration: sessionDuration)
         events.append(contentsOf: talkingEvents)
 
         session.averageDB = events.map(\.averageDB).reduce(0, +) / Double(events.count)
@@ -190,8 +188,7 @@ public enum MockDataGenerator {
       sessions: generatedSessions,
       scoreSpikes: scoreSpikes,
       calendar: calendar,
-      modelContext: modelContext
-    )
+      modelContext: modelContext)
 
     do {
       try modelContext.save()
@@ -251,26 +248,24 @@ public enum MockDataGenerator {
       let remainingPenalty = Double(100 - score) - targetEventsPenalty - targetSnoringPenalty
       let targetIntensityPenalty = max(0, remainingPenalty)
 
-      let weights: [SnoreIntensity: Double]
-      if score >= 80 {
+      let weights: [SnoreIntensity: Double] = if score >= 80 {
         // Good sleep: almost exclusively quiet/light
-        weights = [.quiet: 0.65, .light: 0.35, .loud: 0.0, .epic: 0.0]
+        [.quiet: 0.65, .light: 0.35, .loud: 0.0, .epic: 0.0]
       } else if score >= 65 {
         // Decent sleep: mostly quiet/light, occasional loud
-        weights = [.quiet: 0.40, .light: 0.45, .loud: 0.15, .epic: 0.0]
+        [.quiet: 0.40, .light: 0.45, .loud: 0.15, .epic: 0.0]
       } else if score >= 50 {
         // Moderate: mixed bag
-        weights = [.quiet: 0.15, .light: 0.35, .loud: 0.40, .epic: 0.10]
+        [.quiet: 0.15, .light: 0.35, .loud: 0.40, .epic: 0.10]
       } else {
         // Bad sleep: dominated by loud/epic
-        weights = [.quiet: 0.0, .light: 0.15, .loud: 0.50, .epic: 0.35]
+        [.quiet: 0.0, .light: 0.15, .loud: 0.50, .epic: 0.35]
       }
 
       return SessionParams(
         eventCount: max(2, eventCount),
         totalSnoringDuration: totalSnoringDuration,
-        intensityWeights: weights
-      )
+        intensityWeights: weights)
     }
 
     func randomIntensity() -> SnoreIntensity {
@@ -285,20 +280,20 @@ public enum MockDataGenerator {
 
     func randomAvgDB(for intensity: SnoreIntensity) -> Double {
       switch intensity {
-      case .quiet:  return Double.random(in: -52...(-40))
-      case .light:  return Double.random(in: -46...(-34))
-      case .loud:   return Double.random(in: -38...(-28))
-      case .epic:   return Double.random(in: -30...(-20))
+      case .quiet: Double.random(in: -52...(-40))
+      case .light: Double.random(in: -46...(-34))
+      case .loud: Double.random(in: -38...(-28))
+      case .epic: Double.random(in: -30...(-20))
       }
     }
 
     func randomPeakDB(for intensity: SnoreIntensity, avgDB: Double) -> Double {
       let minPeak = avgDB + 5
       switch intensity {
-      case .quiet:  return Double.random(in: minPeak...(-30))
-      case .light:  return Double.random(in: minPeak...(-22))
-      case .loud:   return Double.random(in: minPeak...(-14))
-      case .epic:   return Double.random(in: minPeak...(-8))
+      case .quiet: return Double.random(in: minPeak...(-30))
+      case .light: return Double.random(in: minPeak...(-22))
+      case .loud: return Double.random(in: minPeak...(-14))
+      case .epic: return Double.random(in: minPeak...(-8))
       }
     }
   }
@@ -311,18 +306,17 @@ public enum MockDataGenerator {
   private static func generateSleepTalkingEvents(
     targetScore: Int,
     sessionStart: Date,
-    sessionDuration: TimeInterval
-  ) -> [SnoreEvent] {
+    sessionDuration: TimeInterval) -> [SnoreEvent]
+  {
     // Probability increases as sleep quality decreases
-    let probability: Double
-    if targetScore < 50 {
-      probability = 0.40
+    let probability = if targetScore < 50 {
+      0.40
     } else if targetScore < 65 {
-      probability = 0.30
+      0.30
     } else if targetScore < 80 {
-      probability = 0.20
+      0.20
     } else {
-      probability = 0.10
+      0.10
     }
 
     guard Double.random(in: 0...1) < probability else { return [] }
@@ -348,8 +342,7 @@ public enum MockDataGenerator {
         averageDB: avgDB,
         peakDB: peakDB,
         bursts: [burst],
-        duration: eventDuration
-      )
+        duration: eventDuration)
       talkingEvents.append(event)
     }
 
@@ -364,8 +357,8 @@ public enum MockDataGenerator {
     sessions: [(session: SleepSession, dayOffset: Int)],
     scoreSpikes: [Int: Int],
     calendar: Calendar,
-    modelContext: ModelContext
-  ) {
+    modelContext: ModelContext)
+  {
     // Sort by dayOffset so we can deterministically pick nights
     let sorted = sessions.sorted { $0.dayOffset < $1.dayOffset }
 
@@ -377,11 +370,10 @@ public enum MockDataGenerator {
       // - Most negative spike days (poor sleep → likely lifestyle cause)
       // - A few random non-spike days
       let isSpikeDay = scoreSpikes[dayOffset] != nil
-      let shouldCreateLog: Bool
-      if isSpikeDay {
-        shouldCreateLog = Double.random(in: 0...1) < 0.60
+      let shouldCreateLog: Bool = if isSpikeDay {
+        Double.random(in: 0...1) < 0.60
       } else {
-        shouldCreateLog = Double.random(in: 0...1) < 0.15
+        Double.random(in: 0...1) < 0.15
       }
 
       guard shouldCreateLog else { continue }
@@ -394,8 +386,7 @@ public enum MockDataGenerator {
         stressfulDay: Bool.random(),
         lateMeal: Bool.random(),
         screenBeforeBed: Bool.random(),
-        sessionID: session.id
-      )
+        sessionID: session.id)
       modelContext.insert(log)
     }
   }
@@ -459,7 +450,7 @@ public enum MockDataGenerator {
       cycleIndex += 1
 
       // Brief awake between cycles (~8% chance, 30s–2min)
-      if Double.random(in: 0...1) < 0.08 && offset < duration - 120 {
+      if Double.random(in: 0...1) < 0.08, offset < duration - 120 {
         let awake = Double.random(in: 30...120)
         segments.append(SleepStageSegment(stage: .awake, startOffset: offset, duration: awake))
         offset += awake
@@ -480,19 +471,16 @@ public enum MockDataGenerator {
         segments[segments.count - 1] = SleepStageSegment(
           stage: last.stage,
           startOffset: last.startOffset,
-          duration: awakeStart - last.startOffset
-        )
+          duration: awakeStart - last.startOffset)
         segments.append(SleepStageSegment(
           stage: .awake,
           startOffset: awakeStart,
-          duration: awakeDuration
-        ))
+          duration: awakeDuration))
       } else {
         segments[segments.count - 1] = SleepStageSegment(
           stage: .awake,
           startOffset: last.startOffset,
-          duration: duration - last.startOffset
-        )
+          duration: duration - last.startOffset)
       }
     }
 
@@ -503,10 +491,10 @@ public enum MockDataGenerator {
 private extension SnoreIntensity {
   var sortOrder: Int {
     switch self {
-    case .quiet: return 0
-    case .light: return 1
-    case .loud:  return 2
-    case .epic:  return 3
+    case .quiet: 0
+    case .light: 1
+    case .loud: 2
+    case .epic: 3
     }
   }
 }

@@ -1,10 +1,10 @@
-import SwiftUI
-import SwiftData
-import AVFoundation
 import AudioEngine
-import Models
-import Env
+import AVFoundation
 import DesignSystem
+import Env
+import Models
+import SwiftData
+import SwiftUI
 
 @MainActor
 public struct SessionDetailView: View {
@@ -21,6 +21,7 @@ public struct SessionDetailView: View {
   @State private var selectedFilter: EventCategoryFilter = .all
 
   // MARK: - Share
+
   @State private var isGeneratingPDF = false
   @State private var isExportingEvent = false
 
@@ -36,7 +37,7 @@ public struct SessionDetailView: View {
           .task {
             await loadSession()
           }
-      case .loaded(let session, _, let isClipSession):
+      case let .loaded(session, _, isClipSession):
         loadedBody(session: session, isClipSession: isClipSession)
       case .error:
         errorBody
@@ -81,8 +82,7 @@ public struct SessionDetailView: View {
                 await exportAndShare(event: event, in: session)
               }
             }
-          }
-        )
+          })
 
         if !shortEvents.isEmpty {
           Button {
@@ -149,29 +149,26 @@ public struct SessionDetailView: View {
     }
     .sheet(item: $activeSheet) { sheet in
       switch sheet {
-      case .player(let initialEvent):
+      case let .player(initialEvent):
         let episodeEvents = initialEvent.map { session.episodePlaybackEvents(for: $0) } ?? filteredEvents
         PlayerSheetView(
           session: session,
           sortedEvents: episodeEvents,
           isClipSession: isClipSession,
-          initialEvent: episodeEvents.first ?? initialEvent
-        )
+          initialEvent: episodeEvents.first ?? initialEvent)
       case .events:
         EventsSheetView(
           session: session,
           events: filteredEvents,
           displayDurations: displayDurations,
           isClipSession: isClipSession,
-          onPlayEvent: { _ in }
-        )
+          onPlayEvent: { _ in })
       case .shortEventsPlayer:
         PlayerSheetView(
           session: session,
           sortedEvents: shortEvents,
           isClipSession: isClipSession,
-          initialEvent: nil
-        )
+          initialEvent: nil)
       }
     }
 
@@ -192,7 +189,7 @@ public struct SessionDetailView: View {
 
   private func fakePlayerSection(session: SleepSession, sortedEvents: [SnoreEvent], isClipSession: Bool) -> some View {
     let totalDuration: TimeInterval = isClipSession
-      ? sortedEvents.map { $0.snoreDuration }.reduce(0, +)
+      ? sortedEvents.map(\.snoreDuration).reduce(0, +)
       : session.totalDuration
     let markers = isClipSession
       ? clipEventMarkers(events: sortedEvents, totalDuration: totalDuration)
@@ -216,8 +213,7 @@ public struct SessionDetailView: View {
         showsPlaybackButton: false,
         onTogglePlayback: {},
         onScrub: { _ in },
-        onExpand: {}
-      )
+        onExpand: {})
     }
   }
 
@@ -265,8 +261,7 @@ public struct SessionDetailView: View {
 
     exportSession.timeRange = CMTimeRange(
       start: CMTime(seconds: startTime, preferredTimescale: 600),
-      duration: CMTime(seconds: endTime - startTime, preferredTimescale: 600)
-    )
+      duration: CMTime(seconds: endTime - startTime, preferredTimescale: 600))
 
     let tempDir = FileManager.default.temporaryDirectory
     let clipURL = tempDir.appendingPathComponent("snore_event_\(event.id.uuidString).m4a")
@@ -311,7 +306,8 @@ public struct SessionDetailView: View {
           && (session.endDate?.timeIntervalSinceNow ?? 0) < -3600
         if appConfig.isEnabled(.enhancedSleepTracking),
            userPreferences.enhancedSleepTracking,
-           (session.sleepStageSegments == nil || stagesEmptyAndOld) {
+           session.sleepStageSegments == nil || stagesEmptyAndOld
+        {
           let stages = await HealthKitSync.shared.fetchSleepStages(for: session)
           session.sleepStageSegments = stages.isEmpty ? [] : stages
         }
@@ -398,7 +394,7 @@ public struct SessionDetailView: View {
   }
 
   private var shouldShowFilter: Bool {
-    guard case .loaded(_, let sortedEvents, _) = viewState else { return false }
+    guard case let .loaded(_, sortedEvents, _) = viewState else { return false }
     let relevantCategories = sortedEvents.compactMap { event -> EventCategoryFilter? in
       switch event.category {
       case .snoring: return .snoring
@@ -413,7 +409,7 @@ public struct SessionDetailView: View {
   /// Uses the episode's full snoring span so melody gaps where snoring
   /// resumed are included, matching the stat calculation.
   private var displayDurations: [UUID: TimeInterval] {
-    guard case .loaded(let session, _, _) = viewState else { return [:] }
+    guard case let .loaded(session, _, _) = viewState else { return [:] }
     var map: [UUID: TimeInterval] = [:]
     for episode in session.displayableSnoringEpisodes {
       if let rep = episode.representativeEvent {
@@ -425,7 +421,7 @@ public struct SessionDetailView: View {
 
   /// Short snoring episodes (under 3 sec) shown in the dedicated player.
   private var shortEvents: [SnoreEvent] {
-    guard case .loaded(let session, _, _) = viewState else { return [] }
+    guard case let .loaded(session, _, _) = viewState else { return [] }
     let shortEpisodes = session.snoringEpisodes.filter { $0.snoreDuration < 3 }
     return shortEpisodes.compactMap(\.representativeEvent)
       .sorted(by: { $0.timestamp < $1.timestamp })
@@ -433,7 +429,7 @@ public struct SessionDetailView: View {
 
   /// Events for display: displayable snoring episodes + non-snoring events.
   private var filteredEvents: [SnoreEvent] {
-    guard case .loaded(let session, let sortedEvents, _) = viewState else { return [] }
+    guard case let .loaded(session, sortedEvents, _) = viewState else { return [] }
 
     switch selectedFilter {
     case .snoring:
@@ -449,10 +445,10 @@ public struct SessionDetailView: View {
 
   private var eventsTitle: String {
     switch selectedFilter {
-    case .all: return Strings.sessionRecordingEventsFormatAll
-    case .snoring: return Strings.sessionRecordingEventsFormatSnoring
-    case .sleepTalking: return Strings.sessionRecordingEventsFormatSleepTalking
-    case .noise: return Strings.sessionRecordingEventsFormatNoise
+    case .all: Strings.sessionRecordingEventsFormatAll
+    case .snoring: Strings.sessionRecordingEventsFormatSnoring
+    case .sleepTalking: Strings.sessionRecordingEventsFormatSleepTalking
+    case .noise: Strings.sessionRecordingEventsFormatNoise
     }
   }
 
@@ -465,19 +461,19 @@ public struct SessionDetailView: View {
 
     var displayName: String {
       switch self {
-      case .all: return Strings.filterAll
-      case .snoring: return Strings.filterSnoring
-      case .sleepTalking: return Strings.filterSleepTalking
-      case .noise: return Strings.filterNoise
+      case .all: Strings.filterAll
+      case .snoring: Strings.filterSnoring
+      case .sleepTalking: Strings.filterSleepTalking
+      case .noise: Strings.filterNoise
       }
     }
 
     func includes(event: SnoreEvent) -> Bool {
       switch self {
-      case .all: return true
-      case .snoring: return event.category == .snoring
-      case .sleepTalking: return event.category == .sleepTalking
-      case .noise: return event.category == .noise || event.category == .coughing || event.category == .other
+      case .all: true
+      case .snoring: event.category == .snoring
+      case .sleepTalking: event.category == .sleepTalking
+      case .noise: event.category == .noise || event.category == .coughing || event.category == .other
       }
     }
   }
@@ -495,12 +491,12 @@ public struct SessionDetailView: View {
 
     var id: String {
       switch self {
-      case .player(let event):
-        return event.map { "player-\($0.id.uuidString)" } ?? "player"
+      case let .player(event):
+        event.map { "player-\($0.id.uuidString)" } ?? "player"
       case .events:
-        return "events"
+        "events"
       case .shortEventsPlayer:
-        return "short-events-player"
+        "short-events-player"
       }
     }
   }

@@ -21,12 +21,10 @@ let package = Package(
       path: "Sources",
       exclude: [],
       resources: [
-        .process("Resources")
+        .process("Resources"),
       ],
       swiftSettings: [
         .swiftLanguageMode(.v6),
         .defaultIsolation(MainActor.self),
-      ]
-    ),
-  ]
-)
+      ]),
+  ])

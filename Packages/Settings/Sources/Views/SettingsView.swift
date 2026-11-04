@@ -1,9 +1,9 @@
-import SwiftUI
-import SwiftData
-import Env
 import DesignSystem
+import Env
 import Models
 import Personalization
+import SwiftData
+import SwiftUI
 
 @MainActor
 public struct SettingsView: View {
@@ -54,24 +54,24 @@ public struct SettingsView: View {
     }
     .background(theme.bgPrimary)
     #if !os(visionOS)
-    .scrollContentBackground(.hidden)
+      .scrollContentBackground(.hidden)
     #endif
     #if DEBUG
-    .sheet(isPresented: $showDebugConfig) {
-      NavigationStack { DebugConfigView() }
-        .environment(AppConfig.shared)
-        .environment(Theme.shared)
-    }
-    #endif
-    .toolbar(.hidden, for: .navigationBar)
-    .alert(Strings.settingsDeleteAll, isPresented: $showDeleteConfirmation) {
-      Button(Strings.actionCancel, role: .cancel) {}
-      Button(Strings.actionDeleteAll, role: .destructive) {
-        deleteAllData()
+      .sheet(isPresented: $showDebugConfig) {
+        NavigationStack { DebugConfigView() }
+          .environment(AppConfig.shared)
+          .environment(Theme.shared)
       }
-    } message: {
-      Text(Strings.settingsDeleteAllConfirmMessage)
-    }
+    #endif
+      .toolbar(.hidden, for: .navigationBar)
+      .alert(Strings.settingsDeleteAll, isPresented: $showDeleteConfirmation) {
+        Button(Strings.actionCancel, role: .cancel) {}
+        Button(Strings.actionDeleteAll, role: .destructive) {
+          deleteAllData()
+        }
+      } message: {
+        Text(Strings.settingsDeleteAllConfirmMessage)
+      }
   }
 
   // MARK: - Title
@@ -79,7 +79,7 @@ public struct SettingsView: View {
   private var titleRow: some View {
     HStack {
       Text(Strings.tabSettings)
-         .font(.system(size: 34, weight: .bold))
+        .font(.system(size: 34, weight: .bold))
         .foregroundStyle(theme.textPrimary)
       Spacer()
       ZStack {

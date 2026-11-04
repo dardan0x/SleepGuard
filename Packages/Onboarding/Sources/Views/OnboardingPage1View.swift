@@ -1,5 +1,5 @@
-import SwiftUI
 import DesignSystem
+import SwiftUI
 
 struct OnboardingPage1View: View {
   let onContinue: () -> Void
@@ -22,8 +22,7 @@ struct OnboardingPage1View: View {
                 Color(red: 0.25, green: 0.35, blue: 0.85),
               ],
               startPoint: .topLeading,
-              endPoint: .bottomTrailing
-            )
+              endPoint: .bottomTrailing)
           )
           .frame(width: 140, height: 140)
           .shadow(color: Color(red: 0.25, green: 0.35, blue: 0.85).opacity(0.4), radius: 30)

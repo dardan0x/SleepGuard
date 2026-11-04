@@ -1,7 +1,7 @@
-import SwiftUI
+import DesignSystem
 import Env
 import Models
-import DesignSystem
+import SwiftUI
 
 @MainActor
 public struct ProfileEditorView: View {

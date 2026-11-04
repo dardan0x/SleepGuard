@@ -113,12 +113,12 @@ public final class AppConfig {
     flags: [String: Bool],
     tabs: [TabConfig],
     learnTab: LearnTabConfig?,
-    updateGate: UpdateGate
-  ) {
-    self.remoteFlags = flags
+    updateGate: UpdateGate)
+  {
+    remoteFlags = flags
     self.tabs = tabs.isEmpty ? TabConfig.defaults : tabs
-    self.remoteLearnTab = learnTab
-    self.remoteUpdateGate = updateGate
+    remoteLearnTab = learnTab
+    remoteUpdateGate = updateGate
     persistCache()
   }
 
@@ -212,15 +212,18 @@ public final class AppConfig {
     }
     if let data = defaults.data(forKey: Key.tabs),
        let decoded = try? JSONDecoder().decode([TabConfig].self, from: data),
-       !decoded.isEmpty {
+       !decoded.isEmpty
+    {
       tabs = decoded
     }
     if let data = defaults.data(forKey: Key.learnTab),
-       let decoded = try? JSONDecoder().decode(LearnTabConfig.self, from: data) {
+       let decoded = try? JSONDecoder().decode(LearnTabConfig.self, from: data)
+    {
       remoteLearnTab = decoded
     }
     if let data = defaults.data(forKey: Key.updateGate),
-       let decoded = try? JSONDecoder().decode(UpdateGate.self, from: data) {
+       let decoded = try? JSONDecoder().decode(UpdateGate.self, from: data)
+    {
       remoteUpdateGate = decoded
     }
     #if DEBUG
@@ -228,15 +231,18 @@ public final class AppConfig {
       debugFlags = cached
     }
     if let data = defaults.data(forKey: Key.debugTabs),
-       let decoded = try? JSONDecoder().decode([TabConfig].self, from: data) {
+       let decoded = try? JSONDecoder().decode([TabConfig].self, from: data)
+    {
       debugTabs = decoded
     }
     if let data = defaults.data(forKey: Key.debugLearnTab),
-       let decoded = try? JSONDecoder().decode(LearnTabConfig.self, from: data) {
+       let decoded = try? JSONDecoder().decode(LearnTabConfig.self, from: data)
+    {
       debugLearnTab = decoded
     }
     if let data = defaults.data(forKey: Key.debugSleepScoreConfig),
-       let decoded = try? JSONDecoder().decode(SleepScoreConfig.self, from: data) {
+       let decoded = try? JSONDecoder().decode(SleepScoreConfig.self, from: data)
+    {
       debugSleepScoreConfig = decoded
     }
     #endif

@@ -1,5 +1,5 @@
-import SwiftUI
 import Models
+import SwiftUI
 
 public struct LowBatteryBannerView: View {
   public let session: SleepSession

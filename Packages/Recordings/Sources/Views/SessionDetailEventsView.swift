@@ -1,6 +1,6 @@
-import SwiftUI
-import Models
 import DesignSystem
+import Models
+import SwiftUI
 
 struct SessionDetailEventsView: View {
   let events: [SnoreEvent]
@@ -25,8 +25,7 @@ struct SessionDetailEventsView: View {
             displayDuration: displayDurations?[event.id],
             theme: theme,
             onPlay: { onPlayEvent(event) },
-            onShare: { onShareEvent(event) }
-          )
+            onShare: { onShareEvent(event) })
         }
       }
 

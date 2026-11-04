@@ -1,5 +1,5 @@
-import SwiftUI
 import DesignSystem
+import SwiftUI
 
 @MainActor
 public struct BriefingRecapCard: View {
@@ -26,8 +26,7 @@ public struct BriefingRecapCard: View {
               icon: iconForLabel(stat.label),
               title: stat.label,
               value: stat.value,
-              theme: theme
-            )
+              theme: theme)
           }
         }
       }
@@ -39,10 +38,10 @@ public struct BriefingRecapCard: View {
 
   private func iconForLabel(_ label: String) -> String {
     switch label {
-    case Strings.briefingStatSleep: return "bed.double.fill"
-    case Strings.briefingStatSnoring: return "waveform"
-    case Strings.briefingStatScore: return "star.fill"
-    default: return "chart.bar.fill"
+    case Strings.briefingStatSleep: "bed.double.fill"
+    case Strings.briefingStatSnoring: "waveform"
+    case Strings.briefingStatScore: "star.fill"
+    default: "chart.bar.fill"
     }
   }
 }

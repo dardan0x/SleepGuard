@@ -29,8 +29,8 @@ public struct RecordingGap: Codable, Sendable {
 
   public init(from decoder: Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
-    self.startOffset = try container.decode(TimeInterval.self, forKey: .startOffset)
-    self.duration = try container.decode(TimeInterval.self, forKey: .duration)
-    self.snoringResumed = (try? container.decode(Bool.self, forKey: .snoringResumed)) ?? true
+    startOffset = try container.decode(TimeInterval.self, forKey: .startOffset)
+    duration = try container.decode(TimeInterval.self, forKey: .duration)
+    snoringResumed = (try? container.decode(Bool.self, forKey: .snoringResumed)) ?? true
   }
 }

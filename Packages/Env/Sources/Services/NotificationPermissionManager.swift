@@ -25,7 +25,7 @@ public final class NotificationPermissionManager {
   /// so APNs/FCM tokens are delivered to the AppDelegate.
   @discardableResult
   public func requestAuthorization() async -> Bool {
-    let granted = (try? await UNUserNotificationCenter.current()
+    let granted = await (try? UNUserNotificationCenter.current()
       .requestAuthorization(options: [.alert, .badge, .sound])) ?? false
     await refreshStatus()
     #if canImport(UIKit)

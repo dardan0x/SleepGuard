@@ -1,8 +1,8 @@
-import SwiftUI
-import SwiftData
-import Models
-import Env
 import DesignSystem
+import Env
+import Models
+import SwiftData
+import SwiftUI
 
 @MainActor
 public struct Last7NightsView: View {
@@ -26,8 +26,7 @@ public struct Last7NightsView: View {
           bestScore: bestScore,
           bestDay: bestDay,
           worstScore: worstScore,
-          worstDay: worstDay
-        )
+          worstDay: worstDay)
 
         allNightsSection
       }
@@ -162,5 +161,3 @@ public struct Last7NightsView: View {
     WeekOverWeekTrendCalculator.trend(for: sessions)
   }
 }
-
-

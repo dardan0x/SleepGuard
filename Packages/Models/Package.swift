@@ -12,7 +12,5 @@ let package = Package(
       name: "Models",
       swiftSettings: [
         .swiftLanguageMode(.v6),
-      ]
-    ),
-  ]
-)
+      ]),
+  ])

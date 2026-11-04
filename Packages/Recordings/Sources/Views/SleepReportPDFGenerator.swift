@@ -1,7 +1,7 @@
-import UIKit
 import AudioEngine
-import Models
 import DesignSystem
+import Models
+import UIKit
 
 @MainActor
 public struct SleepReportPDFGenerator {
@@ -39,8 +39,7 @@ public struct SleepReportPDFGenerator {
     let format = UIGraphicsPDFRendererFormat()
     let renderer = UIGraphicsPDFRenderer(
       bounds: CGRect(x: 0, y: 0, width: pageWidth, height: pageHeight),
-      format: format
-    )
+      format: format)
 
     let tempDir = FileManager.default.temporaryDirectory
     let pdfURL = tempDir.appendingPathComponent("sleep_report_\(session.id.uuidString).pdf")
@@ -110,16 +109,14 @@ public struct SleepReportPDFGenerator {
       colors: [
         gradientTop.cgColor,
         gradientMid.cgColor,
-        gradientBottom.cgColor
+        gradientBottom.cgColor,
       ] as CFArray,
-      locations: [0, 0.5, 1]
-    )!
+      locations: [0, 0.5, 1])!
     context.drawLinearGradient(
       gradient,
       start: CGPoint(x: 0, y: 0),
       end: CGPoint(x: pageWidth, y: headerHeight),
-      options: []
-    )
+      options: [])
 
     let titleAttrs: [NSAttributedString.Key: Any] = [
       .font: UIFont.systemFont(ofSize: 32, weight: .bold),
@@ -141,8 +138,7 @@ public struct SleepReportPDFGenerator {
       radius: 40,
       startAngle: 0,
       endAngle: .pi * 2,
-      clockwise: true
-    )
+      clockwise: true)
     UIColor.white.withAlphaComponent(0.15).setFill()
     circlePath.fill()
 
@@ -151,8 +147,7 @@ public struct SleepReportPDFGenerator {
       radius: 24,
       startAngle: 0,
       endAngle: .pi * 2,
-      clockwise: true
-    )
+      clockwise: true)
     UIColor.white.withAlphaComponent(0.25).setFill()
     innerPath.fill()
 
@@ -177,8 +172,7 @@ public struct SleepReportPDFGenerator {
       radius: circleRadius,
       startAngle: 0,
       endAngle: .pi * 2,
-      clockwise: true
-    )
+      clockwise: true)
     scoreColor(score).withAlphaComponent(0.15).setFill()
     circlePath.fill()
 
@@ -190,8 +184,7 @@ public struct SleepReportPDFGenerator {
     let scoreSize = scoreText.size(withAttributes: scoreAttrs)
     scoreText.draw(
       at: CGPoint(x: circleCenter.x - scoreSize.width / 2, y: circleCenter.y - scoreSize.height / 2 + 2),
-      withAttributes: scoreAttrs
-    )
+      withAttributes: scoreAttrs)
 
     let labelAttrs: [NSAttributedString.Key: Any] = [
       .font: UIFont.systemFont(ofSize: 12, weight: .semibold),
@@ -240,8 +233,7 @@ public struct SleepReportPDFGenerator {
       stats.append((
         Strings.filterSleepTalking,
         String(format: "%.0f%%", session.sleepTalkingPercentage),
-        "💬"
-      ))
+        "💬"))
     }
 
     let cardWidth = (pageWidth - margin * 2 - 16) / 2
@@ -366,8 +358,8 @@ public struct SleepReportPDFGenerator {
     events: [SnoreEvent],
     at y: CGFloat,
     context: UIGraphicsPDFRendererContext,
-    pageHeight: CGFloat
-  ) -> CGFloat {
+    pageHeight: CGFloat) -> CGFloat
+  {
     var currentY = y
 
     let headerAttrs: [NSAttributedString.Key: Any] = [
@@ -430,8 +422,7 @@ public struct SleepReportPDFGenerator {
       radius: 5,
       startAngle: 0,
       endAngle: .pi * 2,
-      clockwise: true
-    )
+      clockwise: true)
     color.setFill()
     dotPath.fill()
 
@@ -462,15 +453,13 @@ public struct SleepReportPDFGenerator {
       x: margin + 320,
       y: y + 6,
       width: intensitySize.width + 20,
-      height: 24
-    )
+      height: 24)
     let pillPath = UIBezierPath(roundedRect: pillRect, cornerRadius: 12)
     color.withAlphaComponent(0.12).setFill()
     pillPath.fill()
     intensityText.draw(
       at: CGPoint(x: pillRect.midX - intensitySize.width / 2, y: pillRect.midY - intensitySize.height / 2 + 1),
-      withAttributes: intensityAttrs
-    )
+      withAttributes: intensityAttrs)
 
     return rowHeight + 4
   }
@@ -486,42 +475,41 @@ public struct SleepReportPDFGenerator {
     let size = text.size(withAttributes: attrs)
     text.draw(
       at: CGPoint(x: (pageWidth - size.width) / 2, y: y),
-      withAttributes: attrs
-    )
+      withAttributes: attrs)
   }
 
   // MARK: - Helpers
 
   private func scoreColor(_ score: Int) -> UIColor {
     switch score {
-    case 80...100: return UIColor(red: 0.188, green: 0.82, blue: 0.345, alpha: 1)
-    case 50..<80: return UIColor(red: 1, green: 0.624, blue: 0.039, alpha: 1)
-    default: return UIColor(red: 1, green: 0.271, blue: 0.227, alpha: 1)
+    case 80...100: UIColor(red: 0.188, green: 0.82, blue: 0.345, alpha: 1)
+    case 50..<80: UIColor(red: 1, green: 0.624, blue: 0.039, alpha: 1)
+    default: UIColor(red: 1, green: 0.271, blue: 0.227, alpha: 1)
     }
   }
 
   private func scoreRating(_ score: Int) -> String {
     switch score {
-    case 80...100: return "Excellent"
-    case 50..<80: return "Fair"
-    default: return "Poor"
+    case 80...100: "Excellent"
+    case 50..<80: "Fair"
+    default: "Poor"
     }
   }
 
   private func intensityColor(_ intensity: SnoreIntensity) -> UIColor {
     switch intensity {
-    case .quiet: return quietColor
-    case .light: return lightColor
-    case .loud: return loudColor
-    case .epic: return epicColor
+    case .quiet: quietColor
+    case .light: lightColor
+    case .loud: loudColor
+    case .epic: epicColor
     }
   }
 
   private func categoryLabel(_ category: SoundCategory) -> String {
     switch category {
-    case .snoring: return "Snoring"
-    case .sleepTalking: return "Sleep Talking"
-    case .noise, .coughing, .other: return "Noise"
+    case .snoring: "Snoring"
+    case .sleepTalking: "Sleep Talking"
+    case .noise, .coughing, .other: "Noise"
     }
   }
 

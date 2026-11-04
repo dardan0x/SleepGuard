@@ -86,7 +86,7 @@ struct MelodyPickerSheet: View {
             .foregroundStyle(theme.accent)
         }
 
-          Text(Strings.recordYoursMelodyPickerSheet)
+        Text(Strings.recordYoursMelodyPickerSheet)
           .font(.system(size: 17, weight: .semibold))
           .foregroundStyle(theme.accent)
 
@@ -201,11 +201,10 @@ struct MelodyPickerSheet: View {
 
     stopPreview()
 
-    let url: URL?
-    if melody.isCustom {
-      url = CustomMelodyStorage.shared.fileURL(for: melody)
+    let url: URL? = if melody.isCustom {
+      CustomMelodyStorage.shared.fileURL(for: melody)
     } else {
-      url = Bundle.main.url(forResource: melody.filename, withExtension: "mp3", subdirectory: "sounds")
+      Bundle.main.url(forResource: melody.filename, withExtension: "mp3", subdirectory: "sounds")
         ?? Bundle.main.url(forResource: melody.filename, withExtension: "mp3")
     }
 
@@ -260,7 +259,7 @@ struct MelodyPickerSheet: View {
         stopPreview()
         dismiss()
       } label: {
-          Text(Strings.saveMelodyPickerSheet)
+        Text(Strings.saveMelodyPickerSheet)
           .font(.system(size: 15, weight: .bold))
           .tracking(1.5)
           .foregroundStyle(theme.textPrimary)

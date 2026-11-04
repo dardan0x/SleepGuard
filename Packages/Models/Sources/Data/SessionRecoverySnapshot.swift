@@ -26,20 +26,20 @@ public struct SessionRecoverySnapshot: Codable, Sendable {
     public let bursts: [SnoreBurst]?
 
     public init(from event: SnoreEvent) {
-      self.id = event.id
-      self.timestamp = event.timestamp
-      self.category = event.category
-      self.intensity = event.intensity
-      self.averageDB = event.averageDB
-      self.peakDB = event.peakDB
-      self.dominantFrequency = event.dominantFrequency
-      self.spectralCentroid = event.spectralCentroid
-      self.lowFreqRatio = event.lowFreqRatio
-      self.averageConfidence = event.averageConfidence
-      self.averageSpectralScore = event.averageSpectralScore
-      self.audioFileURL = event.audioFileURL
-      self.duration = event.duration
-      self.bursts = event.bursts
+      id = event.id
+      timestamp = event.timestamp
+      category = event.category
+      intensity = event.intensity
+      averageDB = event.averageDB
+      peakDB = event.peakDB
+      dominantFrequency = event.dominantFrequency
+      spectralCentroid = event.spectralCentroid
+      lowFreqRatio = event.lowFreqRatio
+      averageConfidence = event.averageConfidence
+      averageSpectralScore = event.averageSpectralScore
+      audioFileURL = event.audioFileURL
+      duration = event.duration
+      bursts = event.bursts
     }
 
     public func makeEvent() -> SnoreEvent {
@@ -57,8 +57,7 @@ public struct SessionRecoverySnapshot: Codable, Sendable {
         averageSpectralScore: averageSpectralScore,
         audioFileURL: audioFileURL,
         bursts: bursts,
-        duration: duration
-      )
+        duration: duration)
     }
   }
 
@@ -76,17 +75,17 @@ public struct SessionRecoverySnapshot: Codable, Sendable {
   public let events: [EventSnapshot]
 
   public init(from session: SleepSession, checkpointDate: Date) {
-    self.id = session.id
-    self.startDate = session.startDate
-    self.lastCheckpointDate = session.endDate ?? checkpointDate
-    self.averageDB = session.averageDB
-    self.peakDB = session.peakDB
-    self.audioFileURL = session.audioFileURL
-    self.rawAudioFileURL = session.rawAudioFileURL
-    self.rawLogFileURL = session.rawLogFileURL
-    self.recordingGaps = session.recordingGaps
-    self.terminationReason = session.terminationReason
-    self.events = (session.events ?? []).map(EventSnapshot.init(from:))
+    id = session.id
+    startDate = session.startDate
+    lastCheckpointDate = session.endDate ?? checkpointDate
+    averageDB = session.averageDB
+    peakDB = session.peakDB
+    audioFileURL = session.audioFileURL
+    rawAudioFileURL = session.rawAudioFileURL
+    rawLogFileURL = session.rawLogFileURL
+    recordingGaps = session.recordingGaps
+    terminationReason = session.terminationReason
+    events = (session.events ?? []).map(EventSnapshot.init(from:))
   }
 
   /// Whether this snapshot holds anything worth recovering. Empty sessions
@@ -106,8 +105,7 @@ public struct SessionRecoverySnapshot: Codable, Sendable {
       peakDB: peakDB,
       audioFileURL: audioFileURL,
       rawAudioFileURL: rawAudioFileURL,
-      rawLogFileURL: rawLogFileURL
-    )
+      rawLogFileURL: rawLogFileURL)
     session.id = id
     session.recordingGaps = recordingGaps
     session.terminationReason = terminationReason

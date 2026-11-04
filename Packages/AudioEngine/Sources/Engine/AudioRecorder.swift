@@ -61,39 +61,33 @@ public final class AudioRecorder {
       self,
       selector: #selector(handleInterruption),
       name: AVAudioSession.interruptionNotification,
-      object: nil
-    )
+      object: nil)
     NotificationCenter.default.addObserver(
       self,
       selector: #selector(handleRouteChange),
       name: .AVAudioEngineConfigurationChange,
-      object: nil
-    )
+      object: nil)
     NotificationCenter.default.addObserver(
       self,
       selector: #selector(handleMelodyWillPlay),
       name: .snoreInterrupterWillPlay,
-      object: nil
-    )
+      object: nil)
     NotificationCenter.default.addObserver(
       self,
       selector: #selector(handleMelodyDidStop),
       name: .snoreInterrupterDidStop,
-      object: nil
-    )
+      object: nil)
     NotificationCenter.default.addObserver(
       self,
       selector: #selector(handleSessionRouteChange),
       name: AVAudioSession.routeChangeNotification,
-      object: nil
-    )
+      object: nil)
     #if canImport(UIKit)
     NotificationCenter.default.addObserver(
       self,
       selector: #selector(handleAppDidBecomeActive),
       name: UIApplication.didBecomeActiveNotification,
-      object: nil
-    )
+      object: nil)
     #endif
   }
 
@@ -129,7 +123,7 @@ public final class AudioRecorder {
     }
   }
 
-  @objc private func handleRouteChange(_ notification: Notification) {
+  @objc private func handleRouteChange(_: Notification) {
     resumeRecordingIfNeeded()
   }
 
@@ -213,7 +207,7 @@ public final class AudioRecorder {
       throw RecordingError.invalidAudioFormat
     }
 
-    if let audioFileURL = audioFileURL {
+    if let audioFileURL {
       audioFile = try AVAudioFile(forWriting: audioFileURL, settings: format.settings)
     }
     isWritingToFile = audioFile != nil || currentEventFile != nil
@@ -225,13 +219,13 @@ public final class AudioRecorder {
     // so there is nothing to feed back.
     input.installTap(onBus: 0, bufferSize: 1024, format: format) { [weak self] buffer, _ in
       guard let self else { return }
-      let db = self.calculateDB(from: buffer)
-      let peakDB = self.calculatePeakDB(from: buffer)
-      let features = self.fftAnalyzer.analyze(buffer: buffer, sampleRate: format.sampleRate)
-      self.soundAnalyzer.analyze(buffer: buffer, at: self.cumulativeFramePosition)
-      self.cumulativeFramePosition += AVAudioFramePosition(buffer.frameLength)
+      let db = calculateDB(from: buffer)
+      let peakDB = calculatePeakDB(from: buffer)
+      let features = fftAnalyzer.analyze(buffer: buffer, sampleRate: format.sampleRate)
+      soundAnalyzer.analyze(buffer: buffer, at: cumulativeFramePosition)
+      cumulativeFramePosition += AVAudioFramePosition(buffer.frameLength)
       var didWrite = false
-      if let audioFile = self.audioFile {
+      if let audioFile {
         do {
           try audioFile.write(from: buffer)
           didWrite = true
@@ -239,7 +233,7 @@ public final class AudioRecorder {
           print("[AudioRecorder] Failed to write audio buffer: \(error)")
         }
       }
-      if let eventFile = self.currentEventFile {
+      if let eventFile = currentEventFile {
         do {
           try eventFile.write(from: buffer)
           didWrite = true
@@ -248,14 +242,14 @@ public final class AudioRecorder {
         }
       }
       if didWrite {
-        self.consecutiveWriteFailures = 0
-      } else if self.audioFile != nil || self.currentEventFile != nil {
-        self.consecutiveWriteFailures += 1
-        if self.consecutiveWriteFailures >= 3 {
+        consecutiveWriteFailures = 0
+      } else if audioFile != nil || currentEventFile != nil {
+        consecutiveWriteFailures += 1
+        if consecutiveWriteFailures >= 3 {
           print("[AudioRecorder] Too many write failures — stopping file writes")
-          self.isWritingToFile = false
-          self.audioFile = nil
-          self.currentEventFile = nil
+          isWritingToFile = false
+          audioFile = nil
+          currentEventFile = nil
         }
       }
       Task { @MainActor in
@@ -302,13 +296,13 @@ public final class AudioRecorder {
     // Tap the microphone directly — no output path, no feedback (see startRecording).
     input.installTap(onBus: 0, bufferSize: 1024, format: format) { [weak self] buffer, _ in
       guard let self else { return }
-      let db = self.calculateDB(from: buffer)
-      let peakDB = self.calculatePeakDB(from: buffer)
-      let features = self.fftAnalyzer.analyze(buffer: buffer, sampleRate: format.sampleRate)
-      self.soundAnalyzer.analyze(buffer: buffer, at: self.cumulativeFramePosition)
-      self.cumulativeFramePosition += AVAudioFramePosition(buffer.frameLength)
+      let db = calculateDB(from: buffer)
+      let peakDB = calculatePeakDB(from: buffer)
+      let features = fftAnalyzer.analyze(buffer: buffer, sampleRate: format.sampleRate)
+      soundAnalyzer.analyze(buffer: buffer, at: cumulativeFramePosition)
+      cumulativeFramePosition += AVAudioFramePosition(buffer.frameLength)
       var didWrite = false
-      if let audioFile = self.audioFile {
+      if let audioFile {
         do {
           try audioFile.write(from: buffer)
           didWrite = true
@@ -316,7 +310,7 @@ public final class AudioRecorder {
           print("[AudioRecorder] Failed to write audio buffer: \(error)")
         }
       }
-      if let eventFile = self.currentEventFile {
+      if let eventFile = currentEventFile {
         do {
           try eventFile.write(from: buffer)
           didWrite = true
@@ -325,14 +319,14 @@ public final class AudioRecorder {
         }
       }
       if didWrite {
-        self.consecutiveWriteFailures = 0
-      } else if self.audioFile != nil || self.currentEventFile != nil {
-        self.consecutiveWriteFailures += 1
-        if self.consecutiveWriteFailures >= 3 {
+        consecutiveWriteFailures = 0
+      } else if audioFile != nil || currentEventFile != nil {
+        consecutiveWriteFailures += 1
+        if consecutiveWriteFailures >= 3 {
           print("[AudioRecorder] Too many write failures — stopping file writes")
-          self.isWritingToFile = false
-          self.audioFile = nil
-          self.currentEventFile = nil
+          isWritingToFile = false
+          audioFile = nil
+          currentEventFile = nil
         }
       }
       Task { @MainActor in

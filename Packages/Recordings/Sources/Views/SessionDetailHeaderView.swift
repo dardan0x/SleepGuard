@@ -1,6 +1,6 @@
-import SwiftUI
-import Models
 import DesignSystem
+import Models
+import SwiftUI
 
 struct SessionDetailHeaderView: View {
   let session: SleepSession
@@ -26,8 +26,7 @@ struct SessionDetailHeaderView: View {
           title: Strings.sessionDisturbances,
           value: "\(disturbanceCount)",
           theme: theme,
-          iconColor: theme.noiseColor
-        )
+          iconColor: theme.noiseColor)
       }
     }
   }

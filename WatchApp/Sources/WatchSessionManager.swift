@@ -1,6 +1,6 @@
 import Foundation
-import WatchConnectivity
 import SwiftUI
+import WatchConnectivity
 
 @MainActor
 final class WatchSessionManager: NSObject, ObservableObject {
@@ -15,7 +15,7 @@ final class WatchSessionManager: NSObject, ObservableObject {
   private var timer: Timer?
   private var audioRecorder = WatchAudioRecorder()
 
-  private override init() {
+  override private init() {
     super.init()
   }
 
@@ -94,5 +94,5 @@ final class WatchSessionManager: NSObject, ObservableObject {
 }
 
 extension WatchSessionManager: WCSessionDelegate {
-  nonisolated func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {}
+  nonisolated func session(_: WCSession, activationDidCompleteWith _: WCSessionActivationState, error _: Error?) {}
 }

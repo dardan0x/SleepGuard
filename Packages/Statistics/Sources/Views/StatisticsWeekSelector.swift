@@ -1,5 +1,5 @@
-import SwiftUI
 import DesignSystem
+import SwiftUI
 
 struct StatisticsWeekDay: Identifiable {
   let id = UUID()

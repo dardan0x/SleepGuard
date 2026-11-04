@@ -1,13 +1,13 @@
-import SwiftUI
-import Env
-import Models
 import AudioEngine
 import DesignSystem
+import Env
+import Models
 import Onboarding
-import SleepSession
-import Statistics
 import Recordings
 import Settings
+import SleepSession
+import Statistics
+import SwiftUI
 
 extension View {
   func withAppDependencyGraph(
@@ -20,10 +20,9 @@ extension View {
     soundAnalysisDetector: SoundAnalysisDetector,
     snoreInterrupterPlayer: SnoreInterrupterPlayer,
     appConfig: AppConfig,
-    notificationPermissionManager: NotificationPermissionManager
-  ) -> some View {
-    self
-      .environment(userPreferences)
+    notificationPermissionManager: NotificationPermissionManager) -> some View
+  {
+    environment(userPreferences)
       .environment(sessionManager)
       .environment(theme)
       .environment(audioRecorder)
@@ -36,8 +35,7 @@ extension View {
   }
 
   func withEnvironments() -> some View {
-    self
-      .environment(UserPreferences.shared)
+    environment(UserPreferences.shared)
       .environment(SessionManager.shared)
       .environment(Theme.shared)
       .environment(AudioRecorder.shared)
@@ -51,22 +49,21 @@ extension View {
   }
 
   func withAppRouter() -> some View {
-    self
-      .navigationDestination(for: RouterDestination.self) { destination in
-        switch destination {
-        case .recordingDetail(let id):
-          SessionDetailView(sessionID: id)
-        case .sessionDetail(let id):
-          SessionDetailView(sessionID: id)
-        case .liveSession:
-          SleepSessionView()
-        case .trends:
-          TrendsView()
-        case .last7Nights:
-          Last7NightsView()
-        case .calendar:
-          CalendarView()
-        }
+    navigationDestination(for: RouterDestination.self) { destination in
+      switch destination {
+      case let .recordingDetail(id):
+        SessionDetailView(sessionID: id)
+      case let .sessionDetail(id):
+        SessionDetailView(sessionID: id)
+      case .liveSession:
+        SleepSessionView()
+      case .trends:
+        TrendsView()
+      case .last7Nights:
+        Last7NightsView()
+      case .calendar:
+        CalendarView()
       }
+    }
   }
 }

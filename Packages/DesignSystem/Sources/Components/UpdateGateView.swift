@@ -1,5 +1,5 @@
-import SwiftUI
 import Models
+import SwiftUI
 
 /// Presents a soft (dismissible) or hard (blocking) update prompt based on the
 /// `UpdateGate` thresholds from Remote Config, compared against the running
@@ -16,8 +16,8 @@ public struct UpdateGateView: View {
   public init(
     updateGate: UpdateGate,
     currentVersion: String = Bundle.main.shortVersionString,
-    openAppStore: @escaping () -> Void
-  ) {
+    openAppStore: @escaping () -> Void)
+  {
     self.updateGate = updateGate
     self.currentVersion = currentVersion
     self.openAppStore = openAppStore
@@ -40,16 +40,14 @@ public struct UpdateGateView: View {
         title: Strings.updateHardTitle,
         message: Strings.updateHardBody,
         primary: Strings.updateActionUpdate,
-        dismissible: false
-      )
+        dismissible: false)
     case .soft:
       if !softDismissed, lastSoftPromptVersion != updateGate.recommendedVersion {
         gate(
           title: Strings.updateSoftTitle,
           message: Strings.updateSoftBody,
           primary: Strings.updateActionUpdate,
-          dismissible: true
-        )
+          dismissible: true)
       }
     }
   }

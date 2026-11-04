@@ -1,6 +1,6 @@
-import SwiftUI
-import Models
 import DesignSystem
+import Models
+import SwiftUI
 
 @MainActor
 struct HiddenEventsSection: View {
@@ -10,7 +10,7 @@ struct HiddenEventsSection: View {
   let onShareEvent: (SnoreEvent) -> Void
   @Environment(Theme.self) private var theme
 
-  @State private var isExpanded: Bool = false
+  @State private var isExpanded = false
 
   var body: some View {
     VStack(spacing: 8) {
@@ -44,8 +44,7 @@ struct HiddenEventsSection: View {
               displayDuration: displayDurations?[event.id],
               theme: theme,
               onPlay: { onPlayEvent(event) },
-              onShare: { onShareEvent(event) }
-            )
+              onShare: { onShareEvent(event) })
           }
         }
       }

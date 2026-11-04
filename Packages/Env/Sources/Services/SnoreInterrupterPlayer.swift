@@ -1,6 +1,6 @@
 import AVFoundation
-import Observation
 import Models
+import Observation
 
 /// Plays the selected Snore Interrupter when snoring is detected.
 /// Respects the user's duration preference and exposes `isPlaying` for UI observation.
@@ -18,7 +18,7 @@ public final class SnoreInterrupterPlayer: NSObject {
   private var stopTimer: Timer?
   private var nudgeTimer: Timer?
 
-  private override init() {
+  override private init() {
     super.init()
   }
 
@@ -55,11 +55,10 @@ public final class SnoreInterrupterPlayer: NSObject {
       return
     }
 
-    let url: URL?
-    if melody.isCustom {
-      url = CustomMelodyStorage.shared.fileURL(for: melody)
+    let url: URL? = if melody.isCustom {
+      CustomMelodyStorage.shared.fileURL(for: melody)
     } else {
-      url = Bundle.main.url(forResource: melody.filename, withExtension: "mp3", subdirectory: "sounds")
+      Bundle.main.url(forResource: melody.filename, withExtension: "mp3", subdirectory: "sounds")
         ?? Bundle.main.url(forResource: melody.filename, withExtension: "mp3")
     }
 
@@ -163,7 +162,7 @@ public final class SnoreInterrupterPlayer: NSObject {
 }
 
 extension SnoreInterrupterPlayer: AVAudioPlayerDelegate {
-  nonisolated public func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+  public nonisolated func audioPlayerDidFinishPlaying(_: AVAudioPlayer, successfully _: Bool) {
     Task { @MainActor in
       self.stop()
     }
@@ -173,11 +172,11 @@ extension SnoreInterrupterPlayer: AVAudioPlayerDelegate {
 private extension UserPreferences.SnoreInterrupterMode {
   var duration: TimeInterval {
     switch self {
-    case .never, .always: return 0
-    case .fiveSeconds: return 5
-    case .fifteenSeconds: return 15
-    case .thirtySeconds: return 30
-    case .sixtySeconds: return 60
+    case .never, .always: 0
+    case .fiveSeconds: 5
+    case .fifteenSeconds: 15
+    case .thirtySeconds: 30
+    case .sixtySeconds: 60
     }
   }
 }

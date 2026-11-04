@@ -1,6 +1,6 @@
-import SwiftUI
-import Env
 import DesignSystem
+import Env
+import SwiftUI
 
 struct OnboardingPageHealthWatchView: View {
   let onContinue: () -> Void

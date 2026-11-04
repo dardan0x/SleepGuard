@@ -9,10 +9,10 @@ public enum SnoreIntensity: String, Codable, Sendable {
 
   public var rank: Int {
     switch self {
-    case .quiet: return 0
-    case .light: return 1
-    case .loud: return 2
-    case .epic: return 3
+    case .quiet: 0
+    case .light: 1
+    case .loud: 2
+    case .epic: 3
     }
   }
 }
@@ -29,7 +29,7 @@ public enum SoundCategory: String, Codable, Sendable {
 public final class SnoreEvent {
   @Attribute(.unique) public var id: UUID
   public var timestamp: Date
-  public var category: SoundCategory = SoundCategory.snoring
+  public var category = SoundCategory.snoring
   public var intensity: SnoreIntensity
   /// Relative loudness in dBFS (digital full scale), not calibrated dB-SPL.
   /// Values are relative and vary by microphone sensitivity and device distance.
@@ -68,8 +68,8 @@ public final class SnoreEvent {
     averageSpectralScore: Double = 0,
     audioFileURL: String? = nil,
     bursts: [SnoreBurst]? = nil,
-    duration: TimeInterval = 0
-  ) {
+    duration: TimeInterval = 0)
+  {
     self.id = id
     self.timestamp = timestamp
     self.category = category

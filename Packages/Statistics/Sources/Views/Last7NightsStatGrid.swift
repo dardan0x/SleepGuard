@@ -1,5 +1,5 @@
-import SwiftUI
 import DesignSystem
+import SwiftUI
 
 struct Last7NightsStatGrid: View {
   let avgSnoringMinutes: Int
@@ -18,31 +18,27 @@ struct Last7NightsStatGrid: View {
         icon: "percent",
         iconColor: theme.scoreAmber,
         label: Strings.statsLast7nightsAvgSnoring,
-        value: DurationFormatter.hoursAndMinutes(avgSnoringMinutes)
-      )
+        value: DurationFormatter.hoursAndMinutes(avgSnoringMinutes))
 
       statCard(
         icon: "bolt.fill",
         iconColor: theme.scoreAmber,
         label: Strings.statsLast7nightsTotalEvents,
-        value: "\(totalEvents)"
-      )
+        value: "\(totalEvents)")
 
       statCard(
         icon: "leaf.fill",
         iconColor: theme.scoreGreen,
         label: Strings.statsLast7nightsBest,
         value: "\(bestScore) \(bestDay)",
-        valueColor: theme.scoreGreen
-      )
+        valueColor: theme.scoreGreen)
 
       statCard(
         icon: "flame.fill",
         iconColor: theme.scoreRed,
         label: Strings.statsLast7nightsWorst,
         value: "\(worstScore) \(worstDay)",
-        valueColor: theme.scoreRed
-      )
+        valueColor: theme.scoreRed)
     }
   }
 
@@ -51,8 +47,8 @@ struct Last7NightsStatGrid: View {
     iconColor: Color,
     label: String,
     value: String,
-    valueColor: Color? = nil
-  ) -> some View {
+    valueColor: Color? = nil) -> some View
+  {
     VStack(alignment: .leading, spacing: 4) {
       HStack(spacing: 4) {
         Image(systemName: icon)
@@ -74,5 +70,4 @@ struct Last7NightsStatGrid: View {
     .background(theme.bgCard)
     .cornerRadius(theme.radiusSmall)
   }
-
 }

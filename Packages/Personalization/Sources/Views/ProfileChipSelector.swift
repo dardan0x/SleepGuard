@@ -1,5 +1,5 @@
-import SwiftUI
 import DesignSystem
+import SwiftUI
 
 @MainActor
 struct ProfileChipSelector: View {
@@ -38,12 +38,12 @@ struct ProfileChipSelector: View {
 struct FlowLayout: Layout {
   var spacing: CGFloat = 8
 
-  func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+  func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache _: inout ()) -> CGSize {
     let result = FlowResult(in: proposal.width ?? 0, subviews: subviews, spacing: spacing)
     return result.size
   }
 
-  func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+  func placeSubviews(in bounds: CGRect, proposal _: ProposedViewSize, subviews: Subviews, cache _: inout ()) {
     let result = FlowResult(in: bounds.width, subviews: subviews, spacing: spacing)
     for (index, subview) in subviews.enumerated() {
       subview.place(at: CGPoint(x: bounds.minX + result.positions[index].x,
@@ -63,7 +63,7 @@ struct FlowLayout: Layout {
 
       for subview in subviews {
         let size = subview.sizeThatFits(.unspecified)
-        if x + size.width > maxWidth && x > 0 {
+        if x + size.width > maxWidth, x > 0 {
           x = 0
           y += rowHeight + spacing
           rowHeight = 0
@@ -73,7 +73,7 @@ struct FlowLayout: Layout {
         x += size.width + spacing
       }
 
-      self.size = CGSize(width: maxWidth, height: y + rowHeight)
+      size = CGSize(width: maxWidth, height: y + rowHeight)
     }
   }
 }

@@ -1,40 +1,40 @@
-import SwiftUI
-import Models
 import DesignSystem
+import Models
+import SwiftUI
 
 struct SessionDetailTimelineView: View {
   let session: SleepSession
   @Environment(Theme.self) private var theme
-  @State private var isSleepStagesExpanded: Bool = true
+  @State private var isSleepStagesExpanded = true
 
   var body: some View {
     VStack(alignment: .leading, spacing: 25) {
-        if let stages = session.sleepStageSegments, !stages.isEmpty {
-            SleepStageBreakdownView(session: session, theme: theme)
-        }
+      if let stages = session.sleepStageSegments, !stages.isEmpty {
+        SleepStageBreakdownView(session: session, theme: theme)
+      }
 
-        VStack(alignment: .leading) {
-            Text(Strings.recordingsDetailTimelineLabel)
-              .font(.system(size: 12, weight: .semibold))
+      VStack(alignment: .leading) {
+        Text(Strings.recordingsDetailTimelineLabel)
+          .font(.system(size: 12, weight: .semibold))
+          .foregroundStyle(theme.textTertiary)
+          .tracking(1)
+
+        SnoringTimelineView(session: session, theme: theme)
+
+        HStack {
+          Text(timeString(session.startDate))
+            .font(.caption2)
+            .foregroundStyle(theme.textTertiary)
+
+          Spacer()
+
+          if let endDate = session.endDate {
+            Text(timeString(endDate))
+              .font(.caption2)
               .foregroundStyle(theme.textTertiary)
-              .tracking(1)
-
-            SnoringTimelineView(session: session, theme: theme)
-            
-            HStack {
-              Text(timeString(session.startDate))
-                .font(.caption2)
-                .foregroundStyle(theme.textTertiary)
-
-              Spacer()
-
-              if let endDate = session.endDate {
-                Text(timeString(endDate))
-                  .font(.caption2)
-                  .foregroundStyle(theme.textTertiary)
-              }
-            }
+          }
         }
+      }
     }
   }
 

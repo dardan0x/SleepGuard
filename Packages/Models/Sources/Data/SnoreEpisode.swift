@@ -32,8 +32,7 @@ public struct SnoringEpisode: Identifiable {
             id: UUID(),
             start: event.timestamp.addingTimeInterval(burst.startOffset),
             duration: burst.duration,
-            intensity: event.intensity
-          ))
+            intensity: event.intensity))
         }
       }
     } else {
@@ -42,8 +41,7 @@ public struct SnoringEpisode: Identifiable {
           id: UUID(),
           start: event.timestamp,
           duration: event.snoreDuration,
-          intensity: event.intensity
-        ))
+          intensity: event.intensity))
       }
     }
     return segments.sorted(by: { $0.1 < $1.1 })

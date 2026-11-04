@@ -1,5 +1,5 @@
-import SwiftUI
 import DesignSystem
+import SwiftUI
 
 struct OnboardingPage3View: View {
   let onContinue: () -> Void

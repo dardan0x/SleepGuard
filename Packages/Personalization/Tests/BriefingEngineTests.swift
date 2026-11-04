@@ -1,10 +1,9 @@
 import Foundation
-import Testing
 import Models
+import Testing
 @testable import Personalization
 
 struct BriefingEngineTests {
-
   // MARK: - Helpers
 
   private var calendar: Calendar { Calendar.current }
@@ -14,15 +13,14 @@ struct BriefingEngineTests {
     endDate: Date? = nil,
     durationHours: Double = 1,
     sleepScore: Int = 100,
-    snoringDuration: TimeInterval = 0
-  ) -> BriefingSession {
+    snoringDuration: TimeInterval = 0) -> BriefingSession
+  {
     BriefingSession(
       startDate: startDate,
       endDate: endDate ?? startDate.addingTimeInterval(durationHours * 3600),
       sleepScore: sleepScore,
       snoringDuration: snoringDuration,
-      totalDuration: durationHours * 3600
-    )
+      totalDuration: durationHours * 3600)
   }
 
   private func date(hour: Int, dayOffset: Int = 0) -> Date {
@@ -43,8 +41,7 @@ struct BriefingEngineTests {
       profile: nil,
       recentSessions: [],
       lifestyleLogs: [],
-      now: now
-    )
+      now: now)
 
     #expect(briefing.scoreContext == .noData)
     #expect(briefing.stats.isEmpty)
@@ -61,8 +58,7 @@ struct BriefingEngineTests {
       profile: nil,
       recentSessions: [session],
       lifestyleLogs: [],
-      now: now
-    )
+      now: now)
 
     #expect(briefing.scoreContext == .firstNight)
     #expect(briefing.insight == nil)
@@ -80,10 +76,9 @@ struct BriefingEngineTests {
       profile: nil,
       recentSessions: [recentSession, oldSession],
       lifestyleLogs: [],
-      now: now
-    )
+      now: now)
 
-    if case .returningAfterGap(let days) = briefing.scoreContext {
+    if case let .returningAfterGap(days) = briefing.scoreContext {
       #expect(days == 5)
     } else {
       Issue.record("Expected .returningAfterGap, got \(briefing.scoreContext)")
@@ -101,8 +96,7 @@ struct BriefingEngineTests {
       profile: nil,
       recentSessions: [s2, s1],
       lifestyleLogs: [],
-      now: now
-    )
+      now: now)
 
     #expect(briefing.scoreContext == .improving)
   }
@@ -116,8 +110,7 @@ struct BriefingEngineTests {
       profile: nil,
       recentSessions: [s2, s1],
       lifestyleLogs: [],
-      now: now
-    )
+      now: now)
 
     #expect(briefing.scoreContext == .declining)
   }
@@ -131,8 +124,7 @@ struct BriefingEngineTests {
       profile: nil,
       recentSessions: [s2, s1],
       lifestyleLogs: [],
-      now: now
-    )
+      now: now)
 
     #expect(briefing.scoreContext == .steady)
   }
@@ -145,8 +137,7 @@ struct BriefingEngineTests {
       profile: nil,
       recentSessions: [],
       lifestyleLogs: [],
-      now: now
-    )
+      now: now)
     #expect(briefing.greeting.contains("morning"))
   }
 
@@ -156,8 +147,7 @@ struct BriefingEngineTests {
       profile: nil,
       recentSessions: [],
       lifestyleLogs: [],
-      now: now
-    )
+      now: now)
     #expect(briefing.greeting.contains("afternoon"))
   }
 
@@ -167,8 +157,7 @@ struct BriefingEngineTests {
       profile: nil,
       recentSessions: [],
       lifestyleLogs: [],
-      now: now
-    )
+      now: now)
     #expect(briefing.greeting.contains("evening"))
   }
 
@@ -178,8 +167,7 @@ struct BriefingEngineTests {
       profile: nil,
       recentSessions: [],
       lifestyleLogs: [],
-      now: now
-    )
+      now: now)
     #expect(briefing.greeting.contains("night"))
   }
 
@@ -190,8 +178,7 @@ struct BriefingEngineTests {
       profile: profile,
       recentSessions: [],
       lifestyleLogs: [],
-      now: now
-    )
+      now: now)
     #expect(briefing.greeting.contains("Alex"))
   }
 
@@ -204,8 +191,7 @@ struct BriefingEngineTests {
       profile: nil,
       recentSessions: [session],
       lifestyleLogs: [],
-      now: now
-    )
+      now: now)
     #expect(briefing.headline.contains("quiet"))
   }
 
@@ -214,14 +200,12 @@ struct BriefingEngineTests {
     let session = makeSession(
       startDate: date(hour: 23, dayOffset: -1),
       durationHours: 8,
-      snoringDuration: 1800
-    )
+      snoringDuration: 1800)
     let briefing = BriefingEngine.generate(
       profile: nil,
       recentSessions: [session],
       lifestyleLogs: [],
-      now: now
-    )
+      now: now)
     #expect(!briefing.headline.contains("quiet"))
   }
 
@@ -232,8 +216,7 @@ struct BriefingEngineTests {
       profile: nil,
       recentSessions: [session],
       lifestyleLogs: [],
-      now: now
-    )
+      now: now)
 
     #expect(briefing.headline.contains("Last night"))
   }
@@ -245,8 +228,7 @@ struct BriefingEngineTests {
       profile: nil,
       recentSessions: [session],
       lifestyleLogs: [],
-      now: now
-    )
+      now: now)
 
     #expect(briefing.headline.contains("Last time"))
   }
@@ -258,14 +240,12 @@ struct BriefingEngineTests {
     let session = makeSession(
       startDate: date(hour: 23, dayOffset: -1),
       durationHours: 8,
-      snoringDuration: 1800
-    )
+      snoringDuration: 1800)
     let briefing = BriefingEngine.generate(
       profile: nil,
       recentSessions: [session],
       lifestyleLogs: [],
-      now: now
-    )
+      now: now)
     #expect(briefing.stats.count == 3)
     #expect(briefing.stats[0].label != nil)
     #expect(briefing.stats[1].label != nil)
@@ -281,8 +261,7 @@ struct BriefingEngineTests {
       profile: nil,
       recentSessions: [session],
       lifestyleLogs: [],
-      now: now
-    )
+      now: now)
     #expect(briefing.insight == nil)
   }
 
@@ -294,8 +273,7 @@ struct BriefingEngineTests {
       profile: nil,
       recentSessions: [s2, s1],
       lifestyleLogs: [],
-      now: now
-    )
+      now: now)
     #expect(briefing.insight != nil)
   }
 
@@ -309,8 +287,7 @@ struct BriefingEngineTests {
       profile: profile,
       recentSessions: [s2, s1],
       lifestyleLogs: [],
-      now: now
-    )
+      now: now)
 
     #expect(briefing.insight != nil)
   }
@@ -324,8 +301,7 @@ struct BriefingEngineTests {
       profile: nil,
       recentSessions: [session],
       lifestyleLogs: [],
-      now: now
-    )
+      now: now)
     #expect(briefing.survey == nil)
   }
 
@@ -337,8 +313,7 @@ struct BriefingEngineTests {
       profile: nil,
       recentSessions: [s2, s1],
       lifestyleLogs: [],
-      now: now
-    )
+      now: now)
     #expect(briefing.survey == nil)
   }
 
@@ -353,15 +328,13 @@ struct BriefingEngineTests {
       exercised: false,
       stressfulDay: false,
       lateMeal: false,
-      screenBeforeBed: false
-    )
+      screenBeforeBed: false)
 
     let briefing = BriefingEngine.generate(
       profile: nil,
       recentSessions: [s2, s1],
       lifestyleLogs: [log],
-      now: now
-    )
+      now: now)
     #expect(briefing.survey == nil)
   }
 
@@ -373,8 +346,7 @@ struct BriefingEngineTests {
       profile: nil,
       recentSessions: [s2, s1],
       lifestyleLogs: [],
-      now: now
-    )
+      now: now)
 
     #expect(briefing.survey != nil)
     #expect(briefing.survey?.isPositiveSwing == true)
@@ -389,8 +361,7 @@ struct BriefingEngineTests {
       profile: nil,
       recentSessions: [s2, s1],
       lifestyleLogs: [],
-      now: now
-    )
+      now: now)
 
     #expect(briefing.survey != nil)
     #expect(briefing.survey?.isPositiveSwing == false)

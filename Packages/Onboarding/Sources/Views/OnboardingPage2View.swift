@@ -1,5 +1,5 @@
-import SwiftUI
 import DesignSystem
+import SwiftUI
 
 struct OnboardingPage2View: View {
   let onContinue: () -> Void
@@ -18,18 +18,15 @@ struct OnboardingPage2View: View {
         featureCard(
           icon: "😴",
           title: Strings.onboardingPage2SleepScoreTitle,
-          description: Strings.onboardingPage2SleepScoreDescription
-        )
+          description: Strings.onboardingPage2SleepScoreDescription)
         featureCard(
           icon: "🎤",
           title: Strings.onboardingPage2SnoreDetectionTitle,
-          description: Strings.onboardingPage2SnoreDetectionDescription
-        )
+          description: Strings.onboardingPage2SnoreDetectionDescription)
         featureCard(
           icon: "📊",
           title: Strings.onboardingPage2SleepTrendsTitle,
-          description: Strings.onboardingPage2SleepTrendsDescription
-        )
+          description: Strings.onboardingPage2SleepTrendsDescription)
       }
 
       Spacer()
