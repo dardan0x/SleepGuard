@@ -201,6 +201,11 @@ These thresholds prevent monolithic views. Enforce them during implementation an
 - One-off buttons that are not reused
 - Private helper formatting functions
 
+**Computed `some View` boundaries (review rule):**
+- A computed `some View` property shares its parent's invalidation boundary — it reorganizes code but does not reduce re-evaluation cost. Prefer a dedicated `View` struct when the section is complex (> ~20 lines), reads `@State`/`@Observable`/environment values, or is built per-item inside a `ForEach` (changing parameters per call).
+- Small, static sections (no state reads, no parameters) may stay as computed properties.
+- During review, run: `grep -rnE '^\s+(private )?var \w+: some View' Packages --include='*.swift'` and check new/changed hits against this rule.
+
 **Duplication rule:**
 - If the same view struct appears in 2+ files, extract it to `DesignSystem` immediately. Do not copy-paste view code.
 
