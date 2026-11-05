@@ -1,11 +1,12 @@
 import Charts
 import DesignSystem
+import FactoryKit
 import Models
 import SwiftUI
 
 struct TrendsChartSection: View {
   let data: [TrendBarData]
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   var body: some View {
     VStack(spacing: 8) {

@@ -1,5 +1,6 @@
 import DesignSystem
 import Env
+import FactoryKit
 import Models
 import SwiftData
 import SwiftUI
@@ -7,7 +8,7 @@ import SwiftUI
 @MainActor
 public struct StatisticsDashboardView: View {
   @Environment(RouterPath.self) private var routerPath
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
   @Query(sort: \SleepSession.startDate, order: .reverse)
   private var sessions: [SleepSession]
 
