@@ -42,7 +42,7 @@ Final merge to `main`: https://github.com/dardan0x/SleepGuard/compare/main...fac
 | ID | Task | Type | Status | Depends On | Package | Started | Completed |
 |----|------|------|--------|------------|---------|---------|-----------|
 | F19-T1 | Factory foundation in Env | Infra | Done | — | Env | 2026-11-05 | 2026-11-05 |
-| F19-T2 | Statistics package pilot | UI | Backlog | F19-T1 | Statistics | — | — |
+| F19-T2 | Statistics package pilot | UI | Done | F19-T1 | Statistics | 2026-11-05 | 2026-11-05 |
 | F19-T3 | Remaining UI packages migration | UI | Backlog | F19-T2 | SleepSession, Recordings, Settings, Personalization, Onboarding, Learn | — | — |
 | F19-T4 | Service composition cleanup | Infra | Backlog | F19-T1 | Env | — | — |
 | F19-T5 | Watch app, docs & rules rewrite | Docs | Backlog | F19-T3, F19-T4 | WatchApp + docs | — | — |
@@ -80,22 +80,24 @@ User: "go on with T1" — implement Factory foundation per F19 plan.
 | Field | Value |
 |-------|-------|
 | Arch Ref | docs/architecture/dependencies.md, docs/architecture/concurrency.md |
-| Status | Backlog |
-| Started | — |
-| Completed | — |
+| Status | Done |
+| Started | 2026-11-05 |
+| Completed | 2026-11-05 |
 
 **Acceptance Criteria:**
-- [ ] FactoryKit added to `Packages/Statistics/Package.swift`
-- [ ] All `@Environment(X.self)` swapped to `@Injected(\.x)` in Statistics views
-- [ ] Statistics previews use `Container.shared.x.register { Mock() }` style where services are involved
-- [ ] Verified on simulator: Statistics tab renders and reacts to service state
-- [ ] Builds with zero errors
+- [x] FactoryKit added to `Packages/Statistics/Package.swift`
+- [x] All `@Environment(X.self)` swapped to `@Injected(\.x)` in Statistics views (17 Theme sites)
+- [x] Statistics previews use `Container.shared.x.register { Mock() }` style where services are involved — **vacuous: no `#Preview` blocks exist in Statistics**
+- [x] Verified on simulator: Statistics tab renders (empty + loaded states) and Calendar push via environment RouterPath works
+- [x] Builds with zero errors
 
 **Prompt Used:**
-_(filled after task completion)_
+User: "go with next task T2" — convert Statistics per F19 plan; pilot gates T3 fan-out.
 
 **Notes:**
-Pilot gates the fan-out: user reviews the pilot PR before T3 proceeds.
+- **Pilot finding (applies app-wide): `RouterPath` stays `@Environment`.** Factory `.unique` scope would orphan navigation paths; `.shared`'s weak cache dies with the first requesting view. Tab-owned navigation stacks need environment propagation. T3 consequence: `withAppDependencyGraph`/`withEnvironments` shrink to RouterPath-only — they don't disappear.
+- "Reacts to service state" demonstrated via RouterPath navigation; live theme switching not demonstrable (build hardcodes Always Dark; Settings Theme row is display-only — pre-existing).
+- PR #89 merged into `factory-reformat`.
 
 ---
 
@@ -120,7 +122,7 @@ Pilot gates the fan-out: user reviews the pilot PR before T3 proceeds.
 _(filled after task completion)_
 
 **Notes:**
-`RouterPath` (`.unique` scope) injection in sheets keeps working — each injected site gets its own instance, same as today's `environment(RouterPath())`.
+`RouterPath` stays `@Environment` throughout (pilot finding from F19-T2): Factory scopes cannot model tab-owned navigation paths. `withAppDependencyGraph()`/`withEnvironments()` in `AppRegistry.swift` therefore shrink to RouterPath-only injection — they are renamed/reduced in this task, not deleted.
 
 ---
 

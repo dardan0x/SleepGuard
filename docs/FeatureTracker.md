@@ -46,12 +46,12 @@ Last updated: 2026-11-05
 | Blocked | 0 |
 | — | — |
 | Total Tasks | 110 |
-| Tasks Done | 90 |
+| Tasks Done | 91 |
 | Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
-| Tasks Backlog | 20 |
+| Tasks Backlog | 19 |
 | — | — |
-| **Progress** | **82%** |
+| **Progress** | **83%** |
 
 ## Features
 
@@ -74,7 +74,7 @@ Last updated: 2026-11-05
 | F15 | Personalization & Sleep Briefing | P1 | Done | 16/16 | ██████████ 100% | [tracker](trackers/f15-personalization.md) |
 | F16 | Learn Tab | P2 | Done | 1/1 | ██████████ 100% | [tracker](trackers/f16-learn-tab.md) |
 | F17 | Swift 6 Migration | P1 | Done | 16/16 | ████████████████ 100% | [tracker](trackers/f17-swift6-migration.md) |
-| F19 | Factory DI Migration | P1 | In Progress | 1/5 | ██░░░░░░░░ 20% | [tracker](trackers/f19-factory-di.md) |
+| F19 | Factory DI Migration | P1 | In Progress | 2/5 | ████░░░░░░ 40% | [tracker](trackers/f19-factory-di.md) |
 
 ## Activity Log
 
@@ -148,6 +148,7 @@ _Most recent first. The AI appends here after every task._
 | 2026-05-26 | P4-T1 HealthKit read sleep stages | Completed | `fetchSleepStages(for:)` queries HK sleep analysis samples, maps to `SleepStageSegment`; `mapSleepStage` maps core/deep/REM/awake; skips legacy/in-bed/unspecified; build succeeds |
 | 2026-05-26 | P3-T6 Build & verify | Completed | Clean build (zero errors); pre-existing asset warnings only; Phase 3 UI verified |
 | 2026-05-26 | P3-T5 Player labels | Completed | `PlayerSheetView` navigation title changes based on event category: snoring = "Snoring Player", sleep talking = "Sleep Talking Player", noise = "Noise Player"; localized 2 new title strings; build succeeds |
+| 2026-11-05 | F19-T2 | Completed | Statistics pilot: 17 views `@Environment(Theme.self)` → `@Injected(\.theme)`; RouterPath stays environment-based (pilot finding); verified on simulator; PR #89 merged |
 | 2026-11-05 | F19-T1 | Completed | Factory foundation: FactoryKit 3.5.2 in Env + DesignSystem; Container registrations for all 17 graph services (16 singletons aliasing `.shared` + routerPath unique); theme in DesignSystem (layering); PR #88 merged |
 | 2026-11-05 | F19-T0 | Planning | Factory DI migration planned: base branch `factory-reformat`, 5 task branches (`feature/f19/t1`…`t5`), PRs target `factory-reformat`, final merge to `main`. Tracker created |
 | 2026-05-26 | P3-T4 Stats grid supplement | Completed | Optional disturbance row in `SessionDetailHeaderView`: full-width `StatCard` below the 2×2 grid, shows non-snoring event count, hidden for snoring-only sessions; localized `session.disturbances`; build succeeds |
@@ -253,7 +254,7 @@ _Most recent first. The AI appends here after every task._
 
 | Task | Feature | Started | Assignee |
 |------|---------|---------|----------|
-| F19-T2 Statistics package pilot | F19 | 2026-11-05 | — |
+| F19-T3 Remaining UI packages migration | F19 | 2026-11-05 | — |
 
 ## Completed (last 10)
 
