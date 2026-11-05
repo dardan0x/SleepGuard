@@ -1,3 +1,4 @@
+import FactoryKit
 import Models
 import SwiftUI
 
@@ -5,7 +6,7 @@ import SwiftUI
 @MainActor
 public struct SessionStatsGrid: View {
   public let session: SleepSession
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   public init(session: SleepSession) {
     self.session = session

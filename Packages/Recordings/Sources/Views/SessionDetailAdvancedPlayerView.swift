@@ -1,4 +1,5 @@
 import DesignSystem
+import FactoryKit
 import Models
 import SwiftUI
 
@@ -8,7 +9,7 @@ struct SessionDetailAdvancedPlayerView: View {
   let waveformSamples: [Float]
   let spectrumBars: [Float]
   let onWaveformTap: (Double) -> Void
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   var body: some View {
     VStack(spacing: 20) {

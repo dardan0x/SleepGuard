@@ -1,4 +1,5 @@
 import DesignSystem
+import FactoryKit
 import Models
 import SwiftUI
 
@@ -22,7 +23,7 @@ struct EventPlayerView: View {
   let isReady: Bool
   let isLoadingWaveform: Bool
 
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   private var intensityColor: Color {
     theme.intensityColor(event.intensity)

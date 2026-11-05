@@ -1,10 +1,11 @@
 import DesignSystem
+import FactoryKit
 import SwiftUI
 
 struct BedsideClockClockView: View {
   let timeString: String
   let dateString: String
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   var body: some View {
     VStack(spacing: 8) {

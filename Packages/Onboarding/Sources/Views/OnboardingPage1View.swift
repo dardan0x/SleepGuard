@@ -1,9 +1,10 @@
 import DesignSystem
+import FactoryKit
 import SwiftUI
 
 struct OnboardingPage1View: View {
   let onContinue: () -> Void
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
   @State private var zOffset1: CGFloat = 0
   @State private var zOffset2: CGFloat = 0
   @State private var zOpacity1: Double = 0

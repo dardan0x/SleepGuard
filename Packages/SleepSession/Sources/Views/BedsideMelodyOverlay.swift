@@ -1,10 +1,11 @@
 import DesignSystem
+import FactoryKit
 import SwiftUI
 
 /// Top overlay on the bedside clock while the Snore Interrupter melody is
 /// playing: melody name + mute/stop actions.
 struct BedsideMelodyOverlay: View {
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   let melodyName: String
   let onMute: () -> Void

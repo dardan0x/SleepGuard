@@ -1,10 +1,11 @@
 import DesignSystem
+import FactoryKit
 import Models
 import SwiftUI
 
 struct SessionDetailTimelineView: View {
   let session: SleepSession
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
   @State private var isSleepStagesExpanded = true
 
   var body: some View {

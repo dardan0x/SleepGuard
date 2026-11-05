@@ -1,13 +1,14 @@
 import DesignSystem
 import Env
+import FactoryKit
 import Models
 import SwiftUI
 
 @MainActor
 struct SettingsProfileSection: View {
-  @Environment(Theme.self) private var theme
-  @Environment(UserPreferences.self) private var userPreferences
-  @Environment(AppConfig.self) private var appConfig
+  @Injected(\.theme) private var theme
+  @Injected(\.userPreferences) private var userPreferences
+  @Injected(\.appConfig) private var appConfig
   let onTapProfile: () -> Void
 
   var body: some View {

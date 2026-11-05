@@ -1,9 +1,10 @@
 import DesignSystem
+import FactoryKit
 import SwiftUI
 
 /// Save + cancel buttons at the bottom of the Snore Interrupter sheet.
 struct SnoreInterrupterButtons: View {
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   let onSave: () -> Void
   let onCancel: () -> Void

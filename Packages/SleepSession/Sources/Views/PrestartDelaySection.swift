@@ -1,13 +1,14 @@
 import DesignSystem
 import Env
+import FactoryKit
 import SwiftUI
 
 /// Recording-delay picker on the prestart screen: one button per delay
 /// option; the selection writes to `UserPreferences.recordingDelayMinutes`
 /// with the same spring animation as before.
 struct PrestartDelaySection: View {
-  @Environment(Theme.self) private var theme
-  @Environment(UserPreferences.self) private var userPreferences
+  @Injected(\.theme) private var theme
+  @Injected(\.userPreferences) private var userPreferences
 
   private let delayOptions = [0, 15, 30, 45, 60]
 

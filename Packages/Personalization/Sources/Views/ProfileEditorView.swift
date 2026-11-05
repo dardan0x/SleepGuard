@@ -1,5 +1,6 @@
 import DesignSystem
 import Env
+import FactoryKit
 import Models
 import SwiftUI
 
@@ -8,7 +9,7 @@ public struct ProfileEditorView: View {
   @Bindable var profile: UserProfile
   let onComplete: () -> Void
   let onDismiss: () -> Void
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
   @State private var currentPage = 0
   private let totalPages = 4
 

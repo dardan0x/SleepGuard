@@ -1,10 +1,11 @@
 import DesignSystem
+import FactoryKit
 import SwiftUI
 
 /// Centered transport controls for the event player: skip back 15 s,
 /// play/pause, skip forward 15 s.
 struct EventPlayerControlsView: View {
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   let isPlaying: Bool
   let onTogglePlayback: () -> Void

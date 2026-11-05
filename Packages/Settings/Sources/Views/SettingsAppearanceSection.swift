@@ -1,10 +1,11 @@
 import DesignSystem
 import Env
+import FactoryKit
 import SwiftUI
 
 @MainActor
 struct SettingsAppearanceSection: View {
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   var body: some View {
     VStack(alignment: .leading, spacing: 2) {

@@ -1,6 +1,7 @@
 import AudioEngine
 import DesignSystem
 import Env
+import FactoryKit
 import Models
 import SwiftData
 import SwiftUI
@@ -13,11 +14,11 @@ public struct SessionSummaryView: View {
     self.session = session
   }
 
-  @Environment(Theme.self) private var theme
-  @Environment(SessionManager.self) private var sessionManager
-  @Environment(HealthKitSync.self) private var healthKitSync
-  @Environment(UserPreferences.self) private var userPreferences
-  @Environment(AppConfig.self) private var appConfig
+  @Injected(\.theme) private var theme
+  @Injected(\.sessionManager) private var sessionManager
+  @Injected(\.healthKitSync) private var healthKitSync
+  @Injected(\.userPreferences) private var userPreferences
+  @Injected(\.appConfig) private var appConfig
   @Environment(\.dismiss) private var dismiss
   @Environment(\.modelContext) private var modelContext
 

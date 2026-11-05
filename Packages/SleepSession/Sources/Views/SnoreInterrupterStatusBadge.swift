@@ -1,9 +1,10 @@
 import DesignSystem
+import FactoryKit
 import SwiftUI
 
 /// Enabled/disabled capsule badge under the Snore Interrupter controls.
 struct SnoreInterrupterStatusBadge: View {
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   let isEnabled: Bool
 

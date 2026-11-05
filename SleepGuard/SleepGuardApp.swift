@@ -1,4 +1,3 @@
-import AudioEngine
 import DesignSystem
 import Env
 import FirebaseCore
@@ -13,7 +12,6 @@ struct SleepGuardApp: App {
   @Environment(\.scenePhase) private var scenePhase
   @State private var userPreferences = UserPreferences.shared
   @State private var sessionManager = SessionManager.shared
-  @State private var theme = Theme.shared
   @State private var appConfig = AppConfig.shared
   @State private var notificationPermissionManager = NotificationPermissionManager.shared
 
@@ -59,17 +57,6 @@ struct SleepGuardApp: App {
         UpdateGateView(updateGate: appConfig.updateGate, openAppStore: openAppStore)
       }
       .preferredColorScheme(colorScheme(for: userPreferences.appearance))
-      .withAppDependencyGraph(
-        userPreferences: userPreferences,
-        sessionManager: sessionManager,
-        theme: theme,
-        audioRecorder: AudioRecorder.shared,
-        healthKitSync: HealthKitSync.shared,
-        watchConnectivityManager: WatchConnectivityManager.shared,
-        soundAnalysisDetector: SoundAnalysisDetector.shared,
-        snoreInterrupterPlayer: SnoreInterrupterPlayer.shared,
-        appConfig: appConfig,
-        notificationPermissionManager: notificationPermissionManager)
       .task {
         await RemoteConfigLoader.shared.refresh()
       }

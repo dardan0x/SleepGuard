@@ -1,11 +1,12 @@
 import AudioEngine
 import DesignSystem
+import FactoryKit
 import SwiftUI
 
 struct OnboardingPage4View: View {
   let onContinue: () -> Void
-  @Environment(AudioRecorder.self) private var audioRecorder
-  @Environment(Theme.self) private var theme
+  @Injected(\.audioRecorder) private var audioRecorder
+  @Injected(\.theme) private var theme
   @State private var ringScale1: CGFloat = 1.0
   @State private var ringScale2: CGFloat = 1.0
   @State private var ringOpacity1 = 0.6

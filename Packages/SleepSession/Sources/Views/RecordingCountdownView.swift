@@ -1,13 +1,14 @@
 import AudioEngine
 import DesignSystem
 import Env
+import FactoryKit
 import SwiftUI
 import UIKit
 
 @MainActor
 struct RecordingCountdownView: View {
-  @Environment(SessionManager.self) private var sessionManager
-  @Environment(Theme.self) private var theme
+  @Injected(\.sessionManager) private var sessionManager
+  @Injected(\.theme) private var theme
   @State private var activeAlert: CountdownAlert?
 
   var body: some View {

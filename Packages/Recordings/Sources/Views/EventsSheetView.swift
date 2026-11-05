@@ -1,5 +1,6 @@
 import DesignSystem
 import Env
+import FactoryKit
 import Models
 import SwiftUI
 
@@ -14,7 +15,7 @@ public struct EventsSheetView: View {
   let isClipSession: Bool
   let onPlayEvent: (SnoreEvent) -> Void
 
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
   @Environment(\.dismiss) private var dismiss
 
   @State private var selectedEvent: SnoreEvent?

@@ -1,11 +1,12 @@
 import DesignSystem
+import FactoryKit
 import SwiftUI
 
 /// Small labeled value box used by the advanced player's stats grid.
 struct StatBox: View {
   let title: String
   let value: String
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   var body: some View {
     VStack(spacing: 4) {

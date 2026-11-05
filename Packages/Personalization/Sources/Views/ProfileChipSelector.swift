@@ -1,4 +1,5 @@
 import DesignSystem
+import FactoryKit
 import SwiftUI
 
 @MainActor
@@ -6,7 +7,7 @@ struct ProfileChipSelector: View {
   let title: String
   let options: [String]
   @Binding var selection: String
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   var body: some View {
     VStack(alignment: .leading, spacing: 10) {

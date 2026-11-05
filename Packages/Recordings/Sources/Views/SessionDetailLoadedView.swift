@@ -1,5 +1,6 @@
 import DesignSystem
 import Env
+import FactoryKit
 import Models
 import SwiftData
 import SwiftUI
@@ -10,8 +11,8 @@ import SwiftUI
 /// goes through `SessionShareCoordinator`.
 @MainActor
 struct SessionDetailLoadedView: View {
-  @Environment(Theme.self) private var theme
-  @Environment(AppConfig.self) private var appConfig
+  @Injected(\.theme) private var theme
+  @Injected(\.appConfig) private var appConfig
   @Environment(\.modelContext) private var modelContext
   @Environment(\.dismiss) private var dismiss
 

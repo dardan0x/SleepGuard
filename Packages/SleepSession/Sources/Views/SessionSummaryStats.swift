@@ -1,13 +1,14 @@
 import DesignSystem
 import Env
+import FactoryKit
 import Models
 import SwiftUI
 
 /// Session summary top block: completion eyebrow, "You slept X" headline,
 /// the sleep-score gauge, and the snoring/events stat cards.
 struct SessionSummaryStats: View {
-  @Environment(Theme.self) private var theme
-  @Environment(AppConfig.self) private var appConfig
+  @Injected(\.theme) private var theme
+  @Injected(\.appConfig) private var appConfig
 
   let session: SleepSession
 

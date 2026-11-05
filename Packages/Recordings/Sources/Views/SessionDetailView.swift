@@ -1,5 +1,6 @@
 import DesignSystem
 import Env
+import FactoryKit
 import Models
 import SwiftData
 import SwiftUI
@@ -8,9 +9,9 @@ import SwiftUI
 public struct SessionDetailView: View {
   let sessionID: UUID
 
-  @Environment(Theme.self) private var theme
-  @Environment(AppConfig.self) private var appConfig
-  @Environment(UserPreferences.self) private var userPreferences
+  @Injected(\.theme) private var theme
+  @Injected(\.appConfig) private var appConfig
+  @Injected(\.userPreferences) private var userPreferences
   @Environment(\.modelContext) private var modelContext
 
   /// Created on first appearance — needs the environment-provided

@@ -1,17 +1,18 @@
 import AudioEngine
 import DesignSystem
 import Env
+import FactoryKit
 import Models
 import SwiftUI
 import UIKit
 
 @MainActor
 struct RecordingPrestartView: View {
-  @Environment(Theme.self) private var theme
-  @Environment(SessionManager.self) private var sessionManager
+  @Injected(\.theme) private var theme
+  @Injected(\.sessionManager) private var sessionManager
   @Environment(RouterPath.self) private var routerPath
-  @Environment(UserPreferences.self) private var userPreferences
-  @Environment(AppConfig.self) private var appConfig
+  @Injected(\.userPreferences) private var userPreferences
+  @Injected(\.appConfig) private var appConfig
   private let audioRecorder = AudioRecorder.shared
 
   @State private var activePresentation: PrestartPresentation?

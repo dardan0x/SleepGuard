@@ -31,6 +31,7 @@ public extension Container {
 
   var sessionRawLogWriter: Factory<SessionRawLogWriter> { self { SessionRawLogWriter.shared }.singleton }
   var storageLimitEnforcer: Factory<StorageLimitEnforcer> { self { StorageLimitEnforcer.shared }.singleton }
+  @MainActor var tabCoordinator: Factory<TabCoordinator> { self { TabCoordinator.shared }.singleton }
 
   // MARK: - Per-instance
 

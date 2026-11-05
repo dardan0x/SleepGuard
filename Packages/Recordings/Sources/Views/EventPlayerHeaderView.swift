@@ -1,11 +1,12 @@
 import DesignSystem
+import FactoryKit
 import Models
 import SwiftUI
 
 /// Event player header: event time, "SNORING EVENT" eyebrow, duration ·
 /// intensity, and the event counter for multi-event playback.
 struct EventPlayerHeaderView: View {
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   let event: SnoreEvent
   let eventNumber: Int

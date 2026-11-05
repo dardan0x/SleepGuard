@@ -1,12 +1,13 @@
 import DesignSystem
 import Env
+import FactoryKit
 import SwiftUI
 
 struct OnboardingPageHealthWatchView: View {
   let onContinue: () -> Void
-  @Environment(HealthKitSync.self) private var healthKitSync
-  @Environment(UserPreferences.self) private var userPreferences
-  @Environment(Theme.self) private var theme
+  @Injected(\.healthKitSync) private var healthKitSync
+  @Injected(\.userPreferences) private var userPreferences
+  @Injected(\.theme) private var theme
   @State private var isRequesting = false
   @State private var showGranted = false
 

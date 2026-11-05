@@ -1,5 +1,6 @@
 import DesignSystem
 import Env
+import FactoryKit
 import Models
 import Personalization
 import SwiftData
@@ -7,11 +8,11 @@ import SwiftUI
 
 @MainActor
 public struct SettingsView: View {
-  @Environment(Theme.self) private var theme
-  @Environment(AppConfig.self) private var appConfig
-  @Environment(UserPreferences.self) private var userPreferences
-  @Environment(WatchConnectivityManager.self) private var watchConnectivityManager
-  @Environment(HealthKitSync.self) private var healthKitSync
+  @Injected(\.theme) private var theme
+  @Injected(\.appConfig) private var appConfig
+  @Injected(\.userPreferences) private var userPreferences
+  @Injected(\.watchConnectivityManager) private var watchConnectivityManager
+  @Injected(\.healthKitSync) private var healthKitSync
   @Environment(\.modelContext) private var modelContext
   @Environment(\.openURL) private var openURL
   @Environment(RouterPath.self) private var routerPath
@@ -58,8 +59,6 @@ public struct SettingsView: View {
     #if DEBUG
       .sheet(isPresented: $showDebugConfig) {
         NavigationStack { DebugConfigView() }
-          .environment(AppConfig.shared)
-          .environment(Theme.shared)
       }
     #endif
       .toolbar(.hidden, for: .navigationBar)
@@ -143,8 +142,4 @@ extension UserPreferences.AppearanceSetting {
 
 #Preview {
   SettingsView()
-    .environment(Theme.shared)
-    .environment(UserPreferences.shared)
-    .environment(WatchConnectivityManager.shared)
-    .environment(HealthKitSync.shared)
 }

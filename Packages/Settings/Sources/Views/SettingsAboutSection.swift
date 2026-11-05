@@ -1,10 +1,11 @@
 import DesignSystem
 import Env
+import FactoryKit
 import SwiftUI
 
 @MainActor
 struct SettingsAboutSection: View {
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
   let onRateApp: () -> Void
 
   private var appVersion: String {
