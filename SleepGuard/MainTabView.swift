@@ -32,7 +32,6 @@ struct MainTabView: View {
         customTabView
       }
     }
-    .environment(tabCoordinator)
     .onChange(of: appConfig.visibleTabsInOrder) { _, tabs in
       ensureValidSelection(among: tabs)
     }
