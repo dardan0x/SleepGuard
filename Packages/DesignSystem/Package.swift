@@ -10,6 +10,7 @@ let package = Package(
   dependencies: [
     .package(path: "../Env"),
     .package(path: "../Models"),
+    .package(url: "https://github.com/hmlongco/Factory", from: "3.5.2"),
   ],
   targets: [
     .target(
@@ -17,6 +18,7 @@ let package = Package(
       dependencies: [
         .product(name: "Env", package: "Env"),
         .product(name: "Models", package: "Models"),
+        .product(name: "FactoryKit", package: "Factory"),
       ],
       path: "Sources",
       exclude: [],
