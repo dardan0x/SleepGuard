@@ -1,12 +1,13 @@
 import DesignSystem
 import Env
+import FactoryKit
 import Models
 import SwiftUI
 
 struct CalendarSelectedNightView: View {
   let session: SleepSession
   let selectedDateString: String
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
   @Environment(RouterPath.self) private var routerPath
 
   var body: some View {

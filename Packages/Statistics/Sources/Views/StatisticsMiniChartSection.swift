@@ -1,11 +1,12 @@
 import DesignSystem
 import Env
+import FactoryKit
 import Models
 import SwiftUI
 
 struct StatisticsMiniChartSection: View {
   let recentSessions: [SleepSession]
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
   @Environment(RouterPath.self) private var routerPath
 
   var body: some View {

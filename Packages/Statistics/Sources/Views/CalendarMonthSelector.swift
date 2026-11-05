@@ -1,11 +1,12 @@
 import DesignSystem
+import FactoryKit
 import SwiftUI
 
 struct CalendarMonthSelector: View {
   let monthYearString: String
   let onPrevious: () -> Void
   let onNext: () -> Void
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   var body: some View {
     HStack {

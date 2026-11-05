@@ -1,10 +1,11 @@
 import DesignSystem
+import FactoryKit
 import Models
 import SwiftUI
 
 struct CalendarMonthStatsView: View {
   let monthSessions: [SleepSession]
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   var body: some View {
     HStack(spacing: 8) {

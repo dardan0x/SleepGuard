@@ -1,10 +1,11 @@
 import DesignSystem
+import FactoryKit
 import Models
 import SwiftUI
 
 struct Last7NightsChartCard: View {
   let days: [DaySummary]
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   var body: some View {
     VStack(spacing: 12) {
