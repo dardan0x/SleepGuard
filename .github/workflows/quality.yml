@@ -22,7 +22,8 @@ jobs:
       - name: Build SwiftFormat from source
         run: |
           if [ ! -x /tmp/swiftformat-build/release/swiftformat ]; then
-            curl -fsSL "https://github.com/nicklockwood/SwiftFormat/archive/refs/tags/${SWIFTFORMAT_VERSION}.tar.gz" | tar -xz -C /tmp
+            # The swift container has no curl, but ships git (SwiftPM needs it).
+            git clone --depth 1 --branch "${SWIFTFORMAT_VERSION}" https://github.com/nicklockwood/SwiftFormat.git "/tmp/SwiftFormat-${SWIFTFORMAT_VERSION}"
             swift build --package-path "/tmp/SwiftFormat-${SWIFTFORMAT_VERSION}" --build-path /tmp/swiftformat-build --product swiftformat --configuration release -Xlinker -s
           fi
           install -m 755 /tmp/swiftformat-build/release/swiftformat /usr/local/bin/swiftformat
