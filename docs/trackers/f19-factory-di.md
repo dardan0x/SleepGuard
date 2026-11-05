@@ -41,7 +41,7 @@ Final merge to `main`: https://github.com/dardan0x/SleepGuard/compare/main...fac
 
 | ID | Task | Type | Status | Depends On | Package | Started | Completed |
 |----|------|------|--------|------------|---------|---------|-----------|
-| F19-T1 | Factory foundation in Env | Infra | Backlog | — | Env | — | — |
+| F19-T1 | Factory foundation in Env | Infra | Done | — | Env | 2026-11-05 | 2026-11-05 |
 | F19-T2 | Statistics package pilot | UI | Backlog | F19-T1 | Statistics | — | — |
 | F19-T3 | Remaining UI packages migration | UI | Backlog | F19-T2 | SleepSession, Recordings, Settings, Personalization, Onboarding, Learn | — | — |
 | F19-T4 | Service composition cleanup | Infra | Backlog | F19-T1 | Env | — | — |
@@ -54,22 +54,24 @@ Final merge to `main`: https://github.com/dardan0x/SleepGuard/compare/main...fac
 | Field | Value |
 |-------|-------|
 | Arch Ref | docs/architecture/dependencies.md |
-| Status | Backlog |
-| Started | — |
-| Completed | — |
+| Status | Done |
+| Started | 2026-11-05 |
+| Completed | 2026-11-05 |
 
 **Acceptance Criteria:**
-- [ ] `Factory` package added to `Packages/Env/Package.swift` (import library `FactoryKit`)
-- [ ] `Container` extension in Env registers all 20 services in `Packages/Env/Sources/Services/` with correct scopes (`.singleton` for `.shared` services, `.unique` for `RouterPath`)
-- [ ] `@MainActor` annotated on factories for MainActor-isolated services
-- [ ] All existing `.shared` singletons preserved — zero view/wiring changes
-- [ ] Builds with zero errors
+- [x] `Factory` package added to `Packages/Env/Package.swift` (import library `FactoryKit`)
+- [x] `Container` extension in Env registers all services in the current DI graph (16 singletons + `RouterPath` unique) with correct scopes
+- [x] `@MainActor` annotated on factories for MainActor-isolated services (non-isolated `SessionRawLogWriter`/`StorageLimitEnforcer` correctly bare)
+- [x] All existing `.shared` singletons preserved — zero view/wiring changes
+- [x] Builds with zero errors (verified twice; layering check green)
 
 **Prompt Used:**
-_(filled after task completion)_
+User: "go on with T1" — implement Factory foundation per F19 plan.
 
 **Notes:**
-_(decisions, issues, deviations)_
+- `Theme` registered in DesignSystem's own `Container` extension (not Env) — layering: Theme sits above Env. Multi-module pattern per Factory docs.
+- Internal composition types (`SessionRecordingController`, `RealtimeDetectionTracker`, `SpeechDetector`, `SnoreDetector`) and non-service utilities (`MockDataGenerator`, `SessionFileCleanup`, `TabCoordinator`) intentionally not registered — nothing speculative; T4 adds composition when it has real call sites.
+- PR #88 merged into `factory-reformat` (merge commit `8c837d4`).
 
 ---
 
