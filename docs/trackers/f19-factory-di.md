@@ -43,7 +43,7 @@ Final merge to `main`: https://github.com/dardan0x/SleepGuard/compare/main...fac
 |----|------|------|--------|------------|---------|---------|-----------|
 | F19-T1 | Factory foundation in Env | Infra | Done | — | Env | 2026-11-05 | 2026-11-05 |
 | F19-T2 | Statistics package pilot | UI | Done | F19-T1 | Statistics | 2026-11-05 | 2026-11-05 |
-| F19-T3 | Remaining UI packages migration | UI | Backlog | F19-T2 | SleepSession, Recordings, Settings, Personalization, Onboarding, Learn | — | — |
+| F19-T3 | Remaining UI packages migration | UI | Done | F19-T2 | SleepSession, Recordings, Settings, Personalization, Onboarding, Learn | 2026-11-05 | 2026-11-05 |
 | F19-T4 | Service composition cleanup | Infra | Backlog | F19-T1 | Env | — | — |
 | F19-T5 | Watch app, docs & rules rewrite | Docs | Backlog | F19-T3, F19-T4 | WatchApp + docs | — | — |
 
@@ -106,23 +106,27 @@ User: "go with next task T2" — convert Statistics per F19 plan; pilot gates T3
 | Field | Value |
 |-------|-------|
 | Arch Ref | docs/architecture/dependencies.md |
-| Status | Backlog |
-| Started | — |
-| Completed | — |
+| Status | Done |
+| Started | 2026-11-05 |
+| Completed | 2026-11-05 |
 
 **Acceptance Criteria:**
-- [ ] `@Environment(X.self)` → `@Injected(\.x)` in SleepSession, Recordings, Settings, Personalization, Onboarding, Learn (package-by-package order)
-- [ ] FactoryKit added to each migrated package's Package.swift
-- [ ] `withAppDependencyGraph()` call site in `SleepGuardApp.swift` removed; `@State` service holdings replaced
-- [ ] `withEnvironments()` call sites removed (SettingsTab, StatisticsTab); `withAppDependencyGraph`/`withEnvironments` deleted from `AppRegistry.swift` when last consumer is gone
-- [ ] Sheets present correctly without environment re-injection (verified on simulator)
-- [ ] Builds with zero errors
+- [x] `@Environment(X.self)` → `@Injected(\.x)` in SleepSession, Recordings, Settings, Personalization, Onboarding, Learn (package-by-package order)
+- [x] FactoryKit added to each migrated package's Package.swift (6 packages)
+- [x] `withAppDependencyGraph()` call site in `SleepGuardApp.swift` removed; `@State` service holdings replaced
+- [x] `withAppDependencyGraph`/`withEnvironments` deleted from `AppRegistry.swift`; `withEnvironments()` shrank to RouterPath-only injection at the two remaining call sites
+- [x] Sheets present correctly without environment re-injection (verified on simulator — briefing sheet, melody picker, snore interrupter)
+- [x] Builds with zero errors (verified twice; layering check green)
 
 **Prompt Used:**
-_(filled after task completion)_
+User: "continue with T3" — fan out the T2 pilot pattern to the remaining UI packages.
 
 **Notes:**
-`RouterPath` stays `@Environment` throughout (pilot finding from F19-T2): Factory scopes cannot model tab-owned navigation paths. `withAppDependencyGraph()`/`withEnvironments()` in `AppRegistry.swift` therefore shrink to RouterPath-only injection — they are renamed/reduced in this task, not deleted.
+- 91 views converted across 7 packages (Statistics pilot + 6 in this task). `TabCoordinator` gained `public static let shared` + `.singleton` registration — LearnTab consumed it via environment before.
+- `RouterPath` stays `@Environment` throughout (pilot finding from F19-T2): Factory scopes cannot model tab-owned navigation paths. `withEnvironments()` survives as RouterPath-only injection for sheets.
+- App target holds `.shared` references directly (composition-root style) — FactoryKit not added to app target pbxproj.
+- Leftovers for T5 consideration: dead `.environment(tabCoordinator)` in `MainTabView.swift:32`; hardcoded DEBUG `Button("Debug Config")` in `SettingsView.swift:46`; direct `.shared` accesses in view closures (e.g. `UserPreferences.shared` in StatisticsTab, `HapticManager.shared`) that could optionally become `@Injected`.
+- PR #90 merged into `factory-reformat` (merge commit `dbac3ab`).
 
 ---
 

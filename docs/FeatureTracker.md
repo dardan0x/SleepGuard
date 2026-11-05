@@ -46,12 +46,12 @@ Last updated: 2026-11-05
 | Blocked | 0 |
 | — | — |
 | Total Tasks | 110 |
-| Tasks Done | 91 |
+| Tasks Done | 92 |
 | Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
-| Tasks Backlog | 19 |
+| Tasks Backlog | 18 |
 | — | — |
-| **Progress** | **83%** |
+| **Progress** | **84%** |
 
 ## Features
 
@@ -74,7 +74,7 @@ Last updated: 2026-11-05
 | F15 | Personalization & Sleep Briefing | P1 | Done | 16/16 | ██████████ 100% | [tracker](trackers/f15-personalization.md) |
 | F16 | Learn Tab | P2 | Done | 1/1 | ██████████ 100% | [tracker](trackers/f16-learn-tab.md) |
 | F17 | Swift 6 Migration | P1 | Done | 16/16 | ████████████████ 100% | [tracker](trackers/f17-swift6-migration.md) |
-| F19 | Factory DI Migration | P1 | In Progress | 2/5 | ████░░░░░░ 40% | [tracker](trackers/f19-factory-di.md) |
+| F19 | Factory DI Migration | P1 | In Progress | 3/5 | ██████░░░░ 60% | [tracker](trackers/f19-factory-di.md) |
 
 ## Activity Log
 
@@ -82,6 +82,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-11-05 | F19-T3 | Completed | UI packages fan-out: 91 views across 7 packages `@Environment` → `@Injected`; 6 Package.swift gained FactoryKit; `withAppDependencyGraph()` deleted, `withEnvironments()` reduced to RouterPath-only. Merged PR #90 |
 | 2026-11-04 | F17 complete | Completed | Swift 6 Migration done (16/16): all 11 packages + app target on v6 with strict concurrency complete; 12 PRs total (#62–#72 + local merges). Feature doc `docs/features/f17-swift6-migration.md`, session fragment `docs/sessions/2026-11-04-swift6-migration.md` |
 | 2026-11-04 | F17-T14 | Completed | Full verification: build zero errors; simulator smoke test PASS (dashboard + 4 tabs render, process healthy 60s); codegen exit 0. No scheme test action (same as baseline). Deep recording flow deferred to on-device |
 | 2026-11-04 | F17-T13 | Completed | App target → `SWIFT_VERSION = 6.0` + `SWIFT_STRICT_CONCURRENCY = complete` (Debug+Release). Compiled clean FIRST try — all 9 app files zero changes. **Entire codebase now Swift 6.** Merged PR #72 |
@@ -254,12 +255,13 @@ _Most recent first. The AI appends here after every task._
 
 | Task | Feature | Started | Assignee |
 |------|---------|---------|----------|
-| F19-T3 Remaining UI packages migration | F19 | 2026-11-05 | — |
+| F19-T4 Service composition cleanup | F19 | 2026-11-05 | — |
 
 ## Completed (last 10)
 
 | Task | Feature | Completed | Duration |
 |------|---------|-----------|----------|
+| F19-T3 Remaining UI packages migration | F19 | 2026-11-05 | — |
 | Settings Storage Limits | F6 | 2026-06-01 | — |
 | Direct Per-Event Recording | F4 | 2026-06-01 | — |
 | Incremental Background Clip Extraction | F4 | 2026-06-01 | — |
