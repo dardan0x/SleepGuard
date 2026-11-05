@@ -1,4 +1,5 @@
 import AudioEngine
+import FactoryKit
 import Foundation
 import Models
 
@@ -14,10 +15,17 @@ import Models
 public final class SessionManager {
   public static let shared = SessionManager()
 
-  private let recording = SessionRecordingController()
-  private let detection = RealtimeDetectionTracker()
+  // Resolved from the container in init rather than `@Injected`: the
+  // `@Observable` macro and `@Injected` both synthesize underscore backing
+  // storage, which collides on the same property name.
+  private let recording: SessionRecordingController
+  private let detection: RealtimeDetectionTracker
 
   private init() {
+    let recording = Container.shared.sessionRecordingController()
+    let detection = Container.shared.realtimeDetectionTracker()
+    self.recording = recording
+    self.detection = detection
     recording.attach(detection: detection)
     detection.recording = recording
   }

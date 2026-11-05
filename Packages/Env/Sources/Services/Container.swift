@@ -37,3 +37,13 @@ public extension Container {
 
   @MainActor var routerPath: Factory<RouterPath> { self { RouterPath() } }
 }
+
+extension Container {
+  // MARK: - Session composition (internal)
+
+  /// Constructed — not `.shared`-aliased — because these types are internal
+  /// to Env and owned exclusively by `SessionManager`, which performs the
+  /// cross-wiring (`attach` / weak `recording`) in its private init.
+  @MainActor var sessionRecordingController: Factory<SessionRecordingController> { self { SessionRecordingController() }.singleton }
+  @MainActor var realtimeDetectionTracker: Factory<RealtimeDetectionTracker> { self { RealtimeDetectionTracker() }.singleton }
+}
