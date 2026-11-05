@@ -1,11 +1,12 @@
 import DesignSystem
+import FactoryKit
 import Models
 import SwiftUI
 
 /// Shown when an event has no playable audio: explanation plus the event's
 /// time, duration and intensity for context.
 struct NoAudioView: View {
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   let event: SnoreEvent
 

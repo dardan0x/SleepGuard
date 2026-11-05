@@ -161,16 +161,18 @@ These are non-negotiable. They come from production patterns in apps like IceCub
 
 - **No ViewModels.** Use `@State` with a `ViewState` enum directly in the view. The view IS the view model.
 - Every data-loading view defines: `.loading`, `.loaded`, `.error`. No boolean soup (`isLoading`, `hasError`, `isEmpty`).
-- `@State` for view-local. `@Environment` for shared. Nothing in between.
+- `@State` for view-local. Shared services resolve from the container (`@Injected`). `@Environment` only for `RouterPath` and SwiftUI system values. Nothing in between.
 - Never nest `@Observable` inside another `@Observable`. It breaks observation.
 - Wrap state transitions in `withAnimation` when they affect the UI.
 
 ### Dependencies
 
-- All dependencies flow through `@Environment`. Never init-inject.
-- Shared services are `@MainActor @Observable` singletons with `.shared`.
-- Wire everything through one `withAppDependencyGraph()` function at the app root.
-- Sheets live in a separate window — they lose environment. Always call `.withEnvironments()`.
+- Views resolve shared services with `@Injected(\.service)` from the Factory container. Never init-inject.
+- Shared services are `@MainActor @Observable` singletons with `.shared`, registered in the container (`Packages/Env/Sources/Services/Container.swift`; DesignSystem registers `Theme` in its own). Feature packages never access `.shared` directly in views.
+- `@Observable` classes must NOT use `@Injected` — both macros synthesize underscore backing storage and collide (compile error). Resolve via `Container.shared.service()` in init.
+- Nonisolated code (Apple delegate methods, detached tasks) resolves via Factory's global `dependency(\.service)` — property wrappers are MainActor-bound.
+- The app target is the composition root: `SleepGuardApp`/`MainTabView` hold `.shared` references directly. FactoryKit is not an app-target dependency.
+- `RouterPath` is the deliberate exception — it stays SwiftUI `.environment` (tab-owned navigation stacks). Sheets receive it via `.withEnvironments()` (RouterPath-only).
 
 ### Navigation
 

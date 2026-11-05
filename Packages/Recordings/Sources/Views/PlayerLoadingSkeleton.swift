@@ -1,11 +1,12 @@
 import DesignSystem
+import FactoryKit
 import SwiftUI
 
 /// Placeholder shown while the player is being set up (clip controller load
 /// or legacy export). Mimics the rough shape of `EventPlayerView` so the
 /// sheet layout doesn't jump when it transitions to the real player.
 struct PlayerLoadingSkeleton: View {
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   var body: some View {
     VStack(spacing: 20) {

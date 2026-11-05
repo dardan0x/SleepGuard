@@ -1,11 +1,12 @@
 import DesignSystem
+import FactoryKit
 import Models
 import SwiftUI
 
 @MainActor
 struct ProfileStepGoalsView: View {
   @Bindable var profile: UserProfile
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   var body: some View {
     ScrollView {

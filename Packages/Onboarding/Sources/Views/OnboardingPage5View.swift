@@ -1,11 +1,12 @@
 import DesignSystem
 import Env
+import FactoryKit
 import SwiftUI
 
 struct OnboardingPage5View: View {
   let onContinue: () -> Void
-  @Environment(Theme.self) private var theme
-  @Environment(UserPreferences.self) private var userPreferences
+  @Injected(\.theme) private var theme
+  @Injected(\.userPreferences) private var userPreferences
 
   var body: some View {
     VStack(spacing: 32) {

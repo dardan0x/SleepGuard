@@ -5,7 +5,7 @@ import SwiftUI
 
 struct SessionsTab: View {
   @State private var routerPath = RouterPath()
-  @Environment(TabCoordinator.self) private var tabCoordinator
+  let tabCoordinator = TabCoordinator.shared
 
   var body: some View {
     NavigationStack(path: Binding(

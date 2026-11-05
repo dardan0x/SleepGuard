@@ -9,12 +9,12 @@ import SwiftUI
 struct StatisticsTab: View {
   @State private var routerPath = RouterPath()
   @State private var showNotificationSoftAsk = false
-  @Environment(TabCoordinator.self) private var tabCoordinator
-  @Environment(UserPreferences.self) private var userPreferences
-  @Environment(SessionManager.self) private var sessionManager
-  @Environment(HealthKitSync.self) private var healthKitSync
-  @Environment(AppConfig.self) private var appConfig
-  @Environment(NotificationPermissionManager.self) private var notificationPermissions
+  let tabCoordinator = TabCoordinator.shared
+  let userPreferences = UserPreferences.shared
+  let sessionManager = SessionManager.shared
+  let healthKitSync = HealthKitSync.shared
+  let appConfig = AppConfig.shared
+  let notificationPermissions = NotificationPermissionManager.shared
   @Environment(\.modelContext) private var modelContext
 
   var body: some View {

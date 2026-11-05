@@ -1,7 +1,8 @@
+import FactoryKit
 import SwiftUI
 
 public struct SnoringLegendView: View {
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   public init() {}
 

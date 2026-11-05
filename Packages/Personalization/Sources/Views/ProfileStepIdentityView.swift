@@ -1,11 +1,12 @@
 import DesignSystem
+import FactoryKit
 import Models
 import SwiftUI
 
 @MainActor
 struct ProfileStepIdentityView: View {
   @Bindable var profile: UserProfile
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   // Local state to avoid writing to @Model on every keystroke
   @State private var firstName: String
@@ -90,7 +91,7 @@ struct ProfileTextField: View {
   let title: String
   @Binding var text: String
   var keyboard: UIKeyboardType = .default
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   var body: some View {
     VStack(alignment: .leading, spacing: 8) {
@@ -115,7 +116,7 @@ struct ProfilePicker<T: Hashable & RawRepresentable>: View where T.RawValue: Str
   let title: String
   @Binding var selection: T
   let options: [(String, T)]
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   var body: some View {
     VStack(alignment: .leading, spacing: 10) {

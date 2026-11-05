@@ -1,13 +1,14 @@
 import AVFoundation
 import DesignSystem
 import Env
+import FactoryKit
 import SwiftUI
 import UserNotifications
 
 @MainActor
 struct SettingsPermissionsSection: View {
-  @Environment(Theme.self) private var theme
-  @Environment(NotificationPermissionManager.self) private var notifications
+  @Injected(\.theme) private var theme
+  @Injected(\.notificationPermissionManager) private var notifications
   @State private var permissionStatus: AVAudioSession.RecordPermission = .undetermined
 
   var body: some View {

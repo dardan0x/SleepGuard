@@ -1,4 +1,5 @@
 import DesignSystem
+import FactoryKit
 import Models
 import SwiftUI
 
@@ -9,7 +10,7 @@ struct SessionDetailEventsView: View {
   let onShowAll: () -> Void
   let onPlayEvent: (SnoreEvent) -> Void
   let onShareEvent: (SnoreEvent) -> Void
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   var body: some View {
     VStack(alignment: .leading, spacing: 16) {

@@ -1,11 +1,12 @@
 import DesignSystem
+import FactoryKit
 import Models
 import SwiftUI
 
 /// Row in the event list below the player: category indicator, time range,
 /// duration and intensity. Highlights when it is the active event.
 struct PlayerEventRow: View {
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   let event: SnoreEvent
   let isActive: Bool

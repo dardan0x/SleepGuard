@@ -1,4 +1,5 @@
 import DesignSystem
+import FactoryKit
 import Models
 import SwiftUI
 
@@ -8,7 +9,7 @@ struct HiddenEventsSection: View {
   let displayDurations: [UUID: TimeInterval]?
   let onPlayEvent: (SnoreEvent) -> Void
   let onShareEvent: (SnoreEvent) -> Void
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   @State private var isExpanded = false
 

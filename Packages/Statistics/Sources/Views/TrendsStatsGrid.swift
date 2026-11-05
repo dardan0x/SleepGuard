@@ -1,4 +1,5 @@
 import DesignSystem
+import FactoryKit
 import SwiftUI
 
 struct TrendsStatsGrid: View {
@@ -6,7 +7,7 @@ struct TrendsStatsGrid: View {
   let bestScore: Int
   let worstScore: Int
   let totalEvents: Int
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   var body: some View {
     let columns = [GridItem(.flexible()), GridItem(.flexible())]

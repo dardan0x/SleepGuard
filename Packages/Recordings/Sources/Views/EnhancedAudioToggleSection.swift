@@ -1,10 +1,11 @@
 import DesignSystem
+import FactoryKit
 import SwiftUI
 
 /// Band-pass + per-clip peak normalization toggle shown below the player.
 /// The binding's setter persists the choice; this view only renders it.
 struct EnhancedAudioToggleSection: View {
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   @Binding var isOn: Bool
 

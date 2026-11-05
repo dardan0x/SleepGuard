@@ -1,12 +1,13 @@
 import DesignSystem
 import Env
+import FactoryKit
 import Models
 import SwiftData
 import SwiftUI
 
 @MainActor
 public struct Last7NightsView: View {
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
   @Environment(RouterPath.self) private var routerPath
   @Query(sort: \SleepSession.startDate, order: .reverse)
   private var sessions: [SleepSession]

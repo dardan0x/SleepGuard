@@ -1,12 +1,13 @@
 import DesignSystem
 import Env
+import FactoryKit
 import SwiftData
 import SwiftUI
 
 @MainActor
 struct SettingsStorageSection: View {
-  @Environment(Theme.self) private var theme
-  @Environment(UserPreferences.self) private var userPreferences
+  @Injected(\.theme) private var theme
+  @Injected(\.userPreferences) private var userPreferences
   @Environment(\.modelContext) private var modelContext
 
   private let mbOptions = [100, 250, 500, 1000, 2000]

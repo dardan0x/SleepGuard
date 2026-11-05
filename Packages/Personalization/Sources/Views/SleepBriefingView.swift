@@ -1,4 +1,5 @@
 import DesignSystem
+import FactoryKit
 import SwiftUI
 
 @MainActor
@@ -6,7 +7,7 @@ public struct SleepBriefingView: View {
   let briefing: Briefing
   let onDismiss: () -> Void
   let onChipTap: ((String) -> Void)?
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   public init(
     briefing: Briefing,

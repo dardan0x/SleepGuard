@@ -1,10 +1,11 @@
 import DesignSystem
+import FactoryKit
 import Models
 import SwiftUI
 
 /// Snoring timeline with start/end time labels on the session summary.
 struct SessionSummaryTimeline: View {
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   let session: SleepSession
 

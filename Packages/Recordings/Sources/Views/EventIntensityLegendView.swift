@@ -1,4 +1,5 @@
 import DesignSystem
+import FactoryKit
 import Models
 import SwiftUI
 
@@ -6,7 +7,7 @@ import SwiftUI
 /// in the app. Pulls colors via `theme.intensityColor(_:)` — the same source
 /// the burst-dots and header use — so the legend never drifts out of sync.
 struct EventIntensityLegendView: View {
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   var body: some View {
     HStack(spacing: 14) {

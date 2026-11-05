@@ -1,13 +1,14 @@
 import Charts
 import DesignSystem
 import Env
+import FactoryKit
 import Models
 import SwiftData
 import SwiftUI
 
 @MainActor
 public struct TrendsView: View {
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
   @Query(sort: \SleepSession.startDate, order: .reverse)
   private var sessions: [SleepSession]
 

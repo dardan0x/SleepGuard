@@ -1,11 +1,12 @@
 import DesignSystem
+import FactoryKit
 import Models
 import SwiftUI
 
 struct Last7NightsRow: View {
   let day: DaySummary
   let onTap: () -> Void
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   var body: some View {
     Button {

@@ -1,11 +1,12 @@
 import DesignSystem
 import Env
+import FactoryKit
 import SwiftUI
 
 @MainActor
 public struct SleepSessionView: View {
-  @Environment(SessionManager.self) private var sessionManager
-  @Environment(Theme.self) private var theme
+  @Injected(\.sessionManager) private var sessionManager
+  @Injected(\.theme) private var theme
 
   public init() {}
 

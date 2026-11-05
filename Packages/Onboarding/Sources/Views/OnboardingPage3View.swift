@@ -1,9 +1,10 @@
 import DesignSystem
+import FactoryKit
 import SwiftUI
 
 struct OnboardingPage3View: View {
   let onContinue: () -> Void
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
   @State private var pulseScale: CGFloat = 1.0
 
   var body: some View {

@@ -1,11 +1,12 @@
 import DesignSystem
+import FactoryKit
 import Models
 import SwiftUI
 
 @MainActor
 struct ProfileStepPersonalView: View {
   @Bindable var profile: UserProfile
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   // Local state to avoid writing to @Model on every keystroke
   @State private var hobbiesText: String

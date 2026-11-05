@@ -1,6 +1,7 @@
 #if DEBUG
 import DesignSystem
 import Env
+import FactoryKit
 import Models
 import SwiftUI
 
@@ -8,8 +9,8 @@ import SwiftUI
 /// touching the Firebase console. Overrides take precedence over remote/cached
 /// values until reset. Strings here are intentionally not localized (dev-only).
 struct DebugConfigView: View {
-  @Environment(Theme.self) private var theme
-  @Environment(AppConfig.self) private var appConfig
+  @Injected(\.theme) private var theme
+  @Injected(\.appConfig) private var appConfig
 
   @State private var tabConfigs: [TabConfig] = []
   @State private var learnIsVisible = false

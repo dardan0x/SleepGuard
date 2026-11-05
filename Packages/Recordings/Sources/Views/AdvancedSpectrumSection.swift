@@ -1,10 +1,11 @@
 import DesignSystem
+import FactoryKit
 import SwiftUI
 
 /// Frequency-spectrum section of the advanced player: gradient-colored bars
 /// plus frequency axis labels.
 struct AdvancedSpectrumSection: View {
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   let bars: [Float]
 

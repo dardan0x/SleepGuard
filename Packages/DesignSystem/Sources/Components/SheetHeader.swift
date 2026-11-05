@@ -1,3 +1,4 @@
+import FactoryKit
 import SwiftUI
 
 public struct SheetHandle: View {
@@ -16,7 +17,7 @@ public struct SheetHandle: View {
 }
 
 public struct SheetNavHeader: View {
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
   let title: String
   let onBack: () -> Void
 

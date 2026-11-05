@@ -1,4 +1,5 @@
 import DesignSystem
+import FactoryKit
 import SwiftUI
 import WebKit
 
@@ -19,7 +20,7 @@ public struct LearnView: View {
     .background(theme.bgPrimary)
   }
 
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 }
 
 // MARK: - WebView

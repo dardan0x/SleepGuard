@@ -1,4 +1,5 @@
 import DesignSystem
+import FactoryKit
 import SwiftUI
 
 @MainActor
@@ -6,7 +7,7 @@ public struct BriefingSurveyCard: View {
   let survey: SurveyPrompt
   let onChipTap: (String) -> Void
   let onSkip: () -> Void
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   public init(
     survey: SurveyPrompt,

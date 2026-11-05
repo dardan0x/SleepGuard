@@ -1,9 +1,10 @@
 import DesignSystem
+import FactoryKit
 import SwiftUI
 
 struct OnboardingPage2View: View {
   let onContinue: () -> Void
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   var body: some View {
     VStack(spacing: 24) {

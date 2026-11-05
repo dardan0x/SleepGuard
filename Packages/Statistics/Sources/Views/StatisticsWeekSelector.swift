@@ -1,4 +1,5 @@
 import DesignSystem
+import FactoryKit
 import SwiftUI
 
 struct StatisticsWeekDay: Identifiable {
@@ -12,7 +13,7 @@ struct StatisticsWeekDay: Identifiable {
 struct StatisticsWeekSelector: View {
   let weekDays: [StatisticsWeekDay]
   let onViewTrends: () -> Void
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   var body: some View {
     VStack(spacing: 8) {

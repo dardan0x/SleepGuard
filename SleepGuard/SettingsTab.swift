@@ -7,7 +7,7 @@ import SwiftUI
 
 struct SettingsTab: View {
   @State private var routerPath = RouterPath()
-  @Environment(TabCoordinator.self) private var tabCoordinator
+  let tabCoordinator = TabCoordinator.shared
   @Environment(\.modelContext) private var modelContext
 
   var body: some View {

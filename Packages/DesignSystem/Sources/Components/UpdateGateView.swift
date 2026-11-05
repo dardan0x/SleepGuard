@@ -1,3 +1,4 @@
+import FactoryKit
 import Models
 import SwiftUI
 
@@ -9,7 +10,7 @@ public struct UpdateGateView: View {
   private let currentVersion: String
   private let openAppStore: () -> Void
 
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
   @State private var softDismissed = false
   @AppStorage("lastSoftUpdatePromptVersion") private var lastSoftPromptVersion = ""
 

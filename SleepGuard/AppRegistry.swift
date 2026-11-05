@@ -1,51 +1,16 @@
-import AudioEngine
-import DesignSystem
 import Env
-import Models
-import Onboarding
 import Recordings
-import Settings
 import SleepSession
 import Statistics
 import SwiftUI
 
 extension View {
-  func withAppDependencyGraph(
-    userPreferences: UserPreferences,
-    sessionManager: SessionManager,
-    theme: Theme,
-    audioRecorder: AudioRecorder,
-    healthKitSync: HealthKitSync,
-    watchConnectivityManager: WatchConnectivityManager,
-    soundAnalysisDetector: SoundAnalysisDetector,
-    snoreInterrupterPlayer: SnoreInterrupterPlayer,
-    appConfig: AppConfig,
-    notificationPermissionManager: NotificationPermissionManager) -> some View
-  {
-    environment(userPreferences)
-      .environment(sessionManager)
-      .environment(theme)
-      .environment(audioRecorder)
-      .environment(healthKitSync)
-      .environment(watchConnectivityManager)
-      .environment(soundAnalysisDetector)
-      .environment(snoreInterrupterPlayer)
-      .environment(appConfig)
-      .environment(notificationPermissionManager)
-  }
-
+  /// Sheets live in a separate window without the tab's environment.
+  /// Injects a fresh RouterPath so sheet content can present its own
+  /// navigation stack. Services resolve through the Factory container
+  /// (`@Injected`) and need no environment forwarding.
   func withEnvironments() -> some View {
-    environment(UserPreferences.shared)
-      .environment(SessionManager.shared)
-      .environment(Theme.shared)
-      .environment(AudioRecorder.shared)
-      .environment(HealthKitSync.shared)
-      .environment(WatchConnectivityManager.shared)
-      .environment(SoundAnalysisDetector.shared)
-      .environment(SnoreInterrupterPlayer.shared)
-      .environment(AppConfig.shared)
-      .environment(NotificationPermissionManager.shared)
-      .environment(RouterPath())
+    environment(RouterPath())
   }
 
   func withAppRouter() -> some View {

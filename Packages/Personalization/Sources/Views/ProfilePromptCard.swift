@@ -1,13 +1,14 @@
 import DesignSystem
 import Env
+import FactoryKit
 import Models
 import SwiftData
 import SwiftUI
 
 @MainActor
 public struct ProfilePromptCard: View {
-  @Environment(UserPreferences.self) private var userPreferences
-  @Environment(Theme.self) private var theme
+  @Injected(\.userPreferences) private var userPreferences
+  @Injected(\.theme) private var theme
   @Query(sort: \SleepSession.startDate, order: .reverse) private var sessions: [SleepSession]
   @Query private var profiles: [UserProfile]
   let onSetupProfile: () -> Void

@@ -1,10 +1,11 @@
 import DesignSystem
 import Env
+import FactoryKit
 import SwiftUI
 
 @MainActor
 struct RecordCustomMelodySheet: View {
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
   @Environment(\.dismiss) private var dismiss
 
   @State private var recorder = CustomMelodyRecorder()

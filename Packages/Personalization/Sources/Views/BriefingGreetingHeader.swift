@@ -1,10 +1,11 @@
 import DesignSystem
+import FactoryKit
 import SwiftUI
 
 @MainActor
 public struct BriefingGreetingHeader: View {
   let greeting: String
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   public init(greeting: String) {
     self.greeting = greeting

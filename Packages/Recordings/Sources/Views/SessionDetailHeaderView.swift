@@ -1,4 +1,5 @@
 import DesignSystem
+import FactoryKit
 import Models
 import SwiftUI
 
@@ -6,7 +7,7 @@ struct SessionDetailHeaderView: View {
   let session: SleepSession
   let score: Int
 
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   private var disturbanceCount: Int {
     session.events?.filter { $0.category != .snoring }.count ?? 0

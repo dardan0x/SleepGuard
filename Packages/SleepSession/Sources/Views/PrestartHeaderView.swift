@@ -1,9 +1,10 @@
 import DesignSystem
+import FactoryKit
 import SwiftUI
 
 /// Prestart screen header: moon icon tile + title and body copy.
 struct PrestartHeaderView: View {
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   var body: some View {
     VStack(spacing: 8) {

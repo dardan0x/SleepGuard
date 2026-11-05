@@ -1,10 +1,11 @@
 import DesignSystem
+import FactoryKit
 import SwiftUI
 
 /// Red-glow tips card on the prestart screen: keep the phone close and stay
 /// plugged in.
 struct PrestartTipsSection: View {
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   var body: some View {
     ZStack {

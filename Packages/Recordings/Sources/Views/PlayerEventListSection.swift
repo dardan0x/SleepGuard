@@ -1,11 +1,12 @@
 import DesignSystem
+import FactoryKit
 import Models
 import SwiftUI
 
 /// "Events" section below the player: every snore event of the session as
 /// tappable rows with the active event highlighted.
 struct PlayerEventListSection: View {
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   let events: [SnoreEvent]
   let currentEventIndex: Int

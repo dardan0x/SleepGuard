@@ -1,4 +1,5 @@
 import DesignSystem
+import FactoryKit
 import Models
 import SwiftUI
 
@@ -14,7 +15,7 @@ struct CalendarGridView: View {
   let sessionForDate: (Date) -> SleepSession?
   let intensityColorForSession: (SleepSession?) -> Color
   let onSelectDate: (Date) -> Void
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   private let calendar = Calendar.current
 

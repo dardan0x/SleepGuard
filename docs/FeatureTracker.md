@@ -2,7 +2,7 @@
 
 > Auto-updated by the AI after every task. This is the local source of truth.
 
-Last updated: 2026-11-03
+Last updated: 2026-11-05
 
 ---
 
@@ -27,10 +27,10 @@ Last updated: 2026-11-03
 | Backlog | 0 |
 | Blocked | 0 |
 | — | — |
-| Features (V3) | 1 |
+| Features (V3) | 2 |
 | Done | 0 |
 | In Progress | 1 |
-| Backlog | 2 |
+| Backlog | 3 |
 | Blocked | 0 |
 | — | — |
 | Features (V4) | 2 |
@@ -45,11 +45,11 @@ Last updated: 2026-11-03
 | Backlog | 0 |
 | Blocked | 0 |
 | — | — |
-| Total Tasks | 105 |
-| Tasks Done | 89 |
+| Total Tasks | 110 |
+| Tasks Done | 93 |
 | Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
-| Tasks Backlog | 16 |
+| Tasks Backlog | 17 |
 | — | — |
 | **Progress** | **85%** |
 
@@ -74,6 +74,7 @@ Last updated: 2026-11-03
 | F15 | Personalization & Sleep Briefing | P1 | Done | 16/16 | ██████████ 100% | [tracker](trackers/f15-personalization.md) |
 | F16 | Learn Tab | P2 | Done | 1/1 | ██████████ 100% | [tracker](trackers/f16-learn-tab.md) |
 | F17 | Swift 6 Migration | P1 | Done | 16/16 | ████████████████ 100% | [tracker](trackers/f17-swift6-migration.md) |
+| F19 | Factory DI Migration | P1 | In Progress | 4/5 | ████████░░ 80% | [tracker](trackers/f19-factory-di.md) |
 
 ## Activity Log
 
@@ -81,6 +82,8 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-11-05 | F19-T4 | Completed | Service composition: SessionManager internals (`SessionRecordingController` + `RealtimeDetectionTracker`) moved to internal container factories. Found `@Observable`+`@Injected` macro collision (fixed via init-time `Container.shared` resolution). Flagged pre-existing simulator recording crash (reproduced on unmodified baseline). Merged PR #91 |
+| 2026-11-05 | F19-T3 | Completed | UI packages fan-out: 91 views across 7 packages `@Environment` → `@Injected`; 6 Package.swift gained FactoryKit; `withAppDependencyGraph()` deleted, `withEnvironments()` reduced to RouterPath-only. Merged PR #90 |
 | 2026-11-04 | F17 complete | Completed | Swift 6 Migration done (16/16): all 11 packages + app target on v6 with strict concurrency complete; 12 PRs total (#62–#72 + local merges). Feature doc `docs/features/f17-swift6-migration.md`, session fragment `docs/sessions/2026-11-04-swift6-migration.md` |
 | 2026-11-04 | F17-T14 | Completed | Full verification: build zero errors; simulator smoke test PASS (dashboard + 4 tabs render, process healthy 60s); codegen exit 0. No scheme test action (same as baseline). Deep recording flow deferred to on-device |
 | 2026-11-04 | F17-T13 | Completed | App target → `SWIFT_VERSION = 6.0` + `SWIFT_STRICT_CONCURRENCY = complete` (Debug+Release). Compiled clean FIRST try — all 9 app files zero changes. **Entire codebase now Swift 6.** Merged PR #72 |
@@ -147,6 +150,9 @@ _Most recent first. The AI appends here after every task._
 | 2026-05-26 | P4-T1 HealthKit read sleep stages | Completed | `fetchSleepStages(for:)` queries HK sleep analysis samples, maps to `SleepStageSegment`; `mapSleepStage` maps core/deep/REM/awake; skips legacy/in-bed/unspecified; build succeeds |
 | 2026-05-26 | P3-T6 Build & verify | Completed | Clean build (zero errors); pre-existing asset warnings only; Phase 3 UI verified |
 | 2026-05-26 | P3-T5 Player labels | Completed | `PlayerSheetView` navigation title changes based on event category: snoring = "Snoring Player", sleep talking = "Sleep Talking Player", noise = "Noise Player"; localized 2 new title strings; build succeeds |
+| 2026-11-05 | F19-T2 | Completed | Statistics pilot: 17 views `@Environment(Theme.self)` → `@Injected(\.theme)`; RouterPath stays environment-based (pilot finding); verified on simulator; PR #89 merged |
+| 2026-11-05 | F19-T1 | Completed | Factory foundation: FactoryKit 3.5.2 in Env + DesignSystem; Container registrations for all 17 graph services (16 singletons aliasing `.shared` + routerPath unique); theme in DesignSystem (layering); PR #88 merged |
+| 2026-11-05 | F19-T0 | Planning | Factory DI migration planned: base branch `factory-reformat`, 5 task branches (`feature/f19/t1`…`t5`), PRs target `factory-reformat`, final merge to `main`. Tracker created |
 | 2026-05-26 | P3-T4 Stats grid supplement | Completed | Optional disturbance row in `SessionDetailHeaderView`: full-width `StatCard` below the 2×2 grid, shows non-snoring event count, hidden for snoring-only sessions; localized `session.disturbances`; build succeeds |
 | 2026-05-26 | P3-T3 Timeline multi-color | Completed | `SnoringTimelineView` renders events by category: snoring retains intensity colors, sleep talking = purple, noise/coughing/other = orange; `eventColor(_:)` helper; build succeeds |
 | 2026-05-26 | P3-T2 EventRow icons | Completed | Category-based icons in `EventRow`: snoring retains intensity dot, sleep talking shows purple `bubble.left.fill`, noise shows orange `waveform`; `Theme` gained `sleepTalkingColor` and `noiseColor` for P3-T3 reuse; build succeeds |
@@ -250,12 +256,14 @@ _Most recent first. The AI appends here after every task._
 
 | Task | Feature | Started | Assignee |
 |------|---------|---------|----------|
-| (none) | — | — | — |
+| F19-T5 Watch app, docs & rules rewrite | F19 | 2026-11-05 | — |
 
 ## Completed (last 10)
 
 | Task | Feature | Completed | Duration |
 |------|---------|-----------|----------|
+| F19-T4 Service composition cleanup | F19 | 2026-11-05 | — |
+| F19-T3 Remaining UI packages migration | F19 | 2026-11-05 | — |
 | Settings Storage Limits | F6 | 2026-06-01 | — |
 | Direct Per-Event Recording | F4 | 2026-06-01 | — |
 | Incremental Background Clip Extraction | F4 | 2026-06-01 | — |
