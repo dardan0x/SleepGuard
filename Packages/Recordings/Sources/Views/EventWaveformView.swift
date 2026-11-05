@@ -1,4 +1,5 @@
 import DesignSystem
+import FactoryKit
 import Models
 import SwiftUI
 
@@ -6,7 +7,7 @@ import SwiftUI
 /// player. Shows a deterministic placeholder with a loading pulse while
 /// samples are being generated.
 struct EventWaveformView: View {
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   let event: SnoreEvent
   let intensityColor: Color

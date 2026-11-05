@@ -1,10 +1,11 @@
 import DesignSystem
 import Env
+import FactoryKit
 import SwiftUI
 
 /// Wheel picker for the Snore Interrupter trigger duration.
 struct SnoreInterrupterDurationPicker: View {
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   @Binding var selection: UserPreferences.SnoreInterrupterMode
 

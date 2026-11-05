@@ -1,11 +1,12 @@
 import DesignSystem
+import FactoryKit
 import Models
 import SwiftUI
 
 /// A single melody row in the picker: selection state ring, previewing
 /// speaker bounce, name, custom-melody delete, and the selected checkmark.
 struct MelodyPickerRow: View {
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   let melody: Melody
   let isSelected: Bool

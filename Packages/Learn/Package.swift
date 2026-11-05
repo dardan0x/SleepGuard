@@ -11,6 +11,7 @@ let package = Package(
     .package(path: "../Models"),
     .package(path: "../Env"),
     .package(path: "../DesignSystem"),
+    .package(url: "https://github.com/hmlongco/Factory", from: "3.5.2"),
   ],
   targets: [
     .target(
@@ -19,6 +20,7 @@ let package = Package(
         .product(name: "Models", package: "Models"),
         .product(name: "Env", package: "Env"),
         .product(name: "DesignSystem", package: "DesignSystem"),
+        .product(name: "FactoryKit", package: "Factory"),
       ],
       path: "Sources",
       swiftSettings: [

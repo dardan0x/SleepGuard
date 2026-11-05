@@ -11,14 +11,17 @@ import SwiftData
 import SwiftUI
 
 struct MainTabView: View {
-  @Environment(Theme.self) private var theme
-  @Environment(SessionManager.self) private var sessionManager
+  // Composition root: shared services held directly (same pattern as
+  // SleepGuardApp's @State service holdings).
+  @State private var theme = Theme.shared
+  @State private var sessionManager = SessionManager.shared
+  @State private var userPreferences = UserPreferences.shared
+  @State private var appConfig = AppConfig.shared
+
   @Environment(\.modelContext) private var modelContext
-  @Environment(UserPreferences.self) private var userPreferences
-  @Environment(AppConfig.self) private var appConfig
-  @State private var tabCoordinator = TabCoordinator()
-  /// Created on first appearance — needs environment-provided
-  /// AppConfig/UserPreferences (same two-phase pattern as SessionDetailModel).
+  @State private var tabCoordinator = TabCoordinator.shared
+  /// Created on first appearance — reads the shared AppConfig/UserPreferences
+  /// (same two-phase pattern as SessionDetailModel).
   @State private var briefingController: AppBriefingController?
 
   var body: some View {

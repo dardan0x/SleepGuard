@@ -1,10 +1,11 @@
 import DesignSystem
+import FactoryKit
 import SwiftUI
 
 /// Settings-style navigation row used on the prestart screen for the Snore
 /// Interrupter: icon, title, current value, optional lockscreen note.
 struct PrestartSnoreInterrupterRow: View {
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   let icon: String
   let title: String

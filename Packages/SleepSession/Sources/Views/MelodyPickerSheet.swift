@@ -1,11 +1,12 @@
 import DesignSystem
 import Env
+import FactoryKit
 import Models
 import SwiftUI
 
 @MainActor
 struct MelodyPickerSheet: View {
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
   @Environment(\.dismiss) private var dismiss
 
   @Binding var selectedMelodyID: Int

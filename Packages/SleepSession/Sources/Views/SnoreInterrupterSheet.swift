@@ -1,12 +1,13 @@
 import DesignSystem
 import Env
+import FactoryKit
 import Models
 import SwiftUI
 
 @MainActor
 struct SnoreInterrupterSheet: View {
-  @Environment(Theme.self) private var theme
-  @Environment(UserPreferences.self) private var userPreferences
+  @Injected(\.theme) private var theme
+  @Injected(\.userPreferences) private var userPreferences
   @Environment(\.dismiss) private var dismiss
 
   @State private var draftMode: UserPreferences.SnoreInterrupterMode = .never

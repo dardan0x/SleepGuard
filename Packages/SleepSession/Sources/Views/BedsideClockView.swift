@@ -1,16 +1,17 @@
 import AudioEngine
 import DesignSystem
 import Env
+import FactoryKit
 import Models
 import SwiftUI
 
 @MainActor
 struct BedsideClockView: View {
-  @Environment(SessionManager.self) private var sessionManager
-  @Environment(AudioRecorder.self) private var audioRecorder
-  @Environment(SnoreInterrupterPlayer.self) private var snoreInterrupterPlayer
-  @Environment(AppConfig.self) private var appConfig
-  @Environment(Theme.self) private var theme
+  @Injected(\.sessionManager) private var sessionManager
+  @Injected(\.audioRecorder) private var audioRecorder
+  @Injected(\.snoreInterrupterPlayer) private var snoreInterrupterPlayer
+  @Injected(\.appConfig) private var appConfig
+  @Injected(\.theme) private var theme
 
   @State private var currentTime = Date()
   @State private var showShortSessionAlert = false

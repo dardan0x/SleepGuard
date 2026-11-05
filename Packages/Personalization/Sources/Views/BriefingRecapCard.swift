@@ -1,11 +1,12 @@
 import DesignSystem
+import FactoryKit
 import SwiftUI
 
 @MainActor
 public struct BriefingRecapCard: View {
   let headline: String
   let stats: [BriefingStat]
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   public init(headline: String, stats: [BriefingStat]) {
     self.headline = headline

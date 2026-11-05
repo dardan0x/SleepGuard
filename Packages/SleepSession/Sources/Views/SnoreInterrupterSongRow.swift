@@ -1,10 +1,11 @@
 import DesignSystem
+import FactoryKit
 import SwiftUI
 
 /// Song selection row in the Snore Interrupter sheet: music tile, title,
 /// current melody name, chevron.
 struct SnoreInterrupterSongRow: View {
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   let melodyName: String
   let action: () -> Void

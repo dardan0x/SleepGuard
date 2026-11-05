@@ -1,10 +1,11 @@
 import DesignSystem
 import Env
+import FactoryKit
 import SwiftUI
 
 public struct OnboardingView: View {
-  @Environment(UserPreferences.self) private var userPreferences
-  @Environment(Theme.self) private var theme
+  @Injected(\.userPreferences) private var userPreferences
+  @Injected(\.theme) private var theme
   @State private var currentPage = 0
   private let totalPages = 6
 

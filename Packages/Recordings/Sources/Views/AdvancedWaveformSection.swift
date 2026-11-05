@@ -1,11 +1,12 @@
 import DesignSystem
+import FactoryKit
 import Models
 import SwiftUI
 
 /// Waveform section of the advanced player: tappable waveform shape plus
 /// the seek hint.
 struct AdvancedWaveformSection: View {
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   let samples: [Float]
   let intensityColor: Color

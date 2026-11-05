@@ -1,5 +1,6 @@
 import DesignSystem
 import Env
+import FactoryKit
 import Models
 import SwiftUI
 
@@ -7,9 +8,9 @@ import SwiftUI
 /// `AppConfig` and falls back to an empty state when none is configured.
 public struct LearnTab: View {
   @State private var routerPath = RouterPath()
-  @Environment(TabCoordinator.self) private var tabCoordinator
-  @Environment(AppConfig.self) private var appConfig
-  @Environment(Theme.self) private var theme
+  @Injected(\.tabCoordinator) private var tabCoordinator
+  @Injected(\.appConfig) private var appConfig
+  @Injected(\.theme) private var theme
 
   public init() {}
 

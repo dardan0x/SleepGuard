@@ -1,9 +1,10 @@
 import DesignSystem
+import FactoryKit
 import SwiftUI
 
 /// Single tip row: leading accent icon + guidance text.
 struct PrestartTipRow: View {
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   let icon: String
   let text: String

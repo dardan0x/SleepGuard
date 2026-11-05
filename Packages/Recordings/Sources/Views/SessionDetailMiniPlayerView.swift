@@ -1,4 +1,5 @@
 import DesignSystem
+import FactoryKit
 import Models
 import SwiftUI
 
@@ -14,7 +15,7 @@ struct SessionDetailMiniPlayerView: View {
   let onTogglePlayback: () -> Void
   let onScrub: (Double) -> Void
   let onExpand: () -> Void
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   init(
     session: SleepSession,

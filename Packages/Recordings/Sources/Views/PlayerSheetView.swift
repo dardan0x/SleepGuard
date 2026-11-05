@@ -1,6 +1,7 @@
 import AudioEngine
 import DesignSystem
 import Env
+import FactoryKit
 import Models
 import SwiftUI
 
@@ -16,7 +17,7 @@ public struct PlayerSheetView: View {
   let isClipSession: Bool
   let initialEvent: SnoreEvent?
 
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
   @Environment(\.dismiss) private var dismiss
 
   @State private var playbackController = ClipPlaybackController()

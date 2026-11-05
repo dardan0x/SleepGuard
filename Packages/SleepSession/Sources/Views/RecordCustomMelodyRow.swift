@@ -1,9 +1,10 @@
 import DesignSystem
+import FactoryKit
 import SwiftUI
 
 /// The "Record yours" entry row at the top of the melody picker.
 struct RecordCustomMelodyRow: View {
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   let action: () -> Void
 

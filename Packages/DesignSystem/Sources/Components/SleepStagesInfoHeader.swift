@@ -1,8 +1,9 @@
+import FactoryKit
 import SwiftUI
 
 /// Header bar of the sleep-stages info sheet: title + close button.
 struct SleepStagesInfoHeader: View {
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
   @Environment(\.dismiss) private var dismiss
 
   var body: some View {

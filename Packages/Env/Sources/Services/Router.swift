@@ -53,6 +53,8 @@ public final class RouterPath {
 @MainActor
 @Observable
 public final class TabCoordinator {
+  public static let shared = TabCoordinator()
+
   public var selectedTab: AppTab = AppConfig.shared.visibleTabsInOrder.first ?? .statistics
   public var resetSignal: TabResetSignal?
 

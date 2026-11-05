@@ -1,10 +1,11 @@
+import FactoryKit
 import Models
 import SwiftUI
 
 public struct LowBatteryBannerView: View {
   public let session: SleepSession
 
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   public init(session: SleepSession) {
     self.session = session

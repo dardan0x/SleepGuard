@@ -1,10 +1,11 @@
 import DesignSystem
+import FactoryKit
 import SwiftUI
 
 /// Banner shown on the bedside clock when the Snore Interrupter is armed:
 /// melody-enabled note + "Mute for session" action.
 struct BedsideMelodyDisclaimer: View {
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   let onMute: () -> Void
 

@@ -1,13 +1,14 @@
 import DesignSystem
 import Env
+import FactoryKit
 import Models
 import SwiftUI
 
 @MainActor
 struct SettingsRecordingSection: View {
-  @Environment(Theme.self) private var theme
-  @Environment(UserPreferences.self) private var userPreferences
-  @Environment(AppConfig.self) private var appConfig
+  @Injected(\.theme) private var theme
+  @Injected(\.userPreferences) private var userPreferences
+  @Injected(\.appConfig) private var appConfig
 
   private var sensitivityBinding: Binding<UserPreferences.DetectionSensitivity> {
     Binding(

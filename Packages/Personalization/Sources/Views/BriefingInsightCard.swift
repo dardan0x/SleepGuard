@@ -1,10 +1,11 @@
 import DesignSystem
+import FactoryKit
 import SwiftUI
 
 @MainActor
 public struct BriefingInsightCard: View {
   let insight: String
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   public init(insight: String) {
     self.insight = insight

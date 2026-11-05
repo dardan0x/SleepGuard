@@ -1,13 +1,14 @@
 import DesignSystem
 import Env
+import FactoryKit
 import SwiftData
 import SwiftUI
 
 @MainActor
 struct SettingsDataSection: View {
-  @Environment(Theme.self) private var theme
-  @Environment(UserPreferences.self) private var userPreferences
-  @Environment(HealthKitSync.self) private var healthKitSync
+  @Injected(\.theme) private var theme
+  @Injected(\.userPreferences) private var userPreferences
+  @Injected(\.healthKitSync) private var healthKitSync
   @Environment(\.modelContext) private var modelContext
   let onShowDeleteConfirmation: () -> Void
 

@@ -1,10 +1,11 @@
 import DesignSystem
+import FactoryKit
 import SwiftUI
 
 /// The glowing "Save Session" capsule + the plain Discard button on the
 /// session summary screen.
 struct SessionSummaryActions: View {
-  @Environment(Theme.self) private var theme
+  @Injected(\.theme) private var theme
 
   let onSave: () -> Void
   let onDiscard: () -> Void
