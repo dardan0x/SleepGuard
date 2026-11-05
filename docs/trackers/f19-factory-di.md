@@ -44,7 +44,7 @@ Final merge to `main`: https://github.com/dardan0x/SleepGuard/compare/main...fac
 | F19-T1 | Factory foundation in Env | Infra | Done | — | Env | 2026-11-05 | 2026-11-05 |
 | F19-T2 | Statistics package pilot | UI | Done | F19-T1 | Statistics | 2026-11-05 | 2026-11-05 |
 | F19-T3 | Remaining UI packages migration | UI | Done | F19-T2 | SleepSession, Recordings, Settings, Personalization, Onboarding, Learn | 2026-11-05 | 2026-11-05 |
-| F19-T4 | Service composition cleanup | Infra | Backlog | F19-T1 | Env | — | — |
+| F19-T4 | Service composition cleanup | Infra | Done | F19-T1 | Env | 2026-11-05 | 2026-11-05 |
 | F19-T5 | Watch app, docs & rules rewrite | Docs | Backlog | F19-T3, F19-T4 | WatchApp + docs | — | — |
 
 ## Task Details
@@ -135,21 +135,24 @@ User: "continue with T3" — fan out the T2 pilot pattern to the remaining UI pa
 | Field | Value |
 |-------|-------|
 | Arch Ref | docs/architecture/concurrency.md |
-| Status | Backlog |
-| Started | — |
-| Completed | — |
+| Status | Done |
+| Started | 2026-11-05 |
+| Completed | 2026-11-05 |
 
 **Acceptance Criteria:**
-- [ ] Internal hand-wired sub-components moved into container factories (e.g. `SessionManager`'s `SessionRecordingController` + `RealtimeDetectionTracker`) with init injection inside Env only
-- [ ] Nonisolated classes (Apple delegates: WCSession, SNResultsObserving, AVAudioPlayerDelegate) use Factory's global `dependency(\.…)` function instead of property wrappers
-- [ ] `dependency(\.…)` helper exposed from Env if needed to hide Factory from call sites
-- [ ] Builds with zero errors
+- [x] Internal hand-wired sub-components moved into container factories (`SessionManager`'s `SessionRecordingController` + `RealtimeDetectionTracker`) with init injection inside Env only
+- [x] Nonisolated classes (Apple delegates) use `dependency(\.…)` — **vacuous: verified all three delegate classes (WCSession, SNResultsObserving, AVAudioPlayerDelegate) access no other service from nonisolated code** — they parse payloads synchronously and hop via `Task { @MainActor in }` to own state only. No call sites exist; nothing speculative added
+- [x] `dependency(\.…)` helper exposed — **not needed** (conditional on previous criterion)
+- [x] Builds with zero errors (verified twice; layering check green)
 
 **Prompt Used:**
-_(filled after task completion)_
+User: "continue" — T4 after T3 merge (PR #90).
 
 **Notes:**
-Depends only on T1 — can run in parallel with T2/T3.
+- **Finding: `@Observable` + `@Injected` collide** — both macros synthesize underscore backing storage → "invalid redeclaration of synthesized property" compile error. `@Observable` classes must resolve via `Container.shared.x()` in init. Rule lands in T5's AGENTS.md rewrite.
+- `SpeechDetector`/`SnoreDetector` (AudioEngine `.shared`) intentionally not containerized — FactoryKit in the core package for two internal call sites is unjustified.
+- **Pre-existing issue flagged:** starting a recording in the simulator crashes (EXC_BREAKPOINT in `installTap`, AVFAudio realtime thread) — reproduced identically on the unmodified `factory-reformat` baseline, even with mic permission granted. Not a T4 regression; needs separate investigation or on-device verification.
+- PR #91 merged into `factory-reformat` (merge commit `c033305`).
 
 ---
 
