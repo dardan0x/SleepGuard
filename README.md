@@ -78,7 +78,7 @@ A modular Swift Package layout with strict isolation: **feature packages never i
 
 **Patterns enforced project-wide:**
 - `@State` + a `ViewState` enum per data-loading view — **no ViewModels**, no boolean soup.
-- Dependencies flow through `@Environment`; shared services are `.shared` singletons.
+- Dependencies resolve from a [Factory](https://github.com/hmlongco/Factory) container — views use `@Injected(\.service)`; `@Observable` classes resolve via `Container.shared` in init. Shared services stay `.shared` singletons, registered in `Packages/Env/Sources/Services/Container.swift`; only `RouterPath` flows through SwiftUI `.environment`.
 - All navigation goes through `RouterPath` (`RouterDestination` for push, `SheetDestination` for modals); each tab owns its own path.
 - `async/await` everywhere — no Combine, no GCD, no completion handlers.
 - **Swift 6 with strict concurrency everywhere** — language mode v6 in all packages, `SWIFT_STRICT_CONCURRENCY = complete` in the app target. `Sendable`/isolation violations are compile errors, fixed properly (never `@unchecked Sendable`). Core packages (`Models`, `Env`, `AudioEngine`) use explicit `@MainActor` annotations; the UI packages declare `MainActor` default isolation.
@@ -112,7 +112,7 @@ Or open `SleepGuard.xcodeproj` in Xcode, select the **SleepGuard** scheme, and r
 
 ```
 SleepGuard/
-├── SleepGuard/              # App target — entry point, tabs, dependency graph, route registry
+├── SleepGuard/              # App target — entry point, tabs, composition root, route registry
 ├── SleepGuard.xcodeproj/
 ├── Packages/                # 11 feature & support packages (see Architecture)
 ├── WatchApp/                # watchOS companion

@@ -46,10 +46,10 @@ Last updated: 2026-11-05
 | Blocked | 0 |
 | — | — |
 | Total Tasks | 110 |
-| Tasks Done | 93 |
+| Tasks Done | 94 |
 | Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
-| Tasks Backlog | 17 |
+| Tasks Backlog | 16 |
 | — | — |
 | **Progress** | **85%** |
 
@@ -74,7 +74,7 @@ Last updated: 2026-11-05
 | F15 | Personalization & Sleep Briefing | P1 | Done | 16/16 | ██████████ 100% | [tracker](trackers/f15-personalization.md) |
 | F16 | Learn Tab | P2 | Done | 1/1 | ██████████ 100% | [tracker](trackers/f16-learn-tab.md) |
 | F17 | Swift 6 Migration | P1 | Done | 16/16 | ████████████████ 100% | [tracker](trackers/f17-swift6-migration.md) |
-| F19 | Factory DI Migration | P1 | In Progress | 4/5 | ████████░░ 80% | [tracker](trackers/f19-factory-di.md) |
+| F19 | Factory DI Migration | P1 | Done | 5/5 | ██████████ 100% | [tracker](trackers/f19-factory-di.md) |
 
 ## Activity Log
 
@@ -82,6 +82,8 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-11-05 | F19 complete | Completed | Factory DI Migration done (5/5): dependency injection moved from SwiftUI environment to Factory container — T1 foundation (17 Env + Theme registrations), T2 Statistics pilot, T3 fan-out (91 views, 7 packages), T4 service composition, T5 watch eval + rules rewrite + feature doc. Key findings: RouterPath must stay environment-based; `@Observable`+`@Injected` macro collision. Pre-existing sim recording crash flagged (reproduced on baseline). Feature doc `docs/features/f19-factory-di.md`. PRs #88–#92 |
+| 2026-11-05 | F19-T5 | Completed | Watch app documented skip; AGENTS.md/CLAUDE.md Dependencies rules rewritten for Factory DI; docs/architecture synced; feature doc created. Merged PR #92 |
 | 2026-11-05 | F19-T4 | Completed | Service composition: SessionManager internals (`SessionRecordingController` + `RealtimeDetectionTracker`) moved to internal container factories. Found `@Observable`+`@Injected` macro collision (fixed via init-time `Container.shared` resolution). Flagged pre-existing simulator recording crash (reproduced on unmodified baseline). Merged PR #91 |
 | 2026-11-05 | F19-T3 | Completed | UI packages fan-out: 91 views across 7 packages `@Environment` → `@Injected`; 6 Package.swift gained FactoryKit; `withAppDependencyGraph()` deleted, `withEnvironments()` reduced to RouterPath-only. Merged PR #90 |
 | 2026-11-04 | F17 complete | Completed | Swift 6 Migration done (16/16): all 11 packages + app target on v6 with strict concurrency complete; 12 PRs total (#62–#72 + local merges). Feature doc `docs/features/f17-swift6-migration.md`, session fragment `docs/sessions/2026-11-04-swift6-migration.md` |
@@ -256,12 +258,13 @@ _Most recent first. The AI appends here after every task._
 
 | Task | Feature | Started | Assignee |
 |------|---------|---------|----------|
-| F19-T5 Watch app, docs & rules rewrite | F19 | 2026-11-05 | — |
+| (none — F19 complete; awaiting next priority) | — | — | — |
 
 ## Completed (last 10)
 
 | Task | Feature | Completed | Duration |
 |------|---------|-----------|----------|
+| F19-T5 Watch app, docs & rules rewrite | F19 | 2026-11-05 | — |
 | F19-T4 Service composition cleanup | F19 | 2026-11-05 | — |
 | F19-T3 Remaining UI packages migration | F19 | 2026-11-05 | — |
 | Settings Storage Limits | F6 | 2026-06-01 | — |

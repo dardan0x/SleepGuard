@@ -45,7 +45,7 @@ Final merge to `main`: https://github.com/dardan0x/SleepGuard/compare/main...fac
 | F19-T2 | Statistics package pilot | UI | Done | F19-T1 | Statistics | 2026-11-05 | 2026-11-05 |
 | F19-T3 | Remaining UI packages migration | UI | Done | F19-T2 | SleepSession, Recordings, Settings, Personalization, Onboarding, Learn | 2026-11-05 | 2026-11-05 |
 | F19-T4 | Service composition cleanup | Infra | Done | F19-T1 | Env | 2026-11-05 | 2026-11-05 |
-| F19-T5 | Watch app, docs & rules rewrite | Docs | Backlog | F19-T3, F19-T4 | WatchApp + docs | — | — |
+| F19-T5 | Watch app, docs & rules rewrite | Docs | Done | F19-T3, F19-T4 | WatchApp + docs | 2026-11-05 | 2026-11-05 |
 
 ## Task Details
 
@@ -161,22 +161,24 @@ User: "continue" — T4 after T3 merge (PR #90).
 | Field | Value |
 |-------|-------|
 | Arch Ref | AGENTS.md, docs/architecture/dependencies.md |
-| Status | Backlog |
-| Started | — |
-| Completed | — |
+| Status | Done |
+| Started | 2026-11-05 |
+| Completed | 2026-11-05 |
 
 **Acceptance Criteria:**
-- [ ] Watch app target evaluated; migrated if low-risk (4 source files, self-contained) or documented skip
-- [ ] `AGENTS.md` DI rules rewritten: `@Environment` dependency flow → `@Injected` container injection; `.shared` → container-owned singletons; sheet re-injection rule removed; `@MainActor` resolution rule added
-- [ ] `docs/architecture/dependencies.md` rewritten to match
-- [ ] `docs/features/f19-factory-di.md` feature doc created (files/routes/state tables)
-- [ ] Builds with zero errors
+- [x] Watch app target evaluated — **documented skip**: no package structure, one self-contained singleton (`WatchSessionManager.shared`) accessed twice; FactoryKit would require watch-target pbxproj edits for zero gain (also noted in f17 follow-up)
+- [x] `AGENTS.md` DI rules rewritten: `@Environment` dependency flow → `@Injected` container injection; `.shared` → container-owned singletons; sheet re-injection rule removed (RouterPath-only exception); `@MainActor` resolution rules added (incl. `@Observable`+`@Injected` macro collision from T4). `CLAUDE.md` + both templates synced
+- [x] `docs/architecture/dependencies.md` rewritten to match (plus rules.md, INDEX, overview, state, views, feature-template, navigation, PROMPTS — those are gitignored local docs)
+- [x] `docs/features/f19-factory-di.md` feature doc created (files/state/edge-cases tables)
+- [x] Builds with zero errors; layering check green
 
 **Prompt Used:**
-_(filled after task completion)_
+User: "continue" — T5 after T4 merge (PR #91).
 
 **Notes:**
-The AGENTS.md rule rewrite is a deliberate, user-approved deviation from the original IceCubes-style rules.
+- T3 orphan closed: dead `.environment(tabCoordinator)` removed from `MainTabView.swift`.
+- T3 leftovers documented in feature-doc follow-up (not migrated): direct `.shared` in view closures (`UserPreferences.shared` in StatisticsTab, `HapticManager.shared`); hardcoded DEBUG `Button("Debug Config")` in SettingsView (pre-existing).
+- PR #92 merged into `factory-reformat` (merge commit `96d3b0e`). **F19 complete — ready for `factory-reformat` → `main` merge.**
 
 ---
 
