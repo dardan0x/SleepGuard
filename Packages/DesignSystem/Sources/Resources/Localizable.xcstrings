@@ -4660,6 +4660,17 @@
           }
         }
       }
+    },
+    "widget.lastNight.inline": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Score %@ · %@ snoring"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

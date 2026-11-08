@@ -432,6 +432,7 @@ public enum Strings {
   public static var widgetLastNightDescription: String { String(localized: "widget.lastNight.description", bundle: .module) }
   public static var widgetLastNightEmptyAction: String { String(localized: "widget.lastNight.empty.action", bundle: .module) }
   public static var widgetLastNightEmptyTitle: String { String(localized: "widget.lastNight.empty.title", bundle: .module) }
+  public static var widgetLastNightInline: String { String(localized: "widget.lastNight.inline", bundle: .module) }
   public static var widgetLastNightLabel: String { String(localized: "widget.lastNight.label", bundle: .module) }
   public static var widgetLastNightName: String { String(localized: "widget.lastNight.name", bundle: .module) }
   public static var widgetLastNightSlept: String { String(localized: "widget.lastNight.slept", bundle: .module) }

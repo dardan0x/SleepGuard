@@ -12,7 +12,7 @@ struct LastNightWidget: Widget {
     }
     .configurationDisplayName(Strings.widgetLastNightName)
     .description(Strings.widgetLastNightDescription)
-    .supportedFamilies([.systemSmall, .systemMedium])
+    .supportedFamilies([.systemSmall, .systemMedium, .accessoryCircular, .accessoryRectangular, .accessoryInline])
   }
 }
 
@@ -24,6 +24,13 @@ struct LastNightWidget: Widget {
 }
 
 #Preview(as: .systemMedium) {
+  LastNightWidget()
+} timeline: {
+  SnapshotEntry(date: .now, snapshot: .sample)
+  SnapshotEntry(date: .now, snapshot: .empty)
+}
+
+#Preview(as: .accessoryRectangular) {
   LastNightWidget()
 } timeline: {
   SnapshotEntry(date: .now, snapshot: .sample)

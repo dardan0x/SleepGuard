@@ -9,13 +9,20 @@ struct LastNightWidgetView: View {
 
   var body: some View {
     Group {
-      if let night {
-        switch family {
-        case .systemMedium: LastNightMediumView(night: night)
-        default: LastNightSmallView(night: night)
+      switch family {
+      case .accessoryCircular: LastNightCircularView(night: night)
+      case .accessoryRectangular: LastNightRectangularView(night: night)
+      case .accessoryInline: LastNightInlineView(night: night)
+      default:
+        if let night {
+          if family == .systemMedium {
+            LastNightMediumView(night: night)
+          } else {
+            LastNightSmallView(night: night)
+          }
+        } else {
+          WidgetEmptyView()
         }
-      } else {
-        WidgetEmptyView()
       }
     }
     .containerBackground(Theme.shared.bgSecondary, for: .widget)
