@@ -7,8 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		F20A00000000000000000001 /* Models in Frameworks */ = {isa = PBXBuildFile; productRef = F20A00000000000000000003 /* Models */; };
-		F20A00000000000000000002 /* DesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = F20A00000000000000000004 /* DesignSystem */; };
 		1A2C26235B1C018F311D03EB /* Statistics in Frameworks */ = {isa = PBXBuildFile; productRef = 62657171C5FF70E51F817515 /* Statistics */; };
 		2482AD2FD2D1857B89507B2E /* DesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = A50DD8EF59A6D6A1BBB7A244 /* DesignSystem */; };
 		3E6C34CBE4058605247D0A36 /* Models in Frameworks */ = {isa = PBXBuildFile; productRef = 47C01997BFA64842BA01B54E /* Models */; };
@@ -33,6 +31,8 @@
 		E962CD02720B46D347403017 /* Recordings in Frameworks */ = {isa = PBXBuildFile; productRef = 613CAAD887F993446993F409 /* Recordings */; };
 		EA3B0BCFD10182B987547C8B /* AudioEngine in Frameworks */ = {isa = PBXBuildFile; productRef = 38CD50332392049638D060DF /* AudioEngine */; };
 		ED7B3283E6D3573708241C8E /* sounds in Resources */ = {isa = PBXBuildFile; fileRef = CE587D245C122AB22F7BD248 /* sounds */; };
+		F20A00000000000000000001 /* Models in Frameworks */ = {isa = PBXBuildFile; productRef = F20A00000000000000000003 /* Models */; };
+		F20A00000000000000000002 /* DesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = F20A00000000000000000004 /* DesignSystem */; };
 		FAED5AD98781D85AB7AFA7A5 /* SleepSession in Frameworks */ = {isa = PBXBuildFile; productRef = A6305AFA32B7A77ECFB0A19F /* SleepSession */; };
 /* End PBXBuildFile section */
 
@@ -67,6 +67,7 @@
 		CE09839A309FF97A002E275D /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		CE09839C309FF97B002E275D /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		CE0983AE309FFA12002E275D /* SleepGuardWidgetsExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SleepGuardWidgetsExtension.entitlements; sourceTree = "<group>"; };
+		CE0984E3309FFF73002E275D /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
 		CE1472B62FC47140009A5425 /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
 		CE1563D52FDA041100A53611 /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
 		CE15643C2FDA27BA00A53611 /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
@@ -179,6 +180,11 @@
 				CE09839C309FF97B002E275D /* SwiftUI.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		CE0984E6309FFF73002E275D /* Products */ = {
+			isa = PBXGroup;
+			name = Products;
 			sourceTree = "<group>";
 		};
 		CE1472B92FC47140009A5425 /* Products */ = {
@@ -394,6 +400,10 @@
 					ProjectRef = CE158A3C2FAB2EC7001B61AA /* SleepGuard.xcodeproj */;
 				},
 				{
+					ProductGroup = CE0984E6309FFF73002E275D /* Products */;
+					ProjectRef = CE0984E3309FFF73002E275D /* SleepGuard.xcodeproj */;
+				},
+				{
 					ProductGroup = CE2590162FAD1D8E004C0C0D /* Products */;
 					ProjectRef = CE2590142FAD1D8E004C0C0D /* SleepGuard.xcodeproj */;
 				},
@@ -563,10 +573,10 @@
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -598,10 +608,10 @@
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -944,16 +954,6 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		F20A00000000000000000003 /* Models */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 8BD2D33DB910A0A051BC520A /* XCLocalSwiftPackageReference "Packages/Models" */;
-			productName = Models;
-		};
-		F20A00000000000000000004 /* DesignSystem */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = C1ABFA1084CFC1B1142A5354 /* XCLocalSwiftPackageReference "Packages/DesignSystem" */;
-			productName = DesignSystem;
-		};
 		167C10ECFE58FBF4929EF997 /* Settings */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 4A855F6D6797671D082B748B /* XCLocalSwiftPackageReference "Packages/Settings" */;
@@ -1057,6 +1057,16 @@
 		E553575F91A447F10F3BDF08 /* DesignSystem */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 7A886DCB087D86E4AC2E7336 /* XCLocalSwiftPackageReference "Packages/DesignSystem" */;
+			productName = DesignSystem;
+		};
+		F20A00000000000000000003 /* Models */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8BD2D33DB910A0A051BC520A /* XCLocalSwiftPackageReference "Packages/Models" */;
+			productName = Models;
+		};
+		F20A00000000000000000004 /* DesignSystem */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C1ABFA1084CFC1B1142A5354 /* XCLocalSwiftPackageReference "Packages/DesignSystem" */;
 			productName = DesignSystem;
 		};
 /* End XCSwiftPackageProductDependency section */
