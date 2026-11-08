@@ -4605,6 +4605,39 @@
           }
         }
       }
+    },
+    "widget.trend.name": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "7-Night Trend"
+          }
+        }
+      }
+    },
+    "widget.trend.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your sleep score over the last seven nights."
+          }
+        }
+      }
+    },
+    "widget.trend.label": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LAST 7 NIGHTS"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

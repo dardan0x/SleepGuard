@@ -5,21 +5,21 @@ import WidgetKit
 
 struct LastNightWidgetView: View {
   @Environment(\.widgetFamily) private var family
-  let entry: LastNightEntry
+  let night: WidgetSnapshot.Night?
 
   var body: some View {
     Group {
-      if let night = entry.night {
+      if let night {
         switch family {
         case .systemMedium: LastNightMediumView(night: night)
         default: LastNightSmallView(night: night)
         }
       } else {
-        LastNightEmptyView()
+        WidgetEmptyView()
       }
     }
     .containerBackground(Theme.shared.bgSecondary, for: .widget)
-    .widgetURL((entry.night.map { WidgetDeepLink.session($0.id) } ?? .startTracking).url)
+    .widgetURL((night.map { WidgetDeepLink.session($0.id) } ?? .startTracking).url)
   }
 }
 

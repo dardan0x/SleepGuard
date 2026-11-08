@@ -2,7 +2,7 @@ import DesignSystem
 import SwiftUI
 
 /// No saved night yet; the whole widget links to `sleepguard://start`.
-struct LastNightEmptyView: View {
+struct WidgetEmptyView: View {
   let theme = Theme.shared
 
   var body: some View {

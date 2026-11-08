@@ -5,5 +5,6 @@ import WidgetKit
 struct SleepGuardWidgetsBundle: WidgetBundle {
   var body: some Widget {
     LastNightWidget()
+    TrendWidget()
   }
 }
