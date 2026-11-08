@@ -28,7 +28,7 @@ Users can add SleepGuard widgets to the Home Screen and Lock Screen: last night'
 | F20-T5 | Last Night widget (small + medium) | UI | Done | F20-T3, F20-T4 | SleepGuardWidgets | 2026-11-08 | 2026-11-08 |
 | F20-T6 | 7-Night Trend widget (medium) | UI | Done | F20-T5 | SleepGuardWidgets | 2026-11-08 | 2026-11-08 |
 | F20-T7 | Start Tracking widget (small) | UI | Done | F20-T4 | SleepGuardWidgets | 2026-11-08 | 2026-11-08 |
-| F20-T8 | Lock Screen accessories | UI | Backlog | F20-T5 | SleepGuardWidgets | — | — |
+| F20-T8 | Lock Screen accessories | UI | In Progress | F20-T5 | SleepGuardWidgets | 2026-11-08 | — |
 | F20-T9 | Verification, docs, merge to main | Docs | Backlog | F20-T1…T8 | — | — | — |
 
 ## Task Details
@@ -211,9 +211,27 @@ Users can add SleepGuard widgets to the Home Screen and Lock Screen: last night'
 
 ### F20-T8 — Lock Screen accessories
 
+| Field | Value |
+|-------|-------|
+| Arch Ref | `docs/architecture/views.md` |
+| Status | In Progress (code done; Lock Screen render unverified) |
+| Started | 2026-11-08 |
+| Completed | — |
+
 **Acceptance Criteria:**
-- [ ] `accessoryCircular`, `accessoryRectangular`, `accessoryInline` render correctly in vibrant mode
-- [ ] Builds with zero errors
+- [ ] `accessoryCircular`, `accessoryRectangular`, `accessoryInline` render correctly in vibrant mode (**not verified**: couldn't lock the simulator via automation; needs a manual check)
+- [x] Builds with zero errors
+
+**Prompt Used:**
+"continue with next tasks"
+
+**Notes:**
+- Added to the existing `LastNightWidget` (no new widget kind): `.supportedFamilies` now includes the 3 accessory families. `LastNightWidgetView` switches on `widgetFamily` first; the accessory views handle `night == nil` themselves.
+- `LastNightCircularView`: `Gauge(score, 0...100)` with `.accessoryCircularCapacity`, the score as the current value, `widgetAccentable()`. Empty: `AccessoryWidgetBackground` + moon.
+- `LastNightRectangularView`: "Last Night" (headline, accentable) / score (title2 bold) + "SLEEP SCORE" / "Snoring 51 mins · 12%". Empty: "No nights yet" / "Tap to start tracking".
+- `LastNightInlineView`: `Label` with moon + `widget.lastNight.inline` ("Score %@ · %@ snoring"). Empty: "No nights yet".
+- No Theme colors in the accessory views (vibrant mode is monochrome). Tap targets come from the shared `widgetURL` (session / start).
+- Verification blocker: 3 simulators are booted, and the Simulator "Device → Lock" menu item (via AppleScript, even after raising the iPhone 16e window) didn't lock BD630AD5. Stopped after 2 attempts.
 
 ### F20-T9 — Verification, docs, merge
 
