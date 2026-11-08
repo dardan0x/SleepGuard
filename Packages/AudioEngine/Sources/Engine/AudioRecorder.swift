@@ -38,18 +38,13 @@ public final class AudioRecorder {
   public var hasPermission = false
   /// Whether audio is currently being written to a file. Set to false after repeated write failures.
   public var isWritingToFile = false
-  /// The event file currently being written to, if any.
-  public private(set) var currentEventFile: AVAudioFile?
   public private(set) var currentEventID: UUID?
 
   private var audioEngine: AVAudioEngine?
   private var warmupEngine: AVAudioEngine?
-  private var audioFile: AVAudioFile?
-  private let fftAnalyzer = FFTAnalyzer(bufferSize: 1024)
+  private let tap = TapProcessor()
   private let soundAnalyzer = SoundAnalysisDetector.shared
-  private var cumulativeFramePosition: AVAudioFramePosition = 0
   private var recordingFormat: AVAudioFormat?
-  private var consecutiveWriteFailures = 0
 
   private init() {
     checkPermission()
@@ -208,61 +203,20 @@ public final class AudioRecorder {
     }
 
     if let audioFileURL {
-      audioFile = try AVAudioFile(forWriting: audioFileURL, settings: format.settings)
+      tap.audioFile = try AVAudioFile(forWriting: audioFileURL, settings: format.settings)
     }
-    isWritingToFile = audioFile != nil || currentEventFile != nil
+    isWritingToFile = tap.isWritingToFile
 
     // Tap the microphone directly. A record-only graph that routes the input
     // through to mainMixerNode also feeds the speaker, and relying on volume = 0
     // to mute it leaks — a mic that can hear the speaker forms a feedback loop.
     // Tapping the input node captures full-band audio with no output path at all,
     // so there is nothing to feed back.
-    input.installTap(onBus: 0, bufferSize: 1024, format: format) { [weak self] buffer, _ in
-      guard let self else { return }
-      let db = calculateDB(from: buffer)
-      let peakDB = calculatePeakDB(from: buffer)
-      let features = fftAnalyzer.analyze(buffer: buffer, sampleRate: format.sampleRate)
-      soundAnalyzer.analyze(buffer: buffer, at: cumulativeFramePosition)
-      cumulativeFramePosition += AVAudioFramePosition(buffer.frameLength)
-      var didWrite = false
-      if let audioFile {
-        do {
-          try audioFile.write(from: buffer)
-          didWrite = true
-        } catch {
-          print("[AudioRecorder] Failed to write audio buffer: \(error)")
-        }
-      }
-      if let eventFile = currentEventFile {
-        do {
-          try eventFile.write(from: buffer)
-          didWrite = true
-        } catch {
-          print("[AudioRecorder] Failed to write event buffer: \(error)")
-        }
-      }
-      if didWrite {
-        consecutiveWriteFailures = 0
-      } else if audioFile != nil || currentEventFile != nil {
-        consecutiveWriteFailures += 1
-        if consecutiveWriteFailures >= 3 {
-          print("[AudioRecorder] Too many write failures — stopping file writes")
-          isWritingToFile = false
-          audioFile = nil
-          currentEventFile = nil
-        }
-      }
-      Task { @MainActor in
-        self.currentDB = db
-        self.currentPeakDB = peakDB
-        self.spectralScore = features.spectralScore
-      }
-    }
-
+    installTap(on: input, format: format)
     try engine.start()
     audioEngine = engine
     recordingFormat = format
-    soundAnalyzer.startAnalyzing(format: format)
+    tap.streamAnalyzer = soundAnalyzer.startAnalyzing(format: format)
     isRecording = true
     isPaused = false
   }
@@ -270,6 +224,7 @@ public final class AudioRecorder {
   public func pauseRecording() {
     guard isRecording, let engine = audioEngine else { return }
     isPaused = true
+    tap.streamAnalyzer = nil
     soundAnalyzer.stopAnalyzing()
     engine.stop()
     // Remove the tap from the input node so the engine can be safely deallocated.
@@ -293,83 +248,39 @@ public final class AudioRecorder {
       throw RecordingError.invalidAudioFormat
     }
 
-    // Tap the microphone directly — no output path, no feedback (see startRecording).
-    input.installTap(onBus: 0, bufferSize: 1024, format: format) { [weak self] buffer, _ in
-      guard let self else { return }
-      let db = calculateDB(from: buffer)
-      let peakDB = calculatePeakDB(from: buffer)
-      let features = fftAnalyzer.analyze(buffer: buffer, sampleRate: format.sampleRate)
-      soundAnalyzer.analyze(buffer: buffer, at: cumulativeFramePosition)
-      cumulativeFramePosition += AVAudioFramePosition(buffer.frameLength)
-      var didWrite = false
-      if let audioFile {
-        do {
-          try audioFile.write(from: buffer)
-          didWrite = true
-        } catch {
-          print("[AudioRecorder] Failed to write audio buffer: \(error)")
-        }
-      }
-      if let eventFile = currentEventFile {
-        do {
-          try eventFile.write(from: buffer)
-          didWrite = true
-        } catch {
-          print("[AudioRecorder] Failed to write event buffer: \(error)")
-        }
-      }
-      if didWrite {
-        consecutiveWriteFailures = 0
-      } else if audioFile != nil || currentEventFile != nil {
-        consecutiveWriteFailures += 1
-        if consecutiveWriteFailures >= 3 {
-          print("[AudioRecorder] Too many write failures — stopping file writes")
-          isWritingToFile = false
-          audioFile = nil
-          currentEventFile = nil
-        }
-      }
-      Task { @MainActor in
-        self.currentDB = db
-        self.spectralScore = features.spectralScore
-      }
-    }
-
+    installTap(on: input, format: format)
     try engine.start()
     audioEngine = engine
     recordingFormat = format
-    soundAnalyzer.startAnalyzing(format: format)
+    tap.streamAnalyzer = soundAnalyzer.startAnalyzing(format: format)
     isPaused = false
   }
 
   public func startEventFile(eventID: UUID, url: URL) throws {
     guard let format = recordingFormat else { return }
-    currentEventFile = try AVAudioFile(forWriting: url, settings: format.settings)
+    tap.eventFile = try AVAudioFile(forWriting: url, settings: format.settings)
     currentEventID = eventID
-    isWritingToFile = audioFile != nil || currentEventFile != nil
+    isWritingToFile = tap.isWritingToFile
   }
 
   public func finalizeEventFile() -> URL? {
-    let url = currentEventFile?.url
-    currentEventFile = nil
+    let url = tap.eventFile?.url
+    tap.eventFile = nil
     currentEventID = nil
-    isWritingToFile = audioFile != nil || currentEventFile != nil
+    isWritingToFile = tap.isWritingToFile
     return url
   }
 
   public func stopRecording() {
+    tap.reset()
     soundAnalyzer.stopAnalyzing()
     audioEngine?.stop()
     audioEngine?.inputNode.removeTap(onBus: 0)
     audioEngine = nil
-    audioFile = nil
-    currentEventFile = nil
     currentEventID = nil
-    cumulativeFramePosition = 0
     isRecording = false
     isPaused = false
     isWritingToFile = false
-    consecutiveWriteFailures = 0
     currentDB = -160.0
     currentPeakDB = -160.0
     spectralScore = 0
@@ -407,7 +318,7 @@ public final class AudioRecorder {
 
     // Tap the input to keep I/O alive, but discard every buffer. No analysis,
     // no file writes — the countdown view handles the timer.
-    input.installTap(onBus: 0, bufferSize: 1024, format: format) { _, _ in
+    input.installTap(onBus: 0, bufferSize: 1024, format: format) { @Sendable _, _ in
       // Intentionally empty.
     }
 
@@ -429,32 +340,25 @@ public final class AudioRecorder {
     }
   }
 
-  private func calculateDB(from buffer: AVAudioPCMBuffer) -> Float {
-    guard let channelData = buffer.floatChannelData?[0] else { return -160.0 }
-    let frameLength = UInt32(buffer.frameLength)
-    var sum: Float = 0
-    for i in 0..<Int(frameLength) {
-      sum += channelData[i] * channelData[i]
-    }
-    let rms = sqrt(sum / Float(frameLength))
-    let db = 20 * log10(max(rms, 1e-10))
-    return db
-  }
+  // MARK: - Tap
 
-  /// Peak level (0 dBFS = full scale) of the buffer. Better than RMS for
-  /// impulsive sounds like snoring, where the perceptual loudness is driven
-  /// by sharp peaks rather than average energy.
-  private func calculatePeakDB(from buffer: AVAudioPCMBuffer) -> Float {
-    guard let channelData = buffer.floatChannelData?[0] else { return -160.0 }
-    let frameLength = Int(buffer.frameLength)
-    var peak: Float = 0
-    for i in 0..<frameLength {
-      let absVal = abs(channelData[i])
-      if absVal > peak {
-        peak = absVal
+  /// Core Audio calls the tap on its realtime thread, so the closure must be
+  /// `@Sendable` (nonisolated); all buffer work happens in `TapProcessor`.
+  /// It taps the microphone directly — no output path, no feedback.
+  private func installTap(on input: AVAudioInputNode, format: AVAudioFormat) {
+    let tap = tap
+    let sampleRate = format.sampleRate
+    input.installTap(onBus: 0, bufferSize: 1024, format: format) { @Sendable [weak self] buffer, _ in
+      let levels = tap.process(buffer, sampleRate: sampleRate)
+      Task { @MainActor in
+        guard let self else { return }
+        self.currentDB = levels.db
+        self.currentPeakDB = levels.peakDB
+        self.spectralScore = levels.spectralScore
+        if levels.writesDisabled {
+          self.isWritingToFile = false
+        }
       }
     }
-    let db = 20 * log10(max(peak, 1e-10))
-    return db
   }
 }
