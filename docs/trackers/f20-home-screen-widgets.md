@@ -27,7 +27,7 @@ Users can add SleepGuard widgets to the Home Screen and Lock Screen: last night'
 | F20-T4 | `sleepguard://` deep links | Navigation | Done | F20-T2 | App / Env | 2026-11-08 | 2026-11-08 |
 | F20-T5 | Last Night widget (small + medium) | UI | Done | F20-T3, F20-T4 | SleepGuardWidgets | 2026-11-08 | 2026-11-08 |
 | F20-T6 | 7-Night Trend widget (medium) | UI | Done | F20-T5 | SleepGuardWidgets | 2026-11-08 | 2026-11-08 |
-| F20-T7 | Start Tracking widget (small) | UI | Backlog | F20-T4 | SleepGuardWidgets | — | — |
+| F20-T7 | Start Tracking widget (small) | UI | Done | F20-T4 | SleepGuardWidgets | 2026-11-08 | 2026-11-08 |
 | F20-T8 | Lock Screen accessories | UI | Backlog | F20-T5 | SleepGuardWidgets | — | — |
 | F20-T9 | Verification, docs, merge to main | Docs | Backlog | F20-T1…T8 | — | — | — |
 
@@ -187,9 +187,27 @@ Users can add SleepGuard widgets to the Home Screen and Lock Screen: last night'
 
 ### F20-T7 — Start Tracking widget
 
+| Field | Value |
+|-------|-------|
+| Arch Ref | `docs/architecture/views.md` |
+| Status | Done |
+| Started | 2026-11-08 |
+| Completed | 2026-11-08 |
+
 **Acceptance Criteria:**
-- [ ] Small tile styled like `StartRecordingButton`; tap → `.liveSession`
-- [ ] Builds with zero errors
+- [x] Small tile styled like `StartRecordingButton`; tap → `.liveSession`
+- [x] Builds with zero errors
+
+**Prompt Used:**
+"continue with next tasks"
+
+**Notes:**
+- `StartTrackingWidget` (kind `StartTrackingWidget`, small) + `StartTrackingWidgetView` in one file (37-line view, no state).
+- Styling: the record dot (44pt halo at 25% + 22pt solid, static because widgets can't animate the pulse) + `Strings.actionStartRecording` (17pt semibold, reused) over `bg-secondary` with a `score-red` 35% → 0 top-to-center gradient, echoing the button's red glow. Uses tokens (`scoreRed` = #FF453A) instead of the button's hardcoded hex values and its non-token `#22232B` fill.
+- No interactive `Button` (that would need App Intents); the whole tile is the `widgetURL`.
+- Reuses `WidgetSnapshotProvider` (ignores the entry) instead of adding a dedicated static provider: zero extra code, and the snapshot read is a tiny file.
+- Verified on simulator BD630AD5: gallery page 4/4, placed on the Home Screen, tap → live session pre-start screen.
+- 2 new strings: `widget.start.name`, `widget.start.description`.
 
 ### F20-T8 — Lock Screen accessories
 
