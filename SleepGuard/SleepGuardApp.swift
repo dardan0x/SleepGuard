@@ -95,6 +95,10 @@ struct SleepGuardApp: App {
 
         WidgetSnapshotWriter.update(modelContext: container.mainContext)
       }
+      .onOpenURL { url in
+        guard userPreferences.hasCompletedOnboarding, let link = WidgetDeepLink(url: url) else { return }
+        TabCoordinator.shared.open(link)
+      }
       .onChange(of: sessionManager.isRecording) { _, isRecording in
         UIApplication.shared.isIdleTimerDisabled = isRecording
       }

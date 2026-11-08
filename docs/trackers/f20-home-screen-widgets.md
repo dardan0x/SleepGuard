@@ -24,7 +24,7 @@ Users can add SleepGuard widgets to the Home Screen and Lock Screen: last night'
 | F20-T1 | Widget extension target + App Group | Infra | Done | — | App / SleepGuardWidgets | 2026-11-08 | 2026-11-08 |
 | F20-T2 | Snapshot model, store, builder, deep-link enum | Model | Done | F20-T1 | Models | 2026-11-08 | 2026-11-08 |
 | F20-T3 | App writes snapshot + reloads timelines | Service | Done | F20-T2 | App | 2026-11-08 | 2026-11-08 |
-| F20-T4 | `sleepguard://` deep links | Navigation | Backlog | F20-T2 | App / Env | — | — |
+| F20-T4 | `sleepguard://` deep links | Navigation | Done | F20-T2 | App / Env | 2026-11-08 | 2026-11-08 |
 | F20-T5 | Last Night widget (small + medium) | UI | Backlog | F20-T3, F20-T4 | SleepGuardWidgets | — | — |
 | F20-T6 | 7-Night Trend widget (medium) | UI | Backlog | F20-T5 | SleepGuardWidgets | — | — |
 | F20-T7 | Start Tracking widget (small) | UI | Backlog | F20-T4 | SleepGuardWidgets | — | — |
@@ -110,11 +110,29 @@ Users can add SleepGuard widgets to the Home Screen and Lock Screen: last night'
 
 ### F20-T4 — Deep links
 
+| Field | Value |
+|-------|-------|
+| Arch Ref | `docs/architecture/navigation.md` |
+| Status | Done |
+| Started | 2026-11-08 |
+| Completed | 2026-11-08 |
+
 **Acceptance Criteria:**
-- [ ] `sleepguard://` scheme is registered; `.onOpenURL` → `TabCoordinator.pendingDeepLink`
-- [ ] Start → `.liveSession`, session → `.sessionDetail(id:)`, trend → `.last7Nights`
-- [ ] Ignored during onboarding; deleted session and hidden Statistics tab are handled
-- [ ] Builds with zero errors
+- [x] `sleepguard://` scheme is registered; `.onOpenURL` → `TabCoordinator.pendingDeepLink`
+- [x] Start → `.liveSession`, session → `.sessionDetail(id:)`, trend → `.last7Nights`
+- [x] Ignored during onboarding; deleted session and hidden Statistics tab are handled (deleted session verified on simulator; onboarding + hidden tab are code guards, not exercised at runtime)
+- [x] Builds with zero errors
+
+**Prompt Used:**
+"continue where we left on with tasks and as usual dont commit without asking me first"
+
+**Notes:**
+- Flow: `SleepGuardApp.onOpenURL` (guard `hasCompletedOnboarding`) → `TabCoordinator.open(_:)` (guard Statistics tab visible, select it, set `pendingDeepLink`) → `StatisticsTab.routePendingDeepLink()` on `onAppear` + `onChange(of: pendingDeepLink)` → `DeepLinkRouter.route` (app target).
+- The link is consumed (set to `nil`) first, then dropped if recording or a sheet is presented, so an unsaved session summary is never replaced. Seen live: a crash-recovered summary sheet was up and the link was correctly ignored.
+- Router pops to root before pushing, so a link always lands one level deep.
+- Unknown/deleted session ID → `fetchCount` is 0 → stays on the dashboard root.
+- Hidden Statistics tab → link ignored, the app just opens (Sessions tab has no start/summary flow, so no fallback tab).
+- Verified on simulator BD630AD5 via `simctl openurl`: last7nights (warm + cold launch), session (real ID from snapshot), zero UUID → dashboard, start from the Sessions tab → switches to Statistics + live session screen.
 
 ### F20-T5 — Last Night widget
 
