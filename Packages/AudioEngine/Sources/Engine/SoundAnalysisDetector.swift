@@ -56,9 +56,11 @@ public final class SoundAnalysisDetector: NSObject, SNResultsObserving {
     }
   }
 
-  /// Starts the stream analyzer with the audio format.
-  public func startAnalyzing(format: AVAudioFormat) {
-    guard let request = analysisRequest else { return }
+  /// Starts the stream analyzer with the audio format. Returns the analyzer so
+  /// the audio-thread `TapProcessor` can feed it buffers directly.
+  @discardableResult
+  public func startAnalyzing(format: AVAudioFormat) -> SNAudioStreamAnalyzer? {
+    guard let request = analysisRequest else { return nil }
 
     streamAnalyzer = SNAudioStreamAnalyzer(format: format)
     do {
@@ -66,6 +68,7 @@ public final class SoundAnalysisDetector: NSObject, SNResultsObserving {
     } catch {
       print("[SoundAnalysis] Failed to add request: \(error)")
     }
+    return streamAnalyzer
   }
 
   /// Stops analysis and cleans up.
@@ -76,16 +79,6 @@ public final class SoundAnalysisDetector: NSObject, SNResultsObserving {
     streamAnalyzer = nil
     snoreConfidence = 0
     speechConfidence = 0
-  }
-
-  /// Feeds a buffer to the analyzer.
-  public func analyze(buffer: AVAudioPCMBuffer, at framePosition: AVAudioFramePosition) {
-    guard let streamAnalyzer else { return }
-    do {
-      try streamAnalyzer.analyze(buffer, atAudioFramePosition: framePosition)
-    } catch {
-      print("[SoundAnalysis] Analyze error: \(error)")
-    }
   }
 
   // MARK: - SNResultsObserving

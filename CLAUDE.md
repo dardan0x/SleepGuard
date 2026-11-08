@@ -395,55 +395,9 @@ ever add files, so session logs can never merge-conflict.
 archive). The fragment only needs `date`, `feature`, `branch`, and `title` in
 frontmatter. See `docs/sessions/README.md` for the full convention.
 
-Use this structure:
-
-```markdown
----
-date: [Date]
-feature: [f#]            # or "none" for a standalone fix
-branch: feature/[f#]/[t#]-short-description
-title: [Feature/Topic]
----
-
-### Completed
-- [Task ID]: [What was built, in technical detail]
-- [Task ID]: [What was built, in technical detail]
-
-### Technical Details
-- [Specific implementation detail: e.g., "TabView uses .page(indexDisplayMode: .never)"]
-- [Specific implementation detail: e.g., "Permission flow handles .granted/.denied/.undetermined"]
-- [Algorithm or formula: e.g., "Sleep score = max(0, 100 - min(snoring% * 0.5, 30) - min(events/hour * 2, 30))"]
-
-### Files Changed
-| File | Lines | What Changed |
-|------|-------|--------------|
-| `path/to/file.swift` | +X/-Y | [Detailed description of the change] |
-
-### Architecture Decisions
-- **[Decision name]**: [Why this approach was chosen over alternatives]
-- **[Decision name]**: [Tradeoffs considered]
-
-### Build Status
-- **BUILD SUCCEEDED / FAILED** — [if failed, what errors and how they were resolved]
-
-### Suggested Branch
-`feature/[f#]/[t#]-short-description`
-
-### Suggested Commit
-`[Task ID] — [Short description]`
-
-### Changes done
-```
-- [Change 1]
-- [Change 2]
-```
-```
-
-### Next Session
-- [Task ID]: [What to start next and why]
-
-### Open Questions
-- [Question that needs user input or future decision]
+Use the fragment template in `docs/sessions/README.md` (sections: Completed, Technical Details,
+Files Changed, Architecture Decisions, Build Status, Suggested Branch, Suggested Commit,
+Changes done, Next Session, Open Questions). Read it before writing the fragment.
 
 ### 2. Create Feature Doc When Feature Ships
 
