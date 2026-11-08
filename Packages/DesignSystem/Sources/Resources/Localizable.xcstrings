@@ -4638,6 +4638,28 @@
           }
         }
       }
+    },
+    "widget.start.name": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start Tracking"
+          }
+        }
+      }
+    },
+    "widget.start.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start a sleep session with one tap."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

@@ -436,6 +436,8 @@ public enum Strings {
   public static var widgetLastNightName: String { String(localized: "widget.lastNight.name", bundle: .module) }
   public static var widgetLastNightSlept: String { String(localized: "widget.lastNight.slept", bundle: .module) }
   public static var widgetLastNightSnoring: String { String(localized: "widget.lastNight.snoring", bundle: .module) }
+  public static var widgetStartDescription: String { String(localized: "widget.start.description", bundle: .module) }
+  public static var widgetStartName: String { String(localized: "widget.start.name", bundle: .module) }
   public static var widgetTrendDescription: String { String(localized: "widget.trend.description", bundle: .module) }
   public static var widgetTrendLabel: String { String(localized: "widget.trend.label", bundle: .module) }
   public static var widgetTrendName: String { String(localized: "widget.trend.name", bundle: .module) }
