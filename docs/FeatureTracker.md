@@ -46,10 +46,10 @@ Last updated: 2026-11-08
 | Blocked | 0 |
 | — | — |
 | Total Tasks | 119 |
-| Tasks Done | 97 |
+| Tasks Done | 98 |
 | Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
-| Tasks Backlog | 22 |
+| Tasks Backlog | 21 |
 | — | — |
 | **Progress** | **82%** |
 
@@ -75,7 +75,7 @@ Last updated: 2026-11-08
 | F16 | Learn Tab | P2 | Done | 1/1 | ██████████ 100% | [tracker](trackers/f16-learn-tab.md) |
 | F17 | Swift 6 Migration | P1 | Done | 16/16 | ████████████████ 100% | [tracker](trackers/f17-swift6-migration.md) |
 | F19 | Factory DI Migration | P1 | Done | 5/5 | ██████████ 100% | [tracker](trackers/f19-factory-di.md) |
-| F20 | Home Screen & Lock Screen Widgets | P1 | In Progress | 3/9 | ███░░░░░░░ 33% | [tracker](trackers/f20-home-screen-widgets.md) |
+| F20 | Home Screen & Lock Screen Widgets | P1 | In Progress | 4/9 | ████░░░░░░ 44% | [tracker](trackers/f20-home-screen-widgets.md) |
 
 ## Activity Log
 
@@ -83,6 +83,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-11-08 | F20-T4 | Completed | `sleepguard://` URL scheme registered; `.onOpenURL` → `TabCoordinator.open` → `StatisticsTab` routes via `DeepLinkRouter` (start / session / last7nights). Verified warm + cold launch, unknown session, cross-tab, and dropped-while-sheet on simulator. Branch `feature/f20/t4-deep-links` |
 | 2026-11-08 | F20-T3 | Completed | `WidgetSnapshotWriter` (app target) writes the App Group snapshot + reloads widget timelines at launch and on `.background`; verified JSON on simulator (mock data, 3/3 background rewrites). Branch `feature/f20/t3-app-writes-snapshot` |
 | 2026-11-08 | F20-T2 | Completed | `WidgetSnapshot` (Night + 7 calendar-day averages), `WidgetSnapshotBuilder` (cached fields only, mirrors Last 7 Nights grouping), `WidgetSnapshotStore` (App Group JSON), `WidgetDeepLink` (`sleepguard://`) in Models; first `ModelsTests` target (10 tests). Branch `feature/f20/t2-widget-snapshot-model` |
 | 2026-11-08 | F20-T1 | Completed | Widget extension `SleepGuardWidgetsExtension` added (iOS 17.6, Swift 6 strict, MainActor default), App Group `group.com.dardan.SleepGuard` on app + extension, links Models + DesignSystem, localized placeholder widget registered with WidgetKit. Branch `feature/f20/t1-widget-extension-target` → `feature/f20-home-screen-widgets` |
@@ -262,7 +263,7 @@ _Most recent first. The AI appends here after every task._
 
 | Task | Feature | Started | Assignee |
 |------|---------|---------|----------|
-| F20-T4 Deep links | F20 | 2026-11-08 | Claude |
+| F20-T5 Last Night widget | F20 | — | Claude |
 
 ## Completed (last 10)
 

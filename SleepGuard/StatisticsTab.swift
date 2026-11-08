@@ -78,6 +78,10 @@ struct StatisticsTab: View {
       // Surface a session already set before this tab began observing — e.g. a
       // crash-recovered session restored at launch.
       presentCompletedSessionIfNeeded()
+      routePendingDeepLink()
+    }
+    .onChange(of: tabCoordinator.pendingDeepLink) {
+      routePendingDeepLink()
     }
     .onChange(of: sessionManager.completedSession) { _, newValue in
       guard newValue != nil else { return }
@@ -100,6 +104,15 @@ struct StatisticsTab: View {
     await notificationPermissions.refreshStatus()
     guard notificationPermissions.authorizationStatus == .notDetermined else { return }
     showNotificationSoftAsk = true
+  }
+
+  /// Consumes a widget deep link. Dropped while recording or while a sheet
+  /// (e.g. an unsaved session summary) is up, so neither gets interrupted.
+  private func routePendingDeepLink() {
+    guard let link = tabCoordinator.pendingDeepLink else { return }
+    tabCoordinator.pendingDeepLink = nil
+    guard !sessionManager.isRecording, routerPath.presentedSheet == nil else { return }
+    DeepLinkRouter.route(link, routerPath: routerPath, modelContext: modelContext)
   }
 
   private func fetchOrCreateProfile() -> UserProfile? {

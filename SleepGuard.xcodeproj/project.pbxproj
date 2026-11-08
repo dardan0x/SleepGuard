@@ -68,6 +68,7 @@
 		CE09839C309FF97B002E275D /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		CE0983AE309FFA12002E275D /* SleepGuardWidgetsExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SleepGuardWidgetsExtension.entitlements; sourceTree = "<group>"; };
 		CE0984E3309FFF73002E275D /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
+		CE09863E30A0EABD002E275D /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
 		CE1472B62FC47140009A5425 /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
 		CE1563D52FDA041100A53611 /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
 		CE15643C2FDA27BA00A53611 /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
@@ -183,6 +184,11 @@
 			sourceTree = "<group>";
 		};
 		CE0984E6309FFF73002E275D /* Products */ = {
+			isa = PBXGroup;
+			name = Products;
+			sourceTree = "<group>";
+		};
+		CE09864230A0EABD002E275D /* Products */ = {
 			isa = PBXGroup;
 			name = Products;
 			sourceTree = "<group>";
@@ -430,6 +436,10 @@
 				{
 					ProductGroup = CE4A51A42FB625C6005BC562 /* Products */;
 					ProjectRef = CE4A51A12FB625C6005BC562 /* SleepGuard.xcodeproj */;
+				},
+				{
+					ProductGroup = CE09864230A0EABD002E275D /* Products */;
+					ProjectRef = CE09863E30A0EABD002E275D /* SleepGuard.xcodeproj */;
 				},
 				{
 					ProductGroup = CE098383309BE837002E275D /* Products */;
