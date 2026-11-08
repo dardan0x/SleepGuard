@@ -66,6 +66,12 @@ title: Short description of the session
 ### Changes done
 - [Change 1]
 - [Change 2]
+
+### Next Session
+- [Task ID]: [What to start next and why]
+
+### Open Questions
+- [Question that needs user input or future decision]
 ```
 
 Then commit it. No number to pick, no shared file to touch.
