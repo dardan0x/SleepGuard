@@ -4528,6 +4528,28 @@
           }
         }
       }
+    },
+    "widget.lastNight.name": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last Night"
+          }
+        }
+      }
+    },
+    "widget.lastNight.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your most recent sleep score and snoring time."
+          }
+        }
+      }
     }
   },
   "version": "1.0"
