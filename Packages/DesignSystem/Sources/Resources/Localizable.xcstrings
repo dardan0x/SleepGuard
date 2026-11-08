@@ -4550,6 +4550,61 @@
           }
         }
       }
+    },
+    "widget.lastNight.label": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LAST NIGHT"
+          }
+        }
+      }
+    },
+    "widget.lastNight.slept": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slept"
+          }
+        }
+      }
+    },
+    "widget.lastNight.snoring": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Snoring"
+          }
+        }
+      }
+    },
+    "widget.lastNight.empty.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No nights yet"
+          }
+        }
+      }
+    },
+    "widget.lastNight.empty.action": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tap to start tracking"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

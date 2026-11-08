@@ -1,54 +1,68 @@
 import DesignSystem
+import Models
 import SwiftUI
 import WidgetKit
 
-// F20-T1 placeholder: proves the extension builds against DesignSystem.
-// Replaced by the snapshot-driven Last Night widget in F20-T5.
-
-struct PlaceholderEntry: TimelineEntry {
+struct LastNightEntry: TimelineEntry {
   let date: Date
+  let night: WidgetSnapshot.Night?
 }
 
-struct PlaceholderProvider: TimelineProvider {
-  func placeholder(in _: Context) -> PlaceholderEntry {
-    PlaceholderEntry(date: .now)
+/// Reads the snapshot the app writes to the App Group. The app reloads
+/// timelines whenever it rewrites the snapshot, so the policy is `.never`.
+struct LastNightProvider: TimelineProvider {
+  func placeholder(in _: Context) -> LastNightEntry {
+    LastNightEntry(date: .now, night: .sample)
   }
 
-  func getSnapshot(in _: Context, completion: @escaping (PlaceholderEntry) -> Void) {
-    completion(PlaceholderEntry(date: .now))
+  func getSnapshot(in context: Context, completion: @escaping (LastNightEntry) -> Void) {
+    let entry = currentEntry()
+    // Widget gallery shows sample data until the user has a night recorded.
+    completion(context.isPreview && entry.night == nil ? placeholder(in: context) : entry)
   }
 
-  func getTimeline(in _: Context, completion: @escaping (Timeline<PlaceholderEntry>) -> Void) {
-    completion(Timeline(entries: [PlaceholderEntry(date: .now)], policy: .never))
+  func getTimeline(in _: Context, completion: @escaping (Timeline<LastNightEntry>) -> Void) {
+    completion(Timeline(entries: [currentEntry()], policy: .never))
   }
-}
 
-struct PlaceholderWidgetView: View {
-  let theme = Theme.shared
-
-  var body: some View {
-    Text(Strings.widgetLastNightName)
-      .font(.headline)
-      .foregroundStyle(theme.textPrimary)
-      .containerBackground(theme.bgCard, for: .widget)
+  private func currentEntry() -> LastNightEntry {
+    let snapshot = WidgetSnapshotStore.fileURL.flatMap(WidgetSnapshotStore.read(from:))
+    return LastNightEntry(date: .now, night: snapshot?.lastNight)
   }
 }
 
-struct SleepGuardWidgets: Widget {
+struct LastNightWidget: Widget {
   let kind = "LastNightWidget"
 
   var body: some WidgetConfiguration {
-    StaticConfiguration(kind: kind, provider: PlaceholderProvider()) { _ in
-      PlaceholderWidgetView()
+    StaticConfiguration(kind: kind, provider: LastNightProvider()) { entry in
+      LastNightWidgetView(entry: entry)
     }
     .configurationDisplayName(Strings.widgetLastNightName)
     .description(Strings.widgetLastNightDescription)
-    .supportedFamilies([.systemSmall])
+    .supportedFamilies([.systemSmall, .systemMedium])
   }
 }
 
+extension WidgetSnapshot.Night {
+  static let sample = WidgetSnapshot.Night(
+    id: UUID(),
+    startDate: .now.addingTimeInterval(-8 * 3600),
+    endDate: .now.addingTimeInterval(-1 * 3600),
+    score: 82,
+    snoringDuration: 42 * 60)
+}
+
 #Preview(as: .systemSmall) {
-  SleepGuardWidgets()
+  LastNightWidget()
 } timeline: {
-  PlaceholderEntry(date: .now)
+  LastNightEntry(date: .now, night: .sample)
+  LastNightEntry(date: .now, night: nil)
+}
+
+#Preview(as: .systemMedium) {
+  LastNightWidget()
+} timeline: {
+  LastNightEntry(date: .now, night: .sample)
+  LastNightEntry(date: .now, night: nil)
 }
