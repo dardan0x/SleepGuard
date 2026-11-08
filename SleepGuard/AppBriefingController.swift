@@ -25,11 +25,6 @@ final class AppBriefingController {
   func generateBriefingIfNeeded(modelContext: ModelContext) {
     guard appConfig.isEnabled(.sleepBriefing) else { return }
     guard userPreferences.briefingEnabled else { return }
-    if let lastDate = userPreferences.lastBriefingShownDate,
-       Calendar.current.isDateInToday(lastDate)
-    {
-      return
-    }
 
     let sessionDescriptor = FetchDescriptor<SleepSession>(
       sortBy: [SortDescriptor(\.startDate, order: .reverse)]
@@ -48,6 +43,13 @@ final class AppBriefingController {
 
     guard let latestSession = briefingSessions.first else { return }
     guard !Calendar.current.isDateInToday(latestSession.startDate) else { return }
+    // Show once per recorded session: skip if the briefing was already
+    // dismissed after the latest session ended.
+    if let lastShown = userPreferences.lastBriefingShownDate,
+       lastShown >= latestSession.endDate ?? latestSession.startDate
+    {
+      return
+    }
 
     let logDescriptor = FetchDescriptor<LifestyleLog>()
     let logs = (try? modelContext.fetch(logDescriptor)) ?? []
