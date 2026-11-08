@@ -429,4 +429,6 @@ public enum Strings {
   public static var watchStatusConnected: String { String(localized: "watch.status.connected", bundle: .module) }
   public static var watchStatusNotConnected: String { String(localized: "watch.status.notConnected", bundle: .module) }
   public static var watchTitle: String { String(localized: "watch.title", bundle: .module) }
+  public static var widgetLastNightDescription: String { String(localized: "widget.lastNight.description", bundle: .module) }
+  public static var widgetLastNightName: String { String(localized: "widget.lastNight.name", bundle: .module) }
 }

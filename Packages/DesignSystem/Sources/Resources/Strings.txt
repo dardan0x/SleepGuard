@@ -173,3 +173,6 @@ update.soft.title = Update Available
 update.soft.body = A new version of SleepGuard is available with improvements and fixes.
 update.action.update = Update Now
 update.action.later = Not Now
+
+widget.lastNight.name = Last Night
+widget.lastNight.description = Your most recent sleep score and snoring time.
