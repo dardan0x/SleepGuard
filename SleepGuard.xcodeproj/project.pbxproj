@@ -70,6 +70,7 @@
 		CE0984E3309FFF73002E275D /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
 		CE09863E30A0EABD002E275D /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
 		CE0986BE30A0F13D002E275D /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
+		CE09874930A11594002E275D /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
 		CE1472B62FC47140009A5425 /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
 		CE1563D52FDA041100A53611 /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
 		CE15643C2FDA27BA00A53611 /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
@@ -195,6 +196,11 @@
 			sourceTree = "<group>";
 		};
 		CE0986C230A0F13D002E275D /* Products */ = {
+			isa = PBXGroup;
+			name = Products;
+			sourceTree = "<group>";
+		};
+		CE09874D30A11594002E275D /* Products */ = {
 			isa = PBXGroup;
 			name = Products;
 			sourceTree = "<group>";
@@ -458,6 +464,10 @@
 				{
 					ProductGroup = CEE00B2730084787005EBD43 /* Products */;
 					ProjectRef = CEE00B2430084787005EBD43 /* SleepGuard.xcodeproj */;
+				},
+				{
+					ProductGroup = CE09874D30A11594002E275D /* Products */;
+					ProjectRef = CE09874930A11594002E275D /* SleepGuard.xcodeproj */;
 				},
 				{
 					ProductGroup = CE4A51A42FB625C6005BC562 /* Products */;

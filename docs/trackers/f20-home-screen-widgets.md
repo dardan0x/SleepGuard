@@ -26,7 +26,7 @@ Users can add SleepGuard widgets to the Home Screen and Lock Screen: last night'
 | F20-T3 | App writes snapshot + reloads timelines | Service | Done | F20-T2 | App | 2026-11-08 | 2026-11-08 |
 | F20-T4 | `sleepguard://` deep links | Navigation | Done | F20-T2 | App / Env | 2026-11-08 | 2026-11-08 |
 | F20-T5 | Last Night widget (small + medium) | UI | Done | F20-T3, F20-T4 | SleepGuardWidgets | 2026-11-08 | 2026-11-08 |
-| F20-T6 | 7-Night Trend widget (medium) | UI | Backlog | F20-T5 | SleepGuardWidgets | — | — |
+| F20-T6 | 7-Night Trend widget (medium) | UI | Done | F20-T5 | SleepGuardWidgets | 2026-11-08 | 2026-11-08 |
 | F20-T7 | Start Tracking widget (small) | UI | Backlog | F20-T4 | SleepGuardWidgets | — | — |
 | F20-T8 | Lock Screen accessories | UI | Backlog | F20-T5 | SleepGuardWidgets | — | — |
 | F20-T9 | Verification, docs, merge to main | Docs | Backlog | F20-T1…T8 | — | — | — |
@@ -163,9 +163,27 @@ Users can add SleepGuard widgets to the Home Screen and Lock Screen: last night'
 
 ### F20-T6 — 7-Night Trend widget
 
+| Field | Value |
+|-------|-------|
+| Arch Ref | `docs/architecture/views.md` |
+| Status | Done |
+| Started | 2026-11-08 |
+| Completed | 2026-11-08 |
+
 **Acceptance Criteria:**
-- [ ] Medium layout with `MiniBarChart` + average; empty state; tap → `.last7Nights`
-- [ ] Builds with zero errors
+- [x] Medium layout with `MiniBarChart` + average; empty state; tap → `.last7Nights`
+- [x] Builds with zero errors
+
+**Prompt Used:**
+"continue with other tasks now"
+
+**Notes:**
+- `TrendWidget` (kind `TrendWidget`, medium only) + `TrendWidgetView`. Left: "LAST 7 NIGHTS" caption, average (44pt rounded, `scoreColor`), "avg sleep score" (reuses `stats.last7Nights.avgSleepScore`). Right: `MiniBarChart` with weekday-initial labels + `scoreColor` bars, built exactly like `StatisticsMiniChartSection`.
+- The average uses the same integer division over day averages as `Last7NightsView.averageSleepScore`. Verified: widget 79 = app 79.
+- Empty (`recentDays` empty) → `WidgetEmptyView`, tap → start tracking (not Last 7 Nights, which would be empty too). Consistent with Last Night.
+- Refactor (duplication rule): the provider moved from `LastNightProvider`/`LastNightEntry` to a shared `WidgetSnapshotProvider`/`SnapshotEntry` (whole snapshot + `WidgetSnapshot.sample`/`.empty`). `LastNightEmptyView` was renamed to `WidgetEmptyView`. `LastNightWidgetView` now takes `night:`. Last Night re-checked in the gallery after the refactor.
+- The empty view still uses the `widget.lastNight.empty.*` string keys (not renamed, to avoid xcstrings churn).
+- Extension still 24 MB peak with two widgets.
 
 ### F20-T7 — Start Tracking widget
 

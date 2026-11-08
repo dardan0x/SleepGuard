@@ -46,12 +46,12 @@ Last updated: 2026-11-08
 | Blocked | 0 |
 | — | — |
 | Total Tasks | 119 |
-| Tasks Done | 99 |
+| Tasks Done | 100 |
 | Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
-| Tasks Backlog | 20 |
+| Tasks Backlog | 19 |
 | — | — |
-| **Progress** | **83%** |
+| **Progress** | **84%** |
 
 ## Features
 
@@ -75,7 +75,7 @@ Last updated: 2026-11-08
 | F16 | Learn Tab | P2 | Done | 1/1 | ██████████ 100% | [tracker](trackers/f16-learn-tab.md) |
 | F17 | Swift 6 Migration | P1 | Done | 16/16 | ████████████████ 100% | [tracker](trackers/f17-swift6-migration.md) |
 | F19 | Factory DI Migration | P1 | Done | 5/5 | ██████████ 100% | [tracker](trackers/f19-factory-di.md) |
-| F20 | Home Screen & Lock Screen Widgets | P1 | In Progress | 5/9 | ██████░░░░ 56% | [tracker](trackers/f20-home-screen-widgets.md) |
+| F20 | Home Screen & Lock Screen Widgets | P1 | In Progress | 6/9 | ███████░░░ 67% | [tracker](trackers/f20-home-screen-widgets.md) |
 
 ## Activity Log
 
@@ -83,6 +83,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-11-08 | F20-T6 | Completed | 7-Night Trend widget (medium): average + `MiniBarChart` from `recentDays`, empty → start, tap → Last 7 Nights; shared `WidgetSnapshotProvider` + `WidgetEmptyView` extracted. Verified on the simulator (avg 79 matches the app). Branch `feature/f20/t6-trend-widget` |
 | 2026-11-08 | F20-T5 | Completed | Last Night widget (small + medium + empty state) replaces the T1 placeholder; reuses `SleepScoreGauge`, `DurationFormatter`, `Theme`; taps → session / start. Verified on the simulator Home Screen; extension 24 MB peak. Branch `feature/f20/t5-last-night-widget` |
 | 2026-11-08 | F20-T4 | Completed | `sleepguard://` URL scheme registered; `.onOpenURL` → `TabCoordinator.open` → `StatisticsTab` routes via `DeepLinkRouter` (start / session / last7nights). Verified warm + cold launch, unknown session, cross-tab, and dropped-while-sheet on simulator. Branch `feature/f20/t4-deep-links` |
 | 2026-11-08 | F20-T3 | Completed | `WidgetSnapshotWriter` (app target) writes the App Group snapshot + reloads widget timelines at launch and on `.background`; verified JSON on simulator (mock data, 3/3 background rewrites). Branch `feature/f20/t3-app-writes-snapshot` |
@@ -264,7 +265,7 @@ _Most recent first. The AI appends here after every task._
 
 | Task | Feature | Started | Assignee |
 |------|---------|---------|----------|
-| F20-T6 7-Night Trend widget | F20 | — | Claude |
+| F20-T7 Start Tracking widget | F20 | — | Claude |
 
 ## Completed (last 10)
 
