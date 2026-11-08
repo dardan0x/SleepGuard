@@ -251,6 +251,6 @@ Users can add SleepGuard widgets to the Home Screen and Lock Screen: last night'
 "go to t9" / "i already pushed the fix for this in main. Can you rebase and use this fix?"
 
 **Notes:**
-- The first save attempt crashed on Start Recording (`_dispatch_assert_queue_fail` in the `AudioRecorder` input tap, a Swift 6 isolation trap introduced with F17-T3). Not F20; the user fixed it on `main` (PR #97, `TapProcessor`). The T9 branch was rebased onto `origin/main` (the 8 F20 task commits replayed cleanly, PR merge commits dropped).
+- The first save attempt crashed on Start Recording (`_dispatch_assert_queue_fail` in the `AudioRecorder` input tap, a Swift 6 isolation trap introduced with F17-T3). Not F20; the user fixed it on `main` (PR #97, `TapProcessor`). `main` was merged into the F20 branch (merge commit on the T9 branch, no conflicts) to bring in the fix.
 - Real save/delete check (deferred from T3): a 2-min recording started from `sleepguard://start` → saved → backgrounded → snapshot `lastNight` = the new session (100), today's day added, oldest dropped. Last Night small/medium showed 100 / 2 mins; Trend average 83 (= 586 / 7, integer division) with today's bar. Tap on medium → that session's detail. Deleted it → backgrounded → snapshot back to last night 82, the oldest day restored.
-- Because the rebase drops the PR merge commits, the T9 PR should target `main` directly; it carries all of F20. `feature/f20-home-screen-widgets` is superseded.
+- A first attempt rebased T9 onto `main`, which conflicted with `feature/f20-home-screen-widgets` (duplicated commits). It was rebuilt as feature branch + merge of `main` + the T9 docs commit, so the T9 PR targets `feature/f20-home-screen-widgets` as usual.

@@ -1,12 +1,12 @@
 
 ### Completed
-- F20-T9 (partial): ran the verification checks, did the real save/delete snapshot check deferred from T3, and wrote the feature doc + architecture section. Rebased the branch onto `origin/main` to pick up the recording-crash fix.
+- F20-T9 (partial): ran the verification checks, did the real save/delete snapshot check deferred from T3, and wrote the feature doc + architecture section. Merged `main` into the F20 branch to pick up the recording-crash fix.
 
 ### Technical Details
 - **Checks**: `check-layering.py` passed (304 files). Hardcoded-string grep: only numeric interpolations, plus one concatenation of two localized strings in the rectangular accessory. Computed-view grep: only `body`. Widget files ≤75 lines.
 - **Tests**: Models 10 tests / 14 cases pass via `xcodebuild test -scheme Models` on BD630AD5 (`swift test` builds for macOS and fails on SwiftData availability). The app scheme has no test bundle. `BriefingEngineTests` (Personalization) doesn't compile on `main`: `ScoreTrend` isn't `Equatable`. Not F20.
 - **Crash found**: Start Recording trapped in `AudioRecorder.startRecording`'s `installTap` closure (`_dispatch_assert_queue_fail` on `RealtimeMessenger.mServiceQueue`; backtrace via `lldb -p`). The closure inherited `@MainActor` isolation after F17-T3 moved AudioEngine to Swift 6. The user had already fixed it on `main` (PR #97, `TapProcessor`).
-- **Rebase**: `feature/f20/t9-verification-docs` rebased onto `origin/main`. The 8 F20 task commits replayed with no conflicts; the PR merge commits are gone. Backup branch: `backup/t9-pre-rebase`.
+- **Picking up the fix**: first tried rebasing T9 onto `origin/main`; its PR then conflicted with `feature/f20-home-screen-widgets` (rebased copies of the same commits). Rebuilt T9 as `feature/f20-home-screen-widgets` + merge of `origin/main` (no conflicts) + the T9 docs commit. The resulting files are identical to the rebased version.
 - **Save/delete check** (simulator, real recording): `sleepguard://start` → Start Recording (no crash) → 2:16 → Save → background. Snapshot `lastNight` = the new session (score 100), today's day added (100), oldest day dropped. Last Night small/medium showed 100 · 2 mins; Trend 83 (586/7). Tap on medium → that session's detail. Delete → background → snapshot back to last night 82 with the oldest day restored.
 
 ### Files Changed
@@ -19,10 +19,10 @@
 | `docs/sessions/2026-11-08-f20-t9-verification-docs.md` | new | This fragment |
 
 ### Architecture Decisions
-- **T9 PR targets `main` directly**: after the rebase the branch holds all of F20 on top of `main`, so merging it into `feature/f20-home-screen-widgets` would duplicate commits. That branch is superseded.
+- **Merge `main` instead of rebasing**: keeps the per-task PR flow into `feature/f20-home-screen-widgets` and rewrites no merged history. The feature branch then merges into `main` without conflicts.
 
 ### Build Status
-- **BUILD SUCCEEDED**: zero errors, zero warnings after the rebase.
+- **BUILD SUCCEEDED**: zero errors, zero warnings with the `main` fix included.
 
 ### Changes done
 ```
