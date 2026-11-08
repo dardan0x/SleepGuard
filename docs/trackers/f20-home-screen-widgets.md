@@ -25,7 +25,7 @@ Users can add SleepGuard widgets to the Home Screen and Lock Screen: last night'
 | F20-T2 | Snapshot model, store, builder, deep-link enum | Model | Done | F20-T1 | Models | 2026-11-08 | 2026-11-08 |
 | F20-T3 | App writes snapshot + reloads timelines | Service | Done | F20-T2 | App | 2026-11-08 | 2026-11-08 |
 | F20-T4 | `sleepguard://` deep links | Navigation | Done | F20-T2 | App / Env | 2026-11-08 | 2026-11-08 |
-| F20-T5 | Last Night widget (small + medium) | UI | Backlog | F20-T3, F20-T4 | SleepGuardWidgets | — | — |
+| F20-T5 | Last Night widget (small + medium) | UI | Done | F20-T3, F20-T4 | SleepGuardWidgets | 2026-11-08 | 2026-11-08 |
 | F20-T6 | 7-Night Trend widget (medium) | UI | Backlog | F20-T5 | SleepGuardWidgets | — | — |
 | F20-T7 | Start Tracking widget (small) | UI | Backlog | F20-T4 | SleepGuardWidgets | — | — |
 | F20-T8 | Lock Screen accessories | UI | Backlog | F20-T5 | SleepGuardWidgets | — | — |
@@ -136,11 +136,30 @@ Users can add SleepGuard widgets to the Home Screen and Lock Screen: last night'
 
 ### F20-T5 — Last Night widget
 
+| Field | Value |
+|-------|-------|
+| Arch Ref | `docs/architecture/views.md` |
+| Status | Done |
+| Started | 2026-11-08 |
+| Completed | 2026-11-08 |
+
 **Acceptance Criteria:**
-- [ ] Small + medium layouts reuse `SleepScoreGauge`, `DurationFormatter`, `Theme`
-- [ ] Empty state → start-tracking link; otherwise → session link
-- [ ] Extension memory fits the widget budget with `DesignSystem` linked
-- [ ] Builds with zero errors
+- [x] Small + medium layouts reuse `SleepScoreGauge`, `DurationFormatter`, `Theme`
+- [x] Empty state → start-tracking link; otherwise → session link
+- [x] Extension memory fits the widget budget with `DesignSystem` linked (24 MB peak on the simulator, Debug; limit ~30 MB. Re-check on a device in T9)
+- [x] Builds with zero errors
+
+**Prompt Used:**
+"continue with next task"
+
+**Notes:**
+- No widget design exists in `designs/SleepGuard.pen` (user confirmed). Layout built from existing components + tokens; background `bg-secondary` (#1C1C1E).
+- The T1 placeholder was replaced in place in `SleepGuardWidgets.swift` (kind `LastNightWidget` kept, so already-placed widgets survive). Views are split: `LastNightWidgetView` (family switch, `containerBackground`, `widgetURL`, shared `LastNightLabel`), `LastNightSmallView`, `LastNightMediumView` (+ `LastNightStatRow`), `LastNightEmptyView`.
+- Provider: reads `WidgetSnapshotStore` and uses timeline policy `.never` (the app reloads timelines on write). The gallery preview falls back to sample data when there's no night yet.
+- `SleepScoreGauge`'s `onAppear` animation isn't a problem: WidgetKit renders the ring filled.
+- Verified on simulator BD630AD5 Home Screen: small + medium with real data (82 · 7h 23 mins · 51 mins · 12%) → tap opens the matching session detail; empty snapshot → "No nights yet" in both sizes → tap cold-launches into the live session screen.
+- Seen: when the Sleep Briefing is due, it appears on top of the deep-linked screen (the push happens underneath). This is existing briefing behavior, not changed here.
+- 5 new strings: `widget.lastNight.label/slept/snoring/empty.title/empty.action`.
 
 ### F20-T6 — 7-Night Trend widget
 

@@ -176,3 +176,8 @@ update.action.later = Not Now
 
 widget.lastNight.name = Last Night
 widget.lastNight.description = Your most recent sleep score and snoring time.
+widget.lastNight.label = LAST NIGHT
+widget.lastNight.slept = Slept
+widget.lastNight.snoring = Snoring
+widget.lastNight.empty.title = No nights yet
+widget.lastNight.empty.action = Tap to start tracking

@@ -69,6 +69,7 @@
 		CE0983AE309FFA12002E275D /* SleepGuardWidgetsExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SleepGuardWidgetsExtension.entitlements; sourceTree = "<group>"; };
 		CE0984E3309FFF73002E275D /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
 		CE09863E30A0EABD002E275D /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
+		CE0986BE30A0F13D002E275D /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
 		CE1472B62FC47140009A5425 /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
 		CE1563D52FDA041100A53611 /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
 		CE15643C2FDA27BA00A53611 /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
@@ -189,6 +190,11 @@
 			sourceTree = "<group>";
 		};
 		CE09864230A0EABD002E275D /* Products */ = {
+			isa = PBXGroup;
+			name = Products;
+			sourceTree = "<group>";
+		};
+		CE0986C230A0F13D002E275D /* Products */ = {
 			isa = PBXGroup;
 			name = Products;
 			sourceTree = "<group>";
@@ -398,6 +404,38 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
+					ProductGroup = CE15643F2FDA27BA00A53611 /* Products */;
+					ProjectRef = CE15643C2FDA27BA00A53611 /* SleepGuard.xcodeproj */;
+				},
+				{
+					ProductGroup = CE09821F309ABE99002E275D /* Products */;
+					ProjectRef = CE09821C309ABE99002E275D /* SleepGuard.xcodeproj */;
+				},
+				{
+					ProductGroup = CE2591312FAE9E98004C0C0D /* Products */;
+					ProjectRef = CE25912E2FAE9E98004C0C0D /* SleepGuard.xcodeproj */;
+				},
+				{
+					ProductGroup = CE098383309BE837002E275D /* Products */;
+					ProjectRef = CE098380309BE837002E275D /* SleepGuard.xcodeproj */;
+				},
+				{
+					ProductGroup = CE49CB312FDC0BEA00BF16A5 /* Products */;
+					ProjectRef = CE49CB2E2FDC0BEA00BF16A5 /* SleepGuard.xcodeproj */;
+				},
+				{
+					ProductGroup = CE1472B92FC47140009A5425 /* Products */;
+					ProjectRef = CE1472B62FC47140009A5425 /* SleepGuard.xcodeproj */;
+				},
+				{
+					ProductGroup = CE258F062FAC77A5004C0C0D /* Products */;
+					ProjectRef = CE258F042FAC77A5004C0C0D /* SleepGuard.xcodeproj */;
+				},
+				{
+					ProductGroup = CE0986C230A0F13D002E275D /* Products */;
+					ProjectRef = CE0986BE30A0F13D002E275D /* SleepGuard.xcodeproj */;
+				},
+				{
 					ProductGroup = CE2591182FAE9289004C0C0D /* Products */;
 					ProjectRef = CE2591162FAE9289004C0C0D /* SleepGuard.xcodeproj */;
 				},
@@ -422,18 +460,6 @@
 					ProjectRef = CEE00B2430084787005EBD43 /* SleepGuard.xcodeproj */;
 				},
 				{
-					ProductGroup = CE15643F2FDA27BA00A53611 /* Products */;
-					ProjectRef = CE15643C2FDA27BA00A53611 /* SleepGuard.xcodeproj */;
-				},
-				{
-					ProductGroup = CE09821F309ABE99002E275D /* Products */;
-					ProjectRef = CE09821C309ABE99002E275D /* SleepGuard.xcodeproj */;
-				},
-				{
-					ProductGroup = CE2591312FAE9E98004C0C0D /* Products */;
-					ProjectRef = CE25912E2FAE9E98004C0C0D /* SleepGuard.xcodeproj */;
-				},
-				{
 					ProductGroup = CE4A51A42FB625C6005BC562 /* Products */;
 					ProjectRef = CE4A51A12FB625C6005BC562 /* SleepGuard.xcodeproj */;
 				},
@@ -442,24 +468,8 @@
 					ProjectRef = CE09863E30A0EABD002E275D /* SleepGuard.xcodeproj */;
 				},
 				{
-					ProductGroup = CE098383309BE837002E275D /* Products */;
-					ProjectRef = CE098380309BE837002E275D /* SleepGuard.xcodeproj */;
-				},
-				{
-					ProductGroup = CE49CB312FDC0BEA00BF16A5 /* Products */;
-					ProjectRef = CE49CB2E2FDC0BEA00BF16A5 /* SleepGuard.xcodeproj */;
-				},
-				{
 					ProductGroup = CEA51B502FBFA95A0092AF44 /* Products */;
 					ProjectRef = CEA51B4D2FBFA95A0092AF44 /* SleepGuard.xcodeproj */;
-				},
-				{
-					ProductGroup = CE258F062FAC77A5004C0C0D /* Products */;
-					ProjectRef = CE258F042FAC77A5004C0C0D /* SleepGuard.xcodeproj */;
-				},
-				{
-					ProductGroup = CE1472B92FC47140009A5425 /* Products */;
-					ProjectRef = CE1472B62FC47140009A5425 /* SleepGuard.xcodeproj */;
 				},
 			);
 			projectRoot = "";
