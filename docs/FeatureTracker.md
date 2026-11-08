@@ -83,6 +83,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-11-08 | F20-T9 | Started | Checks pass (layering, strings, computed views, Models tests). Real save/delete snapshot check passed after rebasing onto `main` for the recording-crash fix (PR #97). Feature doc `docs/features/f20-home-screen-widgets.md`. Branch `feature/f20/t9-verification-docs` |
 | 2026-11-08 | F20-T7 | Completed | Start Tracking widget (small): red record dot + "Start Recording" on a red top glow, mirrors `StartRecordingButton`; tap → `sleepguard://start`. Verified on the simulator Home Screen. Branch `feature/f20/t7-start-tracking-widget` |
 | 2026-11-08 | F20-T6 | Completed | 7-Night Trend widget (medium): average + `MiniBarChart` from `recentDays`, empty → start, tap → Last 7 Nights; shared `WidgetSnapshotProvider` + `WidgetEmptyView` extracted. Verified on the simulator (avg 79 matches the app). Branch `feature/f20/t6-trend-widget` |
 | 2026-11-08 | F20-T5 | Completed | Last Night widget (small + medium + empty state) replaces the T1 placeholder; reuses `SleepScoreGauge`, `DurationFormatter`, `Theme`; taps → session / start. Verified on the simulator Home Screen; extension 24 MB peak. Branch `feature/f20/t5-last-night-widget` |
@@ -266,7 +267,8 @@ _Most recent first. The AI appends here after every task._
 
 | Task | Feature | Started | Assignee |
 |------|---------|---------|----------|
-| F20-T8 Lock Screen accessories | F20 | — | Claude |
+| F20-T8 Lock Screen accessories (code merged; Lock Screen look unverified) | F20 | 2026-11-08 | Claude |
+| F20-T9 Verification, docs, merge to main (checks + docs done; merge pending) | F20 | 2026-11-08 | Claude |
 
 ## Completed (last 10)
 

@@ -29,7 +29,7 @@ Users can add SleepGuard widgets to the Home Screen and Lock Screen: last night'
 | F20-T6 | 7-Night Trend widget (medium) | UI | Done | F20-T5 | SleepGuardWidgets | 2026-11-08 | 2026-11-08 |
 | F20-T7 | Start Tracking widget (small) | UI | Done | F20-T4 | SleepGuardWidgets | 2026-11-08 | 2026-11-08 |
 | F20-T8 | Lock Screen accessories | UI | In Progress | F20-T5 | SleepGuardWidgets | 2026-11-08 | — |
-| F20-T9 | Verification, docs, merge to main | Docs | Backlog | F20-T1…T8 | — | — | — |
+| F20-T9 | Verification, docs, merge to main | Docs | In Progress | F20-T1…T8 | — | 2026-11-08 | — |
 
 ## Task Details
 
@@ -96,7 +96,7 @@ Users can add SleepGuard widgets to the Home Screen and Lock Screen: last night'
 
 **Acceptance Criteria:**
 - [x] Snapshot is written on `.background` and at launch; `WidgetCenter.reloadAllTimelines()` is called
-- [ ] JSON in the App Group container matches the latest sessions after save/delete. Verified against mock data at launch + 3 background transitions; a real save/delete check is deferred to the T9 manual pass
+- [x] JSON in the App Group container matches the latest sessions after save/delete. Verified in T9 with a real 2-min recording: save → snapshot + widgets updated; delete → reverted
 - [x] Builds with zero errors
 
 **Prompt Used:**
@@ -235,8 +235,22 @@ Users can add SleepGuard widgets to the Home Screen and Lock Screen: last night'
 
 ### F20-T9 — Verification, docs, merge
 
+| Field | Value |
+|-------|-------|
+| Status | In Progress (docs + checks done; waiting on the T8 Lock Screen check and the merge) |
+| Started | 2026-11-08 |
+| Completed | — |
+
 **Acceptance Criteria:**
-- [ ] Tests, layering check, hardcoded-string grep, computed-view grep all pass
-- [ ] Manual simulator pass of every widget + tap target
-- [ ] Feature doc, session fragment, architecture notes
+- [x] Tests, layering check, hardcoded-string grep, computed-view grep all pass (Models 10 tests / 14 cases; the app scheme has no tests; `BriefingEngineTests` doesn't compile on `main` and isn't F20's)
+- [x] Manual simulator pass of every Home Screen widget + tap target (Lock Screen still open under T8)
+- [x] Feature doc, session fragment, architecture notes
 - [ ] Feature branch merged to `main`
+
+**Prompt Used:**
+"go to t9" / "i already pushed the fix for this in main. Can you rebase and use this fix?"
+
+**Notes:**
+- The first save attempt crashed on Start Recording (`_dispatch_assert_queue_fail` in the `AudioRecorder` input tap, a Swift 6 isolation trap introduced with F17-T3). Not F20; the user fixed it on `main` (PR #97, `TapProcessor`). `main` was merged into the F20 branch (merge commit on the T9 branch, no conflicts) to bring in the fix.
+- Real save/delete check (deferred from T3): a 2-min recording started from `sleepguard://start` → saved → backgrounded → snapshot `lastNight` = the new session (100), today's day added, oldest dropped. Last Night small/medium showed 100 / 2 mins; Trend average 83 (= 586 / 7, integer division) with today's bar. Tap on medium → that session's detail. Deleted it → backgrounded → snapshot back to last night 82, the oldest day restored.
+- A first attempt rebased T9 onto `main`, which conflicted with `feature/f20-home-screen-widgets` (duplicated commits). It was rebuilt as feature branch + merge of `main` + the T9 docs commit, so the T9 PR targets `feature/f20-home-screen-widgets` as usual.
