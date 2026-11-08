@@ -46,12 +46,12 @@ Last updated: 2026-11-08
 | Blocked | 0 |
 | — | — |
 | Total Tasks | 119 |
-| Tasks Done | 95 |
+| Tasks Done | 96 |
 | Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
-| Tasks Backlog | 24 |
+| Tasks Backlog | 23 |
 | — | — |
-| **Progress** | **80%** |
+| **Progress** | **81%** |
 
 ## Features
 
@@ -75,7 +75,7 @@ Last updated: 2026-11-08
 | F16 | Learn Tab | P2 | Done | 1/1 | ██████████ 100% | [tracker](trackers/f16-learn-tab.md) |
 | F17 | Swift 6 Migration | P1 | Done | 16/16 | ████████████████ 100% | [tracker](trackers/f17-swift6-migration.md) |
 | F19 | Factory DI Migration | P1 | Done | 5/5 | ██████████ 100% | [tracker](trackers/f19-factory-di.md) |
-| F20 | Home Screen & Lock Screen Widgets | P1 | In Progress | 1/9 | █░░░░░░░░░ 11% | [tracker](trackers/f20-home-screen-widgets.md) |
+| F20 | Home Screen & Lock Screen Widgets | P1 | In Progress | 2/9 | ██░░░░░░░░ 22% | [tracker](trackers/f20-home-screen-widgets.md) |
 
 ## Activity Log
 
@@ -83,6 +83,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-11-08 | F20-T2 | Completed | `WidgetSnapshot` (Night + 7 calendar-day averages), `WidgetSnapshotBuilder` (cached fields only, mirrors Last 7 Nights grouping), `WidgetSnapshotStore` (App Group JSON), `WidgetDeepLink` (`sleepguard://`) in Models; first `ModelsTests` target (10 tests). Branch `feature/f20/t2-widget-snapshot-model` |
 | 2026-11-08 | F20-T1 | Completed | Widget extension `SleepGuardWidgetsExtension` added (iOS 17.6, Swift 6 strict, MainActor default), App Group `group.com.dardan.SleepGuard` on app + extension, links Models + DesignSystem, localized placeholder widget registered with WidgetKit. Branch `feature/f20/t1-widget-extension-target` → `feature/f20-home-screen-widgets` |
 | 2026-11-05 | F19 complete | Completed | Factory DI Migration done (5/5): dependency injection moved from SwiftUI environment to Factory container — T1 foundation (17 Env + Theme registrations), T2 Statistics pilot, T3 fan-out (91 views, 7 packages), T4 service composition, T5 watch eval + rules rewrite + feature doc. Key findings: RouterPath must stay environment-based; `@Observable`+`@Injected` macro collision. Pre-existing sim recording crash flagged (reproduced on baseline). Feature doc `docs/features/f19-factory-di.md`. PRs #88–#92 |
 | 2026-11-05 | F19-T5 | Completed | Watch app documented skip; AGENTS.md/CLAUDE.md Dependencies rules rewritten for Factory DI; docs/architecture synced; feature doc created. Merged PR #92 |
@@ -260,7 +261,7 @@ _Most recent first. The AI appends here after every task._
 
 | Task | Feature | Started | Assignee |
 |------|---------|---------|----------|
-| F20-T2 Snapshot model, store, builder | F20 | 2026-11-08 | Claude |
+| F20-T3 App writes snapshot | F20 | 2026-11-08 | Claude |
 
 ## Completed (last 10)
 

@@ -22,7 +22,7 @@ Users can add SleepGuard widgets to the Home Screen and Lock Screen: last night'
 | ID | Task | Type | Status | Depends On | Package | Started | Completed |
 |----|------|------|--------|------------|---------|---------|-----------|
 | F20-T1 | Widget extension target + App Group | Infra | Done | — | App / SleepGuardWidgets | 2026-11-08 | 2026-11-08 |
-| F20-T2 | Snapshot model, store, builder, deep-link enum | Model | Backlog | F20-T1 | Models | — | — |
+| F20-T2 | Snapshot model, store, builder, deep-link enum | Model | Done | F20-T1 | Models | 2026-11-08 | 2026-11-08 |
 | F20-T3 | App writes snapshot + reloads timelines | Service | Backlog | F20-T2 | App | — | — |
 | F20-T4 | `sleepguard://` deep links | Navigation | Backlog | F20-T2 | App / Env | — | — |
 | F20-T5 | Last Night widget (small + medium) | UI | Backlog | F20-T3, F20-T4 | SleepGuardWidgets | — | — |
@@ -61,11 +61,29 @@ Users can add SleepGuard widgets to the Home Screen and Lock Screen: last night'
 
 ### F20-T2 — Snapshot model, store, builder, deep-link enum
 
+| Field | Value |
+|-------|-------|
+| Arch Ref | `docs/architecture/networking.md` (data model conventions) |
+| Status | Done |
+| Started | 2026-11-08 |
+| Completed | 2026-11-08 |
+
 **Acceptance Criteria:**
-- [ ] `WidgetSnapshot`, `WidgetSnapshotStore`, `WidgetSnapshotBuilder`, `WidgetDeepLink` in `Packages/Models/Sources/Widget/`
-- [ ] Builder reads only cached fields (never `events`) and skips uncached sessions
-- [ ] Unit tests: builder edge cases, deep-link round-trip, store encode/decode
-- [ ] Builds with zero errors
+- [x] `WidgetSnapshot`, `WidgetSnapshotStore`, `WidgetSnapshotBuilder`, `WidgetDeepLink` in `Packages/Models/Sources/Widget/`
+- [x] Builder reads only cached fields (never `events`) and skips uncached sessions
+- [x] Unit tests: builder edge cases, deep-link round-trip, store encode/decode (10 tests / 14 cases, all pass)
+- [x] Builds with zero errors
+
+**Prompt Used:**
+"continue with next task, create new branch based from feature/f20-home-screen-widgets"
+
+**Notes:**
+- Snapshot shape differs from the plan: one `Night` type (last session) plus `Day` (calendar-day average score), instead of `NightSummary` + `NightScore`. `recentDays` mirrors `Last7NightsView.daySummaries` exactly (group by `startOfDay(startDate)`, average score, last 7 days with sessions), so widget and app always agree.
+- Dropped the planned `minimumSaveDuration` filter: saved sessions already passed it, so it guarded an impossible case.
+- `WidgetSnapshotStore` takes an explicit URL (`fileURL` is the App Group default and is `nil` without the entitlement), so tests use a temp file.
+- Deep links: `sleepguard://start`, `sleepguard://session/<uuid>`, `sleepguard://last7nights`.
+- `Models` gained its first test target (`ModelsTests`, Swift Testing). The `Models` target now declares `path: "Sources"`, because SwiftPM's single-target fallback no longer applies once a second target exists.
+- Known divergence: a legacy session with `hasCachedScore == false` shows in the app (score computed by faulting `events`) but is skipped by the widget. This is intentional, to avoid the faulting crash path.
 
 ### F20-T3 — App writes snapshot
 
