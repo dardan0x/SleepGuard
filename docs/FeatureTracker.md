@@ -46,12 +46,12 @@ Last updated: 2026-11-09
 | Blocked | 0 |
 | — | — |
 | Total Tasks | 137 |
-| Tasks Done | 104 |
+| Tasks Done | 105 |
 | Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
-| Tasks Backlog | 33 |
+| Tasks Backlog | 32 |
 | — | — |
-| **Progress** | **76%** |
+| **Progress** | **77%** |
 
 ## Features
 
@@ -76,7 +76,7 @@ Last updated: 2026-11-09
 | F17 | Swift 6 Migration | P1 | Done | 16/16 | ████████████████ 100% | [tracker](trackers/f17-swift6-migration.md) |
 | F19 | Factory DI Migration | P1 | Done | 5/5 | ██████████ 100% | [tracker](trackers/f19-factory-di.md) |
 | F20 | Home Screen & Lock Screen Widgets | P1 | In Progress | 7/9 | ████████░░ 78% | [tracker](trackers/f20-home-screen-widgets.md) |
-| F21 | Test Coverage | P1 | In Progress | 3/18 | ██░░░░░░░░ 17% | [tracker](trackers/f21-test-coverage.md) |
+| F21 | Test Coverage | P1 | In Progress | 4/18 | ██░░░░░░░░ 22% | [tracker](trackers/f21-test-coverage.md) |
 
 ## Activity Log
 
@@ -84,6 +84,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-11-09 | F21-T4 | Completed | `ModelsTestSupport` library (TestCalendar, in-memory TestStore, session/event fixtures) used by Models/Env/Recordings/Statistics tests; `run-tests.sh` handles `<Pkg>-Package` schemes; 46 tests pass. Branch `feature/f21/t4-test-fixtures` |
 | 2026-11-09 | F21-T3 | Completed | `.github/workflows/tests.yml`: `run-tests.sh` on `macos-26` + newest Xcode 26, PRs + manual dispatch, logs artifact on failure. First GitHub run pending the PR. Branch `feature/f21/t3-ci-tests-job` |
 | 2026-11-09 | F21-T2 | Completed | `Tests/` targets + 1 seed test each for AudioEngine, Env, Recordings, Statistics, DesignSystem; `run-tests.sh` → 7 packages, 45 tests pass; app build succeeds. Branch `feature/f21/t2-package-test-targets` |
 | 2026-11-09 | F21-T1 | Completed | `sh scripts/run-tests.sh` → Models 10 + Personalization 30 pass; app build succeeds. Fixed first-night survey bug (gate back to ≥2 sessions) and stale greeting test. Feature branch `feature/f21-test-coverage`; task branch `feature/f21/t1-test-plan`. App-scheme test plan can't see package tests (packages linked as package refs only) → per-package `scripts/run-tests.sh`. `ScoreTrend` made `Equatable` so `BriefingEngineTests` compile |

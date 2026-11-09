@@ -24,7 +24,7 @@ Unit tests across the logic layer of every package: sleep scoring, snore detecti
 | F21-T1 | Test runner script + fix Personalization tests | Infra | Done | — | scripts / Personalization | 2026-11-09 | 2026-11-09 |
 | F21-T2 | Test targets for AudioEngine, Env, Recordings, Statistics, DesignSystem | Infra | Done | F21-T1 | Packages | 2026-11-09 | 2026-11-09 |
 | F21-T3 | CI `tests` job | Infra | Done | F21-T1 | .github | 2026-11-09 | 2026-11-09 |
-| F21-T4 | Shared fixtures (in-memory SwiftData, session/event builders) | Infra | Backlog | F21-T2 | Packages | — | — |
+| F21-T4 | Shared fixtures (in-memory SwiftData, session/event builders) | Infra | Done | F21-T2 | Models (`ModelsTestSupport`) | 2026-11-09 | 2026-11-09 |
 | F21-T5 | Sleep score tests | Test | Backlog | F21-T4 | Models | — | — |
 | F21-T6 | Session + episode calculation tests | Test | Backlog | F21-T4 | Models | — | — |
 | F21-T7 | Recovery snapshot, deep link, formatters, URL resolver tests | Test | Backlog | F21-T4 | Models | — | — |
@@ -116,4 +116,29 @@ Unit tests across the logic layer of every package: sleep scoring, snore detecti
 - `runs-on: macos-26` (not `macos-latest`): the packages need Swift 6.2 (`swift-tools-version: 6.2`, `.defaultIsolation`). The step picks the newest `/Applications/Xcode_26*.app`.
 - `DESTINATION=platform=iOS Simulator,name=iPhone 17 Pro,OS=latest`, because the pinned local UDID doesn't exist on runners. Checked locally with Models.
 - No derived-data cache yet; expect a 10–15 minute cold build. Add caching later if it hurts.
+
+---
+
+### F21-T4 — Shared fixtures
+
+| Field | Value |
+|-------|-------|
+| Arch Ref | `docs/architecture/modules.md` |
+| Status | Done |
+| Started | 2026-11-09 |
+| Completed | 2026-11-09 |
+
+**Acceptance Criteria:**
+- [x] One shared helper library, not copies per package: `ModelsTestSupport` (Models package, `TestSupport/`)
+- [x] `TestCalendar` (UTC), `TestStore` (in-memory SwiftData, app schema, insert-then-attach), `SleepSession.fixture` / `SnoreEvent.fixture`
+- [x] Models, Env, Recordings, Statistics test targets depend on it; the app doesn't link it
+- [x] A test proves relationships work through the store (46 tests pass); app builds
+
+**Prompt Used:**
+"continue with next task"
+
+**Notes:**
+- `TestStore.insert` inserts the session first, then sets `events`/`recordingGaps`, following the SwiftData rule in CLAUDE.md (changes before insertion aren't tracked).
+- A second library product makes Xcode put the Models tests on the `Models-Package` scheme (`Models` lost its test action). `run-tests.sh` now picks `<Pkg>-Package` when a manifest declares more than one `.library(`.
+- `WidgetSnapshotTests` keeps its own private helpers; it wasn't migrated (surgical).
 

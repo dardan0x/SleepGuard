@@ -33,6 +33,7 @@ let package = Package(
       dependencies: [
         "Env",
         .product(name: "Models", package: "Models"),
+        .product(name: "ModelsTestSupport", package: "Models"),
       ],
       path: "Tests",
       swiftSettings: [
