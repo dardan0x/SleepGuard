@@ -40,18 +40,18 @@ Last updated: 2026-11-09
 | Blocked | 0 |
 | — | — |
 | Features (V5) | 3 |
-| Done | 2 |
-| In Progress | 1 |
+| Done | 3 |
+| In Progress | 0 |
 | Backlog | 0 |
 | Blocked | 0 |
 | — | — |
 | Total Tasks | 136 |
-| Tasks Done | 118 |
+| Tasks Done | 120 |
 | Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
-| Tasks Backlog | 18 |
+| Tasks Backlog | 16 |
 | — | — |
-| **Progress** | **87%** |
+| **Progress** | **88%** |
 
 ## Features
 
@@ -75,7 +75,7 @@ Last updated: 2026-11-09
 | F16 | Learn Tab | P2 | Done | 1/1 | ██████████ 100% | [tracker](trackers/f16-learn-tab.md) |
 | F17 | Swift 6 Migration | P1 | Done | 16/16 | ████████████████ 100% | [tracker](trackers/f17-swift6-migration.md) |
 | F19 | Factory DI Migration | P1 | Done | 5/5 | ██████████ 100% | [tracker](trackers/f19-factory-di.md) |
-| F20 | Home Screen & Lock Screen Widgets | P1 | In Progress | 7/9 | ████████░░ 78% | [tracker](trackers/f20-home-screen-widgets.md) |
+| F20 | Home Screen & Lock Screen Widgets | P1 | Done | 9/9 | ██████████ 100% | [tracker](trackers/f20-home-screen-widgets.md) |
 | F21 | Test Coverage | P1 | Done | 17/17 | ██████████ 100% | [tracker](trackers/f21-test-coverage.md) |
 
 ## Activity Log
@@ -84,6 +84,8 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-11-09 | F20-T8, F20-T9 | Completed | F20 marked Done (merged to `main` in PR #105). Lock Screen accessory render still unverified on device |
+| 2026-11-09 | F21 follow-up | Cleanup | Removed malformed catalog keys `localizations` / `stringUnit`; `Strings.swift` regenerated; catalog test reminder dropped. 179 tests pass. Branch `feature/f21/catalog-cleanup-f20-done` |
 | 2026-11-09 | F21-T18 | Completed | Verification: 180 tests pass, build, lint, layering, strings OK. Feature doc `docs/features/f21-test-coverage.md`; ProjectArchitecture Tests section. Merge to `main` by the user. Branch `feature/f21/t13-t18-remaining-tests` |
 | 2026-11-09 | F21-T17 | Skipped | UI smoke tests dropped (needs a UI test target in the Xcode project); possible follow-up |
 | 2026-11-09 | F21-T16 | Completed | `DurationFormatterTests` + `LocalizableCatalogTests` (all 438 keys have English values that resolve at runtime). Found 2 malformed catalog keys (`localizations`, `stringUnit`). 180 tests pass |
@@ -286,8 +288,7 @@ _Most recent first. The AI appends here after every task._
 
 | Task | Feature | Started | Assignee |
 |------|---------|---------|----------|
-| F20-T8 Lock Screen accessories (code merged; Lock Screen look unverified) | F20 | 2026-11-08 | Claude |
-| F20-T9 Verification, docs, merge to main (checks + docs done; merge pending) | F20 | 2026-11-08 | Claude |
+| — | — | — | — |
 
 ## Completed (last 10)
 

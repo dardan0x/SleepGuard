@@ -446,14 +446,6 @@
         }
       }
     },
-    "localizations": {
-      "en": {
-        "stringUnit": {
-          "state": "translated",
-          "value": "5 seconds"
-        }
-      }
-    },
     "loud.intensity.label.event.player.view": {
       "extractionState": "manual",
       "localizations": {
@@ -2363,10 +2355,6 @@
           }
         }
       }
-    },
-    "stringUnit": {
-      "state": "translated",
-      "value": "5 seconds"
     },
     "tab.sessions": {
       "localizations": {

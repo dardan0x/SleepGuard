@@ -4,13 +4,13 @@
 
 | Field | Value |
 |-------|-------|
-| **Status** | In Progress |
+| **Status** | Done |
 | **Priority** | P1 |
 | **Version** | V5 |
 | **Blocked By** | — |
 | **Started** | 2026-11-08 |
-| **Completed** | — |
-| **Feature Doc** | — |
+| **Completed** | 2026-11-09 |
+| **Feature Doc** | `docs/features/f20-home-screen-widgets.md` |
 | **Branch** | `feature/f20-home-screen-widgets` (each task merges here; merges to `main` after T9) |
 
 ## Summary
@@ -28,8 +28,8 @@ Users can add SleepGuard widgets to the Home Screen and Lock Screen: last night'
 | F20-T5 | Last Night widget (small + medium) | UI | Done | F20-T3, F20-T4 | SleepGuardWidgets | 2026-11-08 | 2026-11-08 |
 | F20-T6 | 7-Night Trend widget (medium) | UI | Done | F20-T5 | SleepGuardWidgets | 2026-11-08 | 2026-11-08 |
 | F20-T7 | Start Tracking widget (small) | UI | Done | F20-T4 | SleepGuardWidgets | 2026-11-08 | 2026-11-08 |
-| F20-T8 | Lock Screen accessories | UI | In Progress | F20-T5 | SleepGuardWidgets | 2026-11-08 | — |
-| F20-T9 | Verification, docs, merge to main | Docs | In Progress | F20-T1…T8 | — | 2026-11-08 | — |
+| F20-T8 | Lock Screen accessories | UI | Done | F20-T5 | SleepGuardWidgets | 2026-11-08 | 2026-11-09 |
+| F20-T9 | Verification, docs, merge to main | Docs | Done | F20-T1…T8 | — | 2026-11-08 | 2026-11-09 |
 
 ## Task Details
 
@@ -214,9 +214,9 @@ Users can add SleepGuard widgets to the Home Screen and Lock Screen: last night'
 | Field | Value |
 |-------|-------|
 | Arch Ref | `docs/architecture/views.md` |
-| Status | In Progress (code done; Lock Screen render unverified) |
+| Status | Done (marked Done by the user on 2026-11-09; Lock Screen render still unverified) |
 | Started | 2026-11-08 |
-| Completed | — |
+| Completed | 2026-11-09 |
 
 **Acceptance Criteria:**
 - [ ] `accessoryCircular`, `accessoryRectangular`, `accessoryInline` render correctly in vibrant mode (**not verified**: couldn't lock the simulator via automation; needs a manual check)
@@ -237,15 +237,15 @@ Users can add SleepGuard widgets to the Home Screen and Lock Screen: last night'
 
 | Field | Value |
 |-------|-------|
-| Status | In Progress (docs + checks done; waiting on the T8 Lock Screen check and the merge) |
+| Status | Done (merged to `main` in PR #105) |
 | Started | 2026-11-08 |
-| Completed | — |
+| Completed | 2026-11-09 |
 
 **Acceptance Criteria:**
 - [x] Tests, layering check, hardcoded-string grep, computed-view grep all pass (Models 10 tests / 14 cases; the app scheme has no tests; `BriefingEngineTests` doesn't compile on `main` and isn't F20's)
 - [x] Manual simulator pass of every Home Screen widget + tap target (Lock Screen still open under T8)
 - [x] Feature doc, session fragment, architecture notes
-- [ ] Feature branch merged to `main`
+- [x] Feature branch merged to `main` (PR #105)
 
 **Prompt Used:**
 "go to t9" / "i already pushed the fix for this in main. Can you rebase and use this fix?"
