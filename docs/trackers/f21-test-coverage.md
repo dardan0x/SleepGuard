@@ -22,7 +22,7 @@ Unit tests across the logic layer of every package: sleep scoring, snore detecti
 | ID | Task | Type | Status | Depends On | Package | Started | Completed |
 |----|------|------|--------|------------|---------|---------|-----------|
 | F21-T1 | Test runner script + fix Personalization tests | Infra | Done | — | scripts / Personalization | 2026-11-09 | 2026-11-09 |
-| F21-T2 | Test targets for AudioEngine, Env, Recordings, Statistics, DesignSystem | Infra | Backlog | F21-T1 | Packages | — | — |
+| F21-T2 | Test targets for AudioEngine, Env, Recordings, Statistics, DesignSystem | Infra | Done | F21-T1 | Packages | 2026-11-09 | 2026-11-09 |
 | F21-T3 | CI `tests` job | Infra | Backlog | F21-T1 | .github | — | — |
 | F21-T4 | Shared fixtures (in-memory SwiftData, session/event builders) | Infra | Backlog | F21-T2 | Packages | — | — |
 | F21-T5 | Sleep score tests | Test | Backlog | F21-T4 | Models | — | — |
@@ -66,3 +66,28 @@ Unit tests across the logic layer of every package: sleep scoring, snore detecti
 - Once compiling, 4 of 30 failed. The tests had never run, so they had drifted from the engine:
   - `greetingNight`: the night greeting is "Still up?" since F15-T5 localization; the test looked for "night". Test updated.
   - Survey gate: `30778b0` loosened it from "≥2 sessions + ≥15-point swing" to "≥1 session, any swing". With one session the average is 0, so the first night always showed "Nice jump tonight". **Bug fix (user approved):** the gate is back to ≥2 sessions; the any-swing rule stays. `noSurvey_whenScoreSwingIsSmall` → `survey_whenScoreSwingIsSmall` (expects a positive survey).
+
+---
+
+### F21-T2 — Test targets for AudioEngine, Env, Recordings, Statistics, DesignSystem
+
+| Field | Value |
+|-------|-------|
+| Arch Ref | `docs/architecture/modules.md` |
+| Status | Done |
+| Started | 2026-11-09 |
+| Completed | 2026-11-09 |
+
+**Acceptance Criteria:**
+- [x] Each of the 5 packages has a `<Pkg>Tests` target (`path: "Tests"`, Swift 6, same default isolation as the library)
+- [x] One seed test per target compiles and passes; `run-tests.sh` picks all 7 packages up automatically
+- [x] SwiftFormat lint clean; builds with zero errors
+
+**Prompt Used:**
+"i commited and merged, you continue with next one"
+
+**Notes:**
+- Seed tests are edge cases that the later tasks would cover anyway: `SnoreDetector` no-signal → `.none` (T8), `SessionCheckpointStore` clear → nil (T13), `SessionGrouper` empty (T14), `WeekOverWeekTrendCalculator` empty → nil (T15), `DurationFormatter` under an hour (T16).
+- Learn, Onboarding, Settings and SleepSession get no test target: they're almost all views, and their two helpers (`MelodyPreviewPlayer`, `CustomMelodyRecorder`) are audio I/O wrappers.
+- Found while reading: `WeekOverWeekTrendCalculator` builds its label from a hardcoded `"vs prev wk"` (not localized). Not changed here; flag for T15.
+
