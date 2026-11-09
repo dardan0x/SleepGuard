@@ -35,7 +35,8 @@ public final class SnoreDetector {
   public var highConfidenceGate: Float = 0.55
   public var quietFallbackGate: Float = 0.45
 
-  private init() {}
+  /// Internal so tests can create isolated instances; app code uses `.shared`.
+  init() {}
 
   // MARK: - Public Classification
 
