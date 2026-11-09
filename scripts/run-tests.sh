@@ -27,8 +27,11 @@ fi
 FAILED=""
 for pkg in $PACKAGES; do
   log="$LOG_DIR/$pkg.log"
+  # With more than one library product, Xcode puts the tests on "<Pkg>-Package".
+  scheme="$pkg"
+  [ "$(grep -c '\.library(' "Packages/$pkg/Package.swift")" -gt 1 ] && scheme="$pkg-Package"
   printf '▶ %s … ' "$pkg"
-  (cd "Packages/$pkg" && xcodebuild test -scheme "$pkg" -destination "$DESTINATION" \
+  (cd "Packages/$pkg" && xcodebuild test -scheme "$scheme" -destination "$DESTINATION" \
     -derivedDataPath "$DERIVED_DATA" >"$log" 2>&1)
   if [ $? -eq 0 ]; then
     grep -m1 -E 'Test run with .* passed' "$log" || echo "passed"
