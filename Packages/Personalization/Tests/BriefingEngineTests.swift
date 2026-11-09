@@ -168,7 +168,7 @@ struct BriefingEngineTests {
       recentSessions: [],
       lifestyleLogs: [],
       now: now)
-    #expect(briefing.greeting.contains("night"))
+    #expect(briefing.greeting.contains("Still up"))
   }
 
   @Test func greetingWithName() {
@@ -305,7 +305,7 @@ struct BriefingEngineTests {
     #expect(briefing.survey == nil)
   }
 
-  @Test func noSurvey_whenScoreSwingIsSmall() {
+  @Test func survey_whenScoreSwingIsSmall() {
     let now = date(hour: 8)
     let s1 = makeSession(startDate: date(hour: 23, dayOffset: -2), sleepScore: 75)
     let s2 = makeSession(startDate: date(hour: 23, dayOffset: -1), sleepScore: 78)
@@ -314,7 +314,7 @@ struct BriefingEngineTests {
       recentSessions: [s2, s1],
       lifestyleLogs: [],
       now: now)
-    #expect(briefing.survey == nil)
+    #expect(briefing.survey?.isPositiveSwing == true)
   }
 
   @Test func noSurvey_whenLogAlreadyExists() {
