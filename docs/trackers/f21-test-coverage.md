@@ -23,7 +23,7 @@ Unit tests across the logic layer of every package: sleep scoring, snore detecti
 |----|------|------|--------|------------|---------|---------|-----------|
 | F21-T1 | Test runner script + fix Personalization tests | Infra | Done | — | scripts / Personalization | 2026-11-09 | 2026-11-09 |
 | F21-T2 | Test targets for AudioEngine, Env, Recordings, Statistics, DesignSystem | Infra | Done | F21-T1 | Packages | 2026-11-09 | 2026-11-09 |
-| F21-T3 | CI `tests` job | Infra | Backlog | F21-T1 | .github | — | — |
+| F21-T3 | CI `tests` job | Infra | Done | F21-T1 | .github | 2026-11-09 | 2026-11-09 |
 | F21-T4 | Shared fixtures (in-memory SwiftData, session/event builders) | Infra | Backlog | F21-T2 | Packages | — | — |
 | F21-T5 | Sleep score tests | Test | Backlog | F21-T4 | Models | — | — |
 | F21-T6 | Session + episode calculation tests | Test | Backlog | F21-T4 | Models | — | — |
@@ -90,4 +90,30 @@ Unit tests across the logic layer of every package: sleep scoring, snore detecti
 - Seed tests are edge cases that the later tasks would cover anyway: `SnoreDetector` no-signal → `.none` (T8), `SessionCheckpointStore` clear → nil (T13), `SessionGrouper` empty (T14), `WeekOverWeekTrendCalculator` empty → nil (T15), `DurationFormatter` under an hour (T16).
 - Learn, Onboarding, Settings and SleepSession get no test target: they're almost all views, and their two helpers (`MelodyPreviewPlayer`, `CustomMelodyRecorder`) are audio I/O wrappers.
 - Found while reading: `WeekOverWeekTrendCalculator` builds its label from a hardcoded `"vs prev wk"` (not localized). Not changed here; flag for T15.
+
+---
+
+### F21-T3 — CI `tests` job
+
+| Field | Value |
+|-------|-------|
+| Arch Ref | — |
+| Status | Done |
+| Started | 2026-11-09 |
+| Completed | 2026-11-09 |
+
+**Acceptance Criteria:**
+- [x] `.github/workflows/tests.yml` runs `scripts/run-tests.sh` on a macOS runner with Xcode 26
+- [x] Triggers on pull requests + manual dispatch
+- [x] Logs uploaded as an artifact on failure
+- [ ] First green run on GitHub (verified when the T3 PR opens)
+
+**Prompt Used:**
+"continue with next task"
+
+**Notes:**
+- Trigger: the user didn't choose, so the recommendation applied: `pull_request` + `workflow_dispatch`, not every push. Task PRs target `feature/f21-test-coverage`, so each task is tested.
+- `runs-on: macos-26` (not `macos-latest`): the packages need Swift 6.2 (`swift-tools-version: 6.2`, `.defaultIsolation`). The step picks the newest `/Applications/Xcode_26*.app`.
+- `DESTINATION=platform=iOS Simulator,name=iPhone 17 Pro,OS=latest`, because the pinned local UDID doesn't exist on runners. Checked locally with Models.
+- No derived-data cache yet; expect a 10–15 minute cold build. Add caching later if it hurts.
 
