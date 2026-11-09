@@ -220,7 +220,10 @@ final class RealtimeDetectionTracker {
     // Use peakDB for intensity — snoring is impulsive and peak carries
     // more perceptual loudness than RMS over a 23 ms buffer.
     let classifyDB = peakDB ?? db
-    let state = snoreDetector.classify(db: classifyDB, spectralScore: spectralScore, snoreConfidence: snoreConfidence)
+    // Spectral fallback stays off: FFTAnalyzer returned zeros until F21-T9, so live
+    // detection has only ever used SoundAnalysis. Pass `spectralScore` here once a
+    // real night validates the fallback. Logs and events still record the real score.
+    let state = snoreDetector.classify(db: classifyDB, spectralScore: 0, snoreConfidence: snoreConfidence)
     #if DEBUG
     if snoreConfidence > 0.1 || spectralScore > 0.1 || speechConfidence > 0.1 {
       print("[SessionManager] classify rms=\(String(format: "%.1f", db)) peak=\(String(format: "%.1f", classifyDB)) spectral=\(String(format: "%.2f", spectralScore)) snoreConf=\(String(format: "%.2f", snoreConfidence)) speechConf=\(String(format: "%.2f", speechConfidence)) → snore=\(state) speech=\(speechDetector.isSpeechDetected)")
