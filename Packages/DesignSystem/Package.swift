@@ -29,4 +29,14 @@ let package = Package(
         .swiftLanguageMode(.v6),
         .defaultIsolation(MainActor.self),
       ]),
+    .testTarget(
+      name: "DesignSystemTests",
+      dependencies: [
+        "DesignSystem",
+      ],
+      path: "Tests",
+      swiftSettings: [
+        .swiftLanguageMode(.v6),
+        .defaultIsolation(MainActor.self),
+      ]),
   ])

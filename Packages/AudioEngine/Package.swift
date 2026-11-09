@@ -24,4 +24,13 @@ let package = Package(
         .linkedFramework("Accelerate"),
         .linkedFramework("SoundAnalysis"),
       ]),
+    .testTarget(
+      name: "AudioEngineTests",
+      dependencies: [
+        "AudioEngine",
+      ],
+      path: "Tests",
+      swiftSettings: [
+        .swiftLanguageMode(.v6),
+      ]),
   ])
