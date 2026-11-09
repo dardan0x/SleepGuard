@@ -34,6 +34,7 @@ let package = Package(
         "Env",
         .product(name: "Models", package: "Models"),
         .product(name: "ModelsTestSupport", package: "Models"),
+        .product(name: "AudioEngine", package: "AudioEngine"),
       ],
       path: "Tests",
       swiftSettings: [

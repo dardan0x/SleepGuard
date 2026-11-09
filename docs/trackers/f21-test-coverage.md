@@ -31,7 +31,7 @@ Unit tests across the logic layer of every package: sleep scoring, snore detecti
 | F21-T8 | `SnoreDetector` classification tests | Test | Done | F21-T2 | AudioEngine | 2026-11-09 | 2026-11-09 |
 | F21-T9 | FFT + RMS/peak level tests (synthetic buffers) + FFT fix | Test | Done | F21-T2 | AudioEngine / Env | 2026-11-09 | 2026-11-09 |
 | F21-T10 | Clip extractor + compressor tests | Test | Done | F21-T2 | AudioEngine | 2026-11-09 | 2026-11-09 |
-| F21-T11 | `RealtimeDetectionTracker` tests | Test | Backlog | F21-T4 | Env | — | — |
+| F21-T11 | Sensitivity preset tests (`RealtimeDetectionTracker`, option C) | Test | Done | F21-T8 | Env | 2026-11-09 | 2026-11-09 |
 | F21-T12 | `StorageLimitEnforcer` tests | Test | Backlog | F21-T4 | Env | — | — |
 | F21-T13 | Checkpoint store + recording delay tests | Test | Backlog | F21-T2 | Env | — | — |
 | F21-T14 | Recordings helpers tests | Test | Backlog | F21-T4 | Recordings | — | — |
@@ -308,4 +308,29 @@ Unit tests across the logic layer of every package: sleep scoring, snore detecti
 - Fixtures: `TestAudio.writeTone` writes a mono float CAF sine in 4096-frame chunks; `TempFolder` creates and removes a unique temp directory per suite instance.
 - Durations are checked to ±0.15 s (AAC priming/padding adds a few tens of ms).
 - Gotcha: a single `@MainActor` test inside a nonisolated suite broke Swift Testing's macro expansion for the whole suite ("`@const` value should be initialized with a compile-time value"). Keep isolation at the suite level.
+
+---
+
+### F21-T11 — Sensitivity preset tests (`RealtimeDetectionTracker`, option C)
+
+| Field | Value |
+|-------|-------|
+| Arch Ref | `docs/architecture/dependencies.md` |
+| Status | Done |
+| Started | 2026-11-09 |
+| Completed | 2026-11-09 |
+
+**Acceptance Criteria:**
+- [x] `RealtimeDetectionTracker.init(snoreDetector:)` defaults to `.shared`; the Factory registration is unchanged
+- [x] `applyDetectionSensitivity()` delegates to `apply(_:)`, so tests don't touch `UserDefaults`
+- [x] Exact Low / Medium / High values; Medium = detector defaults; strictly ordered; the same sound classified per preset; re-applying is stable
+- [x] 5 new tests; all 139 tests pass; app builds
+
+**Prompt Used:**
+"go with C" (test the presets only; leave the event state machine for a separate refactor)
+
+**Notes:**
+- Scope was cut on purpose. The event state machine (3-sample start, 10 s gap, bursts, intensity promotion, minimum-duration and short-event gates, melody interplay) is still untested. It's tangled with `AudioRecorder` event files, `SnoreInterrupterPlayer` playback, `UserPreferences` and 7 `Date()` calls. **Proposed follow-up feature:** extract it into a pure, clock-driven type with tests, then do a real-night device check.
+- Building a tracker in tests also creates `AudioRecorder.shared` / `SpeechDetector.shared` / `SnoreInterrupterPlayer.shared`. Their initializers only set a permission flag and register observers (simulator), so there are no side effects.
+- EnvTests now depends directly on `AudioEngine` (`@testable import` to build its own `SnoreDetector`).
 
