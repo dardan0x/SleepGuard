@@ -29,7 +29,7 @@ Unit tests across the logic layer of every package: sleep scoring, snore detecti
 | F21-T6 | Session + episode calculation tests | Test | Done | F21-T4 | Models | 2026-11-09 | 2026-11-09 |
 | F21-T7 | Recovery snapshot, deep link, formatters, URL resolver tests | Test | Done | F21-T4 | Models | 2026-11-09 | 2026-11-09 |
 | F21-T8 | `SnoreDetector` classification tests | Test | Done | F21-T2 | AudioEngine | 2026-11-09 | 2026-11-09 |
-| F21-T9 | FFT + RMS/peak level tests (synthetic buffers) | Test | Backlog | F21-T2 | AudioEngine | — | — |
+| F21-T9 | FFT + RMS/peak level tests (synthetic buffers) + FFT fix | Test | Done | F21-T2 | AudioEngine / Env | 2026-11-09 | 2026-11-09 |
 | F21-T10 | Clip extractor + compressor tests | Test | Backlog | F21-T2 | AudioEngine | — | — |
 | F21-T11 | `RealtimeDetectionTracker` tests | Test | Backlog | F21-T4 | Env | — | — |
 | F21-T12 | `StorageLimitEnforcer` tests | Test | Backlog | F21-T4 | Env | — | — |
@@ -247,4 +247,39 @@ Unit tests across the logic layer of every package: sleep scoring, snore detecti
 - Sensitivity presets (Low / Medium / High threshold sets) live in `RealtimeDetectionTracker.applyDetectionSensitivity()` in Env, not in `SnoreDetector`. They're tested in T11.
 - Spectral cases avoid exact float boundaries at score 0.6 (`(1 − 0.6)` isn't exact in `Float`). Each case sits 0.1 dB on either side.
 - Branched from the T7 tip (`feature/f21/t7-models-helpers-tests`) because T7's PR wasn't merged yet, so the tracker docs don't conflict.
+
+---
+
+### F21-T9 — FFT + RMS/peak level tests (synthetic buffers) + FFT fix
+
+| Field | Value |
+|-------|-------|
+| Arch Ref | — |
+| Status | Done |
+| Started | 2026-11-09 |
+| Completed | 2026-11-09 |
+
+**Acceptance Criteria:**
+- [x] `FFTAnalyzer.analyze`: low tone is snore-like, high tone and white noise are not, silence, short buffer (zero-padded), 48 kHz
+- [x] `FFTAnalyzer.spectrumBars`: 32 bars at 44.1 kHz without crashing, normalized, peak at the tone, silence flat
+- [x] `TapProcessor.process` levels: full-scale sine (0 / −3 dB), −20 dB sine, single spike, silence floor, spectral score, no-file writes
+- [x] **Bug fixed (user approved, "Fix, keep detection off")**: FFT works; live detection unchanged
+- [x] 15 new tests; all 123 tests pass; app builds
+
+**Prompt Used:**
+"continue with t9" → FFT bug question → "Fix, keep detection off"
+
+**Notes:**
+- **Bug**: since `e4f7c56` (2026-05-08), `FFTAnalyzer` created its setup with `vDSP_DFT_zop_CreateSetup(nil, log2n, …)`, where `log2n` = 10 for 1024. The function takes the *length*, so the setup was `nil` and every `analyze` / `spectrumBars` call returned zeros. Effects:
+  - live detection's spectral fallback never fired
+  - saved events stored 0 for `dominantFrequency` / `spectralCentroid` / `lowFreqRatio` (via `AudioClipExtractor`)
+  - the Advanced player's spectrum bars were flat
+- **Fix**:
+  - setup uses `vDSP_Length(bufferSize)`
+  - a shared `magnitudeSpectrum(of:)` helper zero-pads buffers shorter than `bufferSize`; the old code also sized the DFT arrays by `frameLength`, which would have overflowed once the setup existed
+  - the unused `log2n` was removed
+- **Second bug exposed by the fix**: `spectrumBars` binning trapped when there are fewer bins than bars. 1024 frames at 44.1 kHz gives 22 bins under 1 kHz for the default 32 bars, so bar 23 got `startBin 24 > endBin 23`, i.e. a crash when opening the Advanced player. Bins are now spread proportionally (neighbours may share a bin).
+- **Detection kept off**: `RealtimeDetectionTracker` passes `spectralScore: 0` to `classify`, with a comment. The short-event gate's spectral branch is only reachable for events without ML confidence, and only ML can start an event, so detection is byte-for-byte the same. Raw logs and `averageSpectralScore` on events now record real values for validation.
+- Silence scores 0.3 (only the centroid term, 800 − 0 → capped 1 × 0.3). That's below the 0.6 gate; noted, not changed.
+- **Follow-up**: validate the spectral fallback on a real night before passing `spectralScore` to `classify`.
 

@@ -46,10 +46,10 @@ Last updated: 2026-11-09
 | Blocked | 0 |
 | — | — |
 | Total Tasks | 137 |
-| Tasks Done | 109 |
+| Tasks Done | 110 |
 | Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
-| Tasks Backlog | 28 |
+| Tasks Backlog | 27 |
 | — | — |
 | **Progress** | **80%** |
 
@@ -76,7 +76,7 @@ Last updated: 2026-11-09
 | F17 | Swift 6 Migration | P1 | Done | 16/16 | ████████████████ 100% | [tracker](trackers/f17-swift6-migration.md) |
 | F19 | Factory DI Migration | P1 | Done | 5/5 | ██████████ 100% | [tracker](trackers/f19-factory-di.md) |
 | F20 | Home Screen & Lock Screen Widgets | P1 | In Progress | 7/9 | ████████░░ 78% | [tracker](trackers/f20-home-screen-widgets.md) |
-| F21 | Test Coverage | P1 | In Progress | 8/18 | ████░░░░░░ 44% | [tracker](trackers/f21-test-coverage.md) |
+| F21 | Test Coverage | P1 | In Progress | 9/18 | █████░░░░░ 50% | [tracker](trackers/f21-test-coverage.md) |
 
 ## Activity Log
 
@@ -84,6 +84,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-11-09 | F21-T9 | Completed | **Bug fix**: `FFTAnalyzer` returned zeros since 2026-05-08 (setup got log2n, not length); fixed + zero-padding + `spectrumBars` out-of-range crash fixed. Live detection kept on SoundAnalysis only (`spectralScore: 0` into `classify`). 15 new tests, 123 pass. Branch `feature/f21/t9-fft-levels-tests` |
 | 2026-11-09 | F21-T8 | Completed | `SnoreDetector.init` internal; `SnoreDetectorTests` 8 tests / 28 cases: routing, SoundAnalysis and spectral tiers, inclusive thresholds, per-instance config. 108 tests pass. Branch `feature/f21/t8-snore-detector-tests` |
 | 2026-11-09 | F21-T7 | Completed | `SessionRecoverySnapshotTests` (5), `AudioFileURLResolverTests` (4), deep-link URL contract (1). `DateFormatters` skipped (locale-dependent config). 101 tests pass. Branch `feature/f21/t7-models-helpers-tests` |
 | 2026-11-09 | F21-T6 | Completed | `SnoringEpisodeTests` (16) + `SessionStatsTests` (9): episode merge/display/playback, episode aggregates, session durations and stats. 91 tests pass. Branch `feature/f21/t6-session-episode-tests` |
