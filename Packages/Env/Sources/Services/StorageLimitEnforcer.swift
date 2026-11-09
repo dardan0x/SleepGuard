@@ -46,14 +46,25 @@ public final class StorageLimitEnforcer: Sendable {
   @discardableResult
   public func enforceLimits(modelContext: ModelContext) async -> CleanupReport {
     let prefs = UserPreferences.shared
+    return await enforceLimits(
+      modelContext: modelContext,
+      maxDays: prefs.limitDaysEnabled ? prefs.maxDays : nil,
+      maxMB: prefs.limitStorageEnabled ? prefs.storageLimitMB : nil)
+  }
+
+  /// Same as above with explicit limits (`nil` = that limit is off), so tests
+  /// don't depend on `UserDefaults`.
+  @MainActor
+  @discardableResult
+  func enforceLimits(modelContext: ModelContext, maxDays: Int?, maxMB: Int?) async -> CleanupReport {
     var dayPlan: CleanupPlan?
     var sizePlan: CleanupPlan?
 
-    if prefs.limitDaysEnabled {
-      dayPlan = buildDayPlan(maxDays: prefs.maxDays, modelContext: modelContext)
+    if let maxDays {
+      dayPlan = buildDayPlan(maxDays: maxDays, modelContext: modelContext)
     }
-    if prefs.limitStorageEnabled {
-      sizePlan = buildSizePlan(maxMB: prefs.storageLimitMB, modelContext: modelContext)
+    if let maxMB {
+      sizePlan = buildSizePlan(maxMB: maxMB, modelContext: modelContext)
     }
 
     // Save URL clears immediately so the model is consistent even if

@@ -46,10 +46,10 @@ Last updated: 2026-11-09
 | Blocked | 0 |
 | — | — |
 | Total Tasks | 137 |
-| Tasks Done | 112 |
+| Tasks Done | 113 |
 | Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
-| Tasks Backlog | 25 |
+| Tasks Backlog | 24 |
 | — | — |
 | **Progress** | **82%** |
 
@@ -76,7 +76,7 @@ Last updated: 2026-11-09
 | F17 | Swift 6 Migration | P1 | Done | 16/16 | ████████████████ 100% | [tracker](trackers/f17-swift6-migration.md) |
 | F19 | Factory DI Migration | P1 | Done | 5/5 | ██████████ 100% | [tracker](trackers/f19-factory-di.md) |
 | F20 | Home Screen & Lock Screen Widgets | P1 | In Progress | 7/9 | ████████░░ 78% | [tracker](trackers/f20-home-screen-widgets.md) |
-| F21 | Test Coverage | P1 | In Progress | 11/18 | ██████░░░░ 61% | [tracker](trackers/f21-test-coverage.md) |
+| F21 | Test Coverage | P1 | In Progress | 12/18 | ███████░░░ 67% | [tracker](trackers/f21-test-coverage.md) |
 
 ## Activity Log
 
@@ -84,6 +84,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-11-09 | F21-T12 | Completed | `StorageLimitEnforcer` internal `enforceLimits(modelContext:maxDays:maxMB:)` seam; `StorageLimitEnforcerTests` (6): day/size plans, metadata kept, no double count, stale refs. 145 tests pass. Branch `feature/f21/t12-storage-limit-tests` |
 | 2026-11-09 | F21-T11 | Completed | Option C: `RealtimeDetectionTracker` takes an injectable `SnoreDetector` + `apply(_:)`; `DetectionSensitivityTests` (5) cover the Low/Medium/High presets. Event state machine left for a follow-up refactor feature. 139 tests pass. Branch `feature/f21/t11-sensitivity-presets-tests` |
 | 2026-11-09 | F21-T10 | Completed | `AudioClipExtractorTests` (8) + `EventClipCompressorTests` (3) on synthetic CAF files in temp folders: clip spans, clamping, batching, spectral features, AAC output. 134 tests pass. Branch `feature/f21/t10-clip-extractor-tests` |
 | 2026-11-09 | F21-T9 | Completed | **Bug fix**: `FFTAnalyzer` returned zeros since 2026-05-08 (setup got log2n, not length); fixed + zero-padding + `spectrumBars` out-of-range crash fixed. Live detection kept on SoundAnalysis only (`spectralScore: 0` into `classify`). 15 new tests, 123 pass. Branch `feature/f21/t9-fft-levels-tests` |
