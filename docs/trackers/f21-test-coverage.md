@@ -25,7 +25,7 @@ Unit tests across the logic layer of every package: sleep scoring, snore detecti
 | F21-T2 | Test targets for AudioEngine, Env, Recordings, Statistics, DesignSystem | Infra | Done | F21-T1 | Packages | 2026-11-09 | 2026-11-09 |
 | F21-T3 | CI `tests` job | Infra | Done | F21-T1 | .github | 2026-11-09 | 2026-11-09 |
 | F21-T4 | Shared fixtures (in-memory SwiftData, session/event builders) | Infra | Done | F21-T2 | Models (`ModelsTestSupport`) | 2026-11-09 | 2026-11-09 |
-| F21-T5 | Sleep score tests | Test | Backlog | F21-T4 | Models | — | — |
+| F21-T5 | Sleep score tests | Test | Done | F21-T4 | Models | 2026-11-09 | 2026-11-09 |
 | F21-T6 | Session + episode calculation tests | Test | Backlog | F21-T4 | Models | — | — |
 | F21-T7 | Recovery snapshot, deep link, formatters, URL resolver tests | Test | Backlog | F21-T4 | Models | — | — |
 | F21-T8 | `SnoreDetector` classification tests | Test | Backlog | F21-T2 | AudioEngine | — | — |
@@ -141,4 +141,31 @@ Unit tests across the logic layer of every package: sleep scoring, snore detecti
 - `TestStore.insert` inserts the session first, then sets `events`/`recordingGaps`, following the SwiftData rule in CLAUDE.md (changes before insertion aren't tracked).
 - A second library product makes Xcode put the Models tests on the `Models-Package` scheme (`Models` lost its test action). `run-tests.sh` now picks `<Pkg>-Package` when a manifest declares more than one `.library(`.
 - `WidgetSnapshotTests` keeps its own private helpers; it wasn't migrated (surgical).
+
+---
+
+### F21-T5 — Sleep score tests
+
+| Field | Value |
+|-------|-------|
+| Arch Ref | CLAUDE.md "Cached computed properties on SleepSession" |
+| Status | Done |
+| Started | 2026-11-09 |
+| Completed | 2026-11-09 |
+
+**Acceptance Criteria:**
+- [x] Every penalty in `sleepScore(using:)` covered in isolation: snoring %, events/hour, intensity, sleep talking, stages, short/long sleep
+- [x] Caps and the `minScore` clamp; zero-duration → `maxScore`; custom config
+- [x] Intensity uses burst sums, not event span; recording gaps (resumed / not resumed / covered by an event)
+- [x] Episode merge (≤ 5 min) and the < 3 s display filter as they affect the score
+- [x] Cached vs. recomputed path
+- [x] 22 new tests; all 66 tests pass; app builds
+
+**Prompt Used:**
+"continue with next"
+
+**Notes:**
+- Each test's comment shows the arithmetic with default config values, so a formula change points at the number that moved.
+- **Finding (not changed):** `sleepScore(using:)` is documented as "always recomputes; does not use the cached score", but it reads `snoringDuration`, which returns `cachedSnoringDuration` once `hasCachedScore` is true. Harmless today (both cached values are written together), but after a change to the snoring-duration formula, recomputes would keep the old cached duration. Option: compute the uncached snoring duration inside `sleepScore(using:)`.
+- **Tooling:** when a test fails, `xcodebuild test` reports it within seconds but then stalls for 10+ minutes before exiting (seen in T1 and T5). This matters for CI's 60-minute timeout. Not investigated yet.
 
