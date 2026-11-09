@@ -969,7 +969,7 @@
 /* Begin XCRemoteSwiftPackageReference section */
 		47447378A1132717B2E05DE4 /* XCRemoteSwiftPackageReference "Recordings" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "file:///Users/user/Documents/VibeCodingProjects/SleepGuard/Packages/Recordings";
+			repositoryURL = "file:///Users/user/Documents/IndependentProjects/SleepGuard/Packages/Recordings";
 			requirement = {
 				kind = exactVersion;
 				version = 1.0.0;
@@ -985,7 +985,7 @@
 		};
 		E15F4B743C5A82C6A11DD6F1 /* XCRemoteSwiftPackageReference "DesignSystem" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "file:///Users/user/Documents/VibeCodingProjects/SleepGuard/Packages/DesignSystem";
+			repositoryURL = "file:///Users/user/Documents/IndependentProjects/SleepGuard/Packages/DesignSystem";
 			requirement = {
 				kind = exactVersion;
 				version = 1.0.0;
