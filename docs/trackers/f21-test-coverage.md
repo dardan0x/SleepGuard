@@ -26,7 +26,7 @@ Unit tests across the logic layer of every package: sleep scoring, snore detecti
 | F21-T3 | CI `tests` job | Infra | Done | F21-T1 | .github | 2026-11-09 | 2026-11-09 |
 | F21-T4 | Shared fixtures (in-memory SwiftData, session/event builders) | Infra | Done | F21-T2 | Models (`ModelsTestSupport`) | 2026-11-09 | 2026-11-09 |
 | F21-T5 | Sleep score tests | Test | Done | F21-T4 | Models | 2026-11-09 | 2026-11-09 |
-| F21-T6 | Session + episode calculation tests | Test | Backlog | F21-T4 | Models | — | — |
+| F21-T6 | Session + episode calculation tests | Test | Done | F21-T4 | Models | 2026-11-09 | 2026-11-09 |
 | F21-T7 | Recovery snapshot, deep link, formatters, URL resolver tests | Test | Backlog | F21-T4 | Models | — | — |
 | F21-T8 | `SnoreDetector` classification tests | Test | Backlog | F21-T2 | AudioEngine | — | — |
 | F21-T9 | FFT + RMS/peak level tests (synthetic buffers) | Test | Backlog | F21-T2 | AudioEngine | — | — |
@@ -168,4 +168,30 @@ Unit tests across the logic layer of every package: sleep scoring, snore detecti
 - Each test's comment shows the arithmetic with default config values, so a formula change points at the number that moved.
 - **Finding (not changed):** `sleepScore(using:)` is documented as "always recomputes; does not use the cached score", but it reads `snoringDuration`, which returns `cachedSnoringDuration` once `hasCachedScore` is true. Harmless today (both cached values are written together), but after a change to the snoring-duration formula, recomputes would keep the old cached duration. Option: compute the uncached snoring duration inside `sleepScore(using:)`.
 - **Tooling:** when a test fails, `xcodebuild test` reports it within seconds but then stalls for 10+ minutes before exiting (seen in T1 and T5). This matters for CI's 60-minute timeout. Not investigated yet.
+
+---
+
+### F21-T6 — Session + episode calculation tests
+
+| Field | Value |
+|-------|-------|
+| Arch Ref | — |
+| Status | Done |
+| Started | 2026-11-09 |
+| Completed | 2026-11-09 |
+
+**Acceptance Criteria:**
+- [x] `snoringEpisodes`: 5-minute merge boundary (300 s merges, 301 s splits), ordering, overlap, max intensity, first-event id, sleep talking excluded
+- [x] `displayableSnoringEpisodes` (< 3 s hidden), `eventsCount`, `eventsPerHour`
+- [x] `episodePlaybackEvents` (representative → whole episode in order; others alone)
+- [x] `SnoringEpisode`: `snoreDuration`, `detectedDuration`, `detectedSegments` (bursts / fallback), `peakDB`, duration-weighted `averageDB`
+- [x] Session stats: total/gaps/monitored durations, percentages, sleep talking, `duration(for:)`, `stageStats`, cached snoring duration, `minimumSaveDuration`
+- [x] 25 new tests; all 91 tests pass; app builds
+
+**Prompt Used:**
+"continue with t6"
+
+**Notes:**
+- `SnoringEpisodeTests` (16) and `SessionStatsTests` (9), kept as separate files.
+- Edge case noted, not tested or changed: `detectedSegments` drops events without bursts when any event in the episode has bursts. Only reachable if one episode mixed legacy (no-burst) and new events. The recorder always closes the open burst when it finalizes an event, so this can't happen within one session today.
 
