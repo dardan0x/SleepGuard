@@ -1,5 +1,5 @@
 ### Completed
-- F21-T6: 25 tests for session and episode calculations in Models (`SnoringEpisodeTests` 16, `SessionStatsTests` 9). The suite is now 91 tests, all passing.
+- F21-T6: 25 tests for session and episode calculations in Models (`SnoringEpisodeTests` 16, `SessionStatsTests` 9). The suite is now 93 tests, all passing.
 
 ### Technical Details
 - **Grouping** (`snoringEpisodes`):
@@ -38,7 +38,7 @@
 - **Two suites instead of one file**: episodes and session stats change for different reasons. This also keeps each file under ~200 lines.
 
 ### Build Status
-- **BUILD SUCCEEDED** (app scheme, BD630AD5). `run-tests.sh`: 91/91 pass. SwiftFormat lint clean.
+- **BUILD SUCCEEDED** (app scheme, BD630AD5). `run-tests.sh`: 93/93 pass. SwiftFormat lint clean.
 
 ### Changes done
 ```

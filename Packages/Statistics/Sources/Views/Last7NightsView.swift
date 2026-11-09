@@ -69,7 +69,7 @@ public struct Last7NightsView: View {
             HStack(spacing: 4) {
               Image(systemName: trend.isPositive ? "arrow.up.forward" : "arrow.down.forward")
                 .font(.system(size: 12, weight: .semibold))
-              Text(trend.label)
+              Text(String(format: Strings.statsLast7nightsTrendVsPrevWeek, trend.diff))
                 .font(.system(size: 12, weight: .medium))
             }
             .foregroundStyle(trend.isPositive ? theme.scoreGreen : theme.scoreRed)

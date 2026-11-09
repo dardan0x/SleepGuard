@@ -1,5 +1,5 @@
 ### Completed
-- F21-T11 (option C): tests for the Low/Medium/High detection sensitivity presets (5 new). The suite is now 139 tests, all passing. The live event state machine is deliberately out of scope.
+- F21-T11 (option C): tests for the Low/Medium/High detection sensitivity presets (5 new). The suite is now 141 tests, all passing. The live event state machine is deliberately out of scope.
 
 ### Technical Details
 - `RealtimeDetectionTracker`:
@@ -25,7 +25,7 @@
 - **Option C over a refactor** (user choice): no behavior change in the most delicate audio path inside a test-coverage feature. The state-machine extraction is proposed as its own feature, with a device check.
 
 ### Build Status
-- **BUILD SUCCEEDED** (app scheme, BD630AD5). `run-tests.sh`: 139/139 pass. SwiftFormat lint is clean and the layering check passes.
+- **BUILD SUCCEEDED** (app scheme, BD630AD5). `run-tests.sh`: 141/141 pass. SwiftFormat lint is clean and the layering check passes.
 
 ### Changes done
 ```

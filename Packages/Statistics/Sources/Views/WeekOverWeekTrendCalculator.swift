@@ -2,8 +2,11 @@ import Foundation
 import Models
 
 struct Trend {
-  let label: String
-  let isPositive: Bool
+  /// Current week's average score minus the previous week's (never 0).
+  let diff: Int
+  var isPositive: Bool {
+    diff > 0
+  }
 }
 
 enum WeekOverWeekTrendCalculator {
@@ -31,8 +34,6 @@ enum WeekOverWeekTrendCalculator {
 
     guard diff != 0 else { return nil }
 
-    return Trend(
-      label: "\(diff > 0 ? "+" : "")\(diff) vs prev wk",
-      isPositive: diff > 0)
+    return Trend(diff: diff)
   }
 }

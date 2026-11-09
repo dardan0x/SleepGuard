@@ -1,5 +1,5 @@
 ### Completed
-- F21-T10: `AudioClipExtractor` and `EventClipCompressor` tests against real audio files generated in temp folders (11 new). The suite is now 134 tests, all passing. This finishes the AudioEngine phase (T8–T10).
+- F21-T10: `AudioClipExtractor` and `EventClipCompressor` tests against real audio files generated in temp folders (11 new). The suite is now 136 tests, all passing. This finishes the AudioEngine phase (T8–T10).
 
 ### Technical Details
 - **Fixtures** (in `TestAudio.swift`):
@@ -33,7 +33,7 @@
 - **Real files, not mocks**: both types are thin wrappers over AVFoundation export/encode. The only meaningful test is that the produced file has the right span and format.
 
 ### Build Status
-- **BUILD SUCCEEDED** (app scheme, BD630AD5). `run-tests.sh`: 134/134 pass. SwiftFormat lint clean.
+- **BUILD SUCCEEDED** (app scheme, BD630AD5). `run-tests.sh`: 136/136 pass. SwiftFormat lint clean.
 
 ### Changes done
 ```

@@ -1,5 +1,5 @@
 ### Completed
-- F21-T8: `SnoreDetector` classification tests in AudioEngine, 7 new tests (28 parameterized cases). The suite is now 108 tests, all passing.
+- F21-T8: `SnoreDetector` classification tests in AudioEngine, 7 new tests (28 parameterized cases). The suite is now 110 tests, all passing.
 
 ### Technical Details
 - `SnoreDetector.init` changed from `private` to internal (user chose option b) so each test builds its own detector. `.shared` is unchanged; `@testable import` reaches the initializer and app code doesn't use it.
@@ -32,7 +32,7 @@
 - **Sensitivity presets deferred to T11**: they're defined in `RealtimeDetectionTracker` (Env).
 
 ### Build Status
-- **BUILD SUCCEEDED** (app scheme, BD630AD5). `run-tests.sh`: 108/108 pass. SwiftFormat lint is clean and the layering check passes.
+- **BUILD SUCCEEDED** (app scheme, BD630AD5). `run-tests.sh`: 110/110 pass. SwiftFormat lint is clean and the layering check passes.
 
 ### Changes done
 ```

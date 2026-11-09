@@ -4671,6 +4671,17 @@
           }
         }
       }
+    },
+    "stats.last7Nights.trendVsPrevWeek": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%+lld vs prev wk"
+          }
+        }
+      }
     }
   },
   "version": "1.0"
