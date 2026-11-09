@@ -117,6 +117,13 @@ struct WidgetDeepLinkTests {
     #expect(WidgetDeepLink(url: link.url) == link)
   }
 
+  @Test func urlsMatchTheWidgetContract() throws {
+    let id = try #require(UUID(uuidString: "00000000-0000-0000-0000-000000000001"))
+    #expect(WidgetDeepLink.startTracking.url.absoluteString == "sleepguard://start")
+    #expect(WidgetDeepLink.last7Nights.url.absoluteString == "sleepguard://last7nights")
+    #expect(WidgetDeepLink.session(id).url.absoluteString == "sleepguard://session/00000000-0000-0000-0000-000000000001")
+  }
+
   @Test(arguments: [
     "https://start",
     "sleepguard://unknown",

@@ -27,7 +27,7 @@ Unit tests across the logic layer of every package: sleep scoring, snore detecti
 | F21-T4 | Shared fixtures (in-memory SwiftData, session/event builders) | Infra | Done | F21-T2 | Models (`ModelsTestSupport`) | 2026-11-09 | 2026-11-09 |
 | F21-T5 | Sleep score tests | Test | Done | F21-T4 | Models | 2026-11-09 | 2026-11-09 |
 | F21-T6 | Session + episode calculation tests | Test | Done | F21-T4 | Models | 2026-11-09 | 2026-11-09 |
-| F21-T7 | Recovery snapshot, deep link, formatters, URL resolver tests | Test | Backlog | F21-T4 | Models | — | — |
+| F21-T7 | Recovery snapshot, deep link, formatters, URL resolver tests | Test | Done | F21-T4 | Models | 2026-11-09 | 2026-11-09 |
 | F21-T8 | `SnoreDetector` classification tests | Test | Backlog | F21-T2 | AudioEngine | — | — |
 | F21-T9 | FFT + RMS/peak level tests (synthetic buffers) | Test | Backlog | F21-T2 | AudioEngine | — | — |
 | F21-T10 | Clip extractor + compressor tests | Test | Backlog | F21-T2 | AudioEngine | — | — |
@@ -194,4 +194,30 @@ Unit tests across the logic layer of every package: sleep scoring, snore detecti
 **Notes:**
 - `SnoringEpisodeTests` (16) and `SessionStatsTests` (9), kept as separate files.
 - Edge case noted, not tested or changed: `detectedSegments` drops events without bursts when any event in the episode has bursts. Only reachable if one episode mixed legacy (no-burst) and new events. The recorder always closes the open burst when it finalizes an event, so this can't happen within one session today.
+
+---
+
+### F21-T7 — Recovery snapshot, deep link, formatters, URL resolver tests
+
+| Field | Value |
+|-------|-------|
+| Arch Ref | — |
+| Status | Done |
+| Started | 2026-11-09 |
+| Completed | 2026-11-09 |
+
+**Acceptance Criteria:**
+- [x] `SessionRecoverySnapshot`: live session → snapshot → JSON → rebuilt session keeps every session and event field, events point back to the session, score and snoring duration are unchanged
+- [x] `SessionRecoverySnapshot`: existing `endDate` wins over the checkpoint date; no events → not recoverable
+- [x] `AudioFileURLResolver`: filename-only and legacy absolute paths resolve to the current Documents folder; nil / empty / missing → nil; `filename(from:)`
+- [x] `WidgetDeepLink`: exact URL strings (round-trip and invalid cases already covered in F20)
+- [x] 10 new tests; all 101 tests pass; app builds
+
+**Prompt Used:**
+"continue with t7"
+
+**Notes:**
+- **`DateFormatters` skipped on purpose**: plain Foundation formatters built from `Locale.current` and the device time zone. A test would restate the config or break when the simulator locale changes. Side note: `time` and `timeWithPeriod` are configured identically.
+- `AudioFileURLResolver.resolve("/")` returns the Documents folder itself (the last path component of "/" is "/"). Nothing stores "/", so the case was dropped from the test; no code change.
+- Recovery tests use detached (not inserted) models, the same as the live recording flow and `makeSession()`.
 
