@@ -28,7 +28,7 @@ Unit tests across the logic layer of every package: sleep scoring, snore detecti
 | F21-T5 | Sleep score tests | Test | Done | F21-T4 | Models | 2026-11-09 | 2026-11-09 |
 | F21-T6 | Session + episode calculation tests | Test | Done | F21-T4 | Models | 2026-11-09 | 2026-11-09 |
 | F21-T7 | Recovery snapshot, deep link, formatters, URL resolver tests | Test | Done | F21-T4 | Models | 2026-11-09 | 2026-11-09 |
-| F21-T8 | `SnoreDetector` classification tests | Test | Backlog | F21-T2 | AudioEngine | — | — |
+| F21-T8 | `SnoreDetector` classification tests | Test | Done | F21-T2 | AudioEngine | 2026-11-09 | 2026-11-09 |
 | F21-T9 | FFT + RMS/peak level tests (synthetic buffers) | Test | Backlog | F21-T2 | AudioEngine | — | — |
 | F21-T10 | Clip extractor + compressor tests | Test | Backlog | F21-T2 | AudioEngine | — | — |
 | F21-T11 | `RealtimeDetectionTracker` tests | Test | Backlog | F21-T4 | Env | — | — |
@@ -220,4 +220,31 @@ Unit tests across the logic layer of every package: sleep scoring, snore detecti
 - **`DateFormatters` skipped on purpose**: plain Foundation formatters built from `Locale.current` and the device time zone. A test would restate the config or break when the simulator locale changes. Side note: `time` and `timeWithPeriod` are configured identically.
 - `AudioFileURLResolver.resolve("/")` returns the Documents folder itself (the last path component of "/" is "/"). Nothing stores "/", so the case was dropped from the test; no code change.
 - Recovery tests use detached (not inserted) models, the same as the live recording flow and `makeSession()`.
+
+---
+
+### F21-T8 — `SnoreDetector` classification tests
+
+| Field | Value |
+|-------|-------|
+| Arch Ref | — |
+| Status | Done |
+| Started | 2026-11-09 |
+| Completed | 2026-11-09 |
+
+**Acceptance Criteria:**
+- [x] Isolated instances: `SnoreDetector.init` is internal (was private); app code still uses `.shared`
+- [x] Routing: SoundAnalysis over spectral, spectral without confidence, no signal → none, `update` stores state
+- [x] SoundAnalysis tiers: gate, high-confidence epic, dB floors, quiet fallback gate
+- [x] Spectral tiers: 0.6 score gate, quiet − 5 floor, score-adjusted thresholds (score 1.0 and 0.6)
+- [x] Plain thresholds are inclusive at each boundary; custom thresholds affect only their own instance
+- [x] 7 new tests (28 parameterized cases); all 108 tests pass; app builds
+
+**Prompt Used:**
+"go with b" (option b: internal initializer instead of mutating `.shared` in serialized tests)
+
+**Notes:**
+- Sensitivity presets (Low / Medium / High threshold sets) live in `RealtimeDetectionTracker.applyDetectionSensitivity()` in Env, not in `SnoreDetector`. They're tested in T11.
+- Spectral cases avoid exact float boundaries at score 0.6 (`(1 − 0.6)` isn't exact in `Float`). Each case sits 0.1 dB on either side.
+- Branched from the T7 tip (`feature/f21/t7-models-helpers-tests`) because T7's PR wasn't merged yet, so the tracker docs don't conflict.
 
