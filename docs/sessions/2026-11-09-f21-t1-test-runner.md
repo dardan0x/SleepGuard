@@ -1,9 +1,3 @@
----
-date: 2026-11-09
-feature: F21
-branch: feature/f21/t1-test-plan
-title: F21-T1 — Test runner script, Personalization tests fixed
----
 
 ### Completed
 - Planned F21 Test Coverage (18 tasks, `docs/trackers/f21-test-coverage.md`). Created `feature/f21-test-coverage` from `main` and the task branch `feature/f21/t1-test-plan`.
@@ -34,12 +28,6 @@ title: F21-T1 — Test runner script, Personalization tests fixed
 
 ### Build Status
 - **BUILD SUCCEEDED** (app scheme, BD630AD5). `sh scripts/run-tests.sh`: Models 10/10, Personalization 30/30. Layering check passed.
-
-### Suggested Branch
-`feature/f21/t1-test-plan`
-
-### Suggested Commit
-`F21-T1 — Tests: per-package runner script, fix Personalization tests`
 
 ### Changes done
 ```
