@@ -488,7 +488,9 @@ public enum BriefingEngine {
     lifestyleLogs: [LifestyleLog],
     calendar: Calendar) -> SurveyPrompt?
   {
-    guard sessions.count >= 1 else { return nil }
+    // Needs a previous session to compare against; with one session the
+    // average is 0, so every first night would read as a "jump".
+    guard sessions.count >= 2 else { return nil }
 
     let latestScore = latestSession.sleepScore
     let previousSessions = sessions.dropFirst().prefix(6)

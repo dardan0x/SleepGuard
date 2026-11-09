@@ -2,7 +2,7 @@
 
 > Auto-updated by the AI after every task. This is the local source of truth.
 
-Last updated: 2026-11-08
+Last updated: 2026-11-09
 
 ---
 
@@ -39,19 +39,19 @@ Last updated: 2026-11-08
 | Backlog | 0 |
 | Blocked | 0 |
 | — | — |
-| Features (V5) | 2 |
+| Features (V5) | 3 |
 | Done | 1 |
-| In Progress | 1 |
+| In Progress | 2 |
 | Backlog | 0 |
 | Blocked | 0 |
 | — | — |
-| Total Tasks | 119 |
-| Tasks Done | 101 |
+| Total Tasks | 137 |
+| Tasks Done | 102 |
 | Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
-| Tasks Backlog | 18 |
+| Tasks Backlog | 35 |
 | — | — |
-| **Progress** | **85%** |
+| **Progress** | **74%** |
 
 ## Features
 
@@ -76,6 +76,7 @@ Last updated: 2026-11-08
 | F17 | Swift 6 Migration | P1 | Done | 16/16 | ████████████████ 100% | [tracker](trackers/f17-swift6-migration.md) |
 | F19 | Factory DI Migration | P1 | Done | 5/5 | ██████████ 100% | [tracker](trackers/f19-factory-di.md) |
 | F20 | Home Screen & Lock Screen Widgets | P1 | In Progress | 7/9 | ████████░░ 78% | [tracker](trackers/f20-home-screen-widgets.md) |
+| F21 | Test Coverage | P1 | In Progress | 1/18 | █░░░░░░░░░ 6% | [tracker](trackers/f21-test-coverage.md) |
 
 ## Activity Log
 
@@ -83,6 +84,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-11-09 | F21-T1 | Completed | `sh scripts/run-tests.sh` → Models 10 + Personalization 30 pass; app build succeeds. Fixed first-night survey bug (gate back to ≥2 sessions) and stale greeting test. Feature branch `feature/f21-test-coverage`; task branch `feature/f21/t1-test-plan`. App-scheme test plan can't see package tests (packages linked as package refs only) → per-package `scripts/run-tests.sh`. `ScoreTrend` made `Equatable` so `BriefingEngineTests` compile |
 | 2026-11-08 | F20-T9 | Started | Checks pass (layering, strings, computed views, Models tests). Real save/delete snapshot check passed after rebasing onto `main` for the recording-crash fix (PR #97). Feature doc `docs/features/f20-home-screen-widgets.md`. Branch `feature/f20/t9-verification-docs` |
 | 2026-11-08 | F20-T7 | Completed | Start Tracking widget (small): red record dot + "Start Recording" on a red top glow, mirrors `StartRecordingButton`; tap → `sleepguard://start`. Verified on the simulator Home Screen. Branch `feature/f20/t7-start-tracking-widget` |
 | 2026-11-08 | F20-T6 | Completed | 7-Night Trend widget (medium): average + `MiniBarChart` from `recentDays`, empty → start, tap → Last 7 Nights; shared `WidgetSnapshotProvider` + `WidgetEmptyView` extracted. Verified on the simulator (avg 79 matches the app). Branch `feature/f20/t6-trend-widget` |
