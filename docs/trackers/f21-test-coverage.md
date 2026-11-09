@@ -30,7 +30,7 @@ Unit tests across the logic layer of every package: sleep scoring, snore detecti
 | F21-T7 | Recovery snapshot, deep link, formatters, URL resolver tests | Test | Done | F21-T4 | Models | 2026-11-09 | 2026-11-09 |
 | F21-T8 | `SnoreDetector` classification tests | Test | Done | F21-T2 | AudioEngine | 2026-11-09 | 2026-11-09 |
 | F21-T9 | FFT + RMS/peak level tests (synthetic buffers) + FFT fix | Test | Done | F21-T2 | AudioEngine / Env | 2026-11-09 | 2026-11-09 |
-| F21-T10 | Clip extractor + compressor tests | Test | Backlog | F21-T2 | AudioEngine | — | — |
+| F21-T10 | Clip extractor + compressor tests | Test | Done | F21-T2 | AudioEngine | 2026-11-09 | 2026-11-09 |
 | F21-T11 | `RealtimeDetectionTracker` tests | Test | Backlog | F21-T4 | Env | — | — |
 | F21-T12 | `StorageLimitEnforcer` tests | Test | Backlog | F21-T4 | Env | — | — |
 | F21-T13 | Checkpoint store + recording delay tests | Test | Backlog | F21-T2 | Env | — | — |
@@ -282,4 +282,30 @@ Unit tests across the logic layer of every package: sleep scoring, snore detecti
 - **Detection kept off**: `RealtimeDetectionTracker` passes `spectralScore: 0` to `classify`, with a comment. The short-event gate's spectral branch is only reachable for events without ML confidence, and only ML can start an event, so detection is byte-for-byte the same. Raw logs and `averageSpectralScore` on events now record real values for validation.
 - Silence scores 0.3 (only the centroid term, 800 − 0 → capped 1 × 0.3). That's below the 0.6 gate; noted, not changed.
 - **Follow-up**: validate the spectral fallback on a real night before passing `spectralScore` to `classify`.
+
+---
+
+### F21-T10 — Clip extractor + compressor tests
+
+| Field | Value |
+|-------|-------|
+| Arch Ref | — |
+| Status | Done |
+| Started | 2026-11-09 |
+| Completed | 2026-11-09 |
+
+**Acceptance Criteria:**
+- [x] `AudioClipExtractor`: legacy span + padding, burst span (ignores event duration), padding clamped to the file, event past the end → nil, `event_<id>.m4a` naming, existing clip replaced
+- [x] `extractClips` across more than one batch of 4; out-of-range events skipped
+- [x] Clip spectral features describe the tone (real values since the T9 fix); missing file → zeros
+- [x] `EventClipCompressor`: mono HE-AAC/AAC, ≥ 16 kHz, same duration, ≥ 20× smaller than float PCM; replaces destination; missing source → false
+- [x] 11 new tests; all 134 tests pass; app builds
+
+**Prompt Used:**
+"continue with t10"
+
+**Notes:**
+- Fixtures: `TestAudio.writeTone` writes a mono float CAF sine in 4096-frame chunks; `TempFolder` creates and removes a unique temp directory per suite instance.
+- Durations are checked to ±0.15 s (AAC priming/padding adds a few tens of ms).
+- Gotcha: a single `@MainActor` test inside a nonisolated suite broke Swift Testing's macro expansion for the whole suite ("`@const` value should be initialized with a compile-time value"). Keep isolation at the suite level.
 

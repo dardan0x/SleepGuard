@@ -31,3 +31,39 @@ enum TestAudio {
     }
   }
 }
+
+extension TestAudio {
+  /// Writes a mono float CAF of `seconds` length containing a sine at `hz`.
+  static func writeTone(to url: URL, seconds: Double, hz: Double = 215, sampleRate: Double = sampleRate) throws {
+    let format = AVAudioFormat(standardFormatWithSampleRate: sampleRate, channels: 1)!
+    let file = try AVAudioFile(forWriting: url, settings: format.settings)
+    let total = Int(seconds * sampleRate)
+    let chunk = 4096
+    var written = 0
+    while written < total {
+      let frames = min(chunk, total - written)
+      let offset = written
+      try file.write(from: buffer(frames: frames, sampleRate: sampleRate) {
+        0.5 * Float(sin(2 * .pi * hz * Double(offset + $0) / sampleRate))
+      })
+      written += frames
+    }
+  }
+
+  static func duration(of url: URL) async throws -> Double {
+    try await AVURLAsset(url: url).load(.duration).seconds
+  }
+}
+
+/// A fresh temporary folder per test suite instance, removed on deinit.
+final class TempFolder {
+  let url = FileManager.default.temporaryDirectory.appendingPathComponent("audio-tests-\(UUID().uuidString)")
+
+  init() throws {
+    try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
+  }
+
+  deinit {
+    try? FileManager.default.removeItem(at: url)
+  }
+}
