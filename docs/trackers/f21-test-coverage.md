@@ -32,7 +32,7 @@ Unit tests across the logic layer of every package: sleep scoring, snore detecti
 | F21-T9 | FFT + RMS/peak level tests (synthetic buffers) + FFT fix | Test | Done | F21-T2 | AudioEngine / Env | 2026-11-09 | 2026-11-09 |
 | F21-T10 | Clip extractor + compressor tests | Test | Done | F21-T2 | AudioEngine | 2026-11-09 | 2026-11-09 |
 | F21-T11 | Sensitivity preset tests (`RealtimeDetectionTracker`, option C) | Test | Done | F21-T8 | Env | 2026-11-09 | 2026-11-09 |
-| F21-T12 | `StorageLimitEnforcer` tests | Test | Backlog | F21-T4 | Env | — | — |
+| F21-T12 | `StorageLimitEnforcer` tests | Test | Done | F21-T4 | Env | 2026-11-09 | 2026-11-09 |
 | F21-T13 | Checkpoint store + recording delay tests | Test | Backlog | F21-T2 | Env | — | — |
 | F21-T14 | Recordings helpers tests | Test | Backlog | F21-T4 | Recordings | — | — |
 | F21-T15 | Week-over-week trend tests | Test | Backlog | F21-T4 | Statistics | — | — |
@@ -333,4 +333,31 @@ Unit tests across the logic layer of every package: sleep scoring, snore detecti
 - Scope was cut on purpose. The event state machine (3-sample start, 10 s gap, bursts, intensity promotion, minimum-duration and short-event gates, melody interplay) is still untested. It's tangled with `AudioRecorder` event files, `SnoreInterrupterPlayer` playback, `UserPreferences` and 7 `Date()` calls. **Proposed follow-up feature:** extract it into a pure, clock-driven type with tests, then do a real-night device check.
 - Building a tracker in tests also creates `AudioRecorder.shared` / `SpeechDetector.shared` / `SnoreInterrupterPlayer.shared`. Their initializers only set a permission flag and register observers (simulator), so there are no side effects.
 - EnvTests now depends directly on `AudioEngine` (`@testable import` to build its own `SnoreDetector`).
+
+---
+
+### F21-T12 — `StorageLimitEnforcer` tests
+
+| Field | Value |
+|-------|-------|
+| Arch Ref | — |
+| Status | Done |
+| Started | 2026-11-09 |
+| Completed | 2026-11-09 |
+
+**Acceptance Criteria:**
+- [x] Day limit removes all 4 audio files (event clip, session audio, raw audio, raw log) of old sessions only, and clears their references
+- [x] Sessions, events and cached score are kept; recent sessions untouched
+- [x] Size limit removes the oldest sessions until under the limit; nothing happens when already under
+- [x] Day + size together: files removed by the day plan aren't counted again by the size plan
+- [x] No limits → no change; a stale reference to a missing file is cleared without being counted
+- [x] 6 new tests; all 145 tests pass; app builds
+
+**Prompt Used:**
+"go with t12"
+
+**Notes:**
+- Seam (same pattern as T11): public `enforceLimits(modelContext:)` reads `UserPreferences` and passes the limits to an internal `enforceLimits(modelContext:maxDays:maxMB:)` (`nil` = off). The body is otherwise unchanged.
+- Files are real 1 KB / 1 MB files in the test host's Documents folder (the enforcer resolves through `AudioFileURLResolver`). They have unique `storage-test-` names and are removed in the suite's `deinit`; none are left after a run.
+- The cutoff uses the real `Date()`; sessions are placed 1–400 days back, so there's no boundary flakiness.
 
