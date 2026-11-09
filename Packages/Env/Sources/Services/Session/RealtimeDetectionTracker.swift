@@ -29,7 +29,7 @@ final class RealtimeDetectionTracker {
   }
 
   private let audioRecorder = AudioRecorder.shared
-  private let snoreDetector = SnoreDetector.shared
+  private let snoreDetector: SnoreDetector
   private let speechDetector = SpeechDetector.shared
   private let snoreInterrupterPlayer = SnoreInterrupterPlayer.shared
 
@@ -94,7 +94,10 @@ final class RealtimeDetectionTracker {
 
   private var pendingEventTasks: [Task<Void, Never>] = []
 
-  init() {
+  /// `snoreDetector` is injectable so tests can check the sensitivity presets
+  /// on their own instance; the app uses `.shared`.
+  init(snoreDetector: SnoreDetector = .shared) {
+    self.snoreDetector = snoreDetector
     NotificationCenter.default.addObserver(
       self,
       selector: #selector(handleMelodyDidStop),
@@ -157,7 +160,10 @@ final class RealtimeDetectionTracker {
   /// compensates, but the thresholds were still sitting above real captured
   /// levels for loud snoring at typical bedside distances.
   func applyDetectionSensitivity() {
-    let sensitivity = UserPreferences.shared.detectionSensitivity
+    apply(UserPreferences.shared.detectionSensitivity)
+  }
+
+  func apply(_ sensitivity: UserPreferences.DetectionSensitivity) {
     switch sensitivity {
     case .low:
       snoreDetector.quietThreshold = -45.0
