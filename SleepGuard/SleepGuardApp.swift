@@ -92,6 +92,12 @@ struct SleepGuardApp: App {
         if !userPreferences.hasExplicitlySetEnhancedSleepTracking {
           userPreferences.enhancedSleepTracking = HealthKitSync.shared.isAuthorized
         }
+
+        WidgetSnapshotWriter.update(modelContext: container.mainContext)
+      }
+      .onOpenURL { url in
+        guard userPreferences.hasCompletedOnboarding, let link = WidgetDeepLink(url: url) else { return }
+        TabCoordinator.shared.open(link)
       }
       .onChange(of: sessionManager.isRecording) { _, isRecording in
         UIApplication.shared.isIdleTimerDisabled = isRecording
@@ -102,6 +108,9 @@ struct SleepGuardApp: App {
         }
         if newPhase == .active {
           Task { await RemoteConfigLoader.shared.refresh() }
+        }
+        if newPhase == .background {
+          WidgetSnapshotWriter.update(modelContext: sharedModelContainer.mainContext)
         }
       }
     }

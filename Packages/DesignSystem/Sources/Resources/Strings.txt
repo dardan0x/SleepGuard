@@ -173,3 +173,17 @@ update.soft.title = Update Available
 update.soft.body = A new version of SleepGuard is available with improvements and fixes.
 update.action.update = Update Now
 update.action.later = Not Now
+
+widget.lastNight.name = Last Night
+widget.lastNight.description = Your most recent sleep score and snoring time.
+widget.lastNight.label = LAST NIGHT
+widget.lastNight.slept = Slept
+widget.lastNight.snoring = Snoring
+widget.lastNight.empty.title = No nights yet
+widget.lastNight.empty.action = Tap to start tracking
+widget.trend.name = 7-Night Trend
+widget.trend.description = Your sleep score over the last seven nights.
+widget.trend.label = LAST 7 NIGHTS
+widget.start.name = Start Tracking
+widget.start.description = Start a sleep session with one tap.
+widget.lastNight.inline = Score %@ · %@ snoring

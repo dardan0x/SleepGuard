@@ -57,6 +57,8 @@ public final class TabCoordinator {
 
   public var selectedTab: AppTab = AppConfig.shared.visibleTabsInOrder.first ?? .statistics
   public var resetSignal: TabResetSignal?
+  /// A widget deep link waiting for the Statistics tab to route it.
+  public var pendingDeepLink: WidgetDeepLink?
 
   public init() {}
 
@@ -66,6 +68,13 @@ public final class TabCoordinator {
     } else {
       selectedTab = tab
     }
+  }
+
+  /// Hands a deep link to the Statistics tab. Ignored when remote config hides that tab.
+  public func open(_ link: WidgetDeepLink) {
+    guard AppConfig.shared.visibleTabsInOrder.contains(.statistics) else { return }
+    selectedTab = .statistics
+    pendingDeepLink = link
   }
 }
 

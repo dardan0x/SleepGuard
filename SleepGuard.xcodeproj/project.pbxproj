@@ -19,6 +19,9 @@
 		A81CE8384C963A2C24507F4F /* Recordings in Frameworks */ = {isa = PBXBuildFile; productRef = 1C4F985595ED007BA103E405 /* Recordings */; };
 		B7E5BB619CAC47AD866118B3 /* Personalization in Frameworks */ = {isa = PBXBuildFile; productRef = DE0D39C8817A44AB96DFE1F5 /* Personalization */; };
 		BBCD8AD5E1B9D0470A48BD85 /* Env in Frameworks */ = {isa = PBXBuildFile; productRef = D7A35E7D5BA7E75CF647C509 /* Env */; };
+		CE09839B309FF97B002E275D /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CE09839A309FF97A002E275D /* WidgetKit.framework */; };
+		CE09839D309FF97B002E275D /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CE09839C309FF97B002E275D /* SwiftUI.framework */; };
+		CE0983A8309FF980002E275D /* SleepGuardWidgetsExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = CE098398309FF97A002E275D /* SleepGuardWidgetsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		CE1563F32FDA136500A53611 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = CE1563F22FDA136500A53611 /* FirebaseAnalytics */; };
 		CE1563F72FDA136500A53611 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = CE1563F62FDA136500A53611 /* FirebaseCrashlytics */; };
 		CE1563FD2FDA136500A53611 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = CE1563FC2FDA136500A53611 /* FirebaseMessaging */; };
@@ -28,11 +31,47 @@
 		E962CD02720B46D347403017 /* Recordings in Frameworks */ = {isa = PBXBuildFile; productRef = 613CAAD887F993446993F409 /* Recordings */; };
 		EA3B0BCFD10182B987547C8B /* AudioEngine in Frameworks */ = {isa = PBXBuildFile; productRef = 38CD50332392049638D060DF /* AudioEngine */; };
 		ED7B3283E6D3573708241C8E /* sounds in Resources */ = {isa = PBXBuildFile; fileRef = CE587D245C122AB22F7BD248 /* sounds */; };
+		F20A00000000000000000001 /* Models in Frameworks */ = {isa = PBXBuildFile; productRef = F20A00000000000000000003 /* Models */; };
+		F20A00000000000000000002 /* DesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = F20A00000000000000000004 /* DesignSystem */; };
 		FAED5AD98781D85AB7AFA7A5 /* SleepSession in Frameworks */ = {isa = PBXBuildFile; productRef = A6305AFA32B7A77ECFB0A19F /* SleepSession */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		CE0983A6309FF980002E275D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CE1588F02FAA9946001B61AA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = CE098397309FF97A002E275D;
+			remoteInfo = SleepGuardWidgetsExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		CE0983A9309FF981002E275D /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				CE0983A8309FF980002E275D /* SleepGuardWidgetsExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		CE09821C309ABE99002E275D /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
+		CE098380309BE837002E275D /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
+		CE098398309FF97A002E275D /* SleepGuardWidgetsExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = SleepGuardWidgetsExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		CE09839A309FF97A002E275D /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		CE09839C309FF97B002E275D /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		CE0983AE309FFA12002E275D /* SleepGuardWidgetsExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SleepGuardWidgetsExtension.entitlements; sourceTree = "<group>"; };
+		CE0984E3309FFF73002E275D /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
+		CE09863E30A0EABD002E275D /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
+		CE0986BE30A0F13D002E275D /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
+		CE09874930A11594002E275D /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
+		CE0987F030A1190D002E275D /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
 		CE1472B62FC47140009A5425 /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
 		CE1563D52FDA041100A53611 /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
 		CE15643C2FDA27BA00A53611 /* SleepGuard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SleepGuard.xcodeproj; sourceTree = "<group>"; };
@@ -50,6 +89,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		CE0983AD309FF981002E275D /* Exceptions for "SleepGuardWidgets" folder in "SleepGuardWidgetsExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = CE098397309FF97A002E275D /* SleepGuardWidgetsExtension */;
+		};
 		CEA51B5A2FBFB8860092AF44 /* Exceptions for "SleepGuard" folder in "SleepGuard" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -60,6 +106,14 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		CE09839E309FF97B002E275D /* SleepGuardWidgets */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				CE0983AD309FF981002E275D /* Exceptions for "SleepGuardWidgets" folder in "SleepGuardWidgetsExtension" target */,
+			);
+			path = SleepGuardWidgets;
+			sourceTree = "<group>";
+		};
 		CE1588FA2FAA9946001B61AA /* SleepGuard */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -71,6 +125,17 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		CE098395309FF97A002E275D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CE09839D309FF97B002E275D /* SwiftUI.framework in Frameworks */,
+				CE09839B309FF97B002E275D /* WidgetKit.framework in Frameworks */,
+				F20A00000000000000000001 /* Models in Frameworks */,
+				F20A00000000000000000002 /* DesignSystem in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		CE1588F52FAA9946001B61AA /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -107,6 +172,45 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		CE098383309BE837002E275D /* Products */ = {
+			isa = PBXGroup;
+			name = Products;
+			sourceTree = "<group>";
+		};
+		CE098399309FF97A002E275D /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				CE09839A309FF97A002E275D /* WidgetKit.framework */,
+				CE09839C309FF97B002E275D /* SwiftUI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		CE0984E6309FFF73002E275D /* Products */ = {
+			isa = PBXGroup;
+			name = Products;
+			sourceTree = "<group>";
+		};
+		CE09864230A0EABD002E275D /* Products */ = {
+			isa = PBXGroup;
+			name = Products;
+			sourceTree = "<group>";
+		};
+		CE0986C230A0F13D002E275D /* Products */ = {
+			isa = PBXGroup;
+			name = Products;
+			sourceTree = "<group>";
+		};
+		CE09874D30A11594002E275D /* Products */ = {
+			isa = PBXGroup;
+			name = Products;
+			sourceTree = "<group>";
+		};
+		CE0987F430A1190D002E275D /* Products */ = {
+			isa = PBXGroup;
+			name = Products;
+			sourceTree = "<group>";
+		};
 		CE1472B92FC47140009A5425 /* Products */ = {
 			isa = PBXGroup;
 			name = Products;
@@ -125,7 +229,10 @@
 		CE1588EF2FAA9946001B61AA = {
 			isa = PBXGroup;
 			children = (
+				CE0983AE309FFA12002E275D /* SleepGuardWidgetsExtension.entitlements */,
 				CE1588FA2FAA9946001B61AA /* SleepGuard */,
+				CE09839E309FF97B002E275D /* SleepGuardWidgets */,
+				CE098399309FF97A002E275D /* Frameworks */,
 				CE1588F92FAA9946001B61AA /* Products */,
 				CE587D245C122AB22F7BD248 /* sounds */,
 			);
@@ -135,6 +242,7 @@
 			isa = PBXGroup;
 			children = (
 				CE1588F82FAA9946001B61AA /* SleepGuard.app */,
+				CE098398309FF97A002E275D /* SleepGuardWidgetsExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -197,6 +305,30 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		CE098397309FF97A002E275D /* SleepGuardWidgetsExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CE0983AC309FF981002E275D /* Build configuration list for PBXNativeTarget "SleepGuardWidgetsExtension" */;
+			buildPhases = (
+				CE098394309FF97A002E275D /* Sources */,
+				CE098395309FF97A002E275D /* Frameworks */,
+				CE098396309FF97A002E275D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				CE09839E309FF97B002E275D /* SleepGuardWidgets */,
+			);
+			name = SleepGuardWidgetsExtension;
+			packageProductDependencies = (
+				F20A00000000000000000003 /* Models */,
+				F20A00000000000000000004 /* DesignSystem */,
+			);
+			productName = SleepGuardWidgetsExtension;
+			productReference = CE098398309FF97A002E275D /* SleepGuardWidgetsExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		CE1588F72FAA9946001B61AA /* SleepGuard */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = CE1589052FAA994A001B61AA /* Build configuration list for PBXNativeTarget "SleepGuard" */;
@@ -206,10 +338,12 @@
 				CE1588F52FAA9946001B61AA /* Frameworks */,
 				CE1588F62FAA9946001B61AA /* Resources */,
 				FBC3A11771C50000DEADBEEF /* Firebase Crashlytics */,
+				CE0983A9309FF981002E275D /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				CE0983A7309FF980002E275D /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				CE1588FA2FAA9946001B61AA /* SleepGuard */,
@@ -243,9 +377,12 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 2630;
+				LastSwiftUpdateCheck = 2640;
 				LastUpgradeCheck = 2630;
 				TargetAttributes = {
+					CE098397309FF97A002E275D = {
+						CreatedOnToolsVersion = 26.4;
+					};
 					CE1588F72FAA9946001B61AA = {
 						CreatedOnToolsVersion = 26.3;
 					};
@@ -279,12 +416,48 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
+					ProductGroup = CE15643F2FDA27BA00A53611 /* Products */;
+					ProjectRef = CE15643C2FDA27BA00A53611 /* SleepGuard.xcodeproj */;
+				},
+				{
+					ProductGroup = CE09821F309ABE99002E275D /* Products */;
+					ProjectRef = CE09821C309ABE99002E275D /* SleepGuard.xcodeproj */;
+				},
+				{
+					ProductGroup = CE2591312FAE9E98004C0C0D /* Products */;
+					ProjectRef = CE25912E2FAE9E98004C0C0D /* SleepGuard.xcodeproj */;
+				},
+				{
+					ProductGroup = CE098383309BE837002E275D /* Products */;
+					ProjectRef = CE098380309BE837002E275D /* SleepGuard.xcodeproj */;
+				},
+				{
+					ProductGroup = CE49CB312FDC0BEA00BF16A5 /* Products */;
+					ProjectRef = CE49CB2E2FDC0BEA00BF16A5 /* SleepGuard.xcodeproj */;
+				},
+				{
+					ProductGroup = CE1472B92FC47140009A5425 /* Products */;
+					ProjectRef = CE1472B62FC47140009A5425 /* SleepGuard.xcodeproj */;
+				},
+				{
+					ProductGroup = CE258F062FAC77A5004C0C0D /* Products */;
+					ProjectRef = CE258F042FAC77A5004C0C0D /* SleepGuard.xcodeproj */;
+				},
+				{
+					ProductGroup = CE0986C230A0F13D002E275D /* Products */;
+					ProjectRef = CE0986BE30A0F13D002E275D /* SleepGuard.xcodeproj */;
+				},
+				{
 					ProductGroup = CE2591182FAE9289004C0C0D /* Products */;
 					ProjectRef = CE2591162FAE9289004C0C0D /* SleepGuard.xcodeproj */;
 				},
 				{
 					ProductGroup = CE158A3D2FAB2EC7001B61AA /* Products */;
 					ProjectRef = CE158A3C2FAB2EC7001B61AA /* SleepGuard.xcodeproj */;
+				},
+				{
+					ProductGroup = CE0984E6309FFF73002E275D /* Products */;
+					ProjectRef = CE0984E3309FFF73002E275D /* SleepGuard.xcodeproj */;
 				},
 				{
 					ProductGroup = CE2590162FAD1D8E004C0C0D /* Products */;
@@ -299,46 +472,42 @@
 					ProjectRef = CEE00B2430084787005EBD43 /* SleepGuard.xcodeproj */;
 				},
 				{
-					ProductGroup = CE15643F2FDA27BA00A53611 /* Products */;
-					ProjectRef = CE15643C2FDA27BA00A53611 /* SleepGuard.xcodeproj */;
-				},
-				{
-					ProductGroup = CE09821F309ABE99002E275D /* Products */;
-					ProjectRef = CE09821C309ABE99002E275D /* SleepGuard.xcodeproj */;
-				},
-				{
-					ProductGroup = CE2591312FAE9E98004C0C0D /* Products */;
-					ProjectRef = CE25912E2FAE9E98004C0C0D /* SleepGuard.xcodeproj */;
+					ProductGroup = CE09874D30A11594002E275D /* Products */;
+					ProjectRef = CE09874930A11594002E275D /* SleepGuard.xcodeproj */;
 				},
 				{
 					ProductGroup = CE4A51A42FB625C6005BC562 /* Products */;
 					ProjectRef = CE4A51A12FB625C6005BC562 /* SleepGuard.xcodeproj */;
 				},
 				{
-					ProductGroup = CE49CB312FDC0BEA00BF16A5 /* Products */;
-					ProjectRef = CE49CB2E2FDC0BEA00BF16A5 /* SleepGuard.xcodeproj */;
+					ProductGroup = CE09864230A0EABD002E275D /* Products */;
+					ProjectRef = CE09863E30A0EABD002E275D /* SleepGuard.xcodeproj */;
+				},
+				{
+					ProductGroup = CE0987F430A1190D002E275D /* Products */;
+					ProjectRef = CE0987F030A1190D002E275D /* SleepGuard.xcodeproj */;
 				},
 				{
 					ProductGroup = CEA51B502FBFA95A0092AF44 /* Products */;
 					ProjectRef = CEA51B4D2FBFA95A0092AF44 /* SleepGuard.xcodeproj */;
 				},
-				{
-					ProductGroup = CE258F062FAC77A5004C0C0D /* Products */;
-					ProjectRef = CE258F042FAC77A5004C0C0D /* SleepGuard.xcodeproj */;
-				},
-				{
-					ProductGroup = CE1472B92FC47140009A5425 /* Products */;
-					ProjectRef = CE1472B62FC47140009A5425 /* SleepGuard.xcodeproj */;
-				},
 			);
 			projectRoot = "";
 			targets = (
 				CE1588F72FAA9946001B61AA /* SleepGuard */,
+				CE098397309FF97A002E275D /* SleepGuardWidgetsExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		CE098396309FF97A002E275D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		CE1588F62FAA9946001B61AA /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -393,6 +562,13 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		CE098394309FF97A002E275D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		CE1588F42FAA9946001B61AA /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -402,7 +578,85 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		CE0983A7309FF980002E275D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = CE098397309FF97A002E275D /* SleepGuardWidgetsExtension */;
+			targetProxy = CE0983A6309FF980002E275D /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		CE0983AA309FF981002E275D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = SleepGuardWidgetsExtension.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = K25AG97Z4V;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SleepGuardWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = SleepGuard;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dardan.SleepGuard.SleepGuardWidgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		CE0983AB309FF981002E275D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = SleepGuardWidgetsExtension.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = K25AG97Z4V;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SleepGuardWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = SleepGuard;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dardan.SleepGuard.SleepGuardWidgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		CE1589032FAA994A001B61AA /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -620,6 +874,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		CE0983AC309FF981002E275D /* Build configuration list for PBXNativeTarget "SleepGuardWidgetsExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CE0983AA309FF981002E275D /* Debug */,
+				CE0983AB309FF981002E275D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		CE1588F32FAA9946001B61AA /* Build configuration list for PBXProject "SleepGuard" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -834,6 +1097,16 @@
 		E553575F91A447F10F3BDF08 /* DesignSystem */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 7A886DCB087D86E4AC2E7336 /* XCLocalSwiftPackageReference "Packages/DesignSystem" */;
+			productName = DesignSystem;
+		};
+		F20A00000000000000000003 /* Models */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8BD2D33DB910A0A051BC520A /* XCLocalSwiftPackageReference "Packages/Models" */;
+			productName = Models;
+		};
+		F20A00000000000000000004 /* DesignSystem */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C1ABFA1084CFC1B1142A5354 /* XCLocalSwiftPackageReference "Packages/DesignSystem" */;
 			productName = DesignSystem;
 		};
 /* End XCSwiftPackageProductDependency section */

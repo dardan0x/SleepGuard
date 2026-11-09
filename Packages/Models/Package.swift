@@ -10,6 +10,13 @@ let package = Package(
   targets: [
     .target(
       name: "Models",
+      path: "Sources",
+      swiftSettings: [
+        .swiftLanguageMode(.v6),
+      ]),
+    .testTarget(
+      name: "ModelsTests",
+      dependencies: ["Models"],
       swiftSettings: [
         .swiftLanguageMode(.v6),
       ]),

@@ -4528,6 +4528,149 @@
           }
         }
       }
+    },
+    "widget.lastNight.name": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last Night"
+          }
+        }
+      }
+    },
+    "widget.lastNight.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your most recent sleep score and snoring time."
+          }
+        }
+      }
+    },
+    "widget.lastNight.label": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LAST NIGHT"
+          }
+        }
+      }
+    },
+    "widget.lastNight.slept": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slept"
+          }
+        }
+      }
+    },
+    "widget.lastNight.snoring": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Snoring"
+          }
+        }
+      }
+    },
+    "widget.lastNight.empty.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No nights yet"
+          }
+        }
+      }
+    },
+    "widget.lastNight.empty.action": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tap to start tracking"
+          }
+        }
+      }
+    },
+    "widget.trend.name": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "7-Night Trend"
+          }
+        }
+      }
+    },
+    "widget.trend.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your sleep score over the last seven nights."
+          }
+        }
+      }
+    },
+    "widget.trend.label": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LAST 7 NIGHTS"
+          }
+        }
+      }
+    },
+    "widget.start.name": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start Tracking"
+          }
+        }
+      }
+    },
+    "widget.start.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start a sleep session with one tap."
+          }
+        }
+      }
+    },
+    "widget.lastNight.inline": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Score %@ · %@ snoring"
+          }
+        }
+      }
     }
   },
   "version": "1.0"
