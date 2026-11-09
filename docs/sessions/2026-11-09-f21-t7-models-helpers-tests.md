@@ -1,5 +1,5 @@
 ### Completed
-- F21-T7: crash-recovery snapshot, audio file path resolver, and deep-link URL contract tests in Models (10 new). The suite is now 101 tests, all passing. `DateFormatters` was skipped on purpose (see Architecture Decisions). This finishes the Models phase (T5–T7).
+- F21-T7: crash-recovery snapshot, audio file path resolver, and deep-link URL contract tests in Models (10 new). The suite is now 103 tests, all passing. `DateFormatters` was skipped on purpose (see Architecture Decisions). This finishes the Models phase (T5–T7).
 
 ### Technical Details
 - **`SessionRecoverySnapshotTests` (5)**: builds a detached live session (dB values, 3 file refs, a gap with `snoringResumed: false`, `terminationReason`, a snoring event with every field and a burst, a sleep-talking event). Runs it through snapshot → `JSONEncoder` → `JSONDecoder` → `makeSession()`, then checks:
@@ -28,7 +28,7 @@
 - **Detached models in the recovery tests**: matches production, where the live session isn't inserted until the user saves.
 
 ### Build Status
-- **BUILD SUCCEEDED** (app scheme, BD630AD5). `run-tests.sh`: 101/101 pass. SwiftFormat lint clean.
+- **BUILD SUCCEEDED** (app scheme, BD630AD5). `run-tests.sh`: 103/103 pass. SwiftFormat lint clean.
 
 ### Changes done
 ```

@@ -1,5 +1,5 @@
 ### Completed
-- F21-T5: `SleepScoreTests`, 22 tests covering `SleepSession.sleepScore(using:)` and the cached `sleepScore` path. The suite is now 66 tests, all passing.
+- F21-T5: `SleepScoreTests`, 22 tests covering `SleepSession.sleepScore(using:)` and the cached `sleepScore` path. The suite is now 68 tests, all passing.
 
 ### Technical Details
 - Every test uses `TestStore` (in-memory SwiftData) with an 8 h night starting 2026-11-01 23:00 UTC, unless noted. Events at `.quiet` intensity isolate the non-intensity penalties.
@@ -26,7 +26,7 @@
 - **No source change for the cache finding**: it's a behavior decision, raised as an open question.
 
 ### Build Status
-- **BUILD SUCCEEDED** (app scheme, BD630AD5). `run-tests.sh`: 66/66 pass. SwiftFormat lint clean.
+- **BUILD SUCCEEDED** (app scheme, BD630AD5). `run-tests.sh`: 68/68 pass. SwiftFormat lint clean.
 
 ### Changes done
 ```

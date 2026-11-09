@@ -78,6 +78,8 @@ Uses `SNClassifySoundRequest(classifierIdentifier: .version1)` — Apple's 300-c
 
 #### Layer 2: FFT Spectral Fallback
 
+> **Currently off in live detection (F21-T9).** `FFTAnalyzer` returned all-zero features from 2026-05-08 until F21-T9 (its DFT setup got `log2n` instead of the length), so this layer never ran in production. The analyzer is fixed, but `RealtimeDetectionTracker` passes `spectralScore: 0` to `classify` until a real night validates the fallback. Raw logs and event `averageSpectralScore` record the real score.
+
 When SoundAnalysis is unavailable (e.g., on older devices or if the snoring class is missing from the model), the FFT path kicks in.
 
 **Hard rejects:**

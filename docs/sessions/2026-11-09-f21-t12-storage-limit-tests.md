@@ -1,5 +1,5 @@
 ### Completed
-- F21-T12: `StorageLimitEnforcer` tests (6 new). The suite is now 145 tests, all passing.
+- F21-T12: `StorageLimitEnforcer` tests (6 new). The suite is now 147 tests, all passing.
 
 ### Technical Details
 - Seam: public `enforceLimits(modelContext:)` → internal `enforceLimits(modelContext:maxDays:maxMB:)`. Each limit is `nil` when its preference toggle is off. Plan building, URL clearing and off-main deletion are unchanged.
@@ -23,7 +23,7 @@
 - **Real files in Documents**: the enforcer resolves everything through `AudioFileURLResolver.documentsDirectory`. Unique names + `deinit` cleanup keep the simulator clean (verified: 0 leftovers).
 
 ### Build Status
-- **BUILD SUCCEEDED** (app scheme, BD630AD5). `run-tests.sh`: 145/145 pass. SwiftFormat lint is clean and the layering check passes.
+- **BUILD SUCCEEDED** (app scheme, BD630AD5). `run-tests.sh`: 147/147 pass. SwiftFormat lint is clean and the layering check passes.
 
 ### Changes done
 ```

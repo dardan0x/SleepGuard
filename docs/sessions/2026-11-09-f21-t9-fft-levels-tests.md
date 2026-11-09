@@ -1,5 +1,5 @@
 ### Completed
-- F21-T9: tests for `FFTAnalyzer` and the `TapProcessor` RMS/peak levels with synthetic buffers (15 new). The suite is now 123 tests, all passing.
+- F21-T9: tests for `FFTAnalyzer` and the `TapProcessor` RMS/peak levels with synthetic buffers (15 new). The suite is now 125 tests, all passing.
 - **Bug fix**: `FFTAnalyzer` had returned all-zero features since 2026-05-08. Fixed, along with a crash in `spectrumBars` that the fix would otherwise have exposed. Live detection is deliberately unchanged (user choice: "Fix, keep detection off").
 
 ### Technical Details
@@ -31,7 +31,7 @@
 - **Shared spectrum helper**: both public functions had the same broken setup and the same overflow risk, so one implementation fixes both.
 
 ### Build Status
-- **BUILD SUCCEEDED** (app scheme, BD630AD5). `run-tests.sh`: 123/123 pass. SwiftFormat lint is clean and the layering check passes.
+- **BUILD SUCCEEDED** (app scheme, BD630AD5). `run-tests.sh`: 125/125 pass. SwiftFormat lint is clean and the layering check passes.
 
 ### Changes done
 ```

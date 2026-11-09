@@ -90,6 +90,9 @@ final class SessionDetailModel {
         predicate: #Predicate { $0.id == sessionID }
       )
       if let session = try modelContext.fetch(descriptor).first {
+        // Delete files while `session.events` still lists the event clips.
+        deleteSessionFiles(session)
+
         // Delete events first with intermediate save to avoid SwiftData
         // faulting crash during cascade delete.
         if let events = session.events {
@@ -102,7 +105,6 @@ final class SessionDetailModel {
         // Resolve transformable faults before deletion
         _ = session.sleepStageSegments
         _ = session.recordingGaps
-        deleteSessionFiles(session)
         modelContext.delete(session)
         try modelContext.save()
         return true

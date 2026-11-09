@@ -389,6 +389,7 @@ public enum Strings {
   public static var statsLast7nightsSnoringMin: String { String(localized: "stats.last7Nights.snoringMin", bundle: .module) }
   public static var statsLast7nightsTapAbar: String { String(localized: "stats.last7Nights.tapABar", bundle: .module) }
   public static var statsLast7nightsTotalEvents: String { String(localized: "stats.last7Nights.totalEvents", bundle: .module) }
+  public static var statsLast7nightsTrendVsPrevWeek: String { String(localized: "stats.last7Nights.trendVsPrevWeek", bundle: .module) }
   public static var statsLast7nightsWorst: String { String(localized: "stats.last7Nights.worst", bundle: .module) }
   public static var statsMiniChartSleepScoreLabel: String { String(localized: "stats.miniChart.sleepScoreLabel", bundle: .module) }
   public static var statsMiniChartToday: String { String(localized: "stats.miniChart.today", bundle: .module) }

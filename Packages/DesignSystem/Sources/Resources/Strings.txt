@@ -187,3 +187,4 @@ widget.trend.label = LAST 7 NIGHTS
 widget.start.name = Start Tracking
 widget.start.description = Start a sleep session with one tap.
 widget.lastNight.inline = Score %@ · %@ snoring
+stats.last7Nights.trendVsPrevWeek = %+lld vs prev wk

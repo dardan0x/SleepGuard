@@ -40,18 +40,18 @@ Last updated: 2026-11-09
 | Blocked | 0 |
 | — | — |
 | Features (V5) | 3 |
-| Done | 1 |
-| In Progress | 2 |
+| Done | 2 |
+| In Progress | 1 |
 | Backlog | 0 |
 | Blocked | 0 |
 | — | — |
-| Total Tasks | 137 |
-| Tasks Done | 113 |
+| Total Tasks | 136 |
+| Tasks Done | 118 |
 | Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
-| Tasks Backlog | 24 |
+| Tasks Backlog | 18 |
 | — | — |
-| **Progress** | **82%** |
+| **Progress** | **87%** |
 
 ## Features
 
@@ -76,7 +76,7 @@ Last updated: 2026-11-09
 | F17 | Swift 6 Migration | P1 | Done | 16/16 | ████████████████ 100% | [tracker](trackers/f17-swift6-migration.md) |
 | F19 | Factory DI Migration | P1 | Done | 5/5 | ██████████ 100% | [tracker](trackers/f19-factory-di.md) |
 | F20 | Home Screen & Lock Screen Widgets | P1 | In Progress | 7/9 | ████████░░ 78% | [tracker](trackers/f20-home-screen-widgets.md) |
-| F21 | Test Coverage | P1 | In Progress | 12/18 | ███████░░░ 67% | [tracker](trackers/f21-test-coverage.md) |
+| F21 | Test Coverage | P1 | Done | 17/17 | ██████████ 100% | [tracker](trackers/f21-test-coverage.md) |
 
 ## Activity Log
 
@@ -84,14 +84,20 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
-| 2026-11-09 | F21-T12 | Completed | `StorageLimitEnforcer` internal `enforceLimits(modelContext:maxDays:maxMB:)` seam; `StorageLimitEnforcerTests` (6): day/size plans, metadata kept, no double count, stale refs. 145 tests pass. Branch `feature/f21/t12-storage-limit-tests` |
-| 2026-11-09 | F21-T11 | Completed | Option C: `RealtimeDetectionTracker` takes an injectable `SnoreDetector` + `apply(_:)`; `DetectionSensitivityTests` (5) cover the Low/Medium/High presets. Event state machine left for a follow-up refactor feature. 139 tests pass. Branch `feature/f21/t11-sensitivity-presets-tests` |
-| 2026-11-09 | F21-T10 | Completed | `AudioClipExtractorTests` (8) + `EventClipCompressorTests` (3) on synthetic CAF files in temp folders: clip spans, clamping, batching, spectral features, AAC output. 134 tests pass. Branch `feature/f21/t10-clip-extractor-tests` |
+| 2026-11-09 | F21-T18 | Completed | Verification: 180 tests pass, build, lint, layering, strings OK. Feature doc `docs/features/f21-test-coverage.md`; ProjectArchitecture Tests section. Merge to `main` by the user. Branch `feature/f21/t13-t18-remaining-tests` |
+| 2026-11-09 | F21-T17 | Skipped | UI smoke tests dropped (needs a UI test target in the Xcode project); possible follow-up |
+| 2026-11-09 | F21-T16 | Completed | `DurationFormatterTests` + `LocalizableCatalogTests` (all 438 keys have English values that resolve at runtime). Found 2 malformed catalog keys (`localizations`, `stringUnit`). 180 tests pass |
+| 2026-11-09 | F21-T15 | Completed | Trend label localized (`stats.last7Nights.trendVsPrevWeek`); `Trend.diff`; `WeekOverWeekTrendCalculatorTests` (9). 176 tests pass. Branch `feature/f21/t13-t18-remaining-tests` |
+| 2026-11-09 | F21-T14 | Completed | **Bug fix**: session delete (detail + list) orphaned event clips; files now deleted before events. `SessionGrouperTests` (5) + `SessionDetailModelTests` (9). 168 tests pass. Branch `feature/f21/t13-t18-remaining-tests` |
+| 2026-11-09 | F21-T13 | Completed | `SessionCheckpointStoreTests` (5) + `RecordingDelayManagerTests` (4, side-effect-free paths only). Found hardcoded notification text in `RecordingDelayManager`. 155 tests pass. Branch `feature/f21/t13-t18-remaining-tests` |
+| 2026-11-09 | F21-T12 | Completed | `StorageLimitEnforcer` internal `enforceLimits(modelContext:maxDays:maxMB:)` seam; `StorageLimitEnforcerTests` (6): day/size plans, metadata kept, no double count, stale refs. 147 tests pass. Branch `feature/f21/t12-storage-limit-tests` |
+| 2026-11-09 | F21-T11 | Completed | Option C: `RealtimeDetectionTracker` takes an injectable `SnoreDetector` + `apply(_:)`; `DetectionSensitivityTests` (5) cover the Low/Medium/High presets. Event state machine left for a follow-up refactor feature. 141 tests pass. Branch `feature/f21/t11-sensitivity-presets-tests` |
+| 2026-11-09 | F21-T10 | Completed | `AudioClipExtractorTests` (8) + `EventClipCompressorTests` (3) on synthetic CAF files in temp folders: clip spans, clamping, batching, spectral features, AAC output. 136 tests pass. Branch `feature/f21/t10-clip-extractor-tests` |
 | 2026-11-09 | F21-T9 | Completed | **Bug fix**: `FFTAnalyzer` returned zeros since 2026-05-08 (setup got log2n, not length); fixed + zero-padding + `spectrumBars` out-of-range crash fixed. Live detection kept on SoundAnalysis only (`spectralScore: 0` into `classify`). 15 new tests, 123 pass. Branch `feature/f21/t9-fft-levels-tests` |
-| 2026-11-09 | F21-T8 | Completed | `SnoreDetector.init` internal; `SnoreDetectorTests` 8 tests / 28 cases: routing, SoundAnalysis and spectral tiers, inclusive thresholds, per-instance config. 108 tests pass. Branch `feature/f21/t8-snore-detector-tests` |
-| 2026-11-09 | F21-T7 | Completed | `SessionRecoverySnapshotTests` (5), `AudioFileURLResolverTests` (4), deep-link URL contract (1). `DateFormatters` skipped (locale-dependent config). 101 tests pass. Branch `feature/f21/t7-models-helpers-tests` |
-| 2026-11-09 | F21-T6 | Completed | `SnoringEpisodeTests` (16) + `SessionStatsTests` (9): episode merge/display/playback, episode aggregates, session durations and stats. 91 tests pass. Branch `feature/f21/t6-session-episode-tests` |
-| 2026-11-09 | F21-T5 | Completed | `SleepScoreTests` (22): each penalty, caps, clamp, burst-sum intensity, gaps, episode merge, cache. 66 tests pass. Finding: `sleepScore(using:)` reads cached snoring duration. Branch `feature/f21/t5-sleep-score-tests` |
+| 2026-11-09 | F21-T8 | Completed | `SnoreDetector.init` internal; `SnoreDetectorTests` 8 tests / 28 cases: routing, SoundAnalysis and spectral tiers, inclusive thresholds, per-instance config. 110 tests pass. Branch `feature/f21/t8-snore-detector-tests` |
+| 2026-11-09 | F21-T7 | Completed | `SessionRecoverySnapshotTests` (5), `AudioFileURLResolverTests` (4), deep-link URL contract (1). `DateFormatters` skipped (locale-dependent config). 103 tests pass. Branch `feature/f21/t7-models-helpers-tests` |
+| 2026-11-09 | F21-T6 | Completed | `SnoringEpisodeTests` (16) + `SessionStatsTests` (9): episode merge/display/playback, episode aggregates, session durations and stats. 93 tests pass. Branch `feature/f21/t6-session-episode-tests` |
+| 2026-11-09 | F21-T5 | Completed | `SleepScoreTests` (22): each penalty, caps, clamp, burst-sum intensity, gaps, episode merge, cache. 68 tests pass. Finding: `sleepScore(using:)` reads cached snoring duration. Branch `feature/f21/t5-sleep-score-tests` |
 | 2026-11-09 | F21-T4 | Completed | `ModelsTestSupport` library (TestCalendar, in-memory TestStore, session/event fixtures) used by Models/Env/Recordings/Statistics tests; `run-tests.sh` handles `<Pkg>-Package` schemes; 46 tests pass. Branch `feature/f21/t4-test-fixtures` |
 | 2026-11-09 | F21-T3 | Completed | `.github/workflows/tests.yml`: `run-tests.sh` on `macos-26` + newest Xcode 26, PRs + manual dispatch, logs artifact on failure. First GitHub run pending the PR. Branch `feature/f21/t3-ci-tests-job` |
 | 2026-11-09 | F21-T2 | Completed | `Tests/` targets + 1 seed test each for AudioEngine, Env, Recordings, Statistics, DesignSystem; `run-tests.sh` → 7 packages, 45 tests pass; app build succeeds. Branch `feature/f21/t2-package-test-targets` |

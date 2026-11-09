@@ -4,14 +4,14 @@
 
 | Field | Value |
 |-------|-------|
-| **Status** | In Progress |
+| **Status** | Done (merge to `main` by the user) |
 | **Priority** | P1 |
 | **Version** | V5 |
 | **Blocked By** | — |
 | **Started** | 2026-11-09 |
-| **Completed** | — |
-| **Feature Doc** | — |
-| **Branch** | `feature/f21-test-coverage` (each task merges here; merges to `main` after T18) |
+| **Completed** | 2026-11-09 |
+| **Feature Doc** | `docs/features/f21-test-coverage.md` |
+| **Branch** | `feature/f21-test-coverage` (T1–T12 merged here one PR per task; T13–T18 together on `feature/f21/t13-t18-remaining-tests`; then `main`) |
 
 ## Summary
 
@@ -33,12 +33,12 @@ Unit tests across the logic layer of every package: sleep scoring, snore detecti
 | F21-T10 | Clip extractor + compressor tests | Test | Done | F21-T2 | AudioEngine | 2026-11-09 | 2026-11-09 |
 | F21-T11 | Sensitivity preset tests (`RealtimeDetectionTracker`, option C) | Test | Done | F21-T8 | Env | 2026-11-09 | 2026-11-09 |
 | F21-T12 | `StorageLimitEnforcer` tests | Test | Done | F21-T4 | Env | 2026-11-09 | 2026-11-09 |
-| F21-T13 | Checkpoint store + recording delay tests | Test | Backlog | F21-T2 | Env | — | — |
-| F21-T14 | Recordings helpers tests | Test | Backlog | F21-T4 | Recordings | — | — |
-| F21-T15 | Week-over-week trend tests | Test | Backlog | F21-T4 | Statistics | — | — |
-| F21-T16 | `DurationFormatter` + strings-key tests | Test | Backlog | F21-T2 | DesignSystem | — | — |
-| F21-T17 | UI smoke tests (optional) | Test | Backlog | F21-T1 | App | — | — |
-| F21-T18 | Verification, docs, merge to main | Docs | Backlog | F21-T1…T17 | — | — | — |
+| F21-T13 | Checkpoint store + recording delay tests | Test | Done | F21-T2 | Env | 2026-11-09 | 2026-11-09 |
+| F21-T14 | Recordings helpers tests + delete fix | Test | Done | F21-T4 | Recordings | 2026-11-09 | 2026-11-09 |
+| F21-T15 | Week-over-week trend tests + localized label | Test | Done | F21-T4 | Statistics / DesignSystem | 2026-11-09 | 2026-11-09 |
+| F21-T16 | `DurationFormatter` + string catalog tests | Test | Done | F21-T2 | DesignSystem | 2026-11-09 | 2026-11-09 |
+| F21-T17 | UI smoke tests (optional) | Test | Skipped | F21-T1 | App | — | — |
+| F21-T18 | Verification, docs, merge to main | Docs | Done | F21-T1…T16 | — | 2026-11-09 | 2026-11-09 |
 
 ## Task Details
 
@@ -159,7 +159,7 @@ Unit tests across the logic layer of every package: sleep scoring, snore detecti
 - [x] Intensity uses burst sums, not event span; recording gaps (resumed / not resumed / covered by an event)
 - [x] Episode merge (≤ 5 min) and the < 3 s display filter as they affect the score
 - [x] Cached vs. recomputed path
-- [x] 22 new tests; all 66 tests pass; app builds
+- [x] 22 new tests; all 68 tests pass; app builds
 
 **Prompt Used:**
 "continue with next"
@@ -186,7 +186,7 @@ Unit tests across the logic layer of every package: sleep scoring, snore detecti
 - [x] `episodePlaybackEvents` (representative → whole episode in order; others alone)
 - [x] `SnoringEpisode`: `snoreDuration`, `detectedDuration`, `detectedSegments` (bursts / fallback), `peakDB`, duration-weighted `averageDB`
 - [x] Session stats: total/gaps/monitored durations, percentages, sleep talking, `duration(for:)`, `stageStats`, cached snoring duration, `minimumSaveDuration`
-- [x] 25 new tests; all 91 tests pass; app builds
+- [x] 25 new tests; all 93 tests pass; app builds
 
 **Prompt Used:**
 "continue with t6"
@@ -211,7 +211,7 @@ Unit tests across the logic layer of every package: sleep scoring, snore detecti
 - [x] `SessionRecoverySnapshot`: existing `endDate` wins over the checkpoint date; no events → not recoverable
 - [x] `AudioFileURLResolver`: filename-only and legacy absolute paths resolve to the current Documents folder; nil / empty / missing → nil; `filename(from:)`
 - [x] `WidgetDeepLink`: exact URL strings (round-trip and invalid cases already covered in F20)
-- [x] 10 new tests; all 101 tests pass; app builds
+- [x] 10 new tests; all 103 tests pass; app builds
 
 **Prompt Used:**
 "continue with t7"
@@ -238,7 +238,7 @@ Unit tests across the logic layer of every package: sleep scoring, snore detecti
 - [x] SoundAnalysis tiers: gate, high-confidence epic, dB floors, quiet fallback gate
 - [x] Spectral tiers: 0.6 score gate, quiet − 5 floor, score-adjusted thresholds (score 1.0 and 0.6)
 - [x] Plain thresholds are inclusive at each boundary; custom thresholds affect only their own instance
-- [x] 7 new tests (28 parameterized cases); all 108 tests pass; app builds
+- [x] 7 new tests (28 parameterized cases); all 110 tests pass; app builds
 
 **Prompt Used:**
 "go with b" (option b: internal initializer instead of mutating `.shared` in serialized tests)
@@ -264,13 +264,13 @@ Unit tests across the logic layer of every package: sleep scoring, snore detecti
 - [x] `FFTAnalyzer.spectrumBars`: 32 bars at 44.1 kHz without crashing, normalized, peak at the tone, silence flat
 - [x] `TapProcessor.process` levels: full-scale sine (0 / −3 dB), −20 dB sine, single spike, silence floor, spectral score, no-file writes
 - [x] **Bug fixed (user approved, "Fix, keep detection off")**: FFT works; live detection unchanged
-- [x] 15 new tests; all 123 tests pass; app builds
+- [x] 15 new tests; all 125 tests pass; app builds
 
 **Prompt Used:**
 "continue with t9" → FFT bug question → "Fix, keep detection off"
 
 **Notes:**
-- **Bug**: since `e4f7c56` (2026-05-08), `FFTAnalyzer` created its setup with `vDSP_DFT_zop_CreateSetup(nil, log2n, …)`, where `log2n` = 10 for 1024. The function takes the *length*, so the setup was `nil` and every `analyze` / `spectrumBars` call returned zeros. Effects:
+- **Bug**: since `e4f7c56` (2026-05-8), `FFTAnalyzer` created its setup with `vDSP_DFT_zop_CreateSetup(nil, log2n, …)`, where `log2n` = 10 for 1024. The function takes the *length*, so the setup was `nil` and every `analyze` / `spectrumBars` call returned zeros. Effects:
   - live detection's spectral fallback never fired
   - saved events stored 0 for `dominantFrequency` / `spectralCentroid` / `lowFreqRatio` (via `AudioClipExtractor`)
   - the Advanced player's spectrum bars were flat
@@ -299,7 +299,7 @@ Unit tests across the logic layer of every package: sleep scoring, snore detecti
 - [x] `extractClips` across more than one batch of 4; out-of-range events skipped
 - [x] Clip spectral features describe the tone (real values since the T9 fix); missing file → zeros
 - [x] `EventClipCompressor`: mono HE-AAC/AAC, ≥ 16 kHz, same duration, ≥ 20× smaller than float PCM; replaces destination; missing source → false
-- [x] 11 new tests; all 134 tests pass; app builds
+- [x] 11 new tests; all 136 tests pass; app builds
 
 **Prompt Used:**
 "continue with t10"
@@ -324,7 +324,7 @@ Unit tests across the logic layer of every package: sleep scoring, snore detecti
 - [x] `RealtimeDetectionTracker.init(snoreDetector:)` defaults to `.shared`; the Factory registration is unchanged
 - [x] `applyDetectionSensitivity()` delegates to `apply(_:)`, so tests don't touch `UserDefaults`
 - [x] Exact Low / Medium / High values; Medium = detector defaults; strictly ordered; the same sound classified per preset; re-applying is stable
-- [x] 5 new tests; all 139 tests pass; app builds
+- [x] 5 new tests; all 141 tests pass; app builds
 
 **Prompt Used:**
 "go with C" (test the presets only; leave the event state machine for a separate refactor)
@@ -351,7 +351,7 @@ Unit tests across the logic layer of every package: sleep scoring, snore detecti
 - [x] Size limit removes the oldest sessions until under the limit; nothing happens when already under
 - [x] Day + size together: files removed by the day plan aren't counted again by the size plan
 - [x] No limits → no change; a stale reference to a missing file is cleared without being counted
-- [x] 6 new tests; all 145 tests pass; app builds
+- [x] 6 new tests; all 147 tests pass; app builds
 
 **Prompt Used:**
 "go with t12"
@@ -360,4 +360,138 @@ Unit tests across the logic layer of every package: sleep scoring, snore detecti
 - Seam (same pattern as T11): public `enforceLimits(modelContext:)` reads `UserPreferences` and passes the limits to an internal `enforceLimits(modelContext:maxDays:maxMB:)` (`nil` = off). The body is otherwise unchanged.
 - Files are real 1 KB / 1 MB files in the test host's Documents folder (the enforcer resolves through `AudioFileURLResolver`). They have unique `storage-test-` names and are removed in the suite's `deinit`; none are left after a run.
 - The cutoff uses the real `Date()`; sessions are placed 1–400 days back, so there's no boundary flakiness.
+
+---
+
+### F21-T13 — Checkpoint store + recording delay tests
+
+| Field | Value |
+|-------|-------|
+| Arch Ref | — |
+| Status | Done |
+| Started | 2026-11-09 |
+| Completed | 2026-11-09 |
+
+**Acceptance Criteria:**
+- [x] `SessionCheckpointStore`: write → load, later write replaces earlier, clear removes the file, a snapshot without events isn't offered, a corrupt file is ignored
+- [x] `RecordingDelayManager`: `remainingTimeString` (mm:ss incl. ≥ 100 min); `checkIfComplete` false when inactive, without a target, or before the target
+- [x] Net +8 tests (the T2 seed was folded into the checkpoint suite); 155 tests pass
+
+**Prompt Used:**
+"can you make from next task all together in one branch example t13-t18"
+
+**Notes:**
+- Both suites are `.serialized` (one shared recovery file; one shared delay singleton).
+- **Not tested**: `startDelay`, `cancel`, and the completion path. They call `UNUserNotificationCenter.current()`, which throws in package tests (no app bundle), and they start/stop `AudioRecorder` warm-up. Testing them would need a notification/warm-up seam.
+- **Localization violation found (not fixed)**: `RecordingDelayManager.scheduleNotification` hardcodes the notification title "SleepGuard" and body "Your recording session is starting now". Env is non-view code and must not import `DesignSystem`; the text would need to be passed in by the caller.
+- **Crash restarts**: when the test process crashes, xcodebuild prints "Restarting after unexpected exit, crash, or test timeout" and relaunches it for each remaining test. Here a `MainActor.assumeIsolated` in a suite `deinit` trapped (the `deinit` ran off the main thread). The fix was to reset shared state in `init`. Separately, a *plain* expectation failure also leaves `xcodebuild test` hanging for 10+ minutes after the results print (seen in T1, T5, T14, with no restarts). The cause is still unknown; `timeout` around the script avoids waiting it out locally.
+
+---
+
+### F21-T14 — Recordings helpers tests + delete fix
+
+| Field | Value |
+|-------|-------|
+| Arch Ref | — |
+| Status | Done |
+| Started | 2026-11-09 |
+| Completed | 2026-11-09 |
+
+**Acceptance Criteria:**
+- [x] `SessionGrouper`: months newest first across a year boundary; nights and sessions newest first; ISO-day group id; uppercased title
+- [x] `NightGroup` totals (integer-average score, duration, count)
+- [x] `SessionDetailModel.load`: cache refreshed with the remote score config, events sorted, clip-session detection, unknown id → `.error`
+- [x] Filters: all / snoring (episode representatives, micro hidden) / sleep talking / noise (+ coughing, other); short events; display durations; filter visibility
+- [x] `delete`: session, events and **all** audio files gone; unknown id → false
+- [x] **Bug fixed**: deleting a session left its event clips on disk
+- [x] Net +13 tests; 168 tests pass
+
+**Prompt Used:**
+"can you make from next task all together in one branch example t13-t18"
+
+**Notes:**
+- **Bug**: `SessionDetailModel.delete` and `RecordingsListView`'s group delete both deleted and saved the events *before* calling `deleteSessionFiles(session)`. That function deletes clips by iterating `session.events`, which was empty by then, so every event clip was orphaned in Documents. Found by `deleteRemovesTheSessionEventsAndAllAudioFiles`. **Fix**: call `deleteSessionFiles` first (both places); the model deletion order (events → save → session) is unchanged. Existing orphaned clips stay on disk; a one-off cleanup could find `event_*.m4a` files with no matching event.
+- RecordingsTests now depends on `Env` directly (`AppConfig`, `UserPreferences`, `AudioFileURLResolver`).
+- The grouper uses `Calendar.current`, so test dates are built with it at midday.
+
+---
+
+### F21-T15 — Week-over-week trend tests + localized label
+
+| Field | Value |
+|-------|-------|
+| Arch Ref | CLAUDE.md "Localization" |
+| Status | Done |
+| Started | 2026-11-09 |
+| Completed | 2026-11-09 |
+
+**Acceptance Criteria:**
+- [x] `WeekOverWeekTrendCalculator`: ≥ 8 recorded days required, positive/negative diff, equal → nil, same-day sessions averaged first, only 14 recorded days count, days without recordings skipped
+- [x] **Hardcoded "vs prev wk" removed (user approved)**: `Trend` carries `diff`; the view formats `stats.last7Nights.trendVsPrevWeek` = "%+lld vs prev wk"
+- [x] Label renders "+5 vs prev wk" / "-3 vs prev wk" (same text as before)
+- [x] Net +8 tests; 176 tests pass
+
+**Prompt Used:**
+"Fix in T15 (Recommended)"
+
+**Notes:**
+- A "week" is the 7 most recent *recorded* days, not calendar weeks; the previous week is the next ≤ 7 recorded days. Tests document this (8 recordings over a month still form two weeks). Not changed.
+- String added via `Strings.txt` → `generate-xcstrings.py` (regenerates `Localizable.xcstrings` + `Strings.swift`).
+- StatisticsTests now depends on `DesignSystem` (label format check).
+
+---
+
+### F21-T16 — `DurationFormatter` + string catalog tests
+
+| Field | Value |
+|-------|-------|
+| Arch Ref | CLAUDE.md "Localization" |
+| Status | Done |
+| Started | 2026-11-09 |
+| Completed | 2026-11-09 |
+
+**Acceptance Criteria:**
+- [x] `DurationFormatter.hoursAndMinutes`: 0 / 1 / 45 / 60 / 61 / 125 / 600 minutes (singular/plural, hours)
+- [x] Every `Localizable.xcstrings` key has an English value, and the compiled bundle returns exactly that value at runtime (438 keys)
+- [x] Net +4 tests; 180 tests pass
+
+**Prompt Used:**
+"can you make from next task all together in one branch example t13-t18"
+
+**Notes:**
+- **Malformed catalog entries found (not removed; deletion needs approval)**: top-level keys `localizations` and `stringUnit` (from `22ea853`, 2026-05-12) are a flattened nested "5 seconds" entry. They generate unused accessors `Strings.localizations` / `Strings.stringUnit`. The test lists them in `knownMalformedKeys`; `knownMalformedKeysStillExist` fails once they're removed, as a reminder to empty the list.
+- Output format note: hours render without a space (`"1h 5 mins"`), the existing behavior.
+- The catalog is read from source via `#filePath` (the simulator can read the host file system).
+
+---
+
+### F21-T17 — UI smoke tests (optional)
+
+| Field | Value |
+|-------|-------|
+| Status | Skipped (user choice) |
+
+**Notes:**
+- Would need a UI test target in `SleepGuard.xcodeproj` (Xcode GUI or hand-edited `project.pbxproj`). Skipped; possible follow-up.
+
+---
+
+### F21-T18 — Verification, docs, merge to main
+
+| Field | Value |
+|-------|-------|
+| Status | Done (merges by the user) |
+| Started | 2026-11-09 |
+| Completed | 2026-11-09 |
+
+**Acceptance Criteria:**
+- [x] `run-tests.sh`: 180/180 pass across 7 packages
+- [x] App builds (BD630AD5); SwiftFormat lint clean; layering check passes; hardcoded-string check passes (base `origin/main`); `Strings.swift` matches the catalog
+- [x] Computed-view grep: only the existing `dateScoreHeader` / `allNightsSection` in `Last7NightsView` (one `Text` line changed inside, structure untouched)
+- [x] Feature doc `docs/features/f21-test-coverage.md`; `docs/ProjectArchitecture.md` Tests section; `docs/snore-detection-algorithm.md` FFT note
+- [ ] Merge `feature/f21/t13-t18-remaining-tests` → `feature/f21-test-coverage` → `main` (user)
+
+**Notes:**
+- The layering check counts test files as non-view code. The trend-label format test moved from StatisticsTests (which had imported `DesignSystem`) to DesignSystemTests (`TrendLabelFormatTests`).
+- Corrected the running test totals in the tracker, FeatureTracker and F21 session fragments: from T5 on they were 2 low (T5 added 22 to 46 = 68, recorded as 66).
 
