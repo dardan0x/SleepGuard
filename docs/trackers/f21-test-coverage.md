@@ -459,7 +459,7 @@ Unit tests across the logic layer of every package: sleep scoring, snore detecti
 "can you make from next task all together in one branch example t13-t18"
 
 **Notes:**
-- **Malformed catalog entries found (not removed; deletion needs approval)**: top-level keys `localizations` and `stringUnit` (from `22ea853`, 2026-05-12) are a flattened nested "5 seconds" entry. They generate unused accessors `Strings.localizations` / `Strings.stringUnit`. The test lists them in `knownMalformedKeys`; `knownMalformedKeysStillExist` fails once they're removed, as a reminder to empty the list.
+- **Malformed catalog entries found (not removed; deletion needs approval)**: top-level keys `localizations` and `stringUnit` (from `22ea853`, 2026-05-12) are a flattened nested "5 seconds" entry. They generated unused accessors `Strings.localizations` / `Strings.stringUnit`. **Removed after F21 (2026-11-09, user approved)**: both keys deleted from the catalog, `Strings.swift` regenerated, `knownMalformedKeys` and `knownMalformedKeysStillExist` dropped (180 → 179 tests).
 - Output format note: hours render without a space (`"1h 5 mins"`), the existing behavior.
 - The catalog is read from source via `#filePath` (the simulator can read the host file system).
 

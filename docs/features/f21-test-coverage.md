@@ -1,6 +1,6 @@
 # F21 — Test Coverage
 
-Unit tests across the logic layer of every package that has logic: 180 Swift Testing tests in 7 packages, up from 40 tests in 2 packages that no command could run in one go (and 30 of those didn't compile). One script runs them all on the simulator, and CI runs it on every pull request. Writing the tests found and fixed four production bugs.
+Unit tests across the logic layer of every package that has logic: 179 Swift Testing tests in 7 packages, up from 40 tests in 2 packages that no command could run in one go (and 30 of those didn't compile). One script runs them all on the simulator, and CI runs it on every pull request. Writing the tests found and fixed four production bugs.
 
 ## Running
 
@@ -25,7 +25,7 @@ DESTINATION='platform=iOS Simulator,name=iPhone 17 Pro,OS=latest' sh scripts/run
 | Env | 20 | `StorageLimitEnforcerTests` (6), `DetectionSensitivityTests` (5), `SessionCheckpointStoreTests` (5), `RecordingDelayManagerTests` (4) |
 | Recordings | 14 | `SessionDetailModelTests` (9), `SessionGrouperTests` (5) |
 | Statistics | 8 | `WeekOverWeekTrendCalculatorTests` |
-| DesignSystem | 6 | `LocalizableCatalogTests` (3), `DurationFormatterTests` (2), `TrendLabelFormatTests` (1) |
+| DesignSystem | 5 | `LocalizableCatalogTests` (2), `DurationFormatterTests` (2), `TrendLabelFormatTests` (1) |
 
 Counts are `@Test` functions; parameterized tests run more cases. Learn, Onboarding, Settings and SleepSession have no test target (views, plus audio I/O wrappers).
 
@@ -88,7 +88,6 @@ F21-T1 … F21-T16, F21-T18. F21-T17 (UI smoke tests) skipped. See `docs/tracker
 - **Event state machine** in `RealtimeDetectionTracker` (start/stop debounce, bursts, intensity, short-event gate, melody) is untested. Proposed: extract it into a pure, clock-driven type in its own feature, with a device check.
 - **Orphaned clips** from past deletes are still on users' disks; a one-off cleanup could remove `event_*.m4a` files with no matching event.
 - **Events saved since May** have 0 frequency/centroid/low-band ratio; recompute from clips or leave.
-- **Malformed catalog keys** `localizations` / `stringUnit` (from `22ea853`): remove them and regenerate, then empty `LocalizableCatalogTests.knownMalformedKeys`.
 - **Hardcoded notification text** in `RecordingDelayManager.scheduleNotification` (title + body).
 - `sleepScore(using:)` reads the cached snoring duration once `hasCachedScore` is set (contradicts its doc comment).
 - `DateFormatters.time` and `.timeWithPeriod` are identical.
