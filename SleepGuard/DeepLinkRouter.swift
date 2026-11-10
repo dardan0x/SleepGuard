@@ -1,6 +1,7 @@
 import Env
 import Foundation
 import Models
+import Routing
 import SwiftData
 
 /// Turns a widget deep link into a push on the Statistics tab's stack.

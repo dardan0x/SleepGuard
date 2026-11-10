@@ -228,7 +228,8 @@ These thresholds prevent monolithic views. Enforce them during implementation an
 
 ### Packages
 
-- Feature packages never import other feature packages. Only: Models, AudioEngine, Env, DesignSystem (the one existing edge: Settings → Personalization).
+- Feature packages never import other feature packages. Only: Models, AudioEngine, Env, Routing, DesignSystem (the one existing edge: Settings → Personalization).
+- Navigation types (`RouterDestination`, `SheetDestination`, `RouterPath`) live in the leaf `Routing` package, not `Env`. `Env` must not import `SwiftUI` (enforced by `check-layering.py`). See `docs/adr/0001-routing-package.md`.
 - The app target is the only place that imports everything.
 - One endpoint enum per API resource. One file per enum.
 - 2-space indentation. Enforced by `.swiftformat`.
@@ -245,8 +246,7 @@ View files (`Sources/Views/`, `Sources/Components/`) own everything visual:
   `DesignSystem` at all.
 - Allowed exceptions: content engines whose output IS user-facing text
   (`Personalization/Engine/BriefingEngine.swift`, `QuoteBank.swift`) may use
-  `Strings`; navigation infrastructure (`Env/Sources/Services/Router.swift`)
-  may import `SwiftUI`; audio infrastructure
+  `Strings`; audio infrastructure
   (`AudioEngine/Sources/Engine/AudioRecorder.swift`) may import `UIKit` for
   session-interruption observation.
 - Enforced by `scripts/check-layering.py` on every push/PR
