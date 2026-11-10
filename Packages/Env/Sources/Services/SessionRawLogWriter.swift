@@ -7,42 +7,55 @@ import Foundation
 public actor SessionRawLogWriter {
   public static let shared = SessionRawLogWriter()
 
+  private let directory: URL
   private var buffer: [SnoreSample] = []
-  private var sessionStart: Date?
+  private var metadata: RawLogMetadata?
   private var logFileURL: URL?
 
-  private init() {}
-
-  public func start(sessionID: UUID) {
-    buffer.removeAll(keepingCapacity: true)
-    sessionStart = Date()
-    logFileURL = FileManager.default
-      .urls(for: .documentDirectory, in: .userDomainMask)[0]
-      .appendingPathComponent("rawlog_\(sessionID.uuidString).json")
+  init(directory: URL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]) {
+    self.directory = directory
   }
 
-  public func append(db: Float, spectralScore: Float, snoreConfidence: Float, state: DetectionState) {
-    guard let start = sessionStart else { return }
-    let sample = SnoreSample(
-      elapsed: Date().timeIntervalSince(start),
+  public func start(sessionID: UUID, metadata: RawLogMetadata) {
+    buffer.removeAll(keepingCapacity: true)
+    self.metadata = metadata
+    logFileURL = directory.appendingPathComponent("rawlog_\(sessionID.uuidString).json")
+  }
+
+  /// `timestamp` is when the tracker processed the sample, not when this
+  /// actor receives it: appends arrive through unstructured tasks, so they
+  /// can be late and out of order. `stop()` sorts by elapsed time.
+  public func append(
+    at timestamp: Date,
+    db: Float,
+    peakDB: Float?,
+    spectralScore: Float,
+    snoreConfidence: Float,
+    speechConfidence: Float,
+    state: DetectionState)
+  {
+    guard let start = metadata?.sessionStart else { return }
+    buffer.append(SnoreSample(
+      elapsed: timestamp.timeIntervalSince(start),
       db: db,
+      peakDB: peakDB,
       spectralScore: spectralScore,
       snoreConfidence: snoreConfidence,
-      state: state)
-    buffer.append(sample)
+      speechConfidence: speechConfidence,
+      state: state))
   }
 
-  /// Writes the buffered samples to disk and returns the filename.
+  /// Writes the buffered samples as a `RawLog` to disk and returns the filename.
   /// Returns `nil` if there are no samples or writing fails.
   public func stop() -> String? {
-    guard let url = logFileURL, !buffer.isEmpty else {
+    guard let url = logFileURL, let metadata, !buffer.isEmpty else {
       reset()
       return nil
     }
 
     do {
-      let data = try JSONEncoder().encode(buffer)
-      try data.write(to: url, options: .atomic)
+      let log = RawLog(metadata: metadata, samples: buffer.sorted { $0.elapsed < $1.elapsed })
+      try JSONEncoder().encode(log).write(to: url, options: .atomic)
       let filename = url.lastPathComponent
       reset()
       return filename
@@ -61,7 +74,7 @@ public actor SessionRawLogWriter {
 
   private func reset() {
     buffer.removeAll(keepingCapacity: false)
-    sessionStart = nil
+    metadata = nil
     logFileURL = nil
   }
 }
