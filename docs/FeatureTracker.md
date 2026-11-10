@@ -2,7 +2,7 @@
 
 > Auto-updated by the AI after every task. This is the local source of truth.
 
-Last updated: 2026-11-09
+Last updated: 2026-11-10
 
 ---
 
@@ -39,19 +39,19 @@ Last updated: 2026-11-09
 | Backlog | 0 |
 | Blocked | 0 |
 | — | — |
-| Features (V5) | 3 |
+| Features (V5) | 4 |
 | Done | 3 |
-| In Progress | 0 |
+| In Progress | 1 |
 | Backlog | 0 |
 | Blocked | 0 |
 | — | — |
-| Total Tasks | 136 |
-| Tasks Done | 120 |
+| Total Tasks | 150 |
+| Tasks Done | 121 |
 | Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
-| Tasks Backlog | 16 |
+| Tasks Backlog | 29 |
 | — | — |
-| **Progress** | **88%** |
+| **Progress** | **81%** |
 
 ## Features
 
@@ -77,6 +77,7 @@ Last updated: 2026-11-09
 | F19 | Factory DI Migration | P1 | Done | 5/5 | ██████████ 100% | [tracker](trackers/f19-factory-di.md) |
 | F20 | Home Screen & Lock Screen Widgets | P1 | Done | 9/9 | ██████████ 100% | [tracker](trackers/f20-home-screen-widgets.md) |
 | F21 | Test Coverage | P1 | Done | 17/17 | ██████████ 100% | [tracker](trackers/f21-test-coverage.md) |
+| F22 | Architecture Hardening | P1 | In Progress | 1/14 | █░░░░░░░░░ 7% | [tracker](trackers/f22-architecture-hardening.md) |
 
 ## Activity Log
 
@@ -84,6 +85,8 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-11-10 | F22-T1 | Completed | Raw log format 2: `RawLog { metadata, samples }` with `peakDB` + `speechConfidence`; tracker-side timestamps (fixes actor-arrival `elapsed`); old format still decodes. AudioEngine 37 + Env 23 tests pass. Branch `feature/f22/t1-rawlog-replay-fields` |
+| 2026-11-10 | F22 | Planned | Architecture Hardening planned from the mock staff-engineer interview, each claim checked against the code first. 14 tasks: pure + versioned score, `Routing` package, protocols + fakes for every service, detection state machine → `DetectionEngine` actor + `AsyncStream` with replay tests, `VersionedSchema`, CI view-size check, ADRs. Local trackers only (no Notion). Feature branch `feature/f22-architecture-hardening` |
 | 2026-11-09 | F20-T8, F20-T9 | Completed | F20 marked Done (merged to `main` in PR #105). Lock Screen accessory render still unverified on device |
 | 2026-11-09 | F21 follow-up | Cleanup | Removed malformed catalog keys `localizations` / `stringUnit`; `Strings.swift` regenerated; catalog test reminder dropped. 179 tests pass. Branch `feature/f21/catalog-cleanup-f20-done` |
 | 2026-11-09 | F21-T18 | Completed | Verification: 180 tests pass, build, lint, layering, strings OK. Feature doc `docs/features/f21-test-coverage.md`; ProjectArchitecture Tests section. Merge to `main` by the user. Branch `feature/f21/t13-t18-remaining-tests` |
@@ -288,7 +291,7 @@ _Most recent first. The AI appends here after every task._
 
 | Task | Feature | Started | Assignee |
 |------|---------|---------|----------|
-| — | — | — | — |
+| F22-T2 | F22 | — | AI (next) |
 
 ## Completed (last 10)
 
