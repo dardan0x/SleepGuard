@@ -49,7 +49,7 @@ Fixes the architecture concerns raised in the mock staff-engineer interview (`Sl
 | F22-T5 | Protocol DI pilot: `HealthKitSync` + `EnvTestSupport` fake | Infra | Done | — | Env / Recordings | 2026-11-10 | 2026-11-10 |
 | F22-T6 | Protocol DI rollout: every remaining service + `Theme` | Infra | Done | F22-T5 | Env / AudioEngine / DesignSystem | 2026-11-10 | 2026-11-10 |
 | F22-T7 | Remove `.shared` from feature packages; `DesignSystem` drops `Env` | Infra | Done | F22-T6 | Features / DesignSystem | 2026-11-10 | 2026-11-10 |
-| F22-T8 | Extract pure `DetectionStateMachine` into `AudioEngine` | Refactor | Backlog | F22-T1 | AudioEngine / Env | — | — |
+| F22-T8 | Extract pure `DetectionStateMachine` into `AudioEngine` | Refactor | Done | F22-T1 | AudioEngine / Env | 2026-11-11 | 2026-11-11 |
 | F22-T9 | Detection replay tests (golden outputs from real-night excerpts) | Test | Backlog | F22-T1, F22-T8 | AudioEngine | — | — |
 | F22-T10 | `DetectionEngine` actor + `AsyncStream` input (+ ADR) | Refactor | Backlog | F22-T9 | AudioEngine / Env | — | — |
 | F22-T11 | `VersionedSchema` V1 + empty migration plan | Model | Done | F22-T3 | Models / App | 2026-11-10 | 2026-11-10 |
