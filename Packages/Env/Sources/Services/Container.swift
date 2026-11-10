@@ -15,7 +15,7 @@ public extension Container {
   @MainActor var appConfig: Factory<AppConfig> { self { AppConfig.shared }.singleton }
   @MainActor var audioRecorder: Factory<AudioRecorder> { self { AudioRecorder.shared }.singleton }
   @MainActor var customMelodyStorage: Factory<CustomMelodyStorage> { self { CustomMelodyStorage.shared }.singleton }
-  @MainActor var healthKitSync: Factory<HealthKitSync> { self { HealthKitSync.shared }.singleton }
+  @MainActor var healthKitSync: Factory<any HealthKitSyncing> { self { HealthKitSync.shared }.singleton }
   @MainActor var hapticManager: Factory<HapticManager> { self { HapticManager.shared }.singleton }
   @MainActor var notificationPermissionManager: Factory<NotificationPermissionManager> { self { NotificationPermissionManager.shared }.singleton }
   @MainActor var pendingSessionStore: Factory<PendingSessionStore> { self { PendingSessionStore.shared }.singleton }
