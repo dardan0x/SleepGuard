@@ -6,10 +6,7 @@ import SwiftUI
 
 @MainActor
 struct StatisticsLoadedView: View {
-  let session: SleepSession
-  let dayScore: Int
-  let daySessionCount: Int
-  let recentSessions: [SleepSession]
+  let state: DashboardState
   let theme: any ThemeProviding
   @MainActor let onStartRecording: () -> Void
   let onViewTrends: () -> Void
@@ -25,7 +22,7 @@ struct StatisticsLoadedView: View {
         VStack(spacing: DeviceSize.isCompactHeight ? 10 : 16) {
           StatisticsWeekSelector(weekDays: weekDays, onViewTrends: onViewTrends)
 
-          SleepScoreGauge(score: dayScore, theme: theme, size: 120)
+          SleepScoreGauge(score: state.dayScore, theme: theme, size: 120)
 
           VStack(spacing: 4) {
             Text(summaryLabel)
@@ -44,8 +41,8 @@ struct StatisticsLoadedView: View {
             SleepStageBreakdownView(session: session, theme: theme)
           }
 
-          if !recentSessions.isEmpty {
-            StatisticsMiniChartSection(recentSessions: recentSessions)
+          if !state.recentSessions.isEmpty {
+            StatisticsMiniChartSection(recentSessions: state.recentSessions)
           }
         }
         .padding(.horizontal, 20)
@@ -62,16 +59,16 @@ struct StatisticsLoadedView: View {
   }
 
   private var summaryLabel: String {
-    if daySessionCount > 1 {
-      return "\(daySessionCount) \(Strings.recordingsStatisticsLoadedView)"
+    if state.daySessionCount > 1 {
+      return "\(state.daySessionCount) \(Strings.recordingsStatisticsLoadedView)"
     }
-    return isLastNight
+    return state.isLastNight
       ? Strings.lastNightStatisticsLoadedView
       : Strings.lastTimeStatisticsLoadedView
   }
 
-  private var isLastNight: Bool {
-    Calendar.current.isDateInYesterday(session.startDate)
+  private var session: SleepSession {
+    state.session
   }
 
   private var dateString: String {
@@ -99,7 +96,7 @@ struct StatisticsLoadedView: View {
       let label = weekdaySymbols[weekdayIndex].uppercased().prefix(3)
       let number = String(calendar.component(.day, from: date))
 
-      let daySession = recentSessions.first { session in
+      let daySession = state.recentSessions.first { session in
         calendar.isDate(session.startDate, inSameDayAs: date)
       }
 

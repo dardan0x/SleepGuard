@@ -53,7 +53,7 @@ Fixes the architecture concerns raised in the mock staff-engineer interview (`Sl
 | F22-T9 | Detection replay tests (golden outputs from real-night excerpts) | Test | Backlog | F22-T1, F22-T8 | AudioEngine | — | — |
 | F22-T10 | `DetectionEngine` actor + `AsyncStream` input (+ ADR) | Refactor | Backlog | F22-T9 | AudioEngine / Env | — | — |
 | F22-T11 | `VersionedSchema` V1 + empty migration plan | Model | Done | F22-T3 | Models / App | 2026-11-10 | 2026-11-10 |
-| F22-T12 | `DashboardState.make(from:now:)` pure mapping + tests | Refactor | Backlog | F22-T3 | Statistics | — | — |
+| F22-T12 | `DashboardState.make(from:now:)` pure mapping + tests | Refactor | Done | F22-T3 | Statistics | 2026-11-11 | 2026-11-11 |
 | F22-T13 | CI check: 200-line view limit with allowlist | Infra | Backlog | — | scripts / .github | — | — |
 | F22-T14 | ADRs (protocols, detection actor) + docs truth pass + feature doc | Docs | Backlog | F22-T1…T13 | docs | — | — |
 
