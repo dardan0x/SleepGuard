@@ -2,7 +2,7 @@ import Foundation
 import Models
 import SwiftData
 
-/// In-memory SwiftData store with the app's schema. Use it whenever a test
+/// In-memory SwiftData store with the app's versioned schema and migration plan. Use it whenever a test
 /// reads `events`, so relationships behave like production.
 @MainActor
 public final class TestStore {
@@ -12,10 +12,7 @@ public final class TestStore {
   }
 
   public init() throws {
-    let schema = Schema([SleepSession.self, SnoreEvent.self, UserProfile.self, LifestyleLog.self])
-    container = try ModelContainer(
-      for: schema,
-      configurations: [ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)])
+    container = try SleepGuardSchema.container(SleepGuardSchema.configuration(inMemory: true))
   }
 
   /// Inserts the session, then attaches events and gaps. Order matters:
