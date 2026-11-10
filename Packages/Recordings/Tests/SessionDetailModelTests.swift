@@ -1,4 +1,7 @@
 import Env
+import EnvTestSupport
+import FactoryKit
+import FactoryTesting
 import Foundation
 import Models
 import ModelsTestSupport
@@ -8,7 +11,13 @@ import Testing
 
 /// Session detail state owner: load (cache refresh), event filters, and delete.
 /// Uses the default feature flags (all on) and `enhancedSleepTracking` off, so
-/// no HealthKit call is made.
+/// no HealthKit call is made, except in the HealthKit tests, which register
+/// `FakeHealthKitSync`.
+///
+/// `.container` gives each test its own Factory scope, so registrations don't
+/// leak. `.serialized` because the HealthKit tests flip the shared
+/// `UserPreferences.enhancedSleepTracking` (until F22-T6 makes it injectable).
+@Suite(.serialized, .container)
 final class SessionDetailModelTests {
   private let store: TestStore
   private let start = TestCalendar.date(day: 1, hour: 23)
@@ -98,6 +107,47 @@ final class SessionDetailModelTests {
       return
     }
     #expect(isClipSession)
+  }
+
+  // MARK: - HealthKit
+
+  /// Runs `body` with enhanced sleep tracking on, restoring the user's value.
+  @MainActor
+  private func withEnhancedTracking(_ body: () async throws -> Void) async rethrows {
+    let previous = UserPreferences.shared.enhancedSleepTracking
+    UserPreferences.shared.enhancedSleepTracking = true
+    defer { UserPreferences.shared.enhancedSleepTracking = previous }
+    try await body()
+  }
+
+  @MainActor
+  @Test func loadFetchesStagesAndScoresThem() async throws {
+    // Deep 0%, REM 0% → stage penalty (15 × 0.6 + 18 × 0.4 = 16.2) capped at 15.
+    let fake = FakeHealthKitSync(
+      isAuthorized: true,
+      stages: [SleepStageSegment(stage: .light, startOffset: 0, duration: 8 * 3600)])
+    Container.shared.healthKitSync.register { fake }
+    let session = try store.insert(.fixture(start: start))
+
+    try await withEnhancedTracking {
+      await model(for: session).load(modelContext: store.context)
+    }
+
+    #expect(fake.fetchedSessionIDs == [session.id])
+    #expect(session.sleepStageSegments?.count == 1)
+    #expect(session.cachedSleepScore == 85)
+  }
+
+  @MainActor
+  @Test func loadSkipsHealthKitWhenTrackingIsOff() async throws {
+    let fake = FakeHealthKitSync(isAuthorized: true)
+    Container.shared.healthKitSync.register { fake }
+    let session = try store.insert(.fixture(start: start))
+
+    await model(for: session).load(modelContext: store.context)
+
+    #expect(fake.fetchedSessionIDs.isEmpty)
+    #expect(session.sleepStageSegments == nil)
   }
 
   // MARK: - Filters

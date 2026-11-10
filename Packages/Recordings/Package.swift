@@ -36,6 +36,9 @@ let package = Package(
         .product(name: "Models", package: "Models"),
         .product(name: "ModelsTestSupport", package: "Models"),
         .product(name: "Env", package: "Env"),
+        .product(name: "EnvTestSupport", package: "Env"),
+        .product(name: "FactoryKit", package: "Factory"),
+        .product(name: "FactoryTesting", package: "Factory"),
       ],
       path: "Tests",
       swiftSettings: [

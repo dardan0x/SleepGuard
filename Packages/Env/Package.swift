@@ -6,6 +6,8 @@ let package = Package(
   platforms: [.iOS(.v17), .macOS(.v14)],
   products: [
     .library(name: "Env", targets: ["Env"]),
+    // Fakes for every `Env` service protocol, for tests and previews.
+    .library(name: "EnvTestSupport", targets: ["EnvTestSupport"]),
   ],
   dependencies: [
     .package(path: "../Models"),
@@ -27,6 +29,16 @@ let package = Package(
       linkerSettings: [
         .linkedFramework("HealthKit"),
         .linkedFramework("WatchConnectivity"),
+      ]),
+    .target(
+      name: "EnvTestSupport",
+      dependencies: [
+        "Env",
+        .product(name: "Models", package: "Models"),
+      ],
+      path: "TestSupport",
+      swiftSettings: [
+        .swiftLanguageMode(.v6),
       ]),
     .testTarget(
       name: "EnvTests",

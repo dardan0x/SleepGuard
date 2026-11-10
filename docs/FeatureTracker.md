@@ -46,10 +46,10 @@ Last updated: 2026-11-10
 | Blocked | 0 |
 | — | — |
 | Total Tasks | 150 |
-| Tasks Done | 124 |
+| Tasks Done | 125 |
 | Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
-| Tasks Backlog | 26 |
+| Tasks Backlog | 25 |
 | — | — |
 | **Progress** | **83%** |
 
@@ -77,7 +77,7 @@ Last updated: 2026-11-10
 | F19 | Factory DI Migration | P1 | Done | 5/5 | ██████████ 100% | [tracker](trackers/f19-factory-di.md) |
 | F20 | Home Screen & Lock Screen Widgets | P1 | Done | 9/9 | ██████████ 100% | [tracker](trackers/f20-home-screen-widgets.md) |
 | F21 | Test Coverage | P1 | Done | 17/17 | ██████████ 100% | [tracker](trackers/f21-test-coverage.md) |
-| F22 | Architecture Hardening | P1 | In Progress | 4/14 | ███░░░░░░░ 29% | [tracker](trackers/f22-architecture-hardening.md) |
+| F22 | Architecture Hardening | P1 | In Progress | 5/14 | ████░░░░░░ 36% | [tracker](trackers/f22-architecture-hardening.md) |
 
 ## Activity Log
 
@@ -85,6 +85,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-11-10 | F22-T5 | Completed | Protocol DI pilot: `HealthKitSyncing` + `Factory<any HealthKitSyncing>`; `SessionDetailModel` resolves via container; `EnvTestSupport` with `FakeHealthKitSync`; Factory `.container` trait for isolated overrides. Recordings 16 tests. Branch `feature/f22/t5-protocol-di-pilot`, merged locally |
 | 2026-11-10 | F22-T4 | Completed | `Routing` leaf package (route enums + `RouterPath`, 3 tests); `Env` SwiftUI-free + layering rule; unused `Container.routerPath` removed; ADR 0001. Branch `feature/f22/t4-routing-package`, merged locally into `feature/f22-architecture-hardening` |
 | 2026-11-10 | F22-T3 | Completed | Versioned score cache: `cachedScoreVersion` (formula version + config fingerprint), single owner `refreshCachedScore(using:)` for all 4 writers, launch pass `refreshStaleCachedScores` before the widget snapshot. `SleepScoreCacheTests` (6). Branch `feature/f22/t3-score-cache-version` |
 | 2026-11-10 | F22-T2 | Completed | `SleepInputs` value type + pure `SleepScore.compute`; `SleepSession.sleepScore(using:)` delegates (identical arithmetic). `SleepScoreFormulaTests`: 14 parameterized cases + bounds + custom min, no SwiftData. Branch `feature/f22/t2-sleep-inputs` |
@@ -294,7 +295,7 @@ _Most recent first. The AI appends here after every task._
 
 | Task | Feature | Started | Assignee |
 |------|---------|---------|----------|
-| F22-T5 | F22 | — | AI (next) |
+| F22-T6 | F22 | — | AI (next) |
 
 ## Completed (last 10)
 

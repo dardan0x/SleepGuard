@@ -46,7 +46,7 @@ Fixes the architecture concerns raised in the mock staff-engineer interview (`Sl
 | F22-T2 | `SleepInputs` value type + pure score function + parameterized tests | Model | Done | — | Models | 2026-11-10 | 2026-11-10 |
 | F22-T3 | Versioned score cache with one owner + launch recompute | Model | Done | F22-T2 | Models / App | 2026-11-10 | 2026-11-10 |
 | F22-T4 | `Routing` package (+ ADR 0001) | Infra | Done | — | Routing / all features | 2026-11-10 | 2026-11-10 |
-| F22-T5 | Protocol DI pilot: `HealthKitSync` + `EnvTestSupport` fake | Infra | Backlog | — | Env / Recordings | — | — |
+| F22-T5 | Protocol DI pilot: `HealthKitSync` + `EnvTestSupport` fake | Infra | Done | — | Env / Recordings | 2026-11-10 | 2026-11-10 |
 | F22-T6 | Protocol DI rollout: every remaining service + `Theme` | Infra | Backlog | F22-T5 | Env / AudioEngine / DesignSystem | — | — |
 | F22-T7 | Remove `.shared` from feature packages; `DesignSystem` drops `Env` | Infra | Backlog | F22-T6 | Features / DesignSystem | — | — |
 | F22-T8 | Extract pure `DetectionStateMachine` into `AudioEngine` | Refactor | Backlog | F22-T1 | AudioEngine / Env | — | — |
@@ -177,22 +177,33 @@ Fixes the architecture concerns raised in the mock staff-engineer interview (`Sl
 | Field | Value |
 |-------|-------|
 | Arch Ref | `docs/architecture/dependencies.md` |
-| Status | Backlog |
-| Started | — |
-| Completed | — |
+| Status | Done |
+| Started | 2026-11-10 |
+| Completed | 2026-11-10 |
 
 **Acceptance Criteria:**
-- [ ] `HealthKitSyncing` protocol (`@MainActor`, `AnyObject`); `HealthKitSync` conforms, init no longer private
-- [ ] Container registers `Factory<any HealthKitSyncing>`; `SessionDetailModel` resolves it via the container instead of `HealthKitSync.shared`
-- [ ] New `EnvTestSupport` library with `FakeHealthKitSync`
-- [ ] `SessionDetailModelTests` uses the fake through `Container.shared.healthKitSync.register { … }`
-- [ ] Builds with zero errors; tests pass
+- [x] `HealthKitSyncing` protocol (`@MainActor`, `AnyObject`); `HealthKitSync` conforms, init no longer private
+- [x] Container registers `Factory<any HealthKitSyncing>`; `SessionDetailModel` resolves it via the container instead of `HealthKitSync.shared`
+- [x] New `EnvTestSupport` library with `FakeHealthKitSync`
+- [x] `SessionDetailModelTests` uses the fake through `Container.shared.healthKitSync.register { … }`
+- [x] Builds with zero errors; tests pass
 
 **Prompt Used:**
-_(filled after task completion)_
+"continue with next tasks" (same message as T4; commit + merge locally from T4 on)
 
 **Notes:**
-_Pilot to validate naming (role-named protocols, concrete class keeps its name), Observation through `any P`, and Factory overrides in tests before the rollout._
+- **Conventions validated for T6:**
+  - The protocol is named for its role (`HealthKitSyncing`) and declared at the top of the concrete type's file. The concrete class keeps its name and `.shared`.
+  - The protocol is `@MainActor` and refines `AnyObject, Observable`.
+  - `init()` is public.
+  - The container returns `Factory<any P>` and still aliases `.shared`.
+  - `@Observable` owners resolve `Container.shared.service()` in init.
+- **Observation through `any P` works:** `OnboardingPageHealthWatchView` reads `healthKitSync.isAuthorized` through the existential, and the app builds with no changes to any view.
+- **Test isolation: Factory's `FactoryTesting` `.container` trait** (Factory 3.5.2) gives each test its own container scope through a `TaskLocal`, so `register { fake }` can't leak into parallel tests. The Recordings test target now depends on `FactoryKit` + `FactoryTesting` + `EnvTestSupport`.
+- `EnvTestSupport` (`Packages/Env/TestSupport/`) mirrors `ModelsTestSupport`. Env now has 2 library products, so its test scheme is `Env-Package`; `run-tests.sh` already handles that.
+- Tests (+2): with enhanced tracking on, the fake's stages are fetched once and stored, and the cached score includes the stage penalty (85). With it off, the fake is never called.
+- **Known gap, closed in T6:** `enhancedSleepTracking` is still read from concrete `UserPreferences.shared`, so the suite is `.serialized` and the test restores the flag.
+- The app target (`SleepGuardApp`, `StatisticsTab`) still uses `HealthKitSync.shared` directly. That's allowed, since it is the composition root.
 
 ---
 
