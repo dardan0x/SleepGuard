@@ -48,7 +48,7 @@ Fixes the architecture concerns raised in the mock staff-engineer interview (`Sl
 | F22-T4 | `Routing` package (+ ADR 0001) | Infra | Done | — | Routing / all features | 2026-11-10 | 2026-11-10 |
 | F22-T5 | Protocol DI pilot: `HealthKitSync` + `EnvTestSupport` fake | Infra | Done | — | Env / Recordings | 2026-11-10 | 2026-11-10 |
 | F22-T6 | Protocol DI rollout: every remaining service + `Theme` | Infra | Done | F22-T5 | Env / AudioEngine / DesignSystem | 2026-11-10 | 2026-11-10 |
-| F22-T7 | Remove `.shared` from feature packages; `DesignSystem` drops `Env` | Infra | Backlog | F22-T6 | Features / DesignSystem | — | — |
+| F22-T7 | Remove `.shared` from feature packages; `DesignSystem` drops `Env` | Infra | Done | F22-T6 | Features / DesignSystem | 2026-11-10 | 2026-11-10 |
 | F22-T8 | Extract pure `DetectionStateMachine` into `AudioEngine` | Refactor | Backlog | F22-T1 | AudioEngine / Env | — | — |
 | F22-T9 | Detection replay tests (golden outputs from real-night excerpts) | Test | Backlog | F22-T1, F22-T8 | AudioEngine | — | — |
 | F22-T10 | `DetectionEngine` actor + `AsyncStream` input (+ ADR) | Refactor | Backlog | F22-T9 | AudioEngine / Env | — | — |
@@ -253,22 +253,40 @@ Fixes the architecture concerns raised in the mock staff-engineer interview (`Sl
 | Field | Value |
 |-------|-------|
 | Arch Ref | `docs/architecture/dependencies.md`, `docs/architecture/rules.md` |
-| Status | Backlog |
-| Started | — |
-| Completed | — |
+| Status | Done |
+| Started | 2026-11-10 |
+| Completed | 2026-11-10 |
 
 **Acceptance Criteria:**
-- [ ] Zero app-service `.shared` references in feature package sources (system singletons like `UIApplication.shared` excluded)
-- [ ] `Env` internals resolve collaborators via the container, not `.shared`
-- [ ] `DesignSystem` no longer depends on `Env` (`RecordingActionButton` takes the haptic as an action; `SnoringTimelineView` import removed)
-- [ ] `check-layering.py` fails on new feature-package `.shared` service access
-- [ ] Builds with zero errors; tests pass
+- [x] Zero app-service `.shared` references in feature package sources (system singletons like `UIApplication.shared` excluded)
+- [x] `Env` internals resolve collaborators via the container, not `.shared`
+- [x] `DesignSystem` no longer depends on `Env` (`RecordingActionButton` takes the haptic as an action; `SnoringTimelineView` import removed)
+- [x] `check-layering.py` fails on new feature-package `.shared` service access
+- [x] Builds with zero errors; tests pass
 
 **Prompt Used:**
-_(filled after task completion)_
+"continue with next tasks"
 
 **Notes:**
-—
+- **Feature views (13 files):** `X.shared.` became an `@Injected` property, reusing the view's existing injection where it had one. `RecordingPrestartView` and `RecordingCountdownView` also call `sessionManager.startSession()` through their injected manager now.
+- **Feature helpers:** `CustomMelodyRecorder` and `MelodyPreviewPlayer` take `melodyStorage: any CustomMelodyStoring = Container.shared.customMelodyStorage()`.
+- **Env internals use constructor injection with container defaults:**
+  - `SessionRecordingController`: recorder, interrupter, sound analysis, prefs, pending, checkpoint, raw log
+  - `RealtimeDetectionTracker`: same set, minus sound analysis
+  - `SnoreInterrupterPlayer`: prefs, melodies, haptics
+  - `RecordingDelayManager`: recorder
+  - `TabCoordinator`: app config, which now picks its initial tab in `init`
+  - `StorageLimitEnforcer` (`Sendable`) and `MockDataGenerator` (static) resolve `Container.shared.userPreferences()` at the call site
+- `AudioRecorder` (AudioEngine has no container) takes `soundAnalyzer: any SoundAnalysisDetecting = SoundAnalysisDetector.shared`. That's the one remaining default `.shared`, and it's intentional.
+- **Deviation:** `RecordingActionButton` didn't take a haptic action. It uses SwiftUI's `.sensoryFeedback(.impact(weight: .light, intensity: 0.8), trigger:)`, the same feedback as `HapticManager.tap()`, so no caller changed and DesignSystem needs no service. **DesignSystem's `Env` dependency is removed** from its manifest.
+- `DaySummary.intensityColor` (a model reading `Theme.shared`) was deleted. It duplicated `Theme.intensityColor(_:)`, which the two views now call.
+- Swift 6 caught the nudge timer: the haptics existential can't be captured into a nonisolated `Timer` block, so it uses the same `[weak self]` + `Task { @MainActor in }` hop as the stop timer below it.
+- `check-layering.py` rule 4 is a regex over the 18 service types, applied to package `Sources` above Env/Routing and excluding `Container.swift`. Checked with a probe file.
+- **Tests:**
+  - `ConstructorInjectionTests` (5): `TabCoordinator` with hidden tabs and deep links on isolated `AppConfig`; `SnoreInterrupterPlayer` set to "never" or muted doesn't play or buzz, with a fake haptic.
+  - `RecordingDelayManagerTests` uses a fresh instance with `FakeAudioRecorder` and is no longer `.serialized`.
+  - The fake's `remainingTimeString` now matches the real `MM:SS` format.
+- Still `.shared`: `SpeechDetector` / `SnoreDetector` defaults in the tracker. They are AudioEngine helpers, not registered services, and T8 reshapes them.
 
 ---
 

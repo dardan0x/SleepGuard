@@ -9,6 +9,8 @@ import UIKit
 struct RecordingCountdownView: View {
   @Injected(\.sessionManager) private var sessionManager
   @Injected(\.theme) private var theme
+  @Injected(\.recordingDelayManager) private var recordingDelayManager
+  @Injected(\.audioRecorder) private var audioRecorder
   @State private var activeAlert: CountdownAlert?
 
   var body: some View {
@@ -27,7 +29,7 @@ struct RecordingCountdownView: View {
             .font(.system(size: 20, weight: .medium))
             .foregroundStyle(theme.textSecondary)
 
-          Text(RecordingDelayManager.shared.remainingTimeString)
+          Text(recordingDelayManager.remainingTimeString)
             .font(.system(size: 72, weight: .thin, design: .rounded))
             .foregroundStyle(theme.textPrimary)
             .monospacedDigit()
@@ -37,7 +39,7 @@ struct RecordingCountdownView: View {
 
         VStack(spacing: 16) {
           Button {
-            RecordingDelayManager.shared.cancel()
+            recordingDelayManager.cancel()
           } label: {
             Text(Strings.actionCancel)
               .font(.system(size: 17, weight: .semibold))
@@ -54,8 +56,8 @@ struct RecordingCountdownView: View {
 
           Button {
             Task {
-              if !AudioRecorder.shared.hasPermission {
-                let granted = await AudioRecorder.shared.requestPermission()
+              if !audioRecorder.hasPermission {
+                let granted = await audioRecorder.requestPermission()
                 guard granted else {
                   activeAlert = .microphone
                   return
@@ -125,9 +127,9 @@ struct RecordingCountdownView: View {
   }
 
   private func startSession() {
-    RecordingDelayManager.shared.cancel()
+    recordingDelayManager.cancel()
     do {
-      try SessionManager.shared.startSession()
+      try sessionManager.startSession()
     } catch {
       print("Failed to start session: \(error)")
     }

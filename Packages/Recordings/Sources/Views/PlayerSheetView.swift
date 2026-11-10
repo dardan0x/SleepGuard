@@ -18,6 +18,7 @@ public struct PlayerSheetView: View {
   let initialEvent: SnoreEvent?
 
   @Injected(\.theme) private var theme
+  @Injected(\.userPreferences) private var userPreferences
   @Environment(\.dismiss) private var dismiss
 
   @State private var playbackController = ClipPlaybackController()
@@ -134,7 +135,7 @@ public struct PlayerSheetView: View {
     // Initialize the enhancement toggle from the persisted user preference
     // BEFORE loading the first clip — `setupPlayerForCurrentEvent` reads
     // `enhancedAudioEnabled` to compute per-clip normalization gain.
-    playbackController.enhancedAudioEnabled = UserPreferences.shared.enhancedAudioPlayback
+    playbackController.enhancedAudioEnabled = userPreferences.enhancedAudioPlayback
 
     if isClipSession {
       playbackController.loadEvents(sortedEvents)

@@ -19,6 +19,9 @@ public struct SessionSummaryView: View {
   @Injected(\.healthKitSync) private var healthKitSync
   @Injected(\.userPreferences) private var userPreferences
   @Injected(\.appConfig) private var appConfig
+  @Injected(\.pendingSessionStore) private var pendingSessionStore
+  @Injected(\.sessionCheckpointStore) private var sessionCheckpointStore
+  @Injected(\.storageLimitEnforcer) private var storageLimitEnforcer
   @Environment(\.dismiss) private var dismiss
   @Environment(\.modelContext) private var modelContext
 
@@ -91,11 +94,11 @@ public struct SessionSummaryView: View {
       return
     }
 
-    PendingSessionStore.shared.clearPending()
-    SessionCheckpointStore.shared.clear()
+    pendingSessionStore.clearPending()
+    sessionCheckpointStore.clear()
 
     Task {
-      await StorageLimitEnforcer.shared.enforceLimits(modelContext: modelContext)
+      await storageLimitEnforcer.enforceLimits(modelContext: modelContext)
     }
 
     if userPreferences.syncToHealthKit {

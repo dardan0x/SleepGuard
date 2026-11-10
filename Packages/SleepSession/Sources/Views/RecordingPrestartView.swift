@@ -14,7 +14,8 @@ struct RecordingPrestartView: View {
   @Environment(RouterPath.self) private var routerPath
   @Injected(\.userPreferences) private var userPreferences
   @Injected(\.appConfig) private var appConfig
-  private let audioRecorder = AudioRecorder.shared
+  @Injected(\.audioRecorder) private var audioRecorder
+  @Injected(\.recordingDelayManager) private var recordingDelayManager
 
   @State private var activePresentation: PrestartPresentation?
 
@@ -129,12 +130,12 @@ struct RecordingPrestartView: View {
   }
 
   private func beginSession() {
-    let delay = UserPreferences.shared.recordingDelayMinutes
+    let delay = userPreferences.recordingDelayMinutes
     if delay > 0 {
-      RecordingDelayManager.shared.startDelay(minutes: delay)
+      recordingDelayManager.startDelay(minutes: delay)
     } else {
       do {
-        try SessionManager.shared.startSession()
+        try sessionManager.startSession()
       } catch {
         print("Failed to start session: \(error)")
       }

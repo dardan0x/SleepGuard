@@ -94,7 +94,7 @@ struct ServiceOverrideTests {
     Container.shared.recordingDelayManager().startDelay(minutes: 2)
 
     #expect(tabs.resetSignal?.tab == .statistics) // already selected → pop to root
-    #expect(delay.isActive && delay.remainingTimeString == "2:00")
+    #expect(delay.isActive && delay.remainingTimeString == "02:00")
   }
 
   @Test func permissionAndDeviceOverrides() async {

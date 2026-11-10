@@ -1,4 +1,5 @@
 import AudioEngine
+import FactoryKit
 import Foundation
 import Models
 import UIKit
@@ -16,15 +17,35 @@ final class SessionRecordingController {
   private(set) var isProcessingSession = false
   var isLiveSessionVisible = false
 
-  private let audioRecorder = AudioRecorder.shared
-  private let snoreInterrupterPlayer = SnoreInterrupterPlayer.shared
+  private let audioRecorder: any AudioRecording
+  private let snoreInterrupterPlayer: any SnoreInterrupterPlaying
+  private let soundAnalysis: any SoundAnalysisDetecting
+  private let preferences: any UserPreferencesStoring
+  private let pendingSessionStore: any PendingSessionStoring
+  private let checkpointStore: any SessionCheckpointStoring
+  private let rawLogWriter: any SessionRawLogWriting
   private var detection: RealtimeDetectionTracker?
 
   private var processingTask: Task<Void, Never>?
   private var batteryCheckCounter = 0
   private var checkpointCounter = 0
 
-  init() {
+  init(
+    audioRecorder: any AudioRecording = Container.shared.audioRecorder(),
+    snoreInterrupterPlayer: any SnoreInterrupterPlaying = Container.shared.snoreInterrupterPlayer(),
+    soundAnalysis: any SoundAnalysisDetecting = Container.shared.soundAnalysisDetector(),
+    preferences: any UserPreferencesStoring = Container.shared.userPreferences(),
+    pendingSessionStore: any PendingSessionStoring = Container.shared.pendingSessionStore(),
+    checkpointStore: any SessionCheckpointStoring = Container.shared.sessionCheckpointStore(),
+    rawLogWriter: any SessionRawLogWriting = Container.shared.sessionRawLogWriter())
+  {
+    self.audioRecorder = audioRecorder
+    self.snoreInterrupterPlayer = snoreInterrupterPlayer
+    self.soundAnalysis = soundAnalysis
+    self.preferences = preferences
+    self.pendingSessionStore = pendingSessionStore
+    self.checkpointStore = checkpointStore
+    self.rawLogWriter = rawLogWriter
     #if !targetEnvironment(simulator)
     UIDevice.current.isBatteryMonitoringEnabled = true
     #endif
@@ -45,20 +66,20 @@ final class SessionRecordingController {
     checkpointCounter = 0
 
     // Clean up any orphaned files from a previous force-closed session.
-    PendingSessionStore.shared.cleanupIfNeeded()
+    pendingSessionStore.cleanupIfNeeded()
 
     let session = SleepSession(startDate: Date())
     session.recordingGaps = []
     currentSession = session
-    let sessionAudioFilename = UserPreferences.shared.preserveRawAudio ? "session_\(session.id.uuidString).caf" : nil
-    PendingSessionStore.shared.setPending(sessionID: session.id, sessionAudioFilename: sessionAudioFilename)
+    let sessionAudioFilename = preferences.preserveRawAudio ? "session_\(session.id.uuidString).caf" : nil
+    pendingSessionStore.setPending(sessionID: session.id, sessionAudioFilename: sessionAudioFilename)
 
     // Apply detection sensitivity thresholds before starting
     detection?.applyDetectionSensitivity()
 
     // Full-session raw audio is only recorded in debug mode for algorithm testing.
     let audioURL: URL?
-    if UserPreferences.shared.preserveRawAudio {
+    if preferences.preserveRawAudio {
       audioURL = audioFileURL(for: session.id)
       session.audioFileURL = AudioFileURLResolver.filename(from: audioURL!)
     } else {
@@ -73,24 +94,24 @@ final class SessionRecordingController {
     // Raw classification log is a debug re-processing aid (~48 MB/night of
     // JSON for a full night, nothing reads it in production yet), so it is
     // gated behind the same flag as the full raw audio.
-    if UserPreferences.shared.preserveRawAudio {
-      let prefs = UserPreferences.shared
+    if preferences.preserveRawAudio {
+      let prefs = preferences
       let metadata = RawLogMetadata(
         sessionStart: session.startDate,
         detectionSensitivity: prefs.detectionSensitivity.rawValue,
         detectSleepTalking: prefs.detectSleepTalking,
         snoreInterrupterMode: prefs.snoreInterrupterMode.rawValue)
       let sessionID = session.id
-      Task {
-        await SessionRawLogWriter.shared.start(sessionID: sessionID, metadata: metadata)
+      Task { [rawLogWriter] in
+        await rawLogWriter.start(sessionID: sessionID, metadata: metadata)
       }
     }
 
     // Drive processAudioLevel from the recording controller so it survives background.
     processingTask = Task { @MainActor in
       while !Task.isCancelled {
-        let saConf = SoundAnalysisDetector.shared.snoreConfidence
-        let saSpeechConf = SoundAnalysisDetector.shared.speechConfidence
+        let saConf = self.soundAnalysis.snoreConfidence
+        let saSpeechConf = self.soundAnalysis.speechConfidence
         self.detection?.processAudioLevel(
           db: self.audioRecorder.currentDB,
           peakDB: self.audioRecorder.currentPeakDB,
@@ -164,7 +185,7 @@ final class SessionRecordingController {
 
     // In debug mode with raw audio preserved, move the full session file to rawAudioFileURL
     // so event clips remain the primary playback source.
-    if UserPreferences.shared.preserveRawAudio,
+    if preferences.preserveRawAudio,
        let events = session.events, !events.isEmpty,
        session.rawAudioFileURL == nil,
        session.audioFileURL != nil
@@ -177,10 +198,10 @@ final class SessionRecordingController {
     }
 
     // Save raw classification log
-    let logFilename = await SessionRawLogWriter.shared.stop()
+    let logFilename = await rawLogWriter.stop()
     session.rawLogFileURL = logFilename
     if let logFilename {
-      PendingSessionStore.shared.addFile(logFilename)
+      pendingSessionStore.addFile(logFilename)
     }
 
     let result = session
@@ -211,8 +232,8 @@ final class SessionRecordingController {
     if let url = AudioFileURLResolver.resolve(completedSession?.rawLogFileURL) {
       try? FileManager.default.removeItem(at: url)
     }
-    PendingSessionStore.shared.cleanupIfNeeded()
-    SessionCheckpointStore.shared.clear()
+    pendingSessionStore.cleanupIfNeeded()
+    checkpointStore.clear()
     completedSession = nil
   }
 
@@ -254,8 +275,8 @@ final class SessionRecordingController {
         }
       }
 
-      PendingSessionStore.shared.cleanupIfNeeded()
-      SessionCheckpointStore.shared.clear()
+      pendingSessionStore.cleanupIfNeeded()
+      checkpointStore.clear()
       currentSession = nil
       detection?.reset()
     }

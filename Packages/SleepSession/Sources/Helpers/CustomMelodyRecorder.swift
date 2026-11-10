@@ -1,5 +1,6 @@
 import AVFoundation
 import Env
+import FactoryKit
 import Foundation
 
 /// Recording engine for the custom-melody sheet: owns the audio recorder,
@@ -21,10 +22,15 @@ final class CustomMelodyRecorder {
   private(set) var permissionGranted = false
 
   private let maxDuration: TimeInterval = 10
+  private let melodyStorage: any CustomMelodyStoring
   private var recorder: AVAudioRecorder?
   private var recordedURL: URL?
   private var playbackPlayer: AVAudioPlayer?
   private var timer: Timer?
+
+  init(melodyStorage: any CustomMelodyStoring = Container.shared.customMelodyStorage()) {
+    self.melodyStorage = melodyStorage
+  }
 
   /// Checks (or requests) microphone permission. Call on appear.
   func checkPermission() {
@@ -137,8 +143,8 @@ final class CustomMelodyRecorder {
   @discardableResult
   func save() -> Bool {
     guard let url = recordedURL else { return false }
-    let name = "My Sound \(CustomMelodyStorage.shared.allCustomMelodies().count + 1)"
-    _ = CustomMelodyStorage.shared.saveRecording(name: name, from: url)
+    let name = "My Sound \(melodyStorage.allCustomMelodies().count + 1)"
+    _ = melodyStorage.saveRecording(name: name, from: url)
     return true
   }
 

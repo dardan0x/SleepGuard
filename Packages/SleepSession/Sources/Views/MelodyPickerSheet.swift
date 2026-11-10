@@ -7,6 +7,7 @@ import SwiftUI
 @MainActor
 struct MelodyPickerSheet: View {
   @Injected(\.theme) private var theme
+  @Injected(\.customMelodyStorage) private var customMelodyStorage
   @Environment(\.dismiss) private var dismiss
 
   @Binding var selectedMelodyID: Int
@@ -39,8 +40,8 @@ struct MelodyPickerSheet: View {
             showRecordSheet = true
           }
 
-          if !CustomMelodyStorage.shared.customMelodies.isEmpty {
-            ForEach(CustomMelodyStorage.shared.customMelodies) { melody in
+          if !customMelodyStorage.customMelodies.isEmpty {
+            ForEach(customMelodyStorage.customMelodies) { melody in
               melodyRow(melody)
             }
           }
@@ -79,7 +80,7 @@ struct MelodyPickerSheet: View {
         previewPlayer.preview(melody)
       },
       onDelete: {
-        CustomMelodyStorage.shared.deleteMelody(id: melody.id)
+        customMelodyStorage.deleteMelody(id: melody.id)
         if selectedMelodyID == melody.id {
           selectedMelodyID = 6
         }

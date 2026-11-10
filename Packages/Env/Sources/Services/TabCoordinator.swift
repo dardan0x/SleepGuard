@@ -1,3 +1,4 @@
+import FactoryKit
 import Foundation
 import Models
 import Observation
@@ -20,12 +21,17 @@ public protocol TabCoordinating: AnyObject, Observable {
 public final class TabCoordinator: TabCoordinating {
   public static let shared = TabCoordinator()
 
-  public var selectedTab: AppTab = AppConfig.shared.visibleTabsInOrder.first ?? .statistics
+  public var selectedTab: AppTab
   public var resetSignal: TabResetSignal?
   /// A widget deep link waiting for the Statistics tab to route it.
   public var pendingDeepLink: WidgetDeepLink?
 
-  public init() {}
+  private let appConfig: any AppConfigProviding
+
+  public init(appConfig: any AppConfigProviding = Container.shared.appConfig()) {
+    self.appConfig = appConfig
+    selectedTab = appConfig.visibleTabsInOrder.first ?? .statistics
+  }
 
   public func selectTab(_ tab: AppTab) {
     if selectedTab == tab {
@@ -37,7 +43,7 @@ public final class TabCoordinator: TabCoordinating {
 
   /// Hands a deep link to the Statistics tab. Ignored when remote config hides that tab.
   public func open(_ link: WidgetDeepLink) {
-    guard AppConfig.shared.visibleTabsInOrder.contains(.statistics) else { return }
+    guard appConfig.visibleTabsInOrder.contains(.statistics) else { return }
     selectedTab = .statistics
     pendingDeepLink = link
   }

@@ -8,6 +8,7 @@ import SwiftUI
 struct SettingsStorageSection: View {
   @Injected(\.theme) private var theme
   @Injected(\.userPreferences) private var userPreferences
+  @Injected(\.storageLimitEnforcer) private var storageLimitEnforcer
   @Environment(\.modelContext) private var modelContext
 
   private let mbOptions = [100, 250, 500, 1000, 2000]
@@ -82,19 +83,19 @@ struct SettingsStorageSection: View {
 
   private func runCleanup() {
     Task {
-      _ = await StorageLimitEnforcer.shared.enforceLimits(modelContext: modelContext)
+      _ = await storageLimitEnforcer.enforceLimits(modelContext: modelContext)
     }
   }
 
   #if DEBUG
   private func runTestCleanup() {
     Task {
-      let injected = StorageLimitEnforcer.shared.injectDummyAudioForTesting(modelContext: modelContext)
+      let injected = storageLimitEnforcer.injectDummyAudioForTesting(modelContext: modelContext)
       if injected == 0 {
         MockDataGenerator.generate(modelContext: modelContext)
-        _ = StorageLimitEnforcer.shared.injectDummyAudioForTesting(modelContext: modelContext)
+        _ = storageLimitEnforcer.injectDummyAudioForTesting(modelContext: modelContext)
       }
-      testReport = await StorageLimitEnforcer.shared.enforceLimits(modelContext: modelContext)
+      testReport = await storageLimitEnforcer.enforceLimits(modelContext: modelContext)
       showTestAlert = true
     }
   }

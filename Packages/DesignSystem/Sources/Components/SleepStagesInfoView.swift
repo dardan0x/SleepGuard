@@ -1,3 +1,4 @@
+import FactoryKit
 import Models
 import SwiftUI
 
@@ -10,7 +11,7 @@ public struct SleepStagesInfoView: View {
 
   public init(session: SleepSession, theme: (any ThemeProviding)? = nil) {
     self.session = session
-    self.theme = theme ?? Theme.shared
+    self.theme = theme ?? Container.shared.theme()
   }
 
   public var body: some View {

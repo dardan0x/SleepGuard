@@ -1,4 +1,5 @@
 import AudioEngine
+import FactoryKit
 import Foundation
 import Observation
 import UserNotifications
@@ -32,7 +33,11 @@ public final class RecordingDelayManager: RecordingDelayManaging {
   private var timer: Timer?
   public let notificationId = "sleepguard-delayed-recording"
 
-  public init() {}
+  private let audioRecorder: any AudioRecording
+
+  public init(audioRecorder: any AudioRecording = Container.shared.audioRecorder()) {
+    self.audioRecorder = audioRecorder
+  }
 
   public func startDelay(minutes: Int) {
     guard minutes > 0 else {
@@ -100,14 +105,14 @@ public final class RecordingDelayManager: RecordingDelayManaging {
 
   private func startWarmup() {
     do {
-      try AudioRecorder.shared.startWarmup()
+      try audioRecorder.startWarmup()
     } catch {
       print("[RecordingDelayManager] Failed to start audio warmup: \(error)")
     }
   }
 
   private func stopWarmup() {
-    AudioRecorder.shared.stopWarmup()
+    audioRecorder.stopWarmup()
   }
 
   // MARK: - Notifications
