@@ -207,6 +207,7 @@ These thresholds prevent monolithic views. Enforce them during implementation an
 
 **File size limits:**
 - No view file should exceed **200 lines**. If it does, split it.
+  Enforced in CI by `scripts/check-view-size.py` (`Sources/Views/`, `Sources/Components/`). Existing offenders sit in its `ALLOWLIST` with a reason and a line ceiling; they may shrink, never grow. Never add a new entry to get a PR through: split the file.
 - A container view (with `switch viewState`) should be **≤100 lines**. State views (`.loading`, `.empty`, `.loaded`, `.error`) live in separate files.
 
 **What to extract into separate files:**

@@ -46,10 +46,10 @@ Last updated: 2026-11-11
 | Blocked | 0 |
 | — | — |
 | Total Tasks | 150 |
-| Tasks Done | 129 |
+| Tasks Done | 130 |
 | Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
-| Tasks Backlog | 21 |
+| Tasks Backlog | 20 |
 | — | — |
 | **Progress** | **85%** |
 
@@ -77,7 +77,7 @@ Last updated: 2026-11-11
 | F19 | Factory DI Migration | P1 | Done | 5/5 | ██████████ 100% | [tracker](trackers/f19-factory-di.md) |
 | F20 | Home Screen & Lock Screen Widgets | P1 | Done | 9/9 | ██████████ 100% | [tracker](trackers/f20-home-screen-widgets.md) |
 | F21 | Test Coverage | P1 | Done | 17/17 | ██████████ 100% | [tracker](trackers/f21-test-coverage.md) |
-| F22 | Architecture Hardening | P1 | In Progress | 9/14 | ██████░░░░ 64% | [tracker](trackers/f22-architecture-hardening.md) |
+| F22 | Architecture Hardening | P1 | In Progress | 10/14 | ███████░░░ 71% | [tracker](trackers/f22-architecture-hardening.md) |
 
 ## Activity Log
 
@@ -85,6 +85,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-11-11 | F22-T13 | Completed | `scripts/check-view-size.py`: 200-line limit on `Sources/Views` + `Sources/Components`; ratcheting allowlist (2 entries with reason + ceiling; stale entries fail); runs in `layering.yml`. Branch `feature/f22/t13-view-size-check`, merged locally |
 | 2026-11-11 | F22-T12 | Completed | `DashboardState.make(from:now:calendar:)`: pure session → dashboard mapping (latest session, day score, last-7, "last night"); `StatisticsDashboardView.loadState()` is one line; `DashboardStateTests` (10). Statistics 18 tests. Branch `feature/f22/t12-dashboard-state`, merged locally |
 | 2026-11-10 | F22-T11 | Completed | `SleepGuardSchemaV1` + empty `SleepGuardMigrationPlan`; app and `TestStore` open through `SleepGuardSchema.container(_:)`; `SleepGuardSchemaTests` (2) incl. pre-V1 on-disk store opening intact; simulator store kept 30 sessions / 614 events; V2 procedure in CLAUDE/AGENTS. Done before T8 (T9 blocked on a recorded night). Branch `feature/f22/t11-versioned-schema`, merged locally |
 | 2026-11-10 | F22-T7 | Completed | No app-service `.shared` in features/DesignSystem (layering rule 4); Env services constructor-injected with container defaults; DesignSystem drops Env (`.sensoryFeedback`); `ConstructorInjectionTests` (5). 218 tests pass. Branch `feature/f22/t7-remove-shared`, merged locally |
@@ -299,7 +300,7 @@ _Most recent first. The AI appends here after every task._
 
 | Task | Feature | Started | Assignee |
 |------|---------|---------|----------|
-| F22-T13 | F22 | — | AI (next) |
+| F22-T8 | F22 | — | AI (next) |
 
 ## Completed (last 10)
 
