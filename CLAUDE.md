@@ -309,7 +309,7 @@ Read these docs when building features. Reference only what you need per prompt.
 
 ## Workflow
 
-Follow `docs/VIBE_CODING_WORKFLOW.md` for the full development process. The core loop:
+Follow `docs/CODING_WORKFLOW.md` for the full development process. The core loop:
 
 ```
 SESSION START
@@ -408,7 +408,7 @@ When ALL tasks in a feature are Done, create `docs/features/f[#]-[name].md` with
 - **Edge cases**: how they're handled
 - **Tasks Completed**: list all task IDs
 
-See `docs/VIBE_CODING_WORKFLOW.md` Phase 3 Step 4 for the full template.
+See `docs/CODING_WORKFLOW.md` Phase 3 Step 4 for the full template.
 
 ### 3. Update Trackers
 
