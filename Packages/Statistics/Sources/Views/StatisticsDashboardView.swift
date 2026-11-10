@@ -32,12 +32,9 @@ public struct StatisticsDashboardView: View {
           onViewCalendar: {
             routerPath.navigate(to: .calendar)
           })
-      case let .loaded(session, dayScore, daySessionCount, recentSessions):
+      case let .loaded(state):
         StatisticsLoadedView(
-          session: session,
-          dayScore: dayScore,
-          daySessionCount: daySessionCount,
-          recentSessions: recentSessions,
+          state: state,
           theme: theme,
           onStartRecording: { @MainActor in
             routerPath.navigate(to: .liveSession)
@@ -61,24 +58,13 @@ public struct StatisticsDashboardView: View {
   }
 
   private func loadState() {
-    if let latest = sessions.first {
-      let calendar = Calendar.current
-      let latestDay = calendar.startOfDay(for: latest.startDate)
-      let daySessions = sessions.filter {
-        calendar.isDate($0.startDate, inSameDayAs: latestDay)
-      }
-      let dayScore = daySessions.isEmpty ? latest.sleepScore : daySessions.map(\.sleepScore).reduce(0, +) / daySessions.count
-      let recent = Array(sessions.prefix(7))
-      viewState = .loaded(session: latest, dayScore: dayScore, daySessionCount: daySessions.count, recentSessions: recent)
-    } else {
-      viewState = .empty
-    }
+    viewState = DashboardState.make(from: sessions, now: Date()).map(ViewState.loaded) ?? .empty
   }
 
-  public enum ViewState {
+  enum ViewState {
     case loading
     case empty
-    case loaded(session: SleepSession, dayScore: Int, daySessionCount: Int, recentSessions: [SleepSession])
+    case loaded(DashboardState)
     case error
   }
 }
