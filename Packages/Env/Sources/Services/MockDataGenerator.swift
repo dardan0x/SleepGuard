@@ -162,7 +162,6 @@ public enum MockDataGenerator {
 
         // Compute values while unmanaged — avoids SwiftData interception
         let computedScore = session.sleepScore
-        let computedSnoring = session.snoringDuration
         if abs(computedScore - targetScore) > 12 {
           print("[MockDataGenerator] Score drift: target=\(targetScore), computed=\(computedScore), day=\(dayOffset)")
         }
@@ -174,9 +173,7 @@ public enum MockDataGenerator {
         modelContext.insert(session)
 
         // Set cached properties AFTER insertion so SwiftData tracks them as changes
-        session.cachedSleepScore = computedScore
-        session.cachedSnoringDuration = computedSnoring
-        session.hasCachedScore = true
+        session.refreshCachedScore(using: .default)
 
         generatedSessions.append((session, dayOffset))
       }

@@ -93,6 +93,14 @@ struct SleepGuardApp: App {
           userPreferences.enhancedSleepTracking = HealthKitSync.shared.isAuthorized
         }
 
+        // Before anything reads cached scores: recompute sessions scored by an
+        // older formula/config, so lists and trends never mix two formulas.
+        do {
+          try SleepSession.refreshStaleCachedScores(in: container.mainContext, config: appConfig.sleepScoreConfig)
+        } catch {
+          print("[SleepGuardApp] Stale score refresh failed: \(error)")
+        }
+
         WidgetSnapshotWriter.update(modelContext: container.mainContext)
       }
       .onOpenURL { url in

@@ -68,9 +68,13 @@ public final class SleepSession {
 
   /// Cached values to avoid faulting the `events` relationship on app reopen.
   /// Set when the session is saved; used by `sleepScore` and `snoringDuration`.
+  /// Written only by `refreshCachedScore(using:)`.
   public var hasCachedScore = false
   public var cachedSleepScore = 0
   public var cachedSnoringDuration: TimeInterval = 0
+  /// `SleepScore.cacheVersion(for:)` of the formula that produced the cached
+  /// values. Empty for sessions cached before F22-T3, so they count as stale.
+  public var cachedScoreVersion = ""
 
   public static var minimumSaveDuration: TimeInterval {
     #if DEBUG
