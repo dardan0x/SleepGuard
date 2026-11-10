@@ -1,0 +1,29 @@
+name: tests
+
+# Pull requests only (task PRs target the feature branch, so each one is tested)
+# plus manual runs. A cold simulator build takes 10+ minutes, too slow for every push.
+on: [pull_request, workflow_dispatch]
+
+jobs:
+  packages:
+    # Packages need Swift 6.2 (swift-tools-version 6.2, .defaultIsolation) → Xcode 26.
+    runs-on: macos-26
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select newest Xcode 26
+        run: |
+          XCODE=$(ls -d /Applications/Xcode_26*.app | sort -V | tail -1)
+          sudo xcode-select -s "$XCODE"
+          xcodebuild -version
+      - name: Run package tests
+        env:
+          # The pinned local simulator UDID doesn't exist on runners.
+          DESTINATION: platform=iOS Simulator,name=iPhone 17 Pro,OS=latest
+        run: sh scripts/run-tests.sh
+      - name: Upload test logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-logs
+          path: .build/test-derived-data/logs

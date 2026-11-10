@@ -28,4 +28,16 @@ let package = Package(
         .linkedFramework("HealthKit"),
         .linkedFramework("WatchConnectivity"),
       ]),
+    .testTarget(
+      name: "EnvTests",
+      dependencies: [
+        "Env",
+        .product(name: "Models", package: "Models"),
+        .product(name: "ModelsTestSupport", package: "Models"),
+        .product(name: "AudioEngine", package: "AudioEngine"),
+      ],
+      path: "Tests",
+      swiftSettings: [
+        .swiftLanguageMode(.v6),
+      ]),
   ])

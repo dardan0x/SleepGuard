@@ -29,7 +29,7 @@ final class RealtimeDetectionTracker {
   }
 
   private let audioRecorder = AudioRecorder.shared
-  private let snoreDetector = SnoreDetector.shared
+  private let snoreDetector: SnoreDetector
   private let speechDetector = SpeechDetector.shared
   private let snoreInterrupterPlayer = SnoreInterrupterPlayer.shared
 
@@ -94,7 +94,10 @@ final class RealtimeDetectionTracker {
 
   private var pendingEventTasks: [Task<Void, Never>] = []
 
-  init() {
+  /// `snoreDetector` is injectable so tests can check the sensitivity presets
+  /// on their own instance; the app uses `.shared`.
+  init(snoreDetector: SnoreDetector = .shared) {
+    self.snoreDetector = snoreDetector
     NotificationCenter.default.addObserver(
       self,
       selector: #selector(handleMelodyDidStop),
@@ -157,7 +160,10 @@ final class RealtimeDetectionTracker {
   /// compensates, but the thresholds were still sitting above real captured
   /// levels for loud snoring at typical bedside distances.
   func applyDetectionSensitivity() {
-    let sensitivity = UserPreferences.shared.detectionSensitivity
+    apply(UserPreferences.shared.detectionSensitivity)
+  }
+
+  func apply(_ sensitivity: UserPreferences.DetectionSensitivity) {
     switch sensitivity {
     case .low:
       snoreDetector.quietThreshold = -45.0
@@ -220,7 +226,10 @@ final class RealtimeDetectionTracker {
     // Use peakDB for intensity — snoring is impulsive and peak carries
     // more perceptual loudness than RMS over a 23 ms buffer.
     let classifyDB = peakDB ?? db
-    let state = snoreDetector.classify(db: classifyDB, spectralScore: spectralScore, snoreConfidence: snoreConfidence)
+    // Spectral fallback stays off: FFTAnalyzer returned zeros until F21-T9, so live
+    // detection has only ever used SoundAnalysis. Pass `spectralScore` here once a
+    // real night validates the fallback. Logs and events still record the real score.
+    let state = snoreDetector.classify(db: classifyDB, spectralScore: 0, snoreConfidence: snoreConfidence)
     #if DEBUG
     if snoreConfidence > 0.1 || spectralScore > 0.1 || speechConfidence > 0.1 {
       print("[SessionManager] classify rms=\(String(format: "%.1f", db)) peak=\(String(format: "%.1f", classifyDB)) spectral=\(String(format: "%.2f", spectralScore)) snoreConf=\(String(format: "%.2f", snoreConfidence)) speechConf=\(String(format: "%.2f", speechConfidence)) → snore=\(state) speech=\(speechDetector.isSpeechDetected)")

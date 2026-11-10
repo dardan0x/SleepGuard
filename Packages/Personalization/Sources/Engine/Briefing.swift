@@ -1,7 +1,7 @@
 import Foundation
 import Models
 
-public enum ScoreTrend: Sendable {
+public enum ScoreTrend: Equatable, Sendable {
   case improving
   case declining
   case steady

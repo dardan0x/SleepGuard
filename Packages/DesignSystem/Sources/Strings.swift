@@ -105,7 +105,6 @@ public enum Strings {
   public static var lightIntensityLabelEventPlayerView: String { String(localized: "light.intensity.label.event.player.view", bundle: .module) }
   public static var lightSnoreEventPlayerView: String { String(localized: "light.snore.event.player.view", bundle: .module) }
   public static var loadingAudioEventPlayerView: String { String(localized: "loading.audio.event.player.view", bundle: .module) }
-  public static var localizations: String { String(localized: "localizations", bundle: .module) }
   public static var loudIntensityLabelEventPlayerView: String { String(localized: "loud.intensity.label.event.player.view", bundle: .module) }
   public static var loudNightsCalendarStatCardLabel: String { String(localized: "loud.nights.calendar.stat.card.label", bundle: .module) }
   public static var loudSnoreEventPlayerView: String { String(localized: "loud.snore.event.player.view", bundle: .module) }
@@ -389,6 +388,7 @@ public enum Strings {
   public static var statsLast7nightsSnoringMin: String { String(localized: "stats.last7Nights.snoringMin", bundle: .module) }
   public static var statsLast7nightsTapAbar: String { String(localized: "stats.last7Nights.tapABar", bundle: .module) }
   public static var statsLast7nightsTotalEvents: String { String(localized: "stats.last7Nights.totalEvents", bundle: .module) }
+  public static var statsLast7nightsTrendVsPrevWeek: String { String(localized: "stats.last7Nights.trendVsPrevWeek", bundle: .module) }
   public static var statsLast7nightsWorst: String { String(localized: "stats.last7Nights.worst", bundle: .module) }
   public static var statsMiniChartSleepScoreLabel: String { String(localized: "stats.miniChart.sleepScoreLabel", bundle: .module) }
   public static var statsMiniChartToday: String { String(localized: "stats.miniChart.today", bundle: .module) }
@@ -408,7 +408,6 @@ public enum Strings {
   public static var statsTrendsWeek: String { String(localized: "stats.trends.week", bundle: .module) }
   public static var stopRecordCustomMelodySheet: String { String(localized: "stop.record.custom.melody.sheet", bundle: .module) }
   public static var stopSnoreInterrupterPlayer: String { String(localized: "stop.snore.interrupter.player", bundle: .module) }
-  public static var stringUnit: String { String(localized: "stringUnit", bundle: .module) }
   public static var tabLearn: String { String(localized: "tab.learn", bundle: .module) }
   public static var tabSessions: String { String(localized: "tab.sessions", bundle: .module) }
   public static var tabSettings: String { String(localized: "tab.settings", bundle: .module) }

@@ -108,6 +108,8 @@ public struct RecordingsListView: View {
       // Delete events first with intermediate save to avoid SwiftData faulting
       // crash during cascade delete on faulted relationship objects.
       for session in group.sessions {
+        // Delete files while `session.events` still lists the event clips.
+        deleteSessionFiles(session)
         if let events = session.events {
           for event in events {
             modelContext.delete(event)
@@ -120,7 +122,6 @@ public struct RecordingsListView: View {
         // Resolve transformable faults before deletion
         _ = session.sleepStageSegments
         _ = session.recordingGaps
-        deleteSessionFiles(session)
         modelContext.delete(session)
       }
       try modelContext.save()

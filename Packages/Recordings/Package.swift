@@ -27,4 +27,17 @@ let package = Package(
         .swiftLanguageMode(.v6),
         .defaultIsolation(MainActor.self),
       ]),
+    .testTarget(
+      name: "RecordingsTests",
+      dependencies: [
+        "Recordings",
+        .product(name: "Models", package: "Models"),
+        .product(name: "ModelsTestSupport", package: "Models"),
+        .product(name: "Env", package: "Env"),
+      ],
+      path: "Tests",
+      swiftSettings: [
+        .swiftLanguageMode(.v6),
+        .defaultIsolation(MainActor.self),
+      ]),
   ])

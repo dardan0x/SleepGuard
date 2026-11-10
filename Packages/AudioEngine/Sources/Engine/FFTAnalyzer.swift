@@ -17,45 +17,41 @@ public struct SpectralFeatures {
 /// spectral patterns: low-frequency dominance and harmonic structure.
 public struct FFTAnalyzer {
   private let fftSetup: vDSP_DFT_Setup?
-  private let log2n: vDSP_Length
   private let bufferSize: Int
 
   public init(bufferSize: Int = 1024) {
     self.bufferSize = bufferSize
-    log2n = vDSP_Length(log2(Float(bufferSize)))
-    fftSetup = vDSP_DFT_zop_CreateSetup(nil, log2n, .FORWARD)
+    // The DFT setup takes the transform length itself (not log2 of it).
+    fftSetup = vDSP_DFT_zop_CreateSetup(nil, vDSP_Length(bufferSize), .FORWARD)
+  }
+
+  /// Magnitude spectrum (first half) of the buffer's first `bufferSize` frames,
+  /// zero-padded when the buffer is shorter, plus the Hz width of one bin.
+  private func magnitudeSpectrum(of buffer: AVAudioPCMBuffer, sampleRate: Double) -> (magnitudes: [Float], freqResolution: Float)? {
+    guard let channelData = buffer.floatChannelData?[0], bufferSize >= 64, let fftSetup else { return nil }
+
+    let frameLength = min(Int(buffer.frameLength), bufferSize)
+    var realInput = [Float](repeating: 0, count: bufferSize)
+    for i in 0..<frameLength {
+      realInput[i] = channelData[i]
+    }
+    var imagInput = [Float](repeating: 0, count: bufferSize)
+    var realOutput = [Float](repeating: 0, count: bufferSize)
+    var imagOutput = [Float](repeating: 0, count: bufferSize)
+    vDSP_DFT_Execute(fftSetup, &realInput, &imagInput, &realOutput, &imagOutput)
+
+    // FFT of a real signal is symmetric; keep the first half.
+    let magnitudes = (0..<(bufferSize / 2)).map { hypot(realOutput[$0], imagOutput[$0]) }
+    return (magnitudes, Float(sampleRate) / Float(bufferSize))
   }
 
   /// Analyzes an audio buffer and returns spectral features.
   public func analyze(buffer: AVAudioPCMBuffer, sampleRate: Double) -> SpectralFeatures {
-    guard let channelData = buffer.floatChannelData?[0],
-          bufferSize >= 64
-    else {
+    guard let spectrum = magnitudeSpectrum(of: buffer, sampleRate: sampleRate) else {
       return SpectralFeatures(lowFreqRatio: 0, spectralCentroid: 0, dominantFrequency: 0, spectralScore: 0)
     }
-
-    let frameLength = min(Int(buffer.frameLength), bufferSize)
-    let halfSize = frameLength / 2
-
-    // Copy samples into mutable arrays for vDSP.
-    var realInput = Array(UnsafeBufferPointer(start: channelData, count: frameLength))
-    var imagInput = [Float](repeating: 0, count: frameLength)
-    var realOutput = [Float](repeating: 0, count: frameLength)
-    var imagOutput = [Float](repeating: 0, count: frameLength)
-
-    // Perform complex FFT.
-    guard let fftSetup else {
-      return SpectralFeatures(lowFreqRatio: 0, spectralCentroid: 0, dominantFrequency: 0, spectralScore: 0)
-    }
-    vDSP_DFT_Execute(fftSetup, &realInput, &imagInput, &realOutput, &imagOutput)
-
-    // Compute magnitude spectrum (only first half; FFT of real signal is symmetric).
-    var magnitudes = [Float](repeating: 0, count: halfSize)
-    for i in 0..<halfSize {
-      magnitudes[i] = hypot(realOutput[i], imagOutput[i])
-    }
-
-    let freqResolution = Float(sampleRate) / Float(frameLength)
+    let (magnitudes, freqResolution) = spectrum
+    let halfSize = magnitudes.count
 
     // Bin indices for frequency bands.
     let lowBin = max(1, Int(100.0 / Double(freqResolution))) // 100 Hz
@@ -108,37 +104,22 @@ public struct FFTAnalyzer {
 
   /// Returns magnitude spectrum grouped into `barCount` frequency bins (0–1000 Hz).
   public func spectrumBars(buffer: AVAudioPCMBuffer, sampleRate: Double, barCount: Int = 32) -> [Float] {
-    guard let channelData = buffer.floatChannelData?[0],
-          bufferSize >= 64,
-          let fftSetup
-    else {
+    guard let spectrum = magnitudeSpectrum(of: buffer, sampleRate: sampleRate) else {
       return [Float](repeating: 0, count: barCount)
     }
-
-    let frameLength = min(Int(buffer.frameLength), bufferSize)
-    let halfSize = frameLength / 2
-
-    var realInput = Array(UnsafeBufferPointer(start: channelData, count: frameLength))
-    var imagInput = [Float](repeating: 0, count: frameLength)
-    var realOutput = [Float](repeating: 0, count: frameLength)
-    var imagOutput = [Float](repeating: 0, count: frameLength)
-
-    vDSP_DFT_Execute(fftSetup, &realInput, &imagInput, &realOutput, &imagOutput)
-
-    var magnitudes = [Float](repeating: 0, count: halfSize)
-    for i in 0..<halfSize {
-      magnitudes[i] = hypot(realOutput[i], imagOutput[i])
-    }
-
-    let freqResolution = Float(sampleRate) / Float(frameLength)
+    let (magnitudes, freqResolution) = spectrum
+    let halfSize = magnitudes.count
     let maxFreq: Float = 1000.0
-    let maxBin = min(halfSize, Int(maxFreq / freqResolution))
-    let binsPerBar = max(1, maxBin / barCount)
+    let maxBin = max(2, min(halfSize, Int(maxFreq / freqResolution)))
+    // Spread bins 1..<maxBin evenly over the bars. With fewer bins than bars
+    // (1024 frames at 44.1 kHz → 22 bins for 32 bars) neighbours share a bin,
+    // and every range stays non-empty and in bounds.
+    let usableBins = maxBin - 1
 
     var bars = [Float](repeating: 0, count: barCount)
     for bar in 0..<barCount {
-      let startBin = bar * binsPerBar + 1
-      let endBin = min(startBin + binsPerBar, maxBin)
+      let startBin = 1 + bar * usableBins / barCount
+      let endBin = max(startBin + 1, 1 + (bar + 1) * usableBins / barCount)
       var sum: Float = 0
       for i in startBin..<endBin {
         sum += magnitudes[i]

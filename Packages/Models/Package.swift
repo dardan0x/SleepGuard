@@ -6,6 +6,8 @@ let package = Package(
   platforms: [.iOS(.v17), .watchOS(.v10)],
   products: [
     .library(name: "Models", targets: ["Models"]),
+    // Test-only helpers (in-memory store, fixtures). Only test targets depend on it.
+    .library(name: "ModelsTestSupport", targets: ["ModelsTestSupport"]),
   ],
   targets: [
     .target(
@@ -14,9 +16,16 @@ let package = Package(
       swiftSettings: [
         .swiftLanguageMode(.v6),
       ]),
+    .target(
+      name: "ModelsTestSupport",
+      dependencies: ["Models"],
+      path: "TestSupport",
+      swiftSettings: [
+        .swiftLanguageMode(.v6),
+      ]),
     .testTarget(
       name: "ModelsTests",
-      dependencies: ["Models"],
+      dependencies: ["Models", "ModelsTestSupport"],
       swiftSettings: [
         .swiftLanguageMode(.v6),
       ]),

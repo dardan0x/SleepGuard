@@ -30,4 +30,16 @@ let package = Package(
       linkerSettings: [
         .linkedFramework("Charts"),
       ]),
+    .testTarget(
+      name: "StatisticsTests",
+      dependencies: [
+        "Statistics",
+        .product(name: "Models", package: "Models"),
+        .product(name: "ModelsTestSupport", package: "Models"),
+      ],
+      path: "Tests",
+      swiftSettings: [
+        .swiftLanguageMode(.v6),
+        .defaultIsolation(MainActor.self),
+      ]),
   ])
