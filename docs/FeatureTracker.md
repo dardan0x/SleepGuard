@@ -46,12 +46,12 @@ Last updated: 2026-11-10
 | Blocked | 0 |
 | — | — |
 | Total Tasks | 150 |
-| Tasks Done | 122 |
+| Tasks Done | 123 |
 | Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
-| Tasks Backlog | 28 |
+| Tasks Backlog | 27 |
 | — | — |
-| **Progress** | **81%** |
+| **Progress** | **82%** |
 
 ## Features
 
@@ -77,7 +77,7 @@ Last updated: 2026-11-10
 | F19 | Factory DI Migration | P1 | Done | 5/5 | ██████████ 100% | [tracker](trackers/f19-factory-di.md) |
 | F20 | Home Screen & Lock Screen Widgets | P1 | Done | 9/9 | ██████████ 100% | [tracker](trackers/f20-home-screen-widgets.md) |
 | F21 | Test Coverage | P1 | Done | 17/17 | ██████████ 100% | [tracker](trackers/f21-test-coverage.md) |
-| F22 | Architecture Hardening | P1 | In Progress | 2/14 | █░░░░░░░░░ 14% | [tracker](trackers/f22-architecture-hardening.md) |
+| F22 | Architecture Hardening | P1 | In Progress | 3/14 | ██░░░░░░░░ 21% | [tracker](trackers/f22-architecture-hardening.md) |
 
 ## Activity Log
 
@@ -85,6 +85,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-11-10 | F22-T3 | Completed | Versioned score cache: `cachedScoreVersion` (formula version + config fingerprint), single owner `refreshCachedScore(using:)` for all 4 writers, launch pass `refreshStaleCachedScores` before the widget snapshot. `SleepScoreCacheTests` (6). Branch `feature/f22/t3-score-cache-version` |
 | 2026-11-10 | F22-T2 | Completed | `SleepInputs` value type + pure `SleepScore.compute`; `SleepSession.sleepScore(using:)` delegates (identical arithmetic). `SleepScoreFormulaTests`: 14 parameterized cases + bounds + custom min, no SwiftData. Branch `feature/f22/t2-sleep-inputs` |
 | 2026-11-10 | F22-T1 | Completed | Raw log format 2: `RawLog { metadata, samples }` with `peakDB` + `speechConfidence`; tracker-side timestamps (fixes actor-arrival `elapsed`); old format still decodes. AudioEngine 37 + Env 23 tests pass. Branch `feature/f22/t1-rawlog-replay-fields` |
 | 2026-11-10 | F22 | Planned | Architecture Hardening planned from the mock staff-engineer interview, each claim checked against the code first. 14 tasks: pure + versioned score, `Routing` package, protocols + fakes for every service, detection state machine → `DetectionEngine` actor + `AsyncStream` with replay tests, `VersionedSchema`, CI view-size check, ADRs. Local trackers only (no Notion). Feature branch `feature/f22-architecture-hardening` |
@@ -292,7 +293,7 @@ _Most recent first. The AI appends here after every task._
 
 | Task | Feature | Started | Assignee |
 |------|---------|---------|----------|
-| F22-T3 | F22 | — | AI (next) |
+| F22-T4 | F22 | — | AI (next) |
 
 ## Completed (last 10)
 

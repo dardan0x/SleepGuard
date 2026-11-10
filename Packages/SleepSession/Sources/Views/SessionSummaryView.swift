@@ -82,9 +82,7 @@ public struct SessionSummaryView: View {
     // Cache AFTER insertion so SwiftData tracks the mutations.
     // Use the current remote config so the cached score reflects the
     // active formula if the session is later shown in a list view.
-    session.cachedSleepScore = session.sleepScore(using: appConfig.sleepScoreConfig)
-    session.cachedSnoringDuration = session.snoringDuration
-    session.hasCachedScore = true
+    session.refreshCachedScore(using: appConfig.sleepScoreConfig)
 
     do {
       try modelContext.save()

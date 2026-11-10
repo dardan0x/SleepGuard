@@ -64,10 +64,7 @@ final class SessionDetailModel {
         // Recalculate cached score and snoring duration to pick up scoring
         // formula changes (e.g. episode merging, gap inclusion, remote config
         // penalty updates) while the session relationship is hot.
-        session.hasCachedScore = false
-        session.cachedSleepScore = session.sleepScore(using: appConfig.sleepScoreConfig)
-        session.cachedSnoringDuration = session.snoringDuration
-        session.hasCachedScore = true
+        session.refreshCachedScore(using: appConfig.sleepScoreConfig)
         try modelContext.save()
 
         let sortedEvents = session.events?.sorted(by: { $0.timestamp < $1.timestamp }) ?? []
