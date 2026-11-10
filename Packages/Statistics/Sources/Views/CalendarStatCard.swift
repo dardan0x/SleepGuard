@@ -7,7 +7,7 @@ struct CalendarStatCard: View {
   let icon: String
   let label: String
   let value: String
-  let theme: Theme
+  let theme: any ThemeProviding
 
   var body: some View {
     VStack(spacing: 4) {

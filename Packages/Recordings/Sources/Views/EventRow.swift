@@ -7,7 +7,7 @@ import SwiftUI
 struct EventRow: View {
   let event: SnoreEvent
   let displayDuration: TimeInterval?
-  let theme: Theme
+  let theme: any ThemeProviding
   let onPlay: () -> Void
   let onShare: () -> Void
 

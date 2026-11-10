@@ -4,7 +4,7 @@ import SwiftUI
 
 @MainActor
 struct RecordingsEmptyView: View {
-  let theme: Theme
+  let theme: any ThemeProviding
 
   var body: some View {
     VStack(spacing: 16) {

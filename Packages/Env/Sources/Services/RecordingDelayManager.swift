@@ -7,9 +7,22 @@ public extension Notification.Name {
   static let recordingDelayDidComplete = Notification.Name("recordingDelayDidComplete")
 }
 
+/// "Start recording in N minutes" countdown. Fake: `FakeRecordingDelayManager`.
+@MainActor
+public protocol RecordingDelayManaging: AnyObject, Observable {
+  var isActive: Bool { get }
+  var targetDate: Date? { get }
+  var currentRemainingSeconds: Int { get }
+  var remainingTimeString: String { get }
+  func startDelay(minutes: Int)
+  func cancel()
+  func finish()
+  func checkIfComplete() -> Bool
+}
+
 @MainActor
 @Observable
-public final class RecordingDelayManager {
+public final class RecordingDelayManager: RecordingDelayManaging {
   public static let shared = RecordingDelayManager()
 
   public var isActive = false
@@ -19,7 +32,7 @@ public final class RecordingDelayManager {
   private var timer: Timer?
   public let notificationId = "sleepguard-delayed-recording"
 
-  private init() {}
+  public init() {}
 
   public func startDelay(minutes: Int) {
     guard minutes > 0 else {

@@ -16,9 +16,9 @@ public struct MiniBarChart: View {
   }
 
   let data: [DataPoint]
-  let theme: Theme
+  let theme: any ThemeProviding
 
-  public init(data: [DataPoint], theme: Theme) {
+  public init(data: [DataPoint], theme: any ThemeProviding) {
     self.data = data
     self.theme = theme
   }

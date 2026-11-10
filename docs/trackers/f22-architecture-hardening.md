@@ -47,7 +47,7 @@ Fixes the architecture concerns raised in the mock staff-engineer interview (`Sl
 | F22-T3 | Versioned score cache with one owner + launch recompute | Model | Done | F22-T2 | Models / App | 2026-11-10 | 2026-11-10 |
 | F22-T4 | `Routing` package (+ ADR 0001) | Infra | Done | — | Routing / all features | 2026-11-10 | 2026-11-10 |
 | F22-T5 | Protocol DI pilot: `HealthKitSync` + `EnvTestSupport` fake | Infra | Done | — | Env / Recordings | 2026-11-10 | 2026-11-10 |
-| F22-T6 | Protocol DI rollout: every remaining service + `Theme` | Infra | Backlog | F22-T5 | Env / AudioEngine / DesignSystem | — | — |
+| F22-T6 | Protocol DI rollout: every remaining service + `Theme` | Infra | Done | F22-T5 | Env / AudioEngine / DesignSystem | 2026-11-10 | 2026-11-10 |
 | F22-T7 | Remove `.shared` from feature packages; `DesignSystem` drops `Env` | Infra | Backlog | F22-T6 | Features / DesignSystem | — | — |
 | F22-T8 | Extract pure `DetectionStateMachine` into `AudioEngine` | Refactor | Backlog | F22-T1 | AudioEngine / Env | — | — |
 | F22-T9 | Detection replay tests (golden outputs from real-night excerpts) | Test | Backlog | F22-T1, F22-T8 | AudioEngine | — | — |
@@ -212,21 +212,39 @@ Fixes the architecture concerns raised in the mock staff-engineer interview (`Sl
 | Field | Value |
 |-------|-------|
 | Arch Ref | `docs/architecture/dependencies.md` |
-| Status | Backlog |
-| Started | — |
-| Completed | — |
+| Status | Done |
+| Started | 2026-11-10 |
+| Completed | 2026-11-10 |
 
 **Acceptance Criteria:**
-- [ ] Every container-registered service (Env, AudioEngine, `Theme`) has a protocol + fake; no `private init()` left on services
-- [ ] `UserPreferences` takes `UserDefaults` (tests use an isolated suite)
-- [ ] Each fake is used by at least one test or preview
-- [ ] Builds with zero errors; tests pass
+- [x] Every container-registered service (Env, AudioEngine, `Theme`) has a protocol + fake; no `private init()` left on services
+- [x] `UserPreferences` takes `UserDefaults` (tests use an isolated suite)
+- [x] Each fake is used by at least one test or preview
+- [x] Builds with zero errors; tests pass
 
 **Prompt Used:**
-_(filled after task completion)_
+"continue with next tasks"
 
 **Notes:**
-_Settings already uses `Binding(get:set:)`, so `@Bindable`'s lack of existential support is not a blocker._
+- **17 new protocols**, plus `HealthKitSyncing` from T5:
+  - `AppConfigProviding` (DEBUG override API inside `#if DEBUG`)
+  - `AudioRecording`, `CustomMelodyStoring`, `HapticFeedbackProviding`, `NotificationPermissionManaging`
+  - `PendingSessionStoring`, `RecordingDelayManaging`, `SessionCheckpointStoring`, `SessionManaging`
+  - `SnoreInterrupterPlaying`, `SoundAnalysisDetecting`, `UserPreferencesStoring`, `WatchConnectivityManaging`, `TabCoordinating`
+  - `SessionRawLogWriting` (an `Actor` protocol)
+  - `StorageLimitEnforcing` (`Sendable`, with `@MainActor` requirements matching the implementation)
+  - `ThemeProviding` (41 token/helper requirements, generated from `Theme`)
+- Every `Container` factory is now `Factory<any P>`, still aliasing `.shared`. Every service init is public.
+- **Ripple:** about 30 `theme: Theme` component params and properties became `any ThemeProviding`, and `SessionDetailModel`/`AppBriefingController` take `any AppConfigProviding` / `any UserPreferencesStoring`. **No `@Injected` site changed**, because the type is inferred from the key path. App, widgets and every package build with 0 warnings.
+- **Test doubles in `EnvTestSupport`:** `FakeSessionManager`, `FakeAudioRecorder`, `FakeSoundAnalysisDetector`, `FakeSnoreInterrupterPlayer`, `FakeRecordingDelayManager`, `FakeTabCoordinator`, `FakeHapticManager`, `FakePendingSessionStore`, `FakeSessionCheckpointStore`, `FakeCustomMelodyStorage`, `FakeNotificationPermissionManager`, `FakeWatchConnectivityManager`, `FakeStorageLimitEnforcer`, `FakeSessionRawLogWriter`, plus `FakeHealthKitSync` from T5.
+- **Deliberate doubles that aren't hand-written fakes:** `UserPreferences.isolated()` / `AppConfig.isolated()` are the real types on a throwaway `UserDefaults` suite (`UserDefaults.isolated()`). Re-implementing 26 `UserDefaults`-backed properties would only create drift. For `Theme`, the double is a separate `Theme()` with tokens changed.
+- **Tests:**
+  - `ServiceOverrideTests` (10, `@Suite(.container)`): the live default resolution, and each fake replacing its service through the container.
+  - `IsolatedStoreTests` (2): preferences don't leak between instances; `AppConfig` persists applied values to its own store.
+  - `ThemeOverrideTests` (2).
+- `SessionDetailModelTests` dropped the T5 workaround (`.serialized` + flipping `UserPreferences.shared`). It now uses isolated stores and runs in parallel.
+- CLAUDE.md / AGENTS.md Dependencies rules now describe the protocol + double conventions.
+- Not in scope (T7): `.shared` calls inside `Env` internals and feature views are still there. The protocols make them replaceable, and T7 routes them through the container.
 
 ---
 

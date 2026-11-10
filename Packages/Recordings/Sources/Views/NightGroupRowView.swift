@@ -9,14 +9,14 @@ public struct NightGroupRowView: View {
   @Environment(RouterPath.self) private var routerPath
 
   let group: NightGroup
-  let theme: Theme
+  let theme: any ThemeProviding
   let onDeleteRequest: (() -> Void)?
 
   @State private var isExpanded = false
 
   public init(
     group: NightGroup,
-    theme: Theme,
+    theme: any ThemeProviding,
     onDeleteRequest: (() -> Void)? = nil)
   {
     self.group = group

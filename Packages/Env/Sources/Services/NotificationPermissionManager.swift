@@ -4,17 +4,26 @@ import UserNotifications
 import UIKit
 #endif
 
+/// Push-notification authorization. Fake: `FakeNotificationPermissionManager`.
+@MainActor
+public protocol NotificationPermissionManaging: AnyObject, Observable {
+  var authorizationStatus: UNAuthorizationStatus { get }
+  func refreshStatus() async
+  @discardableResult
+  func requestAuthorization() async -> Bool
+}
+
 /// Firebase-free wrapper around the system notification authorization state.
 /// Feature packages use this to drive the soft-ask UI; the app-target
 /// `AppDelegate` handles the Firebase Messaging / APNs token plumbing.
 @MainActor
 @Observable
-public final class NotificationPermissionManager {
+public final class NotificationPermissionManager: NotificationPermissionManaging {
   public static let shared = NotificationPermissionManager()
 
   public private(set) var authorizationStatus: UNAuthorizationStatus = .notDetermined
 
-  private init() {}
+  public init() {}
 
   public func refreshStatus() async {
     let settings = await UNUserNotificationCenter.current().notificationSettings()

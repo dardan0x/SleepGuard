@@ -37,11 +37,11 @@ final class SessionDetailModel {
   var selectedFilter: EventCategoryFilter = .all
 
   private let sessionID: UUID
-  private let appConfig: AppConfig
-  private let userPreferences: UserPreferences
+  private let appConfig: any AppConfigProviding
+  private let userPreferences: any UserPreferencesStoring
   private let healthKitSync: any HealthKitSyncing
 
-  init(sessionID: UUID, appConfig: AppConfig, userPreferences: UserPreferences) {
+  init(sessionID: UUID, appConfig: any AppConfigProviding, userPreferences: any UserPreferencesStoring) {
     self.sessionID = sessionID
     self.appConfig = appConfig
     self.userPreferences = userPreferences

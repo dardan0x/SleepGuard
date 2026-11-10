@@ -6,9 +6,9 @@ import SwiftUI
 @MainActor
 public struct SleepStagesInfoView: View {
   public let session: SleepSession
-  public let theme: Theme
+  public let theme: any ThemeProviding
 
-  public init(session: SleepSession, theme: Theme? = nil) {
+  public init(session: SleepSession, theme: (any ThemeProviding)? = nil) {
     self.session = session
     self.theme = theme ?? Theme.shared
   }

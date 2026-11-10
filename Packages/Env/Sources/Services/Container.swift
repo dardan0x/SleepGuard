@@ -3,35 +3,36 @@ import FactoryKit
 
 /// Factory DI registrations for SleepGuard's shared services.
 ///
-/// Singleton factories resolve the existing `.shared` instances, so behavior is
-/// identical to direct singleton access while gaining container-based resolution,
-/// preview mocking (`register { ... }`), and per-test overrides.
+/// Every factory is typed as its service protocol (`any HealthKitSyncing`, …) and
+/// resolves the live `.shared` instance. Tests and previews override with the
+/// fakes in `EnvTestSupport` (`register { FakeX() }`), scoped per test by
+/// `FactoryTesting`'s `.container` trait.
 ///
 /// `RouterPath` is not registered: it is per-tab SwiftUI environment state and
 /// lives in the `Routing` package (docs/adr/0001-routing-package.md).
 public extension Container {
   // MARK: - Singletons (@MainActor services)
 
-  @MainActor var appConfig: Factory<AppConfig> { self { AppConfig.shared }.singleton }
-  @MainActor var audioRecorder: Factory<AudioRecorder> { self { AudioRecorder.shared }.singleton }
-  @MainActor var customMelodyStorage: Factory<CustomMelodyStorage> { self { CustomMelodyStorage.shared }.singleton }
+  @MainActor var appConfig: Factory<any AppConfigProviding> { self { AppConfig.shared }.singleton }
+  @MainActor var audioRecorder: Factory<any AudioRecording> { self { AudioRecorder.shared }.singleton }
+  @MainActor var customMelodyStorage: Factory<any CustomMelodyStoring> { self { CustomMelodyStorage.shared }.singleton }
   @MainActor var healthKitSync: Factory<any HealthKitSyncing> { self { HealthKitSync.shared }.singleton }
-  @MainActor var hapticManager: Factory<HapticManager> { self { HapticManager.shared }.singleton }
-  @MainActor var notificationPermissionManager: Factory<NotificationPermissionManager> { self { NotificationPermissionManager.shared }.singleton }
-  @MainActor var pendingSessionStore: Factory<PendingSessionStore> { self { PendingSessionStore.shared }.singleton }
-  @MainActor var recordingDelayManager: Factory<RecordingDelayManager> { self { RecordingDelayManager.shared }.singleton }
-  @MainActor var sessionCheckpointStore: Factory<SessionCheckpointStore> { self { SessionCheckpointStore.shared }.singleton }
-  @MainActor var sessionManager: Factory<SessionManager> { self { SessionManager.shared }.singleton }
-  @MainActor var snoreInterrupterPlayer: Factory<SnoreInterrupterPlayer> { self { SnoreInterrupterPlayer.shared }.singleton }
-  @MainActor var soundAnalysisDetector: Factory<SoundAnalysisDetector> { self { SoundAnalysisDetector.shared }.singleton }
-  @MainActor var userPreferences: Factory<UserPreferences> { self { UserPreferences.shared }.singleton }
-  @MainActor var watchConnectivityManager: Factory<WatchConnectivityManager> { self { WatchConnectivityManager.shared }.singleton }
+  @MainActor var hapticManager: Factory<any HapticFeedbackProviding> { self { HapticManager.shared }.singleton }
+  @MainActor var notificationPermissionManager: Factory<any NotificationPermissionManaging> { self { NotificationPermissionManager.shared }.singleton }
+  @MainActor var pendingSessionStore: Factory<any PendingSessionStoring> { self { PendingSessionStore.shared }.singleton }
+  @MainActor var recordingDelayManager: Factory<any RecordingDelayManaging> { self { RecordingDelayManager.shared }.singleton }
+  @MainActor var sessionCheckpointStore: Factory<any SessionCheckpointStoring> { self { SessionCheckpointStore.shared }.singleton }
+  @MainActor var sessionManager: Factory<any SessionManaging> { self { SessionManager.shared }.singleton }
+  @MainActor var snoreInterrupterPlayer: Factory<any SnoreInterrupterPlaying> { self { SnoreInterrupterPlayer.shared }.singleton }
+  @MainActor var soundAnalysisDetector: Factory<any SoundAnalysisDetecting> { self { SoundAnalysisDetector.shared }.singleton }
+  @MainActor var userPreferences: Factory<any UserPreferencesStoring> { self { UserPreferences.shared }.singleton }
+  @MainActor var watchConnectivityManager: Factory<any WatchConnectivityManaging> { self { WatchConnectivityManager.shared }.singleton }
 
   // MARK: - Singletons (non-isolated services)
 
-  var sessionRawLogWriter: Factory<SessionRawLogWriter> { self { SessionRawLogWriter.shared }.singleton }
-  var storageLimitEnforcer: Factory<StorageLimitEnforcer> { self { StorageLimitEnforcer.shared }.singleton }
-  @MainActor var tabCoordinator: Factory<TabCoordinator> { self { TabCoordinator.shared }.singleton }
+  var sessionRawLogWriter: Factory<any SessionRawLogWriting> { self { SessionRawLogWriter.shared }.singleton }
+  var storageLimitEnforcer: Factory<any StorageLimitEnforcing> { self { StorageLimitEnforcer.shared }.singleton }
+  @MainActor var tabCoordinator: Factory<any TabCoordinating> { self { TabCoordinator.shared }.singleton }
 }
 
 extension Container {

@@ -6,11 +6,11 @@ import SwiftUI
 @MainActor
 public struct SleepStageBreakdownView: View {
   public let session: SleepSession
-  public let theme: Theme
+  public let theme: any ThemeProviding
   @State private var isExpanded = true
   @State private var isInfoPresented = false
 
-  public init(session: SleepSession, theme: Theme) {
+  public init(session: SleepSession, theme: any ThemeProviding) {
     self.session = session
     self.theme = theme
   }

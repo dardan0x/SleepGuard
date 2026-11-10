@@ -1,14 +1,22 @@
 import UIKit
 
+/// Haptic feedback. Fake: `FakeHapticManager` (records calls).
+@MainActor
+public protocol HapticFeedbackProviding: AnyObject {
+  func prepare()
+  func nudge()
+  func tap()
+}
+
 /// Provides haptic feedback for user-facing events.
 @MainActor
-public final class HapticManager {
+public final class HapticManager: HapticFeedbackProviding {
   public static let shared = HapticManager()
 
   private let impactGenerator = UIImpactFeedbackGenerator(style: .heavy)
   private let lightImpactGenerator = UIImpactFeedbackGenerator(style: .light)
 
-  private init() {}
+  public init() {}
 
   public func prepare() {
     impactGenerator.prepare()

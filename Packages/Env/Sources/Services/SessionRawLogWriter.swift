@@ -1,10 +1,25 @@
 import AudioEngine
 import Foundation
 
+/// Writes the 20 Hz classification log. Fake: `FakeSessionRawLogWriter`.
+public protocol SessionRawLogWriting: Actor {
+  func start(sessionID: UUID, metadata: RawLogMetadata)
+  func append(
+    at timestamp: Date,
+    db: Float,
+    peakDB: Float?,
+    spectralScore: Float,
+    snoreConfidence: Float,
+    speechConfidence: Float,
+    state: DetectionState)
+  func stop() -> String?
+  func discard()
+}
+
 /// Buffers snore classification samples during a session and writes them to disk
 /// as a JSON file on stop. The log becomes the ground truth for future re-processing
 /// when thresholds or debounce values change.
-public actor SessionRawLogWriter {
+public actor SessionRawLogWriter: SessionRawLogWriting {
   public static let shared = SessionRawLogWriter()
 
   private let directory: URL
@@ -12,7 +27,7 @@ public actor SessionRawLogWriter {
   private var metadata: RawLogMetadata?
   private var logFileURL: URL?
 
-  init(directory: URL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]) {
+  public init(directory: URL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]) {
     self.directory = directory
   }
 

@@ -5,14 +5,14 @@ public struct StatCard: View {
   let icon: String
   let title: String
   let value: String
-  let theme: Theme
+  let theme: any ThemeProviding
   let iconColor: Color
 
   public init(
     icon: String,
     title: String,
     value: String,
-    theme: Theme,
+    theme: any ThemeProviding,
     iconColor: Color? = nil)
   {
     self.icon = icon

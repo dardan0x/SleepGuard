@@ -6,7 +6,7 @@ import SwiftUI
 /// bars with target markers.
 struct ScoreImpactSection: View {
   let session: SleepSession
-  let theme: Theme
+  let theme: any ThemeProviding
 
   var body: some View {
     VStack(alignment: .leading, spacing: 16) {

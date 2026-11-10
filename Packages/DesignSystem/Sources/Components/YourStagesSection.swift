@@ -5,7 +5,7 @@ import SwiftUI
 /// with duration, percentage, status badge, recommendation, and description.
 struct YourStagesSection: View {
   let session: SleepSession
-  let theme: Theme
+  let theme: any ThemeProviding
 
   var body: some View {
     VStack(alignment: .leading, spacing: 16) {

@@ -169,6 +169,8 @@ These are non-negotiable. They come from production patterns in apps like IceCub
 
 - Views resolve shared services with `@Injected(\.service)` from the Factory container. Never init-inject.
 - Shared services are `@MainActor @Observable` singletons with `.shared`, registered in the container (`Packages/Env/Sources/Services/Container.swift`; DesignSystem registers `Theme` in its own). Feature packages never access `.shared` directly in views.
+- **Every service sits behind a protocol** named for its role (`HealthKitSyncing`, `AudioRecording`, `UserPreferencesStoring`, …), declared at the top of the concrete type's file. Factories are typed `Factory<any P>` and resolve `.shared`. Inits are public, never `private`. Pass services around as `any P`, never as the concrete type.
+- **Every protocol has a test double** in `EnvTestSupport` (`FakeX`). The exceptions are the `UserDefaults`-backed stores (`UserPreferences.isolated()`, `AppConfig.isolated()`, the real type on a throwaway suite) and `Theme` (a separate `Theme()`). Tests override with `Container.shared.x.register { fake }` inside `@Suite(.container)` / `@Test(.container)` from `FactoryTesting`, so registrations are scoped per test.
 - `@Observable` classes must NOT use `@Injected` — both macros synthesize underscore backing storage and collide (compile error). Resolve via `Container.shared.service()` in init.
 - Nonisolated code (Apple delegate methods, detached tasks) resolves via Factory's global `dependency(\.service)` — property wrappers are MainActor-bound.
 - The app target is the composition root: `SleepGuardApp`/`MainTabView` hold `.shared` references directly. FactoryKit is not an app-target dependency.
