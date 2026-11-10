@@ -7,6 +7,8 @@ Rules (see AGENTS.md "UI Dependencies in Non-View Code"):
      (engines whose output IS user-facing text).
   2. Core packages (Models, AudioEngine) must not import SwiftUI/UIKit/
      DesignSystem at all.
+  3. Env (services) must not import SwiftUI: navigation lives in the
+     `Routing` package (docs/adr/0001-routing-package.md).
 
 Exits 1 with a file:line listing when any violation is found.
 """
@@ -32,6 +34,8 @@ CORE_PREFIXES = (
     "Packages/AudioEngine/",
 )
 
+ENV_PREFIX = "Packages/Env/Sources/"
+
 
 def main() -> int:
     violations = []
@@ -39,6 +43,7 @@ def main() -> int:
         rel = swift.relative_to(ROOT).as_posix()
         in_view_code = "/Views/" in rel or "/Components/" in rel
         in_core = rel.startswith(CORE_PREFIXES)
+        in_env = rel.startswith(ENV_PREFIX)
         for number, line in enumerate(swift.read_text().splitlines(), 1):
             stripped = line.strip()
             if stripped == "import DesignSystem" and not in_view_code and rel not in DESIGNSYSTEM_ALLOWLIST:
@@ -47,6 +52,8 @@ def main() -> int:
                 violations.append(f"{rel}:{number}: '{stripped.split()[1]}' import in core package")
             if in_core and stripped == "import UIKit" and rel not in CORE_UIKIT_ALLOWLIST:
                 violations.append(f"{rel}:{number}: 'UIKit' import in core package")
+            if in_env and stripped == "import SwiftUI":
+                violations.append(f"{rel}:{number}: 'SwiftUI' import in Env (navigation belongs in Routing)")
 
     if violations:
         print("Layering violations (see AGENTS.md 'UI Dependencies in Non-View Code'):")

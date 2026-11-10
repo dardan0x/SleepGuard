@@ -45,7 +45,7 @@ Fixes the architecture concerns raised in the mock staff-engineer interview (`Sl
 | F22-T1 | Raw log: add `peakDB`, `speechConfidence`, sample timestamp | Model | Done | — | AudioEngine / Env | 2026-11-10 | 2026-11-10 |
 | F22-T2 | `SleepInputs` value type + pure score function + parameterized tests | Model | Done | — | Models | 2026-11-10 | 2026-11-10 |
 | F22-T3 | Versioned score cache with one owner + launch recompute | Model | Done | F22-T2 | Models / App | 2026-11-10 | 2026-11-10 |
-| F22-T4 | `Routing` package (+ ADR 0001) | Infra | Backlog | — | Routing / all features | — | — |
+| F22-T4 | `Routing` package (+ ADR 0001) | Infra | Done | — | Routing / all features | 2026-11-10 | 2026-11-10 |
 | F22-T5 | Protocol DI pilot: `HealthKitSync` + `EnvTestSupport` fake | Infra | Backlog | — | Env / Recordings | — | — |
 | F22-T6 | Protocol DI rollout: every remaining service + `Theme` | Infra | Backlog | F22-T5 | Env / AudioEngine / DesignSystem | — | — |
 | F22-T7 | Remove `.shared` from feature packages; `DesignSystem` drops `Env` | Infra | Backlog | F22-T6 | Features / DesignSystem | — | — |
@@ -148,22 +148,27 @@ Fixes the architecture concerns raised in the mock staff-engineer interview (`Sl
 | Field | Value |
 |-------|-------|
 | Arch Ref | `docs/architecture/navigation.md`, `docs/architecture/modules.md` |
-| Status | Backlog |
-| Started | — |
-| Completed | — |
+| Status | Done |
+| Started | 2026-11-10 |
+| Completed | 2026-11-10 |
 
 **Acceptance Criteria:**
-- [ ] `Packages/Routing` holds `RouterDestination`, `SheetDestination`, `RouterPath`; depends only on Foundation + SwiftUI
-- [ ] `Env` no longer defines routes; features import `Routing` for navigation
-- [ ] `docs/adr/0001-routing-package.md`: context, decision, consequences. It states honestly that features still rebuild when a route is added; `Env` and `DesignSystem` don't
-- [ ] `check-layering.py` and `modules.md` updated
-- [ ] Builds with zero errors; tests pass
+- [x] `Packages/Routing` holds `RouterDestination`, `SheetDestination`, `RouterPath`; depends only on Foundation + SwiftUI
+- [x] `Env` no longer defines routes; features import `Routing` for navigation
+- [x] `docs/adr/0001-routing-package.md`: context, decision, consequences. It states honestly that features still rebuild when a route is added; `Env` and `DesignSystem` don't
+- [x] `check-layering.py` and `modules.md` updated
+- [x] Builds with zero errors; tests pass
 
 **Prompt Used:**
-_(filled after task completion)_
+"from now and onwards, can you commit with suggested commit messages. Work on each task by creating branches for each and merge them locally into feature/f22-architecture-hardening … continue with next tasks"
 
 **Notes:**
-—
+- `Routing` is a leaf package (no package dependencies, SwiftUI only, Swift 6) with a `RoutingTests` target: navigate/back/root, back on an empty path, unique sheet ids. 3 tests.
+- `Env/Router.swift` became `TabCoordinator.swift` (`TabCoordinator`, `TabResetSignal`), importing `Observation` instead of SwiftUI. **`Env` no longer imports SwiftUI anywhere.** `check-layering.py` now fails on `import SwiftUI` in `Env/Sources`, and the old SwiftUI exception for `Router.swift` was removed from CLAUDE.md and AGENTS.md.
+- **Deleted the unused `Container.routerPath` factory.** It had zero callers (`RouterPath` is environment-only since F19), and keeping it would have forced an `Env → Routing` edge.
+- Wiring: `Routing` added to the Learn, Recordings, Settings, SleepSession and Statistics manifests, and to the app target in `project.pbxproj` (local package ref + product dependency + Frameworks phase). `import Routing` added to 10 package files and 5 app files.
+- The doc updates in `docs/architecture/*` and `docs/ProjectArchitecture.md` are local only, because both paths are gitignored.
+- Tests: Routing 3, Env 23, Recordings 14, Statistics 8, all passing. App build: 0 warnings, 0 errors.
 
 ---
 

@@ -7,8 +7,8 @@ import FactoryKit
 /// identical to direct singleton access while gaining container-based resolution,
 /// preview mocking (`register { ... }`), and per-test overrides.
 ///
-/// `routerPath` intentionally keeps Factory's default `.unique` scope — each
-/// injection site gets its own instance, matching per-tab / per-sheet usage.
+/// `RouterPath` is not registered: it is per-tab SwiftUI environment state and
+/// lives in the `Routing` package (docs/adr/0001-routing-package.md).
 public extension Container {
   // MARK: - Singletons (@MainActor services)
 
@@ -32,10 +32,6 @@ public extension Container {
   var sessionRawLogWriter: Factory<SessionRawLogWriter> { self { SessionRawLogWriter.shared }.singleton }
   var storageLimitEnforcer: Factory<StorageLimitEnforcer> { self { StorageLimitEnforcer.shared }.singleton }
   @MainActor var tabCoordinator: Factory<TabCoordinator> { self { TabCoordinator.shared }.singleton }
-
-  // MARK: - Per-instance
-
-  @MainActor var routerPath: Factory<RouterPath> { self { RouterPath() } }
 }
 
 extension Container {

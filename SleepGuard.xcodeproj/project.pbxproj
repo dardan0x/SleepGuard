@@ -15,6 +15,7 @@
 		7550A233A59B33AC7BC63FA5 /* Settings in Frameworks */ = {isa = PBXBuildFile; productRef = 167C10ECFE58FBF4929EF997 /* Settings */; };
 		78DDF28BFD0525A9C32B1FE1 /* Recordings in Frameworks */ = {isa = PBXBuildFile; productRef = 7AA654EA1F14D9C6F15AB82A /* Recordings */; };
 		9C2D15AA3B584C0D8BA311FD /* Learn in Frameworks */ = {isa = PBXBuildFile; productRef = 2DFC87C0B35B483EB635F03D /* Learn */; };
+		E8F1BC7519D875ADAD99C2B2 /* Routing in Frameworks */ = {isa = PBXBuildFile; productRef = 6C0711377AA761A844BDFFB6 /* Routing */; };
 		A28EDE8E5E58BE472E55038A /* AudioEngine in Frameworks */ = {isa = PBXBuildFile; productRef = 3E369988AA3966E99F3F6D29 /* AudioEngine */; };
 		A81CE8384C963A2C24507F4F /* Recordings in Frameworks */ = {isa = PBXBuildFile; productRef = 1C4F985595ED007BA103E405 /* Recordings */; };
 		B7E5BB619CAC47AD866118B3 /* Personalization in Frameworks */ = {isa = PBXBuildFile; productRef = DE0D39C8817A44AB96DFE1F5 /* Personalization */; };
@@ -160,6 +161,7 @@
 				7550A233A59B33AC7BC63FA5 /* Settings in Frameworks */,
 				B7E5BB619CAC47AD866118B3 /* Personalization in Frameworks */,
 				9C2D15AA3B584C0D8BA311FD /* Learn in Frameworks */,
+				E8F1BC7519D875ADAD99C2B2 /* Routing in Frameworks */,
 				CE1563FD2FDA136500A53611 /* FirebaseMessaging in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -361,6 +363,7 @@
 				167C10ECFE58FBF4929EF997 /* Settings */,
 				DE0D39C8817A44AB96DFE1F5 /* Personalization */,
 				2DFC87C0B35B483EB635F03D /* Learn */,
+				6C0711377AA761A844BDFFB6 /* Routing */,
 				CE1563F22FDA136500A53611 /* FirebaseAnalytics */,
 				CE1563F62FDA136500A53611 /* FirebaseCrashlytics */,
 				CE1563FC2FDA136500A53611 /* FirebaseMessaging */,
@@ -409,6 +412,7 @@
 				4A855F6D6797671D082B748B /* XCLocalSwiftPackageReference "Packages/Settings" */,
 				9032C9334E924D3398A48885 /* XCLocalSwiftPackageReference "Packages/Personalization" */,
 				A124231B05434FFFB1548919 /* XCLocalSwiftPackageReference "Packages/Learn" */,
+				4338D563BF4BBBAF875A97C3 /* XCLocalSwiftPackageReference "Packages/Routing" */,
 				CE1563F12FDA136500A53611 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
@@ -952,6 +956,10 @@
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/Learn;
 		};
+		4338D563BF4BBBAF875A97C3 /* XCLocalSwiftPackageReference "Packages/Routing" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/Routing;
+		};
 		AE5AF359D280CFA7C94A7CF4 /* XCLocalSwiftPackageReference "Packages/Onboarding" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/Onboarding;
@@ -1008,6 +1016,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = A124231B05434FFFB1548919 /* XCLocalSwiftPackageReference "Packages/Learn" */;
 			productName = Learn;
+		};
+		6C0711377AA761A844BDFFB6 /* Routing */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4338D563BF4BBBAF875A97C3 /* XCLocalSwiftPackageReference "Packages/Routing" */;
+			productName = Routing;
 		};
 		38CD50332392049638D060DF /* AudioEngine */ = {
 			isa = XCSwiftPackageProductDependency;

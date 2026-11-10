@@ -2,6 +2,7 @@ import DesignSystem
 import Env
 import FactoryKit
 import Models
+import Routing
 import SwiftUI
 
 struct StatisticsMiniChartSection: View {
