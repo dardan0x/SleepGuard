@@ -74,8 +74,15 @@ final class SessionRecordingController {
     // JSON for a full night, nothing reads it in production yet), so it is
     // gated behind the same flag as the full raw audio.
     if UserPreferences.shared.preserveRawAudio {
+      let prefs = UserPreferences.shared
+      let metadata = RawLogMetadata(
+        sessionStart: session.startDate,
+        detectionSensitivity: prefs.detectionSensitivity.rawValue,
+        detectSleepTalking: prefs.detectSleepTalking,
+        snoreInterrupterMode: prefs.snoreInterrupterMode.rawValue)
+      let sessionID = session.id
       Task {
-        await SessionRawLogWriter.shared.start(sessionID: session.id)
+        await SessionRawLogWriter.shared.start(sessionID: sessionID, metadata: metadata)
       }
     }
 

@@ -247,9 +247,12 @@ final class RealtimeDetectionTracker {
     if UserPreferences.shared.preserveRawAudio {
       Task {
         await SessionRawLogWriter.shared.append(
+          at: now,
           db: db,
+          peakDB: peakDB,
           spectralScore: spectralScore,
           snoreConfidence: snoreConfidence,
+          speechConfidence: speechConfidence,
           state: state)
       }
     }
