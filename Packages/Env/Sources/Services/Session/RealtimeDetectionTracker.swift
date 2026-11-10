@@ -4,12 +4,13 @@ import Foundation
 import Models
 import UIKit
 
-/// Real-time snore/speech detection engine for an in-progress session.
-/// Consumed by `SessionRecordingController`'s processing loop on a 50 ms
-/// tick: classifies each audio sample, maintains the active snore/speech
-/// event state machines (debounce gaps, bursts, melody interplay), appends
-/// finalized events to the session, and tracks the per-event clip
-/// compression tasks.
+/// Adapter between the 50 ms processing loop and `DetectionStateMachine`.
+///
+/// Each tick it classifies the sample (`SnoreDetector`, `SpeechDetector`),
+/// hands it to the pure state machine, and performs the outputs: event clips,
+/// SwiftData events and gaps, the Snore Interrupter, clip compression and
+/// recovery checkpoints. The event rules themselves live in the machine
+/// (`AudioEngine/Sources/Engine/DetectionStateMachine.swift`).
 ///
 /// Session ownership stays with the controller; the tracker reaches it (and
 /// the recording flag) through `recording`.
@@ -37,56 +38,16 @@ final class RealtimeDetectionTracker {
   private let pendingSessionStore: any PendingSessionStoring
   private let checkpointStore: any SessionCheckpointStoring
   private let rawLogWriter: any SessionRawLogWriting
+  /// Sample timestamps. Tests pass a scripted clock to drive time-based rules.
+  private let clock: @MainActor () -> Date
 
   /// Set by the controller while a session is recording.
   private var isActive = false
 
-  // MARK: - Event tracking state
+  // MARK: - Detection state
 
-  private var activeEventStart: Date?
-  private var activeEventID: UUID?
-  private var activeEventIntensity: SnoreIntensity?
-  private var activeEventDBSum: Double = 0
-  private var activeEventDBCount = 0
-  private var activeEventPeakDB: Double = 0
-  private var activeEventConfidenceSum: Double = 0
-  private var activeEventConfidenceCount = 0
-  private var activeEventSpectralSum: Double = 0
-  private var activeEventSpectralCount = 0
-  private var lastSnoringSampleTime: Date?
-  private let eventGapThreshold: TimeInterval = 10.0
-  /// Require 3 consecutive snoring samples (≈150 ms at 20 Hz) before starting an event.
-  /// Filters out brief transient sounds (bed creaks, taps, notifications).
-  private var consecutiveSnoreSamples = 0
-  private let requiredConsecutiveSamples = 3
-
-  /// Require 3 consecutive non-snoring samples before stopping the melody.
-  /// Keeps melody playing through brief breathing gaps.
-  private var consecutiveNonSnoreSamples = 0
-  private let requiredNonSnoreSamplesToStop = 3
-
-  /// Minimum time the Snore Interrupter must play before it can be stopped by non-snore detection.
-  private let melodyMinPlayDuration: TimeInterval = 4.0
-  /// After the melody stops, wait this long for snoring to resume before
-  /// deciding the gap should not count as snoring time.
-  private let postMelodyBreathingDelay: TimeInterval = 3.0
-  private var melodyStartTime: Date?
-  private var melodyResumeTime: Date?
-  private var postMelodySnoringDetected = false
-
-  // Burst tracking: continuous snoring segments within the active event
-  private var activeBurstStart: Date?
-  private var completedBursts: [(start: Date, end: Date)] = []
-
-  // MARK: - Speech event tracking state
-
-  private var activeSpeechEventStart: Date?
-  private var activeSpeechEventDBSum: Double = 0
-  private var activeSpeechEventDBCount = 0
-  private var activeSpeechEventPeakDB: Double = 0
-  private var lastSpeechSampleTime: Date?
-  private var consecutiveSpeechSamples = 0
-  private let requiredConsecutiveSpeechSamples = 3
+  /// Every snore / speech / melody-gap rule. Rebuilt by `reset()`.
+  private var machine: DetectionStateMachine
 
   // MARK: - Session aggregate state
 
@@ -108,8 +69,11 @@ final class RealtimeDetectionTracker {
     preferences: any UserPreferencesStoring = Container.shared.userPreferences(),
     pendingSessionStore: any PendingSessionStoring = Container.shared.pendingSessionStore(),
     checkpointStore: any SessionCheckpointStoring = Container.shared.sessionCheckpointStore(),
-    rawLogWriter: any SessionRawLogWriting = Container.shared.sessionRawLogWriter())
+    rawLogWriter: any SessionRawLogWriting = Container.shared.sessionRawLogWriter(),
+    clock: @escaping @MainActor () -> Date = Date.init)
   {
+    self.clock = clock
+    machine = DetectionStateMachine(settings: Self.settings(preferences: preferences, snoreDetector: snoreDetector))
     self.snoreDetector = snoreDetector
     self.audioRecorder = audioRecorder
     self.snoreInterrupterPlayer = snoreInterrupterPlayer
@@ -145,12 +109,9 @@ final class RealtimeDetectionTracker {
   /// audio engine: finalization captures the raw .caf URL; if stopRecording()
   /// runs first, currentEventFile is nilled and the event's audio is lost.
   func finalizeActiveEventsIfNeeded() {
-    if activeEventStart != nil {
-      finalizeActiveEvent()
-    }
-    if activeSpeechEventStart != nil {
-      finalizeActiveSpeechEvent()
-    }
+    syncSettings()
+    let now = clock()
+    perform(machine.finalizeActiveEvents(at: now), at: now)
   }
 
   /// Waits for any in-flight per-event compression tasks to finish.
@@ -222,7 +183,7 @@ final class RealtimeDetectionTracker {
   func processAudioLevel(db: Float, peakDB: Float? = nil, spectralScore: Float = 0, snoreConfidence: Float = 0, speechConfidence: Float = 0) {
     guard isActive, let session = recording?.currentSession else { return }
 
-    let now = Date()
+    let now = clock()
     let rawDelta = lastUpdateTime.map { now.timeIntervalSince($0) } ?? 0
     let timeDelta = min(rawDelta, 0.5) // Cap to avoid spikes after background/resume
     lastUpdateTime = now
@@ -281,210 +242,15 @@ final class RealtimeDetectionTracker {
       sessionSnoringDuration += timeDelta
     }
 
-    // Handle event tracking with debounce gap + per-burst tracking
-    if state != .none {
-      // Snoring takes priority — finalize any active speech event immediately
-      if activeSpeechEventStart != nil {
-        finalizeActiveSpeechEvent(endTime: now)
-      }
-
-      consecutiveSnoreSamples += 1
-      consecutiveNonSnoreSamples = 0
-      // During post-melody breathing delay, don't extend the event span
-      // until sustained snoring is confirmed. Transient sounds shouldn't
-      // make the gap count as snoring time.
-      if melodyResumeTime == nil || postMelodySnoringDetected {
-        lastSnoringSampleTime = now
-      }
-      guard consecutiveSnoreSamples >= requiredConsecutiveSamples else {
-        // Not yet sustained enough to start/extend an event
-        return
-      }
-      if activeEventStart == nil {
-        // New event starts — backdate to when sustained detection began
-        let backdate = TimeInterval(requiredConsecutiveSamples - 1) * 0.05
-        activeEventStart = now.addingTimeInterval(-backdate)
-        activeEventID = UUID()
-        activeEventDBSum = Double(db)
-        activeEventDBCount = 1
-        activeEventPeakDB = Double(db)
-        activeEventConfidenceSum = snoreConfidence > 0 ? Double(snoreConfidence) : 0
-        activeEventConfidenceCount = snoreConfidence > 0 ? 1 : 0
-        activeEventSpectralSum = spectralScore > 0 ? Double(spectralScore) : 0
-        activeEventSpectralCount = spectralScore > 0 ? 1 : 0
-        activeEventIntensity = intensity(from: state)
-        activeBurstStart = activeEventStart
-
-        // Start per-event audio recording
-        if let eventID = activeEventID {
-          let fileURL = eventFileURL(eventID: eventID, sessionID: session.id)
-          do {
-            try audioRecorder.startEventFile(eventID: eventID, url: fileURL)
-            pendingSessionStore.addFile(fileURL.lastPathComponent)
-          } catch {
-            print("[SessionManager] Failed to start event file: \(error)")
-          }
-        }
-
-        print("[SessionManager] 🔔 New snore event started, calling playIfNeeded()")
-        let wasPlaying = snoreInterrupterPlayer.isPlaying
-        snoreInterrupterPlayer.playIfNeeded()
-        // If the melody just started, the mic is about to pause. Close the
-        // audio file and current burst so they don't span the dead-mic
-        // interval, but keep the event alive — snoring continues during
-        // melody playback and the event duration will span the gap.
-        if snoreInterrupterPlayer.isPlaying, !wasPlaying {
-          melodyStartTime = now
-          // Close the event audio file; a new one will be started if
-          // snoring resumes after the melody.
-          _ = audioRecorder.finalizeEventFile()
-          // Close the current burst; post-melody snoring starts a new burst.
-          if let burstStart = activeBurstStart {
-            completedBursts.append((start: burstStart, end: lastSnoringSampleTime ?? now))
-            activeBurstStart = nil
-          }
-          lastUpdateTime = nil
-          consecutiveSnoreSamples = 0
-          consecutiveNonSnoreSamples = 0
-          // Intentionally NOT resetting activeEventStart/lastSnoringSampleTime
-          // so the event span covers the melody gap.
-        }
-      } else {
-        // Event already active
-        activeEventDBSum += Double(db)
-        activeEventDBCount += 1
-        if Double(db) > activeEventPeakDB {
-          activeEventPeakDB = Double(db)
-        }
-        if snoreConfidence > 0 {
-          activeEventConfidenceSum += Double(snoreConfidence)
-          activeEventConfidenceCount += 1
-        }
-        if spectralScore > 0 {
-          activeEventSpectralSum += Double(spectralScore)
-          activeEventSpectralCount += 1
-        }
-        let currentIntensity = intensity(from: state)
-        if intensityRank(currentIntensity) > intensityRank(activeEventIntensity ?? .quiet) {
-          activeEventIntensity = currentIntensity
-        }
-        // Start a new burst if we resumed after a brief gap
-        if activeBurstStart == nil {
-          activeBurstStart = now
-        }
-
-        // If we just resumed from a melody gap, confirm that snoring actually
-        // resumed within the breathing delay. Only then does the gap count
-        // as snoring time.
-        if let resumeTime = melodyResumeTime, !postMelodySnoringDetected {
-          postMelodySnoringDetected = true
-          lastSnoringSampleTime = now
-          markLastGapSnoringResumed()
-          print("[SessionManager] Snoring resumed within breathing delay (\(String(format: "%.2f", now.timeIntervalSince(resumeTime)))s) — gap counts as snoring")
-        }
-
-        // Re-trigger melody if snoring resumes after a previous melody stopped.
-        // The event stays open across melody gaps, so this is not a "new" event —
-        // but the melody should still play again on sustained post-melody snoring.
-        let wasPlaying = snoreInterrupterPlayer.isPlaying
-        snoreInterrupterPlayer.playIfNeeded()
-        if snoreInterrupterPlayer.isPlaying, !wasPlaying {
-          melodyStartTime = now
-          // Close the event audio file; a new one will be started if
-          // snoring resumes after this melody.
-          _ = audioRecorder.finalizeEventFile()
-          // Close the current burst; post-melody snoring starts a new burst.
-          if let burstStart = activeBurstStart {
-            completedBursts.append((start: burstStart, end: lastSnoringSampleTime ?? now))
-            activeBurstStart = nil
-          }
-          lastUpdateTime = nil
-          consecutiveSnoreSamples = 0
-          consecutiveNonSnoreSamples = 0
-        }
-      }
-    } else {
-      // If the post-melody breathing delay expires without sustained snoring,
-      // finalize the event using the pre-melody lastSnoringSampleTime so the
-      // gap is not counted as snoring time.
-      if let resumeTime = melodyResumeTime,
-         activeEventStart != nil,
-         !postMelodySnoringDetected,
-         now.timeIntervalSince(resumeTime) >= postMelodyBreathingDelay
-      {
-        print("[SessionManager] Breathing delay expired without snoring resumption — finalizing pre-melody event")
-        melodyResumeTime = nil
-        finalizeActiveEvent()
-        return
-      }
-
-      consecutiveSnoreSamples = 0
-      consecutiveNonSnoreSamples += 1
-      // Silence — close current burst if open
-      if let burstStart = activeBurstStart {
-        completedBursts.append((start: burstStart, end: now))
-        activeBurstStart = nil
-      }
-      // Finalize event if silence exceeded debounce threshold.
-      // Don't finalize while melody is playing — the mic is paused and
-      // currentDB is stale, so silence detection is not trustworthy.
-      if let lastSnore = lastSnoringSampleTime,
-         activeEventStart != nil,
-         now.timeIntervalSince(lastSnore) >= eventGapThreshold,
-         !snoreInterrupterPlayer.isPlaying
-      {
-        print("[SessionManager] Silence for \(eventGapThreshold)s — finalizing snore event")
-        finalizeActiveEvent()
-      }
-
-      // Stop melody when sustained non-snore is detected (but respect minimum play duration)
-      if consecutiveNonSnoreSamples >= requiredNonSnoreSamplesToStop,
-         snoreInterrupterPlayer.isPlaying
-      {
-        let minDurationMet = melodyStartTime.map { now.timeIntervalSince($0) >= melodyMinPlayDuration } ?? true
-        guard minDurationMet else {
-          print("[SessionManager] Sustained non-snore detected but melody still within minimum play duration — keeping playing")
-          return
-        }
-        print("[SessionManager] Sustained non-snore — stopping melody")
-        snoreInterrupterPlayer.stop()
-        consecutiveNonSnoreSamples = 0
-      }
-
-      // Speech event tracking (sleep talking)
-      if preferences.detectSleepTalking {
-        if currentSpeechDetected {
-          consecutiveSpeechSamples += 1
-          lastSpeechSampleTime = now
-          guard consecutiveSpeechSamples >= requiredConsecutiveSpeechSamples else {
-            return
-          }
-          if activeSpeechEventStart == nil {
-            let backdate = TimeInterval(requiredConsecutiveSpeechSamples - 1) * 0.05
-            activeSpeechEventStart = now.addingTimeInterval(-backdate)
-            activeSpeechEventDBSum = Double(db)
-            activeSpeechEventDBCount = 1
-            activeSpeechEventPeakDB = Double(db)
-            print("[SessionManager] 🗣️ New speech event started")
-          } else {
-            activeSpeechEventDBSum += Double(db)
-            activeSpeechEventDBCount += 1
-            if Double(db) > activeSpeechEventPeakDB {
-              activeSpeechEventPeakDB = Double(db)
-            }
-          }
-        } else {
-          consecutiveSpeechSamples = 0
-          if let lastSpeech = lastSpeechSampleTime,
-             activeSpeechEventStart != nil,
-             now.timeIntervalSince(lastSpeech) >= eventGapThreshold
-          {
-            print("[SessionManager] Silence for \(eventGapThreshold)s — finalizing speech event")
-            finalizeActiveSpeechEvent()
-          }
-        }
-      }
-    }
+    syncSettings()
+    let input = DetectionInput(
+      db: db,
+      spectralScore: spectralScore,
+      snoreConfidence: snoreConfidence,
+      snoreState: state,
+      isSpeech: currentSpeechDetected,
+      isMelodyPlaying: snoreInterrupterPlayer.isPlaying)
+    perform(machine.ingest(input, at: now), at: now)
 
     // Update stored aggregate (averageDB only; others are computed on demand)
     if totalDBCount > 0 {
@@ -495,55 +261,22 @@ final class RealtimeDetectionTracker {
   // MARK: - Reset
 
   func reset() {
-    activeEventStart = nil
-    activeEventID = nil
-    activeEventIntensity = nil
-    activeEventDBSum = 0
-    activeEventDBCount = 0
-    activeEventPeakDB = 0
-    activeEventConfidenceSum = 0
-    activeEventConfidenceCount = 0
-    activeEventSpectralSum = 0
-    activeEventSpectralCount = 0
+    machine = DetectionStateMachine(settings: Self.settings(preferences: preferences, snoreDetector: snoreDetector))
     totalDBSum = 0
     totalDBCount = 0
     sessionSnoringDuration = 0
     lastUpdateTime = nil
-    lastSnoringSampleTime = nil
-    activeBurstStart = nil
-    consecutiveSnoreSamples = 0
-    consecutiveNonSnoreSamples = 0
-    melodyStartTime = nil
-    melodyResumeTime = nil
-    postMelodySnoringDetected = false
     currentSpeechDetected = false
-    activeSpeechEventStart = nil
-    activeSpeechEventDBSum = 0
-    activeSpeechEventDBCount = 0
-    activeSpeechEventPeakDB = 0
-    lastSpeechSampleTime = nil
-    consecutiveSpeechSamples = 0
-    completedBursts.removeAll(keepingCapacity: false)
     pendingEventTasks.removeAll(keepingCapacity: false)
   }
 
   // MARK: - Melody gap handling
 
+  /// Every melody stop, whether from `.melodyStopRequested`, its own timer, or
+  /// the user, arrives here through `.snoreInterrupterDidStop`.
   @objc private func handleMelodyDidStop() {
-    guard let start = melodyStartTime else { return }
-    let duration = Date().timeIntervalSince(start)
-    logRecordingGap(start: start, duration: duration, snoringResumed: false)
-    melodyStartTime = nil
-    // Don't extend lastSnoringSampleTime yet. We wait for a short breathing
-    // delay after mic resume to verify snoring actually continued; only then
-    // does the gap count as snoring time.
-    if activeEventStart != nil {
-      melodyResumeTime = Date()
-      postMelodySnoringDetected = false
-    }
-    // Reset non-snore counter so stale data from the pause doesn't
-    // immediately trigger a melody stop when audio resumes.
-    consecutiveNonSnoreSamples = 0
+    let now = clock()
+    perform(machine.melodyDidStop(at: now), at: now)
   }
 
   /// Logs a recording gap directly on the session. Called whenever the Snore Interrupter
@@ -566,90 +299,71 @@ final class RealtimeDetectionTracker {
     session.recordingGaps = gaps
   }
 
-  // MARK: - Event finalization
+  // MARK: - Performing machine outputs
 
-  private func finalizeActiveEvent(skipMinDuration: Bool = false) {
-    guard let startTime = activeEventStart, let session = recording?.currentSession else {
-      print("[SessionManager] finalizeActiveEvent() — no active event or session")
-      return
-    }
-    print("[SessionManager] Finalizing snore event at \(startTime)")
-
-    // Close any open burst
-    if let burstStart = activeBurstStart {
-      completedBursts.append((start: burstStart, end: lastSnoringSampleTime ?? Date()))
-      activeBurstStart = nil
-    }
-
-    // Build burst models with offsets relative to event start
-    let bursts = completedBursts.map { SnoreBurst(
-      startOffset: $0.start.timeIntervalSince(startTime),
-      endOffset: $0.end.timeIntervalSince(startTime)) }
-
-    let eventSpan = (lastSnoringSampleTime ?? Date()).timeIntervalSince(startTime)
-
-    // Discard events shorter than `minEventDuration` (sensitivity-dependent —
-    // 2 s on Low to filter out transients, 0.5 s on High to catch isolated
-    // single snores). When the mic is paused by Snore Interrupter we always
-    // lower to 0.5 s so the truncated event still has meaningful duration.
-    let minDuration: TimeInterval = skipMinDuration ? 0.0 : minEventDuration
-    guard eventSpan >= minDuration else {
-      // Clean up the event file if one was started
-      if let eventID = activeEventID {
-        let fileURL = eventFileURL(eventID: eventID, sessionID: session.id)
-        try? FileManager.default.removeItem(at: fileURL)
-      }
-      audioRecorder.finalizeEventFile()
-      clearActiveEventAccumulators()
-      return
-    }
-
-    let averageConfidence = activeEventConfidenceCount > 0 ? activeEventConfidenceSum / Double(activeEventConfidenceCount) : 0
-    let averageSpectralScore = activeEventSpectralCount > 0 ? activeEventSpectralSum / Double(activeEventSpectralCount) : 0
-
-    // Short events (< 3 s) require high confidence to avoid false positives.
-    // ML-classified events must clear the sensitivity-specific high-confidence gate.
-    // Spectral-only events (no ML confidence) must have a stronger spectral score.
-    let shortEventThreshold: TimeInterval = 3.0
-    if eventSpan < shortEventThreshold {
-      let hasMLConfidence = activeEventConfidenceCount > 0
-      let passesConfidence = hasMLConfidence
-        ? averageConfidence >= Double(snoreDetector.highConfidenceGate)
-        : averageSpectralScore >= 0.65
-      if !passesConfidence {
-        print("[SessionManager] Short event discarded: span \(String(format: "%.2f", eventSpan))s < \(shortEventThreshold)s, avgConf=\(String(format: "%.2f", averageConfidence)), avgSpectral=\(String(format: "%.2f", averageSpectralScore))")
-        if let eventID = activeEventID {
-          let fileURL = eventFileURL(eventID: eventID, sessionID: session.id)
-          try? FileManager.default.removeItem(at: fileURL)
+  private func perform(_ outputs: [DetectionOutput], at now: Date) {
+    for output in outputs {
+      switch output {
+      case let .snoreEventStarted(id, _):
+        startEventClip(id: id)
+      case .melodyRequested:
+        let wasPlaying = snoreInterrupterPlayer.isPlaying
+        snoreInterrupterPlayer.playIfNeeded()
+        if snoreInterrupterPlayer.isPlaying, !wasPlaying {
+          lastUpdateTime = nil
+          perform(machine.melodyDidStart(at: now), at: now)
+        }
+      case .melodyStopRequested:
+        print("[SessionManager] Sustained non-snore — stopping melody")
+        snoreInterrupterPlayer.stop()
+      case .eventClipClosed:
+        _ = audioRecorder.finalizeEventFile()
+      case .snoringResumedAfterMelody:
+        markLastGapSnoringResumed()
+      case let .recordingGap(start, duration):
+        logRecordingGap(start: start, duration: duration, snoringResumed: false)
+      case let .snoreEventFinalized(event):
+        save(event)
+      case let .snoreEventDiscarded(id, reason):
+        print("[SessionManager] Snore event discarded: \(reason)")
+        if let session = recording?.currentSession {
+          try? FileManager.default.removeItem(at: eventFileURL(eventID: id, sessionID: session.id))
         }
         audioRecorder.finalizeEventFile()
-        clearActiveEventAccumulators()
-        return
+      case let .speechEventFinalized(event):
+        save(event)
       }
     }
+  }
 
-    let event = SnoreEvent(
-      id: activeEventID ?? UUID(),
-      timestamp: startTime,
-      category: .snoring,
-      intensity: activeEventIntensity ?? .quiet,
-      averageDB: activeEventDBCount > 0 ? activeEventDBSum / Double(activeEventDBCount) : 0,
-      peakDB: activeEventPeakDB,
-      averageConfidence: averageConfidence,
-      averageSpectralScore: averageSpectralScore,
-      bursts: bursts.isEmpty ? nil : bursts,
-      duration: eventSpan)
-    event.session = session
-
-    if session.events == nil {
-      session.events = []
+  private func startEventClip(id: UUID) {
+    guard let session = recording?.currentSession else { return }
+    let fileURL = eventFileURL(eventID: id, sessionID: session.id)
+    do {
+      try audioRecorder.startEventFile(eventID: id, url: fileURL)
+      pendingSessionStore.addFile(fileURL.lastPathComponent)
+    } catch {
+      print("[SessionManager] Failed to start event file: \(error)")
     }
-    session.events?.append(event)
-    eventsCount = session.events?.count ?? 0
+  }
+
+  private func save(_ detected: DetectedSnoreEvent) {
+    guard let session = recording?.currentSession else { return }
+    let event = SnoreEvent(
+      id: detected.id,
+      timestamp: detected.start,
+      category: .snoring,
+      intensity: detected.intensity,
+      averageDB: detected.averageDB,
+      peakDB: detected.peakDB,
+      averageConfidence: detected.averageConfidence,
+      averageSpectralScore: detected.averageSpectralScore,
+      bursts: detected.bursts.isEmpty ? nil : detected.bursts,
+      duration: detected.duration)
+    append(event, to: session)
 
     // Close the event audio file and compress to .m4a
-    let rawFileURL = audioRecorder.finalizeEventFile()
-    if let rawFileURL {
+    if let rawFileURL = audioRecorder.finalizeEventFile() {
       let task = Task { @MainActor in
         let m4aURL = rawFileURL.deletingPathExtension().appendingPathExtension("m4a")
         if await EventClipCompressor.compress(from: rawFileURL, to: m4aURL) {
@@ -668,108 +382,66 @@ final class RealtimeDetectionTracker {
       pendingEventTasks.append(task)
     }
 
-    clearActiveEventAccumulators()
-    melodyResumeTime = nil
-    postMelodySnoringDetected = false
-    completedBursts.removeAll(keepingCapacity: false)
-
     // Capture this event's metadata immediately; the clip URL is added by a
     // second checkpoint once compression finishes.
     checkpoint()
   }
 
-  private func finalizeActiveSpeechEvent(endTime: Date? = nil) {
-    guard let startTime = activeSpeechEventStart, let session = recording?.currentSession else {
-      return
-    }
-    print("[SessionManager] Finalizing speech event at \(startTime)")
-
-    let eventEnd = endTime ?? (lastSpeechSampleTime ?? Date())
-    let eventSpan = eventEnd.timeIntervalSince(startTime)
-
-    // Discard events shorter than 0.5 s. Sleep talking utterances (single words,
-    // mumbles, groans) are typically 0.5–2 s, much shorter than snoring epochs.
-    guard eventSpan >= 0.5 else {
-      print("[SessionManager] Speech event discarded: span \(String(format: "%.2f", eventSpan))s < 0.5s minimum")
-      clearActiveSpeechAccumulators()
-      return
-    }
-
+  private func save(_ detected: DetectedSpeechEvent) {
+    guard let session = recording?.currentSession else { return }
     let event = SnoreEvent(
-      timestamp: startTime,
+      timestamp: detected.start,
       category: .sleepTalking,
       intensity: .quiet,
-      averageDB: activeSpeechEventDBCount > 0 ? activeSpeechEventDBSum / Double(activeSpeechEventDBCount) : 0,
-      peakDB: activeSpeechEventPeakDB,
-      duration: eventSpan)
-    event.session = session
+      averageDB: detected.averageDB,
+      peakDB: detected.peakDB,
+      duration: detected.duration)
+    append(event, to: session)
+    checkpoint()
+  }
 
+  private func append(_ event: SnoreEvent, to session: SleepSession) {
+    event.session = session
     if session.events == nil {
       session.events = []
     }
     session.events?.append(event)
     eventsCount = session.events?.count ?? 0
-
-    clearActiveSpeechAccumulators()
-    checkpoint()
   }
 
   // MARK: - Private helpers
 
-  private func clearActiveEventAccumulators() {
-    activeEventStart = nil
-    activeEventID = nil
-    activeEventIntensity = nil
-    activeEventDBSum = 0
-    activeEventDBCount = 0
-    activeEventPeakDB = 0
-    activeEventConfidenceSum = 0
-    activeEventConfidenceCount = 0
-    activeEventSpectralSum = 0
-    activeEventSpectralCount = 0
-    completedBursts.removeAll()
+  /// Re-read every tick, as before the extraction: sleep talking and the
+  /// minimum duration follow the live preferences; the confidence gate follows
+  /// the detector, which `applyDetectionSensitivity()` sets at session start.
+  private func syncSettings() {
+    machine.settings = Self.settings(preferences: preferences, snoreDetector: snoreDetector)
   }
 
-  private func clearActiveSpeechAccumulators() {
-    activeSpeechEventStart = nil
-    activeSpeechEventDBSum = 0
-    activeSpeechEventDBCount = 0
-    activeSpeechEventPeakDB = 0
-  }
-
-  private func eventFileURL(eventID: UUID, sessionID: UUID) -> URL {
-    FileManager.default
-      .urls(for: .documentDirectory, in: .userDomainMask)[0]
-      .appendingPathComponent("event_\(eventID.uuidString)_session_\(sessionID.uuidString).caf")
+  private static func settings(
+    preferences: any UserPreferencesStoring,
+    snoreDetector: SnoreDetector) -> DetectionStateMachine.Settings
+  {
+    DetectionStateMachine.Settings(
+      minEventDuration: minEventDuration(for: preferences.detectionSensitivity),
+      highConfidenceGate: snoreDetector.highConfidenceGate,
+      detectSleepTalking: preferences.detectSleepTalking)
   }
 
   /// Minimum snore-event duration. Sensitivity-dependent so isolated single
   /// snores (~1 s) are retained on Medium/High while Low still filters
   /// transient sounds. Ground-truthed against bedroom recordings.
-  private var minEventDuration: TimeInterval {
-    switch preferences.detectionSensitivity {
+  private static func minEventDuration(for sensitivity: UserPreferences.DetectionSensitivity) -> TimeInterval {
+    switch sensitivity {
     case .low: 2.0
     case .medium: 1.0
     case .high: 0.5
     }
   }
 
-  private func intensity(from state: DetectionState) -> SnoreIntensity {
-    switch state {
-    case .quiet: .quiet
-    case .light: .light
-    case .loud: .loud
-    case .epic: .epic
-    case .none: .quiet
-    }
-  }
-
-  private func intensityRank(_ intensity: SnoreIntensity) -> Int {
-    switch intensity {
-    case .quiet: 0
-    case .light: 1
-    case .loud: 2
-    case .epic: 3
-    }
+  private func eventFileURL(eventID: UUID, sessionID: UUID) -> URL {
+    FileManager.default
+      .urls(for: .documentDirectory, in: .userDomainMask)[0]
+      .appendingPathComponent("event_\(eventID.uuidString)_session_\(sessionID.uuidString).caf")
   }
 }
