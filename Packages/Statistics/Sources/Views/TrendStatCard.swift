@@ -8,7 +8,7 @@ struct TrendStatCard: View {
   let iconColor: Color
   let label: String
   let value: String
-  let theme: Theme
+  let theme: any ThemeProviding
 
   var body: some View {
     VStack(alignment: .leading, spacing: 2) {

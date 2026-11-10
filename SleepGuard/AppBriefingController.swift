@@ -14,10 +14,10 @@ import SwiftData
 final class AppBriefingController {
   private(set) var currentBriefing: Briefing?
 
-  private let appConfig: AppConfig
-  private let userPreferences: UserPreferences
+  private let appConfig: any AppConfigProviding
+  private let userPreferences: any UserPreferencesStoring
 
-  init(appConfig: AppConfig, userPreferences: UserPreferences) {
+  init(appConfig: any AppConfigProviding, userPreferences: any UserPreferencesStoring) {
     self.appConfig = appConfig
     self.userPreferences = userPreferences
   }

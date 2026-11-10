@@ -2,11 +2,23 @@ import AVFoundation
 import Models
 import Observation
 
+/// Plays the snore-interrupter melody. Fake: `FakeSnoreInterrupterPlayer`.
+@MainActor
+public protocol SnoreInterrupterPlaying: AnyObject, Observable {
+  var isPlaying: Bool { get }
+  var currentMelodyName: String? { get }
+  var isMutedForSession: Bool { get }
+  func playIfNeeded()
+  func stop()
+  func muteForSession()
+  func resetSessionMute()
+}
+
 /// Plays the selected Snore Interrupter when snoring is detected.
 /// Respects the user's duration preference and exposes `isPlaying` for UI observation.
 @MainActor
 @Observable
-public final class SnoreInterrupterPlayer: NSObject {
+public final class SnoreInterrupterPlayer: NSObject, SnoreInterrupterPlaying {
   public static let shared = SnoreInterrupterPlayer()
 
   public var isPlaying = false
@@ -18,7 +30,7 @@ public final class SnoreInterrupterPlayer: NSObject {
   private var stopTimer: Timer?
   private var nudgeTimer: Timer?
 
-  override private init() {
+  override public init() {
     super.init()
   }
 

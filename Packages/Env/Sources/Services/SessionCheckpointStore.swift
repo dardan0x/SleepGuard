@@ -1,18 +1,26 @@
 import Foundation
 import Models
 
+/// Crash-recovery snapshot file. Fake: `FakeSessionCheckpointStore`.
+@MainActor
+public protocol SessionCheckpointStoring: AnyObject {
+  func write(_ snapshot: SessionRecoverySnapshot)
+  func loadIfPresent() -> SessionRecoverySnapshot?
+  func clear()
+}
+
 /// Persists a recovery snapshot of the in-progress session to disk during
 /// recording. If the app dies mid-session (crash / OOM / background kill), the
 /// snapshot lets the session be reconstructed and offered to the user on the
 /// next launch instead of being lost. Cleared once the session is saved or
 /// discarded.
 @MainActor
-public final class SessionCheckpointStore {
+public final class SessionCheckpointStore: SessionCheckpointStoring {
   public static let shared = SessionCheckpointStore()
 
   private let fileName = "session_recovery.json"
 
-  private init() {}
+  public init() {}
 
   private var recoveryURL: URL {
     FileManager.default

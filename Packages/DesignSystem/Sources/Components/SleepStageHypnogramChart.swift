@@ -7,9 +7,9 @@ import SwiftUI
 @MainActor
 public struct SleepStageHypnogramChart: View {
   public let session: SleepSession
-  public let theme: Theme
+  public let theme: any ThemeProviding
 
-  public init(session: SleepSession, theme: Theme) {
+  public init(session: SleepSession, theme: any ThemeProviding) {
     self.session = session
     self.theme = theme
   }

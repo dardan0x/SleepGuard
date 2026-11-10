@@ -35,6 +35,7 @@ let package = Package(
       dependencies: [
         "Env",
         .product(name: "Models", package: "Models"),
+        .product(name: "AudioEngine", package: "AudioEngine"),
       ],
       path: "TestSupport",
       swiftSettings: [
@@ -44,9 +45,12 @@ let package = Package(
       name: "EnvTests",
       dependencies: [
         "Env",
+        "EnvTestSupport",
         .product(name: "Models", package: "Models"),
         .product(name: "ModelsTestSupport", package: "Models"),
         .product(name: "AudioEngine", package: "AudioEngine"),
+        .product(name: "FactoryKit", package: "Factory"),
+        .product(name: "FactoryTesting", package: "Factory"),
       ],
       path: "Tests",
       swiftSettings: [

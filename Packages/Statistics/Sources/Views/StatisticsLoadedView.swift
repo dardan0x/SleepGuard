@@ -10,7 +10,7 @@ struct StatisticsLoadedView: View {
   let dayScore: Int
   let daySessionCount: Int
   let recentSessions: [SleepSession]
-  let theme: Theme
+  let theme: any ThemeProviding
   @MainActor let onStartRecording: () -> Void
   let onViewTrends: () -> Void
   let onViewCalendar: () -> Void

@@ -2,15 +2,23 @@ import Foundation
 import Observation
 import WatchConnectivity
 
+/// Apple Watch reachability and sync status. Fake: `FakeWatchConnectivityManager`.
+@MainActor
+public protocol WatchConnectivityManaging: AnyObject, Observable {
+  var isWatchReachable: Bool { get }
+  var lastSyncedSession: Date? { get }
+  func checkReachability()
+}
+
 @MainActor
 @Observable
-public final class WatchConnectivityManager: NSObject {
+public final class WatchConnectivityManager: NSObject, WatchConnectivityManaging {
   public static let shared = WatchConnectivityManager()
 
   public var isWatchReachable = false
   public var lastSyncedSession: Date?
 
-  override private init() {
+  override public init() {
     super.init()
     if WCSession.isSupported() {
       WCSession.default.delegate = self

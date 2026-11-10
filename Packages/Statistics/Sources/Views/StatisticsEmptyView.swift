@@ -4,7 +4,7 @@ import SwiftUI
 
 @MainActor
 struct StatisticsEmptyView: View {
-  let theme: Theme
+  let theme: any ThemeProviding
   @MainActor let onStartRecording: () -> Void
   let onViewCalendar: () -> Void
 

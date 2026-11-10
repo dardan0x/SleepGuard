@@ -3,9 +3,9 @@ import SwiftUI
 @MainActor
 public struct AudioLevelMeter: View {
   let levels: [Double]
-  let theme: Theme
+  let theme: any ThemeProviding
 
-  public init(levels: [Double], theme: Theme) {
+  public init(levels: [Double], theme: any ThemeProviding) {
     self.levels = levels
     self.theme = theme
   }

@@ -4,7 +4,7 @@ import SwiftUI
 
 @MainActor
 struct RecordingsErrorView: View {
-  let theme: Theme
+  let theme: any ThemeProviding
   let onRetry: () -> Void
 
   var body: some View {

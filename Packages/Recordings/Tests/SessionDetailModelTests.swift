@@ -10,16 +10,14 @@ import Testing
 @testable import Recordings
 
 /// Session detail state owner: load (cache refresh), event filters, and delete.
-/// Uses the default feature flags (all on) and `enhancedSleepTracking` off, so
-/// no HealthKit call is made, except in the HealthKit tests, which register
-/// `FakeHealthKitSync`.
-///
-/// `.container` gives each test its own Factory scope, so registrations don't
-/// leak. `.serialized` because the HealthKit tests flip the shared
-/// `UserPreferences.enhancedSleepTracking` (until F22-T6 makes it injectable).
-@Suite(.serialized, .container)
+/// Each test gets isolated `AppConfig` / `UserPreferences` (default flags all
+/// on, `enhancedSleepTracking` off) and its own Factory scope (`.container`),
+/// so HealthKit fakes and settings never leak between parallel tests.
+@Suite(.container)
 final class SessionDetailModelTests {
   private let store: TestStore
+  private let appConfig = AppConfig.isolated()
+  private let preferences = UserPreferences.isolated()
   private let start = TestCalendar.date(day: 1, hour: 23)
   private var createdFiles: [URL] = []
 
@@ -38,7 +36,7 @@ final class SessionDetailModelTests {
   }
 
   private func model(for session: SleepSession) -> SessionDetailModel {
-    SessionDetailModel(sessionID: session.id, appConfig: .shared, userPreferences: .shared)
+    SessionDetailModel(sessionID: session.id, appConfig: appConfig, userPreferences: preferences)
   }
 
   private func clipFile() throws -> String {
@@ -81,13 +79,13 @@ final class SessionDetailModelTests {
     #expect(sortedEvents.map(\.timestamp) == sortedEvents.map(\.timestamp).sorted())
     #expect(!isClipSession)
     #expect(session.hasCachedScore)
-    #expect(session.cachedSleepScore == session.sleepScore(using: AppConfig.shared.sleepScoreConfig))
+    #expect(session.cachedSleepScore == session.sleepScore(using: appConfig.sleepScoreConfig))
     #expect(session.cachedSleepScore != 1)
   }
 
   @MainActor
   @Test func loadingAnUnknownSessionIsAnError() async {
-    let model = SessionDetailModel(sessionID: UUID(), appConfig: .shared, userPreferences: .shared)
+    let model = SessionDetailModel(sessionID: UUID(), appConfig: appConfig, userPreferences: preferences)
     await model.load(modelContext: store.context)
     guard case .error = model.viewState else {
       Issue.record("expected .error")
@@ -111,15 +109,6 @@ final class SessionDetailModelTests {
 
   // MARK: - HealthKit
 
-  /// Runs `body` with enhanced sleep tracking on, restoring the user's value.
-  @MainActor
-  private func withEnhancedTracking(_ body: () async throws -> Void) async rethrows {
-    let previous = UserPreferences.shared.enhancedSleepTracking
-    UserPreferences.shared.enhancedSleepTracking = true
-    defer { UserPreferences.shared.enhancedSleepTracking = previous }
-    try await body()
-  }
-
   @MainActor
   @Test func loadFetchesStagesAndScoresThem() async throws {
     // Deep 0%, REM 0% → stage penalty (15 × 0.6 + 18 × 0.4 = 16.2) capped at 15.
@@ -129,9 +118,9 @@ final class SessionDetailModelTests {
     Container.shared.healthKitSync.register { fake }
     let session = try store.insert(.fixture(start: start))
 
-    try await withEnhancedTracking {
-      await model(for: session).load(modelContext: store.context)
-    }
+    preferences.enhancedSleepTracking = true
+
+    await model(for: session).load(modelContext: store.context)
 
     #expect(fake.fetchedSessionIDs == [session.id])
     #expect(session.sleepStageSegments?.count == 1)
@@ -224,7 +213,7 @@ final class SessionDetailModelTests {
 
   @MainActor
   @Test func deletingAnUnknownSessionReturnsFalse() {
-    let model = SessionDetailModel(sessionID: UUID(), appConfig: .shared, userPreferences: .shared)
+    let model = SessionDetailModel(sessionID: UUID(), appConfig: appConfig, userPreferences: preferences)
     #expect(!model.delete(modelContext: store.context))
   }
 }

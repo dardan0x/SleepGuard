@@ -31,14 +31,26 @@ private struct CleanupPlan: Sendable {
   var sessionsAffected: Int
 }
 
+/// Deletes old audio to honor the user's storage limits. Fake: `FakeStorageLimitEnforcer`.
+/// Nonisolated and `Sendable`; the SwiftData work is `@MainActor`.
+public protocol StorageLimitEnforcing: Sendable {
+  @MainActor
+  @discardableResult
+  func enforceLimits(modelContext: ModelContext) async -> CleanupReport
+  #if DEBUG
+  @MainActor
+  func injectDummyAudioForTesting(modelContext: ModelContext) -> Int
+  #endif
+}
+
 /// Enforces user-configured storage limits by deleting oldest audio files
 /// while preserving session metadata in SwiftData.
 ///
 /// File I/O is performed off the main actor so launch and save are not blocked.
-public final class StorageLimitEnforcer: Sendable {
+public final class StorageLimitEnforcer: Sendable, StorageLimitEnforcing {
   public static let shared = StorageLimitEnforcer()
 
-  private init() {}
+  public init() {}
 
   /// Runs both size-based and day-based cleanup according to user preferences.
   /// Returns a report describing what was removed.

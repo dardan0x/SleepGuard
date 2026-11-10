@@ -74,7 +74,7 @@ private struct EventCard: View {
   let event: SnoreEvent
   let displayDuration: TimeInterval?
   let session: SleepSession
-  let theme: Theme
+  let theme: any ThemeProviding
   let onPlay: () -> Void
 
   var body: some View {

@@ -7,7 +7,7 @@ public struct SessionRow: View {
   let duration: String
   let events: String
   let intensityColor: Color
-  let theme: Theme
+  let theme: any ThemeProviding
 
   public init(
     dayNumber: String,
@@ -15,7 +15,7 @@ public struct SessionRow: View {
     duration: String,
     events: String,
     intensityColor: Color,
-    theme: Theme)
+    theme: any ThemeProviding)
   {
     self.dayNumber = dayNumber
     self.weekday = weekday
