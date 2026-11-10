@@ -46,10 +46,10 @@ Last updated: 2026-11-10
 | Blocked | 0 |
 | — | — |
 | Total Tasks | 150 |
-| Tasks Done | 127 |
+| Tasks Done | 128 |
 | Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
-| Tasks Backlog | 23 |
+| Tasks Backlog | 22 |
 | — | — |
 | **Progress** | **85%** |
 
@@ -77,7 +77,7 @@ Last updated: 2026-11-10
 | F19 | Factory DI Migration | P1 | Done | 5/5 | ██████████ 100% | [tracker](trackers/f19-factory-di.md) |
 | F20 | Home Screen & Lock Screen Widgets | P1 | Done | 9/9 | ██████████ 100% | [tracker](trackers/f20-home-screen-widgets.md) |
 | F21 | Test Coverage | P1 | Done | 17/17 | ██████████ 100% | [tracker](trackers/f21-test-coverage.md) |
-| F22 | Architecture Hardening | P1 | In Progress | 7/14 | █████░░░░░ 50% | [tracker](trackers/f22-architecture-hardening.md) |
+| F22 | Architecture Hardening | P1 | In Progress | 8/14 | ██████░░░░ 57% | [tracker](trackers/f22-architecture-hardening.md) |
 
 ## Activity Log
 
@@ -85,6 +85,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-11-10 | F22-T11 | Completed | `SleepGuardSchemaV1` + empty `SleepGuardMigrationPlan`; app and `TestStore` open through `SleepGuardSchema.container(_:)`; `SleepGuardSchemaTests` (2) incl. pre-V1 on-disk store opening intact; simulator store kept 30 sessions / 614 events; V2 procedure in CLAUDE/AGENTS. Done before T8 (T9 blocked on a recorded night). Branch `feature/f22/t11-versioned-schema`, merged locally |
 | 2026-11-10 | F22-T7 | Completed | No app-service `.shared` in features/DesignSystem (layering rule 4); Env services constructor-injected with container defaults; DesignSystem drops Env (`.sensoryFeedback`); `ConstructorInjectionTests` (5). 218 tests pass. Branch `feature/f22/t7-remove-shared`, merged locally |
 | 2026-11-10 | F22-T6 | Completed | Protocol for every service (17 new + HealthKitSyncing) + `ThemeProviding`; `Factory<any P>` everywhere; public inits; `UserPreferences`/`AppConfig(defaults:)`; 14 fakes + isolated stores in `EnvTestSupport`; `ServiceOverrideTests` (10), `IsolatedStoreTests` (2), `ThemeOverrideTests` (2). Branch `feature/f22/t6-protocol-di-rollout`, merged locally |
 | 2026-11-10 | F22-T5 | Completed | Protocol DI pilot: `HealthKitSyncing` + `Factory<any HealthKitSyncing>`; `SessionDetailModel` resolves via container; `EnvTestSupport` with `FakeHealthKitSync`; Factory `.container` trait for isolated overrides. Recordings 16 tests. Branch `feature/f22/t5-protocol-di-pilot`, merged locally |
@@ -297,7 +298,7 @@ _Most recent first. The AI appends here after every task._
 
 | Task | Feature | Started | Assignee |
 |------|---------|---------|----------|
-| F22-T8 | F22 | — | AI (next) |
+| F22-T12 | F22 | — | AI (next) |
 
 ## Completed (last 10)
 

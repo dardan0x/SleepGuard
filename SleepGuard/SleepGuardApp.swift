@@ -20,10 +20,9 @@ struct SleepGuardApp: App {
   }
 
   var sharedModelContainer: ModelContainer = {
-    let schema = Schema([SleepSession.self, SnoreEvent.self, UserProfile.self, LifestyleLog.self])
-    let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+    let modelConfiguration = SleepGuardSchema.configuration(inMemory: false)
     do {
-      let container = try ModelContainer(for: schema, configurations: [modelConfiguration])
+      let container = try SleepGuardSchema.container(modelConfiguration)
       #if DEBUG
       if ProcessInfo.processInfo.arguments.contains("-generateMockData") {
         MockDataGenerator.generate(modelContext: container.mainContext)
@@ -37,7 +36,7 @@ struct SleepGuardApp: App {
       let storeURL = modelConfiguration.url
       try? FileManager.default.removeItem(at: storeURL)
       do {
-        return try ModelContainer(for: schema, configurations: [modelConfiguration])
+        return try SleepGuardSchema.container(modelConfiguration)
       } catch {
         fatalError("Could not create ModelContainer after store deletion: \(error)")
       }

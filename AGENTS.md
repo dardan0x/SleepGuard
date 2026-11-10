@@ -277,6 +277,16 @@ SwiftData lightweight migration is automatic for additive changes, but **removin
 
 SwiftData ignores unused columns in the persistent store. This is the only zero-migration way to evolve schemas.
 
+### Versioned schema (F22-T11)
+Every `ModelContainer` (app and `TestStore`) opens through `SleepGuardSchema.container(_:)`, which attaches `SleepGuardMigrationPlan` (`Packages/Models/Sources/Data/SleepGuardSchema.swift`). Today the plan has one version (`SleepGuardSchemaV1`, pointing at the live `@Model` classes) and no stages. Additive changes still need nothing: keep following the policy above.
+
+**Adding V2** (only for a change the policy above forbids, e.g. dropping `@Attribute(.unique)`):
+1. Freeze V1: copy the current `@Model` classes into `SleepGuardSchemaV1` as nested types, unchanged, and make `models` list those copies.
+2. Declare `SleepGuardSchemaV2` (version `2.0.0`) listing the live classes, then make the change on the live classes.
+3. Append V2 to `SleepGuardMigrationPlan.schemas` and add a `MigrationStage` (`.lightweight` if SwiftData can infer it, `.custom` otherwise). Point `SleepGuardSchema.Current` at V2.
+4. Add a test in `SleepGuardSchemaTests` that writes a V1 store on disk and opens it through the plan with every row intact.
+5. Verify on a simulator that holds real pre-change data before merging. The app's container fallback deletes the store when opening fails.
+
 ### Cached computed properties on `SleepSession`
 `SleepSession` carries three defensive cached properties to avoid relationship faulting crashes:
 
