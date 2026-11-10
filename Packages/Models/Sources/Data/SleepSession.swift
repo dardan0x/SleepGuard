@@ -21,7 +21,7 @@ public struct SleepStageSegment: Codable, Sendable {
 }
 
 /// Aggregated sleep stage percentages derived from `sleepStageSegments`.
-public struct StageStats: Sendable {
+public struct StageStats: Sendable, Equatable {
   public let awakePct: Double
   public let remPct: Double
   public let lightPct: Double
@@ -289,96 +289,32 @@ public final class SleepSession {
   /// cached score. Callers that iterate many sessions should use the
   /// `sleepScore` property instead to avoid SwiftData relationship faulting.
   public func sleepScore(using config: SleepScoreConfig) -> Int {
-    let events = events ?? []
-    let snoringEvents = events.filter { $0.category == .snoring }
-    let totalDuration = totalDuration
-    let eventCount = displayableSnoringEpisodes.count
+    SleepScore.compute(sleepInputs, config: config)
+  }
 
-    guard totalDuration > 0 else {
-      return config.maxScore
-    }
-
-    var detectedSnoringDuration: TimeInterval = 0
-    var lightDuration: TimeInterval = 0
-    var loudDuration: TimeInterval = 0
-    var epicDuration: TimeInterval = 0
-
-    for event in snoringEvents {
-      // Use burst sum for intensity ratios, not the full event span.
-      // Event span includes melody gaps where no spectral data exists;
-      // we should not penalize intensity for time we couldn't measure.
-      let detectedDuration = event.bursts?.reduce(0) { $0 + $1.duration } ?? event.snoreDuration
-      detectedSnoringDuration += detectedDuration
+  /// The score formula's inputs, read from events, gaps, and stages.
+  ///
+  /// Reads `events` (faults the relationship). `snoringDuration` returns the
+  /// cached value when one exists, so inputs match what lists display.
+  public var sleepInputs: SleepInputs {
+    var inputs = SleepInputs(
+      totalDuration: totalDuration,
+      snoringDuration: snoringDuration,
+      snoringEpisodeCount: displayableSnoringEpisodes.count,
+      sleepTalkingCount: sleepTalkingEvents,
+      sleepTalkingDuration: sleepTalkingDuration,
+      stages: stageStats)
+    for event in events ?? [] where event.category == .snoring {
+      // Burst sum, not the full event span: the span includes melody gaps
+      // where no intensity was measured.
+      let measured = event.bursts?.reduce(0) { $0 + $1.duration } ?? event.snoreDuration
       switch event.intensity {
-      case .light:
-        lightDuration += detectedDuration
-      case .loud:
-        loudDuration += detectedDuration
-      case .epic:
-        epicDuration += detectedDuration
-      case .quiet:
-        break
+      case .quiet: inputs.quietSnoring += measured
+      case .light: inputs.lightSnoring += measured
+      case .loud: inputs.loudSnoring += measured
+      case .epic: inputs.epicSnoring += measured
       }
     }
-
-    let sessionDuration = totalDuration
-
-    // Total snoring duration includes both detected events and recording gaps.
-    // Gaps occur when the Snore Interrupter plays after snoring detection;
-    // that time counts as snoring since the melody only triggers on confirmed samples.
-    let totalSnoringDuration = snoringDuration
-    let snoringPercentage = (totalSnoringDuration / sessionDuration) * 100
-    let snoringPenalty = min(Int(snoringPercentage * config.snoringMultiplier), config.snoringPenaltyCap)
-    let eventsPenalty = min(Int(Double(eventCount) / (sessionDuration / 3600) * config.eventsPerHourMultiplier), config.eventsPenaltyCap)
-
-    // Intensity ratios use only detected snoring as the denominator because we have no
-    // spectral data during gaps. This conservatively reduces the intensity penalty.
-    let lightRatio = detectedSnoringDuration > 0 ? lightDuration / detectedSnoringDuration : 0
-    let loudRatio = detectedSnoringDuration > 0 ? loudDuration / detectedSnoringDuration : 0
-    let epicRatio = detectedSnoringDuration > 0 ? epicDuration / detectedSnoringDuration : 0
-    let intensityPenalty = min(Int(
-      lightRatio * config.lightIntensityMultiplier
-        + loudRatio * config.loudIntensityMultiplier
-        + epicRatio * config.epicIntensityMultiplier
-    ), config.intensityPenaltyCap)
-
-    // Sleep talking penalty — only applies when sleep talking events exist.
-    // Weighted ~half of snoring: less severe but still a genuine fragmentation event.
-    let sleepTalkingPenalty: Int
-    if sleepTalkingEvents > 0 {
-      let talkingPctPenalty = sleepTalkingPercentage * config.sleepTalkingPercentageMultiplier
-      let talkingFreqPenalty = sleepTalkingEventsPerHour * config.sleepTalkingFrequencyMultiplier
-      sleepTalkingPenalty = min(Int(talkingPctPenalty + talkingFreqPenalty), config.sleepTalkingPenaltyCap)
-    } else {
-      sleepTalkingPenalty = 0
-    }
-
-    // Sleep stage penalty — only applies when Watch/HealthKit data is available.
-    // Evidence-based thresholds: deep ≥15%, REM ≥18%, awake ≤8%.
-    let stagePenalty: Int
-    if let stats = stageStats {
-      let deepDeficit = max(0, (config.deepPctTarget - stats.deepPct) * config.deepDeficitMultiplier)
-      let remDeficit = max(0, (config.remPctTarget - stats.remPct) * config.remDeficitMultiplier)
-      let awakeExcess = max(0, (stats.awakePct - config.awakePctTarget) * config.awakeExcessMultiplier)
-      stagePenalty = min(Int(deepDeficit + remDeficit + awakeExcess), config.stagePenaltyCap)
-    } else {
-      stagePenalty = 0
-    }
-
-    // Sleep duration penalty — very short or very long nights both reduce quality.
-    let sleepHours = totalDuration / 3600
-    let shortSleepPenalty: Int
-    if sleepHours >= config.shortSleepMinimumSessionHours {
-      let shortSleepDeficit = max(0, config.shortSleepThresholdHours - sleepHours)
-      shortSleepPenalty = min(Int(shortSleepDeficit * config.shortSleepMultiplier), config.shortSleepPenaltyCap)
-    } else {
-      shortSleepPenalty = 0
-    }
-
-    let longSleepExcess = max(0, sleepHours - config.longSleepThresholdHours)
-    let longSleepPenalty = min(Int(longSleepExcess * config.longSleepMultiplier), config.longSleepPenaltyCap)
-
-    return max(config.minScore, config.maxScore - snoringPenalty - eventsPenalty - intensityPenalty
-      - sleepTalkingPenalty - stagePenalty - shortSleepPenalty - longSleepPenalty)
+    return inputs
   }
 }
