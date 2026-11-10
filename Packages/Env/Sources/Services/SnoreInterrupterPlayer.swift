@@ -1,4 +1,5 @@
 import AVFoundation
+import FactoryKit
 import Models
 import Observation
 
@@ -30,7 +31,18 @@ public final class SnoreInterrupterPlayer: NSObject, SnoreInterrupterPlaying {
   private var stopTimer: Timer?
   private var nudgeTimer: Timer?
 
-  override public init() {
+  private let preferences: any UserPreferencesStoring
+  private let melodyStorage: any CustomMelodyStoring
+  private let haptics: any HapticFeedbackProviding
+
+  public init(
+    preferences: any UserPreferencesStoring = Container.shared.userPreferences(),
+    melodyStorage: any CustomMelodyStoring = Container.shared.customMelodyStorage(),
+    haptics: any HapticFeedbackProviding = Container.shared.hapticManager())
+  {
+    self.preferences = preferences
+    self.melodyStorage = melodyStorage
+    self.haptics = haptics
     super.init()
   }
 
@@ -49,18 +61,18 @@ public final class SnoreInterrupterPlayer: NSObject, SnoreInterrupterPlaying {
       return
     }
 
-    let mode = UserPreferences.shared.snoreInterrupterMode
+    let mode = preferences.snoreInterrupterMode
     print("[SnoreInterrupterPlayer] Mode: \(mode)")
     guard mode != .never else {
       print("[SnoreInterrupterPlayer] Mode is .never, skipping")
       return
     }
 
-    let melodyID = UserPreferences.shared.selectedMelodyID
+    let melodyID = preferences.selectedMelodyID
     print("[SnoreInterrupterPlayer] Selected melody ID: \(melodyID)")
 
     let melody = Melody.melody(id: melodyID)
-      ?? CustomMelodyStorage.shared.melody(id: melodyID)
+      ?? melodyStorage.melody(id: melodyID)
 
     guard let melody else {
       print("[SnoreInterrupterPlayer] No melody found for ID \(melodyID)")
@@ -68,7 +80,7 @@ public final class SnoreInterrupterPlayer: NSObject, SnoreInterrupterPlaying {
     }
 
     let url: URL? = if melody.isCustom {
-      CustomMelodyStorage.shared.fileURL(for: melody)
+      melodyStorage.fileURL(for: melody)
     } else {
       Bundle.main.url(forResource: melody.filename, withExtension: "mp3", subdirectory: "sounds")
         ?? Bundle.main.url(forResource: melody.filename, withExtension: "mp3")
@@ -122,10 +134,12 @@ public final class SnoreInterrupterPlayer: NSObject, SnoreInterrupterPlaying {
       isPlaying = true
       print("[SnoreInterrupterPlayer] ✅ Started playing '\(melody.name)' for \(mode.displayLabel)")
 
-      HapticManager.shared.prepare()
-      HapticManager.shared.nudge()
-      nudgeTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { _ in
-        HapticManager.shared.nudge()
+      haptics.prepare()
+      haptics.nudge()
+      nudgeTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { [weak self] _ in
+        Task { @MainActor in
+          self?.haptics.nudge()
+        }
       }
 
       if mode != .always {

@@ -9,6 +9,7 @@ import SwiftUI
 public struct ProfilePromptCard: View {
   @Injected(\.userPreferences) private var userPreferences
   @Injected(\.theme) private var theme
+  @Injected(\.hapticManager) private var hapticManager
   @Query(sort: \SleepSession.startDate, order: .reverse) private var sessions: [SleepSession]
   @Query private var profiles: [UserProfile]
   let onSetupProfile: () -> Void
@@ -32,7 +33,7 @@ public struct ProfilePromptCard: View {
             Spacer()
 
             Button {
-              HapticManager.shared.tap()
+              hapticManager.tap()
               dismiss()
             } label: {
               Image(systemName: "xmark")
@@ -48,7 +49,7 @@ public struct ProfilePromptCard: View {
             .lineSpacing(2)
 
           Button {
-            HapticManager.shared.tap()
+            hapticManager.tap()
             onSetupProfile()
           } label: {
             Text(Strings.profilePromptAction)
@@ -87,7 +88,7 @@ public struct ProfilePromptCard: View {
   }
 
   private func dismiss() {
-    HapticManager.shared.tap()
+    hapticManager.tap()
     userPreferences.profilePromptDismissCount += 1
     isDismissed = true
   }

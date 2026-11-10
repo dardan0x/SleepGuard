@@ -55,7 +55,9 @@ public final class FakeRecordingDelayManager: RecordingDelayManaging {
   public var isActive = false
   public var targetDate: Date?
   public var currentRemainingSeconds = 0
-  public var remainingTimeString: String { "\(currentRemainingSeconds / 60):\(String(format: "%02d", currentRemainingSeconds % 60))" }
+  public var remainingTimeString: String {
+    String(format: "%02d:%02d", currentRemainingSeconds / 60, currentRemainingSeconds % 60)
+  }
 
   public init() {}
 

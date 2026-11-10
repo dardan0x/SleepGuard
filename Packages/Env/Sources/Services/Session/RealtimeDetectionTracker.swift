@@ -1,4 +1,5 @@
 import AudioEngine
+import FactoryKit
 import Foundation
 import Models
 import UIKit
@@ -28,10 +29,14 @@ final class RealtimeDetectionTracker {
     totalDBCount > 0 ? totalDBSum / Double(totalDBCount) : 0
   }
 
-  private let audioRecorder = AudioRecorder.shared
+  private let audioRecorder: any AudioRecording
   private let snoreDetector: SnoreDetector
   private let speechDetector = SpeechDetector.shared
-  private let snoreInterrupterPlayer = SnoreInterrupterPlayer.shared
+  private let snoreInterrupterPlayer: any SnoreInterrupterPlaying
+  private let preferences: any UserPreferencesStoring
+  private let pendingSessionStore: any PendingSessionStoring
+  private let checkpointStore: any SessionCheckpointStoring
+  private let rawLogWriter: any SessionRawLogWriting
 
   /// Set by the controller while a session is recording.
   private var isActive = false
@@ -96,8 +101,22 @@ final class RealtimeDetectionTracker {
 
   /// `snoreDetector` is injectable so tests can check the sensitivity presets
   /// on their own instance; the app uses `.shared`.
-  init(snoreDetector: SnoreDetector = .shared) {
+  init(
+    snoreDetector: SnoreDetector = .shared,
+    audioRecorder: any AudioRecording = Container.shared.audioRecorder(),
+    snoreInterrupterPlayer: any SnoreInterrupterPlaying = Container.shared.snoreInterrupterPlayer(),
+    preferences: any UserPreferencesStoring = Container.shared.userPreferences(),
+    pendingSessionStore: any PendingSessionStoring = Container.shared.pendingSessionStore(),
+    checkpointStore: any SessionCheckpointStoring = Container.shared.sessionCheckpointStore(),
+    rawLogWriter: any SessionRawLogWriting = Container.shared.sessionRawLogWriter())
+  {
     self.snoreDetector = snoreDetector
+    self.audioRecorder = audioRecorder
+    self.snoreInterrupterPlayer = snoreInterrupterPlayer
+    self.preferences = preferences
+    self.pendingSessionStore = pendingSessionStore
+    self.checkpointStore = checkpointStore
+    self.rawLogWriter = rawLogWriter
     NotificationCenter.default.addObserver(
       self,
       selector: #selector(handleMelodyDidStop),
@@ -148,7 +167,7 @@ final class RealtimeDetectionTracker {
   func checkpoint() {
     guard let session = recording?.currentSession else { return }
     let snapshot = SessionRecoverySnapshot(from: session, checkpointDate: Date())
-    SessionCheckpointStore.shared.write(snapshot)
+    checkpointStore.write(snapshot)
   }
 
   /// Calibrated thresholds + SoundAnalysis confidence gates for the full-band
@@ -160,7 +179,7 @@ final class RealtimeDetectionTracker {
   /// compensates, but the thresholds were still sitting above real captured
   /// levels for loud snoring at typical bedside distances.
   func applyDetectionSensitivity() {
-    apply(UserPreferences.shared.detectionSensitivity)
+    apply(preferences.detectionSensitivity)
   }
 
   func apply(_ sensitivity: UserPreferences.DetectionSensitivity) {
@@ -244,9 +263,9 @@ final class RealtimeDetectionTracker {
     currentSpeechDetected = speechDetector.isSpeechDetected
 
     // Append to raw classification log for future re-processing (debug only).
-    if UserPreferences.shared.preserveRawAudio {
-      Task {
-        await SessionRawLogWriter.shared.append(
+    if preferences.preserveRawAudio {
+      Task { [rawLogWriter] in
+        await rawLogWriter.append(
           at: now,
           db: db,
           peakDB: peakDB,
@@ -301,7 +320,7 @@ final class RealtimeDetectionTracker {
           let fileURL = eventFileURL(eventID: eventID, sessionID: session.id)
           do {
             try audioRecorder.startEventFile(eventID: eventID, url: fileURL)
-            PendingSessionStore.shared.addFile(fileURL.lastPathComponent)
+            pendingSessionStore.addFile(fileURL.lastPathComponent)
           } catch {
             print("[SessionManager] Failed to start event file: \(error)")
           }
@@ -433,7 +452,7 @@ final class RealtimeDetectionTracker {
       }
 
       // Speech event tracking (sleep talking)
-      if UserPreferences.shared.detectSleepTalking {
+      if preferences.detectSleepTalking {
         if currentSpeechDetected {
           consecutiveSpeechSamples += 1
           lastSpeechSampleTime = now
@@ -639,7 +658,7 @@ final class RealtimeDetectionTracker {
           event.dominantFrequency = spectral.dominantFrequency
           event.spectralCentroid = spectral.spectralCentroid
           event.lowFreqRatio = spectral.lowFreqRatio
-          PendingSessionStore.shared.addFile(m4aURL.lastPathComponent)
+          self.pendingSessionStore.addFile(m4aURL.lastPathComponent)
           // Delete raw .caf
           try? FileManager.default.removeItem(at: rawFileURL)
           // Re-checkpoint now that the event's clip URL is set.
@@ -728,7 +747,7 @@ final class RealtimeDetectionTracker {
   /// snores (~1 s) are retained on Medium/High while Low still filters
   /// transient sounds. Ground-truthed against bedroom recordings.
   private var minEventDuration: TimeInterval {
-    switch UserPreferences.shared.detectionSensitivity {
+    switch preferences.detectionSensitivity {
     case .low: 2.0
     case .medium: 1.0
     case .high: 0.5

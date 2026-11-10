@@ -6,6 +6,7 @@ import SwiftUI
 public struct OnboardingView: View {
   @Injected(\.userPreferences) private var userPreferences
   @Injected(\.theme) private var theme
+  @Injected(\.hapticManager) private var hapticManager
   @State private var currentPage = 0
   private let totalPages = 6
 
@@ -40,14 +41,14 @@ public struct OnboardingView: View {
   }
 
   private func advance() {
-    HapticManager.shared.tap()
+    hapticManager.tap()
     withAnimation {
       currentPage = min(currentPage + 1, totalPages - 1)
     }
   }
 
   private func finishOnboarding() {
-    HapticManager.shared.tap()
+    hapticManager.tap()
     userPreferences.hasCompletedOnboarding = true
   }
 
@@ -56,7 +57,7 @@ public struct OnboardingView: View {
       Spacer()
       if currentPage < totalPages - 1 {
         Button(action: {
-          HapticManager.shared.tap()
+          hapticManager.tap()
           withAnimation {
             currentPage = totalPages - 1
           }
@@ -77,7 +78,7 @@ public struct OnboardingView: View {
       progressDots
 
       Button(action: {
-        HapticManager.shared.tap()
+        hapticManager.tap()
         withAnimation {
           currentPage -= 1
         }

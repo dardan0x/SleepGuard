@@ -69,10 +69,11 @@ public final class AudioRecorder: AudioRecording {
   private var audioEngine: AVAudioEngine?
   private var warmupEngine: AVAudioEngine?
   private let tap = TapProcessor()
-  private let soundAnalyzer = SoundAnalysisDetector.shared
+  private let soundAnalyzer: any SoundAnalysisDetecting
   private var recordingFormat: AVAudioFormat?
 
-  public init() {
+  public init(soundAnalyzer: any SoundAnalysisDetecting = SoundAnalysisDetector.shared) {
+    self.soundAnalyzer = soundAnalyzer
     checkPermission()
     setupNotifications()
   }

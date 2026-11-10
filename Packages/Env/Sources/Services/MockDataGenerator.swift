@@ -1,3 +1,4 @@
+import FactoryKit
 import Foundation
 import Models
 import SwiftData
@@ -23,10 +24,10 @@ public enum MockDataGenerator {
 
     // Reset personalization prefs so briefing/profile features trigger
     if resetPersonalizationPrefs {
-      UserPreferences.shared.hasCompletedProfile = false
-      UserPreferences.shared.profilePromptDismissCount = 0
-      UserPreferences.shared.lastBriefingShownDate = nil
-      UserPreferences.shared.briefingEnabled = true
+      Container.shared.userPreferences().hasCompletedProfile = false
+      Container.shared.userPreferences().profilePromptDismissCount = 0
+      Container.shared.userPreferences().lastBriefingShownDate = nil
+      Container.shared.userPreferences().briefingEnabled = true
     }
 
     // Clear existing data

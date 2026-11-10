@@ -10,6 +10,7 @@ public struct ProfileEditorView: View {
   let onComplete: () -> Void
   let onDismiss: () -> Void
   @Injected(\.theme) private var theme
+  @Injected(\.hapticManager) private var hapticManager
   @State private var currentPage = 0
   private let totalPages = 4
 
@@ -54,7 +55,7 @@ public struct ProfileEditorView: View {
   private var navBar: some View {
     HStack {
       Button {
-        HapticManager.shared.tap()
+        hapticManager.tap()
         onDismiss()
       } label: {
         Image(systemName: "xmark")
@@ -68,7 +69,7 @@ public struct ProfileEditorView: View {
 
       if currentPage < totalPages - 1 {
         Button {
-          HapticManager.shared.tap()
+          hapticManager.tap()
           withAnimation { currentPage += 1 }
         } label: {
           Text(Strings.actionSkip)
@@ -90,7 +91,7 @@ public struct ProfileEditorView: View {
 
       if currentPage == totalPages - 1 {
         Button {
-          HapticManager.shared.tap()
+          hapticManager.tap()
           profile.updatedAt = Date()
           onComplete()
         } label: {
@@ -104,7 +105,7 @@ public struct ProfileEditorView: View {
         }
       } else {
         Button {
-          HapticManager.shared.tap()
+          hapticManager.tap()
           withAnimation { currentPage += 1 }
         } label: {
           Text(Strings.actionContinue)
@@ -119,7 +120,7 @@ public struct ProfileEditorView: View {
 
       if currentPage > 0 {
         Button {
-          HapticManager.shared.tap()
+          hapticManager.tap()
           withAnimation { currentPage -= 1 }
         } label: {
           Text(Strings.actionBack)

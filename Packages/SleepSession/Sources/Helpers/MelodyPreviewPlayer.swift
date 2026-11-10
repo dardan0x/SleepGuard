@@ -1,5 +1,6 @@
 import AVFoundation
 import Env
+import FactoryKit
 import Foundation
 import Models
 
@@ -12,6 +13,11 @@ final class MelodyPreviewPlayer {
 
   private var previewPlayer: AVAudioPlayer?
   private var previewTask: Task<Void, Never>?
+  private let melodyStorage: any CustomMelodyStoring
+
+  init(melodyStorage: any CustomMelodyStoring = Container.shared.customMelodyStorage()) {
+    self.melodyStorage = melodyStorage
+  }
 
   /// Toggles preview of the given melody: previews it, or stops if it is
   /// already the previewing one.
@@ -24,7 +30,7 @@ final class MelodyPreviewPlayer {
     stop()
 
     let url: URL? = if melody.isCustom {
-      CustomMelodyStorage.shared.fileURL(for: melody)
+      melodyStorage.fileURL(for: melody)
     } else {
       Bundle.main.url(forResource: melody.filename, withExtension: "mp3", subdirectory: "sounds")
         ?? Bundle.main.url(forResource: melody.filename, withExtension: "mp3")

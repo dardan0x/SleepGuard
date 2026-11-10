@@ -1,3 +1,4 @@
+import FactoryKit
 import Foundation
 import Models
 import SwiftData
@@ -57,7 +58,7 @@ public final class StorageLimitEnforcer: Sendable, StorageLimitEnforcing {
   @MainActor
   @discardableResult
   public func enforceLimits(modelContext: ModelContext) async -> CleanupReport {
-    let prefs = UserPreferences.shared
+    let prefs = Container.shared.userPreferences()
     return await enforceLimits(
       modelContext: modelContext,
       maxDays: prefs.limitDaysEnabled ? prefs.maxDays : nil,

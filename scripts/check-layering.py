@@ -9,11 +9,15 @@ Rules (see AGENTS.md "UI Dependencies in Non-View Code"):
      DesignSystem at all.
   3. Env (services) must not import SwiftUI: navigation lives in the
      `Routing` package (docs/adr/0001-routing-package.md).
+  4. Feature packages and DesignSystem never touch an app service's
+     `.shared`: they resolve it from the container (`@Injected` in views,
+     `Container.shared.x()` in state owners), so tests/previews can swap it.
 
 Exits 1 with a file:line listing when any violation is found.
 """
 
 import pathlib
+import re
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -36,6 +40,16 @@ CORE_PREFIXES = (
 
 ENV_PREFIX = "Packages/Env/Sources/"
 
+# Packages above Env: everything except the core/service/navigation layers.
+SERVICE_CONSUMER_EXCLUDED = ("Packages/Models/", "Packages/AudioEngine/", "Packages/Env/", "Packages/Routing/")
+
+SERVICE_SINGLETON = re.compile(
+    r"\b(AppConfig|AudioRecorder|CustomMelodyStorage|HealthKitSync|HapticManager|"
+    r"NotificationPermissionManager|PendingSessionStore|RecordingDelayManager|"
+    r"SessionCheckpointStore|SessionManager|SnoreInterrupterPlayer|SoundAnalysisDetector|"
+    r"UserPreferences|WatchConnectivityManager|SessionRawLogWriter|StorageLimitEnforcer|"
+    r"TabCoordinator|Theme)\.shared\b")
+
 
 def main() -> int:
     violations = []
@@ -44,6 +58,11 @@ def main() -> int:
         in_view_code = "/Views/" in rel or "/Components/" in rel
         in_core = rel.startswith(CORE_PREFIXES)
         in_env = rel.startswith(ENV_PREFIX)
+        consumes_services = (
+            "/Sources/" in rel
+            and not rel.startswith(SERVICE_CONSUMER_EXCLUDED)
+            and not rel.endswith("/Container.swift")
+        )
         for number, line in enumerate(swift.read_text().splitlines(), 1):
             stripped = line.strip()
             if stripped == "import DesignSystem" and not in_view_code and rel not in DESIGNSYSTEM_ALLOWLIST:
@@ -54,6 +73,8 @@ def main() -> int:
                 violations.append(f"{rel}:{number}: 'UIKit' import in core package")
             if in_env and stripped == "import SwiftUI":
                 violations.append(f"{rel}:{number}: 'SwiftUI' import in Env (navigation belongs in Routing)")
+            if consumes_services and not stripped.startswith("//") and (match := SERVICE_SINGLETON.search(line)):
+                violations.append(f"{rel}:{number}: '{match.group(0)}' — resolve from the container instead")
 
     if violations:
         print("Layering violations (see AGENTS.md 'UI Dependencies in Non-View Code'):")

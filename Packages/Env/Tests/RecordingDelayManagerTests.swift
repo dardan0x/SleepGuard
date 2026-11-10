@@ -1,3 +1,4 @@
+import EnvTestSupport
 import Foundation
 import Testing
 @testable import Env
@@ -6,16 +7,9 @@ import Testing
 /// path call `UNUserNotificationCenter.current()` (throws without an app bundle,
 /// as in package tests) and start/stop the microphone warm-up.
 @MainActor
-@Suite(.serialized)
 struct RecordingDelayManagerTests {
-  private let manager = RecordingDelayManager.shared
-
-  /// Each test gets a fresh instance, so reset the shared state here.
-  init() {
-    manager.isActive = false
-    manager.targetDate = nil
-    manager.currentRemainingSeconds = 0
-  }
+  /// A fresh manager per test; the fake recorder keeps the mic untouched.
+  private let manager = RecordingDelayManager(audioRecorder: FakeAudioRecorder())
 
   @Test(arguments: [(0, "00:00"), (5, "00:05"), (65, "01:05"), (600, "10:00"), (5999, "99:59"), (6000, "100:00")])
   func remainingTimeIsMinutesAndSeconds(seconds: Int, expected: String) {

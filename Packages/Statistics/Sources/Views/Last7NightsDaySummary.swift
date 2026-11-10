@@ -1,6 +1,5 @@
-import DesignSystem
+import Foundation
 import Models
-import SwiftUI
 
 @MainActor
 struct DaySummary: Identifiable {
@@ -15,16 +14,6 @@ struct DaySummary: Identifiable {
   let weekday: String
   let dateString: String
   let primarySessionId: UUID?
-
-  var intensityColor: Color {
-    let theme = Theme.shared
-    switch maxIntensity {
-    case .epic: return theme.snoreEpic
-    case .loud: return theme.snoreLoud
-    case .light: return theme.snoreLight
-    case .quiet: return theme.snoreQuiet
-    }
-  }
 
   init(date: Date, sessions: [SleepSession]) {
     self.date = date
