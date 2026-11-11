@@ -1,5 +1,6 @@
 import DesignSystem
 import Env
+import FactoryKit
 import SwiftUI
 
 @MainActor
@@ -8,7 +9,7 @@ struct TrendStatCard: View {
   let iconColor: Color
   let label: String
   let value: String
-  let theme: Theme
+  @Injected(\.theme) private var theme
 
   var body: some View {
     VStack(alignment: .leading, spacing: 2) {
@@ -31,5 +32,8 @@ struct TrendStatCard: View {
     .padding(12)
     .background(theme.bgCard)
     .cornerRadius(12)
+    .accessibilityElement(children: .ignore)
+    .accessibilityLabel(label)
+    .accessibilityValue(value)
   }
 }

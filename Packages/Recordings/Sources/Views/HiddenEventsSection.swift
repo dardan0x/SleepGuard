@@ -43,7 +43,6 @@ struct HiddenEventsSection: View {
             EventRow(
               event: event,
               displayDuration: displayDurations?[event.id],
-              theme: theme,
               onPlay: { onPlayEvent(event) },
               onShare: { onShareEvent(event) })
           }

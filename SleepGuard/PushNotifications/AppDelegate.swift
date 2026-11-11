@@ -1,5 +1,7 @@
 import Env
 import FirebaseMessaging
+import Models
+import os
 import UIKit
 import UserNotifications
 
@@ -26,13 +28,13 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
     _: UIApplication,
     didFailToRegisterForRemoteNotificationsWithError error: Error)
   {
-    print("[Push] APNs registration failed: \(error)")
+    Log.app.error("APNs registration failed: \(String(describing: error), privacy: .public)")
   }
 }
 
 extension AppDelegate: MessagingDelegate {
   func messaging(_: Messaging, didReceiveRegistrationToken fcmToken: String?) {
-    print("[Push] FCM token: \(fcmToken ?? "nil")")
+    Log.app.debug("FCM token: \(fcmToken ?? "nil")")
     // TODO: forward the token to your backend if you target specific devices.
   }
 }
@@ -54,7 +56,11 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
       guard response.notification.request.identifier == RecordingDelayManager.shared.notificationId,
             RecordingDelayManager.shared.isActive else { return }
       RecordingDelayManager.shared.cancel()
-      try? SessionManager.shared.startSession()
+      do {
+        try SessionManager.shared.startSession()
+      } catch {
+        Log.session.error("Start from notification failed: \(String(describing: error), privacy: .public)")
+      }
     }
   }
 }

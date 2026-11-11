@@ -1,16 +1,16 @@
+import FactoryKit
 import SwiftUI
 
 @MainActor
 public struct SleepScoreGauge: View {
   let score: Int
-  let theme: Theme
+  @Injected(\.theme) private var theme
   let size: CGFloat
 
   @State private var animatedProgress: CGFloat = 0
 
-  public init(score: Int, theme: Theme, size: CGFloat = 160) {
+  public init(score: Int, size: CGFloat = 160) {
     self.score = score
-    self.theme = theme
     self.size = size
   }
 
@@ -47,6 +47,9 @@ public struct SleepScoreGauge: View {
       }
     }
     .frame(width: size, height: size)
+    .accessibilityElement(children: .ignore)
+    .accessibilityLabel(Strings.a11ySleepScore)
+    .accessibilityValue(String(format: Strings.a11yScoreOutOf100, score))
     .onAppear {
       animatedProgress = CGFloat(score) / 100.0
     }

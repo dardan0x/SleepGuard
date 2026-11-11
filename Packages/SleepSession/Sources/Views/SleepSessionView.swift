@@ -7,6 +7,7 @@ import SwiftUI
 public struct SleepSessionView: View {
   @Injected(\.sessionManager) private var sessionManager
   @Injected(\.theme) private var theme
+  @Injected(\.recordingDelayManager) private var recordingDelayManager
 
   public init() {}
 
@@ -16,7 +17,7 @@ public struct SleepSessionView: View {
         BedsideClockView()
       } else if sessionManager.completedSession != nil {
         Color.clear
-      } else if RecordingDelayManager.shared.isActive {
+      } else if recordingDelayManager.isActive {
         RecordingCountdownView()
       } else {
         RecordingPrestartView()

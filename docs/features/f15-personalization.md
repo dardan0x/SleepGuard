@@ -1,5 +1,7 @@
 # Feature: F15 — Personalization & Sleep Briefing
 
+> **Historical record (F15).** Later moves: route enums now live in `Packages/Routing/Sources/Router.swift` (F22-T4, ADR 0001).
+
 ## Status: Done
 ## Completed: 2026-06-06
 

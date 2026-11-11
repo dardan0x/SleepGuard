@@ -2,6 +2,7 @@ import DesignSystem
 import Env
 import FactoryKit
 import Models
+import Routing
 import SwiftUI
 
 struct CalendarSelectedNightView: View {
@@ -18,7 +19,7 @@ struct CalendarSelectedNightView: View {
         .tracking(1)
 
       HStack(spacing: 12) {
-        SleepScoreGauge(score: session.sleepScore, theme: theme, size: 44)
+        SleepScoreGauge(score: session.sleepScore, size: 44)
 
         VStack(alignment: .leading, spacing: 2) {
           Text(selectedDateString)

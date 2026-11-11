@@ -1,5 +1,7 @@
 # F19 — Factory DI Migration
 
+> **Historical record (F19).** F22 changed parts of this design: factories are now protocol-typed (`Factory<any P>`) with fakes in `EnvTestSupport` (ADR 0002), feature packages no longer touch `.shared`, the `routerPath` registration was deleted, and route enums moved to the `Routing` package (ADR 0001). See `docs/features/f22-architecture-hardening.md`.
+
 Migration of SleepGuard's dependency injection from SwiftUI environment-based
 injection (IceCubesApp pattern) to a Factory container ([Factory](https://github.com/hmlongco/Factory), pinned `3.5.2`, imported as `FactoryKit`). Services stay `@MainActor @Observable` `.shared` singletons; views now resolve them via `@Injected` from the container instead of `@Environment`. No user-facing behavior changes.
 

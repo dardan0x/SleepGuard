@@ -1,29 +1,24 @@
 import DesignSystem
-import FactoryKit
 import Models
 import SwiftUI
 
 struct CalendarMonthStatsView: View {
   let monthSessions: [SleepSession]
-  @Injected(\.theme) private var theme
 
   var body: some View {
     HStack(spacing: 8) {
       CalendarStatCard(
         icon: "moon.fill",
         label: Strings.sessionsCalendarStatCardLabel,
-        value: "\(monthSessions.count)",
-        theme: theme)
+        value: "\(monthSessions.count)")
       CalendarStatCard(
         icon: "scope",
         label: Strings.avgScoreCalendarStatCardLabel,
-        value: monthSessions.isEmpty ? "—" : "\(avgScore)",
-        theme: theme)
+        value: monthSessions.isEmpty ? "—" : "\(avgScore)")
       CalendarStatCard(
         icon: "speaker.wave.3.fill",
         label: Strings.loudNightsCalendarStatCardLabel,
-        value: "\(loudNights)",
-        theme: theme)
+        value: "\(loudNights)")
     }
   }
 

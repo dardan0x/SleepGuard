@@ -66,7 +66,7 @@ struct Last7NightsRow: View {
 
       Text("\(DurationFormatter.hoursAndMinutes(day.totalSnoringMinutes)) \(Strings.totalSnoringDurationColumn)")
         .font(.system(size: 12))
-        .foregroundStyle(day.intensityColor)
+        .foregroundStyle(theme.intensityColor(day.maxIntensity))
     }
   }
 }

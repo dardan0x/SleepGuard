@@ -1,0 +1,8 @@
+# loud-onset: 6720 samples, 359.996 s
+# minEventDuration 1.0 s, highConfidenceGate 0.55, sleep talking off
+19.859 started #1 from 19.739
+30.985 discarded #1 lowConfidenceShortEvent
+51.139 started #2 from 51.021
+312.986 finalized #2 51.021–302.946 epic avg -57.62 peak -26.97 conf 0.860 spectral 0.000 bursts 5
+# session end
+# melodyRequested 4679

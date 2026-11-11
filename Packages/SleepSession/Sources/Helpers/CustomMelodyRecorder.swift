@@ -1,6 +1,8 @@
 import AVFoundation
 import Env
+import FactoryKit
 import Foundation
+import Models
 
 /// Recording engine for the custom-melody sheet: owns the audio recorder,
 /// the elapsed-time timer, playback of the take, and the record → recorded
@@ -21,10 +23,15 @@ final class CustomMelodyRecorder {
   private(set) var permissionGranted = false
 
   private let maxDuration: TimeInterval = 10
+  private let melodyStorage: any CustomMelodyStoring
   private var recorder: AVAudioRecorder?
   private var recordedURL: URL?
   private var playbackPlayer: AVAudioPlayer?
   private var timer: Timer?
+
+  init(melodyStorage: any CustomMelodyStoring = Container.shared.customMelodyStorage()) {
+    self.melodyStorage = melodyStorage
+  }
 
   /// Checks (or requests) microphone permission. Call on appear.
   func checkPermission() {
@@ -56,7 +63,7 @@ final class CustomMelodyRecorder {
       try session.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker])
       try session.setActive(true)
     } catch {
-      print("[RecordCustomMelodySheet] Failed to configure session: \(error)")
+      Log.interrupter.error("Failed to configure session: \(String(describing: error), privacy: .public)")
       return
     }
 
@@ -90,7 +97,7 @@ final class CustomMelodyRecorder {
         }
       }
     } catch {
-      print("[RecordCustomMelodySheet] Failed to start recording: \(error)")
+      Log.interrupter.error("Failed to start recording: \(String(describing: error), privacy: .public)")
     }
   }
 
@@ -128,7 +135,7 @@ final class CustomMelodyRecorder {
         isPlaying = false
       }
     } catch {
-      print("[RecordCustomMelodySheet] Failed to play back: \(error)")
+      Log.interrupter.error("Failed to play back: \(String(describing: error), privacy: .public)")
     }
   }
 
@@ -137,8 +144,8 @@ final class CustomMelodyRecorder {
   @discardableResult
   func save() -> Bool {
     guard let url = recordedURL else { return false }
-    let name = "My Sound \(CustomMelodyStorage.shared.allCustomMelodies().count + 1)"
-    _ = CustomMelodyStorage.shared.saveRecording(name: name, from: url)
+    let name = "My Sound \(melodyStorage.allCustomMelodies().count + 1)"
+    _ = melodyStorage.saveRecording(name: name, from: url)
     return true
   }
 

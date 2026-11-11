@@ -4,13 +4,13 @@ import WatchConnectivity
 
 @MainActor
 @Observable
-public final class WatchConnectivityManager: NSObject {
+public final class WatchConnectivityManager: NSObject, WatchConnectivityManaging {
   public static let shared = WatchConnectivityManager()
 
   public var isWatchReachable = false
   public var lastSyncedSession: Date?
 
-  override private init() {
+  override public init() {
     super.init()
     if WCSession.isSupported() {
       WCSession.default.delegate = self

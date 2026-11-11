@@ -1,13 +1,13 @@
+import FactoryKit
 import SwiftUI
 
 @MainActor
 public struct AudioLevelMeter: View {
   let levels: [Double]
-  let theme: Theme
+  @Injected(\.theme) private var theme
 
-  public init(levels: [Double], theme: Theme) {
+  public init(levels: [Double]) {
     self.levels = levels
-    self.theme = theme
   }
 
   public var body: some View {
@@ -19,6 +19,7 @@ public struct AudioLevelMeter: View {
       }
     }
     .frame(height: 80)
+    .accessibilityHidden(true)
   }
 
   private func barHeight(for level: Double) -> CGFloat {

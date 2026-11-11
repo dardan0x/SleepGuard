@@ -1,10 +1,10 @@
-import Env
 import SwiftUI
 
 public struct RecordingActionButton<Label: View>: View {
   let height: CGFloat
   let action: () -> Void
   let label: Label
+  @State private var tapCount = 0
 
   public init(
     height: CGFloat = 56,
@@ -40,7 +40,7 @@ public struct RecordingActionButton<Label: View>: View {
         .offset(y: 8)
 
       Button(action: {
-        HapticManager.shared.tap()
+        tapCount += 1
         action()
       }) {
         label
@@ -61,6 +61,8 @@ public struct RecordingActionButton<Label: View>: View {
           .clipShape(RoundedRectangle(cornerRadius: 16))
       }
       .buttonStyle(ScaleButtonStyle())
+      // Same light tap as `HapticManager.tap()`, without DesignSystem depending on Env.
+      .sensoryFeedback(.impact(weight: .light, intensity: 0.8), trigger: tapCount)
     }
   }
 }

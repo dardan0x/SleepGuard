@@ -1,3 +1,4 @@
+import FactoryKit
 import SwiftUI
 
 @MainActor
@@ -5,28 +6,27 @@ public struct StatCard: View {
   let icon: String
   let title: String
   let value: String
-  let theme: Theme
-  let iconColor: Color
+  @Injected(\.theme) private var theme
+  /// `nil` uses the theme accent.
+  let iconColor: Color?
 
   public init(
     icon: String,
     title: String,
     value: String,
-    theme: Theme,
     iconColor: Color? = nil)
   {
     self.icon = icon
     self.title = title
     self.value = value
-    self.theme = theme
-    self.iconColor = iconColor ?? theme.accent
+    self.iconColor = iconColor
   }
 
   public var body: some View {
     VStack(alignment: .leading, spacing: 8) {
       Image(systemName: icon)
         .font(.system(size: 12, weight: .semibold))
-        .foregroundStyle(iconColor)
+        .foregroundStyle(iconColor ?? theme.accent)
 
       VStack(alignment: .leading, spacing: 2) {
         Text(value)
@@ -45,5 +45,8 @@ public struct StatCard: View {
     .frame(maxWidth: .infinity, alignment: .leading)
     .background(theme.bgCard)
     .cornerRadius(theme.radiusCard)
+    .accessibilityElement(children: .ignore)
+    .accessibilityLabel(title)
+    .accessibilityValue(value)
   }
 }

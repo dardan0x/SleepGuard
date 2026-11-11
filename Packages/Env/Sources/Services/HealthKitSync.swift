@@ -3,16 +3,17 @@ import HealthKit
 import Models
 import Observation
 
+/// The live HealthKit implementation of `HealthKitSyncing`.
 @MainActor
 @Observable
-public final class HealthKitSync {
+public final class HealthKitSync: HealthKitSyncing {
   public static let shared = HealthKitSync()
 
   private let healthStore = HKHealthStore()
 
   public var isAuthorized = false
 
-  private init() {}
+  public init() {}
 
   // MARK: - Authorization
 

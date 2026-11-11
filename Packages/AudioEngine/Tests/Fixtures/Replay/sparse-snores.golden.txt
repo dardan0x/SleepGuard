@@ -1,0 +1,14 @@
+# sparse-snores: 8959 samples, 479.987 s
+# minEventDuration 1.0 s, highConfidenceGate 0.55, sleep talking off
+6.099 started #1 from 5.973
+24.968 finalized #1 5.973–14.933 epic avg -53.29 peak -26.80 conf 0.639 spectral 0.000 bursts 2
+117.120 started #2 from 117.000
+137.505 finalized #2 117.000–127.470 quiet avg -66.54 peak -61.78 conf 0.529 spectral 0.000 bursts 2
+141.091 started #3 from 140.975
+152.479 finalized #3 140.975–142.435 quiet avg -64.54 peak -61.49 conf 0.565 spectral 0.000 bursts 1
+216.131 started #4 from 216.009
+227.519 finalized #4 216.009–217.471 quiet avg -67.45 peak -64.10 conf 0.568 spectral 0.000 bursts 1
+337.810 started #5 from 337.695
+348.986 discarded #5 lowConfidenceShortEvent
+# session end
+# melodyRequested 216

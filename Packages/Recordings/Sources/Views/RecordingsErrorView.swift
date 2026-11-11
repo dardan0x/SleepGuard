@@ -1,10 +1,11 @@
 import DesignSystem
 import Env
+import FactoryKit
 import SwiftUI
 
 @MainActor
 struct RecordingsErrorView: View {
-  let theme: Theme
+  @Injected(\.theme) private var theme
   let onRetry: () -> Void
 
   var body: some View {

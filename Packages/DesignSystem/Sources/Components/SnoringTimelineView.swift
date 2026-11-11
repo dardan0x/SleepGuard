@@ -1,15 +1,14 @@
-import Env
+import FactoryKit
 import Models
 import SwiftUI
 
 @MainActor
 public struct SnoringTimelineView: View {
   public let session: SleepSession
-  public let theme: Theme
+  @Injected(\.theme) private var theme
 
-  public init(session: SleepSession, theme: Theme) {
+  public init(session: SleepSession) {
     self.session = session
-    self.theme = theme
   }
 
   public var body: some View {
@@ -41,6 +40,12 @@ public struct SnoringTimelineView: View {
       }
     }
     .frame(height: 34)
+    .accessibilityElement()
+    .accessibilityLabel(Strings.a11ySnoringTimeline)
+    .accessibilityValue(String(
+      format: Strings.a11ySnoringTimelineValueFormat,
+      session.eventsCount,
+      DurationFormatter.hoursAndMinutes(Int(session.snoringDuration / 60))))
   }
 
   /// Timeline items: snoring episodes merged, other categories raw.

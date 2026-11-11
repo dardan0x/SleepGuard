@@ -4,7 +4,7 @@ import SwiftUI
 
 @MainActor
 @Observable
-public final class Theme {
+public final class Theme: ThemeProviding {
   public static let shared = Theme()
 
   // MARK: - Background
@@ -77,7 +77,7 @@ public final class Theme {
   public var labelColor: Color { textPrimary }
   public var secondaryLabelColor: Color { textTertiary }
 
-  private init() {}
+  public init() {}
 
   // MARK: - Helpers
 

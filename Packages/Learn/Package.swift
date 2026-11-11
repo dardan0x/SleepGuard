@@ -10,6 +10,7 @@ let package = Package(
   dependencies: [
     .package(path: "../Models"),
     .package(path: "../Env"),
+    .package(path: "../Routing"),
     .package(path: "../DesignSystem"),
     .package(url: "https://github.com/hmlongco/Factory", from: "3.5.2"),
   ],
@@ -19,6 +20,7 @@ let package = Package(
       dependencies: [
         .product(name: "Models", package: "Models"),
         .product(name: "Env", package: "Env"),
+        .product(name: "Routing", package: "Routing"),
         .product(name: "DesignSystem", package: "DesignSystem"),
         .product(name: "FactoryKit", package: "Factory"),
       ],

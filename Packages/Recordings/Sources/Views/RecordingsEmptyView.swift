@@ -1,10 +1,11 @@
 import DesignSystem
 import Env
+import FactoryKit
 import SwiftUI
 
 @MainActor
 struct RecordingsEmptyView: View {
-  let theme: Theme
+  @Injected(\.theme) private var theme
 
   var body: some View {
     VStack(spacing: 16) {

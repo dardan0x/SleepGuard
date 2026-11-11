@@ -7,7 +7,6 @@ import SwiftUI
 
 @MainActor
 public struct RecordingsListView: View {
-  @Environment(RouterPath.self) private var routerPath
   @Injected(\.theme) private var theme
   @Environment(\.modelContext) private var modelContext
   @Query(sort: \SleepSession.startDate, order: .reverse)
@@ -26,11 +25,11 @@ public struct RecordingsListView: View {
         Color.clear
           .task { loadState() }
       case .empty:
-        RecordingsEmptyView(theme: theme)
+        RecordingsEmptyView()
       case let .loaded(sections):
         loadedBody(sections: sections)
       case .error:
-        RecordingsErrorView(theme: theme) {
+        RecordingsErrorView {
           loadState()
         }
       }
@@ -48,7 +47,6 @@ public struct RecordingsListView: View {
           ForEach(section.groups) { group in
             NightGroupRowView(
               group: group,
-              theme: theme,
               onDeleteRequest: {
                 groupToDelete = group
                 showDeleteAlert = true

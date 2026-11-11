@@ -1,3 +1,4 @@
+import FactoryKit
 import Models
 import SwiftUI
 
@@ -6,7 +7,7 @@ import SwiftUI
 /// bars with target markers.
 struct ScoreImpactSection: View {
   let session: SleepSession
-  let theme: Theme
+  @Injected(\.theme) private var theme
 
   var body: some View {
     VStack(alignment: .leading, spacing: 16) {

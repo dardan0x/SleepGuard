@@ -1,6 +1,8 @@
 import AudioEngine
+import FactoryKit
 import Foundation
 import Models
+import os
 import UIKit
 
 /// Recording lifecycle for a sleep session: starts/stops the audio engine,
@@ -16,15 +18,41 @@ final class SessionRecordingController {
   private(set) var isProcessingSession = false
   var isLiveSessionVisible = false
 
-  private let audioRecorder = AudioRecorder.shared
-  private let snoreInterrupterPlayer = SnoreInterrupterPlayer.shared
+  private let audioRecorder: any AudioRecording
+  private let snoreInterrupterPlayer: any SnoreInterrupterPlaying
+  private let soundAnalysis: any SoundAnalysisDetecting
+  private let preferences: any UserPreferencesStoring
+  private let pendingSessionStore: any PendingSessionStoring
+  private let checkpointStore: any SessionCheckpointStoring
+  private let rawLogWriter: any SessionRawLogWriting
   private var detection: RealtimeDetectionTracker?
+  /// `false` in tests that script every sample themselves (F22-T10).
+  private let runsProcessingLoop: Bool
 
   private var processingTask: Task<Void, Never>?
   private var batteryCheckCounter = 0
   private var checkpointCounter = 0
+  /// Instruments interval for the running session (Points of Interest).
+  private var sessionSignpost: OSSignpostIntervalState?
 
-  init() {
+  init(
+    audioRecorder: any AudioRecording = Container.shared.audioRecorder(),
+    snoreInterrupterPlayer: any SnoreInterrupterPlaying = Container.shared.snoreInterrupterPlayer(),
+    soundAnalysis: any SoundAnalysisDetecting = Container.shared.soundAnalysisDetector(),
+    preferences: any UserPreferencesStoring = Container.shared.userPreferences(),
+    pendingSessionStore: any PendingSessionStoring = Container.shared.pendingSessionStore(),
+    checkpointStore: any SessionCheckpointStoring = Container.shared.sessionCheckpointStore(),
+    rawLogWriter: any SessionRawLogWriting = Container.shared.sessionRawLogWriter(),
+    runsProcessingLoop: Bool = true)
+  {
+    self.runsProcessingLoop = runsProcessingLoop
+    self.audioRecorder = audioRecorder
+    self.snoreInterrupterPlayer = snoreInterrupterPlayer
+    self.soundAnalysis = soundAnalysis
+    self.preferences = preferences
+    self.pendingSessionStore = pendingSessionStore
+    self.checkpointStore = checkpointStore
+    self.rawLogWriter = rawLogWriter
     #if !targetEnvironment(simulator)
     UIDevice.current.isBatteryMonitoringEnabled = true
     #endif
@@ -45,20 +73,20 @@ final class SessionRecordingController {
     checkpointCounter = 0
 
     // Clean up any orphaned files from a previous force-closed session.
-    PendingSessionStore.shared.cleanupIfNeeded()
+    pendingSessionStore.cleanupIfNeeded()
 
     let session = SleepSession(startDate: Date())
     session.recordingGaps = []
     currentSession = session
-    let sessionAudioFilename = UserPreferences.shared.preserveRawAudio ? "session_\(session.id.uuidString).caf" : nil
-    PendingSessionStore.shared.setPending(sessionID: session.id, sessionAudioFilename: sessionAudioFilename)
+    let sessionAudioFilename = preferences.preserveRawAudio ? "session_\(session.id.uuidString).caf" : nil
+    pendingSessionStore.setPending(sessionID: session.id, sessionAudioFilename: sessionAudioFilename)
 
     // Apply detection sensitivity thresholds before starting
     detection?.applyDetectionSensitivity()
 
     // Full-session raw audio is only recorded in debug mode for algorithm testing.
     let audioURL: URL?
-    if UserPreferences.shared.preserveRawAudio {
+    if preferences.preserveRawAudio {
       audioURL = audioFileURL(for: session.id)
       session.audioFileURL = AudioFileURLResolver.filename(from: audioURL!)
     } else {
@@ -67,23 +95,35 @@ final class SessionRecordingController {
 
     try audioRecorder.startRecording(audioFileURL: audioURL)
     isRecording = true
+    sessionSignpost = Log.signposter.beginInterval("Session")
+    Log.session.info("Session started")
     detection?.setActive(true)
     detection?.resetDisplayState()
 
-    // Raw classification log is a debug re-processing aid (~48 MB/night of
-    // JSON for a full night, nothing reads it in production yet), so it is
-    // gated behind the same flag as the full raw audio.
-    if UserPreferences.shared.preserveRawAudio {
-      Task {
-        await SessionRawLogWriter.shared.start(sessionID: session.id)
+    // Raw classification log is a debug re-processing aid (~65 MB/night of
+    // JSON Lines, nothing reads it in production yet), so it is gated behind
+    // the same flag as the full raw audio. It's written while recording, so
+    // register it for crash cleanup now, not at stop.
+    if preferences.preserveRawAudio {
+      let prefs = preferences
+      let metadata = RawLogMetadata(
+        sessionStart: session.startDate,
+        detectionSensitivity: prefs.detectionSensitivity.rawValue,
+        detectSleepTalking: prefs.detectSleepTalking,
+        snoreInterrupterMode: prefs.snoreInterrupterMode.rawValue)
+      let sessionID = session.id
+      pendingSessionStore.addFile(SessionRawLogWriter.fileName(for: sessionID))
+      Task { [rawLogWriter] in
+        await rawLogWriter.start(sessionID: sessionID, metadata: metadata)
       }
     }
 
     // Drive processAudioLevel from the recording controller so it survives background.
+    guard runsProcessingLoop else { return }
     processingTask = Task { @MainActor in
       while !Task.isCancelled {
-        let saConf = SoundAnalysisDetector.shared.snoreConfidence
-        let saSpeechConf = SoundAnalysisDetector.shared.speechConfidence
+        let saConf = self.soundAnalysis.snoreConfidence
+        let saSpeechConf = self.soundAnalysis.speechConfidence
         self.detection?.processAudioLevel(
           db: self.audioRecorder.currentDB,
           peakDB: self.audioRecorder.currentPeakDB,
@@ -114,7 +154,7 @@ final class SessionRecordingController {
     #else
     let level = UIDevice.current.batteryLevel
     guard level >= 0, level <= 0.02 else { return }
-    print("[SessionManager] Battery level at \(Int(level * 100))% — force saving session")
+    Log.session.notice("Battery level at \(Int(level * 100))% — force saving session")
     forceSaveDueToLowBattery()
     #endif
   }
@@ -136,11 +176,12 @@ final class SessionRecordingController {
 
     snoreInterrupterPlayer.stop()
     isRecording = false
+    endSessionSignpost(reason: "stopped")
     detection?.setActive(false)
 
     // Finalize any in-progress events BEFORE stopping the audio engine —
-    // see RealtimeDetectionTracker.finalizeActiveEventsIfNeeded().
-    detection?.finalizeActiveEventsIfNeeded()
+    // see RealtimeDetectionTracker.finishDetection().
+    await detection?.finishDetection()
 
     audioRecorder.stopRecording()
 
@@ -157,7 +198,7 @@ final class SessionRecordingController {
 
     // In debug mode with raw audio preserved, move the full session file to rawAudioFileURL
     // so event clips remain the primary playback source.
-    if UserPreferences.shared.preserveRawAudio,
+    if preferences.preserveRawAudio,
        let events = session.events, !events.isEmpty,
        session.rawAudioFileURL == nil,
        session.audioFileURL != nil
@@ -170,11 +211,8 @@ final class SessionRecordingController {
     }
 
     // Save raw classification log
-    let logFilename = await SessionRawLogWriter.shared.stop()
-    session.rawLogFileURL = logFilename
-    if let logFilename {
-      PendingSessionStore.shared.addFile(logFilename)
-    }
+    // Already registered with the pending store at start.
+    session.rawLogFileURL = await rawLogWriter.stop()
 
     let result = session
     completedSession = result
@@ -204,8 +242,8 @@ final class SessionRecordingController {
     if let url = AudioFileURLResolver.resolve(completedSession?.rawLogFileURL) {
       try? FileManager.default.removeItem(at: url)
     }
-    PendingSessionStore.shared.cleanupIfNeeded()
-    SessionCheckpointStore.shared.clear()
+    pendingSessionStore.cleanupIfNeeded()
+    checkpointStore.clear()
     completedSession = nil
   }
 
@@ -218,16 +256,20 @@ final class SessionRecordingController {
 
       snoreInterrupterPlayer.stop()
       isRecording = false
+      endSessionSignpost(reason: "discarded")
       detection?.setActive(false)
 
       // Finalize events BEFORE stopping audio engine so file URLs are
       // captured while currentEventFile still exists.
-      detection?.finalizeActiveEventsIfNeeded()
+      await detection?.finishDetection()
 
       audioRecorder.stopRecording()
 
       // Wait for any in-flight compression tasks before deleting files.
       await detection?.awaitPendingCompression()
+
+      // The raw log is written while recording (F23-T9): close and delete it.
+      await rawLogWriter.discard()
 
       // Delete the session's audio files and clean up
       if let session = currentSession {
@@ -247,14 +289,21 @@ final class SessionRecordingController {
         }
       }
 
-      PendingSessionStore.shared.cleanupIfNeeded()
-      SessionCheckpointStore.shared.clear()
+      pendingSessionStore.cleanupIfNeeded()
+      checkpointStore.clear()
       currentSession = nil
       detection?.reset()
     }
   }
 
   // MARK: - Private
+
+  private func endSessionSignpost(reason: StaticString) {
+    guard let sessionSignpost else { return }
+    Log.signposter.endInterval("Session", sessionSignpost, "\(reason)")
+    self.sessionSignpost = nil
+    Log.session.info("Session \(reason)")
+  }
 
   private func audioFileURL(for sessionID: UUID) -> URL {
     FileManager.default

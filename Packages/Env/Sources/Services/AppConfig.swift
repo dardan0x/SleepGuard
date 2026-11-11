@@ -14,10 +14,10 @@ import Observation
 /// Resolution order for every value: debug override → remote/cache → default.
 @MainActor
 @Observable
-public final class AppConfig {
+public final class AppConfig: AppConfigProviding {
   public static let shared = AppConfig()
 
-  private let defaults = UserDefaults.standard
+  private let defaults: UserDefaults
 
   private enum Key {
     static let flags = "appconfig.flags"
@@ -63,7 +63,9 @@ public final class AppConfig {
   private var debugSleepScoreConfig: SleepScoreConfig?
   #endif
 
-  private init() {
+  /// `defaults` is `.standard` in the app; tests pass an isolated suite.
+  public init(defaults: UserDefaults = .standard) {
+    self.defaults = defaults
     loadCache()
   }
 

@@ -1,8 +1,11 @@
+import FactoryKit
 import Foundation
 import Models
 import SwiftData
 
+#if DEBUG
 /// Generates realistic mock sleep session data for App Store screenshots.
+/// Debug builds only (F23-T8): every caller is `#if DEBUG`, so Release doesn't ship it.
 /// Creates SleepSession + SnoreEvent instances and persists them via SwiftData.
 ///
 /// Score-first design: each session is generated with a target sleep score, and
@@ -17,16 +20,16 @@ public enum MockDataGenerator {
 
     let today = calendar.startOfDay(for: Date())
     guard let startDate = calendar.date(byAdding: .day, value: -30, to: today) else {
-      print("[MockDataGenerator] Failed to create start date")
+      Log.app.error("Failed to create start date")
       return
     }
 
     // Reset personalization prefs so briefing/profile features trigger
     if resetPersonalizationPrefs {
-      UserPreferences.shared.hasCompletedProfile = false
-      UserPreferences.shared.profilePromptDismissCount = 0
-      UserPreferences.shared.lastBriefingShownDate = nil
-      UserPreferences.shared.briefingEnabled = true
+      Container.shared.userPreferences().hasCompletedProfile = false
+      Container.shared.userPreferences().profilePromptDismissCount = 0
+      Container.shared.userPreferences().lastBriefingShownDate = nil
+      Container.shared.userPreferences().briefingEnabled = true
     }
 
     // Clear existing data
@@ -43,7 +46,7 @@ public enum MockDataGenerator {
       }
       try modelContext.save()
     } catch {
-      print("[MockDataGenerator] Failed to clear existing data: \(error)")
+      Log.app.error("Failed to clear existing data: \(String(describing: error), privacy: .public)")
     }
 
     // Skip 3 random days for realism (deterministic based on day offset)
@@ -162,9 +165,8 @@ public enum MockDataGenerator {
 
         // Compute values while unmanaged — avoids SwiftData interception
         let computedScore = session.sleepScore
-        let computedSnoring = session.snoringDuration
         if abs(computedScore - targetScore) > 12 {
-          print("[MockDataGenerator] Score drift: target=\(targetScore), computed=\(computedScore), day=\(dayOffset)")
+          Log.app.notice("Score drift: target=\(targetScore), computed=\(computedScore), day=\(dayOffset)")
         }
 
         // Insert so SwiftData tracks the objects
@@ -174,9 +176,7 @@ public enum MockDataGenerator {
         modelContext.insert(session)
 
         // Set cached properties AFTER insertion so SwiftData tracks them as changes
-        session.cachedSleepScore = computedScore
-        session.cachedSnoringDuration = computedSnoring
-        session.hasCachedScore = true
+        session.refreshCachedScore(using: .default)
 
         generatedSessions.append((session, dayOffset))
       }
@@ -196,9 +196,9 @@ public enum MockDataGenerator {
       formatter.dateStyle = .short
       let from = formatter.string(from: startDate)
       let to = formatter.string(from: calendar.date(byAdding: .day, value: -1, to: today)!)
-      print("[MockDataGenerator] Successfully generated mock data for \(from) – \(to)")
+      Log.app.info("Successfully generated mock data for \(from) – \(to)")
     } catch {
-      print("[MockDataGenerator] Failed to save mock data: \(error)")
+      Log.app.error("Failed to save mock data: \(String(describing: error), privacy: .public)")
     }
   }
 
@@ -498,3 +498,4 @@ private extension SnoreIntensity {
     }
   }
 }
+#endif

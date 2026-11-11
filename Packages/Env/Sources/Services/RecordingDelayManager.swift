@@ -1,5 +1,7 @@
 import AudioEngine
+import FactoryKit
 import Foundation
+import Models
 import Observation
 import UserNotifications
 
@@ -9,7 +11,7 @@ public extension Notification.Name {
 
 @MainActor
 @Observable
-public final class RecordingDelayManager {
+public final class RecordingDelayManager: RecordingDelayManaging {
   public static let shared = RecordingDelayManager()
 
   public var isActive = false
@@ -19,7 +21,11 @@ public final class RecordingDelayManager {
   private var timer: Timer?
   public let notificationId = "sleepguard-delayed-recording"
 
-  private init() {}
+  private let audioRecorder: any AudioRecording
+
+  public init(audioRecorder: any AudioRecording = Container.shared.audioRecorder()) {
+    self.audioRecorder = audioRecorder
+  }
 
   public func startDelay(minutes: Int) {
     guard minutes > 0 else {
@@ -87,14 +93,14 @@ public final class RecordingDelayManager {
 
   private func startWarmup() {
     do {
-      try AudioRecorder.shared.startWarmup()
+      try audioRecorder.startWarmup()
     } catch {
-      print("[RecordingDelayManager] Failed to start audio warmup: \(error)")
+      Log.session.error("Failed to start audio warmup: \(String(describing: error), privacy: .public)")
     }
   }
 
   private func stopWarmup() {
-    AudioRecorder.shared.stopWarmup()
+    audioRecorder.stopWarmup()
   }
 
   // MARK: - Notifications

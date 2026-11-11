@@ -31,7 +31,6 @@ public struct EventsSheetView: View {
               event: event,
               displayDuration: displayDurations?[event.id],
               session: session,
-              theme: theme,
               onPlay: {
                 selectedEvent = event
                 onPlayEvent(event)
@@ -49,7 +48,7 @@ public struct EventsSheetView: View {
           Button {
             dismiss()
           } label: {
-            Image(systemName: "xmark.circle.fill")
+            Label(Strings.actionClose, systemImage: "xmark.circle.fill").labelStyle(.iconOnly)
               .font(.system(size: 24))
               .foregroundStyle(theme.textTertiary)
           }
@@ -74,7 +73,7 @@ private struct EventCard: View {
   let event: SnoreEvent
   let displayDuration: TimeInterval?
   let session: SleepSession
-  let theme: Theme
+  @Injected(\.theme) private var theme
   let onPlay: () -> Void
 
   var body: some View {

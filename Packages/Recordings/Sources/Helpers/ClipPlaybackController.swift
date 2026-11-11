@@ -128,7 +128,7 @@ public final class ClipPlaybackController {
       setupPlayerForCurrentEvent()
     }
     guard let file = audioFile else {
-      print("[ClipPlaybackController] Cannot play: no file (event \(currentEvent?.id.uuidString ?? "nil"))")
+      Log.playback.error("Cannot play: no file (event \(self.currentEvent?.id.uuidString ?? "nil"))")
       return
     }
 
@@ -177,9 +177,9 @@ public final class ClipPlaybackController {
       playbackStartClipTime = pausedAtClipTime
       isPlaying = true
       startProgressTimer()
-      print("[ClipPlaybackController] Play from \(pausedAtClipTime)s (gain \(eq.globalGain) dB, enhanced=\(enhancedAudioEnabled))")
+      Log.playback.debug("Play from \(self.pausedAtClipTime)s (gain \(self.eq.globalGain) dB, enhanced=\(self.enhancedAudioEnabled))")
     } catch {
-      print("[ClipPlaybackController] play failed: \(error)")
+      Log.playback.error("play failed: \(String(describing: error), privacy: .public)")
     }
   }
 
@@ -288,11 +288,11 @@ public final class ClipPlaybackController {
     audioFile = nil
 
     guard let event = currentEvent else {
-      print("[ClipPlaybackController] setupPlayer: no current event")
+      Log.playback.debug("setupPlayer: no current event")
       return
     }
     guard let url = AudioFileURLResolver.resolve(event.audioFileURL) else {
-      print("[ClipPlaybackController] setupPlayer: no audio file for event \(event.id)")
+      Log.playback.debug("setupPlayer: no audio file for event \(event.id)")
       return
     }
 
@@ -318,9 +318,9 @@ public final class ClipPlaybackController {
           self?.stopProgressTimer()
         }
       }
-      print("[ClipPlaybackController] Loaded \(url.lastPathComponent), \(currentFileDuration)s, gain \(eq.globalGain) dB")
+      Log.playback.debug("Loaded \(url.lastPathComponent), \(self.currentFileDuration)s, gain \(self.eq.globalGain) dB")
     } catch {
-      print("[ClipPlaybackController] Failed to load \(url.lastPathComponent): \(error)")
+      Log.playback.error("Failed to load \(url.lastPathComponent): \(String(describing: error), privacy: .public)")
       audioFile = nil
     }
   }

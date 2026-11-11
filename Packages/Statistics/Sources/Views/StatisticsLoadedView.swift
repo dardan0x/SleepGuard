@@ -1,16 +1,14 @@
 import AudioEngine
 import DesignSystem
 import Env
+import FactoryKit
 import Models
 import SwiftUI
 
 @MainActor
 struct StatisticsLoadedView: View {
-  let session: SleepSession
-  let dayScore: Int
-  let daySessionCount: Int
-  let recentSessions: [SleepSession]
-  let theme: Theme
+  let state: DashboardState
+  @Injected(\.theme) private var theme
   @MainActor let onStartRecording: () -> Void
   let onViewTrends: () -> Void
   let onViewCalendar: () -> Void
@@ -25,7 +23,7 @@ struct StatisticsLoadedView: View {
         VStack(spacing: DeviceSize.isCompactHeight ? 10 : 16) {
           StatisticsWeekSelector(weekDays: weekDays, onViewTrends: onViewTrends)
 
-          SleepScoreGauge(score: dayScore, theme: theme, size: 120)
+          SleepScoreGauge(score: state.dayScore, size: 120)
 
           VStack(spacing: 4) {
             Text(summaryLabel)
@@ -41,11 +39,11 @@ struct StatisticsLoadedView: View {
           StatisticsStatsGrid(session: session)
 
           if let stages = session.sleepStageSegments, !stages.isEmpty {
-            SleepStageBreakdownView(session: session, theme: theme)
+            SleepStageBreakdownView(session: session)
           }
 
-          if !recentSessions.isEmpty {
-            StatisticsMiniChartSection(recentSessions: recentSessions)
+          if !state.recentSessions.isEmpty {
+            StatisticsMiniChartSection(recentSessions: state.recentSessions)
           }
         }
         .padding(.horizontal, 20)
@@ -62,16 +60,16 @@ struct StatisticsLoadedView: View {
   }
 
   private var summaryLabel: String {
-    if daySessionCount > 1 {
-      return "\(daySessionCount) \(Strings.recordingsStatisticsLoadedView)"
+    if state.daySessionCount > 1 {
+      return "\(state.daySessionCount) \(Strings.recordingsStatisticsLoadedView)"
     }
-    return isLastNight
+    return state.isLastNight
       ? Strings.lastNightStatisticsLoadedView
       : Strings.lastTimeStatisticsLoadedView
   }
 
-  private var isLastNight: Bool {
-    Calendar.current.isDateInYesterday(session.startDate)
+  private var session: SleepSession {
+    state.session
   }
 
   private var dateString: String {
@@ -99,7 +97,7 @@ struct StatisticsLoadedView: View {
       let label = weekdaySymbols[weekdayIndex].uppercased().prefix(3)
       let number = String(calendar.component(.day, from: date))
 
-      let daySession = recentSessions.first { session in
+      let daySession = state.recentSessions.first { session in
         calendar.isDate(session.startDate, inSameDayAs: date)
       }
 

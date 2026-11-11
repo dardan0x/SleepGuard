@@ -1,3 +1,4 @@
+import FactoryKit
 import SwiftUI
 
 @MainActor
@@ -7,20 +8,30 @@ public struct MiniBarChart: View {
     public let label: String
     public let value: Double
     public let color: Color
+    /// What VoiceOver says for the bar; the visible label may be one letter.
+    public let accessibilityLabel: String
+    public let accessibilityValue: String
 
-    public init(label: String, value: Double, color: Color) {
+    public init(
+      label: String,
+      value: Double,
+      color: Color,
+      accessibilityLabel: String? = nil,
+      accessibilityValue: String? = nil)
+    {
       self.label = label
       self.value = value
       self.color = color
+      self.accessibilityLabel = accessibilityLabel ?? label
+      self.accessibilityValue = accessibilityValue ?? "\(Int(value.rounded()))"
     }
   }
 
   let data: [DataPoint]
-  let theme: Theme
+  @Injected(\.theme) private var theme
 
-  public init(data: [DataPoint], theme: Theme) {
+  public init(data: [DataPoint]) {
     self.data = data
-    self.theme = theme
   }
 
   public var body: some View {
@@ -36,6 +47,9 @@ public struct MiniBarChart: View {
             .foregroundStyle(theme.textTertiary)
         }
         .frame(maxWidth: .infinity)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(point.accessibilityLabel)
+        .accessibilityValue(point.accessibilityValue)
       }
     }
     .frame(height: 55)

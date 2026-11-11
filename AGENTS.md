@@ -167,8 +167,11 @@ These are non-negotiable. They come from production patterns in apps like IceCub
 
 ### Dependencies
 
-- Views resolve shared services with `@Injected(\.service)` from the Factory container. Never init-inject.
-- Shared services are `@MainActor @Observable` singletons with `.shared`, registered in the container (`Packages/Env/Sources/Services/Container.swift`; DesignSystem registers `Theme` in its own). Feature packages never access `.shared` directly in views.
+- **Views** (`Sources/Views/`, `Sources/Components/`) resolve shared services with `@Injected(\.service)` from the Factory container and never take a service through `init`, not even to pass it down to a child (e.g. `theme`). Why: views aren't unit-tested, the container already lets previews and tests swap a service, and one way to get a dependency keeps 100+ views consistent. Enforced by `check-layering.py` (rule 6).
+- **Non-view types with logic worth testing** (Env services, `@Observable` state owners like `SessionDetailModel`, helpers like `CustomMelodyRecorder`) do the opposite: they take collaborators as `init` parameters that default to the container, so a test passes fakes directly (see `SessionCommitterTests`).
+- Shared services are `@MainActor @Observable` singletons with `.shared`, registered in the container (`Packages/Env/Sources/Services/Container.swift`; DesignSystem registers `Theme` in its own). Feature packages and DesignSystem never access an app service's `.shared` (enforced by `check-layering.py`). Env services take collaborators as init parameters defaulting to the container (`init(preferences: any UserPreferencesStoring = Container.shared.userPreferences())`), so dependencies are visible and replaceable in tests.
+- **Every service sits behind a protocol** (ADR 0002) named for its role (`HealthKitSyncing`, `AudioRecording`, `UserPreferencesStoring`, …), declared in its own file named after the protocol, next to the concrete type (`AudioRecording.swift` beside `AudioRecorder.swift`). Factories are typed `Factory<any P>` and resolve `.shared`. Inits are public, never `private`. Pass services around as `any P`, never as the concrete type.
+- **Every protocol has a test double** in `EnvTestSupport` (`FakeX`). The exceptions are the `UserDefaults`-backed stores (`UserPreferences.isolated()`, `AppConfig.isolated()`, the real type on a throwaway suite) and `Theme` (a separate `Theme()`). Tests override with `Container.shared.x.register { fake }` inside `@Suite(.container)` / `@Test(.container)` from `FactoryTesting`, so registrations are scoped per test.
 - `@Observable` classes must NOT use `@Injected` — both macros synthesize underscore backing storage and collide (compile error). Resolve via `Container.shared.service()` in init.
 - Nonisolated code (Apple delegate methods, detached tasks) resolves via Factory's global `dependency(\.service)` — property wrappers are MainActor-bound.
 - The app target is the composition root: `SleepGuardApp`/`MainTabView` hold `.shared` references directly. FactoryKit is not an app-target dependency.
@@ -190,6 +193,8 @@ These are non-negotiable. They come from production patterns in apps like IceCub
 - **Isolation split**: explicit `@MainActor` on all `@Observable` classes in Models/Env/AudioEngine (load-bearing — no package default isolation); the 8 UI packages declare `.defaultIsolation(MainActor.self)` and the app target sets `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`.
 - Value types are `Sendable` with immutable `let` properties. SwiftData `@Model` classes are never Sendable — destructure their Sendable fields (`id`, `Date`, bursts) before crossing into `@Sendable`/detached closures.
 - Apple delegates (WCSession, SNResultsObserving, AVAudioPlayerDelegate) are nonisolated: mark methods `nonisolated`, parse payloads synchronously, `Task { @MainActor in }` for state mutation. See `docs/architecture/concurrency.md`.
+- **Live detection is one ordered stream into an actor** (ADR 0003). Detection rules live only in the pure `DetectionStateMachine` (AudioEngine): no clock, no singletons, no SwiftData. Anything that changes detection state (sample, melody start/stop, settings, session end) goes into the `DetectionEngine` stream as a timestamped `Message`; never mutate detection state from a side path. Side effects stay on the main actor in `RealtimeDetectionTracker.perform`. Thresholds are durations, not sample counts. A change to detection output must re-record the replay goldens on purpose (`scripts/record-replay-goldens.sh`) and explain the diff.
+- **Logging: never `print`.** Use `Log.<category>` (`audio`, `detection`, `session`, `interrupter`, `storage`, `playback`, `app`; `os.Logger`, in `Models/Sources/Helpers/Log.swift`). `.debug` for traces, `.info` milestones, `.notice` notable state, `.error` failures, `.fault` should-never-happen. Strings are private by default; add `privacy: .public` only for values that can't identify the user. Logger interpolations are autoclosures, so instance properties need `self.` (SwiftFormat keeps it via `--selfrequired`). Enforced by `check-layering.py`.
 
 ### Views
 
@@ -198,6 +203,7 @@ These are non-negotiable. They come from production patterns in apps like IceCub
 - Loading states use redacted placeholders, not spinners.
 - Pull-to-refresh fires haptics via `HapticManager`.
 - Platform branching: `#if !os(visionOS)` for custom backgrounds.
+- **Accessibility (F23-T11):** icon-only buttons use `Label(Strings.x, systemImage:).labelStyle(.iconOnly)`, never a bare `Image`. A custom-drawn view (`Canvas`, shapes, gauges) gets one element with `.accessibilityLabel` + `.accessibilityValue`; a card that shows a value and a title reads as one element (`.accessibilityElement(children: .ignore)`). Purely decorative visuals are `.accessibilityHidden(true)`. Spoken text lives under `a11y.*` keys.
 
 ### View Componentization (Hard Limits)
 
@@ -205,6 +211,7 @@ These thresholds prevent monolithic views. Enforce them during implementation an
 
 **File size limits:**
 - No view file should exceed **200 lines**. If it does, split it.
+  Enforced in CI by `scripts/check-view-size.py` (`Sources/Views/`, `Sources/Components/`). Existing offenders sit in its `ALLOWLIST` with a reason and a line ceiling; they may shrink, never grow. Never add a new entry to get a PR through: split the file.
 - A container view (with `switch viewState`) should be **≤100 lines**. State views (`.loading`, `.empty`, `.loaded`, `.error`) live in separate files.
 
 **What to extract into separate files:**
@@ -228,7 +235,9 @@ These thresholds prevent monolithic views. Enforce them during implementation an
 
 ### Packages
 
-- Feature packages never import other feature packages. Only: Models, AudioEngine, Env, DesignSystem (the one existing edge: Settings → Personalization).
+- Feature packages never import other feature packages. Only: Models, AudioEngine, Env, Routing, DesignSystem (the one existing edge: Settings → Personalization).
+- Navigation types (`RouterDestination`, `SheetDestination`, `RouterPath`) live in the leaf `Routing` package, not `Env`. `Env` must not import `SwiftUI` (enforced by `check-layering.py`). See `docs/adr/0001-routing-package.md`.
+- Architecture decisions are recorded in `docs/adr/` (`NNNN-slug.md`: context, decision, consequences with honest limits, alternatives). Write one when a task changes a boundary, a rule in this file, or a trade-off a reviewer would question.
 - The app target is the only place that imports everything.
 - One endpoint enum per API resource. One file per enum.
 - 2-space indentation. Enforced by `.swiftformat`.
@@ -245,8 +254,7 @@ View files (`Sources/Views/`, `Sources/Components/`) own everything visual:
   `DesignSystem` at all.
 - Allowed exceptions: content engines whose output IS user-facing text
   (`Personalization/Engine/BriefingEngine.swift`, `QuoteBank.swift`) may use
-  `Strings`; navigation infrastructure (`Env/Sources/Services/Router.swift`)
-  may import `SwiftUI`; audio infrastructure
+  `Strings`; audio infrastructure
   (`AudioEngine/Sources/Engine/AudioRecorder.swift`) may import `UIKit` for
   session-interruption observation.
 - Enforced by `scripts/check-layering.py` on every push/PR
@@ -274,6 +282,16 @@ SwiftData lightweight migration is automatic for additive changes, but **removin
 > **Never remove or rename a `@Model` property. Only add new ones with defaults. If a property is no longer needed, deprecate it in code but leave it in the schema.**
 
 SwiftData ignores unused columns in the persistent store. This is the only zero-migration way to evolve schemas.
+
+### Versioned schema (F22-T11)
+Every `ModelContainer` (app and `TestStore`) opens through `SleepGuardSchema.container(_:)`, which attaches `SleepGuardMigrationPlan` (`Packages/Models/Sources/Data/SleepGuardSchema.swift`). Today the plan has one version (`SleepGuardSchemaV1`, pointing at the live `@Model` classes) and no stages. Additive changes still need nothing: keep following the policy above.
+
+**Adding V2** (only for a change the policy above forbids, e.g. dropping `@Attribute(.unique)`):
+1. Freeze V1: copy the current `@Model` classes into `SleepGuardSchemaV1` as nested types, unchanged, and make `models` list those copies.
+2. Declare `SleepGuardSchemaV2` (version `2.0.0`) listing the live classes, then make the change on the live classes.
+3. Append V2 to `SleepGuardMigrationPlan.schemas` and add a `MigrationStage` (`.lightweight` if SwiftData can infer it, `.custom` otherwise). Point `SleepGuardSchema.Current` at V2.
+4. Add a test in `SleepGuardSchemaTests` that writes a V1 store on disk and opens it through the plan with every row intact.
+5. Verify on a simulator that holds real pre-change data before merging. The app's container fallback deletes the store when opening fails.
 
 ### Cached computed properties on `SleepSession`
 `SleepSession` carries three defensive cached properties to avoid relationship faulting crashes:

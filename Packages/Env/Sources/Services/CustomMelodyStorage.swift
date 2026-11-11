@@ -5,7 +5,7 @@ import Observation
 /// Manages user-recorded custom melodies: persistence, file I/O, and metadata.
 @MainActor
 @Observable
-public final class CustomMelodyStorage {
+public final class CustomMelodyStorage: CustomMelodyStoring {
   public static let shared = CustomMelodyStorage()
 
   public private(set) var customMelodies: [Melody] = []
@@ -14,7 +14,7 @@ public final class CustomMelodyStorage {
   private let directoryName = "CustomMelodies"
   private var nextID = 100
 
-  private init() {
+  public init() {
     load()
   }
 
@@ -54,7 +54,7 @@ public final class CustomMelodyStorage {
 
       return melody
     } catch {
-      print("[CustomMelodyStorage] Failed to save recording: \(error)")
+      Log.interrupter.error("Failed to save recording: \(String(describing: error), privacy: .public)")
       return nil
     }
   }

@@ -8,10 +8,10 @@ import Observation
 
 @MainActor
 @Observable
-public final class UserPreferences {
+public final class UserPreferences: UserPreferencesStoring {
   public static let shared = UserPreferences()
 
-  private let defaults = UserDefaults.standard
+  private let defaults: UserDefaults
 
   public var hasCompletedOnboarding: Bool {
     get {
@@ -383,5 +383,8 @@ public final class UserPreferences {
     }
   }
 
-  private init() {}
+  /// `defaults` is `.standard` in the app; tests pass an isolated suite.
+  public init(defaults: UserDefaults = .standard) {
+    self.defaults = defaults
+  }
 }

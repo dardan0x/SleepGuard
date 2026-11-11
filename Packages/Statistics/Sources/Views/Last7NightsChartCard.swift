@@ -43,7 +43,7 @@ struct Last7NightsChartCard: View {
         ForEach(days) { day in
           VStack(spacing: 4) {
             RoundedRectangle(cornerRadius: 3)
-              .fill(day.intensityColor)
+              .fill(theme.intensityColor(day.maxIntensity))
               .frame(height: barHeight(for: day.totalSnoringMinutes))
 
             Text(day.label)

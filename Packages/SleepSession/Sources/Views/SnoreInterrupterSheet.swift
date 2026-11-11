@@ -8,6 +8,7 @@ import SwiftUI
 struct SnoreInterrupterSheet: View {
   @Injected(\.theme) private var theme
   @Injected(\.userPreferences) private var userPreferences
+  @Injected(\.customMelodyStorage) private var customMelodyStorage
   @Environment(\.dismiss) private var dismiss
 
   @State private var draftMode: UserPreferences.SnoreInterrupterMode = .never
@@ -16,7 +17,7 @@ struct SnoreInterrupterSheet: View {
 
   private var selectedMelody: Melody? {
     Melody.melody(id: draftMelodyID)
-      ?? CustomMelodyStorage.shared.melody(id: draftMelodyID)
+      ?? customMelodyStorage.melody(id: draftMelodyID)
   }
 
   var body: some View {

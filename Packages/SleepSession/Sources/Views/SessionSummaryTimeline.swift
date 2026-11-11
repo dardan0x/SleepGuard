@@ -11,7 +11,7 @@ struct SessionSummaryTimeline: View {
 
   var body: some View {
     VStack(alignment: .leading, spacing: 12) {
-      SnoringTimelineView(session: session, theme: theme)
+      SnoringTimelineView(session: session)
 
       HStack {
         Text(timeString(session.startDate))

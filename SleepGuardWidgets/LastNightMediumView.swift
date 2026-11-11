@@ -8,7 +8,7 @@ struct LastNightMediumView: View {
 
   var body: some View {
     HStack(spacing: 20) {
-      SleepScoreGauge(score: night.score, theme: theme, size: 116)
+      SleepScoreGauge(score: night.score, size: 116)
 
       VStack(alignment: .leading, spacing: 10) {
         VStack(alignment: .leading, spacing: 2) {

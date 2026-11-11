@@ -12,6 +12,7 @@ struct BedsideClockView: View {
   @Injected(\.snoreInterrupterPlayer) private var snoreInterrupterPlayer
   @Injected(\.appConfig) private var appConfig
   @Injected(\.theme) private var theme
+  @Injected(\.userPreferences) private var userPreferences
 
   @State private var currentTime = Date()
   @State private var showShortSessionAlert = false
@@ -149,6 +150,6 @@ struct BedsideClockView: View {
   }
 
   private var isMelodyEnabled: Bool {
-    appConfig.isEnabled(.snoreInterrupter) && UserPreferences.shared.snoreInterrupterMode != .never
+    appConfig.isEnabled(.snoreInterrupter) && userPreferences.snoreInterrupterMode != .never
   }
 }

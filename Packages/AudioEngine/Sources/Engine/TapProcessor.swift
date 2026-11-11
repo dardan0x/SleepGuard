@@ -1,10 +1,12 @@
 import AVFoundation
+import Models
 import os
 import SoundAnalysis
 
 /// Audio-thread half of `AudioRecorder`.
 ///
-/// Core Audio calls the input tap on its realtime thread. Under Swift 6 a tap
+/// AVAudioEngine calls the input tap on a thread other than the main thread
+/// (Apple documents only that, not which thread). Under Swift 6 a tap
 /// closure written inside the `@MainActor` recorder inherits main-actor
 /// isolation and traps there (`_dispatch_assert_queue_fail`). So the tap
 /// closure is `@Sendable` (nonisolated) and everything it touches lives here,
@@ -59,7 +61,7 @@ final class TapProcessor: Sendable {
     }
   }
 
-  /// Runs on the realtime audio thread for every tapped buffer.
+  /// Runs on the tap's (non-main) thread for every tapped buffer.
   func process(_ buffer: AVAudioPCMBuffer, sampleRate: Double) -> Levels {
     let db = Self.rmsDB(buffer)
     let peakDB = Self.peakDB(buffer)
@@ -74,7 +76,7 @@ final class TapProcessor: Sendable {
           try audioFile.write(from: buffer)
           didWrite = true
         } catch {
-          print("[AudioRecorder] Failed to write audio buffer: \(error)")
+          Log.audio.error("Failed to write audio buffer: \(String(describing: error), privacy: .public)")
         }
       }
       if let eventFile = s.eventFile {
@@ -82,7 +84,7 @@ final class TapProcessor: Sendable {
           try eventFile.write(from: buffer)
           didWrite = true
         } catch {
-          print("[AudioRecorder] Failed to write event buffer: \(error)")
+          Log.audio.error("Failed to write event buffer: \(String(describing: error), privacy: .public)")
         }
       }
       var writesDisabled = false
@@ -91,7 +93,7 @@ final class TapProcessor: Sendable {
       } else if s.audioFile != nil || s.eventFile != nil {
         s.consecutiveWriteFailures += 1
         if s.consecutiveWriteFailures >= 3 {
-          print("[AudioRecorder] Too many write failures — stopping file writes")
+          Log.audio.error("Too many write failures — stopping file writes")
           s.audioFile = nil
           s.eventFile = nil
           writesDisabled = true

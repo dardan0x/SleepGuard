@@ -1,5 +1,6 @@
 import DesignSystem
 import Env
+import FactoryKit
 import SwiftUI
 
 @MainActor
@@ -7,7 +8,7 @@ struct CalendarStatCard: View {
   let icon: String
   let label: String
   let value: String
-  let theme: Theme
+  @Injected(\.theme) private var theme
 
   var body: some View {
     VStack(spacing: 4) {
@@ -28,5 +29,8 @@ struct CalendarStatCard: View {
     .padding(.vertical, 10)
     .background(theme.bgCard)
     .cornerRadius(12)
+    .accessibilityElement(children: .ignore)
+    .accessibilityLabel(label)
+    .accessibilityValue(value)
   }
 }

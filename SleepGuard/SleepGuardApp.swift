@@ -3,6 +3,7 @@ import Env
 import FirebaseCore
 import Models
 import Onboarding
+import os
 import SwiftData
 import SwiftUI
 
@@ -20,10 +21,9 @@ struct SleepGuardApp: App {
   }
 
   var sharedModelContainer: ModelContainer = {
-    let schema = Schema([SleepSession.self, SnoreEvent.self, UserProfile.self, LifestyleLog.self])
-    let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+    let modelConfiguration = SleepGuardSchema.configuration(inMemory: false)
     do {
-      let container = try ModelContainer(for: schema, configurations: [modelConfiguration])
+      let container = try SleepGuardSchema.container(modelConfiguration)
       #if DEBUG
       if ProcessInfo.processInfo.arguments.contains("-generateMockData") {
         MockDataGenerator.generate(modelContext: container.mainContext)
@@ -33,11 +33,11 @@ struct SleepGuardApp: App {
     } catch {
       // If migration fails (e.g. from a dev schema change), delete the store
       // and recreate rather than crashing. User data loss only in dev builds.
-      print("[SleepGuardApp] ModelContainer creation failed: \(error). Deleting store and retrying...")
+      Log.app.fault("ModelContainer creation failed: \(String(describing: error), privacy: .public). Deleting store and retrying...")
       let storeURL = modelConfiguration.url
       try? FileManager.default.removeItem(at: storeURL)
       do {
-        return try ModelContainer(for: schema, configurations: [modelConfiguration])
+        return try SleepGuardSchema.container(modelConfiguration)
       } catch {
         fatalError("Could not create ModelContainer after store deletion: \(error)")
       }
@@ -91,6 +91,14 @@ struct SleepGuardApp: App {
         }
         if !userPreferences.hasExplicitlySetEnhancedSleepTracking {
           userPreferences.enhancedSleepTracking = HealthKitSync.shared.isAuthorized
+        }
+
+        // Before anything reads cached scores: recompute sessions scored by an
+        // older formula/config, so lists and trends never mix two formulas.
+        do {
+          try SleepSession.refreshStaleCachedScores(in: container.mainContext, config: appConfig.sleepScoreConfig)
+        } catch {
+          Log.app.error("Stale score refresh failed: \(String(describing: error), privacy: .public)")
         }
 
         WidgetSnapshotWriter.update(modelContext: container.mainContext)

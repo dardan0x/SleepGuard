@@ -1,3 +1,4 @@
+import FactoryKit
 import Models
 import SwiftUI
 
@@ -6,19 +7,19 @@ import SwiftUI
 @MainActor
 public struct SleepStagesInfoView: View {
   public let session: SleepSession
-  public let theme: Theme
+  @Injected(\.theme) private var theme
 
-  public init(session: SleepSession, theme: Theme? = nil) {
+  public init(session: SleepSession, theme: (any ThemeProviding)? = nil) {
     self.session = session
-    self.theme = theme ?? Theme.shared
+    self.theme = theme ?? Container.shared.theme()
   }
 
   public var body: some View {
     ScrollView {
       VStack(spacing: 24) {
         SleepStagesInfoHeader()
-        YourStagesSection(session: session, theme: theme)
-        ScoreImpactSection(session: session, theme: theme)
+        YourStagesSection(session: session)
+        ScoreImpactSection(session: session)
       }
       .padding(20)
     }

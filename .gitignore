@@ -47,6 +47,9 @@ xcuserdata/
 # Swift Package Manager
 # ========================
 .build/
+# Library packages don't pin. The app's lockfile IS committed (force-added, F23-T7):
+# SleepGuard.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+# Tracked files ignore these patterns, so updates to it show up in git as usual.
 Package.resolved
 *.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
 .swiftpm/xcode/xcuserdata/

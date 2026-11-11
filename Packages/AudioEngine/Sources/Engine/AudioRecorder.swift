@@ -23,7 +23,7 @@ public func audioLevelPercentage(from db: Float) -> Int {
 
 @MainActor
 @Observable
-public final class AudioRecorder {
+public final class AudioRecorder: AudioRecording {
   public static let shared = AudioRecorder()
 
   public var isRecording = false
@@ -43,10 +43,11 @@ public final class AudioRecorder {
   private var audioEngine: AVAudioEngine?
   private var warmupEngine: AVAudioEngine?
   private let tap = TapProcessor()
-  private let soundAnalyzer = SoundAnalysisDetector.shared
+  private let soundAnalyzer: any SoundAnalysisDetecting
   private var recordingFormat: AVAudioFormat?
 
-  private init() {
+  public init(soundAnalyzer: any SoundAnalysisDetecting = SoundAnalysisDetector.shared) {
+    self.soundAnalyzer = soundAnalyzer
     checkPermission()
     setupNotifications()
   }
@@ -94,7 +95,7 @@ public final class AudioRecorder {
     do {
       try resumeRecording()
     } catch {
-      print("[AudioRecorder] resumeRecording() failed after melody: \(error)")
+      Log.audio.error("resumeRecording() failed after melody: \(String(describing: error), privacy: .public)")
     }
   }
 
@@ -147,7 +148,7 @@ public final class AudioRecorder {
     do {
       try resumeRecording()
     } catch {
-      print("[AudioRecorder] Failed to resume recording: \(error)")
+      Log.audio.error("Failed to resume recording: \(String(describing: error), privacy: .public)")
     }
   }
 
@@ -342,7 +343,7 @@ public final class AudioRecorder {
 
   // MARK: - Tap
 
-  /// Core Audio calls the tap on its realtime thread, so the closure must be
+  /// AVAudioEngine calls the tap off the main thread, so the closure must be
   /// `@Sendable` (nonisolated); all buffer work happens in `TapProcessor`.
   /// It taps the microphone directly — no output path, no feedback.
   private func installTap(on input: AVAudioInputNode, format: AVAudioFormat) {

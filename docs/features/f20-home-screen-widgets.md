@@ -1,5 +1,7 @@
 # F20 — Home Screen & Lock Screen Widgets
 
+> **Historical record (F20).** Later moves: `TabCoordinator` is now `Packages/Env/Sources/Services/TabCoordinator.swift` and route enums live in `Packages/Routing` (F22-T4, ADR 0001).
+
 SleepGuard widgets for the Home Screen and Lock Screen: last night's sleep score and snoring time, a 7-night score trend, and a one-tap Start Tracking tile. The app writes a small JSON snapshot to an App Group at launch and when it goes to the background. The widget extension reads only that file, never the SwiftData store. Tapping a widget opens the matching screen through a `sleepguard://` deep link.
 
 ## Widgets

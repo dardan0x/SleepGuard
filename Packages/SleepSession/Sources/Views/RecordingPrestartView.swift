@@ -3,6 +3,7 @@ import DesignSystem
 import Env
 import FactoryKit
 import Models
+import Routing
 import SwiftUI
 import UIKit
 
@@ -13,7 +14,8 @@ struct RecordingPrestartView: View {
   @Environment(RouterPath.self) private var routerPath
   @Injected(\.userPreferences) private var userPreferences
   @Injected(\.appConfig) private var appConfig
-  private let audioRecorder = AudioRecorder.shared
+  @Injected(\.audioRecorder) private var audioRecorder
+  @Injected(\.recordingDelayManager) private var recordingDelayManager
 
   @State private var activePresentation: PrestartPresentation?
 
@@ -112,6 +114,11 @@ struct RecordingPrestartView: View {
     } message: {
       Text(Strings.sessionMicrophoneAlertMessage)
     }
+    .alert(Strings.sessionStartFailedAlertTitle, isPresented: isPresented(.startFailed)) {
+      Button(Strings.actionOk, role: .cancel) {}
+    } message: {
+      Text(Strings.sessionStartFailedAlertMessage)
+    }
   }
 
   /// Binding for the alert/sheet modifiers, derived from the enum state so
@@ -128,14 +135,15 @@ struct RecordingPrestartView: View {
   }
 
   private func beginSession() {
-    let delay = UserPreferences.shared.recordingDelayMinutes
+    let delay = userPreferences.recordingDelayMinutes
     if delay > 0 {
-      RecordingDelayManager.shared.startDelay(minutes: delay)
+      recordingDelayManager.startDelay(minutes: delay)
     } else {
       do {
-        try SessionManager.shared.startSession()
+        try sessionManager.startSession()
       } catch {
-        print("Failed to start session: \(error)")
+        Log.session.error("Failed to start session: \(String(describing: error), privacy: .public)")
+        activePresentation = .startFailed
       }
     }
   }
@@ -171,4 +179,5 @@ enum PrestartPresentation {
   case snoreInterrupter
   case chargingAlert
   case microphoneAlert
+  case startFailed
 }

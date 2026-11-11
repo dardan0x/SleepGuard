@@ -12,7 +12,7 @@ import Models
 /// through forwarding computed properties (both components are `@Observable`).
 @MainActor
 @Observable
-public final class SessionManager {
+public final class SessionManager: SessionManaging {
   public static let shared = SessionManager()
 
   // Resolved from the container in init rather than `@Injected`: the
@@ -21,7 +21,7 @@ public final class SessionManager {
   private let recording: SessionRecordingController
   private let detection: RealtimeDetectionTracker
 
-  private init() {
+  public init() {
     let recording = Container.shared.sessionRecordingController()
     let detection = Container.shared.realtimeDetectionTracker()
     self.recording = recording

@@ -1,4 +1,5 @@
 import Env
+import FactoryKit
 import Foundation
 import Models
 import SwiftData
@@ -36,13 +37,16 @@ final class SessionDetailModel {
   var selectedFilter: EventCategoryFilter = .all
 
   private let sessionID: UUID
-  private let appConfig: AppConfig
-  private let userPreferences: UserPreferences
+  private let appConfig: any AppConfigProviding
+  private let userPreferences: any UserPreferencesStoring
+  private let healthKitSync: any HealthKitSyncing
 
-  init(sessionID: UUID, appConfig: AppConfig, userPreferences: UserPreferences) {
+  init(sessionID: UUID, appConfig: any AppConfigProviding, userPreferences: any UserPreferencesStoring) {
     self.sessionID = sessionID
     self.appConfig = appConfig
     self.userPreferences = userPreferences
+    // @Observable can't use @Injected (macro collision): resolve in init.
+    healthKitSync = Container.shared.healthKitSync()
   }
 
   func load(modelContext: ModelContext) async {
@@ -57,17 +61,14 @@ final class SessionDetailModel {
            userPreferences.enhancedSleepTracking,
            session.sleepStageSegments == nil || stagesEmptyAndOld
         {
-          let stages = await HealthKitSync.shared.fetchSleepStages(for: session)
+          let stages = await healthKitSync.fetchSleepStages(for: session)
           session.sleepStageSegments = stages.isEmpty ? [] : stages
         }
 
         // Recalculate cached score and snoring duration to pick up scoring
         // formula changes (e.g. episode merging, gap inclusion, remote config
         // penalty updates) while the session relationship is hot.
-        session.hasCachedScore = false
-        session.cachedSleepScore = session.sleepScore(using: appConfig.sleepScoreConfig)
-        session.cachedSnoringDuration = session.snoringDuration
-        session.hasCachedScore = true
+        session.refreshCachedScore(using: appConfig.sleepScoreConfig)
         try modelContext.save()
 
         let sortedEvents = session.events?.sorted(by: { $0.timestamp < $1.timestamp }) ?? []

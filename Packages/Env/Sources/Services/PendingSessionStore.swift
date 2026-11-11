@@ -5,13 +5,13 @@ import Models
 /// On app relaunch or session discard, any tracked files are deleted so
 /// orphaned clips / recordings don't accumulate on disk.
 @MainActor
-public final class PendingSessionStore {
+public final class PendingSessionStore: PendingSessionStoring {
   public static let shared = PendingSessionStore()
 
   private let defaultsKey = "pendingSessionRecord"
   private let defaults = UserDefaults.standard
 
-  private init() {}
+  public init() {}
 
   // MARK: - Public API
 
@@ -56,7 +56,12 @@ public final class PendingSessionStore {
 
   private func load() -> PendingSessionRecord? {
     guard let data = defaults.data(forKey: defaultsKey) else { return nil }
-    return try? JSONDecoder().decode(PendingSessionRecord.self, from: data)
+    do {
+      return try JSONDecoder().decode(PendingSessionRecord.self, from: data)
+    } catch {
+      Log.storage.error("Pending-session record unreadable; its files won't be cleaned up: \(String(describing: error), privacy: .public)")
+      return nil
+    }
   }
 
   private func save(_ record: PendingSessionRecord) {

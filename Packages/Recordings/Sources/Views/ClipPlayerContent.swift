@@ -1,5 +1,6 @@
 import AudioEngine
 import Env
+import FactoryKit
 import Models
 import SwiftUI
 
@@ -7,6 +8,7 @@ import SwiftUI
 /// toggle, and the tappable event list. Selection plays the event and asks
 /// the parent to reload the waveform (`onSelectEvent`).
 struct ClipPlayerContent: View {
+  @Injected(\.userPreferences) private var userPreferences
   let controller: ClipPlaybackController
   let waveformSamples: [Float]
   let isReady: Bool
@@ -46,7 +48,7 @@ struct ClipPlayerContent: View {
       get: { controller.enhancedAudioEnabled },
       set: { newValue in
         controller.enhancedAudioEnabled = newValue
-        UserPreferences.shared.enhancedAudioPlayback = newValue
+        userPreferences.enhancedAudioPlayback = newValue
       })
   }
 

@@ -9,12 +9,12 @@ import UIKit
 /// `AppDelegate` handles the Firebase Messaging / APNs token plumbing.
 @MainActor
 @Observable
-public final class NotificationPermissionManager {
+public final class NotificationPermissionManager: NotificationPermissionManaging {
   public static let shared = NotificationPermissionManager()
 
   public private(set) var authorizationStatus: UNAuthorizationStatus = .notDetermined
 
-  private init() {}
+  public init() {}
 
   public func refreshStatus() async {
     let settings = await UNUserNotificationCenter.current().notificationSettings()

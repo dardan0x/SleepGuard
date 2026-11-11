@@ -30,6 +30,9 @@ let package = Package(
         "AudioEngine",
       ],
       path: "Tests",
+      resources: [
+        .copy("Fixtures"),
+      ],
       swiftSettings: [
         .swiftLanguageMode(.v6),
       ]),

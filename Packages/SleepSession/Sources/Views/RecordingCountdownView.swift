@@ -2,6 +2,7 @@ import AudioEngine
 import DesignSystem
 import Env
 import FactoryKit
+import Models
 import SwiftUI
 import UIKit
 
@@ -9,6 +10,8 @@ import UIKit
 struct RecordingCountdownView: View {
   @Injected(\.sessionManager) private var sessionManager
   @Injected(\.theme) private var theme
+  @Injected(\.recordingDelayManager) private var recordingDelayManager
+  @Injected(\.audioRecorder) private var audioRecorder
   @State private var activeAlert: CountdownAlert?
 
   var body: some View {
@@ -27,7 +30,7 @@ struct RecordingCountdownView: View {
             .font(.system(size: 20, weight: .medium))
             .foregroundStyle(theme.textSecondary)
 
-          Text(RecordingDelayManager.shared.remainingTimeString)
+          Text(recordingDelayManager.remainingTimeString)
             .font(.system(size: 72, weight: .thin, design: .rounded))
             .foregroundStyle(theme.textPrimary)
             .monospacedDigit()
@@ -37,7 +40,7 @@ struct RecordingCountdownView: View {
 
         VStack(spacing: 16) {
           Button {
-            RecordingDelayManager.shared.cancel()
+            recordingDelayManager.cancel()
           } label: {
             Text(Strings.actionCancel)
               .font(.system(size: 17, weight: .semibold))
@@ -54,8 +57,8 @@ struct RecordingCountdownView: View {
 
           Button {
             Task {
-              if !AudioRecorder.shared.hasPermission {
-                let granted = await AudioRecorder.shared.requestPermission()
+              if !audioRecorder.hasPermission {
+                let granted = await audioRecorder.requestPermission()
                 guard granted else {
                   activeAlert = .microphone
                   return
@@ -88,7 +91,12 @@ struct RecordingCountdownView: View {
       UIApplication.shared.isIdleTimerDisabled = sessionManager.isRecording
     }
     .onReceive(NotificationCenter.default.publisher(for: .recordingDelayDidComplete)) { _ in
-      try? sessionManager.startSession()
+      do {
+        try sessionManager.startSession()
+      } catch {
+        Log.session.error("Delayed start failed: \(String(describing: error), privacy: .public)")
+        activeAlert = .startFailed
+      }
     }
     .alert(Strings.sessionChargingAlertTitle, isPresented: isPresented(.charging)) {
       Button(Strings.actionCancel, role: .cancel) {}
@@ -110,6 +118,11 @@ struct RecordingCountdownView: View {
     } message: {
       Text(Strings.sessionMicrophoneAlertMessage)
     }
+    .alert(Strings.sessionStartFailedAlertTitle, isPresented: isPresented(.startFailed)) {
+      Button(Strings.actionOk, role: .cancel) {}
+    } message: {
+      Text(Strings.sessionStartFailedAlertMessage)
+    }
   }
 
   /// Binding for the alert modifiers, derived from the enum state so the
@@ -125,11 +138,12 @@ struct RecordingCountdownView: View {
   }
 
   private func startSession() {
-    RecordingDelayManager.shared.cancel()
+    recordingDelayManager.cancel()
     do {
-      try SessionManager.shared.startSession()
+      try sessionManager.startSession()
     } catch {
-      print("Failed to start session: \(error)")
+      Log.session.error("Failed to start session: \(String(describing: error), privacy: .public)")
+      activeAlert = .startFailed
     }
   }
 
@@ -146,4 +160,5 @@ struct RecordingCountdownView: View {
 enum CountdownAlert {
   case charging
   case microphone
+  case startFailed
 }
