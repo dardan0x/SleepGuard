@@ -16,7 +16,7 @@ SleepGuard runs a **20 Hz detection loop** (every 50 ms) while a session is acti
 
 These feed into a **cascading classifier** that returns one of five states: `.none`, `.quiet`, `.light`, `.loud`, `.epic`.
 
-A **state machine** in `SessionManager` then tracks sustained detection, groups nearby snoring into **epochs**, writes per-event audio files, triggers the soothing melody, and accumulates real-time statistics.
+A **state machine** (`DetectionStateMachine`, run by the `DetectionEngine` actor; see §3.1) then tracks sustained detection and groups nearby snoring into **epochs**. `RealtimeDetectionTracker` performs its outputs: per-event audio files, the soothing melody, and real-time statistics.
 
 ---
 
@@ -491,39 +491,9 @@ Recording gaps occur when the soothing melody plays (mic is paused). Snoring dur
 
 ### 9.4 Sleep Score Formula
 
-```swift
-score = max(0, 100
-    - snoringPenalty
-    - eventsPenalty
-    - intensityPenalty
-    - sleepTalkingPenalty
-    - stagePenalty)
-```
+The score formula, its coefficients and worked examples are documented in [`docs/sleep-score-calculation.md`](sleep-score-calculation.md), and the code is the source of truth: the pure `SleepScore.compute(_:config:)` (`Packages/Models/Sources/Data/SleepScore.swift`) with the defaults in `SleepScoreConfig.default`. (This section used to repeat the formula with older coefficients.)
 
-| Penalty | Calculation | Cap |
-|---------|------------|-----|
-| **Snoring** | `min(Int(snoringPercentage * 0.7), 70)` | 70 |
-| **Events/hour** | `min(Int(Double(eventCount) / (sessionDuration/3600) * 2), 20)` | 20 |
-| **Intensity** | `min(Int(lightRatio*10 + loudRatio*20 + epicRatio*30), 30)` | 30 |
-| **Sleep Talking** | `min(Int(talkingPct*0.35 + talkingEventsPerHr*0.8), 15)` | 15 |
-| **Sleep Stage** | `min(Int(deepDeficit*0.6 + remDeficit*0.4 + awakeExcess*1.0), 15)` | 15 |
-
-**Intensity ratios** use detected burst duration as the denominator (not total session time). This conservatively reduces the intensity penalty because spectral data is missing during recording gaps and melody pauses.
-
-```swift
-for event in snoringEvents {
-    let detectedDuration = event.bursts?.reduce(0) { $0 + $1.duration } ?? event.snoreDuration
-    detectedSnoringDuration += detectedDuration
-    // ... intensity buckets ...
-}
-let lightRatio = detectedSnoringDuration > 0 ? lightDuration / detectedSnoringDuration : 0
-```
-
-**Gap-only inference:** If `eventCount == 0` but `countableGapDuration > 0`, snoring is inferred from countable gaps alone:
-```swift
-let inferredSnoringPercentage = (countableGapDuration / totalDuration) * 100
-let snoringPenalty = min(Int(inferredSnoringPercentage * 0.7), 70)
-```
+What matters for detection: **intensity ratios use detected burst duration as the denominator**, not total session time, because there's no intensity data during recording gaps and melody pauses. Snoring time for the snoring percentage is detected events plus gaps where snoring resumed (`SleepSession.snoringDuration`).
 
 ### 9.5 Session 69 Fix: Player/Waveform Alignment
 
