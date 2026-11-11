@@ -95,6 +95,7 @@ struct RecordingCountdownView: View {
         try sessionManager.startSession()
       } catch {
         Log.session.error("Delayed start failed: \(String(describing: error), privacy: .public)")
+        activeAlert = .startFailed
       }
     }
     .alert(Strings.sessionChargingAlertTitle, isPresented: isPresented(.charging)) {
@@ -117,6 +118,11 @@ struct RecordingCountdownView: View {
     } message: {
       Text(Strings.sessionMicrophoneAlertMessage)
     }
+    .alert(Strings.sessionStartFailedAlertTitle, isPresented: isPresented(.startFailed)) {
+      Button(Strings.actionOk, role: .cancel) {}
+    } message: {
+      Text(Strings.sessionStartFailedAlertMessage)
+    }
   }
 
   /// Binding for the alert modifiers, derived from the enum state so the
@@ -137,6 +143,7 @@ struct RecordingCountdownView: View {
       try sessionManager.startSession()
     } catch {
       Log.session.error("Failed to start session: \(String(describing: error), privacy: .public)")
+      activeAlert = .startFailed
     }
   }
 
@@ -153,4 +160,5 @@ struct RecordingCountdownView: View {
 enum CountdownAlert {
   case charging
   case microphone
+  case startFailed
 }

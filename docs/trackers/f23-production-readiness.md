@@ -34,7 +34,7 @@ The "Do" list from the principal architecture review (`docs/ARCHITECTURE_REVIEW.
 | F23-T7 | Commit the app's `Package.resolved`; CI builds from it | Infra | Done | — | repo / .github | 2026-11-11 | 2026-11-11 |
 | F23-T8 | `MockDataGenerator` Debug-only | Cleanup | Done | — | Env | 2026-11-11 | 2026-11-11 |
 | F23-T9 | Stream the raw log to disk while recording | Perf | Done | — | Env / AudioEngine / scripts | 2026-11-11 | 2026-11-11 |
-| F23-T10 | Alert when a recording fails to start | UI | Backlog | — | SleepSession / App / DesignSystem | — | — |
+| F23-T10 | Alert when a recording fails to start | UI | Done | — | SleepSession / DesignSystem | 2026-11-11 | 2026-11-11 |
 | F23-T11 | Accessibility pass (VoiceOver, Dynamic Type) | UI | Backlog | — | DesignSystem / features | — | — |
 | F23-T12 | Fix the Release build cycle (Crashlytics phase last) | Build | Done | — | App / .github | 2026-11-11 | 2026-11-11 |
 
@@ -296,6 +296,33 @@ User choice "Stream raw log to disk".
 - Tests (+5): format 3 round-trip sorted, a crash-truncated file keeps complete lines, a corrupt middle line throws (AudioEngine); samples reach disk during recording, discard deletes the file (Env). The existing format-2 test now pins `formatVersion: 2`.
 - **Simulator, with the setting on:** the file had only its header at 2 s, 201 lines at 12 s and 401 at 24 s. "Stop Anyway" (discard) deleted it. The setting was switched back off afterwards.
 - Size is about the same as format 2 (~65 MB a night, still Debug-setting-only).
+
+---
+
+### F23-T10 — Alert when a recording fails to start
+
+| Field | Value |
+|-------|-------|
+| Arch Ref | `docs/architecture/views.md` |
+| Status | Done |
+| Started | 2026-11-11 |
+| Completed | 2026-11-11 |
+
+**Acceptance Criteria:**
+- [x] Starting a recording that fails shows an alert instead of doing nothing: immediate start, "Start Anyway" from the charging alert, and the end of the delay countdown
+- [x] Strings localized through the catalog; views stay under 200 lines
+- [x] Seen on the simulator
+
+**Prompt Used:**
+User choice "Start-failure alert".
+
+**Notes:**
+- New keys: `session.startFailedAlert.title` ("Couldn't Start Recording") and `.message` ("The microphone isn't available right now. Close any app that's recording or on a call, then try again."). Added through `Strings.txt` → `generate-xcstrings.py`; English only, like the rest of the catalog.
+- `RecordingPrestartView` (`PrestartPresentation.startFailed`) and `RecordingCountdownView` (`CountdownAlert.startFailed`, both the charging path and `.recordingDelayDidComplete`): an OK-only system alert in the same form as the existing microphone and charging alerts. The screen stays, so the user can retry.
+- No `.pen` design: it's a system alert. The style follows the existing alerts.
+- **Not covered:** starting from the notification tap (`AppDelegate`) still only logs. There's no view in that path; showing it would need app-level presentation state (a follow-up if wanted).
+- Simulator: with a temporary `throw` in `startSession()` (reverted; the controller matches HEAD), tapping Start Recording showed the alert over the prestart screen.
+- Sizes: prestart 183 lines, countdown 164.
 
 ---
 

@@ -188,3 +188,5 @@ widget.start.name = Start Tracking
 widget.start.description = Start a sleep session with one tap.
 widget.lastNight.inline = Score %@ · %@ snoring
 stats.last7Nights.trendVsPrevWeek = %+lld vs prev wk
+session.startFailedAlert.title = Couldn't Start Recording
+session.startFailedAlert.message = The microphone isn't available right now. Close any app that's recording or on a call, then try again.

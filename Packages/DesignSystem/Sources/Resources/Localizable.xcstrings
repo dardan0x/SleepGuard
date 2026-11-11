@@ -4670,6 +4670,28 @@
           }
         }
       }
+    },
+    "session.startFailedAlert.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't Start Recording"
+          }
+        }
+      }
+    },
+    "session.startFailedAlert.message": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The microphone isn't available right now. Close any app that's recording or on a call, then try again."
+          }
+        }
+      }
     }
   },
   "version": "1.0"
