@@ -16,12 +16,7 @@ public struct SessionSummaryView: View {
 
   @Injected(\.theme) private var theme
   @Injected(\.sessionManager) private var sessionManager
-  @Injected(\.healthKitSync) private var healthKitSync
-  @Injected(\.userPreferences) private var userPreferences
-  @Injected(\.appConfig) private var appConfig
-  @Injected(\.pendingSessionStore) private var pendingSessionStore
-  @Injected(\.sessionCheckpointStore) private var sessionCheckpointStore
-  @Injected(\.storageLimitEnforcer) private var storageLimitEnforcer
+  @Injected(\.sessionCommitter) private var sessionCommitter
   @Environment(\.dismiss) private var dismiss
   @Environment(\.modelContext) private var modelContext
 
@@ -75,37 +70,11 @@ public struct SessionSummaryView: View {
       return
     }
 
-    if let events = session.events {
-      for event in events {
-        modelContext.insert(event)
-      }
-    }
-    modelContext.insert(session)
-
-    // Cache AFTER insertion so SwiftData tracks the mutations.
-    // Use the current remote config so the cached score reflects the
-    // active formula if the session is later shown in a list view.
-    session.refreshCachedScore(using: appConfig.sleepScoreConfig)
-
     do {
-      try modelContext.save()
+      try sessionCommitter.commit(session, in: modelContext)
     } catch {
       activeAlert = .saveFailed
       return
-    }
-
-    pendingSessionStore.clearPending()
-    sessionCheckpointStore.clear()
-
-    Task {
-      await storageLimitEnforcer.enforceLimits(modelContext: modelContext)
-    }
-
-    if userPreferences.syncToHealthKit {
-      Task {
-        healthKitSync.checkAuthorizationStatus()
-        await healthKitSync.sync(session: session)
-      }
     }
 
     dismiss()

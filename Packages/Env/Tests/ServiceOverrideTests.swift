@@ -4,6 +4,7 @@ import FactoryKit
 import FactoryTesting
 import Foundation
 import Models
+import ModelsTestSupport
 import Testing
 @testable import Env
 
@@ -17,6 +18,7 @@ struct ServiceOverrideTests {
     #expect(Container.shared.userPreferences() === UserPreferences.shared)
     #expect(Container.shared.sessionManager() === SessionManager.shared)
     #expect(Container.shared.audioRecorder() === AudioRecorder.shared)
+    #expect(Container.shared.sessionCommitter() === SessionCommitter.shared)
   }
 
   @Test func sessionManagerOverride() throws {
@@ -82,6 +84,19 @@ struct ServiceOverrideTests {
     #expect(pending.files == ["a.m4a"])
     #expect(checkpoints.loadIfPresent() == nil)
     #expect(saved.map { melodies.melody(id: $0.id) != nil } == true)
+  }
+
+  @Test func sessionCommitterOverride() throws {
+    let fake = FakeSessionCommitter()
+    Container.shared.sessionCommitter.register { fake }
+    let store = try TestStore()
+    let session = SleepSession.fixture(start: Date(timeIntervalSinceReferenceDate: 0))
+
+    try Container.shared.sessionCommitter().commit(session, in: store.context)
+    fake.error = CocoaError(.fileWriteUnknown)
+
+    #expect(throws: CocoaError.self) { try Container.shared.sessionCommitter().commit(session, in: store.context) }
+    #expect(fake.committedSessionIDs == [session.id])
   }
 
   @Test func coordinationOverrides() {

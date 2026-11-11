@@ -3,6 +3,7 @@ import Env
 import Foundation
 import Models
 import Observation
+import SwiftData
 
 /// Scriptable `SessionManaging`: set the state a view should render.
 @MainActor
@@ -120,5 +121,22 @@ public final class FakeTabCoordinator: TabCoordinating {
   public func open(_ link: WidgetDeepLink) {
     selectedTab = .statistics
     pendingDeepLink = link
+  }
+}
+
+/// Records committed sessions without touching SwiftData. Set `error` to make
+/// `commit` throw, as a failed save would.
+@MainActor
+public final class FakeSessionCommitter: SessionCommitting {
+  public private(set) var committedSessionIDs: [UUID] = []
+  public var error: (any Error)?
+
+  public init() {}
+
+  @discardableResult
+  public func commit(_ session: SleepSession, in _: ModelContext) throws -> Task<Void, Never> {
+    if let error { throw error }
+    committedSessionIDs.append(session.id)
+    return Task {}
   }
 }
