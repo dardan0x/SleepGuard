@@ -588,7 +588,7 @@ struct SnoreSample: Codable {
 }
 ```
 
-On `stopSession()`, writes to `rawlog_<sessionID>.json` in Documents. Since F22-T1 the file is a `RawLog { metadata, samples }` object (format 2, with sensitivity, sleep-talking and interrupter settings); `RawLog.decode(from:)` still reads format 1, a bare sample array. Only written when `preserveRawAudio` is on.
+Since F23-T9 the log is written **while recording** to `rawlog_<sessionID>.jsonl` in Documents (format 3, JSON Lines): line 1 is the metadata (sensitivity, sleep-talking and interrupter settings), then one sample per line, appended every ~10 s. Memory stays flat all night, and a crash keeps everything up to the last few seconds. `RawLog.decode(from:)` reads format 3 (dropping a partial last line), format 2 (one `RawLog` JSON object, F22-T1) and format 1 (a bare sample array). Only written when `preserveRawAudio` is on.
 
 `scripts/make-replay-fixture.py` cuts an excerpt of a raw log into a CSV fixture for the replay tests (F22-T9).
 

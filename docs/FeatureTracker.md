@@ -46,10 +46,10 @@ Last updated: 2026-11-11
 | Blocked | 0 |
 | — | — |
 | Total Tasks | 164 |
-| Tasks Done | 144 |
+| Tasks Done | 145 |
 | Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
-| Tasks Backlog | 20 |
+| Tasks Backlog | 19 |
 | — | — |
 | **Progress** | **87%** |
 
@@ -78,7 +78,7 @@ Last updated: 2026-11-11
 | F20 | Home Screen & Lock Screen Widgets | P1 | Done | 9/9 | ██████████ 100% | [tracker](trackers/f20-home-screen-widgets.md) |
 | F21 | Test Coverage | P1 | Done | 17/17 | ██████████ 100% | [tracker](trackers/f21-test-coverage.md) |
 | F22 | Architecture Hardening | P1 | Done (real-night check pending) | 16/16 | ██████████ 100% | [tracker](trackers/f22-architecture-hardening.md) |
-| F23 | Production Readiness | P1 | In Progress | 8/12 | ███████░░░ 67% | [tracker](trackers/f23-production-readiness.md) |
+| F23 | Production Readiness | P1 | In Progress | 9/12 | ████████░░ 75% | [tracker](trackers/f23-production-readiness.md) |
 
 ## Activity Log
 
@@ -86,6 +86,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-11-11 | F23-T9 | Completed | Raw log format 3 (JSON Lines) written while recording in 10 s chunks: flat memory, crash keeps the log; decoder reads 1/2/3 and truncated files; discard now closes and deletes it. Verified growing on the simulator. Branch `feature/f23/t9-rawlog-streaming` |
 | 2026-11-11 | F23-T12 | Completed | Release (and Archive) build cycle fixed: Crashlytics script phase moved after Embed Foundation Extensions. CI app job builds Release. Branch `feature/f23/t12-release-build-cycle` |
 | 2026-11-11 | F23-T8 | Completed | `MockDataGenerator` wrapped in `#if DEBUG` (callers already were); Env + Settings Release builds pass. Found the app's Release build cycle (Crashlytics phase order) → T12. Branch `feature/f23/t8-mock-data-debug` |
 | 2026-11-11 | F23-T7 | Completed | App `Package.resolved` committed (Firebase 12.14.0, Factory 3.5.2); CI app build uses `-disableAutomaticPackageResolution`. F23 extended with T7–T11 (user choices). Branch `feature/f23/t7-package-resolved` |

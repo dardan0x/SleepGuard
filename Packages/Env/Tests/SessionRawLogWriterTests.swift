@@ -4,7 +4,8 @@ import Testing
 @testable import Env
 
 /// `SessionRawLogWriter` in a temp folder: samples are timestamped by the
-/// caller, written sorted, and carry the session's detection settings.
+/// caller, carry the session's detection settings, and reach disk while
+/// recording (F23-T9), not only at stop.
 struct SessionRawLogWriterTests {
   private let directory = FileManager.default.temporaryDirectory
     .appendingPathComponent("RawLogWriterTests-\(UUID().uuidString)")
@@ -44,7 +45,7 @@ struct SessionRawLogWriterTests {
     let filename = try #require(await writer.stop())
     let log = try read(filename)
 
-    #expect(filename == "rawlog_\(id.uuidString).json")
+    #expect(filename == "rawlog_\(id.uuidString).jsonl")
     #expect(log.metadata == metadata())
     #expect(log.samples.map(\.db) == [-50, -40])
     #expect(abs(log.samples[0].elapsed - 0.05) < 1e-6)
@@ -55,9 +56,44 @@ struct SessionRawLogWriterTests {
 
   @Test func stopWithoutSamplesWritesNothing() async {
     let writer = SessionRawLogWriter(directory: directory)
-    await writer.start(sessionID: UUID(), metadata: metadata())
+    let id = UUID()
+    await writer.start(sessionID: id, metadata: metadata())
 
     #expect(await writer.stop() == nil)
+    #expect(!fileExists(id), "The header-only file is removed")
+  }
+
+  /// A full buffer reaches disk before stop, so a crash keeps it.
+  @Test func samplesReachDiskWhileRecording() async throws {
+    let writer = SessionRawLogWriter(directory: directory)
+    let id = UUID()
+    await writer.start(sessionID: id, metadata: metadata())
+    let count = SessionRawLogWriter.flushThreshold + 5
+    for tick in 0..<count {
+      await append(writer, at: Double(tick) * 0.05, db: -40)
+    }
+
+    let midSession = try read(SessionRawLogWriter.fileName(for: id))
+    #expect(midSession.samples.count == SessionRawLogWriter.flushThreshold)
+    #expect(midSession.metadata == metadata())
+
+    _ = await writer.stop()
+    #expect(try read(SessionRawLogWriter.fileName(for: id)).samples.count == count)
+  }
+
+  @Test func discardDeletesTheFile() async {
+    let writer = SessionRawLogWriter(directory: directory)
+    let id = UUID()
+    await writer.start(sessionID: id, metadata: metadata())
+    await append(writer, at: 0.05, db: -40)
+
+    await writer.discard()
+
+    #expect(!fileExists(id))
+  }
+
+  private func fileExists(_ id: UUID) -> Bool {
+    FileManager.default.fileExists(atPath: directory.appendingPathComponent(SessionRawLogWriter.fileName(for: id)).path)
   }
 
   @Test func appendBeforeStartIsIgnored() async {

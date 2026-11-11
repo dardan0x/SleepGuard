@@ -33,7 +33,7 @@ The "Do" list from the principal architecture review (`docs/ARCHITECTURE_REVIEW.
 | F23-T6 | Detection accuracy evaluation on labelled real nights | Tooling | Backlog | User: real nights with raw logs | scripts / AudioEngine | — | — |
 | F23-T7 | Commit the app's `Package.resolved`; CI builds from it | Infra | Done | — | repo / .github | 2026-11-11 | 2026-11-11 |
 | F23-T8 | `MockDataGenerator` Debug-only | Cleanup | Done | — | Env | 2026-11-11 | 2026-11-11 |
-| F23-T9 | Stream the raw log to disk while recording | Perf | Backlog | — | Env / AudioEngine | — | — |
+| F23-T9 | Stream the raw log to disk while recording | Perf | Done | — | Env / AudioEngine / scripts | 2026-11-11 | 2026-11-11 |
 | F23-T10 | Alert when a recording fails to start | UI | Backlog | — | SleepSession / App / DesignSystem | — | — |
 | F23-T11 | Accessibility pass (VoiceOver, Dynamic Type) | UI | Backlog | — | DesignSystem / features | — | — |
 | F23-T12 | Fix the Release build cycle (Crashlytics phase last) | Build | Done | — | App / .github | 2026-11-11 | 2026-11-11 |
@@ -266,6 +266,36 @@ Found while verifying T8 ("other points from review").
 - Verified: a Release build succeeds, the widget is embedded and the dSYM is produced; Debug builds with 0 warnings.
 - The CI `app` job now builds `-configuration Release`.
 - Not changed: the script's second input path is `$(SRCROOT)/$(BUILT_PRODUCTS_DIR)/$(INFOPLIST_PATH)`, which points nowhere (Firebase documents `$(BUILT_PRODUCTS_DIR)/$(INFOPLIST_PATH)`). It only affects dependency tracking, and the phase is `alwaysOutOfDate`.
+
+---
+
+### F23-T9 — Stream the raw log to disk while recording
+
+| Field | Value |
+|-------|-------|
+| Arch Ref | `docs/ARCHITECTURE_REVIEW.md` Consider |
+| Status | Done |
+| Started | 2026-11-11 |
+| Completed | 2026-11-11 |
+
+**Acceptance Criteria:**
+- [x] Memory stays flat during the night (no whole-night buffer)
+- [x] A crash keeps the log up to the last flush
+- [x] Old logs (formats 1 and 2) still decode; the fixture script reads the new format
+- [x] Discarding a session deletes its log
+
+**Prompt Used:**
+User choice "Stream raw log to disk".
+
+**Notes:**
+- **Format 3 (`rawlog_<id>.jsonl`, JSON Lines):** line 1 is `RawLogMetadata`, then one `SnoreSample` per line. `RawLog.decode(from:)` tries format 2, then 1, then 3; it sorts samples, drops a partial last line (crash) and throws on a corrupt line in the middle.
+- **Writer:** opens the file at `start` with the header, buffers 200 samples (~10 s), appends each chunk through a `FileHandle`, and closes at `stop`. A header-only file is deleted at `stop`. A failed create or write is logged (`Log.storage`) and new samples are dropped instead of piling up.
+- **Crash cleanup:** the controller registers the log's name with the pending store at start (`SessionRawLogWriter.fileName(for:)`), since the file exists from then on. Stop no longer adds it.
+- **Bug avoided:** `stopAndDiscardSession` never told the writer. Harmless while nothing reached disk before stop; now it calls `rawLogWriter.discard()` (closes and deletes).
+- `make-replay-fixture.py` reads format 3, including a truncated file (probed with 1,300 lines plus a partial one).
+- Tests (+5): format 3 round-trip sorted, a crash-truncated file keeps complete lines, a corrupt middle line throws (AudioEngine); samples reach disk during recording, discard deletes the file (Env). The existing format-2 test now pins `formatVersion: 2`.
+- **Simulator, with the setting on:** the file had only its header at 2 s, 201 lines at 12 s and 401 at 24 s. "Stop Anyway" (discard) deleted it. The setting was switched back off afterwards.
+- Size is about the same as format 2 (~65 MB a night, still Debug-setting-only).
 
 ---
 
