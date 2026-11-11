@@ -2,13 +2,11 @@ import DesignSystem
 import Env
 import FactoryKit
 import Models
-import Routing
 import SwiftData
 import SwiftUI
 
 @MainActor
 public struct RecordingsListView: View {
-  @Environment(RouterPath.self) private var routerPath
   @Injected(\.theme) private var theme
   @Environment(\.modelContext) private var modelContext
   @Query(sort: \SleepSession.startDate, order: .reverse)

@@ -57,6 +57,7 @@ Fixes the architecture concerns raised in the mock staff-engineer interview (`Sl
 | F22-T13 | CI check: 200-line view limit with allowlist | Infra | Done | — | scripts / .github | 2026-11-11 | 2026-11-11 |
 | F22-T14 | ADRs (protocols, detection actor) + docs truth pass + feature doc | Docs | Done | F22-T1…T13 | docs | 2026-11-11 | 2026-11-11 |
 | F22-T15 | Each service protocol in its own file | Refactor | Done | F22-T6 | Env / AudioEngine / DesignSystem | 2026-11-11 | 2026-11-11 |
+| F22-T16 | Remove unused `@Environment(RouterPath.self)` | Cleanup | Done | F22-T4 | Recordings / Statistics | 2026-11-11 | 2026-11-11 |
 
 ## Task Details
 
@@ -511,6 +512,29 @@ _Prerequisite for F13 (removing `@Attribute(.unique)` on 4 models needs a real m
 - Moved by a script: the protocol block plus its preceding doc comment and attributes, verbatim. Imports were trimmed per file: framework imports kept only when the declaration uses one of the framework's types, and FactoryKit never.
 - Pure move: no declaration changed. 18 new files: 15 in `Env/Sources/Services/` (`SessionManaging` in `Session/`), 2 in `AudioEngine/Sources/Engine/`, `ThemeProviding` in `DesignSystem/Sources/Components/`.
 - App build 0 warnings; 268/268 tests pass; lint, layering and view-size checks pass.
+
+---
+
+### F22-T16 — Remove unused `@Environment(RouterPath.self)`
+
+| Field | Value |
+|-------|-------|
+| Arch Ref | ADR 0001 |
+| Status | Done |
+| Started | 2026-11-11 |
+| Completed | 2026-11-11 |
+
+**Acceptance Criteria:**
+- [x] Every view that declares `routerPath` uses it
+- [x] Builds with zero errors; Recordings and Statistics tests pass
+
+**Prompt Used:**
+"in our code in some views we have @Environment(RouterPath.self) private var routerPath but we dont use routerPath across that view. Can you check if we have dead code?" → "yep"
+
+**Notes:**
+- Audited all 15 declarations (11 `@Environment` reads + 4 tab roots' `@State`). Two were unused: `RecordingsListView` and `CalendarView`. Both were left behind in `d4477ae` when navigation moved into child views (`NightGroupRowView`, `CalendarSelectedNightView`), which read `RouterPath` themselves.
+- Removed the declarations and those files' `import Routing`. The packages still import `Routing` elsewhere, so the manifests are unchanged.
+- Not purely cosmetic: an unused `@Environment(RouterPath.self)` still traps when no `RouterPath` is in the environment (previews, sheets without `withEnvironments()`).
 
 ---
 
