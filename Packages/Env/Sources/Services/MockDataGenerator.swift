@@ -3,7 +3,9 @@ import Foundation
 import Models
 import SwiftData
 
+#if DEBUG
 /// Generates realistic mock sleep session data for App Store screenshots.
+/// Debug builds only (F23-T8): every caller is `#if DEBUG`, so Release doesn't ship it.
 /// Creates SleepSession + SnoreEvent instances and persists them via SwiftData.
 ///
 /// Score-first design: each session is generated with a target sleep score, and
@@ -496,3 +498,4 @@ private extension SnoreIntensity {
     }
   }
 }
+#endif

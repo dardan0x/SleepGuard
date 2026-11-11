@@ -32,10 +32,11 @@ The "Do" list from the principal architecture review (`docs/ARCHITECTURE_REVIEW.
 | F23-T5 | Audit `try?` on data paths | Quality | Done | F23-T4 | Env / AudioEngine / SleepSession / App | 2026-11-11 | 2026-11-11 |
 | F23-T6 | Detection accuracy evaluation on labelled real nights | Tooling | Backlog | User: real nights with raw logs | scripts / AudioEngine | — | — |
 | F23-T7 | Commit the app's `Package.resolved`; CI builds from it | Infra | Done | — | repo / .github | 2026-11-11 | 2026-11-11 |
-| F23-T8 | `MockDataGenerator` Debug-only | Cleanup | Backlog | — | Env | — | — |
+| F23-T8 | `MockDataGenerator` Debug-only | Cleanup | Done | — | Env | 2026-11-11 | 2026-11-11 |
 | F23-T9 | Stream the raw log to disk while recording | Perf | Backlog | — | Env / AudioEngine | — | — |
 | F23-T10 | Alert when a recording fails to start | UI | Backlog | — | SleepSession / App / DesignSystem | — | — |
 | F23-T11 | Accessibility pass (VoiceOver, Dynamic Type) | UI | Backlog | — | DesignSystem / features | — | — |
+| F23-T12 | Fix the Release build cycle (Crashlytics phase last) | Build | Backlog | — | App | — | — |
 
 ## Task Details
 
@@ -217,6 +218,29 @@ User choice "Commit Package.resolved".
 - Force-added, because its parent folders are ignored (`*.xcworkspace`, `…/swiftpm/`). A tracked file is unaffected by ignore rules, so later updates show up normally. `.gitignore` explains this. Library packages still don't commit lockfiles.
 - The CI `app` job passes `-disableAutomaticPackageResolution`, so a stale lockfile fails the build instead of resolving silently. Verified locally: BUILD SUCCEEDED.
 - The package test job (`run-tests.sh`) resolves per package as before; those packages only declare Factory `from: 3.5.2`.
+
+---
+
+### F23-T8 — `MockDataGenerator` Debug-only
+
+| Field | Value |
+|-------|-------|
+| Arch Ref | `docs/ARCHITECTURE_REVIEW.md` Consider |
+| Status | Done |
+| Started | 2026-11-11 |
+| Completed | 2026-11-11 |
+
+**Acceptance Criteria:**
+- [x] `MockDataGenerator` (498 lines) compiles only in Debug
+- [x] Release builds of the packages that reference it succeed
+
+**Prompt Used:**
+User choice "MockDataGenerator Debug-only".
+
+**Notes:**
+- Whole file wrapped in `#if DEBUG`. All three callers (`SleepGuardApp` launch argument, `SettingsDataSection`, `SettingsStorageSection` test cleanup) were already `#if DEBUG`.
+- Verified: Env and Settings build in Release; the app builds in Debug with 0 warnings.
+- **Found:** the app target's Release build fails with a dependency cycle (Crashlytics script phase before "Embed Foundation Extensions"). It predates F23; fixed in T12.
 
 ---
 
