@@ -26,7 +26,7 @@ The "Do" list from the principal architecture review (`docs/ARCHITECTURE_REVIEW.
 |----|------|------|--------|------------|---------|---------|-----------|
 | F23-T1 | One owner for committing a night (`SessionCommitter`) + low-battery clip-loss fix | Bug / Refactor | Done | — | Env / SleepSession / App | 2026-11-11 | 2026-11-11 |
 | F23-T2 | App privacy manifest (`PrivacyInfo.xcprivacy`) | Compliance | Done | — | App / Widgets | 2026-11-11 | 2026-11-11 |
-| F23-T3 | CI: build the app target (app, widgets, Watch) | Infra | Backlog | — | .github | — | — |
+| F23-T3 | CI: build the app target (app + widgets) | Infra | Done | — | .github | 2026-11-11 | 2026-11-11 |
 | F23-T4 | `os.Logger` instead of `print` (+ signposts for session and event) | Infra | Backlog | — | all | — | — |
 | F23-T5 | Audit `try?` on data paths | Quality | Backlog | F23-T4 | Env / AudioEngine / Recordings / App | — | — |
 | F23-T6 | Detection accuracy evaluation on labelled real nights | Tooling | Backlog | User: real nights with raw logs | scripts / AudioEngine | — | — |
@@ -91,6 +91,31 @@ The "Do" list from the principal architecture review (`docs/ARCHITECTURE_REVIEW.
 - The Watch sources aren't a target in this project, so there's no manifest for them.
 - **Still for the user:** generate the privacy report from an Xcode archive (Organizer → Generate Privacy Report) before submission, and keep the App Store Connect privacy label in line with it (Crashlytics crash and diagnostic data).
 - Both targets use synchronized folders, so the files are picked up with no `project.pbxproj` change.
+
+---
+
+### F23-T3 — CI builds the app target
+
+| Field | Value |
+|-------|-------|
+| Arch Ref | `docs/ARCHITECTURE_REVIEW.md` Do #5 |
+| Status | Done |
+| Started | 2026-11-11 |
+| Completed | 2026-11-11 |
+
+**Acceptance Criteria:**
+- [x] A CI job builds the `SleepGuard` scheme (app + widget extension) on PRs
+- [x] The same command passes locally from a cold derived-data folder
+
+**Prompt Used:**
+"ok lets go with your suggestions"
+
+**Notes:**
+- New `app` job in `tests.yml`, in parallel with `packages`: `xcodebuild build -scheme SleepGuard -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO`. It fails unless `** BUILD SUCCEEDED **` appears, and uploads the log on failure.
+- Local cold run: BUILD SUCCEEDED. Not run on GitHub yet: it runs on the next PR or a manual dispatch.
+- The Watch sources aren't an Xcode target, so there's nothing to build for them.
+- **Found:** the generic destination shows 3 asset warnings that the single-simulator build hides: no `AccentColor` asset, and missing iPad icons (76@2x, 83.5@2x). The target builds for iPad (`TARGETED_DEVICE_FAMILY`). They predate F23; fix them, or drop iPad if it isn't intended (user decision).
+- **Open:** `Package.resolved` is gitignored, so CI resolves the newest Firebase/Factory within the declared ranges, which can differ from local. Committing it is standard for apps (user decision).
 
 ---
 

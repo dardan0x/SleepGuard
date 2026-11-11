@@ -2,6 +2,7 @@ name: tests
 
 # Pull requests only (task PRs target the feature branch, so each one is tested)
 # plus manual runs. A cold simulator build takes 10+ minutes, too slow for every push.
+# Two jobs in parallel: package tests, and an app + widget build.
 on: [pull_request, workflow_dispatch]
 
 jobs:
@@ -27,3 +28,33 @@ jobs:
         with:
           name: test-logs
           path: .build/test-derived-data/logs
+
+  app:
+    # The package tests don't compile the app target (AppRegistry, tabs, deep
+    # links, Firebase wiring) or the widget extension. This builds both.
+    runs-on: macos-26
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select newest Xcode 26
+        run: |
+          XCODE=$(ls -d /Applications/Xcode_26*.app | sort -V | tail -1)
+          sudo xcode-select -s "$XCODE"
+          xcodebuild -version
+      - name: Build app + widgets (simulator, unsigned)
+        run: |
+          mkdir -p .build
+          xcodebuild build \
+            -project SleepGuard.xcodeproj \
+            -scheme SleepGuard \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath .build/app-derived-data \
+            CODE_SIGNING_ALLOWED=NO \
+            | tee .build/app-build.log | grep -E '^(error|warning):|\*\* BUILD' || true
+          grep -q '\*\* BUILD SUCCEEDED \*\*' .build/app-build.log
+      - name: Upload build log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-build-log
+          path: .build/app-build.log
