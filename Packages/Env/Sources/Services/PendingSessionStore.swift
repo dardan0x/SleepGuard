@@ -1,15 +1,6 @@
 import Foundation
 import Models
 
-/// Tracks files of an in-progress session for crash cleanup. Fake: `FakePendingSessionStore`.
-@MainActor
-public protocol PendingSessionStoring: AnyObject {
-  func setPending(sessionID: UUID, sessionAudioFilename: String?)
-  func addFile(_ filename: String)
-  func clearPending()
-  func cleanupIfNeeded()
-}
-
 /// Tracks files belonging to the current unsaved sleep session.
 /// On app relaunch or session discard, any tracked files are deleted so
 /// orphaned clips / recordings don't accumulate on disk.

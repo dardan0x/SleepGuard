@@ -1,14 +1,6 @@
 import Foundation
 import Models
 
-/// Crash-recovery snapshot file. Fake: `FakeSessionCheckpointStore`.
-@MainActor
-public protocol SessionCheckpointStoring: AnyObject {
-  func write(_ snapshot: SessionRecoverySnapshot)
-  func loadIfPresent() -> SessionRecoverySnapshot?
-  func clear()
-}
-
 /// Persists a recovery snapshot of the in-progress session to disk during
 /// recording. If the app dies mid-session (crash / OOM / background kill), the
 /// snapshot lets the session be reconstructed and offered to the user on the

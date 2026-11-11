@@ -2,14 +2,6 @@ import Foundation
 import Observation
 import WatchConnectivity
 
-/// Apple Watch reachability and sync status. Fake: `FakeWatchConnectivityManager`.
-@MainActor
-public protocol WatchConnectivityManaging: AnyObject, Observable {
-  var isWatchReachable: Bool { get }
-  var lastSyncedSession: Date? { get }
-  func checkReachability()
-}
-
 @MainActor
 @Observable
 public final class WatchConnectivityManager: NSObject, WatchConnectivityManaging {

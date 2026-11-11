@@ -18,7 +18,7 @@ The staff-engineer interview (2026-11-10) asked how anything was tested without 
 
 ## Decision
 
-- **One protocol per registered service, named for its role:** `SessionManaging`, `AudioRecording`, `UserPreferencesStoring`, `HealthKitSyncing`, `ThemeProviding`, … (18 in total: 15 in `Env`, 2 in `AudioEngine`, 1 in `DesignSystem`). The protocol is declared at the top of the concrete type's file. The concrete class keeps its name and its `.shared`.
+- **One protocol per registered service, named for its role:** `SessionManaging`, `AudioRecording`, `UserPreferencesStoring`, `HealthKitSyncing`, `ThemeProviding`, … (18 in total: 15 in `Env`, 2 in `AudioEngine`, 1 in `DesignSystem`). Each protocol lives in its own file named after it, in the same folder as the concrete type (`AudioRecording.swift` beside `AudioRecorder.swift`), so the contract can be read without the implementation and the pair sorts together. (T5–T14 declared it at the top of the concrete file; F22-T15 moved them.) The concrete class keeps its name and its `.shared`.
 - **Shape:** `@MainActor` protocols refining `AnyObject, Observable`, so views can read state through `any P` and Observation still tracks it. The exceptions follow the implementation: `SessionRawLogWriting` is an `Actor` protocol, and `StorageLimitEnforcing` is `Sendable`.
 - **Factories are typed `Factory<any P>`** and still alias `.shared`, so the app behaves exactly as before. Inits are public. Services are passed around as `any P`, never as the concrete type.
 - **Every protocol has a test double in `EnvTestSupport`** (`FakeSessionManager`, `FakeAudioRecorder`, `FakeHealthKitSync`, … 15 hand-written fakes), and each one is used by at least one test or preview. Two kinds of service get a real instance instead:

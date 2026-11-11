@@ -1,6 +1,6 @@
 # F22 — Architecture Hardening
 
-Fixes the architecture concerns raised in the mock staff-engineer interview (2026-11-10), after checking each claim against the code. Users see no change. In 14 tasks the codebase got:
+Fixes the architecture concerns raised in the mock staff-engineer interview (2026-11-10), after checking each claim against the code. Users see no change. In 15 tasks the codebase got:
 
 - a pure, versioned sleep score;
 - a `Routing` leaf package;
@@ -42,7 +42,8 @@ Claims found outdated, with no task needed: CI already ran tests, `.measurement`
 | `Packages/Routing/` | New | `RouterDestination`, `SheetDestination`, `RouterPath` + `RouterPathTests` (T4) |
 | `Packages/Env/Sources/Services/Router.swift` → `TabCoordinator.swift` | Moved | Tab state stays in Env; routes moved out (T4) |
 | `Packages/*/Package.swift` (navigating features) | Modified | Depend on `Routing` (T4) |
-| `Packages/Env/Sources/Services/*.swift`, `AudioEngine/…/AudioRecorder.swift`, `SoundAnalysisDetector.swift`, `DesignSystem/…/Theme.swift` | Modified | A protocol at the top of each service; public inits; constructor injection with container defaults (T5–T7) |
+| `Packages/Env/Sources/Services/*.swift`, `AudioEngine/…/AudioRecorder.swift`, `SoundAnalysisDetector.swift`, `DesignSystem/…/Theme.swift` | Modified | A protocol per service; public inits; constructor injection with container defaults (T5–T7) |
+| `AudioRecording.swift`, `SoundAnalysisDetecting.swift`, `ThemeProviding.swift`, and 15 protocol files in `Env/Sources/Services/` | New | Each protocol in its own file next to its concrete type (T15) |
 | `Packages/Env/Sources/Services/Container.swift`, `DesignSystem/Sources/Container.swift` | Modified | `Factory<any P>` for every service; `routerPath` registration deleted (T4–T6) |
 | `Packages/Env/TestSupport/` | New | `EnvTestSupport`: 15 fakes + `UserDefaults.isolated()` (T5, T6) |
 | Feature views (13 files) and helpers | Modified | `@Injected` instead of `.shared` (T7) |
@@ -114,4 +115,4 @@ None added. All push and sheet destinations moved unchanged from `Env` to `Routi
 
 ## Tasks Completed
 
-F22-T1, F22-T2, F22-T3, F22-T4, F22-T5, F22-T6, F22-T7, F22-T8, F22-T9, F22-T10 (real-night check pending), F22-T11, F22-T12, F22-T13, F22-T14.
+F22-T1, F22-T2, F22-T3, F22-T4, F22-T5, F22-T6, F22-T7, F22-T8, F22-T9, F22-T10 (real-night check pending), F22-T11, F22-T12, F22-T13, F22-T14, F22-T15.
