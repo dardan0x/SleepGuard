@@ -1,6 +1,6 @@
 # F22 — Architecture Hardening
 
-Fixes the architecture concerns raised in the mock staff-engineer interview (2026-11-10), after checking each claim against the code. Users see no change. In 15 tasks the codebase got:
+Fixes the architecture concerns raised in the mock staff-engineer interview (2026-11-10), after checking each claim against the code. Users see no change. In 16 tasks the codebase got:
 
 - a pure, versioned sleep score;
 - a `Routing` leaf package;
@@ -115,4 +115,4 @@ None added. All push and sheet destinations moved unchanged from `Env` to `Routi
 
 ## Tasks Completed
 
-F22-T1, F22-T2, F22-T3, F22-T4, F22-T5, F22-T6, F22-T7, F22-T8, F22-T9, F22-T10 (real-night check pending), F22-T11, F22-T12, F22-T13, F22-T14, F22-T15.
+F22-T1, F22-T2, F22-T3, F22-T4, F22-T5, F22-T6, F22-T7, F22-T8, F22-T9, F22-T10 (real-night check pending), F22-T11, F22-T12, F22-T13, F22-T14, F22-T15, F22-T16 (unused `RouterPath` environment reads removed from `RecordingsListView` and `CalendarView`).
