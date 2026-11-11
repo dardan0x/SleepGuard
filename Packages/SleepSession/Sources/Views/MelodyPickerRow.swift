@@ -51,7 +51,7 @@ struct MelodyPickerRow: View {
 
         if melody.isCustom {
           Button(action: onDelete) {
-            Image(systemName: "trash")
+            Label(Strings.actionDelete, systemImage: "trash").labelStyle(.iconOnly)
               .font(.system(size: 14))
               .foregroundStyle(theme.textTertiary)
               .padding(8)

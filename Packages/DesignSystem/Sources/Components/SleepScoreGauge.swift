@@ -47,6 +47,9 @@ public struct SleepScoreGauge: View {
       }
     }
     .frame(width: size, height: size)
+    .accessibilityElement(children: .ignore)
+    .accessibilityLabel(Strings.a11ySleepScore)
+    .accessibilityValue(String(format: Strings.a11yScoreOutOf100, score))
     .onAppear {
       animatedProgress = CGFloat(score) / 100.0
     }

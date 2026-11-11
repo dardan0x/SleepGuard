@@ -30,7 +30,7 @@ public struct SheetNavHeader: View {
     HStack {
       Button(action: onBack) {
         HStack(spacing: 2) {
-          Image(systemName: "chevron.left")
+          Label(Strings.actionBack, systemImage: "chevron.left").labelStyle(.iconOnly)
             .font(.system(size: 17))
             .foregroundStyle(theme.accent)
         }

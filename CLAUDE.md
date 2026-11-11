@@ -202,6 +202,7 @@ These are non-negotiable. They come from production patterns in apps like IceCub
 - Loading states use redacted placeholders, not spinners.
 - Pull-to-refresh fires haptics via `HapticManager`.
 - Platform branching: `#if !os(visionOS)` for custom backgrounds.
+- **Accessibility (F23-T11):** icon-only buttons use `Label(Strings.x, systemImage:).labelStyle(.iconOnly)`, never a bare `Image`. A custom-drawn view (`Canvas`, shapes, gauges) gets one element with `.accessibilityLabel` + `.accessibilityValue`; a card that shows a value and a title reads as one element (`.accessibilityElement(children: .ignore)`). Purely decorative visuals are `.accessibilityHidden(true)`. Spoken text lives under `a11y.*` keys.
 
 ### View Componentization (Hard Limits)
 

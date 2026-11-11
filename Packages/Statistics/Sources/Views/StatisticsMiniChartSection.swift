@@ -44,7 +44,9 @@ struct StatisticsMiniChartSection: View {
         return MiniBarChart.DataPoint(
           label: String(label),
           value: Double(day.score),
-          color: theme.scoreColor(day.score))
+          color: theme.scoreColor(day.score),
+          accessibilityLabel: DateFormatters.dayOfWeekFull.string(from: day.date),
+          accessibilityValue: String(format: Strings.a11yScoreOutOf100, day.score))
       }
 
       MiniBarChart(data: data, theme: theme)

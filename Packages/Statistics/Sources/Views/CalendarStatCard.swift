@@ -28,5 +28,8 @@ struct CalendarStatCard: View {
     .padding(.vertical, 10)
     .background(theme.bgCard)
     .cornerRadius(12)
+    .accessibilityElement(children: .ignore)
+    .accessibilityLabel(label)
+    .accessibilityValue(value)
   }
 }

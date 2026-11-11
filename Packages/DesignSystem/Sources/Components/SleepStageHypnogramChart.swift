@@ -60,7 +60,23 @@ public struct SleepStageHypnogramChart: View {
         }
       }
       .frame(height: 100)
+      .accessibilityElement()
+      .accessibilityLabel(Strings.a11ySleepStagesChart)
+      .accessibilityValue(stagesSummary)
     }
+  }
+
+  /// "Deep 18%, REM 22%, Light 52%, Awake 8%" for VoiceOver.
+  private var stagesSummary: String {
+    guard let stats = session.stageStats else { return "" }
+    return [
+      (Strings.sleepStageDeep, stats.deepPct),
+      (Strings.sleepStageRem, stats.remPct),
+      (Strings.sleepStageLight, stats.lightPct),
+      (Strings.sleepStageAwake, stats.awakePct),
+    ]
+    .map { "\($0) \(Int($1.rounded()))%" }
+    .joined(separator: ", ")
   }
 
   // MARK: - Helpers
