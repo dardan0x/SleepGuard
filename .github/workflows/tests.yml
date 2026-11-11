@@ -31,7 +31,8 @@ jobs:
 
   app:
     # The package tests don't compile the app target (AppRegistry, tabs, deep
-    # links, Firebase wiring) or the widget extension. This builds both.
+    # links, Firebase wiring) or the widget extension. This builds both, with
+    # exactly the dependency versions in the committed Package.resolved.
     runs-on: macos-26
     timeout-minutes: 60
     steps:
@@ -49,6 +50,7 @@ jobs:
             -scheme SleepGuard \
             -destination 'generic/platform=iOS Simulator' \
             -derivedDataPath .build/app-derived-data \
+            -disableAutomaticPackageResolution \
             CODE_SIGNING_ALLOWED=NO \
             | tee .build/app-build.log | grep -E '^(error|warning):|\*\* BUILD' || true
           grep -q '\*\* BUILD SUCCEEDED \*\*' .build/app-build.log
