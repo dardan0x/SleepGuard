@@ -36,11 +36,16 @@ public struct SnoreSample: Codable, Sendable, Equatable {
   }
 }
 
-/// A `rawlog_<id>.json` file: the detection settings in effect plus every
-/// sample, sorted by `elapsed`.
+/// A raw log: the detection settings in effect plus every sample, sorted by
+/// `elapsed`.
 ///
-/// Format 1 (before F22-T1) is a bare `[SnoreSample]` array with no metadata;
-/// `decode(from:)` reads both.
+/// Three on-disk formats; `decode(from:)` reads all of them:
+/// - **3** (F23-T9, `rawlog_<id>.jsonl`): JSON Lines, written while recording.
+///   Line 1 is the `RawLogMetadata`, every following line one `SnoreSample`,
+///   in roughly arrival order. A log cut short by a crash still decodes: an
+///   incomplete last line is dropped.
+/// - **2** (F22-T1, `rawlog_<id>.json`): one `RawLog` JSON object.
+/// - **1** (before F22-T1): a bare `[SnoreSample]` array with no metadata.
 public struct RawLog: Codable, Sendable, Equatable {
   public let metadata: RawLogMetadata?
   public let samples: [SnoreSample]
@@ -55,16 +60,44 @@ public struct RawLog: Codable, Sendable, Equatable {
     if let log = try? decoder.decode(RawLog.self, from: data) {
       return log
     }
-    return try RawLog(metadata: nil, samples: decoder.decode([SnoreSample].self, from: data))
+    if let samples = try? decoder.decode([SnoreSample].self, from: data) {
+      return RawLog(metadata: nil, samples: samples)
+    }
+    return try decodeLines(data, decoder: decoder)
+  }
+
+  /// One format-3 line: `value` as JSON plus a newline.
+  public static func line(_ value: some Encodable) throws -> Data {
+    var data = try JSONEncoder().encode(value)
+    data.append(0x0A)
+    return data
+  }
+
+  private static func decodeLines(_ data: Data, decoder: JSONDecoder) throws -> RawLog {
+    let lines = data.split(separator: 0x0A, omittingEmptySubsequences: true)
+    guard let header = lines.first else { throw DecodingError.dataCorrupted(.init(codingPath: [], debugDescription: "Empty raw log")) }
+    let metadata = try decoder.decode(RawLogMetadata.self, from: Data(header))
+    var samples: [SnoreSample] = []
+    samples.reserveCapacity(lines.count - 1)
+    for (index, line) in lines.dropFirst().enumerated() {
+      do {
+        try samples.append(decoder.decode(SnoreSample.self, from: Data(line)))
+      } catch where index == lines.count - 2 && data.last != 0x0A {
+        // The app died mid-write: keep everything before the partial line.
+        break
+      }
+    }
+    return RawLog(metadata: metadata, samples: samples.sorted { $0.elapsed < $1.elapsed })
   }
 }
 
 /// Detection settings in effect when a raw log was recorded. A replay needs
 /// them to configure the tracker the same way.
 public struct RawLogMetadata: Codable, Sendable, Equatable {
-  /// 2 = `RawLog` object; samples carry `peakDB` / `speechConfidence` and are
-  /// timestamped at the tracker. Format 1 is a bare sample array.
-  public static let currentFormatVersion = 2
+  /// 3 = JSON Lines written while recording (F23-T9); 2 = `RawLog` object
+  /// (samples carry `peakDB` / `speechConfidence`, timestamped at the
+  /// tracker); 1 = bare sample array.
+  public static let currentFormatVersion = 3
 
   public let formatVersion: Int
   public let sessionStart: Date

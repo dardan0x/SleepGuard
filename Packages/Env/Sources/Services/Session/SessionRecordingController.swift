@@ -100,9 +100,10 @@ final class SessionRecordingController {
     detection?.setActive(true)
     detection?.resetDisplayState()
 
-    // Raw classification log is a debug re-processing aid (~48 MB/night of
-    // JSON for a full night, nothing reads it in production yet), so it is
-    // gated behind the same flag as the full raw audio.
+    // Raw classification log is a debug re-processing aid (~65 MB/night of
+    // JSON Lines, nothing reads it in production yet), so it is gated behind
+    // the same flag as the full raw audio. It's written while recording, so
+    // register it for crash cleanup now, not at stop.
     if preferences.preserveRawAudio {
       let prefs = preferences
       let metadata = RawLogMetadata(
@@ -111,6 +112,7 @@ final class SessionRecordingController {
         detectSleepTalking: prefs.detectSleepTalking,
         snoreInterrupterMode: prefs.snoreInterrupterMode.rawValue)
       let sessionID = session.id
+      pendingSessionStore.addFile(SessionRawLogWriter.fileName(for: sessionID))
       Task { [rawLogWriter] in
         await rawLogWriter.start(sessionID: sessionID, metadata: metadata)
       }
@@ -209,11 +211,8 @@ final class SessionRecordingController {
     }
 
     // Save raw classification log
-    let logFilename = await rawLogWriter.stop()
-    session.rawLogFileURL = logFilename
-    if let logFilename {
-      pendingSessionStore.addFile(logFilename)
-    }
+    // Already registered with the pending store at start.
+    session.rawLogFileURL = await rawLogWriter.stop()
 
     let result = session
     completedSession = result
@@ -268,6 +267,9 @@ final class SessionRecordingController {
 
       // Wait for any in-flight compression tasks before deleting files.
       await detection?.awaitPendingCompression()
+
+      // The raw log is written while recording (F23-T9): close and delete it.
+      await rawLogWriter.discard()
 
       // Delete the session's audio files and clean up
       if let session = currentSession {
