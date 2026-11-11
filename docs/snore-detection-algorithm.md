@@ -1,6 +1,6 @@
 # Snore Detection Algorithm & Architecture
 
-> Last updated: 2026-06-10 (Sessions 70–71: post-melody breathing delay, melody re-trigger, gap counting model)
+> Last updated: 2026-11-11 (F22: rules extracted into `DetectionStateMachine` on the `DetectionEngine` actor; duration thresholds; raw log format 2). Earlier: 2026-06-10 (Sessions 70–71: post-melody breathing delay, melody re-trigger, gap counting model)
 
 This document is the canonical reference for how SleepGuard detects, records, measures, and scores snoring. It covers the real-time detection pipeline, the event-tracking state machine, audio file architecture, duration calculation philosophy, and how Sessions 67–69 changed the recording model.
 
@@ -124,23 +124,32 @@ Ideal snore signature: `lowFreqRatio > 0.6`, `spectralCentroid < 400 Hz` → `sp
 
 ## 3. Event Lifecycle & State Machine
 
-### 3.1 Core Constants
+### 3.1 Where the rules live (F22-T8, T10)
+
+The rules below are `DetectionStateMachine` (`Packages/AudioEngine/Sources/Engine/DetectionStateMachine.swift`), a pure value type: classified samples and melody start/stop go in, `DetectionOutput`s (event started, finalized, discarded, melody requested, recording gap, …) come out. It has no clock, no audio and no SwiftData.
+
+At runtime it runs on the `DetectionEngine` actor, fed by one ordered `AsyncStream` of timestamped messages. `RealtimeDetectionTracker` (Env, main actor) takes a sample every 50 ms, classifies it, sends it into the stream, and performs each batch of outputs (event files, SwiftData, the melody). See ADR 0003 (`docs/adr/0003-detection-actor.md`). Its behavior is pinned by `DetectionStateMachineTests`, the replay goldens in `Packages/AudioEngine/Tests/Fixtures/Replay/` and `DetectionCharacterizationTests` (Env).
+
+### 3.2 Core Constants
 
 ```swift
 eventGapThreshold: TimeInterval = 10.0         // silence needed to close an event
-requiredConsecutiveSamples: Int = 3            // ≈150 ms sustained snoring to start
-requiredNonSnoreSamplesToStop: Int = 3         // ≈150 ms silence to stop melody
+sustainedRunDuration: TimeInterval = 0.075     // a run must last this long, first sample to latest
+                                               // (3 samples at 20 Hz): starts an event, stops the
+                                               // melody on silence, starts a speech event
 melodyMinPlayDuration: TimeInterval = 4.0      // minimum melody play time
 postMelodyBreathingDelay: TimeInterval = 3.0   // verify snoring resumed after melody
 ```
 
-### 3.2 From Detection to Event
+Thresholds are durations, not sample counts (F22-T10), so they keep their meaning if the sampling rate changes. Before T10 they were `requiredConsecutiveSamples = 3` and `requiredNonSnoreSamplesToStop = 3`.
+
+### 3.3 From Detection to Event
 
 **Step 1 — Sustained detection**  
-`consecutiveSnoreSamples` must reach 3 before an event can start. At 20 Hz, that's ~150 ms. This filters out brief transients (taps, notifications, bed creaks).
+A snore run must last `sustainedRunDuration` (75 ms from its first sample to the latest, i.e. 3 samples at 20 Hz) before an event can start. This filters out brief transients (taps, notifications, bed creaks).
 
 **Step 2 — Event start (backdated)**  
-When sustained detection is confirmed, the event start is backdated by `(requiredConsecutiveSamples - 1) * 0.05 = 0.10 s` to when sustained detection began. This prevents losing the first snore's leading edge.
+When sustained detection is confirmed, the event starts at the run's first sample, so the first snore's leading edge isn't lost. (Before F22-T10 it was a fixed 0.10 s backdate.)
 
 **Step 3 — Per-event audio file**  
 `audioRecorder.startEventFile(eventID:url:)` creates a new `.caf` file for writing. The tap callback writes to this file in real time alongside the optional full-session file.
@@ -168,7 +177,7 @@ The 10-second gap is the **debounce threshold**. If snoring resumes within 10 se
 
 **Melody re-triggering:** The soothing melody plays every time sustained snoring is confirmed, not just once per event. During continuous snoring the melody may fire multiple times within the same open event.
 
-### 3.3 `finalizeActiveEvent()`
+### 3.4 `finalizeActiveEvent()`
 
 ```swift
 let eventSpan = (lastSnoringSampleTime ?? Date()).timeIntervalSince(startTime)
@@ -569,15 +578,19 @@ Actor-isolated buffer that records every sample at ~20 Hz for future re-processi
 
 ```swift
 struct SnoreSample: Codable {
-    let elapsed: TimeInterval
+    let elapsed: TimeInterval     // from session.startDate, measured by the tracker (F22-T1)
     let db: Float
+    let peakDB: Float?            // F22-T1
     let spectralScore: Float
     let snoreConfidence: Float
+    let speechConfidence: Float?  // F22-T1
     let state: DetectionState
 }
 ```
 
-On `stopSession()`, writes to `rawlog_<sessionID>.json` in Documents.
+On `stopSession()`, writes to `rawlog_<sessionID>.json` in Documents. Since F22-T1 the file is a `RawLog { metadata, samples }` object (format 2, with sensitivity, sleep-talking and interrupter settings); `RawLog.decode(from:)` still reads format 1, a bare sample array. Only written when `preserveRawAudio` is on.
+
+`scripts/make-replay-fixture.py` cuts an excerpt of a raw log into a CSV fixture for the replay tests (F22-T9).
 
 **Use case:** If you want to change thresholds or debounce values later, you can re-run the classifier on the raw log without re-recording audio. This is invaluable for algorithm tuning.
 
@@ -609,13 +622,14 @@ On `stopSession()`, writes to `rawlog_<sessionID>.json` in Documents.
     │
     ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│                    SessionManager.processAudioLevel()                │
+│     RealtimeDetectionTracker (main actor, every 50 ms)               │
 │                                                                      │
 │  SnoreDetector.classify(db, spectralScore, snoreConfidence)          │
 │    → DetectionState (.none / .quiet / .light / .loud / .epic)        │
+│    → .sample(input, at:) into the AsyncStream                        │
 │                                                                      │
-│  State machine:                                                      │
-│    ├─→ consecutiveSnoreSamples >= 3 ? Start/extend event             │
+│  DetectionEngine actor → DetectionStateMachine (ADR 0003):           │
+│    ├─→ run sustained ≥ 75 ms ? Start/extend event                    │
 │    ├─→ activeBurstStart / completedBursts                            │
 │    ├─→ 10 s silence ? finalizeActiveEvent()                          │
 │    ├─→ Trigger soothing melody                                       │

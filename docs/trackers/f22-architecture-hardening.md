@@ -4,13 +4,13 @@
 
 | Field | Value |
 |-------|-------|
-| **Status** | In Progress |
+| **Status** | Done (real-night check pending, T10) |
 | **Priority** | P1 |
 | **Version** | V5 |
 | **Blocked By** | — |
 | **Started** | 2026-11-10 |
-| **Completed** | — |
-| **Feature Doc** | — |
+| **Completed** | 2026-11-11 |
+| **Feature Doc** | [`docs/features/f22-architecture-hardening.md`](../features/f22-architecture-hardening.md) |
 | **Branch** | `feature/f22-architecture-hardening` (one sub-branch per task, `feature/f22/t#-slug`, merged back here; then `main`) |
 
 ## Summary
@@ -55,7 +55,7 @@ Fixes the architecture concerns raised in the mock staff-engineer interview (`Sl
 | F22-T11 | `VersionedSchema` V1 + empty migration plan | Model | Done | F22-T3 | Models / App | 2026-11-10 | 2026-11-10 |
 | F22-T12 | `DashboardState.make(from:now:)` pure mapping + tests | Refactor | Done | F22-T3 | Statistics | 2026-11-11 | 2026-11-11 |
 | F22-T13 | CI check: 200-line view limit with allowlist | Infra | Done | — | scripts / .github | 2026-11-11 | 2026-11-11 |
-| F22-T14 | ADRs (protocols, detection actor) + docs truth pass + feature doc | Docs | Backlog | F22-T1…T13 | docs | — | — |
+| F22-T14 | ADRs (protocols, detection actor) + docs truth pass + feature doc | Docs | Done | F22-T1…T13 | docs | 2026-11-11 | 2026-11-11 |
 
 ## Task Details
 
@@ -295,22 +295,26 @@ Fixes the architecture concerns raised in the mock staff-engineer interview (`Sl
 | Field | Value |
 |-------|-------|
 | Arch Ref | `docs/architecture/concurrency.md` |
-| Status | Backlog |
-| Started | — |
-| Completed | — |
+| Status | Done |
+| Started | 2026-11-11 |
+| Completed | 2026-11-11 |
 
 **Acceptance Criteria:**
-- [ ] `DetectionStateMachine` (struct, `AudioEngine`): `mutating func ingest(_ input:, at:) -> [DetectionOutput]`; no clock, no singletons, no SwiftData
-- [ ] `RealtimeDetectionTracker` becomes an adapter: feeds samples, performs side effects (insert event, clip, melody, checkpoint)
-- [ ] Behavior unchanged: still driven by the 50 ms loop; existing `DetectionSensitivityTests` pass
-- [ ] Unit tests for the main transitions (onset, min duration, orphan filter, melody gap, speech)
-- [ ] Builds with zero errors
+- [x] `DetectionStateMachine` (struct, `AudioEngine`): `mutating func ingest(_ input:, at:) -> [DetectionOutput]`; no clock, no singletons, no SwiftData
+- [x] `RealtimeDetectionTracker` becomes an adapter: feeds samples, performs side effects (insert event, clip, melody, checkpoint)
+- [x] Behavior unchanged: still driven by the 50 ms loop; existing `DetectionSensitivityTests` pass
+- [x] Unit tests for the main transitions (onset, min duration, orphan filter, melody gap, speech)
+- [x] Builds with zero errors
 
 **Prompt Used:**
-_(filled after task completion)_
+"continue with next tasks" (after T11–T13, which ran first while the user recorded the T9 night)
 
 **Notes:**
-—
+- Characterization first: an injectable clock on the old tracker, then 13 end-to-end scripted-sample tests (`DetectionCharacterizationTests`, Env) recorded against it. They passed unchanged after the extraction, and again through the T10 actor.
+- API: `ingest(_:at:)`, the melody feedback calls `melodyDidStart(at:)` / `melodyDidStop(at:)`, and `finalizeActiveEvents(at:)`. Outputs come back in the order to perform them.
+- The melody is a feedback loop (`melodyRequested` → `melodyDidStart`), because only the player knows whether it actually started (muted, mode "never", file missing).
+- Classification stays outside the machine: it takes verdicts, not raw confidences, so T10 could move it independently.
+- `DetectionStateMachineTests` (18) cover onset, min duration, the orphan filter, the melody gap and speech.
 
 ---
 
@@ -381,22 +385,26 @@ _(filled after task completion)_
 | Field | Value |
 |-------|-------|
 | Arch Ref | CLAUDE.md "SwiftData Schema Rules" |
-| Status | Backlog |
-| Started | — |
-| Completed | — |
+| Status | Done |
+| Started | 2026-11-10 |
+| Completed | 2026-11-10 |
 
 **Acceptance Criteria:**
-- [ ] `SleepGuardSchemaV1: VersionedSchema` listing the current models unchanged; `SleepGuardMigrationPlan` with no stages
-- [ ] `ModelContainer` in app + test support uses the plan
-- [ ] Verified on a simulator holding existing (pre-T11) data: launches, sessions intact
-- [ ] CLAUDE.md schema rules updated (how to add V2)
-- [ ] Builds with zero errors
+- [x] `SleepGuardSchemaV1: VersionedSchema` listing the current models unchanged; `SleepGuardMigrationPlan` with no stages
+- [x] `ModelContainer` in app + test support uses the plan
+- [x] Verified on a simulator holding existing (pre-T11) data: launches, sessions intact
+- [x] CLAUDE.md schema rules updated (how to add V2)
+- [x] Builds with zero errors
 
 **Prompt Used:**
-_(filled after task completion)_
+"continue with next tasks" (run before T8: T9 needed a recorded night first)
 
 **Notes:**
 _Prerequisite for F13 (removing `@Attribute(.unique)` on 4 models needs a real migration)._
+- `SleepGuardSchema.container(_:)` calls `ModelContainer(for:migrationPlan:configurations:)`; the app and `TestStore` both use it. `SleepGuardSchema.Current` names the latest version.
+- V1 references the live `@Model` classes. It is not frozen as nested copies yet: that would duplicate four models for no behavior. Freezing becomes step 1 of adding V2 (procedure in CLAUDE.md / AGENTS.md).
+- Simulator with pre-T11 data: 30 sessions / 614 events / 1 profile / 7 logs / score sum 1744 before and after launch.
+- `SleepGuardSchemaTests` (2).
 
 ---
 
@@ -405,20 +413,23 @@ _Prerequisite for F13 (removing `@Attribute(.unique)` on 4 models needs a real m
 | Field | Value |
 |-------|-------|
 | Arch Ref | `docs/architecture/state.md` |
-| Status | Backlog |
-| Started | — |
-| Completed | — |
+| Status | Done |
+| Started | 2026-11-11 |
+| Completed | 2026-11-11 |
 
 **Acceptance Criteria:**
-- [ ] The session → `ViewState` mapping in `StatisticsDashboardView` moves to a pure function
-- [ ] Tests: which night is "last night", a session crossing midnight, force-saved session with a stale cache, no sessions
-- [ ] Builds with zero errors
+- [x] The session → `ViewState` mapping in `StatisticsDashboardView` moves to a pure function
+- [x] Tests: which night is "last night", a session crossing midnight, force-saved session with a stale cache, no sessions
+- [x] Builds with zero errors
 
 **Prompt Used:**
-_(filled after task completion)_
+"continue with next tasks"
 
 **Notes:**
-—
+- `DashboardState.make(from:now:calendar:)` has no SwiftUI, SwiftData query or clock. The view passes `@Query` results and `Date()`. `StatisticsLoadedView` takes one `state` instead of four values.
+- `isLastNight` moved out of the view, so the "LAST NIGHT / LAST TIME" label is testable.
+- Behavior kept identical, including the start-date rule for "last night". Changing what counts as a night is a product decision (open).
+- `DashboardStateTests` (10).
 
 ---
 
@@ -427,20 +438,22 @@ _(filled after task completion)_
 | Field | Value |
 |-------|-------|
 | Arch Ref | CLAUDE.md "View Componentization" |
-| Status | Backlog |
-| Started | — |
-| Completed | — |
+| Status | Done |
+| Started | 2026-11-11 |
+| Completed | 2026-11-11 |
 
 **Acceptance Criteria:**
-- [ ] Script fails when a file in `Sources/Views/` or `Sources/Components/` exceeds 200 lines, unless allowlisted
-- [ ] Allowlist seeded with current offenders (each with a reason)
-- [ ] Runs in `.github/workflows/layering.yml`
+- [x] Script fails when a file in `Sources/Views/` or `Sources/Components/` exceeds 200 lines, unless allowlisted
+- [x] Allowlist seeded with current offenders (each with a reason)
+- [x] Runs in `.github/workflows/layering.yml`
 
 **Prompt Used:**
-_(filled after task completion)_
+"continue with next tasks"
 
 **Notes:**
-—
+- `scripts/check-view-size.py` covers `Sources/Views/` and `Sources/Components/` in every package; runs in `layering.yml`.
+- The allowlist holds the two current offenders (`SleepReportPDFGenerator.swift`, `SessionDetailLoadedView.swift`), each with a line ceiling and a reason. A file that grows past its ceiling fails, and so does a stale entry, so the list only shrinks.
+- The 100-line container rule isn't enforced: detecting a "container view" by pattern would be noisy.
 
 ---
 
@@ -449,23 +462,29 @@ _(filled after task completion)_
 | Field | Value |
 |-------|-------|
 | Arch Ref | — |
-| Status | Backlog |
-| Started | — |
-| Completed | — |
+| Status | Done |
+| Started | 2026-11-11 |
+| Completed | 2026-11-11 |
 
 **Acceptance Criteria:**
-- [ ] `docs/adr/0002-protocol-services.md`
-- [ ] `TECHNICAL_OVERVIEW.md` claims match the code (tests in CI, test count, measurement mode, tap-thread wording verified against Apple docs)
-- [ ] Stale docs deleted or marked historical
-- [ ] `docs/features/f22-architecture-hardening.md`; `ProjectArchitecture.md` updated
-- [ ] AGENTS.md / CLAUDE.md rules synced (protocols, Routing, detection actor)
+- [x] `docs/adr/0002-protocol-services.md` (ADR 0003 was written in T10)
+- [x] `TECHNICAL_OVERVIEW.md` claims match the code (tests in CI, test count, measurement mode, tap-thread wording verified against Apple docs). *Edited locally only: the file is untracked by the user's choice.*
+- [x] Stale docs deleted or marked historical
+- [x] `docs/features/f22-architecture-hardening.md`; `ProjectArchitecture.md` updated (local only: gitignored)
+- [x] AGENTS.md / CLAUDE.md rules synced (protocols, Routing, detection actor)
 
 **Prompt Used:**
-_(filled after task completion)_
+"continue" (after the T10 handoff)
 
 **Notes:**
-—
-
+- **Tap thread:** Apple's `installTap(onBus:bufferSize:format:block:)` docs say only that the framework "may invoke the `tapBlock` on a thread other than the main thread". They don't call it the real-time render thread. The three code comments in `TapProcessor` / `AudioRecorder` and the overview now say "off the main thread".
+- **Measurement mode:** confirmed. `AudioRecorder` sets `.playAndRecord` + `.measurement` in all three session-configuration paths.
+- **Tests and CI:** 268 `@Test` functions in 8 packages (AudioEngine 62, Env 53, Models 79, Personalization 30, Statistics 18, Recordings 16, DesignSystem 7, Routing 3), counted from the sources; `tests.yml` runs them on PRs. README, overview and ProjectArchitecture updated from 179/7.
+- **Committed docs:** README (package graph with Routing, Env/DesignSystem rows, protocols, detection actor, tests table, CI table, package count), `snore-detection-algorithm.md` (state machine + actor, duration thresholds, first-sample onset, raw log format 2), ADR 0002, feature doc, AGENTS/CLAUDE (detection-stream rule, ADR convention, ADR 0002 link), `Container.swift` comment ("private init" was stale).
+- **Historical markers** on F15, F19, F20, F21 feature docs instead of rewriting them: they record what was true then.
+- **Tracker truth:** the detail sections of T8, T11, T12 and T13 still said Backlog with unchecked criteria (only the task table had been updated). Filled from their session fragments.
+- **Local-only edits** (gitignored or untracked, so not in the commit): `docs/TECHNICAL_OVERVIEW.md` (29 edits; original copy in the session scratchpad), `docs/ProjectArchitecture.md`, `docs/architecture/overview.md`, `dependencies.md`, and `concurrency.md` (from T10).
+- `docs/interview-presentation.md` Part 5b still shows `register { FakePreferences() }`. Left as is (user's file); the overview's gotchas section now says what to say instead.
 ---
 
 ## Update Rules (for the AI)
