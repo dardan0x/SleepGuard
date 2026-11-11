@@ -46,7 +46,7 @@ SERVICE_CONSUMER_EXCLUDED = ("Packages/Models/", "Packages/AudioEngine/", "Packa
 SERVICE_SINGLETON = re.compile(
     r"\b(AppConfig|AudioRecorder|CustomMelodyStorage|HealthKitSync|HapticManager|"
     r"NotificationPermissionManager|PendingSessionStore|RecordingDelayManager|"
-    r"SessionCheckpointStore|SessionManager|SnoreInterrupterPlayer|SoundAnalysisDetector|"
+    r"SessionCheckpointStore|SessionCommitter|SessionManager|SnoreInterrupterPlayer|SoundAnalysisDetector|"
     r"UserPreferences|WatchConnectivityManager|SessionRawLogWriter|StorageLimitEnforcer|"
     r"TabCoordinator|Theme)\.shared\b")
 

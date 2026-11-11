@@ -39,19 +39,19 @@ Last updated: 2026-11-11
 | Backlog | 0 |
 | Blocked | 0 |
 | — | — |
-| Features (V5) | 4 |
+| Features (V5) | 5 |
 | Done | 4 |
-| In Progress | 0 |
+| In Progress | 1 |
 | Backlog | 0 |
 | Blocked | 0 |
 | — | — |
-| Total Tasks | 152 |
-| Tasks Done | 136 |
+| Total Tasks | 158 |
+| Tasks Done | 137 |
 | Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
-| Tasks Backlog | 16 |
+| Tasks Backlog | 21 |
 | — | — |
-| **Progress** | **89%** |
+| **Progress** | **87%** |
 
 ## Features
 
@@ -78,6 +78,7 @@ Last updated: 2026-11-11
 | F20 | Home Screen & Lock Screen Widgets | P1 | Done | 9/9 | ██████████ 100% | [tracker](trackers/f20-home-screen-widgets.md) |
 | F21 | Test Coverage | P1 | Done | 17/17 | ██████████ 100% | [tracker](trackers/f21-test-coverage.md) |
 | F22 | Architecture Hardening | P1 | Done (real-night check pending) | 16/16 | ██████████ 100% | [tracker](trackers/f22-architecture-hardening.md) |
+| F23 | Production Readiness | P1 | In Progress | 1/6 | ██░░░░░░░░ 17% | [tracker](trackers/f23-production-readiness.md) |
 
 ## Activity Log
 
@@ -85,6 +86,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-11-11 | F23-T1 | Completed | `SessionCommitter` (Env) owns saving a night; summary sheet and low-battery force-save both use it. Fixes the force-save path never clearing the pending record / checkpoint (saved night's clips deleted on the next launch or recording). `SessionCommitterTests` (mutation-checked). Branch `feature/f23/t1-session-commit` |
 | 2026-11-11 | F22-T16 | Completed | Removed unused `@Environment(RouterPath.self)` (+ `import Routing`) from `RecordingsListView` and `CalendarView`; the other 13 declarations are used. Build 0 warnings; Recordings 16 + Statistics 18 tests pass. Branch `feature/f22/t16-unused-routerpath` |
 | 2026-11-11 | F22-T15 | Completed | Each of the 18 service protocols moved to its own `<Protocol>.swift` beside the concrete type (pure move, imports trimmed); rule updated in AGENTS/CLAUDE + ADR 0002. 268 tests pass, 0 warnings. Branch `feature/f22/t15-protocol-files` |
 | 2026-11-11 | F22-T14 | Completed | ADR 0002 (protocol services); docs truth pass (README, detection doc, overview, ProjectArchitecture, tap-thread comments matched to Apple docs); tracker details for T8/T11–T13 filled; F15/F19/F20/F21 docs marked historical; AGENTS/CLAUDE: detection-stream rule + ADR convention; feature doc `docs/features/f22-architecture-hardening.md`. F22 complete (real night pending). Branch `feature/f22/t14-adrs-docs-truth-pass` |
@@ -306,7 +308,7 @@ _Most recent first. The AI appends here after every task._
 
 | Task | Feature | Started | Assignee |
 |------|---------|---------|----------|
-| — | — | — | F22 done; user: real night on device (T10), then merge `feature/f22-architecture-hardening` into `main` |
+| F23-T2 | F23 | — | Next: privacy manifest. User: real night on device (F22-T10), then merge F22 (and F23 on top) into `main` |
 
 ## Completed (last 10)
 

@@ -22,6 +22,7 @@ public extension Container {
   @MainActor var pendingSessionStore: Factory<any PendingSessionStoring> { self { PendingSessionStore.shared }.singleton }
   @MainActor var recordingDelayManager: Factory<any RecordingDelayManaging> { self { RecordingDelayManager.shared }.singleton }
   @MainActor var sessionCheckpointStore: Factory<any SessionCheckpointStoring> { self { SessionCheckpointStore.shared }.singleton }
+  @MainActor var sessionCommitter: Factory<any SessionCommitting> { self { SessionCommitter.shared }.singleton }
   @MainActor var sessionManager: Factory<any SessionManaging> { self { SessionManager.shared }.singleton }
   @MainActor var snoreInterrupterPlayer: Factory<any SnoreInterrupterPlaying> { self { SnoreInterrupterPlayer.shared }.singleton }
   @MainActor var soundAnalysisDetector: Factory<any SoundAnalysisDetecting> { self { SoundAnalysisDetector.shared }.singleton }
