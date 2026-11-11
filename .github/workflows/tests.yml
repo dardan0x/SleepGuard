@@ -32,7 +32,9 @@ jobs:
   app:
     # The package tests don't compile the app target (AppRegistry, tabs, deep
     # links, Firebase wiring) or the widget extension. This builds both, with
-    # exactly the dependency versions in the committed Package.resolved.
+    # exactly the dependency versions in the committed Package.resolved. Release,
+    # because that's what ships and some build-phase problems only show up there
+    # (F23-T12: the Crashlytics/embed cycle).
     runs-on: macos-26
     timeout-minutes: 60
     steps:
@@ -42,12 +44,13 @@ jobs:
           XCODE=$(ls -d /Applications/Xcode_26*.app | sort -V | tail -1)
           sudo xcode-select -s "$XCODE"
           xcodebuild -version
-      - name: Build app + widgets (simulator, unsigned)
+      - name: Build app + widgets (Release, simulator, unsigned)
         run: |
           mkdir -p .build
           xcodebuild build \
             -project SleepGuard.xcodeproj \
             -scheme SleepGuard \
+            -configuration Release \
             -destination 'generic/platform=iOS Simulator' \
             -derivedDataPath .build/app-derived-data \
             -disableAutomaticPackageResolution \

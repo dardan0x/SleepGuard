@@ -36,7 +36,7 @@ The "Do" list from the principal architecture review (`docs/ARCHITECTURE_REVIEW.
 | F23-T9 | Stream the raw log to disk while recording | Perf | Backlog | — | Env / AudioEngine | — | — |
 | F23-T10 | Alert when a recording fails to start | UI | Backlog | — | SleepSession / App / DesignSystem | — | — |
 | F23-T11 | Accessibility pass (VoiceOver, Dynamic Type) | UI | Backlog | — | DesignSystem / features | — | — |
-| F23-T12 | Fix the Release build cycle (Crashlytics phase last) | Build | Backlog | — | App | — | — |
+| F23-T12 | Fix the Release build cycle (Crashlytics phase last) | Build | Done | — | App / .github | 2026-11-11 | 2026-11-11 |
 
 ## Task Details
 
@@ -241,6 +241,31 @@ User choice "MockDataGenerator Debug-only".
 - Whole file wrapped in `#if DEBUG`. All three callers (`SleepGuardApp` launch argument, `SettingsDataSection`, `SettingsStorageSection` test cleanup) were already `#if DEBUG`.
 - Verified: Env and Settings build in Release; the app builds in Debug with 0 warnings.
 - **Found:** the app target's Release build fails with a dependency cycle (Crashlytics script phase before "Embed Foundation Extensions"). It predates F23; fixed in T12.
+
+---
+
+### F23-T12 — Fix the Release build cycle
+
+| Field | Value |
+|-------|-------|
+| Arch Ref | — |
+| Status | Done |
+| Started | 2026-11-11 |
+| Completed | 2026-11-11 |
+
+**Acceptance Criteria:**
+- [x] The app builds in Release (what Archive uses)
+- [x] CI builds Release, so this can't come back unnoticed
+
+**Prompt Used:**
+Found while verifying T8 ("other points from review").
+
+**Notes:**
+- **The error:** "Cycle inside SleepGuard". The "Firebase Crashlytics" run-script phase sat before "Embed Foundation Extensions". In Release it depends on the dSYM, which depends on the embedded widget `.appex`, which waited for the script. Debug builds never produce a dSYM, which is why it went unnoticed. **It would also fail Archive.**
+- **Fix:** move the Crashlytics phase to the end of the app target's build phases, as Firebase's setup guide requires. One line of `project.pbxproj`.
+- Verified: a Release build succeeds, the widget is embedded and the dSYM is produced; Debug builds with 0 warnings.
+- The CI `app` job now builds `-configuration Release`.
+- Not changed: the script's second input path is `$(SRCROOT)/$(BUILT_PRODUCTS_DIR)/$(INFOPLIST_PATH)`, which points nowhere (Firebase documents `$(BUILT_PRODUCTS_DIR)/$(INFOPLIST_PATH)`). It only affects dependency tracking, and the phase is `alwaysOutOfDate`.
 
 ---
 
