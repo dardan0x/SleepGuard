@@ -1,7 +1,7 @@
 # Sleep Score Calculation
 
-> Source of truth: `Packages/Models/Sources/Data/SleepSession.swift` — `sleepScore`
-> Last updated: 2026-06-19
+> Source of truth: `SleepScore.compute(_:config:)` in `Packages/Models/Sources/Data/SleepScore.swift` (a pure function of `SleepInputs`), with the coefficients in `SleepScoreConfig.default`. `SleepSession.sleepInputs` builds the inputs from a stored session.
+> Last updated: 2026-11-12
 
 SleepGuard produces a single `0–100` sleep score per session. Higher is better. The score is computed after a session ends and is cached in `SleepSession.cachedSleepScore` / `cachedSnoringDuration` to avoid SwiftData relationship faulting.
 
@@ -176,7 +176,7 @@ All coefficients, caps, thresholds, and duration penalties are baked into `Sleep
 
 - `SleepScoreConfig` lives in the `Models` package with baked-in defaults.
 - `AppConfig.sleepScoreConfig` returns `SleepScoreConfig.default` (or the DEBUG override).
-- `SleepSession.sleepScore(using: SleepScoreConfig)` recomputes the score using the supplied config.
+- `SleepSession.sleepScore(using: SleepScoreConfig)` builds `SleepInputs` and calls `SleepScore.compute`; `refreshCachedScore(using:)` stores the result with a version fingerprint, so a config change invalidates cached scores.
 - The `sleepScore` property uses the cached score if available, otherwise computes with `.default`.
 
 ### Cache behavior

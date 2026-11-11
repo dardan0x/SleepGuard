@@ -1,10 +1,12 @@
 # SleepGuard
 
-> Your bedside sleep lab. SleepGuard listens while you sleep, detects and records snoring, sleep talking, coughing, and ambient noise — then scores your sleep and shows you how it trends over time.
+> Your bedside sleep lab. SleepGuard listens while you sleep, detects and records snoring and sleep talking, then scores your sleep and shows you how it trends over time.
 
 **100% on-device.** All audio analysis runs locally on your iPhone using Apple's `SoundAnalysis` framework. No accounts, no servers, no audio ever leaves your phone.
 
-![Platform](https://img.shields.io/badge/platform-iOS%2017%2B-blue)
+📐 **How it's built and why:** the [Technical Overview](docs/TECHNICAL_OVERVIEW.md) covers the architecture, every package, the detection and scoring algorithms, Swift 6 concurrency, dependency injection, testing and CI, and the design decisions behind them.
+
+![Platform](https://img.shields.io/badge/platform-iOS%2017.6%2B-blue)
 ![Language](https://img.shields.io/badge/Swift-6.2-orange)
 ![Architecture](https://img.shields.io/badge/architecture-SPM%20%C2%B7%20SwiftData%20%C2%B7%20SwiftUI-green)
 ![Privacy](https://img.shields.io/badge/privacy-on--device-brightgreen)
@@ -19,15 +21,15 @@ SleepGuard turns your phone into a bedside monitor. Start a session, set it on y
 
 | | Feature | What it does |
 |---|---------|--------------|
-| 🌙 | **Live sleep session** | Bedside-clock UI with a real-time decibel meter, snoring glow, and live event detection. Keeps recording in the background and survives interruptions, route changes, and low battery. |
-| 🔊 | **Multi-sound detection** | Classifies **snoring** (quiet · light · loud · epic), **sleep talking**, **coughing**, and **ambient noise** using Apple's on-device 300-class sound classifier — with an FFT/amplitude fallback. |
+| 🌙 | **Live sleep session** | Bedside-clock UI with a real-time level meter, snoring glow, and live event detection. Keeps recording in the background, recovers from interruptions and route changes, saves automatically when the battery runs critically low, and can restore a night after a crash. |
+| 🔊 | **Snore & sleep-talk detection** | Classifies **snoring** (quiet · light · loud · epic) and, optionally, **sleep talking**, using Apple's on-device sound classifier and the sound level. An FFT-based fallback is implemented and waiting for real-night validation. |
 | 📊 | **Sleep quality score** | A 0–100 score derived from snoring percentage, event frequency, sleep-talking, and (when available) sleep-stage architecture. |
-| 🎧 | **Audio playback** | Browse past nights, scrub the full recording, jump between events, and play individual gap-free snore clips with optional enhanced audio (normalization + bandpass cleanup). |
+| 🎧 | **Audio playback** | Browse past nights, jump between events, and play each event's clip, with optional enhanced audio (normalization + bandpass cleanup). |
 | 📈 | **Trends & statistics** | Dashboard, calendar, "Last 7 Nights" view, and weekly/monthly Swift Charts for sleep score, snoring time, and event frequency. |
 | ⌚ | **Apple Watch + HealthKit** | Reads sleep stages from Apple Watch, overlays a hypnogram on your timeline, and writes sleep sessions back to Apple Health. |
 | 📄 | **PDF sleep reports** | Export a polished report — score, stats, sleep-architecture breakdown, and a full event log — to share with a doctor or partner. |
-| 🎵 | **Soothing melodies** | Optional background sounds that fade in when snoring is detected (built-in library + record-your-own), without ever dropping the mic. |
-| ⏰ | **Delayed start & smart wake** | Countdown-based delayed recording and a smart alarm that wakes you in a light-sleep window. |
+| 🎵 | **Snore Interrupter** | An optional melody that plays when snoring is detected (built-in library + record-your-own). Recording pauses while it plays, and the gap counts as snoring only if snoring resumes afterwards. |
+| ⏰ | **Delayed start** | Start recording after a countdown (15 min – 1 h), so falling asleep isn't recorded. |
 | 🔒 | **Privacy-first** | Everything lives locally in SwiftData. No sign-in, no cloud, no tracking. |
 
 ---
@@ -35,30 +37,30 @@ SleepGuard turns your phone into a bedside monitor. Start a session, set it on y
 ## How detection works
 
 ```
-AVAudioEngine tap
-      │  (full-spectrum PCM, 50 ms windows)
+AVAudioEngine tap ──► level (RMS + peak dB) + SoundAnalysis snore / speech confidence
+      │
+      ▼  sampled every 50 ms
+per-sample classifier ──► none · quiet · light · loud · epic
+      │
+      ▼  one ordered stream into the DetectionEngine actor
+event rules: sustained ≥ 75 ms to start · 10 s silence to close · false-positive filters
+      │
       ▼
-SoundAnalysis  ──►  300-class classifier  ──►  snore / speech / cough / baby / noise confidence
-      │                                              │
-      │ (fallback if "snoring" unavailable)          ▼
-      ▼                                 sustained-run gate (75 ms) + dB floor
-amplitude / FFT detector                              │
-                                                      ▼
-                                          SnoreEvent (bursts, intensity, duration)
-                                                      │
-                                                      ▼
-                                     gap-free audio clip + raw classification log
+SnoreEvent (bursts, intensity, duration) ──► per-event audio clip (.m4a)
 ```
 
 - **Events** group continuous activity, merging brief breathing pauses (≤10 s) so one snoring spell is one event, not fifty.
 - **Bursts** track the actual snoring segments inside an event, so "snoring time" reflects real snoring, not the silent gaps.
-- Detection sensitivity is user-tunable (±5 dB), and sleep-talking detection is an opt-in toggle.
+- Detection sensitivity is user-tunable (three presets, 5 dB apart), and sleep-talking detection is an opt-in toggle.
+- Details: [Technical Overview §5](docs/TECHNICAL_OVERVIEW.md#5-snore-detection) and [`docs/snore-detection-algorithm.md`](docs/snore-detection-algorithm.md).
 
-**Sleep score** combines a snoring penalty (capped), an events-per-hour penalty, an optional sleep-talking penalty, and — when Watch data is present — a sleep-architecture penalty grounded in sleep-medicine thresholds (deep ≥ 15%, REM ≥ 18%, awake ≤ 8%).
+**Sleep score** starts at 100 and subtracts capped penalties for snoring time, snoring episodes per hour, snoring intensity, sleep talking, very short or long nights, and (when Watch data is present) sleep stages, against sleep-literature targets (deep ≥ 15%, REM ≥ 18%, awake ≤ 8%). The coefficients are product heuristics, not a clinical measure. Formula and worked example: [Technical Overview §6](docs/TECHNICAL_OVERVIEW.md#6-sleep-score).
 
 ---
 
 ## Architecture
+
+> The short version is below. For the reasoning behind each decision (packages, MV instead of MVVM, Factory DI, the detection actor, Swift 6 isolation), see the [Technical Overview](docs/TECHNICAL_OVERVIEW.md) and the [architecture decision records](docs/adr/).
 
 A modular Swift Package layout with strict isolation, enforced by the compiler through each `Package.swift`:
 
@@ -94,7 +96,7 @@ App target (composition root, route registry, Firebase)
 - All navigation goes through `RouterPath` (`RouterDestination` for push, `SheetDestination` for modals); each tab owns its own path.
 - `async/await` everywhere — no Combine, no GCD, no completion handlers.
 - **Swift 6 with strict concurrency everywhere** — language mode v6 in all packages, `SWIFT_STRICT_CONCURRENCY = complete` in the app target. `Sendable`/isolation violations are compile errors, fixed properly (never `@unchecked Sendable`). Core packages (`Models`, `Env`, `AudioEngine`) use explicit `@MainActor` annotations; the UI packages declare `MainActor` default isolation.
-- **Remote-tunable without a release.** Feature flags, tab order and the sleep-score weights (`SleepScoreConfig`) live in `AppConfig` in `Env`, which has no Firebase dependency. `RemoteConfigLoader` in the app target is the only Firebase-aware code and pushes values into it.
+- **Remote-tunable without a release.** Feature flags and tab order live in `AppConfig` in `Env`, which has no Firebase dependency. `RemoteConfigLoader` in the app target is the only Firebase-aware code and pushes values into it. The sleep-score weights are built in (`SleepScoreConfig.default`); only Debug builds can override them.
 - **Crash-safe recording.** During a session `SessionCheckpointStore` writes a recovery snapshot, so a night killed by the system at 4 a.m. can be restored instead of lost.
 - **Add-only SwiftData schema.** Properties are only ever added, always with defaults, never renamed or removed, so existing installs never crash on migration. Every container opens through a `VersionedSchema` migration plan (V1, no stages yet), ready for the first change that needs one. `SleepSession` caches its score (versioned, recomputed at launch when the formula changes) so lists never load the `events` relationship.
 - **Detection runs off the main actor.** Samples, melody stops, settings changes and session end go into one ordered `AsyncStream`; the `DetectionEngine` actor runs the pure state machine and hands outputs back in order (`docs/adr/0003-detection-actor.md`). Replay tests pin its output on excerpts of a real night.
@@ -116,13 +118,13 @@ SwiftUI views are already value-type descriptions of state, and the Observation 
 
 **Testability doesn't need ViewModels.** Logic lives in plain Swift outside the views (*humble view* / *functional core, imperative shell*), so tests call it directly, with no SwiftUI and no mocks (real services + an in-memory SwiftData `TestStore`):
 
-**268 Swift Testing tests across 8 packages**, run on every PR in CI:
+**277 Swift Testing tests across 8 packages**, run on every PR in CI:
 
 | Package | Tests | What's covered |
 |---------|------:|----------------|
 | `Models` | 79 | Sleep score (22 + pure formula + versioned cache), snoring episodes, session stats, widget snapshot, crash recovery, schema migration plan |
-| `AudioEngine` | 62 | Detection state machine (18), `DetectionEngine` actor, replay against goldens from a real night, raw log, snore classifier, FFT analyzer, tap levels, clip extraction and compression |
-| `Env` | 53 | Detection characterization through the live tracker (13), service overrides with fakes, constructor injection, storage limits, checkpoints, raw log writer, recording delay |
+| `AudioEngine` | 65 | Detection state machine (18), `DetectionEngine` actor, replay against goldens from a real recording, raw-log formats, snore classifier, FFT analyzer, tap levels, clip extraction and compression |
+| `Env` | 59 | Detection characterization through the live tracker (13), saving a night (`SessionCommitter`), service overrides with fakes, constructor injection, storage limits, checkpoints, raw-log writer, recording delay |
 | `Personalization` | 30 | `BriefingEngine`, a pure function with `now` injected |
 | `Statistics` | 18 | `DashboardState` mapping, week-over-week trend calculator |
 | `Recordings` | 16 | `SessionDetailModel` (load / filter / delete) with a fake HealthKit, session grouping |
@@ -143,10 +145,10 @@ A pre-commit hook (`scripts/install-hooks.sh`) runs SwiftFormat on staged Swift 
 
 ## Requirements
 
-- iOS 17.0+
+- iOS 17.6+ (iPhone and iPad)
 - Xcode 26+ (Swift 6.2 toolchain)
 - Swift 6 language mode with strict concurrency (all packages + app target)
-- A physical device for real recording (the simulator has no microphone input)
+- A physical device for real recording (the simulator uses the Mac's microphone, which is enough for a demo)
 
 ## Build & run
 
@@ -168,7 +170,7 @@ SleepGuard/
 ├── SleepGuard/              # App target — entry point, tabs, composition root, route registry
 ├── SleepGuard.xcodeproj/
 ├── Packages/                # 12 feature & support packages (see Architecture)
-├── WatchApp/                # watchOS companion
+├── WatchApp/                # watchOS companion sources (not yet an Xcode target)
 ├── designs/
 │   ├── SleepGuard.pen       # Pencil design source — single source of truth for UI
 │   └── screenshots/         # Reference screenshots
