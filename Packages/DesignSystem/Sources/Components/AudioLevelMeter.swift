@@ -1,13 +1,13 @@
+import FactoryKit
 import SwiftUI
 
 @MainActor
 public struct AudioLevelMeter: View {
   let levels: [Double]
-  let theme: any ThemeProviding
+  @Injected(\.theme) private var theme
 
-  public init(levels: [Double], theme: any ThemeProviding) {
+  public init(levels: [Double]) {
     self.levels = levels
-    self.theme = theme
   }
 
   public var body: some View {

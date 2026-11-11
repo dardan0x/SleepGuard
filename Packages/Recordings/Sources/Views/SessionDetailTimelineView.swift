@@ -11,7 +11,7 @@ struct SessionDetailTimelineView: View {
   var body: some View {
     VStack(alignment: .leading, spacing: 25) {
       if let stages = session.sleepStageSegments, !stages.isEmpty {
-        SleepStageBreakdownView(session: session, theme: theme)
+        SleepStageBreakdownView(session: session)
       }
 
       VStack(alignment: .leading) {
@@ -20,7 +20,7 @@ struct SessionDetailTimelineView: View {
           .foregroundStyle(theme.textTertiary)
           .tracking(1)
 
-        SnoringTimelineView(session: session, theme: theme)
+        SnoringTimelineView(session: session)
 
         HStack {
           Text(timeString(session.startDate))

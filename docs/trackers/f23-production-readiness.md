@@ -37,6 +37,7 @@ The "Do" list from the principal architecture review (`docs/ARCHITECTURE_REVIEW.
 | F23-T10 | Alert when a recording fails to start | UI | Done | — | SleepSession / DesignSystem | 2026-11-11 | 2026-11-11 |
 | F23-T11 | Accessibility pass (VoiceOver; Dynamic Type assessed) | UI | Done | — | DesignSystem / features | 2026-11-11 | 2026-11-11 |
 | F23-T12 | Fix the Release build cycle (Crashlytics phase last) | Build | Done | — | App / .github | 2026-11-11 | 2026-11-11 |
+| F23-T13 | Views take no services through `init` (`theme` via `@Injected`); refined DI rule | Refactor | Done | — | DesignSystem / Recordings / Statistics / widgets | 2026-11-11 | 2026-11-11 |
 
 ## Task Details
 
@@ -359,6 +360,39 @@ User choice "Accessibility pass (Recommended)".
 - **Dynamic Type, not done:** 382 `.font(.system(size:))` and only 9 text styles, so text doesn't scale with the user's setting. The design file fixes the sizes. Converting means a type scale with `relativeTo:` / `@ScaledMetric`, and checking layouts at large sizes, so it's a design decision.
 - **Found:** small tap targets. The calendar arrows are 12 × 16 pt and the event-row icons are similar, against Apple's 44 × 44 pt guideline. Fixing that changes layout; for the design pass.
 - Rule added to AGENTS.md / CLAUDE.md (Views).
+
+---
+
+### F23-T13 — Views take no services through `init`
+
+| Field | Value |
+|-------|-------|
+| Arch Ref | AGENTS.md / CLAUDE.md "Dependencies" |
+| Status | Done |
+| Started | 2026-11-11 |
+| Completed | 2026-11-11 |
+
+**Acceptance Criteria:**
+- [x] No view stores a service passed through `init` (22 types converted to `@Injected(\.theme)`)
+- [x] Rule refined: views use `@Injected`; testable non-view types use init injection with container defaults, with the reason written down
+- [x] A check enforces it
+- [x] No visual change
+
+**Prompt Used:**
+"i think because theme will not be unit tested, maybe we can leave it just injected without init injection? But maybe we should add that init injection should be only for objects that can be unit tested later not never use init injection." → "yes and do the commit on feature/f22-architecture-hardening directly"
+
+**Notes:**
+- **Converted 22 types:**
+  - DesignSystem (12): `AudioLevelMeter`, `MiniBarChart`, `ScoreImpactSection`, `SessionRow`, `SleepScoreGauge`, `SleepStageBreakdownView`, `SleepStageHypnogramChart`, `SleepStageLegendGrid`, `SleepStagesInfoView`, `SnoringTimelineView`, `StatCard`, `YourStagesSection`.
+  - Recordings (5): `EventRow`, `EventCard`, `NightGroupRowView`, `RecordingsEmptyView`, `RecordingsErrorView`.
+  - Statistics (5): `CalendarStatCard`, `StatisticsEmptyView`, `StatisticsErrorView`, `StatisticsLoadedView`, `TrendStatCard`.
+  - 41 call sites dropped their `theme:` argument, including the widget's `SleepScoreGauge` and `MiniBarChart`.
+- `StatCard`'s default icon color (`theme.accent`) moved from `init` to `body`, since a property wrapper on `self` can't be read before every stored property is set.
+- `CalendarMonthStatsView` only held `theme` to pass it down, so it lost that injection and its `FactoryKit` import.
+- `check-layering.py` rule 6: a view file storing `any …ing` / `any …Providing` fails (probed).
+- Why the old rule changed: "never init-inject" was undocumented and drifted (22 views took `theme` through `init`, 108 used `@Injected`). The init path gave nothing, since the views aren't unit-tested and the container already swaps services for previews and tests.
+- Verified: all 8 package suites pass; the app and widget build with 0 warnings; the dashboard and Sessions list look unchanged on the simulator.
+- Committed directly on `feature/f22-architecture-hardening` (user request), not on a task branch. `feature/f23-production-readiness` doesn't have it.
 
 ---
 

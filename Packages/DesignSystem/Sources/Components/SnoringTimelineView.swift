@@ -1,14 +1,14 @@
+import FactoryKit
 import Models
 import SwiftUI
 
 @MainActor
 public struct SnoringTimelineView: View {
   public let session: SleepSession
-  public let theme: any ThemeProviding
+  @Injected(\.theme) private var theme
 
-  public init(session: SleepSession, theme: any ThemeProviding) {
+  public init(session: SleepSession) {
     self.session = session
-    self.theme = theme
   }
 
   public var body: some View {

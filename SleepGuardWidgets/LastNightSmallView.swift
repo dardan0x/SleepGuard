@@ -10,7 +10,7 @@ struct LastNightSmallView: View {
     VStack(spacing: 6) {
       LastNightLabel()
 
-      SleepScoreGauge(score: night.score, theme: theme, size: 84)
+      SleepScoreGauge(score: night.score, size: 84)
 
       Text(night.sleptText)
         .font(.caption.weight(.medium))

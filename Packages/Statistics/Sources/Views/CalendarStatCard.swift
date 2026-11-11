@@ -1,5 +1,6 @@
 import DesignSystem
 import Env
+import FactoryKit
 import SwiftUI
 
 @MainActor
@@ -7,7 +8,7 @@ struct CalendarStatCard: View {
   let icon: String
   let label: String
   let value: String
-  let theme: any ThemeProviding
+  @Injected(\.theme) private var theme
 
   var body: some View {
     VStack(spacing: 4) {

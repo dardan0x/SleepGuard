@@ -20,8 +20,7 @@ struct BedsideClockWaveformView: View {
       }
 
       AudioLevelMeter(
-        levels: levels,
-        theme: theme)
+        levels: levels)
     }
   }
 }

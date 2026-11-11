@@ -28,7 +28,7 @@ struct TrendWidgetView: View {
               .foregroundStyle(theme.textSecondary)
           }
 
-          MiniBarChart(data: chartData, theme: theme)
+          MiniBarChart(data: chartData)
         }
       }
     }

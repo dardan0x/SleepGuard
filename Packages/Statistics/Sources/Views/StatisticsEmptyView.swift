@@ -1,10 +1,11 @@
 import DesignSystem
 import Env
+import FactoryKit
 import SwiftUI
 
 @MainActor
 struct StatisticsEmptyView: View {
-  let theme: any ThemeProviding
+  @Injected(\.theme) private var theme
   @MainActor let onStartRecording: () -> Void
   let onViewCalendar: () -> Void
 

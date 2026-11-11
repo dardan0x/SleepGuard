@@ -1,3 +1,4 @@
+import FactoryKit
 import SwiftUI
 
 @MainActor
@@ -27,11 +28,10 @@ public struct MiniBarChart: View {
   }
 
   let data: [DataPoint]
-  let theme: any ThemeProviding
+  @Injected(\.theme) private var theme
 
-  public init(data: [DataPoint], theme: any ThemeProviding) {
+  public init(data: [DataPoint]) {
     self.data = data
-    self.theme = theme
   }
 
   public var body: some View {

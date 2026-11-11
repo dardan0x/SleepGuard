@@ -1,16 +1,16 @@
+import FactoryKit
 import SwiftUI
 
 @MainActor
 public struct SleepScoreGauge: View {
   let score: Int
-  let theme: any ThemeProviding
+  @Injected(\.theme) private var theme
   let size: CGFloat
 
   @State private var animatedProgress: CGFloat = 0
 
-  public init(score: Int, theme: any ThemeProviding, size: CGFloat = 160) {
+  public init(score: Int, size: CGFloat = 160) {
     self.score = score
-    self.theme = theme
     self.size = size
   }
 

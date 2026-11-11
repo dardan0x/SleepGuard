@@ -1,5 +1,6 @@
 import DesignSystem
 import Env
+import FactoryKit
 import Models
 import SwiftUI
 
@@ -7,7 +8,7 @@ import SwiftUI
 struct EventRow: View {
   let event: SnoreEvent
   let displayDuration: TimeInterval?
-  let theme: any ThemeProviding
+  @Injected(\.theme) private var theme
   let onPlay: () -> Void
   let onShare: () -> Void
 

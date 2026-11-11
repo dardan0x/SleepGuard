@@ -1,3 +1,4 @@
+import FactoryKit
 import Models
 import SwiftUI
 
@@ -6,13 +7,12 @@ import SwiftUI
 @MainActor
 public struct SleepStageBreakdownView: View {
   public let session: SleepSession
-  public let theme: any ThemeProviding
+  @Injected(\.theme) private var theme
   @State private var isExpanded = true
   @State private var isInfoPresented = false
 
-  public init(session: SleepSession, theme: any ThemeProviding) {
+  public init(session: SleepSession) {
     self.session = session
-    self.theme = theme
   }
 
   public var body: some View {
@@ -51,14 +51,14 @@ public struct SleepStageBreakdownView: View {
       }
 
       if isExpanded {
-        SleepStageHypnogramChart(session: session, theme: theme)
+        SleepStageHypnogramChart(session: session)
           .padding(.horizontal, 30)
-        SleepStageLegendGrid(session: session, theme: theme)
+        SleepStageLegendGrid(session: session)
           .padding(.horizontal, 30)
       }
     }
     .sheet(isPresented: $isInfoPresented) {
-      SleepStagesInfoView(session: session, theme: theme)
+      SleepStagesInfoView(session: session)
     }
   }
 }

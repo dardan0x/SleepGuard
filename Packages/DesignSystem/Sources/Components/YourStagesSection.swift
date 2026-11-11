@@ -1,3 +1,4 @@
+import FactoryKit
 import Models
 import SwiftUI
 
@@ -5,7 +6,7 @@ import SwiftUI
 /// with duration, percentage, status badge, recommendation, and description.
 struct YourStagesSection: View {
   let session: SleepSession
-  let theme: any ThemeProviding
+  @Injected(\.theme) private var theme
 
   var body: some View {
     VStack(alignment: .leading, spacing: 16) {

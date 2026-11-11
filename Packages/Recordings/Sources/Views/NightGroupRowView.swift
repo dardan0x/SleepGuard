@@ -1,5 +1,6 @@
 import DesignSystem
 import Env
+import FactoryKit
 import Models
 import Routing
 import SwiftUI
@@ -9,18 +10,16 @@ public struct NightGroupRowView: View {
   @Environment(RouterPath.self) private var routerPath
 
   let group: NightGroup
-  let theme: any ThemeProviding
+  @Injected(\.theme) private var theme
   let onDeleteRequest: (() -> Void)?
 
   @State private var isExpanded = false
 
   public init(
     group: NightGroup,
-    theme: any ThemeProviding,
     onDeleteRequest: (() -> Void)? = nil)
   {
     self.group = group
-    self.theme = theme
     self.onDeleteRequest = onDeleteRequest
   }
 

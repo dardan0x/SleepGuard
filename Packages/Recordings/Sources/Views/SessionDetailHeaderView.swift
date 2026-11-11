@@ -16,7 +16,7 @@ struct SessionDetailHeaderView: View {
   var body: some View {
     VStack(spacing: 12) {
       HStack(spacing: 16) {
-        SleepScoreGauge(score: score, theme: theme, size: 120)
+        SleepScoreGauge(score: score, size: 120)
 
         SessionStatsGrid(session: session)
       }
@@ -26,7 +26,6 @@ struct SessionDetailHeaderView: View {
           icon: "speaker.wave.2.fill",
           title: Strings.sessionDisturbances,
           value: "\(disturbanceCount)",
-          theme: theme,
           iconColor: theme.noiseColor)
       }
     }

@@ -1,5 +1,6 @@
 import DesignSystem
 import Env
+import FactoryKit
 import SwiftUI
 
 @MainActor
@@ -8,7 +9,7 @@ struct TrendStatCard: View {
   let iconColor: Color
   let label: String
   let value: String
-  let theme: any ThemeProviding
+  @Injected(\.theme) private var theme
 
   var body: some View {
     VStack(alignment: .leading, spacing: 2) {

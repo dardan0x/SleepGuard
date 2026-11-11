@@ -49,7 +49,7 @@ struct StatisticsMiniChartSection: View {
           accessibilityValue: String(format: Strings.a11yScoreOutOf100, day.score))
       }
 
-      MiniBarChart(data: data, theme: theme)
+      MiniBarChart(data: data)
     }
     .padding(12)
     .background(Color.clear)

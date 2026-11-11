@@ -1,13 +1,14 @@
 import AudioEngine
 import DesignSystem
 import Env
+import FactoryKit
 import Models
 import SwiftUI
 
 @MainActor
 struct StatisticsLoadedView: View {
   let state: DashboardState
-  let theme: any ThemeProviding
+  @Injected(\.theme) private var theme
   @MainActor let onStartRecording: () -> Void
   let onViewTrends: () -> Void
   let onViewCalendar: () -> Void
@@ -22,7 +23,7 @@ struct StatisticsLoadedView: View {
         VStack(spacing: DeviceSize.isCompactHeight ? 10 : 16) {
           StatisticsWeekSelector(weekDays: weekDays, onViewTrends: onViewTrends)
 
-          SleepScoreGauge(score: state.dayScore, theme: theme, size: 120)
+          SleepScoreGauge(score: state.dayScore, size: 120)
 
           VStack(spacing: 4) {
             Text(summaryLabel)
@@ -38,7 +39,7 @@ struct StatisticsLoadedView: View {
           StatisticsStatsGrid(session: session)
 
           if let stages = session.sleepStageSegments, !stages.isEmpty {
-            SleepStageBreakdownView(session: session, theme: theme)
+            SleepStageBreakdownView(session: session)
           }
 
           if !state.recentSessions.isEmpty {

@@ -1,3 +1,4 @@
+import FactoryKit
 import SwiftUI
 
 @MainActor
@@ -7,22 +8,20 @@ public struct SessionRow: View {
   let duration: String
   let events: String
   let intensityColor: Color
-  let theme: any ThemeProviding
+  @Injected(\.theme) private var theme
 
   public init(
     dayNumber: String,
     weekday: String,
     duration: String,
     events: String,
-    intensityColor: Color,
-    theme: any ThemeProviding)
+    intensityColor: Color)
   {
     self.dayNumber = dayNumber
     self.weekday = weekday
     self.duration = duration
     self.events = events
     self.intensityColor = intensityColor
-    self.theme = theme
   }
 
   public var body: some View {

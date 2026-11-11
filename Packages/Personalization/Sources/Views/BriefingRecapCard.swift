@@ -26,8 +26,7 @@ public struct BriefingRecapCard: View {
             StatCard(
               icon: iconForLabel(stat.label),
               title: stat.label,
-              value: stat.value,
-              theme: theme)
+              value: stat.value)
           }
         }
       }

@@ -31,7 +31,6 @@ public struct EventsSheetView: View {
               event: event,
               displayDuration: displayDurations?[event.id],
               session: session,
-              theme: theme,
               onPlay: {
                 selectedEvent = event
                 onPlayEvent(event)
@@ -74,7 +73,7 @@ private struct EventCard: View {
   let event: SnoreEvent
   let displayDuration: TimeInterval?
   let session: SleepSession
-  let theme: any ThemeProviding
+  @Injected(\.theme) private var theme
   let onPlay: () -> Void
 
   var body: some View {

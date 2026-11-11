@@ -14,6 +14,9 @@ Rules (see AGENTS.md "UI Dependencies in Non-View Code"):
      `Container.shared.x()` in state owners), so tests/previews can swap it.
   5. No `print(` in package Sources or the app target: log through
      `Log.<category>` (os.Logger, Models/Sources/Helpers/Log.swift).
+  6. View files never take a service through `init` (a stored property typed
+     as a service protocol, `any …ing` / `any …Providing`): they resolve it
+     with `@Injected`. Init injection is for testable non-view types.
 
 Exits 1 with a file:line listing when any violation is found.
 """
@@ -53,6 +56,9 @@ SERVICE_SINGLETON = re.compile(
     r"TabCoordinator|Theme)\.shared\b")
 
 
+# Rule 6 (F23-T13): services in views come from @Injected, not init.
+VIEW_SERVICE_PROPERTY = re.compile(r"^\s*(?:(?:public|private|fileprivate|internal)\s+)?(?:let|var)\s+\w+\s*:\s*any\s+\w+(?:ing|Providing)\b")
+
 # Rule 5 (F23-T4): no print() in shipping code; Models/Helpers/Log.swift has the loggers.
 PRINT_CALL = re.compile(r"^(?!\s*//).*(?<![\w.])print\(")
 
@@ -80,6 +86,8 @@ def main() -> int:
                 violations.append(f"{rel}:{number}: 'SwiftUI' import in Env (navigation belongs in Routing)")
             if consumes_services and not stripped.startswith("//") and (match := SERVICE_SINGLETON.search(line)):
                 violations.append(f"{rel}:{number}: '{match.group(0)}' — resolve from the container instead")
+            if in_view_code and "/.build/" not in rel and VIEW_SERVICE_PROPERTY.match(line):
+                violations.append(f"{rel}:{number}: service passed into a view — use @Injected(\\.x) instead")
             if "/Sources/" in rel and "/.build/" not in rel and PRINT_CALL.search(line):
                 violations.append(f"{rel}:{number}: print() — log with Log.<category> (os.Logger) instead")
 

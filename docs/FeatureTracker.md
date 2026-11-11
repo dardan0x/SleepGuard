@@ -45,8 +45,8 @@ Last updated: 2026-11-11
 | Backlog | 0 |
 | Blocked | 0 |
 | — | — |
-| Total Tasks | 164 |
-| Tasks Done | 147 |
+| Total Tasks | 165 |
+| Tasks Done | 148 |
 | Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
 | Tasks Backlog | 17 |
@@ -78,7 +78,7 @@ Last updated: 2026-11-11
 | F20 | Home Screen & Lock Screen Widgets | P1 | Done | 9/9 | ██████████ 100% | [tracker](trackers/f20-home-screen-widgets.md) |
 | F21 | Test Coverage | P1 | Done | 17/17 | ██████████ 100% | [tracker](trackers/f21-test-coverage.md) |
 | F22 | Architecture Hardening | P1 | Done (real-night check pending) | 16/16 | ██████████ 100% | [tracker](trackers/f22-architecture-hardening.md) |
-| F23 | Production Readiness | P1 | In Progress | 11/12 | █████████░ 92% | [tracker](trackers/f23-production-readiness.md) |
+| F23 | Production Readiness | P1 | In Progress | 12/13 | █████████░ 92% | [tracker](trackers/f23-production-readiness.md) |
 
 ## Activity Log
 
@@ -86,6 +86,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-11-11 | F23-T13 | Completed | 22 views take `theme` via `@Injected` instead of `init` (41 call sites, incl. widget); DI rule refined (views: `@Injected`; testable non-view types: init injection) with its reason; `check-layering.py` rule 6. Committed directly on `feature/f22-architecture-hardening` |
 | 2026-11-11 | F23-T11 | Completed | VoiceOver: 16 icon buttons labelled (Label + iconOnly), gauge/cards/timeline/hypnogram/bars read as meaningful elements, level meter hidden; 13 `a11y.*` strings; rule in AGENTS/CLAUDE. Dynamic Type (382 fixed sizes) and 12×16 pt tap targets flagged for design. Branch `feature/f23/t11-accessibility` |
 | 2026-11-11 | F23-T10 | Completed | "Couldn't Start Recording" alert on prestart and countdown (immediate, charging "Start Anyway", delay end); 2 new strings. Verified on the simulator with a temporary throw. Notification-tap start still only logs. Branch `feature/f23/t10-start-failure-alert` |
 | 2026-11-11 | F23-T9 | Completed | Raw log format 3 (JSON Lines) written while recording in 10 s chunks: flat memory, crash keeps the log; decoder reads 1/2/3 and truncated files; discard now closes and deletes it. Verified growing on the simulator. Branch `feature/f23/t9-rawlog-streaming` |

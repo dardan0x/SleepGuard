@@ -25,7 +25,6 @@ public struct StatisticsDashboardView: View {
           .task { loadState() }
       case .empty:
         StatisticsEmptyView(
-          theme: theme,
           onStartRecording: { @MainActor in
             routerPath.navigate(to: .liveSession)
           },
@@ -35,7 +34,6 @@ public struct StatisticsDashboardView: View {
       case let .loaded(state):
         StatisticsLoadedView(
           state: state,
-          theme: theme,
           onStartRecording: { @MainActor in
             routerPath.navigate(to: .liveSession)
           },
@@ -46,7 +44,7 @@ public struct StatisticsDashboardView: View {
             routerPath.navigate(to: .calendar)
           })
       case .error:
-        StatisticsErrorView(theme: theme) {
+        StatisticsErrorView {
           loadState()
         }
       }

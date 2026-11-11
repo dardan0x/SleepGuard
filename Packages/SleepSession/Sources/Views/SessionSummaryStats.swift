@@ -26,20 +26,18 @@ struct SessionSummaryStats: View {
       }
       .padding(.top, 16)
 
-      SleepScoreGauge(score: session.sleepScore(using: appConfig.sleepScoreConfig), theme: theme, size: 160)
+      SleepScoreGauge(score: session.sleepScore(using: appConfig.sleepScoreConfig), size: 160)
 
       HStack(spacing: 12) {
         StatCard(
           icon: "percent",
           title: Strings.sessionSummaryStatSnoring,
           value: String(format: "%.0f%%", session.snoringPercentage),
-          theme: theme,
           iconColor: theme.scoreAmber)
         StatCard(
           icon: "bolt.fill",
           title: Strings.recordingsDetailEventsLabel,
           value: "\(session.eventsCount)",
-          theme: theme,
           iconColor: theme.scoreAmber)
       }
     }

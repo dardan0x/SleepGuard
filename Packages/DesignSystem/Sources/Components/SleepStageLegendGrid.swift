@@ -1,3 +1,4 @@
+import FactoryKit
 import Models
 import SwiftUI
 
@@ -5,7 +6,7 @@ import SwiftUI
 /// each of the four stages.
 struct SleepStageLegendGrid: View {
   let session: SleepSession
-  let theme: any ThemeProviding
+  @Injected(\.theme) private var theme
 
   var body: some View {
     let columns = [GridItem(.flexible()), GridItem(.flexible())]
