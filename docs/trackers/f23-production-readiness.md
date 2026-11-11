@@ -35,7 +35,7 @@ The "Do" list from the principal architecture review (`docs/ARCHITECTURE_REVIEW.
 | F23-T8 | `MockDataGenerator` Debug-only | Cleanup | Done | — | Env | 2026-11-11 | 2026-11-11 |
 | F23-T9 | Stream the raw log to disk while recording | Perf | Done | — | Env / AudioEngine / scripts | 2026-11-11 | 2026-11-11 |
 | F23-T10 | Alert when a recording fails to start | UI | Done | — | SleepSession / DesignSystem | 2026-11-11 | 2026-11-11 |
-| F23-T11 | Accessibility pass (VoiceOver, Dynamic Type) | UI | Backlog | — | DesignSystem / features | — | — |
+| F23-T11 | Accessibility pass (VoiceOver; Dynamic Type assessed) | UI | Done | — | DesignSystem / features | 2026-11-11 | 2026-11-11 |
 | F23-T12 | Fix the Release build cycle (Crashlytics phase last) | Build | Done | — | App / .github | 2026-11-11 | 2026-11-11 |
 
 ## Task Details
@@ -323,6 +323,42 @@ User choice "Start-failure alert".
 - **Not covered:** starting from the notification tap (`AppDelegate`) still only logs. There's no view in that path; showing it would need app-level presentation state (a follow-up if wanted).
 - Simulator: with a temporary `throw` in `startSession()` (reverted; the controller matches HEAD), tapping Start Recording showed the alert over the prestart screen.
 - Sizes: prestart 183 lines, countdown 164.
+
+---
+
+### F23-T11 — Accessibility pass
+
+| Field | Value |
+|-------|-------|
+| Arch Ref | `docs/architecture/views.md` |
+| Status | Done (VoiceOver); Dynamic Type assessed, not converted |
+| Started | 2026-11-11 |
+| Completed | 2026-11-11 |
+
+**Acceptance Criteria:**
+- [x] Every icon-only button has a spoken name (16)
+- [x] The score gauge, stat cards, timeline, hypnogram and mini bar chart read as meaningful elements
+- [x] Strings localized (`a11y.*`); no visual change; views stay within limits
+- [x] Checked in the simulator's accessibility tree
+- [ ] Dynamic Type: not converted (see Notes; needs a design decision)
+
+**Prompt Used:**
+User choice "Accessibility pass (Recommended)".
+
+**Notes:**
+- **Icon buttons (16):** `Image(systemName:)` → `Label(title, systemImage:).labelStyle(.iconOnly)`. Same pixels, no extra lines (`SessionDetailLoadedView` is at its allowlist ceiling). Covers close ×3, play/pause ×2, share ×2, skip ±15 s, export / generating report, delete ×2, previous/next month and back. Reuses `action.close/play/delete/back`.
+- **Components:**
+  - `SleepScoreGauge`: one element, "Sleep score, 82 out of 100".
+  - `StatCard`, `TrendStatCard`, `CalendarStatCard`: one element, title then value (the icon is decorative).
+  - `SnoringTimelineView` (Canvas, previously invisible): "Snoring timeline, N events, X of snoring".
+  - `SleepStageHypnogramChart` (Canvas, previously invisible): "Sleep stages, Deep 18%, REM 22%, Light 52%, Awake 8%".
+  - `MiniBarChart`: each bar speaks the full weekday and "82 out of 100" instead of a single letter; new optional `accessibilityLabel` / `accessibilityValue` on `DataPoint`, defaulting to the old behavior.
+  - `AudioLevelMeter`: hidden; it's decorative, and the clock screen states the level in text.
+- 13 new strings under `a11y.*`.
+- Simulator accessibility tree: gauge "Sleep score" / "100 out of 100"; cards "Duration" / "2:24", "Events" / "0"; calendar "Previous month" / "Next month". The calendar screenshot is unchanged.
+- **Dynamic Type, not done:** 382 `.font(.system(size:))` and only 9 text styles, so text doesn't scale with the user's setting. The design file fixes the sizes. Converting means a type scale with `relativeTo:` / `@ScaledMetric`, and checking layouts at large sizes, so it's a design decision.
+- **Found:** small tap targets. The calendar arrows are 12 × 16 pt and the event-row icons are similar, against Apple's 44 × 44 pt guideline. Fixing that changes layout; for the design pass.
+- Rule added to AGENTS.md / CLAUDE.md (Views).
 
 ---
 

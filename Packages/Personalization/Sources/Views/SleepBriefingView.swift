@@ -27,7 +27,7 @@ public struct SleepBriefingView: View {
           Button {
             onDismiss()
           } label: {
-            Image(systemName: "xmark.circle.fill")
+            Label(Strings.actionClose, systemImage: "xmark.circle.fill").labelStyle(.iconOnly)
               .font(.system(size: 24))
               .foregroundStyle(theme.textSecondary)
           }

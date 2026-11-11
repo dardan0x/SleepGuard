@@ -18,7 +18,7 @@ struct EventPlayerControlsView: View {
       Button {
         onSkipBack()
       } label: {
-        Image(systemName: "gobackward.15")
+        Label(Strings.a11ySkipBack15, systemImage: "gobackward.15").labelStyle(.iconOnly)
           .font(.system(size: 28, weight: .medium))
           .foregroundStyle(theme.textPrimary)
       }
@@ -27,7 +27,7 @@ struct EventPlayerControlsView: View {
       Button {
         onTogglePlayback()
       } label: {
-        Image(systemName: isPlaying ? "pause.fill" : "play.fill")
+        Label(isPlaying ? Strings.a11yPause : Strings.actionPlay, systemImage: isPlaying ? "pause.fill" : "play.fill").labelStyle(.iconOnly)
           .font(.system(size: 28, weight: .bold))
           .foregroundStyle(theme.bgPrimary)
           .frame(width: 72, height: 72)
@@ -39,7 +39,7 @@ struct EventPlayerControlsView: View {
       Button {
         onSkipForward()
       } label: {
-        Image(systemName: "goforward.15")
+        Label(Strings.a11ySkipForward15, systemImage: "goforward.15").labelStyle(.iconOnly)
           .font(.system(size: 28, weight: .medium))
           .foregroundStyle(theme.textPrimary)
       }

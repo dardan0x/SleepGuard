@@ -40,6 +40,12 @@ public struct SnoringTimelineView: View {
       }
     }
     .frame(height: 34)
+    .accessibilityElement()
+    .accessibilityLabel(Strings.a11ySnoringTimeline)
+    .accessibilityValue(String(
+      format: Strings.a11ySnoringTimelineValueFormat,
+      session.eventsCount,
+      DurationFormatter.hoursAndMinutes(Int(session.snoringDuration / 60))))
   }
 
   /// Timeline items: snoring episodes merged, other categories raw.

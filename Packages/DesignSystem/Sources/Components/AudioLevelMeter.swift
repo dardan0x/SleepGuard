@@ -19,6 +19,7 @@ public struct AudioLevelMeter: View {
       }
     }
     .frame(height: 80)
+    .accessibilityHidden(true)
   }
 
   private func barHeight(for level: Double) -> CGFloat {

@@ -50,7 +50,7 @@ struct SessionDetailMiniPlayerView: View {
           Button {
             onTogglePlayback()
           } label: {
-            Image(systemName: isPlaying ? "pause.fill" : "play.fill")
+            Label(isPlaying ? Strings.a11yPause : Strings.actionPlay, systemImage: isPlaying ? "pause.fill" : "play.fill").labelStyle(.iconOnly)
               .font(.system(size: 14, weight: .semibold))
               .foregroundStyle(.white)
               .frame(width: 28, height: 28)

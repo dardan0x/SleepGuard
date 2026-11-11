@@ -20,7 +20,7 @@ struct CalendarMonthSelector: View {
         Button {
           onPrevious()
         } label: {
-          Image(systemName: "chevron.left")
+          Label(Strings.a11yPreviousMonth, systemImage: "chevron.left").labelStyle(.iconOnly)
             .font(.system(size: 15, weight: .semibold))
             .foregroundStyle(theme.textSecondary)
         }
@@ -28,7 +28,7 @@ struct CalendarMonthSelector: View {
         Button {
           onNext()
         } label: {
-          Image(systemName: "chevron.right")
+          Label(Strings.a11yNextMonth, systemImage: "chevron.right").labelStyle(.iconOnly)
             .font(.system(size: 15, weight: .semibold))
             .foregroundStyle(theme.textSecondary)
         }

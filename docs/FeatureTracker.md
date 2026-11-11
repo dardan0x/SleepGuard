@@ -46,10 +46,10 @@ Last updated: 2026-11-11
 | Blocked | 0 |
 | — | — |
 | Total Tasks | 164 |
-| Tasks Done | 146 |
+| Tasks Done | 147 |
 | Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
-| Tasks Backlog | 18 |
+| Tasks Backlog | 17 |
 | — | — |
 | **Progress** | **87%** |
 
@@ -78,7 +78,7 @@ Last updated: 2026-11-11
 | F20 | Home Screen & Lock Screen Widgets | P1 | Done | 9/9 | ██████████ 100% | [tracker](trackers/f20-home-screen-widgets.md) |
 | F21 | Test Coverage | P1 | Done | 17/17 | ██████████ 100% | [tracker](trackers/f21-test-coverage.md) |
 | F22 | Architecture Hardening | P1 | Done (real-night check pending) | 16/16 | ██████████ 100% | [tracker](trackers/f22-architecture-hardening.md) |
-| F23 | Production Readiness | P1 | In Progress | 10/12 | ████████░░ 83% | [tracker](trackers/f23-production-readiness.md) |
+| F23 | Production Readiness | P1 | In Progress | 11/12 | █████████░ 92% | [tracker](trackers/f23-production-readiness.md) |
 
 ## Activity Log
 
@@ -86,6 +86,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-11-11 | F23-T11 | Completed | VoiceOver: 16 icon buttons labelled (Label + iconOnly), gauge/cards/timeline/hypnogram/bars read as meaningful elements, level meter hidden; 13 `a11y.*` strings; rule in AGENTS/CLAUDE. Dynamic Type (382 fixed sizes) and 12×16 pt tap targets flagged for design. Branch `feature/f23/t11-accessibility` |
 | 2026-11-11 | F23-T10 | Completed | "Couldn't Start Recording" alert on prestart and countdown (immediate, charging "Start Anyway", delay end); 2 new strings. Verified on the simulator with a temporary throw. Notification-tap start still only logs. Branch `feature/f23/t10-start-failure-alert` |
 | 2026-11-11 | F23-T9 | Completed | Raw log format 3 (JSON Lines) written while recording in 10 s chunks: flat memory, crash keeps the log; decoder reads 1/2/3 and truncated files; discard now closes and deletes it. Verified growing on the simulator. Branch `feature/f23/t9-rawlog-streaming` |
 | 2026-11-11 | F23-T12 | Completed | Release (and Archive) build cycle fixed: Crashlytics script phase moved after Embed Foundation Extensions. CI app job builds Release. Branch `feature/f23/t12-release-build-cycle` |
@@ -317,7 +318,7 @@ _Most recent first. The AI appends here after every task._
 
 | Task | Feature | Started | Assignee |
 |------|---------|---------|----------|
-| F23-T8 | F23 | — | Next: T8–T11. T6 waits for labelled real nights (user). User: real night on device (F22-T10), then merge F22 (and F23 on top) into `main` |
+| F23-T6 | F23 | — | Waiting for labelled real nights (user). Then merge F22 + F23 into `main`. User: real night on device (F22-T10), then merge F22 (and F23 on top) into `main` |
 
 ## Completed (last 10)
 
