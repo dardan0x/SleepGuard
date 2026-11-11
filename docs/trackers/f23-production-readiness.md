@@ -28,7 +28,7 @@ The "Do" list from the principal architecture review (`docs/ARCHITECTURE_REVIEW.
 | F23-T2 | App privacy manifest (`PrivacyInfo.xcprivacy`) | Compliance | Done | — | App / Widgets | 2026-11-11 | 2026-11-11 |
 | F23-T3 | CI: build the app target (app + widgets) | Infra | Done | — | .github | 2026-11-11 | 2026-11-11 |
 | F23-T4 | `os.Logger` instead of `print` (+ signposts for session and event) | Infra | Done | — | all | 2026-11-11 | 2026-11-11 |
-| F23-T5 | Audit `try?` on data paths | Quality | Backlog | F23-T4 | Env / AudioEngine / Recordings / App | — | — |
+| F23-T5 | Audit `try?` on data paths | Quality | Done | F23-T4 | Env / AudioEngine / SleepSession / App | 2026-11-11 | 2026-11-11 |
 | F23-T6 | Detection accuracy evaluation on labelled real nights | Tooling | Backlog | User: real nights with raw logs | scripts / AudioEngine | — | — |
 
 ## Task Details
@@ -147,6 +147,46 @@ The "Do" list from the principal architecture review (`docs/ARCHITECTURE_REVIEW.
 - **Two Swift gotchas, handled:** (1) Logger interpolations are autoclosures, so instance properties need `self.`; SwiftFormat's `--self remove` stripped them, so `.swiftformat` now has `--selfrequired debug,info,notice,error,fault,log`. (2) The app target has member-import visibility, so app files that log `import os` themselves.
 - `check-layering.py` rule 5 fails on `print(` outside comments in package Sources and the app target (probed).
 - Simulator: a log stream during start → discard showed `audio`, `detection`, `interrupter`, `session` and `storage` lines, including "Session started" and "Session discarded".
+
+---
+
+### F23-T5 — Audit `try?` on data paths
+
+| Field | Value |
+|-------|-------|
+| Arch Ref | `docs/ARCHITECTURE_REVIEW.md` Do #4 |
+| Status | Done |
+| Started | 2026-11-11 |
+| Completed | 2026-11-11 |
+
+**Acceptance Criteria:**
+- [x] Every `try?` reviewed (95); the ones that can silently lose a night, a clip or user data now log (or change behavior where silence did damage)
+- [x] Harmless ones left alone, with the reasoning recorded
+- [x] Builds with zero errors; tests pass
+
+**Prompt Used:**
+"ok lets go with your suggestions"
+
+**Notes:**
+- **Changed (9 places):**
+  - **Delayed start, from the countdown and from the notification tap** (`RecordingCountdownView`, `AppDelegate`): `try? startSession()` became do/catch + `.error`. Before, a mic or audio-session failure at the end of the delay recorded nothing and logged nothing.
+  - **Checkpoint write and read** (`SessionCheckpointStore`): a failed write, or a file that exists but can't be decoded, now logs. Either one means the night can't be recovered after a crash. Behavior unchanged otherwise (still returns nil).
+  - **Pending record decode** (`PendingSessionStore`): logs, because an unreadable record means its files are never cleaned up.
+  - **Storage-limit fetches** (`StorageLimitEnforcer`, 2 places): log when cleanup is skipped.
+  - **Clip compression** (`EventClipCompressor` + the tracker): logs which step failed and that the event was saved without a clip.
+  - **Profile fetch** (`StatisticsTab`, `SettingsTab`): **behavior change.** A fetch error used to fall through and insert a second `UserProfile`; now it logs and returns nil (no sheet) instead of duplicating.
+- **Left alone, on purpose:**
+  - `Task.sleep` (only throws on cancellation).
+  - `removeItem` on files that may already be gone.
+  - Encoding simple `Codable` configs (can't realistically fail).
+  - Decoding legacy or remote data with a deliberate fallback (`RawLog` format 1, `RecordingGap.snoringResumed`, remote config).
+  - Deactivating the audio session.
+  - UI-only fetches (briefing, deep link, waveform).
+  - The DEBUG-only dummy-audio tool.
+- **Found, not fixed (needs decisions):**
+  - **No user-facing alert when a session fails to start, on any path** (normal, delayed, notification). Only a log now. Needs strings and a design.
+  - **A failed compression leaves the `.caf` on disk** and the event without a clip. Keeping the `.caf` as the clip would be a behavior change.
+- Tests: the logging isn't unit-tested (behavior is unchanged except for the profile path, which runs in the app target). All suites still pass.
 
 ---
 

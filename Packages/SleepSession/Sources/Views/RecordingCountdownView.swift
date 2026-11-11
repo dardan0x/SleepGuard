@@ -91,7 +91,11 @@ struct RecordingCountdownView: View {
       UIApplication.shared.isIdleTimerDisabled = sessionManager.isRecording
     }
     .onReceive(NotificationCenter.default.publisher(for: .recordingDelayDidComplete)) { _ in
-      try? sessionManager.startSession()
+      do {
+        try sessionManager.startSession()
+      } catch {
+        Log.session.error("Delayed start failed: \(String(describing: error), privacy: .public)")
+      }
     }
     .alert(Strings.sessionChargingAlertTitle, isPresented: isPresented(.charging)) {
       Button(Strings.actionCancel, role: .cancel) {}

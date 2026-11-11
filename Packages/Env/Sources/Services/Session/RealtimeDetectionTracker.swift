@@ -440,6 +440,8 @@ final class RealtimeDetectionTracker {
           try? FileManager.default.removeItem(at: rawFileURL)
           // Re-checkpoint now that the event's clip URL is set.
           self.checkpoint()
+        } else {
+          Log.audio.error("Clip compression failed; event saved without a clip")
         }
       }
       pendingEventTasks.append(task)

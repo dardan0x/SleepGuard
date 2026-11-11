@@ -102,7 +102,11 @@ public final class StorageLimitEnforcer: Sendable, StorageLimitEnforcing {
       predicate: #Predicate { $0.startDate < cutoff }
     )
 
-    guard let sessions = try? modelContext.fetch(descriptor) else {
+    let sessions: [SleepSession]
+    do {
+      sessions = try modelContext.fetch(descriptor)
+    } catch {
+      Log.storage.error("Session fetch failed, cleanup skipped: \(String(describing: error), privacy: .public)")
       return CleanupPlan(fileURLs: [], sessionsAffected: 0)
     }
 
@@ -129,7 +133,11 @@ public final class StorageLimitEnforcer: Sendable, StorageLimitEnforcing {
     let maxBytes = Int64(maxMB) * 1_024 * 1_024
     let descriptor = FetchDescriptor<SleepSession>(sortBy: [SortDescriptor(\.startDate)])
 
-    guard let sessions = try? modelContext.fetch(descriptor) else {
+    let sessions: [SleepSession]
+    do {
+      sessions = try modelContext.fetch(descriptor)
+    } catch {
+      Log.storage.error("Session fetch failed, cleanup skipped: \(String(describing: error), privacy: .public)")
       return CleanupPlan(fileURLs: [], sessionsAffected: 0)
     }
 

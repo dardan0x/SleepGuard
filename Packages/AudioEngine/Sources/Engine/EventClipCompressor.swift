@@ -1,6 +1,7 @@
 import AudioToolbox
 import AVFoundation
 import Foundation
+import Models
 
 /// Compresses raw per-event .caf recordings to AAC .m4a.
 ///
@@ -25,7 +26,10 @@ public enum EventClipCompressor {
     guard let track = try? await asset.loadTracks(withMediaType: .audio).first,
           let reader = try? AVAssetReader(asset: asset),
           let writer = try? AVAssetWriter(outputURL: destinationURL, fileType: .m4a)
-    else { return false }
+    else {
+      Log.audio.error("Clip compression couldn't open reader/writer for \(sourceURL.lastPathComponent)")
+      return false
+    }
 
     // Only ever pass a codec-enumerated sample rate to AVAssetWriterInput;
     // an unsupported rate raises an NSException that Swift cannot catch.

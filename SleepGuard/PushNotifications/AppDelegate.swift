@@ -56,7 +56,11 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
       guard response.notification.request.identifier == RecordingDelayManager.shared.notificationId,
             RecordingDelayManager.shared.isActive else { return }
       RecordingDelayManager.shared.cancel()
-      try? SessionManager.shared.startSession()
+      do {
+        try SessionManager.shared.startSession()
+      } catch {
+        Log.session.error("Start from notification failed: \(String(describing: error), privacy: .public)")
+      }
     }
   }
 }
