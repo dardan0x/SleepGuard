@@ -4,20 +4,23 @@ import Foundation
 import Models
 import UIKit
 
-/// Adapter between the 50 ms processing loop and `DetectionStateMachine`.
+/// Adapter between the 50 ms processing loop and `DetectionEngine`.
 ///
-/// Each tick it classifies the sample (`SnoreDetector`, `SpeechDetector`),
-/// hands it to the pure state machine, and performs the outputs: event clips,
-/// SwiftData events and gaps, the Snore Interrupter, clip compression and
-/// recovery checkpoints. The event rules themselves live in the machine
-/// (`AudioEngine/Sources/Engine/DetectionStateMachine.swift`).
+/// Each tick it classifies the sample (`SnoreDetector`, `SpeechDetector`) and
+/// sends it, timestamped, into the engine's stream; melody stops and settings
+/// changes go into the same stream, so the engine sees them in the order they
+/// happened. The engine runs `DetectionStateMachine` on its own actor and
+/// hands the outputs back here, where they are performed on the main actor:
+/// event clips, SwiftData events and gaps, the Snore Interrupter, clip
+/// compression and recovery checkpoints. See ADR 0003.
 ///
 /// Session ownership stays with the controller; the tracker reaches it (and
 /// the recording flag) through `recording`.
 @MainActor
 @Observable
 final class RealtimeDetectionTracker {
-  /// Real-time state for UI observation
+  /// Real-time state for UI observation, published at most every
+  /// `displayInterval` (5 Hz) rather than on every 50 ms sample.
   private(set) var currentDB: Float = -160.0
   private(set) var currentDetectionState: DetectionState = .none
   private(set) var currentSpeechDetected = false
@@ -44,10 +47,18 @@ final class RealtimeDetectionTracker {
   /// Set by the controller while a session is recording.
   private var isActive = false
 
-  // MARK: - Detection state
+  // MARK: - Detection engine
 
-  /// Every snore / speech / melody-gap rule. Rebuilt by `reset()`.
-  private var machine: DetectionStateMachine
+  /// The open engine's input. `nil` once `finishDetection()` has closed it.
+  private var continuation: AsyncStream<DetectionEngine.Message>.Continuation?
+  private var engineTask: Task<Void, Never>?
+  /// Bumped per engine, so a batch from a replaced engine is never performed
+  /// against the next session.
+  private var generation = 0
+  private var lastSentSettings: DetectionStateMachine.Settings?
+
+  static let displayInterval: TimeInterval = 0.2
+  private var lastDisplayUpdate: Date?
 
   // MARK: - Session aggregate state
 
@@ -73,7 +84,6 @@ final class RealtimeDetectionTracker {
     clock: @escaping @MainActor () -> Date = Date.init)
   {
     self.clock = clock
-    machine = DetectionStateMachine(settings: Self.settings(preferences: preferences, snoreDetector: snoreDetector))
     self.snoreDetector = snoreDetector
     self.audioRecorder = audioRecorder
     self.snoreInterrupterPlayer = snoreInterrupterPlayer
@@ -85,7 +95,10 @@ final class RealtimeDetectionTracker {
       self,
       selector: #selector(handleMelodyDidStop),
       name: .snoreInterrupterDidStop,
-      object: nil)
+      // Only this tracker's player: a stop from any other instance (another
+      // test's, say) must not end this session's melody gap.
+      object: snoreInterrupterPlayer)
+    startEngine()
   }
 
   // MARK: - Lifecycle hooks (called by SessionRecordingController)
@@ -99,19 +112,35 @@ final class RealtimeDetectionTracker {
     currentDetectionState = .none
     currentSpeechDetected = false
     eventsCount = 0
+    lastDisplayUpdate = nil
   }
 
   func syncEventsCount(with session: SleepSession) {
     eventsCount = session.eventsCount
   }
 
-  /// Finalizes any in-progress snore/speech events. Call BEFORE stopping the
-  /// audio engine: finalization captures the raw .caf URL; if stopRecording()
-  /// runs first, currentEventFile is nilled and the event's audio is lost.
-  func finalizeActiveEventsIfNeeded() {
-    syncSettings()
-    let now = clock()
-    perform(machine.finalizeActiveEvents(at: now), at: now)
+  /// Finalizes any in-progress snore/speech events and waits until the engine
+  /// has performed every output, then closes it (`reset()` opens the next).
+  /// Call BEFORE stopping the audio engine: finalization captures the raw .caf
+  /// URL; if stopRecording() runs first, currentEventFile is nilled and the
+  /// event's audio is lost.
+  func finishDetection() async {
+    guard let continuation else { return }
+    sendSettingsIfChanged()
+    continuation.yield(.finalize(at: clock()))
+    continuation.finish()
+    self.continuation = nil
+    await engineTask?.value
+    engineTask = nil
+  }
+
+  /// Waits until the engine has handled everything sent so far and performed
+  /// its outputs.
+  func waitUntilProcessed() async {
+    guard let continuation else { return }
+    await withCheckedContinuation { done in
+      continuation.yield(.barrier(done))
+    }
   }
 
   /// Waits for any in-flight per-event compression tasks to finish.
@@ -193,8 +222,6 @@ final class RealtimeDetectionTracker {
     // are stale. Processing them creates false events and prematurely stops the melody.
     guard !audioRecorder.isPaused else { return }
 
-    currentDB = db
-
     // Update running aggregates
     totalDBSum += Double(db)
     totalDBCount += 1
@@ -216,12 +243,16 @@ final class RealtimeDetectionTracker {
     }
     #endif
 
-    // Update display state immediately for UI responsiveness
-    currentDetectionState = state
-
     // Update parallel speech detection
     speechDetector.update(db: db, speechConfidence: speechConfidence)
-    currentSpeechDetected = speechDetector.isSpeechDetected
+    let isSpeech = speechDetector.isSpeechDetected
+
+    if lastDisplayUpdate.map({ now.timeIntervalSince($0) >= Self.displayInterval }) ?? true {
+      lastDisplayUpdate = now
+      currentDB = db
+      currentDetectionState = state
+      currentSpeechDetected = isSpeech
+    }
 
     // Append to raw classification log for future re-processing (debug only).
     if preferences.preserveRawAudio {
@@ -242,15 +273,15 @@ final class RealtimeDetectionTracker {
       sessionSnoringDuration += timeDelta
     }
 
-    syncSettings()
+    sendSettingsIfChanged()
     let input = DetectionInput(
       db: db,
       spectralScore: spectralScore,
       snoreConfidence: snoreConfidence,
       snoreState: state,
-      isSpeech: currentSpeechDetected,
+      isSpeech: isSpeech,
       isMelodyPlaying: snoreInterrupterPlayer.isPlaying)
-    perform(machine.ingest(input, at: now), at: now)
+    continuation?.yield(.sample(input, at: now))
 
     // Update stored aggregate (averageDB only; others are computed on demand)
     if totalDBCount > 0 {
@@ -261,7 +292,7 @@ final class RealtimeDetectionTracker {
   // MARK: - Reset
 
   func reset() {
-    machine = DetectionStateMachine(settings: Self.settings(preferences: preferences, snoreDetector: snoreDetector))
+    startEngine()
     totalDBSum = 0
     totalDBCount = 0
     sessionSnoringDuration = 0
@@ -275,8 +306,7 @@ final class RealtimeDetectionTracker {
   /// Every melody stop, whether from `.melodyStopRequested`, its own timer, or
   /// the user, arrives here through `.snoreInterrupterDidStop`.
   @objc private func handleMelodyDidStop() {
-    let now = clock()
-    perform(machine.melodyDidStop(at: now), at: now)
+    continuation?.yield(.melodyDidStop(at: clock()))
   }
 
   /// Logs a recording gap directly on the session. Called whenever the Snore Interrupter
@@ -299,10 +329,35 @@ final class RealtimeDetectionTracker {
     session.recordingGaps = gaps
   }
 
-  // MARK: - Performing machine outputs
+  // MARK: - Engine lifecycle
 
-  private func perform(_ outputs: [DetectionOutput], at now: Date) {
-    for output in outputs {
+  /// Replaces the engine with a fresh one (new session state). Any previous
+  /// engine's stream is closed and its remaining batches are ignored.
+  private func startEngine() {
+    continuation?.finish()
+    generation += 1
+    let generation = generation
+    let settings = Self.settings(preferences: preferences, snoreDetector: snoreDetector)
+    lastSentSettings = settings
+    let engine = DetectionEngine(settings: settings)
+    let (stream, continuation) = DetectionEngine.makeStream()
+    self.continuation = continuation
+    let perform: DetectionEngine.Perform = { [weak self] batch in
+      await self?.perform(batch, generation: generation) ?? []
+    }
+    engineTask = Task {
+      await engine.run(stream, perform: perform)
+    }
+  }
+
+  // MARK: - Performing engine outputs
+
+  /// Performs one batch and returns the feedback for the engine: the melody
+  /// actually started.
+  private func perform(_ batch: DetectionEngine.Batch, generation: Int) -> [DetectionEngine.Message] {
+    guard generation == self.generation else { return [] }
+    var feedback: [DetectionEngine.Message] = []
+    for output in batch.outputs {
       switch output {
       case let .snoreEventStarted(id, _):
         startEventClip(id: id)
@@ -311,7 +366,7 @@ final class RealtimeDetectionTracker {
         snoreInterrupterPlayer.playIfNeeded()
         if snoreInterrupterPlayer.isPlaying, !wasPlaying {
           lastUpdateTime = nil
-          perform(machine.melodyDidStart(at: now), at: now)
+          feedback.append(.melodyDidStart(at: batch.time))
         }
       case .melodyStopRequested:
         print("[SessionManager] Sustained non-snore — stopping melody")
@@ -334,6 +389,7 @@ final class RealtimeDetectionTracker {
         save(event)
       }
     }
+    return feedback
   }
 
   private func startEventClip(id: UUID) {
@@ -414,8 +470,12 @@ final class RealtimeDetectionTracker {
   /// Re-read every tick, as before the extraction: sleep talking and the
   /// minimum duration follow the live preferences; the confidence gate follows
   /// the detector, which `applyDetectionSensitivity()` sets at session start.
-  private func syncSettings() {
-    machine.settings = Self.settings(preferences: preferences, snoreDetector: snoreDetector)
+  /// Sent only when something changed, ahead of the sample it applies to.
+  private func sendSettingsIfChanged() {
+    let settings = Self.settings(preferences: preferences, snoreDetector: snoreDetector)
+    guard settings != lastSentSettings else { return }
+    lastSentSettings = settings
+    continuation?.yield(.settings(settings))
   }
 
   private static func settings(

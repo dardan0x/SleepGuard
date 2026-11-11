@@ -119,7 +119,7 @@ public final class SnoreInterrupterPlayer: NSObject, SnoreInterrupterPlaying {
 
       guard player.prepareToPlay() else {
         print("[SnoreInterrupterPlayer] prepareToPlay() returned false")
-        NotificationCenter.default.post(name: .snoreInterrupterDidStop, object: nil)
+        NotificationCenter.default.post(name: .snoreInterrupterDidStop, object: self)
         return
       }
       print("[SnoreInterrupterPlayer] prepareToPlay() succeeded")
@@ -127,7 +127,7 @@ public final class SnoreInterrupterPlayer: NSObject, SnoreInterrupterPlaying {
       let didPlay = player.play()
       print("[SnoreInterrupterPlayer] play() returned \(didPlay)")
       guard didPlay else {
-        NotificationCenter.default.post(name: .snoreInterrupterDidStop, object: nil)
+        NotificationCenter.default.post(name: .snoreInterrupterDidStop, object: self)
         return
       }
 
@@ -152,7 +152,7 @@ public final class SnoreInterrupterPlayer: NSObject, SnoreInterrupterPlaying {
       }
     } catch {
       print("[SnoreInterrupterPlayer] ❌ Failed to play: \(error)")
-      NotificationCenter.default.post(name: .snoreInterrupterDidStop, object: nil)
+      NotificationCenter.default.post(name: .snoreInterrupterDidStop, object: self)
     }
   }
 
@@ -170,7 +170,7 @@ public final class SnoreInterrupterPlayer: NSObject, SnoreInterrupterPlaying {
     currentMelodyName = nil
     print("[SnoreInterrupterPlayer] ✅ Stopped — isPlaying now \(isPlaying)")
 
-    NotificationCenter.default.post(name: .snoreInterrupterDidStop, object: nil)
+    NotificationCenter.default.post(name: .snoreInterrupterDidStop, object: self)
   }
 
   /// Stops the current melody and prevents any further playback during this recording session.

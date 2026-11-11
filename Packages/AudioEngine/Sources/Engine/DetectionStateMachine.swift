@@ -84,9 +84,11 @@ public enum DetectionOutput: Sendable, Equatable {
 /// The real-time snore / sleep-talking event state machine.
 ///
 /// Pure value type: no clock (every call takes the time), no singletons, no
-/// SwiftData, no audio. Feed it one classified sample per 50 ms tick with
-/// `ingest(_:at:)` and perform the returned outputs in order;
-/// `RealtimeDetectionTracker` is that adapter in the app.
+/// SwiftData, no audio. Feed it classified samples in time order with
+/// `ingest(_:at:)` and perform the returned outputs in order. Every rule is
+/// expressed in time, not sample counts, so the sampling rate is free to
+/// change. In the app, `DetectionEngine` runs it on its own actor and
+/// `RealtimeDetectionTracker` performs the outputs.
 ///
 /// The Snore Interrupter is a feedback loop: `ingest` may emit
 /// `.melodyRequested`, and the owner reports back `melodyDidStart(at:)` (if the
@@ -110,11 +112,15 @@ public struct DetectionStateMachine: Sendable {
 
   /// Silence that ends an event.
   static let eventGapThreshold: TimeInterval = 10.0
-  /// Consecutive snoring samples (≈150 ms at 20 Hz) before an event starts.
-  /// Filters transient sounds (bed creaks, taps, notifications).
-  static let requiredConsecutiveSamples = 3
-  /// Consecutive non-snoring samples before the melody may stop.
-  static let requiredNonSnoreSamplesToStop = 3
+  /// How long a run of snoring (or speech, or non-snoring) samples must last,
+  /// first sample to latest, before it counts as sustained. Filters transient
+  /// sounds (bed creaks, taps, notifications).
+  ///
+  /// Time, not a sample count, so the rules don't depend on the sampling rate
+  /// (F22-T10). 75 ms sits between two and three 50 ms intervals: at the 20 Hz
+  /// sampler it means "three consecutive samples", exactly the count it
+  /// replaced, and it tolerates timer jitter in either direction.
+  static let sustainedRunDuration: TimeInterval = 0.075
   /// The melody plays at least this long before non-snoring can stop it.
   static let melodyMinPlayDuration: TimeInterval = 4.0
   /// After the melody stops, snoring must resume within this delay for the gap
@@ -124,10 +130,8 @@ public struct DetectionStateMachine: Sendable {
   static let shortEventThreshold: TimeInterval = 3.0
   /// Spectral-only short events need this mean spectral score.
   static let shortEventSpectralGate = 0.65
-  static let requiredConsecutiveSpeechSamples = 3
   /// Sleep-talking utterances shorter than this are discarded.
   static let minSpeechEventDuration: TimeInterval = 0.5
-  static let sampleInterval: TimeInterval = 0.05
 
   public var settings: Settings
   private let makeID: @Sendable () -> UUID
@@ -145,8 +149,10 @@ public struct DetectionStateMachine: Sendable {
   private var activeEventSpectralSum: Double = 0
   private var activeEventSpectralCount = 0
   private var lastSnoringSampleTime: Date?
-  private var consecutiveSnoreSamples = 0
-  private var consecutiveNonSnoreSamples = 0
+  /// First sample of the current snoring run; `nil` when the run is broken.
+  private var snoreRunStart: Date?
+  /// First sample of the current non-snoring run (melody stop rule).
+  private var nonSnoreRunStart: Date?
   private var activeBurstStart: Date?
   private var completedBursts: [(start: Date, end: Date)] = []
 
@@ -163,7 +169,8 @@ public struct DetectionStateMachine: Sendable {
   private var activeSpeechEventDBCount = 0
   private var activeSpeechEventPeakDB: Double = 0
   private var lastSpeechSampleTime: Date?
-  private var consecutiveSpeechSamples = 0
+  /// First sample of the current speech run.
+  private var speechRunStart: Date?
 
   /// `makeID` names new snore events; tests pass a deterministic sequence.
   public init(settings: Settings, makeID: @escaping @Sendable () -> UUID = { UUID() }) {
@@ -197,20 +204,20 @@ public struct DetectionStateMachine: Sendable {
       finalizeSpeechEvent(endTime: now, fallback: now, into: &outputs)
     }
 
-    consecutiveSnoreSamples += 1
-    consecutiveNonSnoreSamples = 0
+    let runStart = snoreRunStart ?? now
+    snoreRunStart = runStart
+    nonSnoreRunStart = nil
     // During the post-melody breathing delay, don't extend the event until
     // sustained snoring confirms it; transients shouldn't make the gap count.
     if melodyResumeTime == nil || postMelodySnoringDetected {
       lastSnoringSampleTime = now
     }
-    guard consecutiveSnoreSamples >= Self.requiredConsecutiveSamples else { return }
+    guard now.timeIntervalSince(runStart) >= Self.sustainedRunDuration else { return }
 
     let db = Double(input.db)
     if activeEventStart == nil {
-      // Backdate to when sustained detection began.
-      let backdate = TimeInterval(Self.requiredConsecutiveSamples - 1) * Self.sampleInterval
-      let start = now.addingTimeInterval(-backdate)
+      // Backdate to the first sample of the run.
+      let start = runStart
       let id = makeID()
       activeEventStart = start
       activeEventID = id
@@ -271,8 +278,9 @@ public struct DetectionStateMachine: Sendable {
       return
     }
 
-    consecutiveSnoreSamples = 0
-    consecutiveNonSnoreSamples += 1
+    snoreRunStart = nil
+    let nonSnoreRun = nonSnoreRunStart ?? now
+    nonSnoreRunStart = nonSnoreRun
     if let burstStart = activeBurstStart {
       completedBursts.append((start: burstStart, end: now))
       activeBurstStart = nil
@@ -286,22 +294,22 @@ public struct DetectionStateMachine: Sendable {
       finalizeSnoreEvent(fallback: now, into: &outputs)
     }
 
-    if consecutiveNonSnoreSamples >= Self.requiredNonSnoreSamplesToStop, input.isMelodyPlaying {
+    if now.timeIntervalSince(nonSnoreRun) >= Self.sustainedRunDuration, input.isMelodyPlaying {
       let minDurationMet = melodyStartTime.map { now.timeIntervalSince($0) >= Self.melodyMinPlayDuration } ?? true
       guard minDurationMet else { return }
       outputs.append(.melodyStopRequested)
-      consecutiveNonSnoreSamples = 0
+      nonSnoreRunStart = nil
     }
 
     guard settings.detectSleepTalking else { return }
     if input.isSpeech {
-      consecutiveSpeechSamples += 1
+      let runStart = speechRunStart ?? now
+      speechRunStart = runStart
       lastSpeechSampleTime = now
-      guard consecutiveSpeechSamples >= Self.requiredConsecutiveSpeechSamples else { return }
+      guard now.timeIntervalSince(runStart) >= Self.sustainedRunDuration else { return }
       let db = Double(input.db)
       if activeSpeechEventStart == nil {
-        let backdate = TimeInterval(Self.requiredConsecutiveSpeechSamples - 1) * Self.sampleInterval
-        activeSpeechEventStart = now.addingTimeInterval(-backdate)
+        activeSpeechEventStart = runStart
         activeSpeechEventDBSum = db
         activeSpeechEventDBCount = 1
         activeSpeechEventPeakDB = db
@@ -311,7 +319,7 @@ public struct DetectionStateMachine: Sendable {
         activeSpeechEventPeakDB = max(activeSpeechEventPeakDB, db)
       }
     } else {
-      consecutiveSpeechSamples = 0
+      speechRunStart = nil
       if let lastSpeech = lastSpeechSampleTime,
          activeSpeechEventStart != nil,
          now.timeIntervalSince(lastSpeech) >= Self.eventGapThreshold
@@ -332,8 +340,8 @@ public struct DetectionStateMachine: Sendable {
       completedBursts.append((start: burstStart, end: lastSnoringSampleTime ?? now))
       activeBurstStart = nil
     }
-    consecutiveSnoreSamples = 0
-    consecutiveNonSnoreSamples = 0
+    snoreRunStart = nil
+    nonSnoreRunStart = nil
     return [.eventClipClosed]
   }
 
@@ -347,7 +355,7 @@ public struct DetectionStateMachine: Sendable {
       postMelodySnoringDetected = false
     }
     // Stale pause-time samples must not stop the next melody immediately.
-    consecutiveNonSnoreSamples = 0
+    nonSnoreRunStart = nil
     return [.recordingGap(start: start, duration: now.timeIntervalSince(start))]
   }
 
