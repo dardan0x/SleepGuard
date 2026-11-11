@@ -50,7 +50,7 @@ Fixes the architecture concerns raised in the mock staff-engineer interview (`Sl
 | F22-T6 | Protocol DI rollout: every remaining service + `Theme` | Infra | Done | F22-T5 | Env / AudioEngine / DesignSystem | 2026-11-10 | 2026-11-10 |
 | F22-T7 | Remove `.shared` from feature packages; `DesignSystem` drops `Env` | Infra | Done | F22-T6 | Features / DesignSystem | 2026-11-10 | 2026-11-10 |
 | F22-T8 | Extract pure `DetectionStateMachine` into `AudioEngine` | Refactor | Done | F22-T1 | AudioEngine / Env | 2026-11-11 | 2026-11-11 |
-| F22-T9 | Detection replay tests (golden outputs from real-night excerpts) | Test | Backlog | F22-T1, F22-T8 | AudioEngine | — | — |
+| F22-T9 | Detection replay tests (golden outputs from real-recording excerpts) | Test | Done | F22-T1, F22-T8 | AudioEngine | 2026-11-11 | 2026-11-11 |
 | F22-T10 | `DetectionEngine` actor + `AsyncStream` input (+ ADR) | Refactor | Backlog | F22-T9 | AudioEngine / Env | — | — |
 | F22-T11 | `VersionedSchema` V1 + empty migration plan | Model | Done | F22-T3 | Models / App | 2026-11-10 | 2026-11-10 |
 | F22-T12 | `DashboardState.make(from:now:)` pure mapping + tests | Refactor | Done | F22-T3 | Statistics | 2026-11-11 | 2026-11-11 |
@@ -319,22 +319,28 @@ _(filled after task completion)_
 | Field | Value |
 |-------|-------|
 | Arch Ref | — |
-| Status | Backlog |
-| Started | — |
-| Completed | — |
+| Status | Done |
+| Started | 2026-11-11 |
+| Completed | 2026-11-11 |
 
 **Acceptance Criteria:**
-- [ ] 2–4 trimmed excerpts (5–10 min) from real T1-format nights, committed as fixtures (small, compressed if needed)
-- [ ] Golden expected outputs (events: start, end, intensity) stored alongside
-- [ ] Replay test feeds each excerpt through `DetectionStateMachine` and diffs against the golden
-- [ ] A script regenerates goldens on purpose (never silently)
-- [ ] Tests pass in CI
+- [x] 2–4 trimmed excerpts (5–10 min) from a real recording, committed as fixtures (small, compressed if needed). *Changed by the user: a 37-min scripted recording instead of a real night, and the log is format 1, not T1 format (see Notes).*
+- [x] Golden expected outputs (events: start, end, intensity) stored alongside
+- [x] Replay test feeds each excerpt through `DetectionStateMachine` and diffs against the golden
+- [x] A script regenerates goldens on purpose (never silently)
+- [x] Tests pass in CI (they run in `run-tests.sh AudioEngine`, which `tests.yml` calls)
 
 **Prompt Used:**
-_(filled after task completion)_
+"can i record a 30 min snoring samples for t9, is it enough?" → "i recorded and here is the rawlog file i extracted: …/rawlog_AF51658B-….json"
 
 **Notes:**
-_Needs at least one real night recorded with the T1 log format (user)._
+- Source: one 37-minute recording on the user's iPhone (2026-11-11), imitated snoring, Snore Interrupter off. 41,594 samples, ordered, no gaps over 0.5 s.
+- **The log is format 1.** The phone ran a build from before T1, so there is no `peakDB`, `speechConfidence` or settings metadata. The replay runs at Medium (`minEventDuration` 1.0 s, gate 0.55) with sleep talking off, so **speech detection has no replay coverage**. The T8 characterization tests still cover it. `spectralScore` is 0 throughout.
+- 4 fixtures in `Packages/AudioEngine/Tests/Fixtures/Replay/`: `sustained-snoring` (0–7.5 min), `sparse-snores` (7–15), `loud-onset` (15–21), `short-bursts-and-quiet` (23–32). Total 1.1 MB of CSV (rounded levels, no audio).
+- Goldens list every decision with its time: event start, finalize (span, intensity, avg/peak dB, confidence, burst count), and discard with reason. Per-sample `melodyRequested` outputs are counted, not listed.
+- `scripts/make-replay-fixture.py` cuts excerpts. `scripts/record-replay-goldens.sh` re-records via `TEST_RUNNER_RECORD_REPLAY_GOLDENS=1` and prints the golden diff. Normal runs only compare.
+- Mutation check: changing the 10 s silence gap to 9 s failed all 4 replays, each with a first-difference message. Reverted.
+- Follow-up: add a T1-format excerpt with sleep talking from a real night.
 
 ---
 

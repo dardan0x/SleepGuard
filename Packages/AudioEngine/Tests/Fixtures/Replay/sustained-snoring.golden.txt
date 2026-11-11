@@ -1,0 +1,8 @@
+# sustained-snoring: 8302 samples, 449.962 s
+# minEventDuration 1.0 s, highConfidenceGate 0.55, sleep talking off
+3.120 started #1 from 3.020
+423.983 finalized #1 3.020–413.940 loud avg -60.60 peak -37.78 conf 0.771 spectral 0.000 bursts 20
+426.099 started #2 from 425.999
+444.967 finalized #2 425.999–434.933 epic avg -53.29 peak -26.80 conf 0.639 spectral 0.000 bursts 2
+# session end
+# melodyRequested 7338
