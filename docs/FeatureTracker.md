@@ -45,8 +45,8 @@ Last updated: 2026-11-11
 | Backlog | 0 |
 | Blocked | 0 |
 | — | — |
-| Total Tasks | 163 |
-| Tasks Done | 142 |
+| Total Tasks | 164 |
+| Tasks Done | 143 |
 | Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
 | Tasks Backlog | 21 |
@@ -78,7 +78,7 @@ Last updated: 2026-11-11
 | F20 | Home Screen & Lock Screen Widgets | P1 | Done | 9/9 | ██████████ 100% | [tracker](trackers/f20-home-screen-widgets.md) |
 | F21 | Test Coverage | P1 | Done | 17/17 | ██████████ 100% | [tracker](trackers/f21-test-coverage.md) |
 | F22 | Architecture Hardening | P1 | Done (real-night check pending) | 16/16 | ██████████ 100% | [tracker](trackers/f22-architecture-hardening.md) |
-| F23 | Production Readiness | P1 | In Progress | 6/11 | █████░░░░░ 55% | [tracker](trackers/f23-production-readiness.md) |
+| F23 | Production Readiness | P1 | In Progress | 7/12 | ██████░░░░ 58% | [tracker](trackers/f23-production-readiness.md) |
 
 ## Activity Log
 
@@ -86,6 +86,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-11-11 | F23-T8 | Completed | `MockDataGenerator` wrapped in `#if DEBUG` (callers already were); Env + Settings Release builds pass. Found the app's Release build cycle (Crashlytics phase order) → T12. Branch `feature/f23/t8-mock-data-debug` |
 | 2026-11-11 | F23-T7 | Completed | App `Package.resolved` committed (Firebase 12.14.0, Factory 3.5.2); CI app build uses `-disableAutomaticPackageResolution`. F23 extended with T7–T11 (user choices). Branch `feature/f23/t7-package-resolved` |
 | 2026-11-11 | F23-T5 | Completed | `try?` audit: delayed start, checkpoint write/read, pending record, storage fetches and clip compression now log failures; profile fetch error no longer creates a duplicate profile. Found: no start-failure alert anywhere; failed compression orphans the .caf. Branch `feature/f23/t5-try-audit` |
 | 2026-11-11 | F23-T4 | Completed | 76 `print` → `Log.<category>` (os.Logger, 7 categories, per-call levels, private by default); session + snore-event signposts; layering rule 5 bans `print`; SwiftFormat `--selfrequired` for Logger autoclosures. Logs verified on the simulator. Branch `feature/f23/t4-os-logger` |
