@@ -73,7 +73,7 @@ public final class StorageLimitEnforcer: Sendable, StorageLimitEnforcing {
     do {
       try modelContext.save()
     } catch {
-      print("[StorageLimitEnforcer] Failed to save context after clearing URLs: \(error)")
+      Log.storage.error("Failed to save context after clearing URLs: \(String(describing: error), privacy: .public)")
     }
 
     // Perform all file deletions off the main actor.
@@ -87,7 +87,7 @@ public final class StorageLimitEnforcer: Sendable, StorageLimitEnforcing {
       dayLimitSessions: dayReport.sessionsAffected,
       sizeLimitSessions: sizeReport.sessionsAffected)
 
-    print("[StorageLimitEnforcer] Cleanup complete — \(report.filesRemoved) file(s), \(report.bytesRemoved / 1_024 / 1_024) MB, \(report.sessionsAffected) session(s)")
+    Log.storage.info("Cleanup complete — \(report.filesRemoved) file(s), \(report.bytesRemoved / 1_024 / 1_024) MB, \(report.sessionsAffected) session(s)")
     return report
   }
 
@@ -117,7 +117,7 @@ public final class StorageLimitEnforcer: Sendable, StorageLimitEnforcing {
     }
 
     if affected > 0 {
-      print("[StorageLimitEnforcer] Planned removal for \(affected) sessions older than \(maxDays) days")
+      Log.storage.info("Planned removal for \(affected) sessions older than \(maxDays) days")
     }
     return CleanupPlan(fileURLs: urls, sessionsAffected: affected)
   }
@@ -152,7 +152,7 @@ public final class StorageLimitEnforcer: Sendable, StorageLimitEnforcing {
     }
 
     if affected > 0 {
-      print("[StorageLimitEnforcer] Planned removal to get under \(maxMB) MB")
+      Log.storage.info("Planned removal to get under \(maxMB) MB")
     }
     return CleanupPlan(fileURLs: urls, sessionsAffected: affected)
   }
@@ -283,7 +283,7 @@ public final class StorageLimitEnforcer: Sendable, StorageLimitEnforcing {
   public func injectDummyAudioForTesting(modelContext: ModelContext) -> Int {
     let descriptor = FetchDescriptor<SleepSession>(sortBy: [SortDescriptor(\.startDate)])
     guard let sessions = try? modelContext.fetch(descriptor), !sessions.isEmpty else {
-      print("[StorageLimitEnforcer] No sessions found — generate mock data first")
+      Log.storage.notice("No sessions found — generate mock data first")
       return 0
     }
 
@@ -312,7 +312,7 @@ public final class StorageLimitEnforcer: Sendable, StorageLimitEnforcing {
     }
 
     try? modelContext.save()
-    print("[StorageLimitEnforcer] Created \(created) dummy audio file(s) (~1 MB each)")
+    Log.storage.info("Created \(created) dummy audio file(s) (~1 MB each)")
     return created
   }
   #endif

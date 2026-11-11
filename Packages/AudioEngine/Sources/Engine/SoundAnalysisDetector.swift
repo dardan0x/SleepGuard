@@ -1,4 +1,5 @@
 import AVFoundation
+import Models
 import Observation
 import SoundAnalysis
 
@@ -41,18 +42,17 @@ public final class SoundAnalysisDetector: NSObject, SNResultsObserving, SoundAna
       analysisRequest = request
 
       let known = request.knownClassifications.map { $0.lowercased() }
-      print("[SoundAnalysis] Built-in sound classes: \(known.sorted())")
-
+      Log.audio.debug("Built-in sound classes: \(known.sorted())")
       let found = snoreIdentifiers.first { known.contains($0) }
       if let found {
         isSnoringClassAvailable = true
-        print("[SoundAnalysis] Found snoring-related class: '\(found)'")
+        Log.audio.info("Found snoring-related class: '\(found)'")
       } else {
         isSnoringClassAvailable = false
-        print("[SoundAnalysis] Snoring NOT in built-in classes. FFT fallback will be used.")
+        Log.audio.notice("Snoring NOT in built-in classes. FFT fallback will be used.")
       }
     } catch {
-      print("[SoundAnalysis] Failed to create request: \(error)")
+      Log.audio.error("Failed to create request: \(String(describing: error), privacy: .public)")
     }
   }
 
@@ -66,7 +66,7 @@ public final class SoundAnalysisDetector: NSObject, SNResultsObserving, SoundAna
     do {
       try streamAnalyzer?.add(request, withObserver: self)
     } catch {
-      print("[SoundAnalysis] Failed to add request: \(error)")
+      Log.audio.error("Failed to add request: \(String(describing: error), privacy: .public)")
     }
     return streamAnalyzer
   }
@@ -89,12 +89,14 @@ public final class SoundAnalysisDetector: NSObject, SNResultsObserving, SoundAna
   {
     guard let result = result as? SNClassificationResult else { return }
 
-    // Print top 3 classifications for diagnostics.
+    #if DEBUG
+    // Top 3 classifications for diagnostics. Built only in Debug: this runs
+    // for every result, about twice a second all night.
     let top3 = result.classifications.prefix(3).map {
       "\($0.identifier): \(String(format: "%.3f", $0.confidence))"
     }.joined(separator: ", ")
-    print("[SoundAnalysis] Top classifications: \(top3)")
-
+    Log.audio.debug("Top classifications: \(top3, privacy: .public)")
+    #endif
     var maxSnoreConfidence: Float = 0
     var maxSpeechConfidence: Float = 0
     for classification in result.classifications {
@@ -115,10 +117,10 @@ public final class SoundAnalysisDetector: NSObject, SNResultsObserving, SoundAna
       self.speechConfidence = maxSpeechConfidence
       #if DEBUG
       if maxSnoreConfidence > 0 {
-        print("[SoundAnalysis] snoreConfidence updated: \(String(format: "%.3f", maxSnoreConfidence))")
+        Log.audio.debug("snoreConfidence updated: \(maxSnoreConfidence, format: .fixed(precision: 3))")
       }
       if maxSpeechConfidence > 0 {
-        print("[SoundAnalysis] speechConfidence updated: \(String(format: "%.3f", maxSpeechConfidence))")
+        Log.audio.debug("speechConfidence updated: \(maxSpeechConfidence, format: .fixed(precision: 3))")
       }
       #endif
     }
@@ -128,7 +130,7 @@ public final class SoundAnalysisDetector: NSObject, SNResultsObserving, SoundAna
     _: SNRequest,
     didFailWithError error: Error)
   {
-    print("[SoundAnalysis] Request failed: \(error.localizedDescription)")
+    Log.audio.error("Request failed: \(error.localizedDescription, privacy: .public)")
   }
 
   public nonisolated func requestDidComplete(_: SNRequest) {}

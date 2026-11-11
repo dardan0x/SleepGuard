@@ -2,6 +2,7 @@ import AVFoundation
 import Env
 import FactoryKit
 import Foundation
+import Models
 
 /// Recording engine for the custom-melody sheet: owns the audio recorder,
 /// the elapsed-time timer, playback of the take, and the record → recorded
@@ -62,7 +63,7 @@ final class CustomMelodyRecorder {
       try session.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker])
       try session.setActive(true)
     } catch {
-      print("[RecordCustomMelodySheet] Failed to configure session: \(error)")
+      Log.interrupter.error("Failed to configure session: \(String(describing: error), privacy: .public)")
       return
     }
 
@@ -96,7 +97,7 @@ final class CustomMelodyRecorder {
         }
       }
     } catch {
-      print("[RecordCustomMelodySheet] Failed to start recording: \(error)")
+      Log.interrupter.error("Failed to start recording: \(String(describing: error), privacy: .public)")
     }
   }
 
@@ -134,7 +135,7 @@ final class CustomMelodyRecorder {
         isPlaying = false
       }
     } catch {
-      print("[RecordCustomMelodySheet] Failed to play back: \(error)")
+      Log.interrupter.error("Failed to play back: \(String(describing: error), privacy: .public)")
     }
   }
 

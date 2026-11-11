@@ -2,6 +2,7 @@ import AudioEngine
 import DesignSystem
 import Env
 import FactoryKit
+import Models
 import SwiftUI
 import UIKit
 
@@ -131,7 +132,7 @@ struct RecordingCountdownView: View {
     do {
       try sessionManager.startSession()
     } catch {
-      print("Failed to start session: \(error)")
+      Log.session.error("Failed to start session: \(String(describing: error), privacy: .public)")
     }
   }
 

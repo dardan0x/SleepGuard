@@ -1,4 +1,5 @@
 import AVFoundation
+import Models
 import os
 import SoundAnalysis
 
@@ -75,7 +76,7 @@ final class TapProcessor: Sendable {
           try audioFile.write(from: buffer)
           didWrite = true
         } catch {
-          print("[AudioRecorder] Failed to write audio buffer: \(error)")
+          Log.audio.error("Failed to write audio buffer: \(String(describing: error), privacy: .public)")
         }
       }
       if let eventFile = s.eventFile {
@@ -83,7 +84,7 @@ final class TapProcessor: Sendable {
           try eventFile.write(from: buffer)
           didWrite = true
         } catch {
-          print("[AudioRecorder] Failed to write event buffer: \(error)")
+          Log.audio.error("Failed to write event buffer: \(String(describing: error), privacy: .public)")
         }
       }
       var writesDisabled = false
@@ -92,7 +93,7 @@ final class TapProcessor: Sendable {
       } else if s.audioFile != nil || s.eventFile != nil {
         s.consecutiveWriteFailures += 1
         if s.consecutiveWriteFailures >= 3 {
-          print("[AudioRecorder] Too many write failures — stopping file writes")
+          Log.audio.error("Too many write failures — stopping file writes")
           s.audioFile = nil
           s.eventFile = nil
           writesDisabled = true

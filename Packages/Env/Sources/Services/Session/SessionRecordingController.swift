@@ -2,6 +2,7 @@ import AudioEngine
 import FactoryKit
 import Foundation
 import Models
+import os
 import UIKit
 
 /// Recording lifecycle for a sleep session: starts/stops the audio engine,
@@ -31,6 +32,8 @@ final class SessionRecordingController {
   private var processingTask: Task<Void, Never>?
   private var batteryCheckCounter = 0
   private var checkpointCounter = 0
+  /// Instruments interval for the running session (Points of Interest).
+  private var sessionSignpost: OSSignpostIntervalState?
 
   init(
     audioRecorder: any AudioRecording = Container.shared.audioRecorder(),
@@ -92,6 +95,8 @@ final class SessionRecordingController {
 
     try audioRecorder.startRecording(audioFileURL: audioURL)
     isRecording = true
+    sessionSignpost = Log.signposter.beginInterval("Session")
+    Log.session.info("Session started")
     detection?.setActive(true)
     detection?.resetDisplayState()
 
@@ -147,7 +152,7 @@ final class SessionRecordingController {
     #else
     let level = UIDevice.current.batteryLevel
     guard level >= 0, level <= 0.02 else { return }
-    print("[SessionManager] Battery level at \(Int(level * 100))% — force saving session")
+    Log.session.notice("Battery level at \(Int(level * 100))% — force saving session")
     forceSaveDueToLowBattery()
     #endif
   }
@@ -169,6 +174,7 @@ final class SessionRecordingController {
 
     snoreInterrupterPlayer.stop()
     isRecording = false
+    endSessionSignpost(reason: "stopped")
     detection?.setActive(false)
 
     // Finalize any in-progress events BEFORE stopping the audio engine —
@@ -251,6 +257,7 @@ final class SessionRecordingController {
 
       snoreInterrupterPlayer.stop()
       isRecording = false
+      endSessionSignpost(reason: "discarded")
       detection?.setActive(false)
 
       // Finalize events BEFORE stopping audio engine so file URLs are
@@ -288,6 +295,13 @@ final class SessionRecordingController {
   }
 
   // MARK: - Private
+
+  private func endSessionSignpost(reason: StaticString) {
+    guard let sessionSignpost else { return }
+    Log.signposter.endInterval("Session", sessionSignpost, "\(reason)")
+    self.sessionSignpost = nil
+    Log.session.info("Session \(reason)")
+  }
 
   private func audioFileURL(for sessionID: UUID) -> URL {
     FileManager.default

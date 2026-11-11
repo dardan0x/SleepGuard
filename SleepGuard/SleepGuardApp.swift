@@ -3,6 +3,7 @@ import Env
 import FirebaseCore
 import Models
 import Onboarding
+import os
 import SwiftData
 import SwiftUI
 
@@ -32,7 +33,7 @@ struct SleepGuardApp: App {
     } catch {
       // If migration fails (e.g. from a dev schema change), delete the store
       // and recreate rather than crashing. User data loss only in dev builds.
-      print("[SleepGuardApp] ModelContainer creation failed: \(error). Deleting store and retrying...")
+      Log.app.fault("ModelContainer creation failed: \(String(describing: error), privacy: .public). Deleting store and retrying...")
       let storeURL = modelConfiguration.url
       try? FileManager.default.removeItem(at: storeURL)
       do {
@@ -97,7 +98,7 @@ struct SleepGuardApp: App {
         do {
           try SleepSession.refreshStaleCachedScores(in: container.mainContext, config: appConfig.sleepScoreConfig)
         } catch {
-          print("[SleepGuardApp] Stale score refresh failed: \(error)")
+          Log.app.error("Stale score refresh failed: \(String(describing: error), privacy: .public)")
         }
 
         WidgetSnapshotWriter.update(modelContext: container.mainContext)

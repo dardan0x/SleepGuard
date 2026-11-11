@@ -37,33 +37,31 @@ public final class SnoreInterrupterPlayer: NSObject, SnoreInterrupterPlaying {
   /// Call when a new snore event is detected. Checks preferences and starts playback
   /// if a melody is configured and nothing is already playing.
   public func playIfNeeded() {
-    print("[SnoreInterrupterPlayer] playIfNeeded() called — isMutedForSession=\(isMutedForSession), isPlaying=\(isPlaying)")
-
+    Log.interrupter.debug("playIfNeeded() called — isMutedForSession=\(self.isMutedForSession), isPlaying=\(self.isPlaying)")
     guard !isMutedForSession else {
-      print("[SnoreInterrupterPlayer] Muted for this session, skipping")
+      Log.interrupter.debug("Muted for this session, skipping")
       return
     }
 
     guard !isPlaying else {
-      print("[SnoreInterrupterPlayer] Already playing, skipping re-trigger")
+      Log.interrupter.debug("Already playing, skipping re-trigger")
       return
     }
 
     let mode = preferences.snoreInterrupterMode
-    print("[SnoreInterrupterPlayer] Mode: \(mode)")
+    Log.interrupter.debug("Mode: \(String(describing: mode), privacy: .public)")
     guard mode != .never else {
-      print("[SnoreInterrupterPlayer] Mode is .never, skipping")
+      Log.interrupter.debug("Mode is .never, skipping")
       return
     }
 
     let melodyID = preferences.selectedMelodyID
-    print("[SnoreInterrupterPlayer] Selected melody ID: \(melodyID)")
-
+    Log.interrupter.debug("Selected melody ID: \(melodyID)")
     let melody = Melody.melody(id: melodyID)
       ?? melodyStorage.melody(id: melodyID)
 
     guard let melody else {
-      print("[SnoreInterrupterPlayer] No melody found for ID \(melodyID)")
+      Log.interrupter.debug("No melody found for ID \(melodyID)")
       return
     }
 
@@ -75,53 +73,48 @@ public final class SnoreInterrupterPlayer: NSObject, SnoreInterrupterPlaying {
     }
 
     guard let fileURL = url else {
-      print("[SnoreInterrupterPlayer] Sound file not found: \(melody.filename).mp3")
+      Log.interrupter.error("Sound file not found: \(melody.filename).mp3")
       let bundlePath = Bundle.main.bundlePath
       let soundsPath = (bundlePath as NSString).appendingPathComponent("sounds")
       if FileManager.default.fileExists(atPath: soundsPath) {
         let files = (try? FileManager.default.contentsOfDirectory(atPath: soundsPath)) ?? []
-        print("[SnoreInterrupterPlayer] Available sounds: \(files)")
+        Log.interrupter.debug("Available sounds: \(files)")
       } else {
-        print("[SnoreInterrupterPlayer] sounds/ directory does not exist at \(soundsPath)")
+        Log.interrupter.error("sounds/ directory does not exist at \(soundsPath)")
       }
       return
     }
 
-    print("[SnoreInterrupterPlayer] Found sound at \(fileURL.path)")
-
+    Log.interrupter.debug("Found sound at \(fileURL.path)")
     NotificationCenter.default.post(name: .snoreInterrupterWillPlay, object: nil)
 
     do {
       let session = AVAudioSession.sharedInstance()
       try session.setCategory(.playback, mode: .default)
       try session.setActive(true)
-      print("[SnoreInterrupterPlayer] Audio session activated with .playback")
-
+      Log.interrupter.debug("Audio session activated with .playback")
       let player = try AVAudioPlayer(contentsOf: fileURL)
       player.volume = 1.0
       player.numberOfLoops = mode == .always ? -1 : 0
       player.delegate = self
       audioPlayer = player
       currentMelodyName = melody.name
-      print("[SnoreInterrupterPlayer] AVAudioPlayer created, delegate set")
-
+      Log.interrupter.debug("AVAudioPlayer created, delegate set")
       guard player.prepareToPlay() else {
-        print("[SnoreInterrupterPlayer] prepareToPlay() returned false")
+        Log.interrupter.error("prepareToPlay() returned false")
         NotificationCenter.default.post(name: .snoreInterrupterDidStop, object: self)
         return
       }
-      print("[SnoreInterrupterPlayer] prepareToPlay() succeeded")
-
+      Log.interrupter.debug("prepareToPlay() succeeded")
       let didPlay = player.play()
-      print("[SnoreInterrupterPlayer] play() returned \(didPlay)")
+      Log.interrupter.debug("play() returned \(didPlay)")
       guard didPlay else {
         NotificationCenter.default.post(name: .snoreInterrupterDidStop, object: self)
         return
       }
 
       isPlaying = true
-      print("[SnoreInterrupterPlayer] ✅ Started playing '\(melody.name)' for \(mode.displayLabel)")
-
+      Log.interrupter.info("Started playing '\(melody.name)' for \(mode.displayLabel)")
       haptics.prepare()
       haptics.nudge()
       nudgeTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { [weak self] _ in
@@ -139,14 +132,14 @@ public final class SnoreInterrupterPlayer: NSObject, SnoreInterrupterPlaying {
         }
       }
     } catch {
-      print("[SnoreInterrupterPlayer] ❌ Failed to play: \(error)")
+      Log.interrupter.error("Failed to play: \(String(describing: error), privacy: .public)")
       NotificationCenter.default.post(name: .snoreInterrupterDidStop, object: self)
     }
   }
 
   /// Stops playback immediately and cleans up.
   public func stop() {
-    print("[SnoreInterrupterPlayer] stop() called — isPlaying was \(isPlaying)")
+    Log.interrupter.debug("stop() called — isPlaying was \(self.isPlaying)")
     audioPlayer?.stop()
     audioPlayer?.delegate = nil
     audioPlayer = nil
@@ -156,8 +149,7 @@ public final class SnoreInterrupterPlayer: NSObject, SnoreInterrupterPlaying {
     nudgeTimer = nil
     isPlaying = false
     currentMelodyName = nil
-    print("[SnoreInterrupterPlayer] ✅ Stopped — isPlaying now \(isPlaying)")
-
+    Log.interrupter.info("Stopped — isPlaying now \(self.isPlaying)")
     NotificationCenter.default.post(name: .snoreInterrupterDidStop, object: self)
   }
 
@@ -165,13 +157,13 @@ public final class SnoreInterrupterPlayer: NSObject, SnoreInterrupterPlaying {
   public func muteForSession() {
     stop()
     isMutedForSession = true
-    print("[SnoreInterrupterPlayer] Muted for remainder of session")
+    Log.interrupter.info("Muted for remainder of session")
   }
 
   /// Resets the session mute flag. Called when a new recording session starts.
   public func resetSessionMute() {
     isMutedForSession = false
-    print("[SnoreInterrupterPlayer] Session mute reset")
+    Log.interrupter.info("Session mute reset")
   }
 }
 

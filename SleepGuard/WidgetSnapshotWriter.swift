@@ -1,4 +1,5 @@
 import Models
+import os
 import SwiftData
 import WidgetKit
 
@@ -22,7 +23,7 @@ enum WidgetSnapshotWriter {
       try WidgetSnapshotStore.write(WidgetSnapshotBuilder.make(from: sessions), to: url)
       WidgetCenter.shared.reloadAllTimelines()
     } catch {
-      print("[WidgetSnapshotWriter] Failed to update widget snapshot: \(error)")
+      Log.app.error("Failed to update widget snapshot: \(String(describing: error), privacy: .public)")
     }
   }
 }
