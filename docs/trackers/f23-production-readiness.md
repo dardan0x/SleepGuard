@@ -19,6 +19,7 @@ The "Do" list from the principal architecture review (`docs/ARCHITECTURE_REVIEW.
 
 ### Decisions (user, 2026-11-11)
 - "ok lets go with your suggestions": follow the review's suggested order.
+- Follow-up choices: commit `Package.resolved`; do accessibility, the start-failure alert, Debug-only mock data and raw-log streaming. Not chosen: deleting the stray nested xcodeproj, keeping the `.caf` when compression fails, iPhone-only.
 
 ## Tasks
 
@@ -30,6 +31,11 @@ The "Do" list from the principal architecture review (`docs/ARCHITECTURE_REVIEW.
 | F23-T4 | `os.Logger` instead of `print` (+ signposts for session and event) | Infra | Done | — | all | 2026-11-11 | 2026-11-11 |
 | F23-T5 | Audit `try?` on data paths | Quality | Done | F23-T4 | Env / AudioEngine / SleepSession / App | 2026-11-11 | 2026-11-11 |
 | F23-T6 | Detection accuracy evaluation on labelled real nights | Tooling | Backlog | User: real nights with raw logs | scripts / AudioEngine | — | — |
+| F23-T7 | Commit the app's `Package.resolved`; CI builds from it | Infra | Done | — | repo / .github | 2026-11-11 | 2026-11-11 |
+| F23-T8 | `MockDataGenerator` Debug-only | Cleanup | Backlog | — | Env | — | — |
+| F23-T9 | Stream the raw log to disk while recording | Perf | Backlog | — | Env / AudioEngine | — | — |
+| F23-T10 | Alert when a recording fails to start | UI | Backlog | — | SleepSession / App / DesignSystem | — | — |
+| F23-T11 | Accessibility pass (VoiceOver, Dynamic Type) | UI | Backlog | — | DesignSystem / features | — | — |
 
 ## Task Details
 
@@ -187,6 +193,30 @@ The "Do" list from the principal architecture review (`docs/ARCHITECTURE_REVIEW.
   - **No user-facing alert when a session fails to start, on any path** (normal, delayed, notification). Only a log now. Needs strings and a design.
   - **A failed compression leaves the `.caf` on disk** and the event without a clip. Keeping the `.caf` as the clip would be a behavior change.
 - Tests: the logging isn't unit-tested (behavior is unchanged except for the profile path, which runs in the app target). All suites still pass.
+
+---
+
+### F23-T7 — Commit the app's `Package.resolved`
+
+| Field | Value |
+|-------|-------|
+| Arch Ref | — |
+| Status | Done |
+| Started | 2026-11-11 |
+| Completed | 2026-11-11 |
+
+**Acceptance Criteria:**
+- [x] The app's `Package.resolved` is tracked
+- [x] The CI app build uses exactly those versions
+
+**Prompt Used:**
+User choice "Commit Package.resolved".
+
+**Notes:**
+- Pinned: Firebase 12.14.0, Factory 3.5.2, and their transitive dependencies (14 pins).
+- Force-added, because its parent folders are ignored (`*.xcworkspace`, `…/swiftpm/`). A tracked file is unaffected by ignore rules, so later updates show up normally. `.gitignore` explains this. Library packages still don't commit lockfiles.
+- The CI `app` job passes `-disableAutomaticPackageResolution`, so a stale lockfile fails the build instead of resolving silently. Verified locally: BUILD SUCCEEDED.
+- The package test job (`run-tests.sh`) resolves per package as before; those packages only declare Factory `from: 3.5.2`.
 
 ---
 
