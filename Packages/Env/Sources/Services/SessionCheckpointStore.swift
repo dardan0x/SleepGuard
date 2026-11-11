@@ -23,17 +23,25 @@ public final class SessionCheckpointStore: SessionCheckpointStoring {
   /// Atomically writes the snapshot. `.atomic` writes to a temp file and renames,
   /// so a crash mid-write leaves the previous good snapshot intact.
   public func write(_ snapshot: SessionRecoverySnapshot) {
-    guard let data = try? JSONEncoder().encode(snapshot) else { return }
-    try? data.write(to: recoveryURL, options: .atomic)
+    do {
+      let data = try JSONEncoder().encode(snapshot)
+      try data.write(to: recoveryURL, options: .atomic)
+    } catch {
+      Log.session.error("Checkpoint write failed: \(String(describing: error), privacy: .public)")
+    }
   }
 
   /// Returns the persisted snapshot if one exists and holds recoverable data.
   public func loadIfPresent() -> SessionRecoverySnapshot? {
-    guard let data = try? Data(contentsOf: recoveryURL),
-          let snapshot = try? JSONDecoder().decode(SessionRecoverySnapshot.self, from: data),
-          snapshot.isRecoverable
-    else { return nil }
-    return snapshot
+    guard FileManager.default.fileExists(atPath: recoveryURL.path) else { return nil }
+    do {
+      let data = try Data(contentsOf: recoveryURL)
+      let snapshot = try JSONDecoder().decode(SessionRecoverySnapshot.self, from: data)
+      return snapshot.isRecoverable ? snapshot : nil
+    } catch {
+      Log.session.error("Checkpoint unreadable, night not recoverable: \(String(describing: error), privacy: .public)")
+      return nil
+    }
   }
 
   /// Removes the recovery file. Called after the session is saved or discarded.
