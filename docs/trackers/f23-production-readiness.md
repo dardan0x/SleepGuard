@@ -25,7 +25,7 @@ The "Do" list from the principal architecture review (`docs/ARCHITECTURE_REVIEW.
 | ID | Task | Type | Status | Depends On | Package | Started | Completed |
 |----|------|------|--------|------------|---------|---------|-----------|
 | F23-T1 | One owner for committing a night (`SessionCommitter`) + low-battery clip-loss fix | Bug / Refactor | Done | — | Env / SleepSession / App | 2026-11-11 | 2026-11-11 |
-| F23-T2 | App privacy manifest (`PrivacyInfo.xcprivacy`) | Compliance | Backlog | — | App | — | — |
+| F23-T2 | App privacy manifest (`PrivacyInfo.xcprivacy`) | Compliance | Done | — | App / Widgets | 2026-11-11 | 2026-11-11 |
 | F23-T3 | CI: build the app target (app, widgets, Watch) | Infra | Backlog | — | .github | — | — |
 | F23-T4 | `os.Logger` instead of `print` (+ signposts for session and event) | Infra | Backlog | — | all | — | — |
 | F23-T5 | Audit `try?` on data paths | Quality | Backlog | F23-T4 | Env / AudioEngine / Recordings / App | — | — |
@@ -60,6 +60,37 @@ The "Do" list from the principal architecture review (`docs/ARCHITECTURE_REVIEW.
 - Not tested: the save-failure path. An in-memory SwiftData store can't be made to fail its save, so `FakeSessionCommitter.error` covers the caller side instead.
 - Simulator: recorded 2 min 24 s, stopped, Save Session → the dashboard shows the new night (Nov 11 20:07–20:10, cached score), and `session_recovery.json` is gone from the app container. The low-battery path can't be triggered on the simulator (battery level is -1); the unit test covers it.
 - Tests: `SessionCommitterTests` (3 tests, 5 cases), plus a `ServiceOverrideTests` case and the default-resolution check. Mutation: removing the two clears fails the regression test for both `nil` and `low_battery`.
+
+---
+
+### F23-T2 — App privacy manifest
+
+| Field | Value |
+|-------|-------|
+| Arch Ref | `docs/ARCHITECTURE_REVIEW.md` Do #2 |
+| Status | Done |
+| Started | 2026-11-11 |
+| Completed | 2026-11-11 |
+
+**Acceptance Criteria:**
+- [x] `SleepGuard/PrivacyInfo.xcprivacy` declares every required-reason API the app's own code uses
+- [x] The widget extension has its own manifest
+- [x] Both are bundled (checked in the built `.app` / `.appex`)
+
+**Prompt Used:**
+"ok lets go with your suggestions"
+
+**Notes:**
+- Found by grepping all first-party targets:
+  - **UserDefaults → CA92.1:** the app's own settings stores, plus `UpdateGateView`.
+  - **File timestamp → C617.1:** `attributesOfItem` in `StorageLimitEnforcer` and `SessionShareCoordinator`; only `.size` is read, but Apple lists the API.
+  - **System boot time → 35F9.1:** `systemUptime` in `ClipPlaybackController`, for elapsed playback time.
+  - No disk-space or keyboard APIs are used.
+- Widget: UserDefaults only (linked `DesignSystem` code).
+- `NSPrivacyTracking` false; no collected data types declared by the app itself. Firebase (Crashlytics, Messaging, Remote Config, Installations) and Factory ship their own manifests, which Xcode merges into the privacy report.
+- The Watch sources aren't a target in this project, so there's no manifest for them.
+- **Still for the user:** generate the privacy report from an Xcode archive (Organizer → Generate Privacy Report) before submission, and keep the App Store Connect privacy label in line with it (Crashlytics crash and diagnostic data).
+- Both targets use synchronized folders, so the files are picked up with no `project.pbxproj` change.
 
 ---
 
