@@ -25,6 +25,8 @@ final class SessionRecordingController {
   private let checkpointStore: any SessionCheckpointStoring
   private let rawLogWriter: any SessionRawLogWriting
   private var detection: RealtimeDetectionTracker?
+  /// `false` in tests that script every sample themselves (F22-T10).
+  private let runsProcessingLoop: Bool
 
   private var processingTask: Task<Void, Never>?
   private var batteryCheckCounter = 0
@@ -37,8 +39,10 @@ final class SessionRecordingController {
     preferences: any UserPreferencesStoring = Container.shared.userPreferences(),
     pendingSessionStore: any PendingSessionStoring = Container.shared.pendingSessionStore(),
     checkpointStore: any SessionCheckpointStoring = Container.shared.sessionCheckpointStore(),
-    rawLogWriter: any SessionRawLogWriting = Container.shared.sessionRawLogWriter())
+    rawLogWriter: any SessionRawLogWriting = Container.shared.sessionRawLogWriter(),
+    runsProcessingLoop: Bool = true)
   {
+    self.runsProcessingLoop = runsProcessingLoop
     self.audioRecorder = audioRecorder
     self.snoreInterrupterPlayer = snoreInterrupterPlayer
     self.soundAnalysis = soundAnalysis
@@ -108,6 +112,7 @@ final class SessionRecordingController {
     }
 
     // Drive processAudioLevel from the recording controller so it survives background.
+    guard runsProcessingLoop else { return }
     processingTask = Task { @MainActor in
       while !Task.isCancelled {
         let saConf = self.soundAnalysis.snoreConfidence
@@ -167,8 +172,8 @@ final class SessionRecordingController {
     detection?.setActive(false)
 
     // Finalize any in-progress events BEFORE stopping the audio engine —
-    // see RealtimeDetectionTracker.finalizeActiveEventsIfNeeded().
-    detection?.finalizeActiveEventsIfNeeded()
+    // see RealtimeDetectionTracker.finishDetection().
+    await detection?.finishDetection()
 
     audioRecorder.stopRecording()
 
@@ -250,7 +255,7 @@ final class SessionRecordingController {
 
       // Finalize events BEFORE stopping audio engine so file URLs are
       // captured while currentEventFile still exists.
-      detection?.finalizeActiveEventsIfNeeded()
+      await detection?.finishDetection()
 
       audioRecorder.stopRecording()
 

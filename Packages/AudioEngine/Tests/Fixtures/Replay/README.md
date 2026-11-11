@@ -29,6 +29,11 @@ refactors such as F22-T10, not proof that detection is accurate. The
 recording was imitated snoring, and `spectralScore` is 0 throughout because
 the classifier path was active.
 
+## History
+
+- 2026-11-11, F22-T9: recorded.
+- 2026-11-11, F22-T10: re-recorded on purpose. Run thresholds became durations, and events now start at the run's first sample instead of a fixed 0.1 s backdate, so event start times moved 15–26 ms earlier. When events were detected, finalized or discarded, and their counts, intensities, volume, confidence and bursts, are unchanged. See ADR 0003.
+
 ## Changing them
 
 - Normal test runs never write goldens.

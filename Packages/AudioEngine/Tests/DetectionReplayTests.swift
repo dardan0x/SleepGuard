@@ -100,9 +100,47 @@ enum ReplayFixture {
 /// the excerpt start. Per-sample `melodyRequested` outputs are counted, not
 /// listed: the fixture was recorded with the Snore Interrupter off.
 enum ReplayTranscript {
-  static func make(name: String, samples: [ReplaySample], settings: DetectionStateMachine.Settings) -> String {
-    let origin = Date(timeIntervalSinceReferenceDate: 0)
+  static let origin = Date(timeIntervalSinceReferenceDate: 0)
+
+  /// What a replay produced: batches from the samples, then from the session-end flush.
+  struct Run: Equatable {
+    var samples: [DetectionEngine.Batch] = []
+    var sessionEnd: [DetectionEngine.Batch] = []
+  }
+
+  static func sampleMessages(_ samples: [ReplaySample]) -> [DetectionEngine.Message] {
+    samples.map { .sample($0.input, at: origin.addingTimeInterval($0.elapsed)) }
+  }
+
+  static func endTime(_ samples: [ReplaySample]) -> Date {
+    origin.addingTimeInterval(samples.last?.elapsed ?? 0)
+  }
+
+  /// Runs the bare machine synchronously, one batch per call that produced outputs.
+  static func machineRun(_ samples: [ReplaySample], settings: DetectionStateMachine.Settings) -> Run {
     var machine = DetectionStateMachine(settings: settings)
+    var run = Run()
+    for sample in samples {
+      let now = origin.addingTimeInterval(sample.elapsed)
+      let outputs = machine.ingest(sample.input, at: now)
+      if !outputs.isEmpty { run.samples.append(.init(outputs: outputs, time: now)) }
+    }
+    let outputs = machine.finalizeActiveEvents(at: endTime(samples))
+    if !outputs.isEmpty { run.sessionEnd.append(.init(outputs: outputs, time: endTime(samples))) }
+    return run
+  }
+
+  static func make(name: String, samples: [ReplaySample], settings: DetectionStateMachine.Settings) -> String {
+    render(name: name, samples: samples, settings: settings, run: machineRun(samples, settings: settings))
+  }
+
+  /// Event IDs are random, so they are numbered in order of appearance.
+  static func render(
+    name: String,
+    samples: [ReplaySample],
+    settings: DetectionStateMachine.Settings,
+    run: Run) -> String
+  {
     var numbers: [UUID: Int] = [:]
     var melodyRequests = 0
     var lines = [
@@ -114,8 +152,9 @@ enum ReplayTranscript {
       seconds(date.timeIntervalSince(origin))
     }
 
-    func record(_ outputs: [DetectionOutput], at now: Date) {
-      for output in outputs {
+    func record(_ batch: DetectionEngine.Batch) {
+      let now = batch.time
+      for output in batch.outputs {
         switch output {
         case let .snoreEventStarted(id, start):
           numbers[id] = numbers.count + 1
@@ -138,13 +177,9 @@ enum ReplayTranscript {
       }
     }
 
-    for sample in samples {
-      let now = origin.addingTimeInterval(sample.elapsed)
-      record(machine.ingest(sample.input, at: now), at: now)
-    }
-    let end = origin.addingTimeInterval(samples.last?.elapsed ?? 0)
+    run.samples.forEach(record)
     lines.append("# session end")
-    record(machine.finalizeActiveEvents(at: end), at: end)
+    run.sessionEnd.forEach(record)
     lines.append("# melodyRequested \(melodyRequests)")
     return lines.joined(separator: "\n") + "\n"
   }

@@ -51,7 +51,7 @@ Fixes the architecture concerns raised in the mock staff-engineer interview (`Sl
 | F22-T7 | Remove `.shared` from feature packages; `DesignSystem` drops `Env` | Infra | Done | F22-T6 | Features / DesignSystem | 2026-11-10 | 2026-11-10 |
 | F22-T8 | Extract pure `DetectionStateMachine` into `AudioEngine` | Refactor | Done | F22-T1 | AudioEngine / Env | 2026-11-11 | 2026-11-11 |
 | F22-T9 | Detection replay tests (golden outputs from real-recording excerpts) | Test | Done | F22-T1, F22-T8 | AudioEngine | 2026-11-11 | 2026-11-11 |
-| F22-T10 | `DetectionEngine` actor + `AsyncStream` input (+ ADR) | Refactor | Backlog | F22-T9 | AudioEngine / Env | — | — |
+| F22-T10 | `DetectionEngine` actor + `AsyncStream` input (+ ADR) | Refactor | Done | F22-T9 | AudioEngine / Env | 2026-11-11 | 2026-11-11 |
 | F22-T11 | `VersionedSchema` V1 + empty migration plan | Model | Done | F22-T3 | Models / App | 2026-11-10 | 2026-11-10 |
 | F22-T12 | `DashboardState.make(from:now:)` pure mapping + tests | Refactor | Done | F22-T3 | Statistics | 2026-11-11 | 2026-11-11 |
 | F22-T13 | CI check: 200-line view limit with allowlist | Infra | Done | — | scripts / .github | 2026-11-11 | 2026-11-11 |
@@ -349,24 +349,30 @@ _(filled after task completion)_
 | Field | Value |
 |-------|-------|
 | Arch Ref | `docs/architecture/concurrency.md` |
-| Status | Backlog |
-| Started | — |
-| Completed | — |
+| Status | Done (real-night check pending) |
+| Started | 2026-11-11 |
+| Completed | 2026-11-11 |
 
 **Acceptance Criteria:**
-- [ ] Tap, SoundAnalysis results, and melody start/stop are sent as `DetectionInput` into one `AsyncStream` (`.bufferingNewest(n)`), timestamped at the source
-- [ ] `DetectionEngine` actor runs the state machine; outputs go to a MainActor adapter for side effects
-- [ ] UI snapshot published at about 5 Hz
-- [ ] Sample-count thresholds converted to durations (rate-independent)
-- [ ] Replay tests (T9) still match the goldens, or each difference is explained and approved
-- [ ] `docs/adr/0003-detection-actor.md`
-- [ ] Builds with zero errors; one real-night check on device
+- [x] Samples, melody start/stop, settings changes and the session-end flush go into one ordered `AsyncStream`, each timestamped at its source. *Changed by the user (option A): the source is the 50 ms sampler, not each mic buffer and SoundAnalysis result. The stream is `.unbounded`, not `.bufferingNewest(n)` (see ADR 0003).*
+- [x] `DetectionEngine` actor runs the state machine; outputs go to a MainActor adapter for side effects
+- [x] UI snapshot published at about 5 Hz
+- [x] Sample-count thresholds converted to durations (rate-independent)
+- [x] Replay tests (T9) still match the goldens, or each difference is explained and approved. *Re-recorded: only event start times moved, 15–26 ms earlier; explained in ADR 0003 and the fixtures README.*
+- [x] `docs/adr/0003-detection-actor.md`
+- [ ] Builds with zero errors; one real-night check on device. *The build has 0 warnings, and the simulator smoke test (start, record, stop, discard) passed. **The real night is still to do (user).***
 
 **Prompt Used:**
-_(filled after task completion)_
+"ok continue with t10", then option A chosen: "keep the 50 ms sampler".
 
 **Notes:**
-_Highest-risk task in F22. Do not start before T9 is merged._
+- `DetectionEngine` (AudioEngine): `Message` = `.sample` / `.melodyDidStart` / `.melodyDidStop` / `.settings` / `.finalize` / `.barrier`. `run(_:perform:)` awaits each `Batch`, and feedback returned from `perform` is applied before the next queued message.
+- Tracker: `startEngine()` per session (a generation counter ignores stale batches), `sendSettingsIfChanged()`, `finishDetection()` (flush + await, replaces `finalizeActiveEventsIfNeeded()`), `waitUntilProcessed()` (barrier), 5 Hz display throttle.
+- Machine: run start dates replace three counters (`sustainedRunDuration` 75 ms); onset backdates to the run's first sample.
+- `.snoreInterrupterDidStop` is posted with the player as sender, and the tracker observes only its own player. This fixes crosstalk between the now-interleaving characterization tests.
+- `SessionRecordingController(runsProcessingLoop:)`: test switch so only scripted samples arrive.
+- Tests: `DetectionEngineTests` (4 fixtures × 3 delivery patterns vs goldens and vs the bare machine; feedback ordering × 3; control-message order; settings; barrier). The 13 characterization tests pass unchanged. 268 tests total.
+- Follow-up: feeding mic buffers directly (option B) once a real night can validate it.
 
 ---
 

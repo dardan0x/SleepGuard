@@ -11,27 +11,28 @@ import Testing
 /// against the tracker before `DetectionStateMachine` was extracted (F22-T8), so
 /// the extraction has to reproduce every line.
 ///
-/// Each test is synchronous on the main actor, so the controller's own 50 ms
-/// loop never runs between scripted samples.
+/// Since F22-T10 the rules run on `DetectionEngine`'s actor. The harness waits
+/// for the engine after every sample, as the real 50 ms spacing does. The
+/// controller's own 50 ms loop is off, so only scripted samples arrive.
 @MainActor
 struct DetectionCharacterizationTests {
   // MARK: - Snore events
 
-  @Test func sustainedSnoringBecomesOneEvent() throws {
+  @Test func sustainedSnoringBecomesOneEvent() async throws {
     let harness = try DetectionHarness()
-    harness.silence(1)
-    harness.snore(3, db: -35, confidence: 0.6)
-    harness.silence(11)
+    await harness.silence(1)
+    await harness.snore(3, db: -35, confidence: 0.6)
+    await harness.silence(11)
     #expect(harness.summary() == [
       "snoring light t=1.05 d=2.95 avg=-35.0 peak=-35.0 conf=0.60 bursts=[0.00-3.00]",
       "melody requests=58 stops=0",
     ])
   }
 
-  @Test func twoSnoringSamplesAreIgnored() throws {
+  @Test func twoSnoringSamplesAreIgnored() async throws {
     let harness = try DetectionHarness()
-    harness.snore(0.1, db: -35, confidence: 0.6)
-    harness.silence(11)
+    await harness.snore(0.1, db: -35, confidence: 0.6)
+    await harness.silence(11)
     #expect(harness.summary() == ["melody requests=0 stops=0"])
   }
 
@@ -39,48 +40,48 @@ struct DetectionCharacterizationTests {
     (UserPreferences.DetectionSensitivity.medium, false),
     (.high, true),
   ])
-  func minimumDurationDependsOnSensitivity(sensitivity: UserPreferences.DetectionSensitivity, kept: Bool) throws {
+  func minimumDurationDependsOnSensitivity(sensitivity: UserPreferences.DetectionSensitivity, kept: Bool) async throws {
     let harness = try DetectionHarness(sensitivity: sensitivity)
-    harness.snore(0.8, db: -35, confidence: 0.6)
-    harness.silence(11)
+    await harness.snore(0.8, db: -35, confidence: 0.6)
+    await harness.silence(11)
     #expect(harness.events.count == (kept ? 1 : 0))
   }
 
   @Test(arguments: [(Float(0.4), false), (0.6, true)])
-  func shortEventsNeedHighConfidence(confidence: Float, kept: Bool) throws {
+  func shortEventsNeedHighConfidence(confidence: Float, kept: Bool) async throws {
     let harness = try DetectionHarness()
-    harness.snore(2, db: -35, confidence: confidence)
-    harness.silence(11)
+    await harness.snore(2, db: -35, confidence: confidence)
+    await harness.silence(11)
     #expect(harness.events.count == (kept ? 1 : 0))
   }
 
-  @Test func briefPauseSplitsBurstsButNotTheEvent() throws {
+  @Test func briefPauseSplitsBurstsButNotTheEvent() async throws {
     let harness = try DetectionHarness()
-    harness.snore(2, db: -35, confidence: 0.6)
-    harness.silence(2)
-    harness.snore(2, db: -35, confidence: 0.6)
-    harness.silence(11)
+    await harness.snore(2, db: -35, confidence: 0.6)
+    await harness.silence(2)
+    await harness.snore(2, db: -35, confidence: 0.6)
+    await harness.silence(11)
     #expect(harness.summary() == [
       "snoring light t=0.05 d=5.95 avg=-35.0 peak=-35.0 conf=0.60 bursts=[0.00-2.00, 4.10-6.00]",
       "melody requests=76 stops=0",
     ])
   }
 
-  @Test func intensityKeepsTheLoudestTier() throws {
+  @Test func intensityKeepsTheLoudestTier() async throws {
     let harness = try DetectionHarness()
-    harness.snore(1.5, db: -35, confidence: 0.6)
-    harness.snore(1.5, db: -15, confidence: 0.6)
-    harness.silence(11)
+    await harness.snore(1.5, db: -35, confidence: 0.6)
+    await harness.snore(1.5, db: -15, confidence: 0.6)
+    await harness.silence(11)
     #expect(harness.summary() == [
       "snoring loud t=0.05 d=2.95 avg=-24.7 peak=-15.0 conf=0.60 bursts=[0.00-3.00]",
       "melody requests=58 stops=0",
     ])
   }
 
-  @Test func sessionEndFinalizesTheOpenEvent() throws {
+  @Test func sessionEndFinalizesTheOpenEvent() async throws {
     let harness = try DetectionHarness()
-    harness.snore(4, db: -35, confidence: 0.6)
-    harness.tracker.finalizeActiveEventsIfNeeded()
+    await harness.snore(4, db: -35, confidence: 0.6)
+    await harness.tracker.finishDetection()
     #expect(harness.summary() == [
       "snoring light t=0.05 d=3.95 avg=-35.0 peak=-35.0 conf=0.60 bursts=[0.00-3.95]",
       "melody requests=78 stops=0",
@@ -93,16 +94,16 @@ struct DetectionCharacterizationTests {
   /// so the first gap counts as snoring and the event spans it. Resumed snoring
   /// re-triggers the melody; after the second gap nothing resumes, so the event
   /// ends at the last snoring sample before it.
-  @Test func melodyGapWithResumedSnoringExtendsTheEvent() throws {
+  @Test func melodyGapWithResumedSnoringExtendsTheEvent() async throws {
     let harness = try DetectionHarness(melody: .pausesMic)
-    harness.snore(2, db: -35, confidence: 0.6)
-    harness.silence(5)
+    await harness.snore(2, db: -35, confidence: 0.6)
+    await harness.silence(5)
     harness.interrupter.stop()
-    harness.silence(1)
-    harness.snore(2, db: -35, confidence: 0.6)
-    harness.silence(3)
+    await harness.silence(1)
+    await harness.snore(2, db: -35, confidence: 0.6)
+    await harness.silence(3)
     harness.interrupter.stop()
-    harness.silence(11)
+    await harness.silence(11)
     #expect(harness.summary() == [
       "snoring light t=0.05 d=8.10 avg=-35.0 peak=-35.0 conf=0.60 bursts=[0.00-0.10, 8.10-8.10]",
       "gap t=0.15 d=6.85 resumed=true",
@@ -115,12 +116,12 @@ struct DetectionCharacterizationTests {
   /// snoring was before the melody, and the gap doesn't count. The melody starts
   /// on the onset sample, so that span is 0.10 s, under every minimum duration:
   /// the event is discarded and only the gap remains. (Pinned, not endorsed.)
-  @Test func melodyGapWithoutSnoringDiscardsTheEvent() throws {
+  @Test func melodyGapWithoutSnoringDiscardsTheEvent() async throws {
     let harness = try DetectionHarness(melody: .pausesMic)
-    harness.snore(2, db: -35, confidence: 0.6)
-    harness.silence(5)
+    await harness.snore(2, db: -35, confidence: 0.6)
+    await harness.silence(5)
     harness.interrupter.stop()
-    harness.silence(11)
+    await harness.silence(11)
     #expect(harness.summary() == [
       "gap t=0.15 d=6.85 resumed=false",
       "melody requests=1 stops=1",
@@ -129,10 +130,10 @@ struct DetectionCharacterizationTests {
 
   /// With the mic still live, sustained silence stops the melody, but only
   /// after its 4 s minimum play time.
-  @Test func sustainedSilenceStopsTheMelodyAfterItsMinimumPlayTime() throws {
+  @Test func sustainedSilenceStopsTheMelodyAfterItsMinimumPlayTime() async throws {
     let harness = try DetectionHarness(melody: .keepsMicLive)
-    harness.snore(1, db: -35, confidence: 0.6)
-    harness.silence(6)
+    await harness.snore(1, db: -35, confidence: 0.6)
+    await harness.silence(6)
     #expect(harness.summary() == [
       "gap t=0.15 d=4.00 resumed=false",
       "melody requests=16 stops=1",
@@ -141,21 +142,21 @@ struct DetectionCharacterizationTests {
 
   // MARK: - Sleep talking
 
-  @Test func speechBecomesASleepTalkingEvent() throws {
+  @Test func speechBecomesASleepTalkingEvent() async throws {
     let harness = try DetectionHarness(sleepTalking: true)
-    harness.speech(2, db: -40, confidence: 0.8)
-    harness.silence(11)
+    await harness.speech(2, db: -40, confidence: 0.8)
+    await harness.silence(11)
     #expect(harness.summary() == [
       "sleepTalking quiet t=0.05 d=1.95 avg=-40.0 peak=-40.0 conf=0.00 bursts=[]",
       "melody requests=0 stops=0",
     ])
   }
 
-  @Test func snoringEndsTheSpeechEventImmediately() throws {
+  @Test func snoringEndsTheSpeechEventImmediately() async throws {
     let harness = try DetectionHarness(sleepTalking: true)
-    harness.speech(2, db: -40, confidence: 0.8)
-    harness.snore(2, db: -35, confidence: 0.6)
-    harness.silence(11)
+    await harness.speech(2, db: -40, confidence: 0.8)
+    await harness.snore(2, db: -35, confidence: 0.6)
+    await harness.silence(11)
     #expect(harness.summary() == [
       "sleepTalking quiet t=0.05 d=2.00 avg=-40.0 peak=-40.0 conf=0.00 bursts=[]",
       "snoring light t=2.05 d=1.95 avg=-35.0 peak=-35.0 conf=0.60 bursts=[0.00-2.00]",
@@ -163,10 +164,10 @@ struct DetectionCharacterizationTests {
     ])
   }
 
-  @Test func speechIsIgnoredWhenSleepTalkingIsOff() throws {
+  @Test func speechIsIgnoredWhenSleepTalkingIsOff() async throws {
     let harness = try DetectionHarness(sleepTalking: false)
-    harness.speech(2, db: -40, confidence: 0.8)
-    harness.silence(11)
+    await harness.speech(2, db: -40, confidence: 0.8)
+    await harness.silence(11)
     #expect(harness.summary() == ["melody requests=0 stops=0"])
   }
 }
@@ -217,7 +218,7 @@ final class ScriptedInterrupter: SnoreInterrupterPlaying {
       stops += 1
       recorder.isPaused = false
     }
-    NotificationCenter.default.post(name: .snoreInterrupterDidStop, object: nil)
+    NotificationCenter.default.post(name: .snoreInterrupterDidStop, object: self)
   }
 
   func muteForSession() { isMutedForSession = true }
@@ -254,7 +255,8 @@ final class DetectionHarness {
       preferences: preferences,
       pendingSessionStore: pending,
       checkpointStore: checkpoints,
-      rawLogWriter: rawLog)
+      rawLogWriter: rawLog,
+      runsProcessingLoop: false)
     tracker = RealtimeDetectionTracker(
       snoreDetector: SnoreDetector(),
       audioRecorder: recorder,
@@ -281,25 +283,26 @@ final class DetectionHarness {
     (controller.currentSession?.events ?? []).sorted { $0.timestamp < $1.timestamp }
   }
 
-  func snore(_ seconds: Double, db: Float, confidence: Float) {
-    feed(seconds, db: db, snoreConfidence: confidence, speechConfidence: 0)
+  func snore(_ seconds: Double, db: Float, confidence: Float) async {
+    await feed(seconds, db: db, snoreConfidence: confidence, speechConfidence: 0)
   }
 
-  func speech(_ seconds: Double, db: Float, confidence: Float) {
-    feed(seconds, db: db, snoreConfidence: 0, speechConfidence: confidence)
+  func speech(_ seconds: Double, db: Float, confidence: Float) async {
+    await feed(seconds, db: db, snoreConfidence: 0, speechConfidence: confidence)
   }
 
-  func silence(_ seconds: Double) {
-    feed(seconds, db: -60, snoreConfidence: 0, speechConfidence: 0)
+  func silence(_ seconds: Double) async {
+    await feed(seconds, db: -60, snoreConfidence: 0, speechConfidence: 0)
   }
 
   /// One sample per 50 ms, timestamped from an integer tick so times don't drift.
-  private func feed(_ seconds: Double, db: Float, snoreConfidence: Float, speechConfidence: Float) {
+  private func feed(_ seconds: Double, db: Float, snoreConfidence: Float, speechConfidence: Float) async {
     for _ in 0..<Int((seconds / 0.05).rounded()) {
       tick += 1
       clock.now = start.addingTimeInterval(Double(tick) * 0.05)
       tracker.processAudioLevel(
         db: db, peakDB: nil, spectralScore: 0, snoreConfidence: snoreConfidence, speechConfidence: speechConfidence)
+      await tracker.waitUntilProcessed()
     }
   }
 
