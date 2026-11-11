@@ -169,7 +169,7 @@ These are non-negotiable. They come from production patterns in apps like IceCub
 
 - Views resolve shared services with `@Injected(\.service)` from the Factory container. Never init-inject.
 - Shared services are `@MainActor @Observable` singletons with `.shared`, registered in the container (`Packages/Env/Sources/Services/Container.swift`; DesignSystem registers `Theme` in its own). Feature packages and DesignSystem never access an app service's `.shared` (enforced by `check-layering.py`). Env services take collaborators as init parameters defaulting to the container (`init(preferences: any UserPreferencesStoring = Container.shared.userPreferences())`), so dependencies are visible and replaceable in tests.
-- **Every service sits behind a protocol** named for its role (`HealthKitSyncing`, `AudioRecording`, `UserPreferencesStoring`, …), declared at the top of the concrete type's file. Factories are typed `Factory<any P>` and resolve `.shared`. Inits are public, never `private`. Pass services around as `any P`, never as the concrete type.
+- **Every service sits behind a protocol** (ADR 0002) named for its role (`HealthKitSyncing`, `AudioRecording`, `UserPreferencesStoring`, …), declared at the top of the concrete type's file. Factories are typed `Factory<any P>` and resolve `.shared`. Inits are public, never `private`. Pass services around as `any P`, never as the concrete type.
 - **Every protocol has a test double** in `EnvTestSupport` (`FakeX`). The exceptions are the `UserDefaults`-backed stores (`UserPreferences.isolated()`, `AppConfig.isolated()`, the real type on a throwaway suite) and `Theme` (a separate `Theme()`). Tests override with `Container.shared.x.register { fake }` inside `@Suite(.container)` / `@Test(.container)` from `FactoryTesting`, so registrations are scoped per test.
 - `@Observable` classes must NOT use `@Injected` — both macros synthesize underscore backing storage and collide (compile error). Resolve via `Container.shared.service()` in init.
 - Nonisolated code (Apple delegate methods, detached tasks) resolves via Factory's global `dependency(\.service)` — property wrappers are MainActor-bound.
@@ -192,6 +192,7 @@ These are non-negotiable. They come from production patterns in apps like IceCub
 - **Isolation split**: explicit `@MainActor` on all `@Observable` classes in Models/Env/AudioEngine (load-bearing — no package default isolation); the 8 UI packages declare `.defaultIsolation(MainActor.self)` and the app target sets `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`.
 - Value types are `Sendable` with immutable `let` properties. SwiftData `@Model` classes are never Sendable — destructure their Sendable fields (`id`, `Date`, bursts) before crossing into `@Sendable`/detached closures.
 - Apple delegates (WCSession, SNResultsObserving, AVAudioPlayerDelegate) are nonisolated: mark methods `nonisolated`, parse payloads synchronously, `Task { @MainActor in }` for state mutation. See `docs/architecture/concurrency.md`.
+- **Live detection is one ordered stream into an actor** (ADR 0003). Detection rules live only in the pure `DetectionStateMachine` (AudioEngine): no clock, no singletons, no SwiftData. Anything that changes detection state (sample, melody start/stop, settings, session end) goes into the `DetectionEngine` stream as a timestamped `Message`; never mutate detection state from a side path. Side effects stay on the main actor in `RealtimeDetectionTracker.perform`. Thresholds are durations, not sample counts. A change to detection output must re-record the replay goldens on purpose (`scripts/record-replay-goldens.sh`) and explain the diff.
 
 ### Views
 
@@ -233,6 +234,7 @@ These thresholds prevent monolithic views. Enforce them during implementation an
 
 - Feature packages never import other feature packages. Only: Models, AudioEngine, Env, Routing, DesignSystem (the one existing edge: Settings → Personalization).
 - Navigation types (`RouterDestination`, `SheetDestination`, `RouterPath`) live in the leaf `Routing` package, not `Env`. `Env` must not import `SwiftUI` (enforced by `check-layering.py`). See `docs/adr/0001-routing-package.md`.
+- Architecture decisions are recorded in `docs/adr/` (`NNNN-slug.md`: context, decision, consequences with honest limits, alternatives). Write one when a task changes a boundary, a rule in this file, or a trade-off a reviewer would question.
 - The app target is the only place that imports everything.
 - One endpoint enum per API resource. One file per enum.
 - 2-space indentation. Enforced by `.swiftformat`.

@@ -4,7 +4,8 @@ import SoundAnalysis
 
 /// Audio-thread half of `AudioRecorder`.
 ///
-/// Core Audio calls the input tap on its realtime thread. Under Swift 6 a tap
+/// AVAudioEngine calls the input tap on a thread other than the main thread
+/// (Apple documents only that, not which thread). Under Swift 6 a tap
 /// closure written inside the `@MainActor` recorder inherits main-actor
 /// isolation and traps there (`_dispatch_assert_queue_fail`). So the tap
 /// closure is `@Sendable` (nonisolated) and everything it touches lives here,
@@ -59,7 +60,7 @@ final class TapProcessor: Sendable {
     }
   }
 
-  /// Runs on the realtime audio thread for every tapped buffer.
+  /// Runs on the tap's (non-main) thread for every tapped buffer.
   func process(_ buffer: AVAudioPCMBuffer, sampleRate: Double) -> Levels {
     let db = Self.rmsDB(buffer)
     let peakDB = Self.peakDB(buffer)

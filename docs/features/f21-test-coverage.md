@@ -1,5 +1,7 @@
 # F21 — Test Coverage
 
+> **Historical record (F21).** Counts are as of F21. After F22 there are 268 tests in 8 packages; see `docs/features/f22-architecture-hardening.md`.
+
 Unit tests across the logic layer of every package that has logic: 179 Swift Testing tests in 7 packages, up from 40 tests in 2 packages that no command could run in one go (and 30 of those didn't compile). One script runs them all on the simulator, and CI runs it on every pull request. Writing the tests found and fixed four production bugs.
 
 ## Running

@@ -40,7 +40,7 @@ extension Container {
 
   /// Constructed — not `.shared`-aliased — because these types are internal
   /// to Env and owned exclusively by `SessionManager`, which performs the
-  /// cross-wiring (`attach` / weak `recording`) in its private init.
+  /// cross-wiring (`attach` / weak `recording`) in its init.
   @MainActor var sessionRecordingController: Factory<SessionRecordingController> { self { SessionRecordingController() }.singleton }
   @MainActor var realtimeDetectionTracker: Factory<RealtimeDetectionTracker> { self { RealtimeDetectionTracker() }.singleton }
 }

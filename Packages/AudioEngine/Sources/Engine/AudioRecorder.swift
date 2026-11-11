@@ -369,7 +369,7 @@ public final class AudioRecorder: AudioRecording {
 
   // MARK: - Tap
 
-  /// Core Audio calls the tap on its realtime thread, so the closure must be
+  /// AVAudioEngine calls the tap off the main thread, so the closure must be
   /// `@Sendable` (nonisolated); all buffer work happens in `TapProcessor`.
   /// It taps the microphone directly — no output path, no feedback.
   private func installTap(on input: AVAudioInputNode, format: AVAudioFormat) {
