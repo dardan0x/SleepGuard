@@ -339,8 +339,8 @@
 				CE1588F42FAA9946001B61AA /* Sources */,
 				CE1588F52FAA9946001B61AA /* Frameworks */,
 				CE1588F62FAA9946001B61AA /* Resources */,
-				FBC3A11771C50000DEADBEEF /* Firebase Crashlytics */,
 				CE0983A9309FF981002E275D /* Embed Foundation Extensions */,
+				FBC3A11771C50000DEADBEEF /* Firebase Crashlytics */,
 			);
 			buildRules = (
 			);
