@@ -56,6 +56,7 @@ Fixes the architecture concerns raised in the mock staff-engineer interview (`Sl
 | F22-T12 | `DashboardState.make(from:now:)` pure mapping + tests | Refactor | Done | F22-T3 | Statistics | 2026-11-11 | 2026-11-11 |
 | F22-T13 | CI check: 200-line view limit with allowlist | Infra | Done | — | scripts / .github | 2026-11-11 | 2026-11-11 |
 | F22-T14 | ADRs (protocols, detection actor) + docs truth pass + feature doc | Docs | Done | F22-T1…T13 | docs | 2026-11-11 | 2026-11-11 |
+| F22-T15 | Each service protocol in its own file | Refactor | Done | F22-T6 | Env / AudioEngine / DesignSystem | 2026-11-11 | 2026-11-11 |
 
 ## Task Details
 
@@ -193,7 +194,7 @@ Fixes the architecture concerns raised in the mock staff-engineer interview (`Sl
 
 **Notes:**
 - **Conventions validated for T6:**
-  - The protocol is named for its role (`HealthKitSyncing`) and declared at the top of the concrete type's file. The concrete class keeps its name and `.shared`.
+  - The protocol is named for its role (`HealthKitSyncing`) and declared at the top of the concrete type's file (moved to its own file in T15). The concrete class keeps its name and `.shared`.
   - The protocol is `@MainActor` and refines `AnyObject, Observable`.
   - `init()` is public.
   - The container returns `Factory<any P>` and still aliases `.shared`.
@@ -485,6 +486,32 @@ _Prerequisite for F13 (removing `@Attribute(.unique)` on 4 models needs a real m
 - **Tracker truth:** the detail sections of T8, T11, T12 and T13 still said Backlog with unchecked criteria (only the task table had been updated). Filled from their session fragments.
 - **Local-only edits** (gitignored or untracked, so not in the commit): `docs/TECHNICAL_OVERVIEW.md` (29 edits; original copy in the session scratchpad), `docs/ProjectArchitecture.md`, `docs/architecture/overview.md`, `dependencies.md`, and `concurrency.md` (from T10).
 - `docs/interview-presentation.md` Part 5b still shows `register { FakePreferences() }`. Left as is (user's file); the overview's gotchas section now says what to say instead.
+---
+
+### F22-T15 — Each service protocol in its own file
+
+| Field | Value |
+|-------|-------|
+| Arch Ref | ADR 0002 |
+| Status | Done |
+| Started | 2026-11-11 |
+| Completed | 2026-11-11 |
+
+**Acceptance Criteria:**
+- [x] All 18 service protocols move out of their concrete type's file into `<Protocol>.swift` next to it, unchanged (doc comments and attributes included)
+- [x] Each new file imports only what its declaration needs
+- [x] AGENTS.md / CLAUDE.md rule, ADR 0002 and the feature doc updated
+- [x] Builds with zero errors; all package tests pass
+
+**Prompt Used:**
+"what i would want is to move protocols not in the same class as the conforming class but rather in a new file. I dont know if we should create a folder inside the package or create the file just there, you decide. For example for AudioRecorder, SoundAnalysisDetector etc"
+
+**Notes:**
+- **Sibling files, not a `Protocols/` folder.** The role names mostly share a prefix with the type (`AudioRecorder` / `AudioRecording`, `HealthKitSync` / `HealthKitSyncing`, `SessionManager` / `SessionManaging`), so each pair sorts together in Xcode. A separate folder would split contract from implementation and break the `Session/` grouping.
+- Moved by a script: the protocol block plus its preceding doc comment and attributes, verbatim. Imports were trimmed per file: framework imports kept only when the declaration uses one of the framework's types, and FactoryKit never.
+- Pure move: no declaration changed. 18 new files: 15 in `Env/Sources/Services/` (`SessionManaging` in `Session/`), 2 in `AudioEngine/Sources/Engine/`, `ThemeProviding` in `DesignSystem/Sources/Components/`.
+- App build 0 warnings; 268/268 tests pass; lint, layering and view-size checks pass.
+
 ---
 
 ## Update Rules (for the AI)

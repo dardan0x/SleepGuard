@@ -2,17 +2,6 @@ import AVFoundation
 import Observation
 import SoundAnalysis
 
-/// Apple SoundAnalysis classifier confidences for snoring and speech.
-/// Fake: `FakeSoundAnalysisDetector` (EnvTestSupport).
-@MainActor
-public protocol SoundAnalysisDetecting: AnyObject, Observable {
-  var snoreConfidence: Float { get }
-  var speechConfidence: Float { get }
-  var isSnoringClassAvailable: Bool { get }
-  func startAnalyzing(format: AVAudioFormat) -> SNAudioStreamAnalyzer?
-  func stopAnalyzing()
-}
-
 /// Wraps Apple's built-in SNAudioStreamAnalyzer to detect snoring
 /// using the pre-trained 300-class sound classifier shipped with iOS.
 @MainActor

@@ -8,19 +8,6 @@ public extension Notification.Name {
   static let recordingDelayDidComplete = Notification.Name("recordingDelayDidComplete")
 }
 
-/// "Start recording in N minutes" countdown. Fake: `FakeRecordingDelayManager`.
-@MainActor
-public protocol RecordingDelayManaging: AnyObject, Observable {
-  var isActive: Bool { get }
-  var targetDate: Date? { get }
-  var currentRemainingSeconds: Int { get }
-  var remainingTimeString: String { get }
-  func startDelay(minutes: Int)
-  func cancel()
-  func finish()
-  func checkIfComplete() -> Bool
-}
-
 @MainActor
 @Observable
 public final class RecordingDelayManager: RecordingDelayManaging {

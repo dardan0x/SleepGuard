@@ -45,8 +45,8 @@ Last updated: 2026-11-11
 | Backlog | 0 |
 | Blocked | 0 |
 | — | — |
-| Total Tasks | 150 |
-| Tasks Done | 134 |
+| Total Tasks | 151 |
+| Tasks Done | 135 |
 | Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
 | Tasks Backlog | 16 |
@@ -77,7 +77,7 @@ Last updated: 2026-11-11
 | F19 | Factory DI Migration | P1 | Done | 5/5 | ██████████ 100% | [tracker](trackers/f19-factory-di.md) |
 | F20 | Home Screen & Lock Screen Widgets | P1 | Done | 9/9 | ██████████ 100% | [tracker](trackers/f20-home-screen-widgets.md) |
 | F21 | Test Coverage | P1 | Done | 17/17 | ██████████ 100% | [tracker](trackers/f21-test-coverage.md) |
-| F22 | Architecture Hardening | P1 | Done (real-night check pending) | 14/14 | ██████████ 100% | [tracker](trackers/f22-architecture-hardening.md) |
+| F22 | Architecture Hardening | P1 | Done (real-night check pending) | 15/15 | ██████████ 100% | [tracker](trackers/f22-architecture-hardening.md) |
 
 ## Activity Log
 
@@ -85,6 +85,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-11-11 | F22-T15 | Completed | Each of the 18 service protocols moved to its own `<Protocol>.swift` beside the concrete type (pure move, imports trimmed); rule updated in AGENTS/CLAUDE + ADR 0002. 268 tests pass, 0 warnings. Branch `feature/f22/t15-protocol-files` |
 | 2026-11-11 | F22-T14 | Completed | ADR 0002 (protocol services); docs truth pass (README, detection doc, overview, ProjectArchitecture, tap-thread comments matched to Apple docs); tracker details for T8/T11–T13 filled; F15/F19/F20/F21 docs marked historical; AGENTS/CLAUDE: detection-stream rule + ADR convention; feature doc `docs/features/f22-architecture-hardening.md`. F22 complete (real night pending). Branch `feature/f22/t14-adrs-docs-truth-pass` |
 | 2026-11-11 | F22-T10 | Completed | `DetectionEngine` actor fed by one ordered `AsyncStream` (samples, melody stop, settings, finalize); awaited batches, melody feedback applied before queued samples; thresholds as durations; 5 Hz UI publish; ADR 0003. Goldens re-recorded (start times only, explained). 268 tests pass; sim smoke OK; real night pending. Branch `feature/f22/t10-detection-engine-actor` |
 | 2026-11-11 | F22-T9 | Completed | Detection replay tests: 4 excerpts (6–9 min) from a 37-min scripted recording replayed through `DetectionStateMachine` against reviewed goldens; `make-replay-fixture.py` + `record-replay-goldens.sh` (explicit re-record only). Mutation check: gap 10→9 s fails all 4. AudioEngine 57 tests pass. Branch `feature/f22/t9-detection-replay` |
