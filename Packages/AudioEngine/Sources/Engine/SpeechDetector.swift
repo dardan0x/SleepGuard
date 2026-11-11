@@ -1,4 +1,5 @@
 import AVFoundation
+import Models
 import Observation
 
 /// Detects sleep talking / speech in audio using SoundAnalysis confidence.
@@ -29,13 +30,13 @@ public final class SpeechDetector {
   public func classify(db: Float, speechConfidence: Float) -> Bool {
     guard speechConfidence >= confidenceThreshold else {
       #if DEBUG
-      print("[SpeechDetector] Rejected: confidence \(String(format: "%.2f", speechConfidence)) < threshold \(confidenceThreshold)")
+      Log.detection.debug("Rejected: confidence \(speechConfidence, format: .fixed(precision: 2)) < threshold \(self.confidenceThreshold)")
       #endif
       return false
     }
     guard db >= dbFloor else {
       #if DEBUG
-      print("[SpeechDetector] Rejected: db \(String(format: "%.1f", db)) < floor \(dbFloor)")
+      Log.detection.debug("Rejected: db \(db, format: .fixed(precision: 1)) < floor \(self.dbFloor)")
       #endif
       return false
     }

@@ -37,7 +37,7 @@ struct EventRow: View {
         Button {
           onShare()
         } label: {
-          Image(systemName: "square.and.arrow.up")
+          Label(Strings.a11yShare, systemImage: "square.and.arrow.up").labelStyle(.iconOnly)
             .font(.system(size: 14))
             .foregroundStyle(theme.textTertiary)
         }
@@ -45,7 +45,7 @@ struct EventRow: View {
         Button {
           onPlay()
         } label: {
-          Image(systemName: "play.fill")
+          Label(Strings.actionPlay, systemImage: "play.fill").labelStyle(.iconOnly)
             .font(.system(size: 14))
             .foregroundStyle(theme.accent)
         }

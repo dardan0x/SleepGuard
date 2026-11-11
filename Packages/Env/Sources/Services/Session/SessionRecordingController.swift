@@ -2,6 +2,7 @@ import AudioEngine
 import FactoryKit
 import Foundation
 import Models
+import os
 import UIKit
 
 /// Recording lifecycle for a sleep session: starts/stops the audio engine,
@@ -31,6 +32,8 @@ final class SessionRecordingController {
   private var processingTask: Task<Void, Never>?
   private var batteryCheckCounter = 0
   private var checkpointCounter = 0
+  /// Instruments interval for the running session (Points of Interest).
+  private var sessionSignpost: OSSignpostIntervalState?
 
   init(
     audioRecorder: any AudioRecording = Container.shared.audioRecorder(),
@@ -92,12 +95,15 @@ final class SessionRecordingController {
 
     try audioRecorder.startRecording(audioFileURL: audioURL)
     isRecording = true
+    sessionSignpost = Log.signposter.beginInterval("Session")
+    Log.session.info("Session started")
     detection?.setActive(true)
     detection?.resetDisplayState()
 
-    // Raw classification log is a debug re-processing aid (~48 MB/night of
-    // JSON for a full night, nothing reads it in production yet), so it is
-    // gated behind the same flag as the full raw audio.
+    // Raw classification log is a debug re-processing aid (~65 MB/night of
+    // JSON Lines, nothing reads it in production yet), so it is gated behind
+    // the same flag as the full raw audio. It's written while recording, so
+    // register it for crash cleanup now, not at stop.
     if preferences.preserveRawAudio {
       let prefs = preferences
       let metadata = RawLogMetadata(
@@ -106,6 +112,7 @@ final class SessionRecordingController {
         detectSleepTalking: prefs.detectSleepTalking,
         snoreInterrupterMode: prefs.snoreInterrupterMode.rawValue)
       let sessionID = session.id
+      pendingSessionStore.addFile(SessionRawLogWriter.fileName(for: sessionID))
       Task { [rawLogWriter] in
         await rawLogWriter.start(sessionID: sessionID, metadata: metadata)
       }
@@ -147,7 +154,7 @@ final class SessionRecordingController {
     #else
     let level = UIDevice.current.batteryLevel
     guard level >= 0, level <= 0.02 else { return }
-    print("[SessionManager] Battery level at \(Int(level * 100))% — force saving session")
+    Log.session.notice("Battery level at \(Int(level * 100))% — force saving session")
     forceSaveDueToLowBattery()
     #endif
   }
@@ -169,6 +176,7 @@ final class SessionRecordingController {
 
     snoreInterrupterPlayer.stop()
     isRecording = false
+    endSessionSignpost(reason: "stopped")
     detection?.setActive(false)
 
     // Finalize any in-progress events BEFORE stopping the audio engine —
@@ -203,11 +211,8 @@ final class SessionRecordingController {
     }
 
     // Save raw classification log
-    let logFilename = await rawLogWriter.stop()
-    session.rawLogFileURL = logFilename
-    if let logFilename {
-      pendingSessionStore.addFile(logFilename)
-    }
+    // Already registered with the pending store at start.
+    session.rawLogFileURL = await rawLogWriter.stop()
 
     let result = session
     completedSession = result
@@ -251,6 +256,7 @@ final class SessionRecordingController {
 
       snoreInterrupterPlayer.stop()
       isRecording = false
+      endSessionSignpost(reason: "discarded")
       detection?.setActive(false)
 
       // Finalize events BEFORE stopping audio engine so file URLs are
@@ -261,6 +267,9 @@ final class SessionRecordingController {
 
       // Wait for any in-flight compression tasks before deleting files.
       await detection?.awaitPendingCompression()
+
+      // The raw log is written while recording (F23-T9): close and delete it.
+      await rawLogWriter.discard()
 
       // Delete the session's audio files and clean up
       if let session = currentSession {
@@ -288,6 +297,13 @@ final class SessionRecordingController {
   }
 
   // MARK: - Private
+
+  private func endSessionSignpost(reason: StaticString) {
+    guard let sessionSignpost else { return }
+    Log.signposter.endInterval("Session", sessionSignpost, "\(reason)")
+    self.sessionSignpost = nil
+    Log.session.info("Session \(reason)")
+  }
 
   private func audioFileURL(for sessionID: UUID) -> URL {
     FileManager.default

@@ -39,19 +39,19 @@ Last updated: 2026-11-11
 | Backlog | 0 |
 | Blocked | 0 |
 | — | — |
-| Features (V5) | 4 |
+| Features (V5) | 5 |
 | Done | 4 |
-| In Progress | 0 |
+| In Progress | 1 |
 | Backlog | 0 |
 | Blocked | 0 |
 | — | — |
-| Total Tasks | 152 |
-| Tasks Done | 136 |
+| Total Tasks | 164 |
+| Tasks Done | 147 |
 | Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
-| Tasks Backlog | 16 |
+| Tasks Backlog | 17 |
 | — | — |
-| **Progress** | **89%** |
+| **Progress** | **87%** |
 
 ## Features
 
@@ -78,6 +78,7 @@ Last updated: 2026-11-11
 | F20 | Home Screen & Lock Screen Widgets | P1 | Done | 9/9 | ██████████ 100% | [tracker](trackers/f20-home-screen-widgets.md) |
 | F21 | Test Coverage | P1 | Done | 17/17 | ██████████ 100% | [tracker](trackers/f21-test-coverage.md) |
 | F22 | Architecture Hardening | P1 | Done (real-night check pending) | 16/16 | ██████████ 100% | [tracker](trackers/f22-architecture-hardening.md) |
+| F23 | Production Readiness | P1 | In Progress | 11/12 | █████████░ 92% | [tracker](trackers/f23-production-readiness.md) |
 
 ## Activity Log
 
@@ -85,6 +86,17 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-11-11 | F23-T11 | Completed | VoiceOver: 16 icon buttons labelled (Label + iconOnly), gauge/cards/timeline/hypnogram/bars read as meaningful elements, level meter hidden; 13 `a11y.*` strings; rule in AGENTS/CLAUDE. Dynamic Type (382 fixed sizes) and 12×16 pt tap targets flagged for design. Branch `feature/f23/t11-accessibility` |
+| 2026-11-11 | F23-T10 | Completed | "Couldn't Start Recording" alert on prestart and countdown (immediate, charging "Start Anyway", delay end); 2 new strings. Verified on the simulator with a temporary throw. Notification-tap start still only logs. Branch `feature/f23/t10-start-failure-alert` |
+| 2026-11-11 | F23-T9 | Completed | Raw log format 3 (JSON Lines) written while recording in 10 s chunks: flat memory, crash keeps the log; decoder reads 1/2/3 and truncated files; discard now closes and deletes it. Verified growing on the simulator. Branch `feature/f23/t9-rawlog-streaming` |
+| 2026-11-11 | F23-T12 | Completed | Release (and Archive) build cycle fixed: Crashlytics script phase moved after Embed Foundation Extensions. CI app job builds Release. Branch `feature/f23/t12-release-build-cycle` |
+| 2026-11-11 | F23-T8 | Completed | `MockDataGenerator` wrapped in `#if DEBUG` (callers already were); Env + Settings Release builds pass. Found the app's Release build cycle (Crashlytics phase order) → T12. Branch `feature/f23/t8-mock-data-debug` |
+| 2026-11-11 | F23-T7 | Completed | App `Package.resolved` committed (Firebase 12.14.0, Factory 3.5.2); CI app build uses `-disableAutomaticPackageResolution`. F23 extended with T7–T11 (user choices). Branch `feature/f23/t7-package-resolved` |
+| 2026-11-11 | F23-T5 | Completed | `try?` audit: delayed start, checkpoint write/read, pending record, storage fetches and clip compression now log failures; profile fetch error no longer creates a duplicate profile. Found: no start-failure alert anywhere; failed compression orphans the .caf. Branch `feature/f23/t5-try-audit` |
+| 2026-11-11 | F23-T4 | Completed | 76 `print` → `Log.<category>` (os.Logger, 7 categories, per-call levels, private by default); session + snore-event signposts; layering rule 5 bans `print`; SwiftFormat `--selfrequired` for Logger autoclosures. Logs verified on the simulator. Branch `feature/f23/t4-os-logger` |
+| 2026-11-11 | F23-T3 | Completed | CI `app` job builds the SleepGuard scheme (app + widgets, simulator, unsigned); verified locally from cold. Found 3 pre-existing asset warnings (AccentColor, iPad icons) and unpinned `Package.resolved`. Branch `feature/f23/t3-ci-app-build` |
+| 2026-11-11 | F23-T2 | Completed | `PrivacyInfo.xcprivacy` for app (UserDefaults CA92.1, file timestamp C617.1, boot time 35F9.1) and widget (UserDefaults); verified bundled. Branch `feature/f23/t2-privacy-manifest` |
+| 2026-11-11 | F23-T1 | Completed | `SessionCommitter` (Env) owns saving a night; summary sheet and low-battery force-save both use it. Fixes the force-save path never clearing the pending record / checkpoint (saved night's clips deleted on the next launch or recording). `SessionCommitterTests` (mutation-checked). Branch `feature/f23/t1-session-commit` |
 | 2026-11-11 | F22-T16 | Completed | Removed unused `@Environment(RouterPath.self)` (+ `import Routing`) from `RecordingsListView` and `CalendarView`; the other 13 declarations are used. Build 0 warnings; Recordings 16 + Statistics 18 tests pass. Branch `feature/f22/t16-unused-routerpath` |
 | 2026-11-11 | F22-T15 | Completed | Each of the 18 service protocols moved to its own `<Protocol>.swift` beside the concrete type (pure move, imports trimmed); rule updated in AGENTS/CLAUDE + ADR 0002. 268 tests pass, 0 warnings. Branch `feature/f22/t15-protocol-files` |
 | 2026-11-11 | F22-T14 | Completed | ADR 0002 (protocol services); docs truth pass (README, detection doc, overview, ProjectArchitecture, tap-thread comments matched to Apple docs); tracker details for T8/T11–T13 filled; F15/F19/F20/F21 docs marked historical; AGENTS/CLAUDE: detection-stream rule + ADR convention; feature doc `docs/features/f22-architecture-hardening.md`. F22 complete (real night pending). Branch `feature/f22/t14-adrs-docs-truth-pass` |
@@ -306,7 +318,7 @@ _Most recent first. The AI appends here after every task._
 
 | Task | Feature | Started | Assignee |
 |------|---------|---------|----------|
-| — | — | — | F22 done; user: real night on device (T10), then merge `feature/f22-architecture-hardening` into `main` |
+| F23-T6 | F23 | — | Waiting for labelled real nights (user). Then merge F22 + F23 into `main`. User: real night on device (F22-T10), then merge F22 (and F23 on top) into `main` |
 
 ## Completed (last 10)
 

@@ -89,7 +89,7 @@ struct SessionDetailLoadedView: View {
             Button {
               shareCoordinator.exportReport(for: session)
             } label: {
-              Image(systemName: shareCoordinator.isGeneratingPDF ? "clock" : "doc.text")
+              Label(shareCoordinator.isGeneratingPDF ? Strings.a11yGeneratingReport : Strings.a11yExportReport, systemImage: shareCoordinator.isGeneratingPDF ? "clock" : "doc.text").labelStyle(.iconOnly)
                 .font(.system(size: 17))
                 .foregroundStyle(shareCoordinator.isGeneratingPDF ? theme.textTertiary : theme.accent)
             }
@@ -99,7 +99,7 @@ struct SessionDetailLoadedView: View {
             Button {
               shareCoordinator.shareFullSession(session)
             } label: {
-              Image(systemName: "square.and.arrow.up")
+              Label(Strings.a11yShare, systemImage: "square.and.arrow.up").labelStyle(.iconOnly)
                 .font(.system(size: 17))
                 .foregroundStyle(theme.accent)
             }
@@ -109,7 +109,7 @@ struct SessionDetailLoadedView: View {
               dismiss()
             }
           } label: {
-            Image(systemName: "trash")
+            Label(Strings.actionDelete, systemImage: "trash").labelStyle(.iconOnly)
               .font(.system(size: 17))
               .foregroundStyle(theme.destructive)
           }

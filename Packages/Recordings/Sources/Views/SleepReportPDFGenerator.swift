@@ -93,7 +93,7 @@ public struct SleepReportPDFGenerator {
       }
       return pdfURL
     } catch {
-      print("[SleepReportPDFGenerator] PDF generation failed: \(error)")
+      Log.playback.error("PDF generation failed: \(String(describing: error), privacy: .public)")
       return nil
     }
   }

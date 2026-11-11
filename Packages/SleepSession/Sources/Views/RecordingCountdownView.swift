@@ -2,6 +2,7 @@ import AudioEngine
 import DesignSystem
 import Env
 import FactoryKit
+import Models
 import SwiftUI
 import UIKit
 
@@ -90,7 +91,12 @@ struct RecordingCountdownView: View {
       UIApplication.shared.isIdleTimerDisabled = sessionManager.isRecording
     }
     .onReceive(NotificationCenter.default.publisher(for: .recordingDelayDidComplete)) { _ in
-      try? sessionManager.startSession()
+      do {
+        try sessionManager.startSession()
+      } catch {
+        Log.session.error("Delayed start failed: \(String(describing: error), privacy: .public)")
+        activeAlert = .startFailed
+      }
     }
     .alert(Strings.sessionChargingAlertTitle, isPresented: isPresented(.charging)) {
       Button(Strings.actionCancel, role: .cancel) {}
@@ -112,6 +118,11 @@ struct RecordingCountdownView: View {
     } message: {
       Text(Strings.sessionMicrophoneAlertMessage)
     }
+    .alert(Strings.sessionStartFailedAlertTitle, isPresented: isPresented(.startFailed)) {
+      Button(Strings.actionOk, role: .cancel) {}
+    } message: {
+      Text(Strings.sessionStartFailedAlertMessage)
+    }
   }
 
   /// Binding for the alert modifiers, derived from the enum state so the
@@ -131,7 +142,8 @@ struct RecordingCountdownView: View {
     do {
       try sessionManager.startSession()
     } catch {
-      print("Failed to start session: \(error)")
+      Log.session.error("Failed to start session: \(String(describing: error), privacy: .public)")
+      activeAlert = .startFailed
     }
   }
 
@@ -148,4 +160,5 @@ struct RecordingCountdownView: View {
 enum CountdownAlert {
   case charging
   case microphone
+  case startFailed
 }

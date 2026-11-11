@@ -95,7 +95,7 @@ public final class AudioRecorder: AudioRecording {
     do {
       try resumeRecording()
     } catch {
-      print("[AudioRecorder] resumeRecording() failed after melody: \(error)")
+      Log.audio.error("resumeRecording() failed after melody: \(String(describing: error), privacy: .public)")
     }
   }
 
@@ -148,7 +148,7 @@ public final class AudioRecorder: AudioRecording {
     do {
       try resumeRecording()
     } catch {
-      print("[AudioRecorder] Failed to resume recording: \(error)")
+      Log.audio.error("Failed to resume recording: \(String(describing: error), privacy: .public)")
     }
   }
 

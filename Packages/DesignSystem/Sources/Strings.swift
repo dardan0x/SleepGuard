@@ -3,6 +3,19 @@ import Foundation
 /// Auto-generated from Localizable.xcstrings — do not edit manually.
 /// Run: python3 scripts/generate-strings.py
 public enum Strings {
+  public static var a11yExportReport: String { String(localized: "a11y.exportReport", bundle: .module) }
+  public static var a11yGeneratingReport: String { String(localized: "a11y.generatingReport", bundle: .module) }
+  public static var a11yNextMonth: String { String(localized: "a11y.nextMonth", bundle: .module) }
+  public static var a11yPause: String { String(localized: "a11y.pause", bundle: .module) }
+  public static var a11yPreviousMonth: String { String(localized: "a11y.previousMonth", bundle: .module) }
+  public static var a11yScoreOutOf100: String { String(localized: "a11y.scoreOutOf100", bundle: .module) }
+  public static var a11yShare: String { String(localized: "a11y.share", bundle: .module) }
+  public static var a11ySkipBack15: String { String(localized: "a11y.skipBack15", bundle: .module) }
+  public static var a11ySkipForward15: String { String(localized: "a11y.skipForward15", bundle: .module) }
+  public static var a11ySleepScore: String { String(localized: "a11y.sleepScore", bundle: .module) }
+  public static var a11ySleepStagesChart: String { String(localized: "a11y.sleepStagesChart", bundle: .module) }
+  public static var a11ySnoringTimeline: String { String(localized: "a11y.snoringTimeline", bundle: .module) }
+  public static var a11ySnoringTimelineValueFormat: String { String(localized: "a11y.snoringTimelineValue", bundle: .module) }
   public static var actionBack: String { String(localized: "action.back", bundle: .module) }
   public static var actionCancel: String { String(localized: "action.cancel", bundle: .module) }
   public static var actionClose: String { String(localized: "action.close", bundle: .module) }
@@ -262,6 +275,8 @@ public enum Strings {
   public static var sessionRecordingEventsFormatSleepTalking: String { String(localized: "session.recording.eventsFormat.sleepTalking", bundle: .module) }
   public static var sessionRecordingEventsFormatSnoring: String { String(localized: "session.recording.eventsFormat.snoring", bundle: .module) }
   public static var sessionRecordingStatusFormat: String { String(localized: "session.recording.statusFormat", bundle: .module) }
+  public static var sessionStartFailedAlertMessage: String { String(localized: "session.startFailedAlert.message", bundle: .module) }
+  public static var sessionStartFailedAlertTitle: String { String(localized: "session.startFailedAlert.title", bundle: .module) }
   public static var sessionSummaryLowBatteryForceSaveInfo: String { String(localized: "session.summary.lowBattery.forceSave.info", bundle: .module) }
   public static var sessionSummaryMelodyGapsInfo: String { String(localized: "session.summary.melodyGapsInfo", bundle: .module) }
   public static var sessionSummaryMelodyGapsTimeInfo: String { String(localized: "session.summary.melodyGapsTimeInfo", bundle: .module) }

@@ -114,6 +114,11 @@ struct RecordingPrestartView: View {
     } message: {
       Text(Strings.sessionMicrophoneAlertMessage)
     }
+    .alert(Strings.sessionStartFailedAlertTitle, isPresented: isPresented(.startFailed)) {
+      Button(Strings.actionOk, role: .cancel) {}
+    } message: {
+      Text(Strings.sessionStartFailedAlertMessage)
+    }
   }
 
   /// Binding for the alert/sheet modifiers, derived from the enum state so
@@ -137,7 +142,8 @@ struct RecordingPrestartView: View {
       do {
         try sessionManager.startSession()
       } catch {
-        print("Failed to start session: \(error)")
+        Log.session.error("Failed to start session: \(String(describing: error), privacy: .public)")
+        activePresentation = .startFailed
       }
     }
   }
@@ -173,4 +179,5 @@ enum PrestartPresentation {
   case snoreInterrupter
   case chargingAlert
   case microphoneAlert
+  case startFailed
 }

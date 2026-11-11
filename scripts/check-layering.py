@@ -12,6 +12,8 @@ Rules (see AGENTS.md "UI Dependencies in Non-View Code"):
   4. Feature packages and DesignSystem never touch an app service's
      `.shared`: they resolve it from the container (`@Injected` in views,
      `Container.shared.x()` in state owners), so tests/previews can swap it.
+  5. No `print(` in package Sources or the app target: log through
+     `Log.<category>` (os.Logger, Models/Sources/Helpers/Log.swift).
 
 Exits 1 with a file:line listing when any violation is found.
 """
@@ -46,10 +48,13 @@ SERVICE_CONSUMER_EXCLUDED = ("Packages/Models/", "Packages/AudioEngine/", "Packa
 SERVICE_SINGLETON = re.compile(
     r"\b(AppConfig|AudioRecorder|CustomMelodyStorage|HealthKitSync|HapticManager|"
     r"NotificationPermissionManager|PendingSessionStore|RecordingDelayManager|"
-    r"SessionCheckpointStore|SessionManager|SnoreInterrupterPlayer|SoundAnalysisDetector|"
+    r"SessionCheckpointStore|SessionCommitter|SessionManager|SnoreInterrupterPlayer|SoundAnalysisDetector|"
     r"UserPreferences|WatchConnectivityManager|SessionRawLogWriter|StorageLimitEnforcer|"
     r"TabCoordinator|Theme)\.shared\b")
 
+
+# Rule 5 (F23-T4): no print() in shipping code; Models/Helpers/Log.swift has the loggers.
+PRINT_CALL = re.compile(r"^(?!\s*//).*(?<![\w.])print\(")
 
 def main() -> int:
     violations = []
@@ -75,6 +80,14 @@ def main() -> int:
                 violations.append(f"{rel}:{number}: 'SwiftUI' import in Env (navigation belongs in Routing)")
             if consumes_services and not stripped.startswith("//") and (match := SERVICE_SINGLETON.search(line)):
                 violations.append(f"{rel}:{number}: '{match.group(0)}' — resolve from the container instead")
+            if "/Sources/" in rel and "/.build/" not in rel and PRINT_CALL.search(line):
+                violations.append(f"{rel}:{number}: print() — log with Log.<category> (os.Logger) instead")
+
+    for swift in sorted(ROOT.glob("SleepGuard/**/*.swift")):
+        rel = swift.relative_to(ROOT).as_posix()
+        for number, line in enumerate(swift.read_text().splitlines(), 1):
+            if PRINT_CALL.search(line):
+                violations.append(f"{rel}:{number}: print() — log with Log.<category> (os.Logger) instead")
 
     if violations:
         print("Layering violations (see AGENTS.md 'UI Dependencies in Non-View Code'):")

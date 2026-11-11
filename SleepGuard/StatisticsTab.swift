@@ -1,5 +1,6 @@
 import Env
 import Models
+import os
 import Personalization
 import Routing
 import SleepSession
@@ -13,7 +14,7 @@ struct StatisticsTab: View {
   let tabCoordinator = TabCoordinator.shared
   let userPreferences = UserPreferences.shared
   let sessionManager = SessionManager.shared
-  let healthKitSync = HealthKitSync.shared
+  let sessionCommitter = SessionCommitter.shared
   let appConfig = AppConfig.shared
   let notificationPermissions = NotificationPermissionManager.shared
   @Environment(\.modelContext) private var modelContext
@@ -118,8 +119,14 @@ struct StatisticsTab: View {
 
   private func fetchOrCreateProfile() -> UserProfile? {
     let descriptor = FetchDescriptor<UserProfile>()
-    if let existing = try? modelContext.fetch(descriptor).first {
-      return existing
+    do {
+      if let existing = try modelContext.fetch(descriptor).first {
+        return existing
+      }
+    } catch {
+      // Don't create a second profile because the first one couldn't be read.
+      Log.app.error("Profile fetch failed: \(String(describing: error), privacy: .public)")
+      return nil
     }
     let profile = UserProfile()
     modelContext.insert(profile)
@@ -141,33 +148,13 @@ struct StatisticsTab: View {
   }
 
   private func autoSaveForceSavedSession(session: SleepSession) {
-    if let events = session.events {
-      for event in events {
-        modelContext.insert(event)
-      }
-    }
-    modelContext.insert(session)
-
-    // Cache AFTER insertion so SwiftData tracks the mutations.
-    // Use the current remote config so the cached score reflects the
-    // active formula if the session is later shown in a list view.
-    session.refreshCachedScore(using: appConfig.sleepScoreConfig)
-
     do {
-      try modelContext.save()
+      try sessionCommitter.commit(session, in: modelContext)
     } catch {
       routerPath.navigateToRoot()
       routerPath.presentedSheet = .sessionSummary
       return
     }
-
     sessionManager.completedSession = nil
-
-    if userPreferences.syncToHealthKit {
-      Task {
-        healthKitSync.checkAuthorizationStatus()
-        await healthKitSync.sync(session: session)
-      }
-    }
   }
 }

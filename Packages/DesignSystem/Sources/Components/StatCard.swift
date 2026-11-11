@@ -45,5 +45,8 @@ public struct StatCard: View {
     .frame(maxWidth: .infinity, alignment: .leading)
     .background(theme.bgCard)
     .cornerRadius(theme.radiusCard)
+    .accessibilityElement(children: .ignore)
+    .accessibilityLabel(title)
+    .accessibilityValue(value)
   }
 }

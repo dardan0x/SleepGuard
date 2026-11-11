@@ -68,13 +68,16 @@ public final class FakeCustomMelodyStorage: CustomMelodyStoring {
   public func fileURL(for _: Melody) -> URL? { nil }
 }
 
-/// Never touches files; reports nothing removed.
+/// Never touches files; reports nothing removed. Counts calls.
 public final class FakeStorageLimitEnforcer: StorageLimitEnforcing {
+  @MainActor public private(set) var enforceCount = 0
+
   public init() {}
 
   @MainActor
   public func enforceLimits(modelContext _: ModelContext) async -> CleanupReport {
-    CleanupReport()
+    enforceCount += 1
+    return CleanupReport()
   }
 
   #if DEBUG

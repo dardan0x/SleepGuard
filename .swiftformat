@@ -15,6 +15,7 @@
 --maxwidth none
 --nospaceoperators ...,..<
 --self remove
+--selfrequired debug,info,notice,error,fault,log
 --importgrouping testable-bottom
 --decimalgrouping ignore
 --hexgrouping ignore

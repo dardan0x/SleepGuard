@@ -56,7 +56,12 @@ public final class PendingSessionStore: PendingSessionStoring {
 
   private func load() -> PendingSessionRecord? {
     guard let data = defaults.data(forKey: defaultsKey) else { return nil }
-    return try? JSONDecoder().decode(PendingSessionRecord.self, from: data)
+    do {
+      return try JSONDecoder().decode(PendingSessionRecord.self, from: data)
+    } catch {
+      Log.storage.error("Pending-session record unreadable; its files won't be cleaned up: \(String(describing: error), privacy: .public)")
+      return nil
+    }
   }
 
   private func save(_ record: PendingSessionRecord) {
