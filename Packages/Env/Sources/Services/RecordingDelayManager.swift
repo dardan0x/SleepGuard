@@ -1,6 +1,7 @@
 import AudioEngine
 import FactoryKit
 import Foundation
+import Models
 import Observation
 import UserNotifications
 
@@ -94,7 +95,7 @@ public final class RecordingDelayManager: RecordingDelayManaging {
     do {
       try audioRecorder.startWarmup()
     } catch {
-      print("[RecordingDelayManager] Failed to start audio warmup: \(error)")
+      Log.session.error("Failed to start audio warmup: \(String(describing: error), privacy: .public)")
     }
   }
 

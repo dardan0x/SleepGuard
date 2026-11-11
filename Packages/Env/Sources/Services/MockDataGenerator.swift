@@ -18,7 +18,7 @@ public enum MockDataGenerator {
 
     let today = calendar.startOfDay(for: Date())
     guard let startDate = calendar.date(byAdding: .day, value: -30, to: today) else {
-      print("[MockDataGenerator] Failed to create start date")
+      Log.app.error("Failed to create start date")
       return
     }
 
@@ -44,7 +44,7 @@ public enum MockDataGenerator {
       }
       try modelContext.save()
     } catch {
-      print("[MockDataGenerator] Failed to clear existing data: \(error)")
+      Log.app.error("Failed to clear existing data: \(String(describing: error), privacy: .public)")
     }
 
     // Skip 3 random days for realism (deterministic based on day offset)
@@ -164,7 +164,7 @@ public enum MockDataGenerator {
         // Compute values while unmanaged — avoids SwiftData interception
         let computedScore = session.sleepScore
         if abs(computedScore - targetScore) > 12 {
-          print("[MockDataGenerator] Score drift: target=\(targetScore), computed=\(computedScore), day=\(dayOffset)")
+          Log.app.notice("Score drift: target=\(targetScore), computed=\(computedScore), day=\(dayOffset)")
         }
 
         // Insert so SwiftData tracks the objects
@@ -194,9 +194,9 @@ public enum MockDataGenerator {
       formatter.dateStyle = .short
       let from = formatter.string(from: startDate)
       let to = formatter.string(from: calendar.date(byAdding: .day, value: -1, to: today)!)
-      print("[MockDataGenerator] Successfully generated mock data for \(from) – \(to)")
+      Log.app.info("Successfully generated mock data for \(from) – \(to)")
     } catch {
-      print("[MockDataGenerator] Failed to save mock data: \(error)")
+      Log.app.error("Failed to save mock data: \(String(describing: error), privacy: .public)")
     }
   }
 

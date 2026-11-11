@@ -54,7 +54,7 @@ public final class CustomMelodyStorage: CustomMelodyStoring {
 
       return melody
     } catch {
-      print("[CustomMelodyStorage] Failed to save recording: \(error)")
+      Log.interrupter.error("Failed to save recording: \(String(describing: error), privacy: .public)")
       return nil
     }
   }

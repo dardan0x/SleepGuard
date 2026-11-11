@@ -27,7 +27,7 @@ The "Do" list from the principal architecture review (`docs/ARCHITECTURE_REVIEW.
 | F23-T1 | One owner for committing a night (`SessionCommitter`) + low-battery clip-loss fix | Bug / Refactor | Done | — | Env / SleepSession / App | 2026-11-11 | 2026-11-11 |
 | F23-T2 | App privacy manifest (`PrivacyInfo.xcprivacy`) | Compliance | Done | — | App / Widgets | 2026-11-11 | 2026-11-11 |
 | F23-T3 | CI: build the app target (app + widgets) | Infra | Done | — | .github | 2026-11-11 | 2026-11-11 |
-| F23-T4 | `os.Logger` instead of `print` (+ signposts for session and event) | Infra | Backlog | — | all | — | — |
+| F23-T4 | `os.Logger` instead of `print` (+ signposts for session and event) | Infra | Done | — | all | 2026-11-11 | 2026-11-11 |
 | F23-T5 | Audit `try?` on data paths | Quality | Backlog | F23-T4 | Env / AudioEngine / Recordings / App | — | — |
 | F23-T6 | Detection accuracy evaluation on labelled real nights | Tooling | Backlog | User: real nights with raw logs | scripts / AudioEngine | — | — |
 
@@ -116,6 +116,37 @@ The "Do" list from the principal architecture review (`docs/ARCHITECTURE_REVIEW.
 - The Watch sources aren't an Xcode target, so there's nothing to build for them.
 - **Found:** the generic destination shows 3 asset warnings that the single-simulator build hides: no `AccentColor` asset, and missing iPad icons (76@2x, 83.5@2x). The target builds for iPad (`TARGETED_DEVICE_FAMILY`). They predate F23; fix them, or drop iPad if it isn't intended (user decision).
 - **Open:** `Package.resolved` is gitignored, so CI resolves the newest Firebase/Factory within the declared ranges, which can differ from local. Committing it is standard for apps (user decision).
+
+---
+
+### F23-T4 — `os.Logger` instead of `print`
+
+| Field | Value |
+|-------|-------|
+| Arch Ref | `docs/ARCHITECTURE_REVIEW.md` Do #3 |
+| Status | Done |
+| Started | 2026-11-11 |
+| Completed | 2026-11-11 |
+
+**Acceptance Criteria:**
+- [x] No `print(` left in package sources or the app target (76 converted)
+- [x] Categories and levels chosen per call; private by default, `privacy: .public` only for errors, numbers and enum cases
+- [x] Signpost intervals for each session and each snore event
+- [x] A check keeps `print` out; rule in AGENTS/CLAUDE
+- [x] Builds with zero errors; tests pass; logs verified on the simulator
+
+**Prompt Used:**
+"ok lets go with your suggestions"
+
+**Notes:**
+- `Log` (in `Models/Sources/Helpers/Log.swift`, since every target imports Models): 7 categories under subsystem `com.dardan.SleepGuard`, plus `Log.signposter`.
+- Levels: 38 `.debug` (traces, mostly the interrupter and per-sample detection), 31 `.error`, 11 `.info`, 4 `.notice`, 1 `.fault` (the SwiftData container failing and the store being deleted).
+- Errors are logged `privacy: .public` so sysdiagnose shows them. The FCM push token, file names, paths and melody names stay private by default.
+- `SoundAnalysisDetector` built a top-3 string for every result (about 2 Hz all night) in Release too. It is now built only in Debug.
+- Signposts: a "Session" interval (`SessionRecordingController`, ended as "stopped" or "discarded") and a "Snore event" interval per event (`RealtimeDetectionTracker`, ended as "saved" or "discarded"), visible in Instruments' Points of Interest. Plus `.info` "Session started / stopped / discarded".
+- **Two Swift gotchas, handled:** (1) Logger interpolations are autoclosures, so instance properties need `self.`; SwiftFormat's `--self remove` stripped them, so `.swiftformat` now has `--selfrequired debug,info,notice,error,fault,log`. (2) The app target has member-import visibility, so app files that log `import os` themselves.
+- `check-layering.py` rule 5 fails on `print(` outside comments in package Sources and the app target (probed).
+- Simulator: a log stream during start → discard showed `audio`, `detection`, `interrupter`, `session` and `storage` lines, including "Session started" and "Session discarded".
 
 ---
 

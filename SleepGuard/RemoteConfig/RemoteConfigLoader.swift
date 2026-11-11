@@ -2,6 +2,7 @@ import Env
 import FirebaseRemoteConfig
 import Foundation
 import Models
+import os
 
 /// Bridges Firebase Remote Config into the Firebase-free `AppConfig` store.
 /// This is the only place that imports Firebase Remote Config, keeping the
@@ -46,7 +47,7 @@ final class RemoteConfigLoader {
     do {
       try await remoteConfig.fetchAndActivate()
     } catch {
-      print("[RemoteConfigLoader] fetch failed: \(error)")
+      Log.app.error("fetch failed: \(String(describing: error), privacy: .public)")
     }
     apply()
   }

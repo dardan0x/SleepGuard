@@ -2,6 +2,7 @@ import AudioEngine
 import FactoryKit
 import Foundation
 import Models
+import os
 import UIKit
 
 /// Adapter between the 50 ms processing loop and `DetectionEngine`.
@@ -70,6 +71,8 @@ final class RealtimeDetectionTracker {
   // MARK: - Per-event compression tasks
 
   private var pendingEventTasks: [Task<Void, Never>] = []
+  /// Instruments intervals for open snore events (Points of Interest).
+  private var eventSignposts: [UUID: OSSignpostIntervalState] = [:]
 
   /// `snoreDetector` is injectable so tests can check the sensitivity presets
   /// on their own instance; the app uses `.shared`.
@@ -239,7 +242,7 @@ final class RealtimeDetectionTracker {
     let state = snoreDetector.classify(db: classifyDB, spectralScore: 0, snoreConfidence: snoreConfidence)
     #if DEBUG
     if snoreConfidence > 0.1 || spectralScore > 0.1 || speechConfidence > 0.1 {
-      print("[SessionManager] classify rms=\(String(format: "%.1f", db)) peak=\(String(format: "%.1f", classifyDB)) spectral=\(String(format: "%.2f", spectralScore)) snoreConf=\(String(format: "%.2f", snoreConfidence)) speechConf=\(String(format: "%.2f", speechConfidence)) → snore=\(state) speech=\(speechDetector.isSpeechDetected)")
+      Log.detection.debug("classify rms=\(db, format: .fixed(precision: 1)) peak=\(classifyDB, format: .fixed(precision: 1)) spectral=\(spectralScore, format: .fixed(precision: 2)) snoreConf=\(snoreConfidence, format: .fixed(precision: 2)) speechConf=\(speechConfidence, format: .fixed(precision: 2)) → snore=\(String(describing: state), privacy: .public) speech=\(self.speechDetector.isSpeechDetected)")
     }
     #endif
 
@@ -299,6 +302,7 @@ final class RealtimeDetectionTracker {
     lastUpdateTime = nil
     currentSpeechDetected = false
     pendingEventTasks.removeAll(keepingCapacity: false)
+    eventSignposts.removeAll()
   }
 
   // MARK: - Melody gap handling
@@ -318,7 +322,7 @@ final class RealtimeDetectionTracker {
     var gaps = session.recordingGaps ?? []
     gaps.append(RecordingGap(startOffset: startOffset, duration: duration, snoringResumed: snoringResumed))
     session.recordingGaps = gaps
-    print("[SessionManager] Logged gap: startOffset=\(String(format: "%.1f", startOffset))s duration=\(String(format: "%.1f", duration))s snoringResumed=\(snoringResumed)")
+    Log.detection.info("Logged gap: startOffset=\(startOffset, format: .fixed(precision: 1))s duration=\(duration, format: .fixed(precision: 1))s snoringResumed=\(snoringResumed)")
   }
 
   /// Marks the most recent recording gap as having confirmed snoring resumption.
@@ -360,6 +364,7 @@ final class RealtimeDetectionTracker {
     for output in batch.outputs {
       switch output {
       case let .snoreEventStarted(id, _):
+        eventSignposts[id] = Log.signposter.beginInterval("Snore event", id: Log.signposter.makeSignpostID())
         startEventClip(id: id)
       case .melodyRequested:
         let wasPlaying = snoreInterrupterPlayer.isPlaying
@@ -369,7 +374,7 @@ final class RealtimeDetectionTracker {
           feedback.append(.melodyDidStart(at: batch.time))
         }
       case .melodyStopRequested:
-        print("[SessionManager] Sustained non-snore — stopping melody")
+        Log.detection.debug("Sustained non-snore — stopping melody")
         snoreInterrupterPlayer.stop()
       case .eventClipClosed:
         _ = audioRecorder.finalizeEventFile()
@@ -378,9 +383,11 @@ final class RealtimeDetectionTracker {
       case let .recordingGap(start, duration):
         logRecordingGap(start: start, duration: duration, snoringResumed: false)
       case let .snoreEventFinalized(event):
+        endEventSignpost(id: event.id, outcome: "saved")
         save(event)
       case let .snoreEventDiscarded(id, reason):
-        print("[SessionManager] Snore event discarded: \(reason)")
+        Log.detection.debug("Snore event discarded: \(String(describing: reason), privacy: .public)")
+        endEventSignpost(id: id, outcome: "discarded")
         if let session = recording?.currentSession {
           try? FileManager.default.removeItem(at: eventFileURL(eventID: id, sessionID: session.id))
         }
@@ -399,7 +406,7 @@ final class RealtimeDetectionTracker {
       try audioRecorder.startEventFile(eventID: id, url: fileURL)
       pendingSessionStore.addFile(fileURL.lastPathComponent)
     } catch {
-      print("[SessionManager] Failed to start event file: \(error)")
+      Log.detection.error("Failed to start event file: \(String(describing: error), privacy: .public)")
     }
   }
 
@@ -466,6 +473,11 @@ final class RealtimeDetectionTracker {
   }
 
   // MARK: - Private helpers
+
+  private func endEventSignpost(id: UUID, outcome: StaticString) {
+    guard let state = eventSignposts.removeValue(forKey: id) else { return }
+    Log.signposter.endInterval("Snore event", state, "\(outcome)")
+  }
 
   /// Re-read every tick, as before the extraction: sleep talking and the
   /// minimum duration follow the live preferences; the confidence gate follows
