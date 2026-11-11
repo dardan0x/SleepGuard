@@ -2,8 +2,6 @@
 
 A single reference for how SleepGuard is built and why: the architecture, every package, the snore-detection and sleep-score algorithms, the concurrency model, dependency injection, testing and CI, and how the project is developed with AI coding agents.
 
-> **Verified against the code on 2026-11-12** (branch `feature/f22-architecture-hardening`, after F22 *Architecture Hardening* and F23 *Production Readiness*). Code is referenced by type and function name rather than line number, so the references stay valid as files change.
-
 ## Contents
 
 1. [At a glance](#1-at-a-glance)
