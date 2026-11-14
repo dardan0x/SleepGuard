@@ -243,7 +243,10 @@ These thresholds prevent monolithic views. Enforce them during implementation an
 ### Packages
 
 - Feature packages never import other feature packages. Only: Models, AudioEngine, Env, Routing, DesignSystem (the one existing edge: Settings → Personalization).
-- **Shared repo.** `../SleepGuardShared` (its own git repo, checked out next to this one) holds code shared with the other SleepGuard apps: `SleepCore` (sleep score, detection state machine, the plain value types stored in the models) and `SleepStrings` (the string catalog). Packages depend on it by path and `import SleepCore` where they name its types. A change there changes every app, so run its tests (`sh scripts/run-tests.sh` in that repo) as well as this repo's. See `docs/adr/0004-shared-repo.md`.
+- **Shared repo.** `../SleepGuardShared` (its own git repo, checked out next to this one) holds code shared with the other SleepGuard apps: `SleepCore` (sleep score, detection state machine, the plain value types stored in the models) and `SleepStrings` (the string catalog). Packages depend on a released version (`.package(url: …SleepGuardShared.git, exact: "x.y.z")`) and `import SleepCore` where they name its types.
+  - **Two ways to build.** `SleepGuard.xcworkspace` (the project + `../SleepGuardShared` as a local package) uses your local shared checkout: open it in Xcode for day-to-day work, and edits in the shared repo show up on the next build. `SleepGuard.xcodeproj`, `scripts/run-tests.sh` and CI use the pinned release.
+  - **Releasing a shared change:** in the shared repo, run its tests, commit, push, tag (`git tag -a 0.2.0 -m "…" && git push origin 0.2.0`); here, `sh scripts/bump-shared.sh 0.2.0`, run the tests, commit the manifests and both `Package.resolved` files.
+  - A change there changes every app. See `docs/adr/0004-shared-repo.md`.
 - Navigation types (`RouterDestination`, `SheetDestination`, `RouterPath`) live in the leaf `Routing` package, not `Env`. `Env` must not import `SwiftUI` (enforced by `check-layering.py`). See `docs/adr/0001-routing-package.md`.
 - Architecture decisions are recorded in `docs/adr/` (`NNNN-slug.md`: context, decision, consequences with honest limits, alternatives). Write one when a task changes a boundary, a rule in this file, or a trade-off a reviewer would question.
 - The app target is the only place that imports everything.
@@ -373,7 +376,7 @@ After every task: build the project. Zero errors before moving on.
 
 Use XcodeBuildMCP for builds:
 
-**Session defaults** (project, scheme, simulator) are already pinned in `.xcodebuildmcp/config.yaml`. Check them once per session with `mcp__XcodeBuildMCP__session_show_defaults`; set them only if they're missing:
+**Session defaults** (workspace, scheme, simulator) are already pinned in `.xcodebuildmcp/config.yaml`. Check them once per session with `mcp__XcodeBuildMCP__session_show_defaults`; set them only if they're missing:
 ```
 mcp__XcodeBuildMCP__session_set_defaults simulatorId: "BD630AD5-5A05-4663-8F1B-A17283EBCBF5" simulatorPlatform: "iOS Simulator"
 ```
@@ -396,6 +399,9 @@ mcp__XcodeBuildMCP__test_sim
 
 **Fallback (Shell):**
 ```bash
+# Local work (uses ../SleepGuardShared):
+xcodebuild -workspace SleepGuard.xcworkspace -scheme SleepGuard -destination 'platform=iOS Simulator,id=BD630AD5-5A05-4663-8F1B-A17283EBCBF5' build
+# What CI builds (pinned shared release):
 xcodebuild -project SleepGuard.xcodeproj -scheme SleepGuard -destination 'platform=iOS Simulator,id=BD630AD5-5A05-4663-8F1B-A17283EBCBF5' build
 ```
 

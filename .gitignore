@@ -60,6 +60,9 @@ Package.resolved
 Pods/
 *.xcworkspace
 !default.xcworkspace
+# The dev workspace (the project + ../SleepGuardShared as a local package override)
+# and its lockfile are committed; see docs/adr/0004-shared-repo.md.
+!SleepGuard.xcworkspace
 
 # ========================
 # Carthage
