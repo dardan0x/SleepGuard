@@ -1,5 +1,6 @@
 import Foundation
 import Models
+import SleepCore
 
 public extension SleepSession {
   /// A finished session of `hours` length starting at `start`.

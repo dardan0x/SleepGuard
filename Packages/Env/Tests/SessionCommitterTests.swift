@@ -2,6 +2,7 @@ import EnvTestSupport
 import Foundation
 import Models
 import ModelsTestSupport
+import SleepCore
 import SwiftData
 import Testing
 @testable import Env

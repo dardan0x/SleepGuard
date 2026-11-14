@@ -1,5 +1,6 @@
 import Foundation
 import Models
+import SleepCore
 
 @MainActor
 struct DaySummary: Identifiable {

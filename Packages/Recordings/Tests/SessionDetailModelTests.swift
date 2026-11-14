@@ -5,6 +5,7 @@ import FactoryTesting
 import Foundation
 import Models
 import ModelsTestSupport
+import SleepCore
 import SwiftData
 import Testing
 @testable import Recordings

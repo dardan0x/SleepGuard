@@ -1,6 +1,7 @@
 import FactoryKit
 import Foundation
 import Models
+import SleepCore
 import SwiftData
 
 #if DEBUG

@@ -1,13 +1,6 @@
 import AVFoundation
 import Observation
-
-public enum DetectionState: String, Sendable, Codable {
-  case none
-  case quiet
-  case light
-  case loud
-  case epic
-}
+import SleepCore
 
 @MainActor
 @Observable

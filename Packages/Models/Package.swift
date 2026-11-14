@@ -9,23 +9,32 @@ let package = Package(
     // Test-only helpers (in-memory store, fixtures). Only test targets depend on it.
     .library(name: "ModelsTestSupport", targets: ["ModelsTestSupport"]),
   ],
+  dependencies: [
+    .package(path: "../../../SleepGuardShared"),
+  ],
   targets: [
     .target(
       name: "Models",
+      dependencies: [
+        .product(name: "SleepCore", package: "SleepGuardShared"),
+      ],
       path: "Sources",
       swiftSettings: [
         .swiftLanguageMode(.v6),
       ]),
     .target(
       name: "ModelsTestSupport",
-      dependencies: ["Models"],
+      dependencies: ["Models", .product(name: "SleepCore", package: "SleepGuardShared")],
       path: "TestSupport",
       swiftSettings: [
         .swiftLanguageMode(.v6),
       ]),
     .testTarget(
       name: "ModelsTests",
-      dependencies: ["Models", "ModelsTestSupport"],
+      dependencies: ["Models", "ModelsTestSupport", .product(name: "SleepCore", package: "SleepGuardShared")],
+      resources: [
+        .copy("Fixtures"),
+      ],
       swiftSettings: [
         .swiftLanguageMode(.v6),
       ]),

@@ -2,6 +2,7 @@ import Env
 import Foundation
 import Models
 import Observation
+import SleepCore
 
 /// In-memory `HealthKitSyncing` for tests and previews. Never touches HealthKit.
 ///

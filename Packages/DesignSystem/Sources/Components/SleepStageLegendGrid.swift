@@ -1,5 +1,6 @@
 import FactoryKit
 import Models
+import SleepCore
 import SwiftUI
 
 /// Two-column legend under the hypnogram: stage color chip + duration for

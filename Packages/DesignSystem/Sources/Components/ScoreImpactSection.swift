@@ -1,5 +1,6 @@
 import FactoryKit
 import Models
+import SleepCore
 import SwiftUI
 
 /// "Score Impact" section of the sleep-stages info sheet: the scoring

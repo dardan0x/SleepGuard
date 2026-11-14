@@ -1,4 +1,5 @@
 import Foundation
+import SleepCore
 
 /// A single classification sample recorded during a sleep session.
 /// Stored at ~20 Hz (every 50 ms) to create a ground-truth log that can be

@@ -1,5 +1,6 @@
 import Foundation
 import ModelsTestSupport
+import SleepCore
 import Testing
 @testable import Models
 

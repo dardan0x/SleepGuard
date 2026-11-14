@@ -30,7 +30,9 @@ import sys
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(SCRIPT_DIR)
 
-XCSTRINGS = os.path.join(ROOT, "Packages/DesignSystem/Sources/Resources/Localizable.xcstrings")
+# The catalog and generated Strings.swift live in the SleepGuardShared repo.
+SHARED = os.environ.get("SLEEPGUARD_SHARED") or os.path.join(os.path.dirname(ROOT), "SleepGuardShared")
+XCSTRINGS = os.path.join(SHARED, "Sources/SleepStrings/Resources/Localizable.xcstrings")
 GENERATE_SCRIPT = os.path.join(ROOT, "scripts/generate-strings.py")
 SCAN_DIRS = [
     os.path.join(ROOT, "SnoreGuard"),
@@ -230,7 +232,7 @@ def main():
 
     # Build key -> property_name map from generated Strings.swift
     key_to_prop = {}
-    strings_swift = os.path.join(ROOT, "Packages/DesignSystem/Sources/Strings.swift")
+    strings_swift = os.path.join(SHARED, "Sources/SleepStrings/Strings.swift")
     with open(strings_swift, "r", encoding="utf-8") as f:
         for line in f:
             m = re.search(r'public static var (\w+): String \{ String\(localized: "([^"]+)"', line)

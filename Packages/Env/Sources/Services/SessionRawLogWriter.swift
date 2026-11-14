@@ -1,6 +1,7 @@
 import AudioEngine
 import Foundation
 import Models
+import SleepCore
 
 /// Writes the classification log while recording, as JSON Lines
 /// (`rawlog_<id>.jsonl`, format 3; see `RawLog`). The log is the ground truth

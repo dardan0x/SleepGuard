@@ -1,5 +1,6 @@
 import Foundation
 import Models
+import SleepCore
 import SwiftData
 
 /// In-memory SwiftData store with the app's versioned schema and migration plan. Use it whenever a test

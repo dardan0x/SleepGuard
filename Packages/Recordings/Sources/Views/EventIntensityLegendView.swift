@@ -1,6 +1,7 @@
 import DesignSystem
 import FactoryKit
 import Models
+import SleepCore
 import SwiftUI
 
 /// Four-intensity legend so users can read what dot/text color means anywhere
