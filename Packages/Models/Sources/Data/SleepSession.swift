@@ -92,42 +92,18 @@ public final class SleepSession {
     if hasCachedScore {
       return cachedSnoringDuration
     }
-    let snoringEvents = events?.filter { $0.category == .snoring } ?? []
-    let eventDuration = snoringEvents.reduce(0) { $0 + $1.snoreDuration }
-
-    // Only count gaps where snoring actually resumed. A paused microphone
-    // doesn't prove snoring continued — we verify it with a short breathing
-    // delay after the melody stops. Legacy gaps default to `snoringResumed`
-    // so existing sessions keep their previous behavior.
-    let countableGaps = (recordingGaps ?? []).filter(\.snoringResumed)
-    let countableGapDuration = countableGaps.reduce(0) { $0 + $1.duration }
-    guard countableGapDuration > 0 else { return eventDuration }
-
-    // New sessions: events span gaps (event duration includes melody time).
-    // Old sessions: events don't span gaps — add countable gap duration manually.
-    // Detect old sessions by checking if any countable gap is NOT fully covered.
-    let sessionStart = startDate.timeIntervalSinceReferenceDate
-    let hasUncoveredGap = countableGaps.contains { gap in
-      let gapStart = sessionStart + gap.startOffset
-      let gapEnd = gapStart + gap.duration
-      let covered = snoringEvents.contains { event in
-        let eventStart = event.timestamp.timeIntervalSinceReferenceDate
-        let eventEnd = eventStart + event.snoreDuration
-        return eventStart <= gapStart && eventEnd >= gapEnd
-      }
-      return !covered
-    }
-    return eventDuration + (hasUncoveredGap ? countableGapDuration : 0)
+    // Events plus recording gaps where snoring resumed: the shared rule.
+    return night.snoringDuration
   }
 
   /// Total duration of sleep talking events.
   public var sleepTalkingDuration: TimeInterval {
-    events?.filter { $0.category == .sleepTalking }.reduce(0) { $0 + $1.snoreDuration } ?? 0
+    night.sleepTalkingDuration
   }
 
   /// Sleep talking events count.
   public var sleepTalkingEvents: Int {
-    events?.filter { $0.category == .sleepTalking }.count ?? 0
+    night.sleepTalkingEvents.count
   }
 
   /// Sleep talking duration as a percentage of total session time.
@@ -154,82 +130,33 @@ public final class SleepSession {
     totalDuration > 0 ? (snoringDuration / totalDuration) * 100 : 0
   }
 
-  /// Groups adjacent snoring events within a 5-minute gap into episodes.
-  /// This reduces visual clutter and false-positive event counts while
-  /// preserving total snoring duration.
+  /// Groups adjacent snoring events within a 5-minute gap into episodes
+  /// (shared `SnoringEpisodes` rule). Reduces visual clutter and false-positive
+  /// event counts while preserving total snoring duration.
   public var snoringEpisodes: [SnoringEpisode] {
-    let snoringEvents = (events ?? [])
-      .filter { $0.category == .snoring }
-      .sorted(by: { $0.timestamp < $1.timestamp })
-
-    guard !snoringEvents.isEmpty else { return [] }
-
-    let mergeGap: TimeInterval = 300
-
-    var episodes: [SnoringEpisode] = []
-    var currentEvents: [SnoreEvent] = [snoringEvents[0]]
-    var currentEnd = snoringEvents[0].timestamp.addingTimeInterval(snoringEvents[0].snoreDuration)
-
-    for event in snoringEvents.dropFirst() {
-      let eventStart = event.timestamp
-      if eventStart.timeIntervalSince(currentEnd) <= mergeGap {
-        currentEvents.append(event)
-        currentEnd = max(currentEnd, eventStart.addingTimeInterval(event.snoreDuration))
-      } else {
-        let maxIntensity = currentEvents.map(\.intensity).max(by: { $0.rank < $1.rank }) ?? .quiet
-        episodes.append(SnoringEpisode(
-          id: currentEvents[0].id,
-          startTime: currentEvents[0].timestamp,
-          duration: currentEnd.timeIntervalSince(currentEvents[0].timestamp),
-          intensity: maxIntensity,
-          events: currentEvents))
-        currentEvents = [event]
-        currentEnd = eventStart.addingTimeInterval(event.snoreDuration)
-      }
-    }
-
-    let maxIntensity = currentEvents.map(\.intensity).max(by: { $0.rank < $1.rank }) ?? .quiet
-    episodes.append(SnoringEpisode(
-      id: currentEvents[0].id,
-      startTime: currentEvents[0].timestamp,
-      duration: currentEnd.timeIntervalSince(currentEvents[0].timestamp),
-      intensity: maxIntensity,
-      events: currentEvents))
-
-    return episodes
+    let models = eventModelsByID
+    return SnoringEpisodes.all(in: night.events).map { SnoringEpisode($0, models: models) }
   }
 
-  /// Episodes with enough total snoring duration to be worth displaying.
-  /// Hides micro-episodes that are likely false positives while still
-  /// counting them in `snoringDuration`. Episodes finalized after the
-  /// post-melody breathing delay use pre-melody duration, so gap-only
-  /// episodes naturally fall below the threshold and stay hidden.
+  /// Episodes with enough total snoring duration to be worth displaying (3 s,
+  /// shared rule). Hides micro-episodes that are likely false positives while
+  /// still counting them in `snoringDuration`.
   public var displayableSnoringEpisodes: [SnoringEpisode] {
-    snoringEpisodes.filter { $0.snoreDuration >= 3 }
+    let models = eventModelsByID
+    return SnoringEpisodes.displayable(in: night.events).map { SnoringEpisode($0, models: models) }
   }
 
-  /// The events to play when a list row for `event` is tapped.
-  ///
-  /// Snoring rows represent a whole episode but are keyed by the episode's
-  /// single representative event, so loading only `[event]` plays just that
-  /// clip — making the player's total far shorter than the duration shown on
-  /// the row (which sums every clip in the episode). This returns the full
-  /// episode's events, time-ordered, so the player total matches the row.
-  /// Non-snoring events (sleep talking, noise) are standalone and return `[event]`.
+  /// The events to play when a list row for `event` is tapped: a snoring row
+  /// keyed by its episode's representative event plays the whole episode in
+  /// time order, so the player total matches the row; anything else plays alone.
   public func episodePlaybackEvents(for event: SnoreEvent) -> [SnoreEvent] {
-    if let episode = displayableSnoringEpisodes.first(where: {
-      $0.representativeEvent?.id == event.id
-    }) {
-      return episode.events.sorted(by: { $0.timestamp < $1.timestamp })
-    }
-    return [event]
+    let models = eventModelsByID
+    return SnoringEpisodes.playbackEvents(for: event.nightEvent, in: night.events).compactMap { models[$0.id] }
   }
 
-  /// Event count using displayable snoring episodes.
-  /// Non-snoring events are still counted individually.
+  /// Displayable snoring episodes plus every non-snoring event (shared rule).
   public var eventsCount: Int {
-    let otherEvents = (events ?? []).filter { $0.category != .snoring }.count
-    return displayableSnoringEpisodes.count + otherEvents
+    night.eventCount
   }
 
   public var eventsPerHour: Double {
@@ -238,20 +165,7 @@ public final class SleepSession {
 
   /// Percentage breakdown of sleep stages when Watch data is available.
   public var stageStats: StageStats? {
-    guard let segments = sleepStageSegments, !segments.isEmpty else { return nil }
-    let total = segments.reduce(0) { $0 + $1.duration }
-    guard total > 0 else { return nil }
-
-    let awake = segments.filter { $0.stage == .awake }.reduce(0) { $0 + $1.duration }
-    let rem = segments.filter { $0.stage == .rem }.reduce(0) { $0 + $1.duration }
-    let light = segments.filter { $0.stage == .light }.reduce(0) { $0 + $1.duration }
-    let deep = segments.filter { $0.stage == .deep }.reduce(0) { $0 + $1.duration }
-
-    return StageStats(
-      awakePct: (awake / total) * 100,
-      remPct: (rem / total) * 100,
-      lightPct: (light / total) * 100,
-      deepPct: (deep / total) * 100)
+    night.stageStats
   }
 
   public var sleepScore: Int {
@@ -275,24 +189,9 @@ public final class SleepSession {
   /// Reads `events` (faults the relationship). `snoringDuration` returns the
   /// cached value when one exists, so inputs match what lists display.
   public var sleepInputs: SleepInputs {
-    var inputs = SleepInputs(
-      totalDuration: totalDuration,
-      snoringDuration: snoringDuration,
-      snoringEpisodeCount: displayableSnoringEpisodes.count,
-      sleepTalkingCount: sleepTalkingEvents,
-      sleepTalkingDuration: sleepTalkingDuration,
-      stages: stageStats)
-    for event in events ?? [] where event.category == .snoring {
-      // Burst sum, not the full event span: the span includes melody gaps
-      // where no intensity was measured.
-      let measured = event.bursts?.reduce(0) { $0 + $1.duration } ?? event.snoreDuration
-      switch event.intensity {
-      case .quiet: inputs.quietSnoring += measured
-      case .light: inputs.lightSnoring += measured
-      case .loud: inputs.loudSnoring += measured
-      case .epic: inputs.epicSnoring += measured
-      }
-    }
+    var inputs = night.scoreInputs
+    // The cached value when there is one, so the score matches what lists show.
+    inputs.snoringDuration = snoringDuration
     return inputs
   }
 }
