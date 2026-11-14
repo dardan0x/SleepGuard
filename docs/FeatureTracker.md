@@ -2,7 +2,7 @@
 
 > Auto-updated by the AI after every task. This is the local source of truth.
 
-Last updated: 2026-11-11
+Last updated: 2026-11-14
 
 ---
 
@@ -45,11 +45,11 @@ Last updated: 2026-11-11
 | Backlog | 0 |
 | Blocked | 0 |
 | — | — |
-| Total Tasks | 165 |
+| Total Tasks | 169 |
 | Tasks Done | 148 |
 | Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
-| Tasks Backlog | 17 |
+| Tasks Backlog | 21 |
 | — | — |
 | **Progress** | **87%** |
 
@@ -79,6 +79,7 @@ Last updated: 2026-11-11
 | F21 | Test Coverage | P1 | Done | 17/17 | ██████████ 100% | [tracker](trackers/f21-test-coverage.md) |
 | F22 | Architecture Hardening | P1 | Done (real-night check pending) | 16/16 | ██████████ 100% | [tracker](trackers/f22-architecture-hardening.md) |
 | F23 | Production Readiness | P1 | In Progress | 12/13 | █████████░ 92% | [tracker](trackers/f23-production-readiness.md) |
+| F24 | Shared Design Kit Adoption | P2 | Backlog | 0/4 | ░░░░░░░░░░ 0% | [tracker](trackers/f24-shared-design-kit-adoption.md) |
 
 ## Activity Log
 
@@ -86,6 +87,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-11-14 | F24 Planning | Planned | F24 (Shared Design Kit Adoption) defined; tracker + 4-task backlog. SleepGuard moves its tokens and presentational components onto the shared `SleepGuardDesignKit` so a view change is made once for both apps. Mirrors SleepGuardUIKitWay F6. No code yet |
 | 2026-11-11 | F23-T13 | Completed | 22 views take `theme` via `@Injected` instead of `init` (41 call sites, incl. widget); DI rule refined (views: `@Injected`; testable non-view types: init injection) with its reason; `check-layering.py` rule 6. Committed directly on `feature/f22-architecture-hardening` |
 | 2026-11-11 | F23-T11 | Completed | VoiceOver: 16 icon buttons labelled (Label + iconOnly), gauge/cards/timeline/hypnogram/bars read as meaningful elements, level meter hidden; 13 `a11y.*` strings; rule in AGENTS/CLAUDE. Dynamic Type (382 fixed sizes) and 12×16 pt tap targets flagged for design. Branch `feature/f23/t11-accessibility` |
 | 2026-11-11 | F23-T10 | Completed | "Couldn't Start Recording" alert on prestart and countdown (immediate, charging "Start Anyway", delay end); 2 new strings. Verified on the simulator with a temporary throw. Notification-tap start still only logs. Branch `feature/f23/t10-start-failure-alert` |
