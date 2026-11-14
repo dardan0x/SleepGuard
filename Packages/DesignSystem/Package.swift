@@ -9,6 +9,7 @@ let package = Package(
   ],
   dependencies: [
     .package(path: "../Models"),
+    .package(url: "https://github.com/dardan0x/SleepGuardShared.git", exact: "0.1.0"),
     .package(url: "https://github.com/hmlongco/Factory", from: "3.5.2"),
   ],
   targets: [
@@ -17,12 +18,11 @@ let package = Package(
       dependencies: [
         .product(name: "Models", package: "Models"),
         .product(name: "FactoryKit", package: "Factory"),
+        .product(name: "SleepCore", package: "SleepGuardShared"),
+        .product(name: "SleepStrings", package: "SleepGuardShared"),
       ],
       path: "Sources",
       exclude: [],
-      resources: [
-        .process("Resources"),
-      ],
       swiftSettings: [
         .swiftLanguageMode(.v6),
         .defaultIsolation(MainActor.self),

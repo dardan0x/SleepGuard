@@ -560,7 +560,7 @@ struct SnoreSample: Codable {
 
 Since F23-T9 the log is written **while recording** to `rawlog_<sessionID>.jsonl` in Documents (format 3, JSON Lines): line 1 is the metadata (sensitivity, sleep-talking and interrupter settings), then one sample per line, appended every ~10 s. Memory stays flat all night, and a crash keeps everything up to the last few seconds. `RawLog.decode(from:)` reads format 3 (dropping a partial last line), format 2 (one `RawLog` JSON object, F22-T1) and format 1 (a bare sample array). Only written when `preserveRawAudio` is on.
 
-`scripts/make-replay-fixture.py` cuts an excerpt of a raw log into a CSV fixture for the replay tests (F22-T9).
+`scripts/make-replay-fixture.py` (in the `SleepGuardShared` repo) cuts an excerpt of a raw log into a CSV fixture for the replay tests (F22-T9).
 
 **Use case:** If you want to change thresholds or debounce values later, you can re-run the classifier on the raw log without re-recording audio. This is invaluable for algorithm tuning.
 

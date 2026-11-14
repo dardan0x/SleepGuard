@@ -70,9 +70,9 @@ If a design token is missing for a property, derive it from the screenshot or as
 **All user-facing strings must be localized. Never hardcode text in views.**
 
 ### Where strings live
-- **Source of truth**: `Packages/DesignSystem/Sources/Resources/Localizable.xcstrings`
-- **Generated accessor**: `Packages/DesignSystem/Sources/Strings.swift` (auto-generated — never edit manually)
-- **Helper file**: `Packages/DesignSystem/Sources/Resources/Strings.txt` (optional staging area)
+- **Source of truth**: `../SleepGuardShared/Sources/SleepStrings/Resources/Localizable.xcstrings`
+- **Generated accessor**: `../SleepGuardShared/Sources/SleepStrings/Strings.swift` (auto-generated — never edit manually; `DesignSystem` re-exposes it as `Strings`)
+- **Helper file**: `../SleepGuardShared/Sources/SleepStrings/Resources/Strings.txt` (optional staging area)
 
 ### Key format
 Use lowercase dot-notation that describes the context:
@@ -84,12 +84,12 @@ Examples: `action.save`, `settings.theme.dark`, `session.summary.title`
 ### Adding a new string
 
 **Option A — direct edit (preferred for one-off additions):**
-1. Open `Packages/DesignSystem/Sources/Resources/Localizable.xcstrings`
+1. Open `../SleepGuardShared/Sources/SleepStrings/Resources/Localizable.xcstrings`
 2. Add the entry following the existing JSON structure with `"extractionState": "manual"`
 3. Run `python3 scripts/generate-strings.py` to regenerate `Strings.swift`
 
 **Option B — via Strings.txt (preferred for batch additions):**
-1. Open `Packages/DesignSystem/Sources/Resources/Strings.txt`
+1. Open `../SleepGuardShared/Sources/SleepStrings/Resources/Strings.txt`
 2. Add entries in one of these formats:
    ```
    key
@@ -200,7 +200,7 @@ These are non-negotiable. They come from production patterns in apps like IceCub
 - **Isolation split**: explicit `@MainActor` on all `@Observable` classes in Models/Env/AudioEngine (load-bearing — no package default isolation); the 8 UI packages declare `.defaultIsolation(MainActor.self)` and the app target sets `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`.
 - Value types are `Sendable` with immutable `let` properties. SwiftData `@Model` classes are never Sendable — destructure their Sendable fields (`id`, `Date`, bursts) before crossing into `@Sendable`/detached closures.
 - Apple delegates (WCSession, SNResultsObserving, AVAudioPlayerDelegate) are nonisolated: mark methods `nonisolated`, parse payloads synchronously, `Task { @MainActor in }` for state mutation. See `docs/architecture/concurrency.md`.
-- **Live detection is one ordered stream into an actor** (ADR 0003). Detection rules live only in the pure `DetectionStateMachine` (AudioEngine): no clock, no singletons, no SwiftData. Anything that changes detection state (sample, melody start/stop, settings, session end) goes into the `DetectionEngine` stream as a timestamped `Message`; never mutate detection state from a side path. Side effects stay on the main actor in `RealtimeDetectionTracker.perform`. Thresholds are durations, not sample counts. A change to detection output must re-record the replay goldens on purpose (`scripts/record-replay-goldens.sh`) and explain the diff.
+- **Live detection is one ordered stream into an actor** (ADR 0003). Detection rules live only in the pure `DetectionStateMachine` (`SleepCore`, in the shared `SleepGuardShared` repo): no clock, no singletons, no SwiftData. Anything that changes detection state (sample, melody start/stop, settings, session end) goes into the `DetectionEngine` stream as a timestamped `Message`; never mutate detection state from a side path. Side effects stay on the main actor in `RealtimeDetectionTracker.perform`. Thresholds are durations, not sample counts. A change to detection output must re-record the replay goldens on purpose (`scripts/record-replay-goldens.sh`) and explain the diff.
 - **Logging: never `print`.** Use `Log.<category>` (`audio`, `detection`, `session`, `interrupter`, `storage`, `playback`, `app`; `os.Logger`, in `Models/Sources/Helpers/Log.swift`). `.debug` for traces, `.info` milestones, `.notice` notable state, `.error` failures, `.fault` should-never-happen. Strings are private by default; add `privacy: .public` only for values that can't identify the user. Logger interpolations are autoclosures, so instance properties need `self.` (SwiftFormat keeps it via `--selfrequired`). Enforced by `check-layering.py`.
 
 ### Views
@@ -243,6 +243,10 @@ These thresholds prevent monolithic views. Enforce them during implementation an
 ### Packages
 
 - Feature packages never import other feature packages. Only: Models, AudioEngine, Env, Routing, DesignSystem (the one existing edge: Settings → Personalization).
+- **Shared repo.** `../SleepGuardShared` (its own git repo, checked out next to this one) holds code shared with the other SleepGuard apps: `SleepCore` (sleep score, detection state machine, the plain value types stored in the models) and `SleepStrings` (the string catalog). Packages depend on a released version (`.package(url: …SleepGuardShared.git, exact: "x.y.z")`) and `import SleepCore` where they name its types.
+  - **Two ways to build.** `SleepGuard.xcworkspace` (the project + `../SleepGuardShared` as a local package) uses your local shared checkout: open it in Xcode for day-to-day work, and edits in the shared repo show up on the next build. `SleepGuard.xcodeproj`, `scripts/run-tests.sh` and CI use the pinned release.
+  - **Releasing a shared change:** in the shared repo, run its tests, commit, push, tag (`git tag -a 0.2.0 -m "…" && git push origin 0.2.0`); here, `sh scripts/bump-shared.sh 0.2.0`, run the tests, commit the manifests and both `Package.resolved` files.
+  - A change there changes every app. See `docs/adr/0004-shared-repo.md`.
 - Navigation types (`RouterDestination`, `SheetDestination`, `RouterPath`) live in the leaf `Routing` package, not `Env`. `Env` must not import `SwiftUI` (enforced by `check-layering.py`). See `docs/adr/0001-routing-package.md`.
 - Architecture decisions are recorded in `docs/adr/` (`NNNN-slug.md`: context, decision, consequences with honest limits, alternatives). Write one when a task changes a boundary, a rule in this file, or a trade-off a reviewer would question.
 - The app target is the only place that imports everything.
@@ -372,7 +376,7 @@ After every task: build the project. Zero errors before moving on.
 
 Use XcodeBuildMCP for builds:
 
-**Session defaults** (project, scheme, simulator) are already pinned in `.xcodebuildmcp/config.yaml`. Check them once per session with `mcp__XcodeBuildMCP__session_show_defaults`; set them only if they're missing:
+**Session defaults** (workspace, scheme, simulator) are already pinned in `.xcodebuildmcp/config.yaml`. Check them once per session with `mcp__XcodeBuildMCP__session_show_defaults`; set them only if they're missing:
 ```
 mcp__XcodeBuildMCP__session_set_defaults simulatorId: "BD630AD5-5A05-4663-8F1B-A17283EBCBF5" simulatorPlatform: "iOS Simulator"
 ```
@@ -395,6 +399,9 @@ mcp__XcodeBuildMCP__test_sim
 
 **Fallback (Shell):**
 ```bash
+# Local work (uses ../SleepGuardShared):
+xcodebuild -workspace SleepGuard.xcworkspace -scheme SleepGuard -destination 'platform=iOS Simulator,id=BD630AD5-5A05-4663-8F1B-A17283EBCBF5' build
+# What CI builds (pinned shared release):
 xcodebuild -project SleepGuard.xcodeproj -scheme SleepGuard -destination 'platform=iOS Simulator,id=BD630AD5-5A05-4663-8F1B-A17283EBCBF5' build
 ```
 

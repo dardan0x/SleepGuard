@@ -51,12 +51,3 @@ jobs:
           fi
       - name: Check hardcoded strings
         run: python3 scripts/check-hardcoded-strings.py --base "${{ steps.base.outputs.ref }}"
-
-  strings-sync:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Regenerate Strings.swift
-        run: python3 scripts/generate-strings.py
-      - name: Check Strings.swift is in sync with Localizable.xcstrings
-        run: git diff --exit-code -- Packages/DesignSystem/Sources/Strings.swift

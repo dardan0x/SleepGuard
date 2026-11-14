@@ -2,6 +2,7 @@ import AudioEngine
 import FactoryKit
 import Foundation
 import Models
+import SleepCore
 
 /// Public entry point for sleep-session recording. A thin facade that
 /// forwards to two focused components:

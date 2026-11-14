@@ -11,6 +11,7 @@ let package = Package(
   ],
   dependencies: [
     .package(path: "../Models"),
+    .package(url: "https://github.com/dardan0x/SleepGuardShared.git", exact: "0.1.0"),
     .package(path: "../AudioEngine"),
     .package(url: "https://github.com/hmlongco/Factory", from: "3.5.2"),
   ],
@@ -19,6 +20,7 @@ let package = Package(
       name: "Env",
       dependencies: [
         .product(name: "Models", package: "Models"),
+        .product(name: "SleepCore", package: "SleepGuardShared"),
         .product(name: "AudioEngine", package: "AudioEngine"),
         .product(name: "FactoryKit", package: "Factory"),
       ],
@@ -35,6 +37,7 @@ let package = Package(
       dependencies: [
         "Env",
         .product(name: "Models", package: "Models"),
+        .product(name: "SleepCore", package: "SleepGuardShared"),
         .product(name: "AudioEngine", package: "AudioEngine"),
       ],
       path: "TestSupport",
@@ -47,6 +50,7 @@ let package = Package(
         "Env",
         "EnvTestSupport",
         .product(name: "Models", package: "Models"),
+        .product(name: "SleepCore", package: "SleepGuardShared"),
         .product(name: "ModelsTestSupport", package: "Models"),
         .product(name: "AudioEngine", package: "AudioEngine"),
         .product(name: "FactoryKit", package: "Factory"),

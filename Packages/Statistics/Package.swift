@@ -9,6 +9,7 @@ let package = Package(
   ],
   dependencies: [
     .package(path: "../Models"),
+    .package(url: "https://github.com/dardan0x/SleepGuardShared.git", exact: "0.1.0"),
     .package(path: "../Env"),
     .package(path: "../Routing"),
     .package(path: "../DesignSystem"),
@@ -19,6 +20,7 @@ let package = Package(
       name: "Statistics",
       dependencies: [
         .product(name: "Models", package: "Models"),
+        .product(name: "SleepCore", package: "SleepGuardShared"),
         .product(name: "Env", package: "Env"),
         .product(name: "Routing", package: "Routing"),
         .product(name: "DesignSystem", package: "DesignSystem"),
@@ -37,6 +39,7 @@ let package = Package(
       dependencies: [
         "Statistics",
         .product(name: "Models", package: "Models"),
+        .product(name: "SleepCore", package: "SleepGuardShared"),
         .product(name: "ModelsTestSupport", package: "Models"),
       ],
       path: "Tests",

@@ -3,19 +3,17 @@
 # is meant to alter detection, then review the diff it prints and explain each
 # changed line in the PR. A normal test run never writes goldens.
 #
+# The detection state machine, its replay fixtures and goldens live in the
+# SleepGuardShared repo (SleepCore). This runs that repo's script against a
+# local checkout: $SLEEPGUARD_SHARED, or ../SleepGuardShared next to this repo.
+#
 # Usage: sh scripts/record-replay-goldens.sh
 set -eu
 cd "$(dirname "$0")/.."
 
-# xcodebuild forwards TEST_RUNNER_-prefixed variables to the test process.
-TEST_RUNNER_RECORD_REPLAY_GOLDENS=1 sh scripts/run-tests.sh AudioEngine
-
-GOLDENS=Packages/AudioEngine/Tests/Fixtures/Replay
-echo
-if git diff --quiet -- "$GOLDENS" && [ -z "$(git ls-files --others --exclude-standard -- "$GOLDENS")" ]; then
-  echo "Goldens unchanged."
-else
-  echo "Goldens changed. Review before committing:"
-  git status --short -- "$GOLDENS"
-  git --no-pager diff --stat -- "$GOLDENS"
+SHARED=${SLEEPGUARD_SHARED:-"$(pwd)/../SleepGuardShared"}
+if [ ! -f "$SHARED/scripts/record-replay-goldens.sh" ]; then
+  echo "error: no SleepGuardShared checkout at $SHARED; goldens are recorded there" >&2
+  exit 1
 fi
+exec sh "$SHARED/scripts/record-replay-goldens.sh"

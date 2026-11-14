@@ -1,6 +1,7 @@
 import Foundation
 import Models
 import Observation
+import SleepCore
 
 /// Reads sleep stages from and writes sleep sessions to Apple Health.
 ///

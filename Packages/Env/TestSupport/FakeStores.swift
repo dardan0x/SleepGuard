@@ -3,6 +3,7 @@ import Env
 import Foundation
 import Models
 import Observation
+import SleepCore
 import SwiftData
 
 /// In-memory `PendingSessionStoring`.

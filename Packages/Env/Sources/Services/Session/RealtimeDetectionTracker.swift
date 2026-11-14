@@ -3,6 +3,7 @@ import FactoryKit
 import Foundation
 import Models
 import os
+import SleepCore
 import UIKit
 
 /// Adapter between the 50 ms processing loop and `DetectionEngine`.

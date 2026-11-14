@@ -1,6 +1,7 @@
 import Foundation
 import Models
 import Observation
+import SleepCore
 
 /// Remote-driven feature flags, tabs, update gate, and score config.
 /// Live: `AppConfig`. Tests: `AppConfig(defaults:)` on an isolated suite.

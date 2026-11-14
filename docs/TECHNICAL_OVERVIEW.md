@@ -251,7 +251,7 @@ App to background ─► widget snapshot JSON ─► WidgetCenter reload
 | **Event rules** | `DetectionStateMachine.ingest(_:at:)`, `melodyDidStart/Stop`, `finalizeActiveEvents` (AudioEngine) |
 | Runs the rules, in order | `DetectionEngine` actor (AudioEngine), [ADR 0003](adr/0003-detection-actor.md) |
 | Sampling, sensitivity presets, side effects | `RealtimeDetectionTracker` (`apply(_:)`, `perform(_:generation:)`), Env |
-| Replay tests | `Packages/AudioEngine/Tests/Fixtures/Replay/` (excerpts of a real recording + golden outputs) |
+| Replay tests | `../SleepGuardShared/Tests/SleepCoreTests/Fixtures/Replay/` (excerpts of a real recording + golden outputs) |
 | Full write-up | [`docs/snore-detection-algorithm.md`](snore-detection-algorithm.md) |
 
 ### 5.2 How it works
@@ -290,7 +290,7 @@ App to background ─► widget snapshot JSON ─► WidgetCenter reload
 
 | Piece | Where |
 |---|---|
-| **Formula (pure)** | `SleepScore.compute(_ inputs: SleepInputs, config:)` in `Packages/Models/Sources/Data/SleepScore.swift` |
+| **Formula (pure)** | `SleepScore.compute(_ inputs: SleepInputs, config:)` in `../SleepGuardShared/Sources/SleepCore/Score/SleepScore.swift` |
 | **Coefficients and caps** | `SleepScoreConfig.default` in `SleepScoreConfig.swift` |
 | Inputs from a stored session | `SleepSession.sleepInputs` (`snoringDuration`, `displayableSnoringEpisodes`, `stageStats`) in `SleepSession.swift` |
 | Cache and launch refresh | `refreshCachedScore(using:)`, `refreshStaleCachedScores(in:config:)` in `SleepScoreCache.swift` |
@@ -716,4 +716,4 @@ The lesson worth keeping: the structural concerns were cheap to fix once the rul
 | [`docs/FeatureTracker.md`](FeatureTracker.md), [`docs/trackers/`](trackers/) | Feature and task status, acceptance criteria, notes |
 | [`docs/sessions/`](sessions/) | One note per working session |
 | [`AGENTS.md`](../AGENTS.md) | The project rulebook |
-| [`Packages/AudioEngine/Tests/Fixtures/Replay/README.md`](../Packages/AudioEngine/Tests/Fixtures/Replay/README.md) | How the detection replay fixtures and goldens work |
+| `../SleepGuardShared/Tests/SleepCoreTests/Fixtures/Replay/README.md` | How the detection replay fixtures and goldens work |

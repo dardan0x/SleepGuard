@@ -1,5 +1,6 @@
 import FactoryKit
 import Models
+import SleepCore
 import SwiftUI
 
 /// Hypnogram chart rendering the session's sleep-stage segments as colored
