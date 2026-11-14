@@ -150,6 +150,12 @@ Vendored agent skills live in `.claude/skills/` (MIT licensed, LICENSE files inc
 
 Notes:
 - The skills are advisory and non-opinionated by design; where a skill's style suggestion (e.g., view property ordering) conflicts with project conventions, project conventions apply.
+- Known conflicts. Ignore the skill's advice and its example code here:
+  - **Dependency injection.** The skills inject services through `@Environment(Model.self)` (`swiftui-view-refactor` §2 and `references/mv-patterns.md`, `swiftui-expert-skill` `references/environment-patterns.md`) or pass them to a view through `init` (`swiftui-view-refactor` §5). Here, views use `@Injected(\.service)` and never take a service through `init`; `@Environment` is only for `RouterPath` and SwiftUI system values (see Dependencies).
+  - **Localization.** `swiftui-expert-skill` `references/localization.md` recommends string literals in `Text("…")` and `String(localized:)` outside views. Here, every user-facing string goes through `Strings.` (see Localization).
+  - **Stable view tree.** `swiftui-view-refactor` §4 warns against switching branches at the root of `body`. A container view's `switch viewState` is the intended pattern here; apply the advice inside the state views.
+  - **View size.** `swiftui-view-refactor` splits at ~300 lines; the limits here are 200 per view and 100 per container.
+  - **View models.** The skill's §5 view model setup (dependencies through `init`) doesn't apply. A state owner resolves its collaborators as described in Dependencies.
 - `swiftui-expert-skill` bundles Instruments trace tooling (`scripts/`). Consent rules: prefer app-scoped `--attach`/`--launch`; system-wide recording requires explicit user approval; treat traces as sensitive.
 - To refresh: re-clone upstream at a new commit and re-copy, updating the pinned hashes here.
 
@@ -159,8 +165,9 @@ These are non-negotiable. They come from production patterns in apps like IceCub
 
 ### State
 
-- **No ViewModels.** Use `@State` with a `ViewState` enum directly in the view. The view IS the view model.
-- Every data-loading view defines: `.loading`, `.loaded`, `.error`. No boolean soup (`isLoading`, `hasError`, `isEmpty`).
+- **No ViewModels by default.** Use `@State` with a `ViewState` enum directly in the view. The view IS the view model.
+- The deliberate exception is an `@Observable` state owner (`SessionDetailModel`, `ClipPlaybackController`): add one only when the state owns an imperative resource (audio engine, timers, callbacks), or when a screen's state and side effects can't fit in a view under 200 lines. Never one per screen by reflex. It holds the `ViewState`, doesn't import `DesignSystem`, and is unit-tested.
+- A view that loads asynchronously defines a `ViewState` enum: `.loading`, `.loaded`, `.error`, plus `.empty` when the screen has an empty state. No boolean soup (`isLoading`, `hasError`, `isEmpty`). A view backed only by `@Query` has no loading phase, so it reads the query directly and needs no enum.
 - `@State` for view-local. Shared services resolve from the container (`@Injected`). `@Environment` only for `RouterPath` and SwiftUI system values. Nothing in between.
 - Never nest `@Observable` inside another `@Observable`. It breaks observation.
 - Wrap state transitions in `withAnimation` when they affect the UI.
@@ -169,8 +176,8 @@ These are non-negotiable. They come from production patterns in apps like IceCub
 
 - **Views** (`Sources/Views/`, `Sources/Components/`) resolve shared services with `@Injected(\.service)` from the Factory container and never take a service through `init`, not even to pass it down to a child (e.g. `theme`). Why: views aren't unit-tested, the container already lets previews and tests swap a service, and one way to get a dependency keeps 100+ views consistent. Enforced by `check-layering.py` (rule 6).
 - **Non-view types with logic worth testing** (Env services, `@Observable` state owners like `SessionDetailModel`, helpers like `CustomMelodyRecorder`) do the opposite: they take collaborators as `init` parameters that default to the container, so a test passes fakes directly (see `SessionCommitterTests`).
-- Shared services are `@MainActor @Observable` singletons with `.shared`, registered in the container (`Packages/Env/Sources/Services/Container.swift`; DesignSystem registers `Theme` in its own). Feature packages and DesignSystem never access an app service's `.shared` (enforced by `check-layering.py`). Env services take collaborators as init parameters defaulting to the container (`init(preferences: any UserPreferencesStoring = Container.shared.userPreferences())`), so dependencies are visible and replaceable in tests.
-- **Every service sits behind a protocol** (ADR 0002) named for its role (`HealthKitSyncing`, `AudioRecording`, `UserPreferencesStoring`, …), declared in its own file named after the protocol, next to the concrete type (`AudioRecording.swift` beside `AudioRecorder.swift`). Factories are typed `Factory<any P>` and resolve `.shared`. Inits are public, never `private`. Pass services around as `any P`, never as the concrete type.
+- Shared services are singletons with `.shared`, usually `@MainActor @Observable` (the exceptions are `SessionRawLogWriter`, an actor, and `StorageLimitEnforcer`, which is `Sendable`: their factories aren't `@MainActor`). They are registered in the container (`Packages/Env/Sources/Services/Container.swift`; DesignSystem registers `Theme` in its own). Feature packages and DesignSystem never access an app service's `.shared` (enforced by `check-layering.py`). Env services take collaborators as init parameters defaulting to the container (`init(preferences: any UserPreferencesStoring = Container.shared.userPreferences())`), so dependencies are visible and replaceable in tests.
+- **Every service sits behind a protocol** (ADR 0002) named for its role (`HealthKitSyncing`, `AudioRecording`, `UserPreferencesStoring`, …), declared in its own file named after the protocol, next to the concrete type (`AudioRecording.swift` beside `AudioRecorder.swift`). Factories are typed `Factory<any P>` and resolve `.shared`. The one exception is Env's internal session composition (`sessionRecordingController`, `realtimeDetectionTracker`): these are concrete types owned only by `SessionManager`, so they are constructed in the factory and never used outside Env. Inits are public, never `private`. Pass services around as `any P`, never as the concrete type.
 - **Every protocol has a test double** in `EnvTestSupport` (`FakeX`). The exceptions are the `UserDefaults`-backed stores (`UserPreferences.isolated()`, `AppConfig.isolated()`, the real type on a throwaway suite) and `Theme` (a separate `Theme()`). Tests override with `Container.shared.x.register { fake }` inside `@Suite(.container)` / `@Test(.container)` from `FactoryTesting`, so registrations are scoped per test.
 - `@Observable` classes must NOT use `@Injected` — both macros synthesize underscore backing storage and collide (compile error). Resolve via `Container.shared.service()` in init.
 - Nonisolated code (Apple delegate methods, detached tasks) resolves via Factory's global `dependency(\.service)` — property wrappers are MainActor-bound.
@@ -239,7 +246,6 @@ These thresholds prevent monolithic views. Enforce them during implementation an
 - Navigation types (`RouterDestination`, `SheetDestination`, `RouterPath`) live in the leaf `Routing` package, not `Env`. `Env` must not import `SwiftUI` (enforced by `check-layering.py`). See `docs/adr/0001-routing-package.md`.
 - Architecture decisions are recorded in `docs/adr/` (`NNNN-slug.md`: context, decision, consequences with honest limits, alternatives). Write one when a task changes a boundary, a rule in this file, or a trade-off a reviewer would question.
 - The app target is the only place that imports everything.
-- One endpoint enum per API resource. One file per enum.
 - 2-space indentation. Enforced by `.swiftformat`.
 
 ### UI Dependencies in Non-View Code
@@ -294,36 +300,38 @@ Every `ModelContainer` (app and `TestStore`) opens through `SleepGuardSchema.con
 5. Verify on a simulator that holds real pre-change data before merging. The app's container fallback deletes the store when opening fails.
 
 ### Cached computed properties on `SleepSession`
-`SleepSession` carries three defensive cached properties to avoid relationship faulting crashes:
+`SleepSession` carries four defensive cached properties to avoid relationship faulting crashes:
 
 ```swift
-public var hasCachedScore: Bool = false
-public var cachedSleepScore: Int = 0
+public var hasCachedScore = false
+public var cachedSleepScore = 0
 public var cachedSnoringDuration: TimeInterval = 0
+public var cachedScoreVersion = ""   // SleepScore.cacheVersion(for:) of the formula + config
 ```
 
-These are **necessary** — do not remove them. `sleepScore` and `snoringDuration` are computed from `events`, and faulting `session.events` has crashed in production. The cached values provide a zero-faulting read path.
+These are **necessary** — do not remove them. `sleepScore` and `snoringDuration` are computed from `events`, and faulting `session.events` has crashed in production. The cached values provide a zero-faulting read path. The version stamp makes a cache stale when the formula or `SleepScoreConfig` changes; `SleepSession.refreshStaleCachedScores(in:config:)` recomputes stale sessions at launch.
 
 **Rules when modifying sessions:**
-- Set cached values **after** `modelContext.insert(session)`, never before. SwiftData snapshots at insertion time; pre-insertion mutations on `@Model` objects are **not tracked**.
-- Any code that modifies a session after its initial save (e.g. adding `sleepStageSegments` in `SessionDetailView`) must recalculate and update `cachedSleepScore` before calling `modelContext.save()`.
+- Never write the cached fields by hand. `refreshCachedScore(using:)` (`Packages/Models/Sources/Data/SleepScoreCache.swift`) is their single writer: it recomputes from events and stamps the version.
+- Call it **after** `modelContext.insert(session)`, never before. SwiftData snapshots at insertion time; pre-insertion mutations on `@Model` objects are **not tracked**. The caller saves.
+- Saving a finished night goes through `SessionCommitter` only. Any code that changes a session after its initial save (e.g. `SessionDetailModel` adding `sleepStageSegments` from HealthKit) calls `refreshCachedScore(using:)` before `modelContext.save()`.
 
 ## Architecture Reference
 
-Read these docs when building features. Reference only what you need per prompt.
+Read these docs when building features. Reference only what you need per prompt. `docs/TECHNICAL_OVERVIEW.md` (in the repo) is the verified whole-system reference; the `docs/architecture/` notes are local only (gitignored). If a note disagrees with this file, this file wins.
 
-| Doc | When to Read | Lines |
-|-----|-------------|-------|
-| `docs/architecture/INDEX.md` | Quick orientation | 30 |
-| `docs/architecture/feature-template.md` | Building any new feature | 244 |
-| `docs/architecture/navigation.md` | Adding routes, sheets, deep links | 137 |
-| `docs/architecture/state.md` | State management questions | 116 |
-| `docs/architecture/networking.md` | Data model conventions | 154 |
-| `docs/architecture/dependencies.md` | DI, shared services, environment | 114 |
-| `docs/architecture/views.md` | UI composition, styling | 121 |
-| `docs/architecture/concurrency.md` | Swift 6 isolation, async patterns, cancellation | 120 |
-| `docs/architecture/modules.md` | Package structure, isolation | 54 |
-| `docs/architecture/rules.md` | Audit code against rules | 48 |
+| Doc | When to Read |
+|-----|-------------|
+| `docs/TECHNICAL_OVERVIEW.md` | Whole-system reference: packages, detection, score, DI, CI |
+| `docs/architecture/INDEX.md` | Quick orientation |
+| `docs/architecture/feature-template.md` | Building any new feature |
+| `docs/architecture/navigation.md` | Adding routes, sheets, deep links |
+| `docs/architecture/state.md` | State management questions |
+| `docs/architecture/dependencies.md` | DI, shared services, environment |
+| `docs/architecture/views.md` | UI composition, styling |
+| `docs/architecture/concurrency.md` | Swift 6 isolation, async patterns, cancellation |
+| `docs/architecture/modules.md` | Package structure, isolation |
+| `docs/architecture/rules.md` | Audit code against rules |
 
 ## Workflow
 
@@ -364,7 +372,7 @@ After every task: build the project. Zero errors before moving on.
 
 Use XcodeBuildMCP for builds:
 
-**First, set session defaults once per session (deterministic simulator):**
+**Session defaults** (project, scheme, simulator) are already pinned in `.xcodebuildmcp/config.yaml`. Check them once per session with `mcp__XcodeBuildMCP__session_show_defaults`; set them only if they're missing:
 ```
 mcp__XcodeBuildMCP__session_set_defaults simulatorId: "BD630AD5-5A05-4663-8F1B-A17283EBCBF5" simulatorPlatform: "iOS Simulator"
 ```
@@ -381,11 +389,13 @@ mcp__XcodeBuildMCP__build_run_sim
 mcp__XcodeBuildMCP__test_sim
 ```
 
-**Why `simulatorId`:** `iPhone 17 Pro` is ambiguous (exists on iOS 18.3, 26.0, and 26.2). Using the UDID pins the iOS 26.2 simulator and eliminates flakiness.
+**Why `simulatorId`:** device names are ambiguous across runtimes (e.g. `iPhone 17 Pro` exists on iOS 18.3, 26.0, and 26.2). The UDID pins one simulator (iPhone 16e, iOS 26.2) and eliminates flakiness.
+
+**Package tests:** `sh scripts/run-tests.sh` (all packages) or `sh scripts/run-tests.sh Models Env`. It runs them on the iOS Simulator; don't use `swift test`, which builds for macOS.
 
 **Fallback (Shell):**
 ```bash
-xcodebuild -project SleepGuard.xcodeproj -scheme SleepGuard -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2' build
+xcodebuild -project SleepGuard.xcodeproj -scheme SleepGuard -destination 'platform=iOS Simulator,id=BD630AD5-5A05-4663-8F1B-A17283EBCBF5' build
 ```
 
 ## Session End Requirements
@@ -451,6 +461,6 @@ The user cannot read your mind. They need to know:
 - Diffs are small and traceable to the request.
 - No rewrites due to overcomplication.
 - Clarifying questions come before implementation, not after mistakes.
-- Every view has a `ViewState` enum, not boolean flags.
+- Every view that loads asynchronously has a `ViewState` enum, not boolean flags.
 - No feature package imports another feature package.
 - Notion and FeatureTracker always agree.
