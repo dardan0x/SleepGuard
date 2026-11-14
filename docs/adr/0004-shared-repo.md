@@ -45,6 +45,15 @@ In this repo:
   - The `strings-sync` check moved to the shared repo's CI, where the generated file lives.
   - Still in this repo, and candidates to move later: episode merging and snoring duration (computed on the `@Model`), the classifier rules, and the sensitivity thresholds in `RealtimeDetectionTracker`. Each needs a small refactor to become pure first, so they were left out of a move-only change.
 
+## Revision: night rules (F0-T6, 2026-11-14)
+
+Episode grouping, snoring duration with the gap rule, event count, stage percentages and the score inputs were computed properties on `SleepSession`, and SleepGuardUIKitWay had ported them to its own value types: two copies of the same rules. They now live once in `SleepCore`, on shared values (`Night`, `NightEvent`, `NightEpisode`, `NightSummary`).
+
+- `SleepSession+Night.swift` maps the stored models to `Night`; the computed properties call the shared rules. `SnoringEpisode` keeps its public API and wraps `NightEpisode`, adding the stored `SnoreEvent`s screens need.
+- Kept on purpose: an unfinished session maps to a zero-length night (scores the maximum); `sleepInputs` uses the cached snoring duration when present.
+- Proof: every Models test (episodes, stats, score, cache) passes unchanged. No schema change.
+- Cost: the computed properties now build a `Night` (mapping every event) each time they are read. They already faulted every event, so the cost is the same order; lists keep using the cached score.
+
 ## Alternatives
 
 - **Copy the code into the new app.** No coupling, but two diverging formulas; rejected.
