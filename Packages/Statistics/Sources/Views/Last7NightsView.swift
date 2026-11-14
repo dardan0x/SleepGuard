@@ -3,6 +3,7 @@ import Env
 import FactoryKit
 import Models
 import Routing
+import SleepCore
 import SwiftData
 import SwiftUI
 
@@ -105,17 +106,15 @@ public struct Last7NightsView: View {
 
   // MARK: - Data Helpers
 
+  /// The last 7 recorded days, from SleepCore's rules. Chosen without reading
+  /// events, then built in full for those days only.
+  private var stats: NightDayStats {
+    let chosen = NightDayStats.recent(from: sessions.summariesWithoutEvents).days.flatMap(\.nights)
+    return NightDayStats(days: NightDay.days(from: sessions.fullSummaries(of: chosen)))
+  }
+
   private var daySummaries: [DaySummary] {
-    let calendar = Calendar.current
-    let grouped = Dictionary(grouping: sessions) {
-      calendar.startOfDay(for: $0.startDate)
-    }
-
-    let sortedDays = grouped.map { date, daySessions in
-      DaySummary(date: date, sessions: daySessions)
-    }.sorted { $0.date < $1.date }
-
-    return Array(sortedDays.suffix(7))
+    stats.days.map(DaySummary.init(day:))
   }
 
   private var dateRangeString: String {
@@ -128,34 +127,32 @@ public struct Last7NightsView: View {
   }
 
   private var averageSleepScore: Int {
-    guard !daySummaries.isEmpty else { return 0 }
-    return daySummaries.map(\.avgScore).reduce(0, +) / daySummaries.count
+    stats.averageScore
   }
 
   private var avgSnoringMinutes: Int {
-    guard !daySummaries.isEmpty else { return 0 }
-    return daySummaries.map(\.totalSnoringMinutes).reduce(0, +) / daySummaries.count
+    stats.averageSnoringMinutes
   }
 
   private var totalEvents: Int {
-    daySummaries.map(\.totalEvents).reduce(0, +)
+    stats.eventCount
   }
 
   private var bestScore: Int {
-    daySummaries.map(\.avgScore).max() ?? 0
+    stats.best?.averageScore ?? 0
   }
 
   private var bestDay: String {
-    guard let day = daySummaries.max(by: { $0.avgScore < $1.avgScore }) else { return "" }
+    guard let day = stats.best else { return "" }
     return DateFormatters.dayOfWeekShort.string(from: day.date)
   }
 
   private var worstScore: Int {
-    daySummaries.map(\.avgScore).min() ?? 0
+    stats.worst?.averageScore ?? 0
   }
 
   private var worstDay: String {
-    guard let day = daySummaries.min(by: { $0.avgScore < $1.avgScore }) else { return "" }
+    guard let day = stats.worst else { return "" }
     return DateFormatters.dayOfWeekShort.string(from: day.date)
   }
 

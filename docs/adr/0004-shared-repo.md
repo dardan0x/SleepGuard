@@ -54,6 +54,14 @@ Episode grouping, snoring duration with the gap rule, event count, stage percent
 - Proof: every Models test (episodes, stats, score, cache) passes unchanged. No schema change.
 - Cost: the computed properties now build a `Night` (mapping every event) each time they are read. They already faulted every event, so the cost is the same order; lists keep using the cached score.
 
+## Revision: statistics rules (F4-T2 in SleepGuardUIKitWay, 2026-11-14)
+
+The Statistics numbers (dashboard state, week-over-week trend, Last 7 Nights day totals and best/worst, Trends averages, calendar month stats and grid, mini-chart day averages) were computed inside the Statistics views. They now live in `SleepCore` (`NightDashboard`, `ScoreTrend`, `NightDay`/`NightDayStats`, `NightPeriod`, `CalendarMonth`) on `NightSummary`, which gained `loudestIntensity`.
+
+- The views keep their types (`DashboardState`, `DaySummary`, `Trend`); their bodies call the shared rules. No visual change intended.
+- Two mappings, because faulting `events` has crashed: `summaryWithoutEvents` (cached score and snoring time, no events) chooses nights; `nightSummary` (reads events) is built only for the nights a screen shows. The dashboard and the trend stay event-free, as before.
+- Proof: the Statistics tests (dashboard, week-over-week) pass unchanged; the same cases run in the shared repo against the shared rules.
+
 ## Alternatives
 
 - **Copy the code into the new app.** No coupling, but two diverging formulas; rejected.

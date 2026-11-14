@@ -3,6 +3,7 @@ import DesignSystem
 import Env
 import FactoryKit
 import Models
+import SleepCore
 import SwiftData
 import SwiftUI
 
@@ -97,66 +98,45 @@ public struct TrendsView: View {
 
   // MARK: - Data Helpers
 
-  private func filteredSessions() -> [SleepSession] {
-    let calendar = Calendar.current
+  /// The week's or month's nights, from SleepCore's `NightPeriod`. Chosen
+  /// without reading events, then built in full for those nights only.
+  private var period: NightPeriod {
     let now = Date()
     let days = timeRange == .week ? 7 : 30
-    guard let cutoff = calendar.date(byAdding: .day, value: -days, to: now) else {
-      return []
-    }
-    return sessions.filter { $0.startDate >= cutoff }.sorted { $0.startDate < $1.startDate }
+    let chosen = NightPeriod(lastDays: days, of: sessions.summariesWithoutEvents, now: now).nights
+    return NightPeriod(lastDays: days, of: sessions.fullSummaries(of: chosen), now: now)
   }
 
   private func chartData() -> [TrendBarData] {
     let formatter = timeRange == .week ? DateFormatters.dayOfWeekShort : DateFormatters.dayOfMonth
 
-    return filteredSessions().map { session in
-      let label = formatter.string(from: session.startDate)
-      let minutes = Int(session.snoringDuration / 60)
-      let color = maxIntensityColor(for: session)
-      return TrendBarData(
-        id: session.id,
-        label: label,
-        minutes: minutes,
-        color: color)
+    return period.nights.map { night in
+      TrendBarData(
+        id: night.id,
+        label: formatter.string(from: night.start),
+        minutes: Int(night.snoringDuration / 60),
+        color: theme.intensityColor(night.loudestIntensity ?? .quiet))
     }
   }
 
   private func averageSnoringMinutes() -> Int {
-    let filtered = filteredSessions()
-    guard !filtered.isEmpty else { return 0 }
-    let totalMinutes = filtered.reduce(0) { $0 + Int($1.snoringDuration / 60) }
-    return totalMinutes / filtered.count
+    period.averageSnoringMinutes
   }
 
   private func averageScore() -> Int {
-    let filtered = filteredSessions()
-    guard !filtered.isEmpty else { return 0 }
-    let total = filtered.reduce(0) { $0 + $1.sleepScore }
-    return total / filtered.count
+    period.averageScore
   }
 
   private func bestScore() -> Int {
-    filteredSessions().map(\.sleepScore).max() ?? 0
+    period.bestScore
   }
 
   private func worstScore() -> Int {
-    filteredSessions().map(\.sleepScore).min() ?? 0
+    period.worstScore
   }
 
   private func totalEvents() -> Int {
-    filteredSessions().reduce(0) { $0 + $1.eventsCount }
-  }
-
-  private func maxIntensityColor(for session: SleepSession) -> Color {
-    guard let events = session.events, !events.isEmpty else {
-      return theme.snoreQuiet
-    }
-    let intensities = events.map(\.intensity)
-    if intensities.contains(.epic) { return theme.snoreEpic }
-    if intensities.contains(.loud) { return theme.snoreLoud }
-    if intensities.contains(.light) { return theme.snoreLight }
-    return theme.snoreQuiet
+    period.eventCount
   }
 }
 

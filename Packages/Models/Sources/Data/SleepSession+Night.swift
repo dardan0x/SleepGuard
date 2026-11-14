@@ -22,6 +22,26 @@ extension SleepSession {
       endReason: terminationReason == "low_battery" ? .lowBattery : .stopped)
   }
 
+  /// What the statistics rules (SleepCore) need about this night: the cached
+  /// score and snoring time where there are ones, as the views always showed.
+  /// Reads `events`: build it only for the nights a screen shows.
+  public var nightSummary: NightSummary {
+    let night = night
+    return NightSummary(
+      id: id, start: night.start, end: night.end, score: sleepScore, snoringDuration: snoringDuration,
+      eventCount: night.eventCount, loudestIntensity: night.loudestIntensity)
+  }
+
+  /// Start, end, score and snoring time from the cached fields, without
+  /// reading `events` (faulting them has crashed in production). For choosing
+  /// nights (dashboard, trend, which day): `eventCount` is 0 and
+  /// `loudestIntensity` is `nil`, so don't show those from it.
+  public var summaryWithoutEvents: NightSummary {
+    NightSummary(
+      id: id, start: startDate, end: max(endDate ?? startDate, startDate), score: sleepScore,
+      snoringDuration: snoringDuration, eventCount: 0)
+  }
+
   /// The stored events by id, to map shared episodes back to models.
   var eventModelsByID: [UUID: SnoreEvent] {
     Dictionary((events ?? []).map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })

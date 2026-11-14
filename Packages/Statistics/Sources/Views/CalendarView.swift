@@ -2,6 +2,7 @@ import DesignSystem
 import Env
 import FactoryKit
 import Models
+import SleepCore
 import SwiftData
 import SwiftUI
 
@@ -41,7 +42,7 @@ public struct CalendarView: View {
           intensityColorForSession: intensityColor(for:),
           onSelectDate: { selectedDate = $0 })
 
-        CalendarMonthStatsView(monthSessions: sessionsInSelectedMonth)
+        CalendarMonthStatsView(month: monthStats)
 
         if let selected = selectedDate, let session = sessionFor(date: selected) {
           CalendarSelectedNightView(
@@ -106,58 +107,29 @@ public struct CalendarView: View {
     calendar.date(byAdding: .month, value: 1, to: selectedMonth) ?? selectedMonth
   }
 
-  private var sessionsInSelectedMonth: [SleepSession] {
-    sessions.filter { calendar.isDate($0.startDate, equalTo: selectedMonth, toGranularity: .month) }
+  /// The month's counts, from SleepCore's `CalendarMonth`. Chosen without
+  /// reading events, then built in full for the month's nights only.
+  private var monthStats: CalendarMonth {
+    let chosen = CalendarMonth(month: selectedMonth, nights: sessions.summariesWithoutEvents, calendar: calendar).nights
+    return CalendarMonth(month: selectedMonth, nights: sessions.fullSummaries(of: chosen), calendar: calendar)
   }
 
+  /// The night shown for a grid day: SleepCore's `CalendarMonth` rule.
   private func sessionFor(date: Date) -> SleepSession? {
-    sessions.first { calendar.isDate($0.startDate, inSameDayAs: date) }
+    guard let night = CalendarMonth.night(on: date, in: sessions.summariesWithoutEvents, calendar: calendar) else {
+      return nil
+    }
+    return sessions.first { $0.id == night.id }
   }
 
+  /// The loudest event's colour; none for a night without events.
   private func intensityColor(for session: SleepSession?) -> Color {
-    guard let session, let events = session.events, !events.isEmpty else {
-      return Color.clear
-    }
-    let intensities = events.map(\.intensity)
-    if intensities.contains(.epic) { return theme.snoreEpic }
-    if intensities.contains(.loud) { return theme.snoreLoud }
-    if intensities.contains(.light) { return theme.snoreLight }
-    return theme.snoreQuiet
+    guard let loudest = session?.nightSummary.loudestIntensity else { return Color.clear }
+    return theme.intensityColor(loudest)
   }
 
   private func calendarDays() -> [CalendarDay] {
-    guard let monthInterval = calendar.dateInterval(of: .month, for: selectedMonth) else { return [] }
-    let firstDayOfMonth = monthInterval.start
-
-    let weekdayOfFirst = calendar.component(.weekday, from: firstDayOfMonth)
-    let firstWeekday = calendar.firstWeekday
-    let leadingDays = (weekdayOfFirst - firstWeekday + 7) % 7
-
-    var days: [CalendarDay] = []
-
-    // Leading days from previous month
-    for offset in stride(from: leadingDays, to: 0, by: -1) {
-      if let date = calendar.date(byAdding: .day, value: -offset, to: firstDayOfMonth) {
-        days.append(CalendarDay(date: date))
-      }
-    }
-
-    // Days in current month
-    var current = firstDayOfMonth
-    while calendar.isDate(current, equalTo: selectedMonth, toGranularity: .month) {
-      days.append(CalendarDay(date: current))
-      guard let next = calendar.date(byAdding: .day, value: 1, to: current) else { break }
-      current = next
-    }
-
-    // Trailing days to fill 6 rows (42 days total)
-    while days.count < 42 {
-      if let date = calendar.date(byAdding: .day, value: 1, to: days.last?.date ?? Date()) {
-        days.append(CalendarDay(date: date))
-      }
-    }
-
-    return days
+    CalendarMonth.grid(for: selectedMonth, calendar: calendar).map { CalendarDay(date: $0) }
   }
 
   private var selectedDateString: String {
