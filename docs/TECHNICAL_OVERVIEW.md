@@ -175,7 +175,7 @@ Every rule below is either checked by the compiler or by CI, or it's a conventio
 | **Routing** | 1 / 0.05k | — | `RouterDestination`, `SheetDestination`, `RouterPath` |
 | **Onboarding** | 7 / 0.7k | Models, AudioEngine, Env, DesignSystem | First-run flow and permission requests |
 | **SleepSession** | 30 / 2.1k | Models, AudioEngine, Env, Routing, DesignSystem | Recording: pre-start (delay timer, Snore Interrupter), bedside clock with live level, session summary |
-| **Statistics** | 26 / 1.7k | Models, Env, Routing, DesignSystem | Home tab: dashboard (`DashboardState`), calendar, trends (Swift Charts), Last 7 Nights |
+| **Statistics** | 26 / 1.7k | Models, Env, Routing, DesignSystem | Home tab: dashboard (`DashboardState`), calendar, trends (Swift Charts), Last 7 Nights; the numbers come from `SleepCore`'s statistics rules |
 | **Recordings** | 41 / 3.8k | Models, Env, Routing, DesignSystem | Largest feature: sessions list, session detail (`SessionDetailModel`), event timeline, clip player (`ClipPlaybackController`, with optional "enhanced audio"), sharing, **PDF report** |
 | **Settings** | 12 / 1.0k | Models, Env, Routing, DesignSystem, **Personalization** | Sensitivity, appearance, HealthKit, melodies, storage limits, data management, debug tools |
 | **Personalization** | 15 / 1.6k | Models, Env, DesignSystem | `BriefingEngine` (pure: sessions + `now` → morning briefing), `QuoteBank`, profile editor, lifestyle surveys |

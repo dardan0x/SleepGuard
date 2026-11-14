@@ -1,5 +1,6 @@
 import Foundation
 import Models
+import SleepCore
 
 /// What the Statistics dashboard shows, derived from the stored sessions.
 ///
@@ -16,19 +17,19 @@ struct DashboardState {
   /// `session` started yesterday relative to `now` (by start date, not end date).
   let isLastNight: Bool
 
-  /// `nil` when there are no sessions. `sessions` may be in any order.
+  /// `nil` when there are no sessions. `sessions` may be in any order. The
+  /// rules are SleepCore's `NightDashboard`; this maps its nights back to models.
   static func make(from sessions: [SleepSession], now: Date, calendar: Calendar = .current) -> DashboardState? {
-    let newestFirst = sessions.sorted { $0.startDate > $1.startDate }
-    guard let latest = newestFirst.first else { return nil }
-
-    let daySessions = newestFirst.filter { calendar.isDate($0.startDate, inSameDayAs: latest.startDate) }
-    let yesterday = calendar.date(byAdding: .day, value: -1, to: now) ?? now
-
+    guard let dashboard = NightDashboard.make(from: sessions.summariesWithoutEvents, now: now, calendar: calendar) else {
+      return nil
+    }
+    let byID = Dictionary(sessions.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+    guard let latest = byID[dashboard.latest.id] else { return nil }
     return DashboardState(
       session: latest,
-      dayScore: daySessions.map(\.sleepScore).reduce(0, +) / daySessions.count,
-      daySessionCount: daySessions.count,
-      recentSessions: Array(newestFirst.prefix(7)),
-      isLastNight: calendar.isDate(latest.startDate, inSameDayAs: yesterday))
+      dayScore: dashboard.dayScore,
+      daySessionCount: dashboard.dayNightCount,
+      recentSessions: dashboard.recent.compactMap { byID[$0.id] },
+      isLastNight: dashboard.isLastNight)
   }
 }

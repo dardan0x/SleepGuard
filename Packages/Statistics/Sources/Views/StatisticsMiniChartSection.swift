@@ -3,6 +3,7 @@ import Env
 import FactoryKit
 import Models
 import Routing
+import SleepCore
 import SwiftUI
 
 struct StatisticsMiniChartSection: View {
@@ -28,25 +29,16 @@ struct StatisticsMiniChartSection: View {
         }
       }
 
-      // Group sessions by day and average scores so multiple recordings
-      // on the same night collapse to a single bar.
-      let calendar = Calendar.current
-      let grouped = Dictionary(grouping: recentSessions) {
-        calendar.startOfDay(for: $0.startDate)
-      }
-      let dayAverages = grouped.map { date, sessions in
-        let avg = sessions.map(\.sleepScore).reduce(0, +) / sessions.count
-        return (date: date, score: avg)
-      }.sorted { $0.date < $1.date }
-
-      let data = dayAverages.map { day in
+      // One bar per day (several recordings on a night collapse), from
+      // SleepCore's `NightDay`.
+      let data = NightDay.days(from: recentSessions.summariesWithoutEvents).map { day in
         let label = DateFormatters.dayOfWeekShort.string(from: day.date).prefix(1).uppercased()
         return MiniBarChart.DataPoint(
           label: String(label),
-          value: Double(day.score),
-          color: theme.scoreColor(day.score),
+          value: Double(day.averageScore),
+          color: theme.scoreColor(day.averageScore),
           accessibilityLabel: DateFormatters.dayOfWeekFull.string(from: day.date),
-          accessibilityValue: String(format: Strings.a11yScoreOutOf100, day.score))
+          accessibilityValue: String(format: Strings.a11yScoreOutOf100, day.averageScore))
       }
 
       MiniBarChart(data: data)

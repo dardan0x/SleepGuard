@@ -16,25 +16,17 @@ struct DaySummary: Identifiable {
   let dateString: String
   let primarySessionId: UUID?
 
-  init(date: Date, sessions: [SleepSession]) {
-    self.date = date
-    avgScore = sessions.map(\.sleepScore).reduce(0, +) / max(sessions.count, 1)
-    totalSnoringMinutes = Int(sessions.map(\.snoringDuration).reduce(0, +) / 60)
-    totalEvents = sessions.map(\.eventsCount).reduce(0, +)
-    totalDuration = sessions.map(\.totalDuration).reduce(0, +)
-    maxIntensity = DaySummary.maxIntensity(for: sessions)
-    label = String(DateFormatters.dayOfWeekShort.string(from: date).prefix(1).uppercased())
-    weekday = DateFormatters.dayOfWeekShort.string(from: date)
-    dateString = DateFormatters.monthDay.string(from: date)
-    primarySessionId = sessions.first?.id
-  }
-
-  private static func maxIntensity(for sessions: [SleepSession]) -> SnoreIntensity {
-    let allEvents = sessions.compactMap(\.events).flatMap(\.self)
-    let intensities = allEvents.map(\.intensity)
-    if intensities.contains(.epic) { return .epic }
-    if intensities.contains(.loud) { return .loud }
-    if intensities.contains(.light) { return .light }
-    return .quiet
+  /// Totals come from SleepCore's `NightDay`; this adds the labels.
+  init(day: NightDay) {
+    date = day.date
+    avgScore = day.averageScore
+    totalSnoringMinutes = day.snoringMinutes
+    totalEvents = day.eventCount
+    totalDuration = day.duration
+    maxIntensity = day.loudestIntensity
+    label = String(DateFormatters.dayOfWeekShort.string(from: day.date).prefix(1).uppercased())
+    weekday = DateFormatters.dayOfWeekShort.string(from: day.date)
+    dateString = DateFormatters.monthDay.string(from: day.date)
+    primarySessionId = day.nights.first?.id
   }
 }

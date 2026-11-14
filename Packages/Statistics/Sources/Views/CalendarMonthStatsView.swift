@@ -1,36 +1,25 @@
 import DesignSystem
-import Models
+import SleepCore
 import SwiftUI
 
 struct CalendarMonthStatsView: View {
-  let monthSessions: [SleepSession]
+  /// Counts and averages from SleepCore's `CalendarMonth`.
+  let month: CalendarMonth
 
   var body: some View {
     HStack(spacing: 8) {
       CalendarStatCard(
         icon: "moon.fill",
         label: Strings.sessionsCalendarStatCardLabel,
-        value: "\(monthSessions.count)")
+        value: "\(month.nights.count)")
       CalendarStatCard(
         icon: "scope",
         label: Strings.avgScoreCalendarStatCardLabel,
-        value: monthSessions.isEmpty ? "—" : "\(avgScore)")
+        value: month.averageScore.map { "\($0)" } ?? "—")
       CalendarStatCard(
         icon: "speaker.wave.3.fill",
         label: Strings.loudNightsCalendarStatCardLabel,
-        value: "\(loudNights)")
+        value: "\(month.loudNightCount)")
     }
-  }
-
-  private var avgScore: Int {
-    guard !monthSessions.isEmpty else { return 0 }
-    return monthSessions.reduce(0) { $0 + $1.sleepScore } / monthSessions.count
-  }
-
-  private var loudNights: Int {
-    monthSessions.filter { session in
-      guard let events = session.events else { return false }
-      return events.contains { $0.intensity == .loud || $0.intensity == .epic }
-    }.count
   }
 }
