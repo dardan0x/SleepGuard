@@ -5,7 +5,7 @@ import WidgetKit
 
 struct TrendWidgetView: View {
   let days: [WidgetSnapshot.Day]
-  let theme = Theme.shared
+  let theme = AppTheme.shared
 
   var body: some View {
     Group {

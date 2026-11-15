@@ -7,7 +7,7 @@ import SwiftUI
 /// selection is reported through `onSelect` so the owner keeps coordinator
 /// and animation control.
 struct CustomTabBarView: View {
-  let theme = Theme.shared
+  let theme = AppTheme.shared
 
   let tabs: [AppTab]
   let selectedTab: AppTab

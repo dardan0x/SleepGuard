@@ -5,7 +5,7 @@ import SwiftUI
 /// Dimming overlay with a progress indicator shown while a finished session
 /// is being processed after stop.
 struct SessionProcessingOverlay: View {
-  let theme = Theme.shared
+  let theme = AppTheme.shared
 
   let isVisible: Bool
 

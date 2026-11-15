@@ -13,7 +13,7 @@ import SwiftUI
 struct MainTabView: View {
   // Composition root: shared services held directly (same pattern as
   // SleepGuardApp's @State service holdings).
-  @State private var theme = Theme.shared
+  @State private var theme = AppTheme.shared
   @State private var sessionManager = SessionManager.shared
   @State private var userPreferences = UserPreferences.shared
   @State private var appConfig = AppConfig.shared

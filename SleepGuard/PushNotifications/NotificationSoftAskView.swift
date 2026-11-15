@@ -6,7 +6,7 @@ import SwiftUI
 /// the real request if the user taps Enable, so a "Don't Allow" isn't burned
 /// on an unexplained prompt.
 struct NotificationSoftAskView: View {
-  let theme = Theme.shared
+  let theme = AppTheme.shared
   let permissions = NotificationPermissionManager.shared
   let userPreferences = UserPreferences.shared
   let onClose: () -> Void
