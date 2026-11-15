@@ -30,7 +30,6 @@ public struct EventsSheetView: View {
             EventCard(
               event: event,
               displayDuration: displayDurations?[event.id],
-              session: session,
               onPlay: {
                 selectedEvent = event
                 onPlayEvent(event)
@@ -63,76 +62,5 @@ public struct EventsSheetView: View {
         isClipSession: isClipSession,
         initialEvent: episodeEvents.first ?? event)
     }
-  }
-}
-
-// MARK: - Event Card
-
-@MainActor
-private struct EventCard: View {
-  let event: SnoreEvent
-  let displayDuration: TimeInterval?
-  let session: SleepSession
-  @Injected(\.theme) private var theme
-  let onPlay: () -> Void
-
-  var body: some View {
-    VStack(spacing: 10) {
-      // Intensity indicator + time
-      HStack(spacing: 2) {
-        Text(Strings.startTimeEventCard)
-          .font(.system(size: 11, weight: .semibold))
-          .foregroundStyle(theme.textSecondary)
-          .lineLimit(1)
-
-        Text(eventTime)
-          .font(.system(size: 11, weight: .semibold))
-          .foregroundStyle(theme.textSecondary)
-          .lineLimit(1)
-          .minimumScaleFactor(0.7)
-      }
-
-      Spacer()
-
-      HStack(spacing: 6) {
-        Circle()
-          .fill(theme.intensityColor(event.intensity))
-          .frame(width: 8, height: 8)
-        // Duration
-        Text(durationString(displayDuration ?? event.snoreDuration))
-          .font(.system(size: 22, weight: .bold, design: .rounded))
-          .foregroundStyle(theme.intensityColor(event.intensity))
-      }
-
-      // Play button
-      Button {
-        onPlay()
-      } label: {
-        HStack(spacing: 4) {
-          Image(systemName: "play.fill")
-            .font(.system(size: 12, weight: .semibold))
-          Text(Strings.actionPlay)
-            .font(.system(size: 13, weight: .semibold))
-        }
-        .foregroundStyle(theme.accent)
-        .padding(.horizontal, 12)
-        .padding(.vertical, 6)
-        .background(theme.accent.opacity(0.12))
-        .cornerRadius(8)
-      }
-    }
-    .padding(12)
-    .frame(width: 120, height: 140)
-    .background(theme.bgCard)
-    .cornerRadius(theme.radiusCard)
-  }
-
-  private var eventTime: String {
-    DateFormatters.timeWithPeriod.string(from: event.timestamp)
-  }
-
-  private func durationString(_ total: TimeInterval) -> String {
-    let seconds = Int(total)
-    return String(format: "%d:%02d", seconds / 60, seconds % 60)
   }
 }
