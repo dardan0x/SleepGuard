@@ -4,7 +4,8 @@ import SleepCore
 import SwiftUI
 
 /// Design tokens (colors, radii, fonts) from `designs/SleepGuard.pen`.
-/// Live: `Theme`. Previews/tests can pass a `Theme()` with tokens changed.
+/// Live: `AppTheme`, whose values start from the shared design kit's
+/// `Theme.sleepGuard`. Previews/tests can pass an `AppTheme()` with tokens changed.
 @MainActor
 public protocol ThemeProviding: AnyObject, Observable {
   var bgPrimary: Color { get }

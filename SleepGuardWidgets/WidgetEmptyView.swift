@@ -3,7 +3,7 @@ import SwiftUI
 
 /// No saved night yet; the whole widget links to `sleepguard://start`.
 struct WidgetEmptyView: View {
-  let theme = Theme.shared
+  let theme = AppTheme.shared
 
   var body: some View {
     VStack(spacing: 8) {

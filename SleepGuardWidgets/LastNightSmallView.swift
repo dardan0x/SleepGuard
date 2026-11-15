@@ -4,7 +4,7 @@ import SwiftUI
 
 struct LastNightSmallView: View {
   let night: WidgetSnapshot.Night
-  let theme = Theme.shared
+  let theme = AppTheme.shared
 
   var body: some View {
     VStack(spacing: 6) {

@@ -25,7 +25,7 @@ struct LastNightWidgetView: View {
         }
       }
     }
-    .containerBackground(Theme.shared.bgSecondary, for: .widget)
+    .containerBackground(AppTheme.shared.bgSecondary, for: .widget)
     .widgetURL((night.map { WidgetDeepLink.session($0.id) } ?? .startTracking).url)
   }
 }
@@ -36,7 +36,7 @@ struct LastNightLabel: View {
     Text(Strings.widgetLastNightLabel)
       .font(.caption2.weight(.semibold))
       .tracking(1)
-      .foregroundStyle(Theme.shared.textTertiary)
+      .foregroundStyle(AppTheme.shared.textTertiary)
   }
 }
 

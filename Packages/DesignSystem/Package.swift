@@ -20,6 +20,7 @@ let package = Package(
         .product(name: "FactoryKit", package: "Factory"),
         .product(name: "SleepCore", package: "SleepGuardShared"),
         .product(name: "SleepStrings", package: "SleepGuardShared"),
+        .product(name: "SleepGuardDesignKit", package: "SleepGuardShared"),
       ],
       path: "Sources",
       exclude: [],

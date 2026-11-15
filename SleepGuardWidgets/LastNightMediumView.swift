@@ -4,7 +4,7 @@ import SwiftUI
 
 struct LastNightMediumView: View {
   let night: WidgetSnapshot.Night
-  let theme = Theme.shared
+  let theme = AppTheme.shared
 
   var body: some View {
     HStack(spacing: 20) {
@@ -35,10 +35,10 @@ struct LastNightStatRow: View {
     VStack(alignment: .leading, spacing: 1) {
       Text(title)
         .font(.caption)
-        .foregroundStyle(Theme.shared.textTertiary)
+        .foregroundStyle(AppTheme.shared.textTertiary)
       Text(value)
         .font(.subheadline.weight(.semibold))
-        .foregroundStyle(Theme.shared.textPrimary)
+        .foregroundStyle(AppTheme.shared.textPrimary)
     }
   }
 }

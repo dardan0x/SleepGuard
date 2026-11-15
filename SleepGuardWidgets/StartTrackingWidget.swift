@@ -20,7 +20,7 @@ struct StartTrackingWidget: Widget {
 
 /// Mirrors `StartRecordingButton`: red record dot, label, red top glow.
 struct StartTrackingWidgetView: View {
-  let theme = Theme.shared
+  let theme = AppTheme.shared
 
   var body: some View {
     VStack(spacing: 14) {

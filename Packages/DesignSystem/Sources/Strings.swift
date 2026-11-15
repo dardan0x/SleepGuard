@@ -4,3 +4,7 @@
 // build with member import visibility, where a typealias alone doesn't make the
 // enum's members visible.
 @_exported import SleepStrings
+
+// The shared design kit (tokens, `Color(hex:)`, components), for every view
+// that imports DesignSystem, like the strings.
+@_exported import SleepGuardDesignKit

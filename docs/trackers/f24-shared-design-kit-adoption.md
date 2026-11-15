@@ -4,11 +4,11 @@
 
 | Field | Value |
 |-------|-------|
-| **Status** | Backlog |
+| **Status** | In Progress |
 | **Priority** | P2 |
 | **Version** | — |
 | **Blocked By** | — (do when there's time; best after SleepGuardUIKitWay F3-T5, which puts the detail components into the kit) |
-| **Started** | — |
+| **Started** | 2026-11-15 |
 | **Completed** | — |
 | **Feature Doc** | — |
 
@@ -24,7 +24,7 @@ Mirrors SleepGuardUIKitWay's F6 ("Design kit adoption in SleepGuard").
 
 | ID | Task | Type | Status | Depends On | Package | Started | Completed |
 |----|------|------|--------|------------|---------|---------|-----------|
-| F24-T1 | `Theme` built from the kit's default palette; kit theme injected into the SwiftUI environment at the root | Refactor | Backlog | — | DesignSystem, app | — | — |
+| F24-T1 | `Theme` built from the kit's default palette; kit theme injected into the SwiftUI environment at the root | Refactor | Done | — | DesignSystem, app | 2026-11-15 | 2026-11-15 |
 | F24-T2 | Replace `DesignSystem` primitives with the kit's (`StatCard`, `SleepScoreGauge`, `MiniBarChart`, `AudioLevelMeter`, sheet header/handle, `ScaleButtonStyle`, recording buttons) | Refactor | Backlog | F24-T1 | DesignSystem + call sites | — | — |
 | F24-T3 | Replace the detail components with the kit's view-data versions (`SessionStatsGrid`, `EventRow`, score badge, `SnoringLegendView`, `EventIntensityLegendView`, `SleepStageLegendGrid`, timeline); map `@Model` values to view data at the call site | Refactor | Backlog | F24-T2, UIKitWay F3-T5 | DesignSystem, Recordings, Statistics | — | — |
 | F24-T4 | ADR (`docs/adr/`), `AGENTS.md`/`CLAUDE.md` design section and duplication rule point at the shared kit | Docs | Backlog | F24-T3 | docs | — | — |
@@ -41,10 +41,12 @@ Mirrors SleepGuardUIKitWay's F6 ("Design kit adoption in SleepGuard").
 | Completed | — |
 
 **Acceptance Criteria:**
-- [ ] `DesignSystem` depends on `SleepGuardDesignKit` (pinned shared release; local override via `SleepGuard.xcworkspace`)
-- [ ] The 131 `@Injected(\.theme)` call sites are untouched
-- [ ] Token values match `designs/SleepGuard.pen` (resolve the open `bg-card` mismatch: `#2C2C2E` in AGENTS.md vs `#22232B` in code)
-- [ ] Builds with zero errors; all tests pass
+- [x] `DesignSystem` depends on `SleepGuardDesignKit` and re-exports it (like `SleepStrings`)
+- [x] SleepGuard's theme class is now `AppTheme` (the kit's value is `Theme`; both visible together would clash). 14 `Theme.shared` / `Theme()` sites renamed (app, widgets, test); `DesignSystem`'s duplicate `Color(hex:)` removed (the kit's is identical)
+- [x] Every token starts from the kit's `Theme.sleepGuard` (identical values: no visual change); `designKitTheme` gives the kit value, following overrides; the app root puts it in the environment
+- [x] The 131 `@Injected(\.theme)` call sites are untouched
+- [ ] Token values match `designs/SleepGuard.pen`: **open.** Code and kit use `#22232B` for `bg-card` (what ships today); AGENTS.md says `#2C2C2E`. Pencil wasn't running, so the design file wasn't checked.
+- [x] All 8 suites pass (DesignSystem 7: 2 new theme tests); app and widgets build; format, layering, view size pass
 
 ### F24-T2 — Primitive components
 
