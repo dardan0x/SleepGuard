@@ -3,6 +3,7 @@ import DesignSystem
 import Env
 import FactoryKit
 import Models
+import SleepCore
 import SwiftUI
 
 @MainActor
@@ -85,38 +86,18 @@ struct StatisticsLoadedView: View {
     return start
   }
 
+  /// Days and levels from SleepCore's week-strip rule; this adds labels and colours.
   private var weekDays: [StatisticsWeekDay] {
     let calendar = Calendar.current
-    let today = calendar.startOfDay(for: Date())
     let weekdaySymbols = calendar.shortWeekdaySymbols
 
-    return (0..<7).map { offset in
-      let date = calendar.date(byAdding: .day, value: offset - 6, to: today)!
-      let isToday = calendar.isDate(date, inSameDayAs: today)
-      let weekdayIndex = calendar.component(.weekday, from: date) - 1
-      let label = weekdaySymbols[weekdayIndex].uppercased().prefix(3)
-      let number = String(calendar.component(.day, from: date))
-
-      let daySession = state.recentSessions.first { session in
-        calendar.isDate(session.startDate, inSameDayAs: date)
-      }
-
-      let dotColor: Color? = daySession.map { session in
-        let pct = session.snoringPercentage
-        if pct > 15 {
-          return theme.snoreLoud
-        } else if pct > 5 {
-          return theme.snoreLight
-        } else {
-          return theme.snoreQuiet
-        }
-      }
-
+    return state.week.map { day in
+      let weekdayIndex = calendar.component(.weekday, from: day.date) - 1
       return StatisticsWeekDay(
-        label: String(label),
-        number: number,
-        isToday: isToday,
-        dotColor: dotColor)
+        label: String(weekdaySymbols[weekdayIndex].uppercased().prefix(3)),
+        number: String(calendar.component(.day, from: day.date)),
+        isToday: day.isToday,
+        dotColor: day.snoringLevel.map { theme.intensityColor($0) })
     }
   }
 }

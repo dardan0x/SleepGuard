@@ -79,6 +79,18 @@ struct DashboardStateTests {
     #expect(state.dayScore == 75)
   }
 
+  /// The week strip comes from the shared rule: 7 days ending today, the
+  /// day's level from its night's snoring share.
+  @Test func weekStripEndsTodayWithEachNightsLevel() throws {
+    let loud = session(day: 9, hour: 23, hours: 10)
+    loud.cachedSnoringDuration = 6000
+    let state = try #require(make([loud]))
+    #expect(state.week.count == 7)
+    #expect(state.week.last?.isToday == true)
+    #expect(state.week.last?.date == calendar.startOfDay(for: now))
+    #expect(state.week.map(\.snoringLevel) == [nil, nil, nil, nil, nil, .loud, nil])
+  }
+
   @Test func dayScoreIgnoresOtherDays() throws {
     let state = try #require(make([session(day: 8, hour: 23, score: 40), session(day: 9, hour: 23, score: 90)]))
     #expect(state.daySessionCount == 1)
