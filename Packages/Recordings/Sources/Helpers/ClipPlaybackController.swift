@@ -1,6 +1,7 @@
 import AVFoundation
 import Models
 import Observation
+import SleepCore
 
 /// Manages sequential playback of snore-event audio clips.
 ///
@@ -9,14 +10,26 @@ import Observation
 /// capped at +24 dB) can be applied without modifying the saved `.m4a` files.
 /// When `enhancedAudioEnabled` is `false`, the EQ bands and global gain are
 /// bypassed and playback is bit-exact to the recorded clip.
+///
+/// The playback rules (joined timeline, seeking, auto-advance, the boost) are
+/// SleepCore's `ClipPlaylist`, `PlaybackGain` and `PlaybackEnhancement`,
+/// shared with SleepGuardUIKitWay; this class drives the audio engine.
 @MainActor
 @Observable
 public final class ClipPlaybackController {
   public var events: [SnoreEvent] = []
-  public var currentEventIndex = 0
   public var isPlaying = false
   public var currentClipTime: TimeInterval = 0
-  public var totalClipsDuration: TimeInterval = 0
+  /// Which clip is current and the joined timeline (SleepCore).
+  private var playlist = ClipPlaylist(clips: [])
+
+  public var currentEventIndex: Int {
+    playlist.index
+  }
+
+  public var totalClipsDuration: TimeInterval {
+    playlist.totalDuration
+  }
 
   /// When `true`, clips play through band-pass (80 Hz–1.5 kHz) + per-clip
   /// peak normalization (target −3 dBFS, capped at +24 dB EQ headroom).
@@ -44,8 +57,8 @@ public final class ClipPlaybackController {
   /// Algorithm-defined playback duration for the current clip.
   /// Falls back to the actual file duration if the clip duration is missing.
   private var currentClipDuration: TimeInterval {
-    guard clipDurations.indices.contains(currentEventIndex) else { return currentFileDuration }
-    return min(clipDurations[currentEventIndex], currentFileDuration)
+    guard let clip = playlist.current else { return currentFileDuration }
+    return min(clip.duration, currentFileDuration)
   }
 
   private var pausedAtClipTime: TimeInterval = 0
@@ -58,7 +71,6 @@ public final class ClipPlaybackController {
   // MARK: - Aggregate state
 
   private var progressTimer: Timer?
-  private var clipDurations: [TimeInterval] = []
   private var notificationObserver: NSObjectProtocol?
 
   public init() {
@@ -70,13 +82,13 @@ public final class ClipPlaybackController {
     // Snore energy lives 100 Hz–1 kHz so this passband preserves all of it.
     let hp = eq.bands[0]
     hp.filterType = .highPass
-    hp.frequency = 80
+    hp.frequency = PlaybackEnhancement.highPassHz
     hp.bandwidth = 1.0
     hp.gain = 0
 
     let lp = eq.bands[1]
     lp.filterType = .lowPass
-    lp.frequency = 1500
+    lp.frequency = PlaybackEnhancement.lowPassHz
     lp.bandwidth = 1.0
     lp.gain = 0
 
@@ -84,7 +96,7 @@ public final class ClipPlaybackController {
   }
 
   public var currentEvent: SnoreEvent? {
-    events.indices.contains(currentEventIndex) ? events[currentEventIndex] : nil
+    events.indices.contains(playlist.index) ? events[playlist.index] : nil
   }
 
   public var currentEventNumber: Int { currentEventIndex + 1 }
@@ -93,7 +105,7 @@ public final class ClipPlaybackController {
 
   /// Cumulative time of all clips before the current one.
   public var currentClipStartTime: TimeInterval {
-    clipDurations.prefix(currentEventIndex).reduce(0, +)
+    playlist.currentClipStart
   }
 
   /// Current playback time across the concatenated timeline.
@@ -109,9 +121,7 @@ public final class ClipPlaybackController {
 
   public func loadEvents(_ events: [SnoreEvent]) {
     self.events = events
-    clipDurations = events.map(\.snoreDuration)
-    totalClipsDuration = clipDurations.reduce(0, +)
-    currentEventIndex = 0
+    playlist = ClipPlaylist(clips: events.map { ClipPlaylist.Clip(id: $0.id, fileName: nil, duration: $0.snoreDuration) })
     currentClipTime = 0
     pausedAtClipTime = 0
     audioFile = nil
@@ -202,8 +212,7 @@ public final class ClipPlaybackController {
   public func toggle() { togglePlayback() }
 
   public func playEvent(at index: Int) {
-    guard events.indices.contains(index) else { return }
-    currentEventIndex = index
+    guard playlist.select(index) else { return }
     currentClipTime = 0
     pausedAtClipTime = 0
     setupPlayerForCurrentEvent()
@@ -220,31 +229,25 @@ public final class ClipPlaybackController {
 
   /// Seeks to a relative position (0–1) across the concatenated timeline.
   public func seekToOverall(relative: Double) {
-    guard totalClipsDuration > 0, !clipDurations.isEmpty else { return }
-    let targetTime = relative * totalClipsDuration
-
-    var accumulated: TimeInterval = 0
-    for (index, duration) in clipDurations.enumerated() {
-      if accumulated + duration >= targetTime {
-        let clipOffset = targetTime - accumulated
-        let wasPlaying = isPlaying
-        if wasPlaying { pause() }
-        if currentEventIndex != index {
-          currentEventIndex = index
-          setupPlayerForCurrentEvent()
-        }
-        pausedAtClipTime = max(0, min(clipOffset, currentClipDuration))
-        currentClipTime = pausedAtClipTime
-        if wasPlaying { play() }
-        return
-      }
-      accumulated += duration
+    guard playlist.totalDuration > 0, !playlist.clips.isEmpty else { return }
+    // Past the end: the end of the last clip, playback left as it was.
+    guard relative <= 1 else {
+      playlist.seek(toProgress: relative)
+      setupPlayerForCurrentEvent()
+      pausedAtClipTime = currentClipDuration
+      currentClipTime = pausedAtClipTime
+      return
     }
-    // Past the end
-    currentEventIndex = max(0, clipDurations.count - 1)
-    setupPlayerForCurrentEvent()
-    pausedAtClipTime = currentClipDuration
+    let wasPlaying = isPlaying
+    if wasPlaying { pause() }
+    let previousIndex = playlist.index
+    playlist.seek(toProgress: relative)
+    if playlist.index != previousIndex {
+      setupPlayerForCurrentEvent()
+    }
+    pausedAtClipTime = max(0, min(playlist.offset, currentClipDuration))
     currentClipTime = pausedAtClipTime
+    if wasPlaying { play() }
   }
 
   /// Seeks within the current clip (0–1).
@@ -378,26 +381,20 @@ public final class ClipPlaybackController {
         }
       }
     }
-    guard peak > 0 else { return 0 }
-
-    // Target peak: −3 dBFS ≈ 0.708. Never attenuate (>= 0). Cap at +24 dB.
-    let target: Float = 0.708
-    let gainLinear = target / peak
-    let gainDB = 20 * log10(gainLinear)
-    return min(max(gainDB, 0), 24)
+    // −3 dBFS, never quieter, at most +24 dB: SleepCore's rule.
+    return PlaybackGain.boostDB(peak: peak)
   }
 
   private func handlePlaybackFinished() {
     pausedAtClipTime = 0
-    if currentEventIndex + 1 < events.count {
-      currentEventIndex += 1
+    switch playlist.clipFinished() {
+    case .playNext:
       currentClipTime = 0
       setupPlayerForCurrentEvent()
       play()
-    } else {
+    case .stopAtStart:
       isPlaying = false
       currentClipTime = 0
-      currentEventIndex = 0
       stopProgressTimer()
       setupPlayerForCurrentEvent()
     }

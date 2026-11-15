@@ -62,6 +62,14 @@ The Statistics numbers (dashboard state, week-over-week trend, Last 7 Nights day
 - Two mappings, because faulting `events` has crashed: `summaryWithoutEvents` (cached score and snoring time, no events) chooses nights; `nightSummary` (reads events) is built only for the nights a screen shows. The dashboard and the trend stay event-free, as before.
 - Proof: the Statistics tests (dashboard, week-over-week) pass unchanged; the same cases run in the shared repo against the shared rules.
 
+## Revision: playback rules (F5-T2 in SleepGuardUIKitWay, 2026-11-15)
+
+`ClipPlaybackController` mixed pure playback logic with `AVAudioEngine` code. The pure part is now `SleepCore`'s `ClipPlaylist` (current clip, joined timeline, seek across or within clips, what follows a finished clip), `PlaybackGain` (peak to −3 dBFS, never quieter, at most +24 dB) and `PlaybackEnhancement` (80 Hz high-pass, 1.5 kHz low-pass).
+
+- The controller's public API is unchanged; `currentEventIndex` and `totalClipsDuration` became read-only (no caller wrote them). The engine, filter chain, session, interruption and progress timer are untouched.
+- Kept as it was: seeking within a clip clamps to the shorter of the clip and its file; seeking past the end leaves playback as it was.
+- Limit: the controller has no tests; the shared rules do (9), and the change was checked by ear.
+
 ## Alternatives
 
 - **Copy the code into the new app.** No coupling, but two diverging formulas; rejected.
