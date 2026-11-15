@@ -1,35 +1,12 @@
 import DesignSystem
-import FactoryKit
 import Models
 import SwiftUI
 
 /// Snoring timeline with start/end time labels on the session summary.
 struct SessionSummaryTimeline: View {
-  @Injected(\.theme) private var theme
-
   let session: SleepSession
 
   var body: some View {
-    VStack(alignment: .leading, spacing: 12) {
-      SnoringTimelineView(session: session)
-
-      HStack {
-        Text(timeString(session.startDate))
-          .font(.caption2)
-          .foregroundStyle(theme.textTertiary)
-
-        Spacer()
-
-        if let endDate = session.endDate {
-          Text(timeString(endDate))
-            .font(.caption2)
-            .foregroundStyle(theme.textTertiary)
-        }
-      }
-    }
-  }
-
-  private func timeString(_ date: Date) -> String {
-    DateFormatters.timeWithPeriod.string(from: date)
+    NightTimeline(session: session, showsTitle: false)
   }
 }

@@ -26,7 +26,7 @@ Mirrors SleepGuardUIKitWay's F6 ("Design kit adoption in SleepGuard").
 |----|------|------|--------|------------|---------|---------|-----------|
 | F24-T1 | `Theme` built from the kit's default palette; kit theme injected into the SwiftUI environment at the root | Refactor | Done | — | DesignSystem, app | 2026-11-15 | 2026-11-15 |
 | F24-T2 | Replace `DesignSystem` primitives with the kit's (`StatCard`, `SleepScoreGauge`, `MiniBarChart`, `AudioLevelMeter`, sheet header/handle, `ScaleButtonStyle`, recording buttons) | Refactor | Done | F24-T1 | DesignSystem + call sites | 2026-11-15 | 2026-11-15 |
-| F24-T3 | Replace the detail components with the kit's view-data versions (`SessionStatsGrid`, `EventRow`, score badge, `SnoringLegendView`, `EventIntensityLegendView`, `SleepStageLegendGrid`, timeline); map `@Model` values to view data at the call site | Refactor | Backlog | F24-T2, UIKitWay F3-T5 | DesignSystem, Recordings, Statistics | — | — |
+| F24-T3 | Replace the detail components with the kit's view-data versions (`SessionStatsGrid`, `EventRow`, score badge, `SnoringLegendView`, `EventIntensityLegendView`, `SleepStageLegendGrid`, timeline); map `@Model` values to view data at the call site | Refactor | In Progress | F24-T2, UIKitWay F3-T5 | DesignSystem, Recordings, Statistics | 2026-11-15 | — |
 | F24-T4 | ADR (`docs/adr/`), `AGENTS.md`/`CLAUDE.md` design section and duplication rule point at the shared kit | Docs | Backlog | F24-T3 | docs | — | — |
 
 ## Task Details
@@ -62,6 +62,16 @@ Mirrors SleepGuardUIKitWay's F6 ("Design kit adoption in SleepGuard").
 - [ ] Kit components take plain values / `SleepCore` types, never SwiftData models
 - [ ] Mapping from `SleepSession`/`SnoreEvent` to view data lives in this app, next to the call site
 - [ ] Checked against `designs/SleepGuard.pen`; builds with zero errors; all tests pass
+
+**Split into three steps (2026-11-15):** T3a night detail, T3b Statistics, T3c player.
+
+**T3a — night detail (done 2026-11-15; shared 0.12.0)**
+- [x] Deleted (approved): `DesignSystem`'s `SessionStatsGrid`, `SnoringTimelineView`; `Recordings`' `EventRow`; the private `EventCard` in `EventsSheetView`
+- [x] `MelodyGapsBannerView` / `LowBatteryBannerView` rewritten as thin wrappers over the kit's banners; both timelines (detail, session summary) use the kit's `NightTimeline` (the summary without its title: kit option `showsTitle`, shared 0.12.0)
+- [x] `SleepGuardKitAdapters.swift`: kit initializers from the stored models with the old signatures (`SessionStatsGrid(session:)`, `NightTimeline(session:)`, `EventRow(event:displayDuration:onPlay:onShare:)`, `EventCard(event:displayDuration:onPlay:)`), so the 13 call sites didn't change
+- [x] Visible change (approved): event rows show the device's short time ("2:46 AM", or "02:46" on 24-hour devices) instead of a fixed "02:46 AM"
+- [x] All 8 suites pass against the local shared checkout; app builds; format, layering, view size pass
+- [ ] Seen on screen: not yet (night detail, events sheet, session summary)
 
 ### F24-T4 — Docs
 
