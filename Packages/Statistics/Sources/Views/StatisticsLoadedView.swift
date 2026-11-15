@@ -22,7 +22,7 @@ struct StatisticsLoadedView: View {
 
       ScrollView {
         VStack(spacing: DeviceSize.isCompactHeight ? 10 : 16) {
-          StatisticsWeekSelector(weekDays: weekDays, onViewTrends: onViewTrends)
+          StatisticsWeekSelector(week: state.week, onViewTrends: onViewTrends)
 
           SleepScoreGauge(score: state.dayScore, size: 120)
 
@@ -84,20 +84,5 @@ struct StatisticsLoadedView: View {
       return "\(start) – \(end)"
     }
     return start
-  }
-
-  /// Days and levels from SleepCore's week-strip rule; this adds labels and colours.
-  private var weekDays: [StatisticsWeekDay] {
-    let calendar = Calendar.current
-    let weekdaySymbols = calendar.shortWeekdaySymbols
-
-    return state.week.map { day in
-      let weekdayIndex = calendar.component(.weekday, from: day.date) - 1
-      return StatisticsWeekDay(
-        label: String(weekdaySymbols[weekdayIndex].uppercased().prefix(3)),
-        number: String(calendar.component(.day, from: day.date)),
-        isToday: day.isToday,
-        dotColor: day.snoringLevel.map { theme.intensityColor($0) })
-    }
   }
 }

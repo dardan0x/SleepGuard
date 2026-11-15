@@ -12,8 +12,6 @@ struct DaySummary: Identifiable {
   let totalDuration: TimeInterval
   let maxIntensity: SnoreIntensity
   let label: String
-  let weekday: String
-  let dateString: String
   let primarySessionId: UUID?
 
   /// Totals come from SleepCore's `NightDay`; this adds the labels.
@@ -25,8 +23,6 @@ struct DaySummary: Identifiable {
     totalDuration = day.duration
     maxIntensity = day.loudestIntensity
     label = String(DateFormatters.dayOfWeekShort.string(from: day.date).prefix(1).uppercased())
-    weekday = DateFormatters.dayOfWeekShort.string(from: day.date)
-    dateString = DateFormatters.monthDay.string(from: day.date)
     primarySessionId = day.nights.first?.id
   }
 }
