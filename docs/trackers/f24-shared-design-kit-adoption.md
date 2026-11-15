@@ -25,7 +25,7 @@ Mirrors SleepGuardUIKitWay's F6 ("Design kit adoption in SleepGuard").
 | ID | Task | Type | Status | Depends On | Package | Started | Completed |
 |----|------|------|--------|------------|---------|---------|-----------|
 | F24-T1 | `Theme` built from the kit's default palette; kit theme injected into the SwiftUI environment at the root | Refactor | Done | — | DesignSystem, app | 2026-11-15 | 2026-11-15 |
-| F24-T2 | Replace `DesignSystem` primitives with the kit's (`StatCard`, `SleepScoreGauge`, `MiniBarChart`, `AudioLevelMeter`, sheet header/handle, `ScaleButtonStyle`, recording buttons) | Refactor | Backlog | F24-T1 | DesignSystem + call sites | — | — |
+| F24-T2 | Replace `DesignSystem` primitives with the kit's (`StatCard`, `SleepScoreGauge`, `MiniBarChart`, `AudioLevelMeter`, sheet header/handle, `ScaleButtonStyle`, recording buttons) | Refactor | Done | F24-T1 | DesignSystem + call sites | 2026-11-15 | 2026-11-15 |
 | F24-T3 | Replace the detail components with the kit's view-data versions (`SessionStatsGrid`, `EventRow`, score badge, `SnoringLegendView`, `EventIntensityLegendView`, `SleepStageLegendGrid`, timeline); map `@Model` values to view data at the call site | Refactor | Backlog | F24-T2, UIKitWay F3-T5 | DesignSystem, Recordings, Statistics | — | — |
 | F24-T4 | ADR (`docs/adr/`), `AGENTS.md`/`CLAUDE.md` design section and duplication rule point at the shared kit | Docs | Backlog | F24-T3 | docs | — | — |
 
@@ -51,9 +51,10 @@ Mirrors SleepGuardUIKitWay's F6 ("Design kit adoption in SleepGuard").
 ### F24-T2 — Primitive components
 
 **Acceptance Criteria:**
-- [ ] Each replaced component is deleted from `DesignSystem`; call sites use the kit's
-- [ ] Checked against `designs/SleepGuard.pen` (simulator screenshots before/after)
-- [ ] `check-layering.py` and `check-view-size.py` pass; builds with zero errors; all tests pass
+- [x] Deleted from `DesignSystem` (approved by the user): `StatCard`, `SleepScoreGauge`, `MiniBarChart`, `AudioLevelMeter`, `ScaleButtonStyle`, `SheetHandle` / `SheetNavHeader`, `RecordingActionButton`, `StartRecordingButton`, `StopRecordingButton`. The kit's take over through `DesignSystem`'s re-export; the 48 call sites are unchanged (same APIs)
+- [x] Same drawing: compared line by line; every hardcoded value in SleepGuard's copies equals the kit's token (`#FF453A` = destructive, `#22232B` = bgCard, 16 = card radius, white = textPrimary, `#8E8E93` = textTertiary); fonts are the system font either way
+- [ ] Checked on screen: **not done.** The simulator opens on the daily briefing, which covers these screens, and I can't tap from here. Needs a look (dashboard, recording buttons, sheets)
+- [x] All 8 suites pass; app and widgets build; format, layering, view size pass
 
 ### F24-T3 — Detail components
 

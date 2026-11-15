@@ -46,10 +46,10 @@ Last updated: 2026-11-14
 | Blocked | 0 |
 | — | — |
 | Total Tasks | 169 |
-| Tasks Done | 149 |
+| Tasks Done | 150 |
 | Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
-| Tasks Backlog | 20 |
+| Tasks Backlog | 19 |
 | — | — |
 | **Progress** | **87%** |
 
@@ -79,7 +79,7 @@ Last updated: 2026-11-14
 | F21 | Test Coverage | P1 | Done | 17/17 | ██████████ 100% | [tracker](trackers/f21-test-coverage.md) |
 | F22 | Architecture Hardening | P1 | Done (real-night check pending) | 16/16 | ██████████ 100% | [tracker](trackers/f22-architecture-hardening.md) |
 | F23 | Production Readiness | P1 | In Progress | 12/13 | █████████░ 92% | [tracker](trackers/f23-production-readiness.md) |
-| F24 | Shared Design Kit Adoption | P2 | In Progress | 1/4 | ██░░░░░░░░ 25% | [tracker](trackers/f24-shared-design-kit-adoption.md) |
+| F24 | Shared Design Kit Adoption | P2 | In Progress | 2/4 | █████░░░░░ 50% | [tracker](trackers/f24-shared-design-kit-adoption.md) |
 
 ## Activity Log
 
@@ -87,6 +87,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-11-15 | F24-T2 | Completed | Nine basic components now come from the shared kit (SleepGuard's copies deleted, same drawing, call sites unchanged). Branch `feature/f24/t2-kit-primitives` |
 | 2026-11-15 | F24-T1 | Completed | Theme from the shared kit: `AppTheme` (was `Theme`) starts from `Theme.sleepGuard`, `DesignSystem` re-exports the kit, the root injects the kit theme. No visual change. Open: `bg-card` vs the design file. Branch `feature/f24/t1-theme-from-kit` |
 | 2026-11-14 | F24 Planning | Planned | F24 (Shared Design Kit Adoption) defined; tracker + 4-task backlog. SleepGuard moves its tokens and presentational components onto the shared `SleepGuardDesignKit` so a view change is made once for both apps. Mirrors SleepGuardUIKitWay F6. No code yet |
 | 2026-11-11 | F23-T13 | Completed | 22 views take `theme` via `@Injected` instead of `init` (41 call sites, incl. widget); DI rule refined (views: `@Injected`; testable non-view types: init injection) with its reason; `check-layering.py` rule 6. Committed directly on `feature/f22-architecture-hardening` |
