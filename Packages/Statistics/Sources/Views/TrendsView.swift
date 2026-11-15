@@ -20,13 +20,13 @@ public struct TrendsView: View {
   public var body: some View {
     ScrollView {
       VStack(spacing: 24) {
-        timeRangePicker
+        PillPicker(options: TimeRange.allCases, selection: $timeRange) { $0.localizedName }
 
         snoringMinutesSection
 
-        TrendsChartSection(data: chartData())
+        SnoringBarChart(bars: chartData())
 
-        SnoringLegendView()
+        SnoringLegend()
 
         TrendsStatsGrid(
           averageScore: averageScore(),
@@ -46,30 +46,6 @@ public struct TrendsView: View {
           .foregroundStyle(theme.textPrimary)
       }
     }
-  }
-
-  // MARK: - Time Range Picker
-
-  private var timeRangePicker: some View {
-    HStack(spacing: 0) {
-      ForEach(TimeRange.allCases) { range in
-        Button {
-          withAnimation(.easeInOut(duration: 0.2)) {
-            timeRange = range
-          }
-        } label: {
-          Text(range.localizedName)
-            .font(.system(size: 13, weight: .semibold))
-            .foregroundStyle(timeRange == range ? .white : theme.textTertiary)
-            .frame(maxWidth: .infinity)
-            .frame(height: 36)
-            .background(timeRange == range ? theme.accent : Color.clear)
-            .cornerRadius(8)
-        }
-      }
-    }
-    .background(theme.bgCard)
-    .cornerRadius(8)
   }
 
   // MARK: - Snoring Minutes
@@ -107,15 +83,15 @@ public struct TrendsView: View {
     return NightPeriod(lastDays: days, of: sessions.fullSummaries(of: chosen), now: now)
   }
 
-  private func chartData() -> [TrendBarData] {
+  private func chartData() -> [SnoringBar] {
     let formatter = timeRange == .week ? DateFormatters.dayOfWeekShort : DateFormatters.dayOfMonth
 
     return period.nights.map { night in
-      TrendBarData(
+      SnoringBar(
         id: night.id,
         label: formatter.string(from: night.start),
         minutes: Int(night.snoringDuration / 60),
-        color: theme.intensityColor(night.loudestIntensity ?? .quiet))
+        intensity: night.loudestIntensity ?? .quiet)
     }
   }
 
@@ -141,7 +117,7 @@ public struct TrendsView: View {
 }
 
 @MainActor
-private enum TimeRange: String, CaseIterable, Identifiable {
+private enum TimeRange: String, CaseIterable, Identifiable, Hashable {
   case week = "Week"
   case month = "Month"
 

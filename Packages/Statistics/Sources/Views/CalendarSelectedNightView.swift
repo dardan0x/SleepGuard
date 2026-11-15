@@ -18,31 +18,7 @@ struct CalendarSelectedNightView: View {
         .foregroundStyle(theme.textTertiary)
         .tracking(1)
 
-      HStack(spacing: 12) {
-        SleepScoreGauge(score: session.sleepScore, size: 44)
-
-        VStack(alignment: .leading, spacing: 2) {
-          Text(selectedDateString)
-            .font(.system(size: 16, weight: .semibold))
-            .foregroundStyle(theme.textPrimary)
-
-          Text(sessionDescription)
-            .font(.system(size: 13))
-            .foregroundStyle(theme.textSecondary)
-        }
-
-        Spacer()
-
-        Image(systemName: "chevron.right")
-          .font(.system(size: 13, weight: .semibold))
-          .foregroundStyle(theme.textTertiary)
-      }
-      .padding(.horizontal, 16)
-      .padding(.vertical, 12)
-      .background(theme.bgCard)
-      .cornerRadius(theme.radiusCard)
-      .contentShape(Rectangle())
-      .onTapGesture {
+      NightCard(score: session.sleepScore, title: selectedDateString, detail: sessionDescription) {
         routerPath.navigate(to: .sessionDetail(id: session.id))
       }
     }

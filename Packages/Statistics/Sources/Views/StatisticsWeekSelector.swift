@@ -1,17 +1,11 @@
 import DesignSystem
 import FactoryKit
+import SleepCore
 import SwiftUI
 
-struct StatisticsWeekDay: Identifiable {
-  let id = UUID()
-  let label: String
-  let number: String
-  let isToday: Bool
-  let dotColor: Color?
-}
-
 struct StatisticsWeekSelector: View {
-  let weekDays: [StatisticsWeekDay]
+  /// The 7 days ending today, from SleepCore's `NightDashboard.week(now:)`.
+  let week: [NightDashboard.WeekDay]
   let onViewTrends: () -> Void
   @Injected(\.theme) private var theme
 
@@ -34,31 +28,7 @@ struct StatisticsWeekSelector: View {
         }
       }
 
-      HStack(spacing: 0) {
-        ForEach(weekDays, id: \.label) { day in
-          VStack(spacing: 4) {
-            Text(day.label)
-              .font(.system(size: 10, weight: .medium))
-              .foregroundStyle(day.isToday ? theme.textPrimary : theme.textTertiary)
-              .tracking(0.5)
-
-            Text(day.number)
-              .font(.system(size: 18, weight: .semibold))
-              .foregroundStyle(day.isToday ? theme.textPrimary : theme.textSecondary)
-
-            Circle()
-              .fill(day.dotColor ?? Color.clear)
-              .frame(width: 4, height: 4)
-          }
-          .frame(maxWidth: .infinity)
-          .padding(.vertical, 8)
-          .background(day.isToday ? theme.bgCard : Color.clear)
-          .clipShape(RoundedRectangle(cornerRadius: 12))
-        }
-      }
-      .padding(.horizontal, 8)
-      .padding(.vertical, 4)
-      .clipShape(RoundedRectangle(cornerRadius: theme.radiusCard))
+      WeekStrip(days: week)
     }
   }
 }

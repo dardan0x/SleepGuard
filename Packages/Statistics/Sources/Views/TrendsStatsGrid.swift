@@ -13,22 +13,22 @@ struct TrendsStatsGrid: View {
     let columns = [GridItem(.flexible()), GridItem(.flexible())]
 
     LazyVGrid(columns: columns, spacing: 12) {
-      TrendStatCard(
+      StatTile(
         icon: "scope",
         iconColor: theme.accent,
         label: Strings.statsTrendsStatCardAvgScore,
         value: "\(averageScore)")
-      TrendStatCard(
+      StatTile(
         icon: "star.fill",
         iconColor: theme.scoreGreen,
         label: Strings.statsTrendsStatCardBestNight,
         value: "\(bestScore)")
-      TrendStatCard(
+      StatTile(
         icon: "bolt.fill",
         iconColor: theme.snoreLoud,
         label: Strings.statsTrendsStatCardWorstNight,
         value: "\(worstScore)")
-      TrendStatCard(
+      StatTile(
         icon: "number",
         iconColor: theme.textTertiary,
         label: Strings.statsTrendsStatCardTotalEvents,

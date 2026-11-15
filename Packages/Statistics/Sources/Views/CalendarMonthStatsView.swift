@@ -8,15 +8,15 @@ struct CalendarMonthStatsView: View {
 
   var body: some View {
     HStack(spacing: 8) {
-      CalendarStatCard(
+      CenteredStatTile(
         icon: "moon.fill",
         label: Strings.sessionsCalendarStatCardLabel,
         value: "\(month.nights.count)")
-      CalendarStatCard(
+      CenteredStatTile(
         icon: "scope",
         label: Strings.avgScoreCalendarStatCardLabel,
         value: month.averageScore.map { "\($0)" } ?? "—")
-      CalendarStatCard(
+      CenteredStatTile(
         icon: "speaker.wave.3.fill",
         label: Strings.loudNightsCalendarStatCardLabel,
         value: "\(month.loudNightCount)")

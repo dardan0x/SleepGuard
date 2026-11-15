@@ -16,31 +16,18 @@ public struct CalendarView: View {
   @State private var selectedDate: Date? = nil
 
   private let calendar = Calendar.current
-  private var weekdaySymbols: [String] {
-    let symbols = calendar.shortWeekdaySymbols
-    let first = calendar.firstWeekday - 1
-    return Array(symbols[first...] + symbols[..<first])
-  }
 
   public init() {}
 
   public var body: some View {
     ScrollView {
       VStack(spacing: 16) {
-        CalendarMonthSelector(
-          monthYearString: monthYearString,
+        MonthHeader(
+          title: monthYearString,
           onPrevious: { selectedMonth = previousMonth },
           onNext: { selectedMonth = nextMonth })
 
-        CalendarDayHeaders(symbols: weekdaySymbols)
-
-        CalendarGridView(
-          days: calendarDays(),
-          selectedDate: selectedDate,
-          selectedMonth: selectedMonth,
-          sessionForDate: sessionFor(date:),
-          intensityColorForSession: intensityColor(for:),
-          onSelectDate: { selectedDate = $0 })
+        CalendarMonthGrid(days: calendarDays()) { selectedDate = $0 }
 
         CalendarMonthStatsView(month: monthStats)
 
@@ -50,7 +37,7 @@ public struct CalendarView: View {
             selectedDateString: selectedDateString)
         }
 
-        SnoringLegendView()
+        SnoringLegend()
       }
       .padding(.horizontal, 20)
       .padding(.bottom, 20)
@@ -122,14 +109,16 @@ public struct CalendarView: View {
     return sessions.first { $0.id == night.id }
   }
 
-  /// The loudest event's colour; none for a night without events.
-  private func intensityColor(for session: SleepSession?) -> Color {
-    guard let loudest = session?.nightSummary.loudestIntensity else { return Color.clear }
-    return theme.intensityColor(loudest)
-  }
-
-  private func calendarDays() -> [CalendarDay] {
-    CalendarMonth.grid(for: selectedMonth, calendar: calendar).map { CalendarDay(date: $0) }
+  /// The grid's 42 days (SleepCore's `CalendarMonth`), each with its night's
+  /// loudest intensity (no dot for a night without events).
+  private func calendarDays() -> [CalendarMonthGrid.Day] {
+    CalendarMonth.grid(for: selectedMonth, calendar: calendar).map { date in
+      CalendarMonthGrid.Day(
+        date: date,
+        isInMonth: calendar.isDate(date, equalTo: selectedMonth, toGranularity: .month),
+        isSelected: selectedDate.map { calendar.isDate(date, inSameDayAs: $0) } ?? false,
+        loudest: sessionFor(date: date)?.nightSummary.loudestIntensity)
+    }
   }
 
   private var selectedDateString: String {

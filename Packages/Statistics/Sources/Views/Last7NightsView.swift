@@ -21,7 +21,9 @@ public struct Last7NightsView: View {
       VStack(spacing: 16) {
         dateScoreHeader
 
-        Last7NightsChartCard(days: daySummaries)
+        SnoringDayBars(bars: daySummaries.map { day in
+          SnoringBar(label: day.label, minutes: day.totalSnoringMinutes, intensity: day.maxIntensity)
+        })
 
         Last7NightsStatGrid(
           avgSnoringMinutes: avgSnoringMinutes,
@@ -93,7 +95,10 @@ public struct Last7NightsView: View {
 
       VStack(spacing: 8) {
         ForEach(daySummaries.reversed()) { day in
-          Last7NightsRow(day: day) {
+          DayRow(
+            score: day.avgScore, date: day.date, duration: day.totalDuration,
+            snoringMinutes: day.totalSnoringMinutes, loudest: day.maxIntensity)
+          {
             // Navigate to session detail for the primary session of this day
             if let sessionId = day.primarySessionId {
               routerPath.navigate(to: .sessionDetail(id: sessionId))

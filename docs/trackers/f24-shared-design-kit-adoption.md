@@ -73,6 +73,15 @@ Mirrors SleepGuardUIKitWay's F6 ("Design kit adoption in SleepGuard").
 - [x] All 8 suites pass against the local shared checkout; app builds; format, layering, view size pass
 - [ ] Seen on screen: not yet (night detail, events sheet, session summary)
 
+**T3b — Statistics (done 2026-11-15; shared 0.13.0)**
+- [x] Deleted (approved): `DesignSystem`'s `SnoringLegendView`; Statistics' `TrendStatCard`, `TrendsChartSection`, `CalendarStatCard`, `CalendarGridView`, `CalendarDayHeaders`, `CalendarMonthSelector`, `Last7NightsChartCard`, `Last7NightsRow`
+- [x] Rewritten on kit components: week strip (`WeekStrip` from the dashboard's week; header kept), Trends (`PillPicker`, `SnoringBarChart`, `SnoringLegend`, `StatTile`), calendar (`MonthHeader`, `CalendarMonthGrid`, `CenteredStatTile`, `NightCard` with the same text; "Today" stays in the toolbar), Last 7 Nights (`SnoringDayBars`, `StatTile` 22 pt, `DayRow`)
+- [x] Orphans removed: `StatisticsWeekDay` and its mapping, `DaySummary.weekday` / `dateString`, the calendar's weekday symbols and colour helper
+- [x] Kit fix (shared 0.13.0): calendar days with a night sit on the card colour (`#22232B`), as in SleepGuard; the kit had `#3A3A3C`
+- [x] Visible change (approved): Trends' stat tiles take the Last 7 Nights style (2 pt more spacing, semibold icon)
+- [x] All 8 suites pass against the local shared checkout; app builds; format, layering, view size pass
+- [ ] Seen on screen: not yet (dashboard week strip, Trends, calendar, Last 7 Nights)
+
 ### F24-T4 — Docs
 
 **Acceptance Criteria:**
