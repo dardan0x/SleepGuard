@@ -80,7 +80,7 @@ Last updated: 2026-11-14
 | F22 | Architecture Hardening | P1 | Done (real-night check pending) | 16/16 | ██████████ 100% | [tracker](trackers/f22-architecture-hardening.md) |
 | F23 | Production Readiness | P1 | In Progress | 12/13 | █████████░ 92% | [tracker](trackers/f23-production-readiness.md) |
 | F24 | Shared Design Kit Adoption | P2 | Done (bg-card open) | 4/4 | ██████████ 100% | [tracker](trackers/f24-shared-design-kit-adoption.md) |
-| F25 | Shared Screen Content | P2 | In Progress | 2/6 | ███░░░░░░░ 33% | [tracker](trackers/f25-shared-screen-content.md) |
+| F25 | Shared Screen Content | P2 | In Progress | 3/6 | █████░░░░░ 50% | [tracker](trackers/f25-shared-screen-content.md) |
 
 ## Activity Log
 
@@ -88,6 +88,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-11-16 | F25-T3 | Completed | Recordings list hosts the shared nights list content; grouping is SleepCore's `NightMonth` (shared 0.18.0). 6 files deleted (approved). Branch `feature/f25/t3-nights-list` |
 | 2026-11-16 | F25-T2 | Completed | Statistics screens host the shared content (`SleepGuardContentKit`, shared 0.17.0). 10 files deleted (approved). Calendar line localized. Branch `feature/f25/t2-statistics-content` |
 | 2026-11-16 | F25-T1 | Completed | F25 (Shared Screen Content) decided with the owner: screens' loaded layouts move to the shared `SleepGuardContentKit`, screens stay here. ADR 0006; rule in AGENTS/CLAUDE; tracker with 6 tasks. Mirrors SleepGuardUIKitWay F10. Branch `docs/f25-shared-screen-content` |
 | 2026-11-16 | F24-T4 | Completed | ADR 0005 (shared design kit); AGENTS/CLAUDE design section and duplication rule point to the kit. F24 done; `bg-card` open. Branch `docs/f24-t4-design-kit-docs` |
