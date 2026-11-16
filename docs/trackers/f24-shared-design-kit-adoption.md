@@ -4,12 +4,12 @@
 
 | Field | Value |
 |-------|-------|
-| **Status** | In Progress |
+| **Status** | Done (bg-card open) |
 | **Priority** | P2 |
 | **Version** | — |
 | **Blocked By** | — (do when there's time; best after SleepGuardUIKitWay F3-T5, which puts the detail components into the kit) |
 | **Started** | 2026-11-15 |
-| **Completed** | — |
+| **Completed** | 2026-11-16 |
 | **Feature Doc** | — |
 
 ## Summary
@@ -27,7 +27,7 @@ Mirrors SleepGuardUIKitWay's F6 ("Design kit adoption in SleepGuard").
 | F24-T1 | `Theme` built from the kit's default palette; kit theme injected into the SwiftUI environment at the root | Refactor | Done | — | DesignSystem, app | 2026-11-15 | 2026-11-15 |
 | F24-T2 | Replace `DesignSystem` primitives with the kit's (`StatCard`, `SleepScoreGauge`, `MiniBarChart`, `AudioLevelMeter`, sheet header/handle, `ScaleButtonStyle`, recording buttons) | Refactor | Done | F24-T1 | DesignSystem + call sites | 2026-11-15 | 2026-11-15 |
 | F24-T3 | Replace the detail components with the kit's view-data versions (`SessionStatsGrid`, `EventRow`, score badge, `SnoringLegendView`, `EventIntensityLegendView`, `SleepStageLegendGrid`, timeline); map `@Model` values to view data at the call site | Refactor | Done | F24-T2, UIKitWay F3-T5 | DesignSystem, Recordings, Statistics | 2026-11-15 | 2026-11-16 |
-| F24-T4 | ADR (`docs/adr/`), `AGENTS.md`/`CLAUDE.md` design section and duplication rule point at the shared kit | Docs | Backlog | F24-T3 | docs | — | — |
+| F24-T4 | ADR (`docs/adr/`), `AGENTS.md`/`CLAUDE.md` design section and duplication rule point at the shared kit | Docs | Done | F24-T3 | docs | 2026-11-16 | 2026-11-16 |
 
 ## Task Details
 
@@ -92,8 +92,9 @@ Mirrors SleepGuardUIKitWay's F6 ("Design kit adoption in SleepGuard").
 ### F24-T4 — Docs
 
 **Acceptance Criteria:**
-- [ ] ADR: context, decision, consequences (one change reaches both apps; a kit change needs a shared release), alternatives (keep copies)
-- [ ] `AGENTS.md` and `CLAUDE.md` kept in sync
+- [x] ADR 0005 (`docs/adr/0005-shared-design-kit.md`): context, decision, consequences (one change reaches both apps; a kit change needs a shared release; two theme reads), alternatives
+- [x] `AGENTS.md` and `CLAUDE.md` (in sync): shared kit paragraph in Design Compliance, the extraction and duplication rules point to the kit, `bg-card` marked open
+- [x] Technical overview's DesignSystem row
 
 ## Notes
 

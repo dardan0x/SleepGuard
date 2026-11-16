@@ -65,6 +65,10 @@ Before implementing or modifying ANY view:
 
 If a design token is missing for a property, derive it from the screenshot or ask. Never guess a color or radius that contradicts the design.
 
+**Open:** `bg-card` is `#22232B` in code and in the shared kit (what ships); the list above says `#2C2C2E`. Settle it against the `.pen` file before relying on either.
+
+**Shared design kit (ADR 0005).** Tokens and presentational components live in `SleepGuardDesignKit` in `../SleepGuardShared`, used by SleepGuard and SleepGuardUIKitWay. `DesignSystem` re-exports it; `AppTheme` starts from its `Theme.sleepGuard`; the app root puts `AppTheme.shared.designKitTheme` in the SwiftUI environment, where kit components read it. Build kit components from SwiftData models through `DesignSystem/Sources/Components/SleepGuardKitAdapters.swift`. A change to a kit component is a shared release (tag, then `scripts/bump-shared.sh`) and reaches both apps.
+
 ## Localization (Non-Negotiable)
 
 **All user-facing strings must be localized. Never hardcode text in views.**
@@ -225,7 +229,7 @@ These thresholds prevent monolithic views. Enforce them during implementation an
 - State-specific views: `[Feature]EmptyView`, `[Feature]ErrorView`, `[Feature]LoadedView`
 - Reusable rows/cards: `[Feature]RowView`, `[Feature]StatCard`, `[Feature]EventRow`
 - Full-screen overlays: `AlarmOverlayView`, `PermissionOverlayView`
-- Shared visualization components used by 2+ packages: move to `DesignSystem`
+- A view that only takes values and draws them: the shared kit (`SleepGuardDesignKit`), so both apps use one copy. A SleepGuard-only piece used by 2+ packages (it reads models or services): `DesignSystem`
 
 **What stays inline (fine as private computed properties):**
 - Simple headers, badges, or labels under 10 lines
@@ -238,7 +242,7 @@ These thresholds prevent monolithic views. Enforce them during implementation an
 - During review, run: `grep -rnE '^\s+(private )?var \w+: some View' Packages --include='*.swift'` and check new/changed hits against this rule.
 
 **Duplication rule:**
-- If the same view struct appears in 2+ files, extract it to `DesignSystem` immediately. Do not copy-paste view code.
+- If the same view struct appears in 2+ files, extract it immediately: to the shared kit if it only draws values, otherwise to `DesignSystem`. Do not copy-paste view code, and don't copy a kit component into this repo.
 
 ### Packages
 
