@@ -1,6 +1,7 @@
 import AVFoundation
 import Models
 import Observation
+import SleepCore
 import SoundAnalysis
 
 /// Wraps Apple's built-in SNAudioStreamAnalyzer to detect snoring
@@ -21,16 +22,6 @@ public final class SoundAnalysisDetector: NSObject, SNResultsObserving, SoundAna
 
   private var streamAnalyzer: SNAudioStreamAnalyzer?
   private var analysisRequest: SNClassifySoundRequest?
-  private let snoreIdentifiers = ["snore", "snoring"]
-  private let speechIdentifiers = [
-    "speech", "talking", "conversation", "narration", "monologue",
-    "whisper", "mumble", "mutter", "stutter",
-    "groan", "moan", "sigh", "grunt", "grumble",
-    "exclaim", "gasp", "yell", "scream", "shout",
-    "laugh", "giggle", "whimper",
-  ]
-  private let babyIdentifiers = ["baby_crying", "baby_laughter", "babble"]
-
   override public init() {
     super.init()
     setupRequest()
@@ -43,7 +34,7 @@ public final class SoundAnalysisDetector: NSObject, SNResultsObserving, SoundAna
 
       let known = request.knownClassifications.map { $0.lowercased() }
       Log.audio.debug("Built-in sound classes: \(known.sorted())")
-      let found = snoreIdentifiers.first { known.contains($0) }
+      let found = SoundClassLabels.snore.first { known.contains($0) }
       if let found {
         isSnoringClassAvailable = true
         Log.audio.info("Found snoring-related class: '\(found)'")
@@ -97,20 +88,10 @@ public final class SoundAnalysisDetector: NSObject, SNResultsObserving, SoundAna
     }.joined(separator: ", ")
     Log.audio.debug("Top classifications: \(top3, privacy: .public)")
     #endif
-    var maxSnoreConfidence: Float = 0
-    var maxSpeechConfidence: Float = 0
-    for classification in result.classifications {
-      let id = classification.identifier.lowercased()
-      if snoreIdentifiers.contains(where: { id.contains($0) }) {
-        maxSnoreConfidence = max(maxSnoreConfidence, Float(classification.confidence))
-      }
-      if speechIdentifiers.contains(where: { id.contains($0) }) {
-        maxSpeechConfidence = max(maxSpeechConfidence, Float(classification.confidence))
-      }
-      if babyIdentifiers.contains(where: { id.contains($0) }) {
-        maxSpeechConfidence = max(maxSpeechConfidence, Float(classification.confidence))
-      }
-    }
+    // Which classes count as snoring and talking: SleepCore's `SoundClassLabels`.
+    let confidences = SoundClassLabels.confidences(result.classifications.map { ($0.identifier, $0.confidence) })
+    let maxSnoreConfidence = confidences.snore
+    let maxSpeechConfidence = confidences.speech
 
     Task { @MainActor in
       self.snoreConfidence = maxSnoreConfidence
