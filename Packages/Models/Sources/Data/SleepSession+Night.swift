@@ -7,7 +7,7 @@ import SleepCore
 /// compute the same numbers from one implementation.
 ///
 /// Reads `events` (faults the relationship), like the properties it replaced.
-extension SleepSession {
+public extension SleepSession {
   var night: Night {
     Night(
       id: id,
@@ -25,7 +25,7 @@ extension SleepSession {
   /// What the statistics rules (SleepCore) need about this night: the cached
   /// score and snoring time where there are ones, as the views always showed.
   /// Reads `events`: build it only for the nights a screen shows.
-  public var nightSummary: NightSummary {
+  var nightSummary: NightSummary {
     let night = night
     return NightSummary(
       id: id, start: night.start, end: night.end, score: sleepScore, snoringDuration: snoringDuration,
@@ -36,14 +36,14 @@ extension SleepSession {
   /// reading `events` (faulting them has crashed in production). For choosing
   /// nights (dashboard, trend, which day): `eventCount` is 0 and
   /// `loudestIntensity` is `nil`, so don't show those from it.
-  public var summaryWithoutEvents: NightSummary {
+  var summaryWithoutEvents: NightSummary {
     NightSummary(
       id: id, start: startDate, end: max(endDate ?? startDate, startDate), score: sleepScore,
       snoringDuration: snoringDuration, eventCount: 0)
   }
 
   /// The stored events by id, to map shared episodes back to models.
-  var eventModelsByID: [UUID: SnoreEvent] {
+  internal var eventModelsByID: [UUID: SnoreEvent] {
     Dictionary((events ?? []).map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
   }
 }

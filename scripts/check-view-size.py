@@ -23,10 +23,6 @@ ALLOWLIST = {
         525,
         "UIKit PDF drawing, not a SwiftUI view; move to Helpers/ and split per page section",
     ),
-    "Packages/Recordings/Sources/Views/SessionDetailLoadedView.swift": (
-        201,
-        "one line over; extract the share/export toolbar section",
-    ),
 }
 
 
