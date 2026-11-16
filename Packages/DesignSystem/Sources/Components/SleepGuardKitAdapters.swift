@@ -61,3 +61,10 @@ public extension EventCard {
       intensity: event.intensity, onPlay: onPlay)
   }
 }
+
+public extension PlayerClip {
+  /// A stored event as the shared player's clip.
+  init(event: SnoreEvent) {
+    self.init(id: event.id, start: event.timestamp, duration: event.snoreDuration, category: event.category, intensity: event.intensity)
+  }
+}

@@ -3,7 +3,7 @@ import FactoryKit
 import SwiftUI
 
 /// Placeholder shown while the player is being set up (clip controller load
-/// or legacy export). Mimics the rough shape of `EventPlayerView` so the
+/// or legacy export). Mimics the rough shape of the shared `PlayerCard` so the
 /// sheet layout doesn't jump when it transitions to the real player.
 struct PlayerLoadingSkeleton: View {
   @Injected(\.theme) private var theme
