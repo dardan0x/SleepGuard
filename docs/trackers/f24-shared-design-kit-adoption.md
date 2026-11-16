@@ -26,7 +26,7 @@ Mirrors SleepGuardUIKitWay's F6 ("Design kit adoption in SleepGuard").
 |----|------|------|--------|------------|---------|---------|-----------|
 | F24-T1 | `Theme` built from the kit's default palette; kit theme injected into the SwiftUI environment at the root | Refactor | Done | — | DesignSystem, app | 2026-11-15 | 2026-11-15 |
 | F24-T2 | Replace `DesignSystem` primitives with the kit's (`StatCard`, `SleepScoreGauge`, `MiniBarChart`, `AudioLevelMeter`, sheet header/handle, `ScaleButtonStyle`, recording buttons) | Refactor | Done | F24-T1 | DesignSystem + call sites | 2026-11-15 | 2026-11-15 |
-| F24-T3 | Replace the detail components with the kit's view-data versions (`SessionStatsGrid`, `EventRow`, score badge, `SnoringLegendView`, `EventIntensityLegendView`, `SleepStageLegendGrid`, timeline); map `@Model` values to view data at the call site | Refactor | In Progress | F24-T2, UIKitWay F3-T5 | DesignSystem, Recordings, Statistics | 2026-11-15 | — |
+| F24-T3 | Replace the detail components with the kit's view-data versions (`SessionStatsGrid`, `EventRow`, score badge, `SnoringLegendView`, `EventIntensityLegendView`, `SleepStageLegendGrid`, timeline); map `@Model` values to view data at the call site | Refactor | Done | F24-T2, UIKitWay F3-T5 | DesignSystem, Recordings, Statistics | 2026-11-15 | 2026-11-16 |
 | F24-T4 | ADR (`docs/adr/`), `AGENTS.md`/`CLAUDE.md` design section and duplication rule point at the shared kit | Docs | Backlog | F24-T3 | docs | — | — |
 
 ## Task Details
@@ -81,6 +81,13 @@ Mirrors SleepGuardUIKitWay's F6 ("Design kit adoption in SleepGuard").
 - [x] Visible change (approved): Trends' stat tiles take the Last 7 Nights style (2 pt more spacing, semibold icon)
 - [x] All 8 suites pass against the local shared checkout; app builds; format, layering, view size pass
 - [ ] Seen on screen: not yet (dashboard week strip, Trends, calendar, Last 7 Nights)
+
+**T3c — player (done 2026-11-16)**
+- [x] Deleted (approved): `EventPlayerHeaderView`, `EventPlayerControlsView`, `PlayerEventRow`, `EnhancedAudioToggleSection`, `NoAudioView`, `EventIntensityLegendView`
+- [x] The four call sites use the kit's `PlayerHeader`, `PlayerControls`, `EventIntensityLegend`, `EnhancedAudioToggle`, `PlayerEventRow`, `NoAudioCard`; the waveform stays SleepGuard's
+- [x] Visible changes (approved): header time in the device's short style ("1:49 AM"), "Event 1 / 3", player rows "1m 4s · Quiet" with translated loudness and the detail rows' kind dot, the no-audio line in the same formats
+- [x] All 8 suites pass; app builds; format, layering, view size pass
+- [ ] Heard and seen: not yet (the player from a row, the events sheet and the hidden events)
 
 ### F24-T4 — Docs
 
