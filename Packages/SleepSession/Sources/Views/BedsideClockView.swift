@@ -23,9 +23,12 @@ struct BedsideClockView: View {
 
       VStack(spacing: 0) {
         VStack(spacing: 8) {
-          BedsideClockBadgesView(
-            eventsCount: sessionManager.eventsCount
-          )
+          HStack {
+            Spacer()
+            BedsideEventsBadge(count: sessionManager.eventsCount)
+          }
+          .padding(.top, 16)
+          .padding(.horizontal, 24)
 
           if isMelodyEnabled, !snoreInterrupterPlayer.isMutedForSession {
             BedsideMelodyDisclaimer {
@@ -38,21 +41,15 @@ struct BedsideClockView: View {
 
         Spacer()
 
-        BedsideClockClockView(
-          timeString: timeString,
-          dateString: dateString)
+        BedsideClockFace(time: currentTime)
 
         Spacer()
 
-        BedsideClockWaveformView(
-          durationString: durationString,
-          levels: simulatedWaveform)
+        BedsideRecordingStatus(elapsed: elapsed, db: audioRecorder.currentDB, time: currentTime)
 
         Spacer()
 
-        BedsideClockStatusView(
-          statusLabel: statusLabel,
-          snoringColor: snoringColor)
+        BedsideSnoreStatus(state: sessionManager.currentDetectionState)
 
         Spacer()
 
@@ -102,51 +99,8 @@ struct BedsideClockView: View {
 
   // MARK: - Helpers
 
-  private var timeString: String {
-    DateFormatters.time.string(from: currentTime)
-  }
-
-  private var dateString: String {
-    DateFormatters.weekdayAndMonthDay.string(from: currentTime).uppercased()
-  }
-
-  private var durationString: String {
-    guard let session = sessionManager.currentSession else { return "0 min" }
-    let duration = currentTime.timeIntervalSince(session.startDate)
-    let hours = Int(duration) / 3600
-    let minutes = (Int(duration) % 3600) / 60
-    if hours > 0 {
-      return String(format: "%d h %d min", hours, minutes)
-    }
-    return String(format: "%d min", minutes)
-  }
-
-  private var simulatedWaveform: [Double] {
-    let baseLevel = Double(max(0, (audioRecorder.currentDB + 60) / 40))
-    return (0..<9).map { index in
-      let variation = sin(Double(index) * 1.3 + Date().timeIntervalSince1970 * 5) * 0.3
-      return max(0.1, min(1.0, baseLevel + variation))
-    }
-  }
-
-  private var snoringColor: Color {
-    switch sessionManager.currentDetectionState {
-    case .none: theme.textTertiary
-    case .quiet: theme.snoreQuiet
-    case .light: theme.snoreLight
-    case .loud: theme.snoreLoud
-    case .epic: theme.snoreEpic
-    }
-  }
-
-  private var statusLabel: String {
-    switch sessionManager.currentDetectionState {
-    case .none: Strings.statsCalendarIntensityQuiet
-    case .quiet: Strings.sessionBedsideSnoreQuiet
-    case .light: Strings.sessionBedsideSnoreLight
-    case .loud: Strings.sessionBedsideSnoreLoud
-    case .epic: Strings.sessionBedsideSnoreEpic
-    }
+  private var elapsed: TimeInterval {
+    sessionManager.currentSession.map { currentTime.timeIntervalSince($0.startDate) } ?? 0
   }
 
   private var isMelodyEnabled: Bool {

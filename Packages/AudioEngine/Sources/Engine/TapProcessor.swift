@@ -1,6 +1,7 @@
 import AVFoundation
 import Models
 import os
+import SleepCore
 import SoundAnalysis
 
 /// Audio-thread half of `AudioRecorder`.
@@ -103,32 +104,16 @@ final class TapProcessor: Sendable {
     }
   }
 
+  /// RMS level of the first channel (SleepCore's `AudioLevels`).
   private static func rmsDB(_ buffer: AVAudioPCMBuffer) -> Float {
     guard let channelData = buffer.floatChannelData?[0] else { return -160.0 }
-    let frameLength = UInt32(buffer.frameLength)
-    var sum: Float = 0
-    for i in 0..<Int(frameLength) {
-      sum += channelData[i] * channelData[i]
-    }
-    let rms = sqrt(sum / Float(frameLength))
-    let db = 20 * log10(max(rms, 1e-10))
-    return db
+    return AudioLevels.rmsDB(UnsafeBufferPointer(start: channelData, count: Int(buffer.frameLength)))
   }
 
-  /// Peak level (0 dBFS = full scale) of the buffer. Better than RMS for
-  /// impulsive sounds like snoring, where the perceptual loudness is driven
-  /// by sharp peaks rather than average energy.
+  /// Peak level of the first channel (SleepCore's `AudioLevels`): tracks
+  /// impulsive snoring better than RMS.
   private static func peakDB(_ buffer: AVAudioPCMBuffer) -> Float {
     guard let channelData = buffer.floatChannelData?[0] else { return -160.0 }
-    let frameLength = Int(buffer.frameLength)
-    var peak: Float = 0
-    for i in 0..<frameLength {
-      let absVal = abs(channelData[i])
-      if absVal > peak {
-        peak = absVal
-      }
-    }
-    let db = 20 * log10(max(peak, 1e-10))
-    return db
+    return AudioLevels.peakDB(UnsafeBufferPointer(start: channelData, count: Int(buffer.frameLength)))
   }
 }

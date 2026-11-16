@@ -17,6 +17,7 @@ public struct SessionSummaryView: View {
   @Injected(\.theme) private var theme
   @Injected(\.sessionManager) private var sessionManager
   @Injected(\.sessionCommitter) private var sessionCommitter
+  @Injected(\.appConfig) private var appConfig
   @Environment(\.dismiss) private var dismiss
   @Environment(\.modelContext) private var modelContext
 
@@ -25,7 +26,7 @@ public struct SessionSummaryView: View {
   public var body: some View {
     ScrollView {
       VStack(spacing: 32) {
-        SessionSummaryStats(session: session)
+        SessionSummaryHeader(session: session, scoreConfig: appConfig.sleepScoreConfig)
 
         MelodyGapsBannerView(session: session)
 

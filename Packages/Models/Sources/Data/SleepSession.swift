@@ -50,12 +50,9 @@ public final class SleepSession {
   /// values. Empty for sessions cached before F22-T3, so they count as stale.
   public var cachedScoreVersion = ""
 
+  /// SleepCore's rule (`Night.minimumSaveDuration`).
   public static var minimumSaveDuration: TimeInterval {
-    #if DEBUG
-    return 120
-    #else
-    return 1800
-    #endif
+    Night.minimumSaveDuration
   }
 
   public init(

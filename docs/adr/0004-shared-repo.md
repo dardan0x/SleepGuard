@@ -62,6 +62,13 @@ The Statistics numbers (dashboard state, week-over-week trend, Last 7 Nights day
 - Two mappings, because faulting `events` has crashed: `summaryWithoutEvents` (cached score and snoring time, no events) chooses nights; `nightSummary` (reads events) is built only for the nights a screen shows. The dashboard and the trend stay event-free, as before.
 - Proof: the Statistics tests (dashboard, week-over-week) pass unchanged; the same cases run in the shared repo against the shared rules.
 
+## Revision: detection inputs (F7-T3 in SleepGuardUIKitWay, 2026-11-16)
+
+The numbers detection is calibrated against are computed by shared code, so both apps feed the classifiers the same values: `AudioLevels` (RMS and peak dBFS of a buffer), `SpectralFeatures` (low-band ratio, centroid, dominant frequency, snore score and spectrum bars from a magnitude spectrum) and `SoundClassLabels` (snore and speech classes, and the confidences they give).
+
+- `TapProcessor`, `FFTAnalyzer` and `SoundAnalysisDetector` keep the AVFoundation, Accelerate and SoundAnalysis code (the tap, the transform, the stream analyzer) and call these; `SpectralFeatures` is an alias of the shared type.
+- Proof: `FFTAnalyzerTests` (also ported to the shared repo with the same cases), `AudioClipExtractorTests` and the detection tests pass unchanged.
+
 ## Revision: per-sample detection rules (F7-T2 in SleepGuardUIKitWay, 2026-11-16)
 
 `SnoreDetector` and `SpeechDetector` held pure classification rules in main-actor classes, and `RealtimeDetectionTracker` the sensitivity presets. They are now `SleepCore`'s `SnoreClassifier` (thresholds, gates, the SoundAnalysis → FFT routing, `preset(_:)`), `SpeechClassifier` (with a verdict, so the debug logs stay) and `DetectionSensitivity` (`minEventDuration`).
