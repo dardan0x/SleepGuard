@@ -2,18 +2,22 @@ import DesignSystem
 import Env
 import FactoryKit
 import Models
+import Routing
 import SleepCore
 import SwiftData
 import SwiftUI
 
+/// A month of nights. Hosts the shared `CalendarContent` (ADR 0006) under
+/// SleepGuard's toolbar (title capsule, Today).
 @MainActor
 public struct CalendarView: View {
   @Injected(\.theme) private var theme
+  @Environment(RouterPath.self) private var routerPath
   @Query(sort: \SleepSession.startDate, order: .reverse)
   private var sessions: [SleepSession]
 
   @State private var selectedMonth = Date()
-  @State private var selectedDate: Date? = nil
+  @State private var selectedDay = Calendar.current.startOfDay(for: Date())
 
   private let calendar = Calendar.current
 
@@ -21,26 +25,9 @@ public struct CalendarView: View {
 
   public var body: some View {
     ScrollView {
-      VStack(spacing: 16) {
-        MonthHeader(
-          title: monthYearString,
-          onPrevious: { selectedMonth = previousMonth },
-          onNext: { selectedMonth = nextMonth })
-
-        CalendarMonthGrid(days: calendarDays()) { selectedDate = $0 }
-
-        CalendarMonthStatsView(month: monthStats)
-
-        if let selected = selectedDate, let session = sessionFor(date: selected) {
-          CalendarSelectedNightView(
-            session: session,
-            selectedDateString: selectedDateString)
-        }
-
-        SnoringLegend()
+      CalendarContent(month: $selectedMonth, selectedDay: $selectedDay, nights: gridNights) { night in
+        routerPath.navigate(to: .sessionDetail(id: night.id))
       }
-      .padding(.horizontal, 20)
-      .padding(.bottom, 20)
     }
     .background(theme.bgPrimary.ignoresSafeArea())
     .navigationTitle("")
@@ -66,7 +53,7 @@ public struct CalendarView: View {
         Button {
           withAnimation(.easeInOut(duration: 0.2)) {
             selectedMonth = Date()
-            selectedDate = calendar.startOfDay(for: Date())
+            selectedDay = calendar.startOfDay(for: Date())
           }
         } label: {
           Text(Strings.statsMiniChartToday)
@@ -75,54 +62,15 @@ public struct CalendarView: View {
         }
       }
     }
-    .onAppear {
-      selectedDate = calendar.startOfDay(for: Date())
-    }
   }
 
-  // MARK: - Helpers
-
-  private var monthYearString: String {
-    DateFormatters.monthYear.string(from: selectedMonth)
-  }
-
-  private var previousMonth: Date {
-    calendar.date(byAdding: .month, value: -1, to: selectedMonth) ?? selectedMonth
-  }
-
-  private var nextMonth: Date {
-    calendar.date(byAdding: .month, value: 1, to: selectedMonth) ?? selectedMonth
-  }
-
-  /// The month's counts, from SleepCore's `CalendarMonth`. Chosen without
-  /// reading events, then built in full for the month's nights only.
-  private var monthStats: CalendarMonth {
-    let chosen = CalendarMonth(month: selectedMonth, nights: sessions.summariesWithoutEvents, calendar: calendar).nights
-    return CalendarMonth(month: selectedMonth, nights: sessions.fullSummaries(of: chosen), calendar: calendar)
-  }
-
-  /// The night shown for a grid day: SleepCore's `CalendarMonth` rule.
-  private func sessionFor(date: Date) -> SleepSession? {
-    guard let night = CalendarMonth.night(on: date, in: sessions.summariesWithoutEvents, calendar: calendar) else {
-      return nil
-    }
-    return sessions.first { $0.id == night.id }
-  }
-
-  /// The grid's 42 days (SleepCore's `CalendarMonth`), each with its night's
-  /// loudest intensity (no dot for a night without events).
-  private func calendarDays() -> [CalendarMonthGrid.Day] {
-    CalendarMonth.grid(for: selectedMonth, calendar: calendar).map { date in
-      CalendarMonthGrid.Day(
-        date: date,
-        isInMonth: calendar.isDate(date, equalTo: selectedMonth, toGranularity: .month),
-        isSelected: selectedDate.map { calendar.isDate(date, inSameDayAs: $0) } ?? false,
-        loudest: sessionFor(date: date)?.nightSummary.loudestIntensity)
-    }
-  }
-
-  private var selectedDateString: String {
-    guard let date = selectedDate else { return "" }
-    return DateFormatters.fullDayAndDate.string(from: date)
+  /// Full summaries of the nights in the month's grid (42 days), for their
+  /// loudest snoring. Chosen without reading events.
+  private var gridNights: [NightSummary] {
+    let grid = CalendarMonth.grid(for: selectedMonth, calendar: calendar)
+    guard let first = grid.first, let last = grid.last,
+          let end = calendar.date(byAdding: .day, value: 1, to: last) else { return [] }
+    let chosen = sessions.summariesWithoutEvents.filter { $0.start >= first && $0.start < end }
+    return sessions.fullSummaries(of: chosen)
   }
 }

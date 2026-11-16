@@ -17,37 +17,10 @@ struct StatisticsEmptyView: View {
           .padding(.top, 10)
 
         ScrollView {
-          VStack(spacing: 16) {
-            ZStack {
-              Circle()
-                .fill(theme.accent.opacity(0.15))
-                .frame(width: 80, height: 80)
-
-              Image(systemName: "moon.fill")
-                .font(.system(size: 32))
-                .foregroundStyle(theme.accent)
-            }
-
-            VStack(spacing: 4) {
-              Text(Strings.sessionPrestartTitle)
-                .font(.system(size: 20, weight: .semibold))
-                .foregroundStyle(theme.textPrimary)
-
-              Text(Strings.statsEmptyMessage)
-                .font(.system(size: 15))
-                .foregroundStyle(theme.textSecondary)
-                .multilineTextAlignment(.center)
-
-              StartRecordingButton(height: 56) {
-                onStartRecording()
-              }
-              .padding(.top, 10)
-            }
-          }
-          .frame(maxWidth: .infinity, maxHeight: .infinity)
-          .padding(24)
-          .cornerRadius(theme.radiusCard)
-          .containerRelativeFrame(.vertical, alignment: .center)
+          // The shared empty content (ADR 0006), centred in the space below the header.
+          StatisticsEmptyContent(onStartRecording: onStartRecording)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .containerRelativeFrame(.vertical, alignment: .center)
         }
       }
       .background(theme.bgPrimary.ignoresSafeArea(edges: .bottom))

@@ -25,7 +25,7 @@ Mirrors SleepGuardUIKitWay's F10, which carries the detailed task notes.
 | ID | Task | Type | Status | Depends On | Package | Started | Completed |
 |----|------|------|--------|------------|---------|---------|-----------|
 | F25-T1 | Decision recorded: ADR 0006, the three-layer rule in `AGENTS.md` / `CLAUDE.md` | Docs | Done | — | docs | 2026-11-16 | 2026-11-16 |
-| F25-T2 | Statistics screens (dashboard, Trends, Calendar, Last 7 Nights) host the shared content | Refactor | Backlog | F25-T1 | Statistics, DesignSystem | — | — |
+| F25-T2 | Statistics screens (dashboard, Trends, Calendar, Last 7 Nights) host the shared content | Refactor | Done | F25-T1 | Statistics, DesignSystem | 2026-11-16 | 2026-11-16 |
 | F25-T3 | Recordings list hosts the shared content; `SessionGrouper` replaced by `SleepCore`'s rule | Refactor | Backlog | F25-T2 | Recordings | — | — |
 | F25-T4 | Session detail, events sheet and player host the shared content | Refactor | Backlog | F25-T2 | Recordings | — | — |
 | F25-T5 | Prestart, bedside clock and summary host the shared content (melody rows and overlay through slots) | Refactor | Backlog | F25-T2 | SleepSession | — | — |
@@ -36,4 +36,5 @@ Mirrors SleepGuardUIKitWay's F10, which carries the detailed task notes.
 - Containers map models to `SleepCore` values before handing them to content. Lists use `summaryWithoutEvents` (no event faulting).
 - Every file deletion is listed and confirmed first.
 - Each adopted screen is checked on the simulator, before and after.
+- **T2 (2026-11-16):** `DesignSystem` re-exports `SleepGuardContentKit`. The four screens keep their `@Query`, `RouterPath`, header and toolbar, and host `StatisticsDashboardContent` (sleep stages in its slot), `TrendsContent`, `CalendarContent`, `LastSevenNightsContent`, `StatisticsEmptyContent`. Containers still choose nights without reading events, then build full summaries for the shown ones. `DashboardState` carries SleepCore's `NightDashboard`. Deleted (approved): 8 views, `WeekOverWeekTrendCalculator` and its tests (`ScoreTrend` directly). Approved visible change: the calendar's selected night reads "Loud snoring · 62 out of 100" (was "· score 62", hard-coded English). Not checked on screen (the morning briefing sheet covers launch).
 - `DesignSystem` stays as the bridge (ADR 0006). Its sleep-stage views move to the shared kit with SleepGuardUIKitWay's F8-T3.

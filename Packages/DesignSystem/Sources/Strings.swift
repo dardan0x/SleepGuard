@@ -8,3 +8,7 @@
 // The shared design kit (tokens, `Color(hex:)`, components), for every view
 // that imports DesignSystem, like the strings.
 @_exported import SleepGuardDesignKit
+
+// Shared screen content (one screen's loaded layout, ADR 0006), for the
+// containers that host it.
+@_exported import SleepGuardContentKit

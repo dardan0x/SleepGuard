@@ -11,7 +11,7 @@ let package = Package(
   ],
   dependencies: [
     .package(path: "../Models"),
-    .package(url: "https://github.com/dardan0x/SleepGuardShared.git", exact: "0.16.0"),
+    .package(url: "https://github.com/dardan0x/SleepGuardShared.git", exact: "0.17.0"),
     .package(path: "../AudioEngine"),
     .package(url: "https://github.com/hmlongco/Factory", from: "3.5.2"),
   ],
