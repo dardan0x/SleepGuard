@@ -176,33 +176,9 @@ final class RealtimeDetectionTracker {
     apply(preferences.detectionSensitivity)
   }
 
+  /// SleepCore's calibrated preset for `sensitivity`.
   func apply(_ sensitivity: UserPreferences.DetectionSensitivity) {
-    switch sensitivity {
-    case .low:
-      snoreDetector.quietThreshold = -45.0
-      snoreDetector.lightThreshold = -35.0
-      snoreDetector.loudThreshold = -15.0
-      snoreDetector.epicThreshold = -5.0
-      snoreDetector.confidenceGate = 0.45
-      snoreDetector.highConfidenceGate = 0.65
-      snoreDetector.quietFallbackGate = 0.55
-    case .medium:
-      snoreDetector.quietThreshold = -50.0
-      snoreDetector.lightThreshold = -40.0
-      snoreDetector.loudThreshold = -20.0
-      snoreDetector.epicThreshold = -10.0
-      snoreDetector.confidenceGate = 0.35
-      snoreDetector.highConfidenceGate = 0.55
-      snoreDetector.quietFallbackGate = 0.45
-    case .high:
-      snoreDetector.quietThreshold = -55.0
-      snoreDetector.lightThreshold = -45.0
-      snoreDetector.loudThreshold = -25.0
-      snoreDetector.epicThreshold = -15.0
-      snoreDetector.confidenceGate = 0.25
-      snoreDetector.highConfidenceGate = 0.45
-      snoreDetector.quietFallbackGate = 0.35
-    }
+    snoreDetector.apply(.preset(sensitivity))
   }
 
   // MARK: - Real-time audio processing
@@ -498,20 +474,9 @@ final class RealtimeDetectionTracker {
     snoreDetector: SnoreDetector) -> DetectionStateMachine.Settings
   {
     DetectionStateMachine.Settings(
-      minEventDuration: minEventDuration(for: preferences.detectionSensitivity),
+      minEventDuration: preferences.detectionSensitivity.minEventDuration,
       highConfidenceGate: snoreDetector.highConfidenceGate,
       detectSleepTalking: preferences.detectSleepTalking)
-  }
-
-  /// Minimum snore-event duration. Sensitivity-dependent so isolated single
-  /// snores (~1 s) are retained on Medium/High while Low still filters
-  /// transient sounds. Ground-truthed against bedroom recordings.
-  private static func minEventDuration(for sensitivity: UserPreferences.DetectionSensitivity) -> TimeInterval {
-    switch sensitivity {
-    case .low: 2.0
-    case .medium: 1.0
-    case .high: 0.5
-    }
   }
 
   private func eventFileURL(eventID: UUID, sessionID: UUID) -> URL {

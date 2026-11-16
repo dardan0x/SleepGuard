@@ -62,6 +62,13 @@ The Statistics numbers (dashboard state, week-over-week trend, Last 7 Nights day
 - Two mappings, because faulting `events` has crashed: `summaryWithoutEvents` (cached score and snoring time, no events) chooses nights; `nightSummary` (reads events) is built only for the nights a screen shows. The dashboard and the trend stay event-free, as before.
 - Proof: the Statistics tests (dashboard, week-over-week) pass unchanged; the same cases run in the shared repo against the shared rules.
 
+## Revision: per-sample detection rules (F7-T2 in SleepGuardUIKitWay, 2026-11-16)
+
+`SnoreDetector` and `SpeechDetector` held pure classification rules in main-actor classes, and `RealtimeDetectionTracker` the sensitivity presets. They are now `SleepCore`'s `SnoreClassifier` (thresholds, gates, the SoundAnalysis → FFT routing, `preset(_:)`), `SpeechClassifier` (with a verdict, so the debug logs stay) and `DetectionSensitivity` (`minEventDuration`).
+
+- The detectors keep their public API and adjustable thresholds; their defaults come from the Medium preset. `UserPreferences.DetectionSensitivity` is an alias of the shared enum (same cases and raw values).
+- Proof: `SnoreDetectorTests`, `DetectionSensitivityTests` and `DetectionCharacterizationTests` pass unchanged; the replay goldens are unchanged.
+
 ## Revision: playback rules (F5-T2 in SleepGuardUIKitWay, 2026-11-15)
 
 `ClipPlaybackController` mixed pure playback logic with `AVAudioEngine` code. The pure part is now `SleepCore`'s `ClipPlaylist` (current clip, joined timeline, seek across or within clips, what follows a finished clip), `PlaybackGain` (peak to −3 dBFS, never quieter, at most +24 dB) and `PlaybackEnhancement` (80 Hz high-pass, 1.5 kHz low-pass).
