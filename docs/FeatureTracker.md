@@ -46,10 +46,10 @@ Last updated: 2026-11-14
 | Blocked | 0 |
 | — | — |
 | Total Tasks | 169 |
-| Tasks Done | 151 |
+| Tasks Done | 152 |
 | Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
-| Tasks Backlog | 18 |
+| Tasks Backlog | 17 |
 | — | — |
 | **Progress** | **87%** |
 
@@ -79,7 +79,7 @@ Last updated: 2026-11-14
 | F21 | Test Coverage | P1 | Done | 17/17 | ██████████ 100% | [tracker](trackers/f21-test-coverage.md) |
 | F22 | Architecture Hardening | P1 | Done (real-night check pending) | 16/16 | ██████████ 100% | [tracker](trackers/f22-architecture-hardening.md) |
 | F23 | Production Readiness | P1 | In Progress | 12/13 | █████████░ 92% | [tracker](trackers/f23-production-readiness.md) |
-| F24 | Shared Design Kit Adoption | P2 | In Progress | 3/4 | ███████░░░ 75% | [tracker](trackers/f24-shared-design-kit-adoption.md) |
+| F24 | Shared Design Kit Adoption | P2 | Done (bg-card open) | 4/4 | ██████████ 100% | [tracker](trackers/f24-shared-design-kit-adoption.md) |
 
 ## Activity Log
 
@@ -87,6 +87,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-11-16 | F24-T4 | Completed | ADR 0005 (shared design kit); AGENTS/CLAUDE design section and duplication rule point to the kit. F24 done; `bg-card` open. Branch `docs/f24-t4-design-kit-docs` |
 | 2026-11-16 | F24-T3 | Completed | Detail (T3a), Statistics (T3b) and player (T3c) components come from the shared kit; SleepGuard's copies deleted. Branches `feature/f24/t3a-…`, `t3b-…`, `t3c-player-components` |
 | 2026-11-15 | F24-T2 | Completed | Nine basic components now come from the shared kit (SleepGuard's copies deleted, same drawing, call sites unchanged). Branch `feature/f24/t2-kit-primitives` |
 | 2026-11-15 | F24-T1 | Completed | Theme from the shared kit: `AppTheme` (was `Theme`) starts from `Theme.sleepGuard`, `DesignSystem` re-exports the kit, the root injects the kit theme. No visual change. Open: `bg-card` vs the design file. Branch `feature/f24/t1-theme-from-kit` |
