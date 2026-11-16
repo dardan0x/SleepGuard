@@ -23,10 +23,10 @@ struct RecordingPrestartView: View {
     ZStack(alignment: .bottom) {
       ScrollView {
         VStack(spacing: 0) {
-          PrestartHeaderView()
+          PrestartHeader(compact: DeviceSize.isCompactHeight)
             .padding(.top, DeviceSize.isCompactHeight ? 20 : 24)
 
-          PrestartTipsSection()
+          PrestartTipsCard()
             .padding(.top, DeviceSize.isCompactHeight ? 20 : 24)
 
           VStack(spacing: 12) {

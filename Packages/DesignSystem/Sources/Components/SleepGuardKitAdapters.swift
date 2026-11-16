@@ -15,6 +15,15 @@ public extension SessionStatsGrid {
   }
 }
 
+public extension SessionSummaryHeader {
+  /// Length, score, snoring share and events of the night just recorded.
+  init(session: SleepSession, scoreConfig: SleepScoreConfig) {
+    self.init(
+      duration: session.totalDuration, score: session.sleepScore(using: scoreConfig),
+      snoringPercent: session.snoringPercentage, eventCount: session.eventsCount)
+  }
+}
+
 public extension NightTimeline {
   /// The night's snoring episodes (merged, long enough to show) and its other
   /// events, its recording gaps, and its start and end. Reads `events`.
