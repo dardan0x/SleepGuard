@@ -147,7 +147,7 @@ final class SessionDetailModelTests {
     let (session, e) = try night()
     let model = model(for: session)
     await model.load(modelContext: store.context)
-    let ids = { model.filteredEvents.map(\.id) }
+    let ids = { model.rows.map(\.id) }
 
     model.selectedFilter = .all
     #expect(try ids() == [#require(e["snoreB"]).id, #require(e["talk"]).id, #require(e["noise"]).id])
@@ -160,15 +160,17 @@ final class SessionDetailModelTests {
   }
 
   @MainActor
-  @Test func shortEventsAndDisplayDurations() async throws {
+  @Test func shortEventsRowsAndFilters() async throws {
     let (session, e) = try night()
     let model = model(for: session)
     await model.load(modelContext: store.context)
 
     #expect(try model.shortEvents.map(\.id) == [#require(e["micro"]).id])
-    #expect(try model.displayDurations[#require(e["snoreB"]).id] == 150) // 30 + 120
-    #expect(model.shouldShowFilter)
-    #expect(model.availableFilters == SessionDetailModel.EventCategoryFilter.allCases)
+    let snoringRow = try #require(model.rows.first { $0.category == .snoring })
+    #expect(try snoringRow.id == #require(e["snoreB"]).id)
+    #expect(snoringRow.duration == 150) // 30 + 120
+    #expect(model.filters == EventFilter.allCases)
+    #expect(try model.event(for: snoringRow)?.id == #require(e["snoreB"]).id)
   }
 
   @MainActor
@@ -176,20 +178,7 @@ final class SessionDetailModelTests {
     let session = try store.insert(.fixture(start: start), events: [.fixture(at: at(0), duration: 30)])
     let model = model(for: session)
     await model.load(modelContext: store.context)
-    #expect(!model.shouldShowFilter)
-  }
-
-  @Test(arguments: [
-    (SoundCategory.snoring, SessionDetailModel.EventCategoryFilter.snoring),
-    (.sleepTalking, .sleepTalking),
-    (.noise, .noise),
-    (.coughing, .noise),
-    (.other, .noise),
-  ])
-  func categoryFilterMembership(category: SoundCategory, filter: SessionDetailModel.EventCategoryFilter) {
-    let event = SnoreEvent.fixture(at: Date(), category: category)
-    #expect(filter.includes(event: event))
-    #expect(SessionDetailModel.EventCategoryFilter.all.includes(event: event))
+    #expect(model.filters.isEmpty)
   }
 
   // MARK: - Delete

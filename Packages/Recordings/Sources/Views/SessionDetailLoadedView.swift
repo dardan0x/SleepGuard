@@ -25,55 +25,26 @@ struct SessionDetailLoadedView: View {
 
   var body: some View {
     ScrollView {
-      VStack(spacing: 24) {
-        SessionDetailHeaderView(session: session, score: session.sleepScore(using: appConfig.sleepScoreConfig))
-
-        SessionDetailTimelineView(session: session)
-
-        MelodyGapsBannerView(session: session)
-
-        LowBatteryBannerView(session: session)
-
-        if model.shouldShowFilter {
-          Picker("", selection: $model.selectedFilter) {
-            ForEach(model.availableFilters, id: \.self) { filter in
-              Text(filter.displayName).tag(filter)
-            }
-          }
-          .pickerStyle(.segmented)
-        }
-
-        SessionDetailEventsView(
-          events: model.filteredEvents,
-          displayDurations: model.displayDurations,
-          title: eventsTitle,
-          onShowAll: { activeSheet = .events },
-          onPlayEvent: { event in
-            activeSheet = .player(initialEvent: event)
+      // The shared content (ADR 0006); sleep stages and the short-events
+      // button go in its slots.
+      if let night = model.night {
+        NightDetailContent(
+          night: night,
+          summary: night.summary(using: appConfig.sleepScoreConfig),
+          filters: model.filters,
+          filter: $model.selectedFilter,
+          onPlay: { row in activeSheet = .player(initialEvent: model.event(for: row)) },
+          onShowAll: { _ in activeSheet = .events },
+          onShare: { row in
+            if let event = model.event(for: row) { shareCoordinator.shareEvent(event, in: session) }
           },
-          onShareEvent: { event in
-            shareCoordinator.shareEvent(event, in: session)
-          })
-
-        if !model.shortEvents.isEmpty {
-          Button {
-            activeSheet = .shortEventsPlayer
-          } label: {
-            HStack(spacing: 8) {
-              Image(systemName: "waveform")
-                .font(.system(size: 14, weight: .semibold))
-              Text(String(format: Strings.sessionDetailHiddenEventsFormat, model.shortEvents.count))
-                .font(.system(size: 15, weight: .medium))
+          stages: {
+            if let stages = session.sleepStageSegments, !stages.isEmpty {
+              SleepStageBreakdownView(session: session)
             }
-            .foregroundStyle(theme.accent)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 12)
-            .background(theme.accent.opacity(0.12))
-            .cornerRadius(theme.radiusCard)
-          }
-        }
+          },
+          footer: { ShortEventsButton(count: model.shortEvents.count) { activeSheet = .shortEventsPlayer } })
       }
-      .padding(20)
     }
     .navigationTitle("")
     .navigationBarTitleDisplayMode(.inline)
@@ -119,7 +90,7 @@ struct SessionDetailLoadedView: View {
     .sheet(item: $activeSheet) { sheet in
       switch sheet {
       case let .player(initialEvent):
-        let episodeEvents = initialEvent.map { session.episodePlaybackEvents(for: $0) } ?? model.filteredEvents
+        let episodeEvents = initialEvent.map { session.episodePlaybackEvents(for: $0) } ?? []
         PlayerSheetView(
           session: session,
           sortedEvents: episodeEvents,
@@ -128,10 +99,8 @@ struct SessionDetailLoadedView: View {
       case .events:
         EventsSheetView(
           session: session,
-          events: model.filteredEvents,
-          displayDurations: model.displayDurations,
-          isClipSession: isClipSession,
-          onPlayEvent: { _ in })
+          rows: model.rows,
+          isClipSession: isClipSession)
       case .shortEventsPlayer:
         PlayerSheetView(
           session: session,
@@ -152,17 +121,6 @@ struct SessionDetailLoadedView: View {
       }
     }
   }
-
-  /// Localized events-section header — view-layer mapping of the model's
-  /// selected filter (see the MARK note at the bottom of this file).
-  private var eventsTitle: String {
-    switch model.selectedFilter {
-    case .all: Strings.sessionRecordingEventsFormatAll
-    case .snoring: Strings.sessionRecordingEventsFormatSnoring
-    case .sleepTalking: Strings.sessionRecordingEventsFormatSleepTalking
-    case .noise: Strings.sessionRecordingEventsFormatNoise
-    }
-  }
 }
 
 enum SessionDetailSheet: Identifiable {
@@ -178,24 +136,6 @@ enum SessionDetailSheet: Identifiable {
       "events"
     case .shortEventsPlayer:
       "short-events-player"
-    }
-  }
-}
-
-// MARK: - Presentation mappings
-
-//
-// Label text lives in the view layer (see AGENTS.md "UI Dependencies in
-// Non-View Code"): the filter enum and its selection logic stay in
-// SessionDetailModel; only the display strings are mapped here.
-
-extension SessionDetailModel.EventCategoryFilter {
-  var displayName: String {
-    switch self {
-    case .all: Strings.filterAll
-    case .snoring: Strings.filterSnoring
-    case .sleepTalking: Strings.filterSleepTalking
-    case .noise: Strings.filterNoise
     }
   }
 }

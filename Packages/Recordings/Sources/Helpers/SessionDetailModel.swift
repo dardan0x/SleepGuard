@@ -2,6 +2,7 @@ import Env
 import FactoryKit
 import Foundation
 import Models
+import SleepCore
 import SwiftData
 
 /// State owner for the session detail screen: loads the session (with the
@@ -17,24 +18,9 @@ final class SessionDetailModel {
     case error
   }
 
-  enum EventCategoryFilter: String, CaseIterable {
-    case all
-    case snoring
-    case sleepTalking
-    case noise
-
-    func includes(event: SnoreEvent) -> Bool {
-      switch self {
-      case .all: true
-      case .snoring: event.category == .snoring
-      case .sleepTalking: event.category == .sleepTalking
-      case .noise: event.category == .noise || event.category == .coughing || event.category == .other
-      }
-    }
-  }
-
   private(set) var viewState: ViewState = .loading
-  var selectedFilter: EventCategoryFilter = .all
+  /// The event list's filter (SleepCore's `EventFilter`).
+  var selectedFilter: EventFilter = .all
 
   private let sessionID: UUID
   private let appConfig: any AppConfigProviding
@@ -119,37 +105,30 @@ final class SessionDetailModel {
 
   // MARK: - Filter & derived events
 
-  var availableFilters: [EventCategoryFilter] {
-    if appConfig.isEnabled(.sleepTalkingDetection) {
-      return EventCategoryFilter.allCases
-    }
-    return EventCategoryFilter.allCases.filter { $0 != .sleepTalking }
+  /// The loaded night as SleepCore's value: what the shared detail content and
+  /// the event-list rules read.
+  var night: Night? {
+    guard case let .loaded(session, _, _) = viewState else { return nil }
+    return session.night
   }
 
-  var shouldShowFilter: Bool {
-    guard case let .loaded(_, sortedEvents, _) = viewState else { return false }
-    let relevantCategories = sortedEvents.compactMap { event -> EventCategoryFilter? in
-      switch event.category {
-      case .snoring: return .snoring
-      case .sleepTalking: return appConfig.isEnabled(.sleepTalkingDetection) ? .sleepTalking : nil
-      case .noise, .coughing, .other: return .noise
-      }
-    }
-    return Set(relevantCategories).count > 1
+  /// SleepCore's rule: every filter once the night has two kinds of event;
+  /// sleep talking only while that detection is on.
+  var filters: [EventFilter] {
+    guard let night else { return [] }
+    return EventFilter.options(for: night.events, includeSleepTalking: appConfig.isEnabled(.sleepTalkingDetection))
   }
 
-  /// Display duration overrides for episode representatives.
-  /// Uses the episode's full snoring span so melody gaps where snoring
-  /// resumed are included, matching the stat calculation.
-  var displayDurations: [UUID: TimeInterval] {
-    guard case let .loaded(session, _, _) = viewState else { return [:] }
-    var map: [UUID: TimeInterval] = [:]
-    for episode in session.displayableSnoringEpisodes {
-      if let rep = episode.representativeEvent {
-        map[rep.id] = episode.snoreDuration
-      }
-    }
-    return map
+  /// The event list under the filter (SleepCore's `EventListRow`).
+  var rows: [EventListRow] {
+    guard let night else { return [] }
+    return EventListRow.rows(for: night, filter: selectedFilter)
+  }
+
+  /// The stored event a row plays or shares.
+  func event(for row: EventListRow) -> SnoreEvent? {
+    guard case let .loaded(_, sortedEvents, _) = viewState else { return nil }
+    return sortedEvents.first { $0.id == row.id }
   }
 
   /// Short snoring episodes (under 3 sec) shown in the dedicated player.
@@ -158,21 +137,5 @@ final class SessionDetailModel {
     let shortEpisodes = session.snoringEpisodes.filter { $0.snoreDuration < 3 }
     return shortEpisodes.compactMap(\.representativeEvent)
       .sorted(by: { $0.timestamp < $1.timestamp })
-  }
-
-  /// Events for display: displayable snoring episodes + non-snoring events.
-  var filteredEvents: [SnoreEvent] {
-    guard case let .loaded(session, sortedEvents, _) = viewState else { return [] }
-
-    switch selectedFilter {
-    case .snoring:
-      return session.displayableSnoringEpisodes.compactMap(\.representativeEvent)
-    case .sleepTalking, .noise:
-      return sortedEvents.filter { selectedFilter.includes(event: $0) }
-    case .all:
-      let reps = session.displayableSnoringEpisodes.compactMap(\.representativeEvent)
-      let others = sortedEvents.filter { $0.category != .snoring }
-      return (reps + others).sorted(by: { $0.timestamp < $1.timestamp })
-    }
   }
 }
