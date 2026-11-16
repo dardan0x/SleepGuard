@@ -14,7 +14,6 @@ public struct SessionSummaryView: View {
     self.session = session
   }
 
-  @Injected(\.theme) private var theme
   @Injected(\.sessionManager) private var sessionManager
   @Injected(\.sessionCommitter) private var sessionCommitter
   @Injected(\.appConfig) private var appConfig
@@ -24,31 +23,21 @@ public struct SessionSummaryView: View {
   @State private var activeAlert: SummaryAlert?
 
   public var body: some View {
-    ScrollView {
-      VStack(spacing: 32) {
-        SessionSummaryHeader(session: session, scoreConfig: appConfig.sleepScoreConfig)
-
-        MelodyGapsBannerView(session: session)
-
-        LowBatteryBannerView(session: session)
-
-        SessionSummaryTimeline(session: session)
-
-        SessionSummaryActions(onSave: saveSession, onDiscard: discardSession)
+    // The shared summary content (ADR 0006).
+    let night = session.night
+    SessionSummaryContent(
+      night: night, summary: night.summary(using: appConfig.sleepScoreConfig),
+      onSave: saveSession, onDiscard: discardSession)
+      .alert(Strings.sessionSummaryTooShortTitle, isPresented: isPresented(.tooShort)) {
+        Button(Strings.actionOk, role: .cancel) {}
+      } message: {
+        Text(String(format: Strings.sessionSummaryTooShortInfoFormat, Int(SleepSession.minimumSaveDuration / 60)))
       }
-      .padding(24)
-    }
-    .background(theme.bgPrimary.ignoresSafeArea())
-    .alert(Strings.sessionSummaryTooShortTitle, isPresented: isPresented(.tooShort)) {
-      Button(Strings.actionOk, role: .cancel) {}
-    } message: {
-      Text(String(format: Strings.sessionSummaryTooShortInfoFormat, Int(SleepSession.minimumSaveDuration / 60)))
-    }
-    .alert(Strings.saveFailed, isPresented: isPresented(.saveFailed)) {
-      Button(Strings.actionOk, role: .cancel) {}
-    } message: {
-      Text(Strings.unableToSaveTheSession)
-    }
+      .alert(Strings.saveFailed, isPresented: isPresented(.saveFailed)) {
+        Button(Strings.actionOk, role: .cancel) {}
+      } message: {
+        Text(Strings.unableToSaveTheSession)
+      }
   }
 
   /// Binding for the alert modifiers, derived from the enum state so the

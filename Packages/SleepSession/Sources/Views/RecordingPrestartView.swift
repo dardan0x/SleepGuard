@@ -9,7 +9,6 @@ import UIKit
 
 @MainActor
 struct RecordingPrestartView: View {
-  @Injected(\.theme) private var theme
   @Injected(\.sessionManager) private var sessionManager
   @Environment(RouterPath.self) private var routerPath
   @Injected(\.userPreferences) private var userPreferences
@@ -20,77 +19,20 @@ struct RecordingPrestartView: View {
   @State private var activePresentation: PrestartPresentation?
 
   var body: some View {
-    ZStack(alignment: .bottom) {
-      ScrollView {
-        VStack(spacing: 0) {
-          PrestartHeader(compact: DeviceSize.isCompactHeight)
-            .padding(.top, DeviceSize.isCompactHeight ? 20 : 24)
-
-          PrestartTipsCard()
-            .padding(.top, DeviceSize.isCompactHeight ? 20 : 24)
-
-          VStack(spacing: 12) {
-            VStack(alignment: .leading, spacing: 8) {
-              PrestartDelaySection()
-              if appConfig.isEnabled(.snoreInterrupter) {
-                PrestartSnoreInterrupterRow(
-                  icon: "timer",
-                  title: Strings.snoreInterrupterRecordingPrestartViewTitle,
-                  value: snoreInterrupterValue,
-                  subtitle: Strings.snoreInterrupterLockscreenNote)
-                {
-                  activePresentation = .snoreInterrupter
-                }
-                .padding(.top, 8)
-              }
-            }
-            if appConfig.isEnabled(.snoreInterrupter) {
-              Text(Strings.snoreInterrupterRowHelperText)
-                .font(.system(size: 14))
-                .foregroundStyle(theme.textTertiary)
-                .multilineTextAlignment(.center)
-                .lineLimit(nil)
-                .fixedSize(horizontal: false, vertical: true)
-                .frame(maxWidth: .infinity)
-            }
-          }
-          .padding(.top, DeviceSize.isCompactHeight ? 20 : 24)
-
-          Color.clear.frame(height: 160)
-        }
-        .padding(.horizontal, 24)
+    // The shared prestart content (ADR 0006); the start delay and the Snore
+    // Interrupter rows go in its options slot.
+    PrestartContent(
+      compact: DeviceSize.isCompactHeight,
+      onStart: { Task { await startTapped() } },
+      onCancel: { routerPath.navigateBack() })
+    {
+      PrestartOptions(
+        showsSnoreInterrupter: appConfig.isEnabled(.snoreInterrupter),
+        snoreInterrupterValue: snoreInterrupterValue)
+      {
+        activePresentation = .snoreInterrupter
       }
-
-      VStack(spacing: 0) {
-        StartRecordingButton(height: 56) {
-          Task { @MainActor in
-            if !audioRecorder.hasPermission {
-              let granted = await audioRecorder.requestPermission()
-              guard granted else {
-                activePresentation = .microphoneAlert
-                return
-              }
-            }
-            guard isCharging else {
-              activePresentation = .chargingAlert
-              return
-            }
-            beginSession()
-          }
-        }
-
-        Button {
-          routerPath.navigateBack()
-        } label: {
-          Text(Strings.actionCancel)
-            .font(.system(size: 17, weight: .medium))
-            .foregroundStyle(theme.textSecondary)
-        }
-      }
-      .padding(.horizontal, 24)
-      .background(theme.bgPrimary.ignoresSafeArea(edges: .bottom))
     }
-    .background(theme.bgPrimary.ignoresSafeArea())
     .sheet(isPresented: isPresented(.snoreInterrupter)) {
       SnoreInterrupterSheet()
     }
@@ -132,6 +74,22 @@ struct RecordingPrestartView: View {
           activePresentation = nil
         }
       })
+  }
+
+  /// Microphone, then charger, then the session (or its delay).
+  private func startTapped() async {
+    if !audioRecorder.hasPermission {
+      let granted = await audioRecorder.requestPermission()
+      guard granted else {
+        activePresentation = .microphoneAlert
+        return
+      }
+    }
+    guard isCharging else {
+      activePresentation = .chargingAlert
+      return
+    }
+    beginSession()
   }
 
   private func beginSession() {
