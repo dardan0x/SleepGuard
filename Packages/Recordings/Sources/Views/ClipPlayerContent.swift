@@ -1,4 +1,5 @@
 import AudioEngine
+import DesignSystem
 import Env
 import FactoryKit
 import Models
@@ -32,7 +33,7 @@ struct ClipPlayerContent: View {
         onScrub: { relative in controller.seek(to: relative) },
         isReady: isReady,
         isLoadingWaveform: isLoadingWaveform)
-      EnhancedAudioToggleSection(isOn: enhancedAudioBinding)
+      EnhancedAudioToggle(isOn: enhancedAudioBinding)
       if sortedEvents.count > 1 {
         PlayerEventListSection(
           events: sortedEvents,

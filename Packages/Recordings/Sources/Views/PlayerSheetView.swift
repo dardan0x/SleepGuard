@@ -57,7 +57,7 @@ public struct PlayerSheetView: View {
             readyContent
           case let .noAudio(event):
             if let event {
-              NoAudioView(event: event)
+              NoAudioCard(start: event.timestamp, duration: event.snoreDuration, intensity: event.intensity)
             }
           }
         }

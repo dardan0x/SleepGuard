@@ -32,13 +32,9 @@ struct EventPlayerView: View {
   var body: some View {
     ZStack {
       VStack(spacing: 24) {
-        EventPlayerHeaderView(
-          event: event,
-          eventNumber: eventNumber,
-          totalEvents: totalEvents,
-          totalDuration: totalDuration,
-          intensityColor: intensityColor,
-          intensityLabel: intensityLabel)
+        PlayerHeader(
+          start: event.timestamp, duration: totalDuration, intensity: event.intensity,
+          number: eventNumber, count: totalEvents)
         EventWaveformView(
           event: event,
           intensityColor: intensityColor,
@@ -47,12 +43,8 @@ struct EventPlayerView: View {
           totalDuration: totalDuration,
           isLoadingWaveform: isLoadingWaveform,
           onScrub: onScrub)
-        EventPlayerControlsView(
-          isPlaying: isPlaying,
-          onTogglePlayback: onTogglePlayback,
-          onSkipBack: onSkipBack,
-          onSkipForward: onSkipForward)
-        EventIntensityLegendView()
+        PlayerControls(isPlaying: isPlaying, onToggle: onTogglePlayback, onBack: onSkipBack, onForward: onSkipForward)
+        EventIntensityLegend()
       }
       .padding(20)
       .background(theme.bgCard)
@@ -76,14 +68,5 @@ struct EventPlayerView: View {
     .frame(maxWidth: .infinity, maxHeight: .infinity)
     .background(theme.bgCard.opacity(0.95))
     .cornerRadius(theme.radiusCard)
-  }
-
-  private var intensityLabel: String {
-    switch event.intensity {
-    case .quiet: Strings.quietIntensityLabel
-    case .light: Strings.lightIntensityLabelEventPlayerView
-    case .loud: Strings.loudIntensityLabelEventPlayerView
-    case .epic: Strings.epicIntensityLabelEventPlayerView
-    }
   }
 }

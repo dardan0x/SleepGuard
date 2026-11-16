@@ -23,10 +23,8 @@ struct PlayerEventListSection: View {
       VStack(spacing: 6) {
         ForEach(Array(events.enumerated()), id: \.element.id) { index, event in
           PlayerEventRow(
-            event: event,
-            isActive: currentEventIndex == index,
-            isPlaying: isPlaying,
-            onTap: { onSelect(index) })
+            start: event.timestamp, duration: event.snoreDuration, category: event.category, intensity: event.intensity,
+            isActive: currentEventIndex == index, isPlaying: isPlaying) { onSelect(index) }
         }
       }
     }
