@@ -5,9 +5,10 @@ import FactoryKit
 import Models
 import SwiftUI
 
-/// Player content for clip sessions: full event player, enhanced-audio
-/// toggle, and the tappable event list. Selection plays the event and asks
-/// the parent to reload the waveform (`onSelectEvent`).
+/// Player content for clip sessions: the shared `PlayerContent` (card with
+/// waveform, enhanced audio, the event list) over `ClipPlaybackController`.
+/// Selection plays the event and asks the parent to reload the waveform
+/// (`onSelectEvent`).
 struct ClipPlayerContent: View {
   @Injected(\.userPreferences) private var userPreferences
   let controller: ClipPlaybackController
@@ -18,29 +19,20 @@ struct ClipPlayerContent: View {
   let onSelectEvent: (SnoreEvent, Int) -> Void
 
   var body: some View {
-    if let currentEvent = controller.currentEvent {
-      EventPlayerView(
-        event: currentEvent,
-        waveformSamples: waveformSamples,
+    if controller.currentEvent != nil {
+      PlayerContent(
+        clips: sortedEvents.map(PlayerClip.init(event:)),
+        index: controller.currentEventIndex,
         isPlaying: controller.isPlaying,
         currentTime: controller.currentTime,
         totalDuration: controller.totalClipsDuration,
-        eventNumber: controller.currentEventNumber,
-        totalEvents: controller.totalEventCount,
-        onTogglePlayback: { controller.togglePlayback() },
-        onSkipBack: { skip(by: -15) },
-        onSkipForward: { skip(by: 15) },
-        onScrub: { relative in controller.seek(to: relative) },
+        waveform: waveformSamples,
+        isLoadingWaveform: isLoadingWaveform,
         isReady: isReady,
-        isLoadingWaveform: isLoadingWaveform)
-      EnhancedAudioToggle(isOn: enhancedAudioBinding)
-      if sortedEvents.count > 1 {
-        PlayerEventListSection(
-          events: sortedEvents,
-          currentEventIndex: controller.currentEventIndex,
-          isPlaying: controller.isPlaying,
-          onSelect: { index in onSelectEvent(sortedEvents[index], index) })
-      }
+        isEnhanced: enhancedAudioBinding,
+        onToggle: { controller.togglePlayback() },
+        onSeek: { controller.seek(to: $0) },
+        onSelect: { index in onSelectEvent(sortedEvents[index], index) })
     }
   }
 
@@ -51,11 +43,5 @@ struct ClipPlayerContent: View {
         controller.enhancedAudioEnabled = newValue
         userPreferences.enhancedAudioPlayback = newValue
       })
-  }
-
-  private func skip(by seconds: TimeInterval) {
-    let newTime = max(0, controller.currentTime + seconds)
-    guard controller.totalClipsDuration > 0 else { return }
-    controller.seek(to: newTime / controller.totalClipsDuration)
   }
 }
