@@ -1,6 +1,7 @@
 import AVFoundation
 import Models
 import Observation
+import SleepCore
 
 /// Detects sleep talking / speech in audio using SoundAnalysis confidence.
 /// Designed to run in parallel with SnoreDetector. When both snoring and speech
@@ -27,20 +28,22 @@ public final class SpeechDetector {
   private init() {}
 
   /// Classifies whether the current audio contains speech.
+  /// SleepCore's `SpeechClassifier` with this detector's threshold and floor.
   public func classify(db: Float, speechConfidence: Float) -> Bool {
-    guard speechConfidence >= confidenceThreshold else {
+    switch SpeechClassifier(confidenceThreshold: confidenceThreshold, dbFloor: dbFloor).verdict(db: db, speechConfidence: speechConfidence) {
+    case .speech:
+      return true
+    case .lowConfidence:
       #if DEBUG
       Log.detection.debug("Rejected: confidence \(speechConfidence, format: .fixed(precision: 2)) < threshold \(self.confidenceThreshold)")
       #endif
       return false
-    }
-    guard db >= dbFloor else {
+    case .tooQuiet:
       #if DEBUG
       Log.detection.debug("Rejected: db \(db, format: .fixed(precision: 1)) < floor \(self.dbFloor)")
       #endif
       return false
     }
-    return true
   }
 
   /// Updates the detector state with new audio features.

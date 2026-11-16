@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import SleepCore
 
 // NOTE: These properties use manual access/withMutation because @Observable only
 // auto-instruments stored properties. Computed properties backed by UserDefaults
@@ -190,11 +191,8 @@ public final class UserPreferences: UserPreferencesStoring {
     }
   }
 
-  public enum DetectionSensitivity: String, CaseIterable, Sendable {
-    case low
-    case medium
-    case high
-  }
+  /// SleepCore's (same cases and raw values, so stored settings read the same).
+  public typealias DetectionSensitivity = SleepCore.DetectionSensitivity
 
   public enum AppearanceSetting: String, CaseIterable, Sendable {
     case light

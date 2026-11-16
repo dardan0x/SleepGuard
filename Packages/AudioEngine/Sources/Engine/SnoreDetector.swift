@@ -13,119 +13,62 @@ public final class SnoreDetector {
   /// These are relative to digital full scale, not calibrated dB-SPL.
   /// loud/epic lowered 5 dB (2026-06-01) because RMS over 23 ms buffers
   /// under-reports impulsive snoring peaks; peak-dB classification compensates.
-  public var quietThreshold: Float = -50.0
-  public var lightThreshold: Float = -40.0
-  public var loudThreshold: Float = -20.0
-  public var epicThreshold: Float = -10.0
+  public var quietThreshold = SnoreClassifier.preset(.medium).quietThreshold
+  public var lightThreshold = SnoreClassifier.preset(.medium).lightThreshold
+  public var loudThreshold = SnoreClassifier.preset(.medium).loudThreshold
+  public var epicThreshold = SnoreClassifier.preset(.medium).epicThreshold
 
   /// SoundAnalysis confidence gates (medium sensitivity defaults).
   /// `confidenceGate`: minimum to register as snoring at all.
-  /// `highConfidenceGate`: required for loud/epic intensities.
+  /// `highConfidenceGate`: required for epic.
   /// `quietFallbackGate`: counts as quiet even when dB is below all floors.
-  /// Recalibrated from 0.5/0.7/0.6 — the old defaults were too strict and
-  /// missed real bedroom snoring confirmed by independent burst analysis.
-  public var confidenceGate: Float = 0.35
-  public var highConfidenceGate: Float = 0.55
-  public var quietFallbackGate: Float = 0.45
+  public var confidenceGate = SnoreClassifier.preset(.medium).confidenceGate
+  public var highConfidenceGate = SnoreClassifier.preset(.medium).highConfidenceGate
+  public var quietFallbackGate = SnoreClassifier.preset(.medium).quietFallbackGate
+
+  /// The current thresholds as SleepCore's classifier, which holds the rules.
+  public var classifier: SnoreClassifier {
+    SnoreClassifier(
+      quietThreshold: quietThreshold, lightThreshold: lightThreshold, loudThreshold: loudThreshold,
+      epicThreshold: epicThreshold, confidenceGate: confidenceGate, highConfidenceGate: highConfidenceGate,
+      quietFallbackGate: quietFallbackGate)
+  }
+
+  /// Takes a preset's values (SleepCore's calibrated sensitivity presets).
+  public func apply(_ preset: SnoreClassifier) {
+    quietThreshold = preset.quietThreshold
+    lightThreshold = preset.lightThreshold
+    loudThreshold = preset.loudThreshold
+    epicThreshold = preset.epicThreshold
+    confidenceGate = preset.confidenceGate
+    highConfidenceGate = preset.highConfidenceGate
+    quietFallbackGate = preset.quietFallbackGate
+  }
 
   /// Internal so tests can create isolated instances; app code uses `.shared`.
   init() {}
 
-  // MARK: - Public Classification
+  // MARK: - Classification (SleepCore's `SnoreClassifier`)
 
-  /// Classifies snoring using Apple's SoundAnalysis confidence when available,
-  /// falling back to FFT spectral features. Never falls back to pure dB thresholds
-  /// because they have no frequency discrimination and create massive false positives
-  /// (breathing, bed creaking, traffic, etc.).
+  /// SoundAnalysis confidence when available, else FFT spectral features;
+  /// never pure dB thresholds (no frequency discrimination).
   public func classify(db: Float, spectralScore: Float = 0, snoreConfidence: Float = 0) -> DetectionState {
-    if snoreConfidence > 0 {
-      return classifyWithSoundAnalysis(db: db, snoreConfidence: snoreConfidence)
-    }
-    if spectralScore > 0 {
-      return classifyWithSpectral(db: db, spectralScore: spectralScore)
-    }
-    return .none
+    classifier.classify(db: db, spectralScore: spectralScore, snoreConfidence: snoreConfidence)
   }
 
   public func update(db: Float, spectralScore: Float = 0, snoreConfidence: Float = 0) {
     currentState = classify(db: db, spectralScore: spectralScore, snoreConfidence: snoreConfidence)
   }
 
-  // MARK: - Threshold Fallback
-
   public func classifyWithThresholds(db: Float) -> DetectionState {
-    if db >= epicThreshold {
-      return .epic
-    } else if db >= loudThreshold {
-      return .loud
-    } else if db >= lightThreshold {
-      return .light
-    } else if db >= quietThreshold {
-      return .quiet
-    }
-    return .none
+    classifier.classifyWithThresholds(db: db)
   }
 
-  // MARK: - SoundAnalysis Classification
-
-  /// Uses Apple's built-in sound classifier confidence.
-  /// `snoreConfidence` is 0–1 from the 300-class pre-trained model.
-  ///
-  /// Confidence gates are configurable per sensitivity. dB is used for intensity,
-  /// with floors tuned to reduce false positives from ambient bedroom noise
-  /// while still capturing quiet snoring.
   public func classifyWithSoundAnalysis(db: Float, snoreConfidence: Float) -> DetectionState {
-    guard snoreConfidence >= confidenceGate else {
-      return .none
-    }
-
-    // Intensity is primarily amplitude-based. ML confidence already gated
-    // entry above, so dB alone determines tier. Only epic requires extra
-    // confidence to avoid false positives at the extreme end.
-    if db >= epicThreshold, snoreConfidence >= highConfidenceGate {
-      return .epic
-    } else if db >= loudThreshold {
-      return .loud
-    } else if db >= lightThreshold {
-      return .light
-    } else if db >= quietThreshold {
-      return .quiet
-    }
-    // Even if dB is below all thresholds, sufficient classifier confidence counts as quiet.
-    return snoreConfidence >= quietFallbackGate ? .quiet : .none
+    classifier.classifyWithSoundAnalysis(db: db, snoreConfidence: snoreConfidence)
   }
 
-  // MARK: - Spectral Classification
-
-  /// Uses FFT spectral features to distinguish snoring from other loud sounds.
-  /// Rejects sounds that are loud but don't have snore-like spectral structure.
-  /// Threshold raised from 0.3 → 0.6 because breathing and other non-snore sounds
-  /// easily score 0.4–0.7 in the 100–500 Hz band.
   public func classifyWithSpectral(db: Float, spectralScore: Float) -> DetectionState {
-    guard spectralScore >= 0.6 else {
-      return .none
-    }
-
-    // Require minimum dB even with good spectral score. Quiet ambient sounds
-    // (breathing at -40 dB) should not trigger even if spectral looks similar.
-    guard db >= quietThreshold - 5 else {
-      return .none
-    }
-
-    let adjustedQuiet = quietThreshold + (1.0 - spectralScore) * 10
-    let adjustedLight = lightThreshold + (1.0 - spectralScore) * 8
-    let adjustedLoud = loudThreshold + (1.0 - spectralScore) * 5
-    let adjustedEpic = epicThreshold + (1.0 - spectralScore) * 3
-
-    if db >= adjustedEpic {
-      return .epic
-    } else if db >= adjustedLoud {
-      return .loud
-    } else if db >= adjustedLight {
-      return .light
-    } else if db >= adjustedQuiet {
-      return .quiet
-    }
-    return .none
+    classifier.classifyWithSpectral(db: db, spectralScore: spectralScore)
   }
 }
