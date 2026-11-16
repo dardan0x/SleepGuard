@@ -42,6 +42,9 @@ public struct StatisticsDashboardView: View {
           },
           onViewCalendar: {
             routerPath.navigate(to: .calendar)
+          },
+          onViewLastSevenNights: {
+            routerPath.navigate(to: .last7Nights)
           })
       case .error:
         StatisticsErrorView {

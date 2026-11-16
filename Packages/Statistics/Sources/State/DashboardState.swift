@@ -18,6 +18,10 @@ struct DashboardState {
   let isLastNight: Bool
   /// The week strip: 7 days ending on `now`'s day, with each day's snoring level.
   let week: [NightDashboard.WeekDay]
+  /// SleepCore's dashboard (from summaries without events) and the time it was
+  /// made for: what the shared `StatisticsDashboardContent` draws.
+  let dashboard: NightDashboard
+  let now: Date
 
   /// `nil` when there are no sessions. `sessions` may be in any order. The
   /// rules are SleepCore's `NightDashboard`; this maps its nights back to models.
@@ -33,6 +37,8 @@ struct DashboardState {
       daySessionCount: dashboard.dayNightCount,
       recentSessions: dashboard.recent.compactMap { byID[$0.id] },
       isLastNight: dashboard.isLastNight,
-      week: dashboard.week(now: now, calendar: calendar))
+      week: dashboard.week(now: now, calendar: calendar),
+      dashboard: dashboard,
+      now: now)
   }
 }

@@ -1,11 +1,11 @@
-import AudioEngine
 import DesignSystem
-import Env
 import FactoryKit
 import Models
-import SleepCore
 import SwiftUI
 
+/// The dashboard: SleepGuard's title and calendar button, the shared content
+/// (`StatisticsDashboardContent`, ADR 0006) with the night's sleep stages in
+/// its slot, and Start Recording.
 @MainActor
 struct StatisticsLoadedView: View {
   let state: DashboardState
@@ -13,6 +13,7 @@ struct StatisticsLoadedView: View {
   @MainActor let onStartRecording: () -> Void
   let onViewTrends: () -> Void
   let onViewCalendar: () -> Void
+  let onViewLastSevenNights: () -> Void
 
   var body: some View {
     VStack(spacing: 0) {
@@ -21,35 +22,17 @@ struct StatisticsLoadedView: View {
         .padding(.top, 10)
 
       ScrollView {
-        VStack(spacing: DeviceSize.isCompactHeight ? 10 : 16) {
-          StatisticsWeekSelector(week: state.week, onViewTrends: onViewTrends)
-
-          SleepScoreGauge(score: state.dayScore, size: 120)
-
-          VStack(spacing: 4) {
-            Text(summaryLabel)
-              .font(.system(size: 12, weight: .semibold))
-              .foregroundStyle(theme.textTertiary)
-              .tracking(1)
-
-            Text("\(dateString) · \(timeRangeString)")
-              .font(.system(size: 15))
-              .foregroundStyle(theme.textSecondary)
-          }
-
-          StatisticsStatsGrid(session: session)
-
-          if let stages = session.sleepStageSegments, !stages.isEmpty {
-            SleepStageBreakdownView(session: session)
-          }
-
-          if !state.recentSessions.isEmpty {
-            StatisticsMiniChartSection(recentSessions: state.recentSessions)
+        // The latest night in full (events read): the dashboard itself is built
+        // from summaries without events.
+        StatisticsDashboardContent(
+          dashboard: state.dashboard, latest: state.session.nightSummary, now: state.now,
+          compact: DeviceSize.isCompactHeight, onShowTrends: onViewTrends, onShowLastSevenNights: onViewLastSevenNights)
+        {
+          if let stages = state.session.sleepStageSegments, !stages.isEmpty {
+            SleepStageBreakdownView(session: state.session)
           }
         }
-        .padding(.horizontal, 20)
       }
-      .padding(.top, 10)
 
       StartRecordingButton(height: 56) {
         onStartRecording()
@@ -58,31 +41,5 @@ struct StatisticsLoadedView: View {
     }
     .background(theme.bgPrimary.ignoresSafeArea(edges: .bottom))
     .toolbar(.hidden, for: .navigationBar)
-  }
-
-  private var summaryLabel: String {
-    if state.daySessionCount > 1 {
-      return "\(state.daySessionCount) \(Strings.recordingsStatisticsLoadedView)"
-    }
-    return state.isLastNight
-      ? Strings.lastNightStatisticsLoadedView
-      : Strings.lastTimeStatisticsLoadedView
-  }
-
-  private var session: SleepSession {
-    state.session
-  }
-
-  private var dateString: String {
-    DateFormatters.monthDay.string(from: session.startDate)
-  }
-
-  private var timeRangeString: String {
-    let start = DateFormatters.timeWithPeriod.string(from: session.startDate)
-    if let endDate = session.endDate {
-      let end = DateFormatters.timeWithPeriod.string(from: endDate)
-      return "\(start) – \(end)"
-    }
-    return start
   }
 }

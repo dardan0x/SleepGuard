@@ -1,4 +1,3 @@
-import Charts
 import DesignSystem
 import Env
 import FactoryKit
@@ -7,34 +6,21 @@ import SleepCore
 import SwiftData
 import SwiftUI
 
+/// Trends: the week's or month's nights. Hosts the shared `TrendsContent`
+/// (ADR 0006) under SleepGuard's toolbar title.
 @MainActor
 public struct TrendsView: View {
   @Injected(\.theme) private var theme
   @Query(sort: \SleepSession.startDate, order: .reverse)
   private var sessions: [SleepSession]
 
-  @State private var timeRange: TimeRange = .week
+  @State private var range = TrendsRange.week
 
   public init() {}
 
   public var body: some View {
     ScrollView {
-      VStack(spacing: 24) {
-        PillPicker(options: TimeRange.allCases, selection: $timeRange) { $0.localizedName }
-
-        snoringMinutesSection
-
-        SnoringBarChart(bars: chartData())
-
-        SnoringLegend()
-
-        TrendsStatsGrid(
-          averageScore: averageScore(),
-          bestScore: bestScore(),
-          worstScore: worstScore(),
-          totalEvents: totalEvents())
-      }
-      .padding(20)
+      TrendsContent(range: $range, period: period)
     }
     .background(theme.bgPrimary.ignoresSafeArea())
     .navigationTitle("")
@@ -48,85 +34,11 @@ public struct TrendsView: View {
     }
   }
 
-  // MARK: - Snoring Minutes
-
-  private var snoringMinutesSection: some View {
-    let avgMinutes = averageSnoringMinutes()
-
-    return VStack(alignment: .leading, spacing: 4) {
-      Text(Strings.statsTrendsAvgSnoringLabel)
-        .font(.system(size: 11, weight: .semibold))
-        .foregroundStyle(theme.textTertiary)
-        .tracking(1)
-
-      HStack(alignment: .lastTextBaseline, spacing: 6) {
-        Text(DurationFormatter.hoursAndMinutes(avgMinutes))
-          .font(.system(size: 36, weight: .bold))
-          .foregroundStyle(theme.textPrimary)
-
-        Text(Strings.statsTrendsAvgMinFormat)
-          .font(.system(size: 14))
-          .foregroundStyle(theme.textSecondary)
-      }
-    }
-    .frame(maxWidth: .infinity, alignment: .leading)
-  }
-
-  // MARK: - Data Helpers
-
   /// The week's or month's nights, from SleepCore's `NightPeriod`. Chosen
   /// without reading events, then built in full for those nights only.
   private var period: NightPeriod {
     let now = Date()
-    let days = timeRange == .week ? 7 : 30
-    let chosen = NightPeriod(lastDays: days, of: sessions.summariesWithoutEvents, now: now).nights
-    return NightPeriod(lastDays: days, of: sessions.fullSummaries(of: chosen), now: now)
+    let chosen = NightPeriod(lastDays: range.days, of: sessions.summariesWithoutEvents, now: now).nights
+    return NightPeriod(lastDays: range.days, of: sessions.fullSummaries(of: chosen), now: now)
   }
-
-  private func chartData() -> [SnoringBar] {
-    let formatter = timeRange == .week ? DateFormatters.dayOfWeekShort : DateFormatters.dayOfMonth
-
-    return period.nights.map { night in
-      SnoringBar(
-        id: night.id,
-        label: formatter.string(from: night.start),
-        minutes: Int(night.snoringDuration / 60),
-        intensity: night.loudestIntensity ?? .quiet)
-    }
-  }
-
-  private func averageSnoringMinutes() -> Int {
-    period.averageSnoringMinutes
-  }
-
-  private func averageScore() -> Int {
-    period.averageScore
-  }
-
-  private func bestScore() -> Int {
-    period.bestScore
-  }
-
-  private func worstScore() -> Int {
-    period.worstScore
-  }
-
-  private func totalEvents() -> Int {
-    period.eventCount
-  }
-}
-
-@MainActor
-private enum TimeRange: String, CaseIterable, Identifiable, Hashable {
-  case week = "Week"
-  case month = "Month"
-
-  var localizedName: String {
-    switch self {
-    case .week: Strings.statsTrendsWeek
-    case .month: Strings.statsTrendsMonth
-    }
-  }
-
-  var id: String { rawValue }
 }

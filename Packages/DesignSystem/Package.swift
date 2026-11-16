@@ -9,7 +9,7 @@ let package = Package(
   ],
   dependencies: [
     .package(path: "../Models"),
-    .package(url: "https://github.com/dardan0x/SleepGuardShared.git", exact: "0.16.0"),
+    .package(url: "https://github.com/dardan0x/SleepGuardShared.git", exact: "0.17.0"),
     .package(url: "https://github.com/hmlongco/Factory", from: "3.5.2"),
   ],
   targets: [
@@ -21,6 +21,7 @@ let package = Package(
         .product(name: "SleepCore", package: "SleepGuardShared"),
         .product(name: "SleepStrings", package: "SleepGuardShared"),
         .product(name: "SleepGuardDesignKit", package: "SleepGuardShared"),
+        .product(name: "SleepGuardContentKit", package: "SleepGuardShared"),
       ],
       path: "Sources",
       exclude: [],
