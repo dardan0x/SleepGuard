@@ -229,7 +229,8 @@ These thresholds prevent monolithic views. Enforce them during implementation an
 - State-specific views: `[Feature]EmptyView`, `[Feature]ErrorView`, `[Feature]LoadedView`
 - Reusable rows/cards: `[Feature]RowView`, `[Feature]StatCard`, `[Feature]EventRow`
 - Full-screen overlays: `AlarmOverlayView`, `PermissionOverlayView`
-- A view that only takes values and draws them: the shared kit (`SleepGuardDesignKit`), so both apps use one copy. A SleepGuard-only piece used by 2+ packages (it reads models or services): `DesignSystem`
+- A view that only takes values and draws them: the shared repo, so both apps use one copy. A component goes in `SleepGuardDesignKit`; a screen's loaded layout (screen content) goes in `SleepGuardContentKit`. A SleepGuard-only piece used by 2+ packages (it reads models or services): `DesignSystem`
+- **Three layers (ADR 0006).** Components and screen content are shared; the screen stays in its feature package: loading and `ViewState`, `@Query`, `@Injected` services, `RouterPath`, alerts and sheets, the header. The test: if a view can be rendered from plain values alone, it is shared. A container loads, maps models to `SleepCore` values (`summaryWithoutEvents` for lists, `nightSummary` / `night` for what a screen shows) and hands the content those values and closures. A SleepGuard-only extra goes into shared content through an optional value or a `@ViewBuilder` slot. `DesignSystem` is this app's bridge to the shared code (`AppTheme`, model adapters, re-exports), not a design system of its own.
 
 **What stays inline (fine as private computed properties):**
 - Simple headers, badges, or labels under 10 lines
@@ -242,7 +243,7 @@ These thresholds prevent monolithic views. Enforce them during implementation an
 - During review, run: `grep -rnE '^\s+(private )?var \w+: some View' Packages --include='*.swift'` and check new/changed hits against this rule.
 
 **Duplication rule:**
-- If the same view struct appears in 2+ files, extract it immediately: to the shared kit if it only draws values, otherwise to `DesignSystem`. Do not copy-paste view code, and don't copy a kit component into this repo.
+- If the same view struct appears in 2+ files, extract it immediately: to the shared repo if it only draws values (kit for a component, content kit for a screen's layout), otherwise to `DesignSystem`. Do not copy-paste view code, and don't copy a shared view into this repo.
 
 ### Packages
 
