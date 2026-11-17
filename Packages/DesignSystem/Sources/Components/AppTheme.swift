@@ -122,13 +122,4 @@ public final class AppTheme: ThemeProviding {
       typography: AppTheme.kit.typography,
       radii: Radii(card: radiusCard, small: radiusSmall))
   }
-
-  public func stageColor(_ stage: SleepStage) -> Color {
-    switch stage {
-    case .deep: stageDeepColor
-    case .light: stageLightColor
-    case .rem: stageREMColor
-    case .awake: stageAwakeColor
-    }
-  }
 }

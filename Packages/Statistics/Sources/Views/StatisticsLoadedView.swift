@@ -1,4 +1,5 @@
 import DesignSystem
+import Env
 import FactoryKit
 import Models
 import SwiftUI
@@ -10,6 +11,7 @@ import SwiftUI
 struct StatisticsLoadedView: View {
   let state: DashboardState
   @Injected(\.theme) private var theme
+  @Injected(\.appConfig) private var appConfig
   @MainActor let onStartRecording: () -> Void
   let onViewTrends: () -> Void
   let onViewCalendar: () -> Void
@@ -28,9 +30,7 @@ struct StatisticsLoadedView: View {
           dashboard: state.dashboard, latest: state.session.nightSummary, now: state.now,
           compact: DeviceSize.isCompactHeight, onShowTrends: onViewTrends, onShowLastSevenNights: onViewLastSevenNights)
         {
-          if let stages = state.session.sleepStageSegments, !stages.isEmpty {
-            SleepStageBreakdownView(session: state.session)
-          }
+          SleepStagesSection(session: state.session, scoreConfig: appConfig.sleepScoreConfig)
         }
       }
 

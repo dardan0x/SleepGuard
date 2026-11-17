@@ -48,5 +48,4 @@ public protocol ThemeProviding: AnyObject, Observable {
   func scoreColor(_ score: Int) -> Color
   func intensityColor(_ intensity: SnoreIntensity) -> Color
   func scoreGradient(for score: Int) -> Color
-  func stageColor(_ stage: SleepStage) -> Color
 }

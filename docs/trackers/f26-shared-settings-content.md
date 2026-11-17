@@ -21,10 +21,14 @@ Settings, the profile editor, the prestart's start delay and the countdown host 
 | ID | Task | Type | Status | Depends On | Package | Started | Completed |
 |----|------|------|--------|------------|---------|---------|-----------|
 | F26-T1 | Settings, profile editor, delay row and countdown host the shared content; storage, delay and raw log rules from SleepCore; `UserProfile` ↔ `SleepProfile` | Refactor | Done | F25 | Settings, Personalization, SleepSession, Env, Models, AudioEngine | 2026-11-17 | 2026-11-17 |
+| F26-T2 | Sleep stages: the breakdown card and the info sheet host the shared content; stage statuses and the score impact from SleepCore's `SleepStageBreakdown` | Refactor | Done | F26-T1 | DesignSystem, Recordings, Statistics | 2026-11-17 | 2026-11-17 |
 
 ## Notes
 
 - 18 files deleted with the owner's approval (the Settings sections and their helpers, the four profile pages and the chip selector, `PrestartDelaySection`, `SnoreSample.swift` and its tests, now in the shared repo).
 - `SettingsView` is split in three files (`+Values`, `+Actions`) for the 200-line limit.
 - The shared day rule chooses every night past the limit, as `StorageLimitEnforcer` did, so stale references are still cleared.
+- F26-T2: 7 files deleted with the owner's approval (`SleepStageBreakdownView`, `SleepStageHypnogramChart`, `SleepStageLegendGrid`, `SleepStagesInfoView`, `SleepStagesInfoHeader`, `YourStagesSection`, `ScoreImpactSection`), now in the shared repo. `SleepStagesSection` (DesignSystem) maps the session and owns the sheet. `stageColor(_:)` left the theme (orphaned); the `stage*Color` members stay.
+- Fix, don't port (F26-T2): the score impact hard-coded the stage constants; the shared content reads `appConfig.sleepScoreConfig`. Same values today, so nothing visible changes.
+- Open: the light recommendation text says 45–55% while the status band is 40–60%.
 - Open: `RecordingDelayManager`'s notification text is English-only. The shared key `session.countdown.notificationBody` exists; using it from `Env` needs a layering decision (non-view code and `Strings`).

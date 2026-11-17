@@ -45,8 +45,8 @@ Last updated: 2026-11-14
 | Backlog | 0 |
 | Blocked | 0 |
 | — | — |
-| Total Tasks | 170 |
-| Tasks Done | 153 |
+| Total Tasks | 171 |
+| Tasks Done | 154 |
 | Tasks In Progress | 0 |
 | Tasks Blocked | 0 |
 | Tasks Backlog | 17 |
@@ -81,7 +81,7 @@ Last updated: 2026-11-14
 | F23 | Production Readiness | P1 | In Progress | 12/13 | █████████░ 92% | [tracker](trackers/f23-production-readiness.md) |
 | F24 | Shared Design Kit Adoption | P2 | Done (bg-card open) | 4/4 | ██████████ 100% | [tracker](trackers/f24-shared-design-kit-adoption.md) |
 | F25 | Shared Screen Content | P2 | Done | 7/7 | ██████████ 100% | [tracker](trackers/f25-shared-screen-content.md) |
-| F26 | Shared Settings Content | P2 | Done | 1/1 | ██████████ 100% | [tracker](trackers/f26-shared-settings-content.md) |
+| F26 | Shared Settings Content | P2 | Done | 2/2 | ██████████ 100% | [tracker](trackers/f26-shared-settings-content.md) |
 
 ## Activity Log
 
@@ -89,6 +89,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-11-17 | F26-T2 | Completed | Sleep stages card and info sheet host the shared content (`SleepStagesCard`, `SleepStagesInfoContent`, shared 0.23.0) through `SleepStagesSection`; score impact reads `SleepScoreConfig`. 7 files deleted (approved). Branch `feature/f26/t2-sleep-stages` |
 | 2026-11-17 | F26-T1 | Completed | Settings, profile editor, delay row and countdown host the shared content; StoragePlan, RecordingDelay, RawLog from SleepCore (shared 0.22.0). 18 files deleted (approved). Branch `feature/f26/settings-content` |
 | 2026-11-17 | F25-T6 | Completed | Review: nothing left to share for these screens; AGENTS/CLAUDE and the technical overview name the content kit. F25 done (feature doc in SleepGuardUIKitWay, F10). Branch `docs/f25-t6-review` |
 | 2026-11-17 | F25-T5 | Completed | Prestart, bedside clock and summary host the shared recording content (shared 0.21.0); melody pieces in slots. Branch `feature/f25/t5-recording-content` |
