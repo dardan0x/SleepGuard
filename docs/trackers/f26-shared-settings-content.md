@@ -23,6 +23,7 @@ Settings, the profile editor, the prestart's start delay and the countdown host 
 | F26-T1 | Settings, profile editor, delay row and countdown host the shared content; storage, delay and raw log rules from SleepCore; `UserProfile` ↔ `SleepProfile` | Refactor | Done | F25 | Settings, Personalization, SleepSession, Env, Models, AudioEngine | 2026-11-17 | 2026-11-17 |
 | F26-T2 | Sleep stages: the breakdown card and the info sheet host the shared content; stage statuses and the score impact from SleepCore's `SleepStageBreakdown` | Refactor | Done | F26-T1 | DesignSystem, Recordings, Statistics | 2026-11-17 | 2026-11-17 |
 | F26-T3 | Snore Interrupter: prestart row, settings sheet, melody picker, recorder and bedside pieces host the shared content; mode, catalog, recording rules and gap helpers from SleepCore; sounds from the shared `SleepMelodies` | Refactor | Done | F26-T2 | SleepSession, Env, Models, DesignSystem, app bundle | 2026-11-17 | 2026-11-17 |
+| F26-T4 | Onboarding hosts the shared content; page order and moves from SleepCore's `OnboardingPages`; the Health page follows the `healthSync` flag | Refactor | Done | F26-T3 | Onboarding | 2026-11-17 | 2026-11-17 |
 
 ## Notes
 
@@ -34,4 +35,7 @@ Settings, the profile editor, the prestart's start delay and the countdown host 
 - Open: the light recommendation text says 45–55% while the status band is 40–60%.
 - F26-T3: 23 files deleted with the owner's approval: 10 interrupter views, `Models/Melody.swift`, the unused `MelodyGapsBannerView`, and the 11 catalog sounds in `sounds/` (now in `SleepMelodies`). The two sounds not in the catalog stay. `SnoreInterrupterSheet`, `MelodyPickerSheet` and `RecordCustomMelodySheet` are now thin hosts.
 - Fix, don't port (F26-T3): the 11 melody names, the mode labels (`displayLabel`) and "My Sound N" were English-only. They are strings now. A recording someone already saved keeps its stored name.
+- F26-T4: 6 page views deleted with the owner's approval; `OnboardingView` is the host. `docs/features/f1-onboarding.md` brought up to date (it described @AppStorage, a sheet route and an Open Settings button that are long gone).
+- Fix, don't port (F26-T4): the Health page showed even with the `healthSync` flag off; it now follows the flag.
+- Open: the onboarding string keys are named for other pages (page 1's body is `onboarding.page4.body`); the values are right, so they were left.
 - Open: `RecordingDelayManager`'s notification text is English-only. The shared key `session.countdown.notificationBody` exists; using it from `Env` needs a layering decision (non-view code and `Strings`).
