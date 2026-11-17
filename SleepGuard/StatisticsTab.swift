@@ -25,7 +25,7 @@ struct StatisticsTab: View {
       set: { routerPath.path = $0 }))
     {
       VStack(spacing: 0) {
-        ProfilePromptCard {
+        ProfilePromptSection {
           routerPath.presentedSheet = .profileEditor
         }
         .padding(.horizontal, 16)

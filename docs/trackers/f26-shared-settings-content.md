@@ -25,6 +25,7 @@ Settings, the profile editor, the prestart's start delay and the countdown host 
 | F26-T3 | Snore Interrupter: prestart row, settings sheet, melody picker, recorder and bedside pieces host the shared content; mode, catalog, recording rules and gap helpers from SleepCore; sounds from the shared `SleepMelodies` | Refactor | Done | F26-T2 | SleepSession, Env, Models, DesignSystem, app bundle | 2026-11-17 | 2026-11-17 |
 | F26-T4 | Onboarding hosts the shared content; page order and moves from SleepCore's `OnboardingPages`; the Health page follows the `healthSync` flag | Refactor | Done | F26-T3 | Onboarding | 2026-11-17 | 2026-11-17 |
 | F26-T5 | Learn hosts the shared content; the tab order places Learn only from `feature_learn` | Refactor / Fix | Done | F26-T4 | Learn, Env | 2026-11-17 | 2026-11-17 |
+| F26-T6 | Personalization: the briefing, the profile prompt and the PDF report host the shared content and rules | Refactor | Done | F26-T5 | Personalization, Recordings, DesignSystem, app | 2026-11-17 | 2026-11-17 |
 
 ## Notes
 
@@ -40,5 +41,8 @@ Settings, the profile editor, the prestart's start delay and the countdown host 
 - Fix, don't port (F26-T4): the Health page showed even with the `healthSync` flag off; it now follows the flag.
 - F26-T5: `LearnView.swift` deleted with the owner's approval (now the shared `LearnWebView`). Fix, don't port: the page reloaded on every view update; it now loads when its URL changes.
 - F26-T5 bug fix (agreed with the owner): when the tab list fell back to defaults (first launch, empty remote `tabs`), Learn showed even with `feature_learn` off, and with it on it was added twice (a duplicate tab id). `visibleTabsInOrder` now takes Learn only from `learnTabConfig`; `LearnTabOrderTests` cover it.
+- F26-T6: 14 files deleted with the owner's approval: the briefing engine, `QuoteBank`, the briefing views, `ProfilePromptCard`, the engine's tests (now SleepCore's, on values), `SleepReportPDFGenerator`, the app's `AppBriefingController` (now `Personalization/BriefingController`), and the unused `ActivityView` and `HiddenEventsSection`. `check-view-size.py`'s allowlist is empty now.
+- Fix, don't port (F26-T6): the briefing picked its content with `randomElement()` (now by the night, testable); the engine returned text (now values); the report had English labels and fixed date formats (now localized); the profile prompt re-rolled its chance on every redraw (now once per appearance).
+- Open (F26-T6): the four positive survey answers other than "exercised" have no field on `LifestyleLog`, so they're stored as an answered night with no flags, as before. Adding fields is a schema addition if they're ever read.
 - Open: the onboarding string keys are named for other pages (page 1's body is `onboarding.page4.body`); the values are right, so they were left.
 - Open: `RecordingDelayManager`'s notification text is English-only. The shared key `session.countdown.notificationBody` exists; using it from `Env` needs a layering decision (non-view code and `Strings`).

@@ -9,7 +9,7 @@ let package = Package(
   ],
   dependencies: [
     .package(path: "../Models"),
-    .package(url: "https://github.com/dardan0x/SleepGuardShared.git", exact: "0.26.0"),
+    .package(url: "https://github.com/dardan0x/SleepGuardShared.git", exact: "0.27.0"),
   ],
   targets: [
     .target(
