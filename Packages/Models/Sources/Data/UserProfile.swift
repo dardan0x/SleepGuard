@@ -127,29 +127,12 @@ public final class UserProfile {
 
   /// Derived age from birthYear, nil if birthYear is nil.
   public var age: Int? {
-    guard let birthYear else { return nil }
-    let calendar = Calendar.current
-    let currentYear = calendar.component(.year, from: Date())
-    return currentYear - birthYear
+    sleepProfile.age(in: Calendar.current.component(.year, from: Date()))
   }
 
-  /// Percentage of profile fields that have been filled (0.0–1.0).
-  /// Only counts fields that can actually be left empty/default;
-  /// enum lifestyle fields are ignored because the profile editor always
-  /// assigns them a value during the flow.
+  /// Percentage of profile fields that have been filled (0.0–1.0); the rule
+  /// is `SleepProfile.completion`.
   public var completionPercentage: Double {
-    let fields: [Bool] = [
-      firstName?.isEmpty == false,
-      birthYear != nil,
-      biologicalSex != .unspecified,
-      heightCm != nil,
-      weightKg != nil,
-      targetBedtime != nil,
-      targetSleepHours != nil,
-      !hobbies.isEmpty,
-      occupationType != .other,
-    ]
-    let filled = fields.filter(\.self).count
-    return Double(filled) / Double(fields.count)
+    sleepProfile.completion
   }
 }

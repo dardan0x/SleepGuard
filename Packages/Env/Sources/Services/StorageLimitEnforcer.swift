@@ -1,6 +1,7 @@
 import FactoryKit
 import Foundation
 import Models
+import SleepCore
 import SwiftData
 
 /// Report returned after running storage cleanup.
@@ -58,15 +59,7 @@ public final class StorageLimitEnforcer: Sendable, StorageLimitEnforcing {
   @MainActor
   @discardableResult
   func enforceLimits(modelContext: ModelContext, maxDays: Int?, maxMB: Int?) async -> CleanupReport {
-    var dayPlan: CleanupPlan?
-    var sizePlan: CleanupPlan?
-
-    if let maxDays {
-      dayPlan = buildDayPlan(maxDays: maxDays, modelContext: modelContext)
-    }
-    if let maxMB {
-      sizePlan = buildSizePlan(maxMB: maxMB, modelContext: modelContext)
-    }
+    let (dayPlan, sizePlan) = buildPlans(maxDays: maxDays, maxMB: maxMB, modelContext: modelContext)
 
     // Save URL clears immediately so the model is consistent even if
     // background file deletion is slow or fails.
@@ -91,78 +84,49 @@ public final class StorageLimitEnforcer: Sendable, StorageLimitEnforcing {
     return report
   }
 
-  // MARK: - Plan builders (MainActor)
+  // MARK: - Plan builder (MainActor)
 
-  /// Builds a plan of files to delete for sessions older than `maxDays`.
-  /// Also clears the audio URL properties on the model objects.
+  /// Measures every session's audio, lets the shared `StoragePlan` choose the
+  /// nights (older than `maxDays`, then oldest first over `maxMB`), and clears
+  /// those nights' audio URLs on the models.
   @MainActor
-  private func buildDayPlan(maxDays: Int, modelContext: ModelContext) -> CleanupPlan {
-    let cutoff = Date().addingTimeInterval(-TimeInterval(maxDays) * 24 * 3600)
-    let descriptor = FetchDescriptor<SleepSession>(
-      predicate: #Predicate { $0.startDate < cutoff }
-    )
-
+  private func buildPlans(maxDays: Int?, maxMB: Int?, modelContext: ModelContext) -> (day: CleanupPlan, size: CleanupPlan) {
+    let empty = CleanupPlan(fileURLs: [], sessionsAffected: 0)
+    guard maxDays != nil || maxMB != nil else { return (empty, empty) }
     let sessions: [SleepSession]
     do {
-      sessions = try modelContext.fetch(descriptor)
+      sessions = try modelContext.fetch(FetchDescriptor<SleepSession>(sortBy: [SortDescriptor(\.startDate)]))
     } catch {
       Log.storage.error("Session fetch failed, cleanup skipped: \(String(describing: error), privacy: .public)")
-      return CleanupPlan(fileURLs: [], sessionsAffected: 0)
+      return (empty, empty)
     }
 
-    var urls: [URL] = []
-    var affected = 0
-    for session in sessions {
-      let sessionURLs = collectAndClearURLs(for: session, modelContext: modelContext)
-      if !sessionURLs.isEmpty {
-        urls.append(contentsOf: sessionURLs)
-        affected += 1
+    let nights = sessions.map {
+      StoragePlan.Night(id: $0.id, start: $0.startDate, bytes: audioSize(for: $0, modelContext: modelContext))
+    }
+    let plan = StoragePlan.make(nights: nights, now: Date(), maxDays: maxDays, maxMB: maxMB)
+    let byID = Dictionary(sessions.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+
+    func clear(_ ids: [UUID]) -> CleanupPlan {
+      var urls: [URL] = []
+      var affected = 0
+      for id in ids {
+        guard let session = byID[id] else { continue }
+        let sessionURLs = collectAndClearURLs(for: session, modelContext: modelContext)
+        if !sessionURLs.isEmpty {
+          urls.append(contentsOf: sessionURLs)
+          affected += 1
+        }
       }
+      return CleanupPlan(fileURLs: urls, sessionsAffected: affected)
     }
 
-    if affected > 0 {
-      Log.storage.info("Planned removal for \(affected) sessions older than \(maxDays) days")
+    let day = clear(plan.dayLimited)
+    let size = clear(plan.sizeLimited)
+    if day.sessionsAffected > 0 || size.sessionsAffected > 0 {
+      Log.storage.info("Planned removal for \(day.sessionsAffected) old and \(size.sessionsAffected) over-limit session(s)")
     }
-    return CleanupPlan(fileURLs: urls, sessionsAffected: affected)
-  }
-
-  /// Builds a plan of files to delete to get under `maxMB`.
-  /// Also clears the audio URL properties on the model objects.
-  @MainActor
-  private func buildSizePlan(maxMB: Int, modelContext: ModelContext) -> CleanupPlan {
-    let maxBytes = Int64(maxMB) * 1_024 * 1_024
-    let descriptor = FetchDescriptor<SleepSession>(sortBy: [SortDescriptor(\.startDate)])
-
-    let sessions: [SleepSession]
-    do {
-      sessions = try modelContext.fetch(descriptor)
-    } catch {
-      Log.storage.error("Session fetch failed, cleanup skipped: \(String(describing: error), privacy: .public)")
-      return CleanupPlan(fileURLs: [], sessionsAffected: 0)
-    }
-
-    var totalSize = totalAudioSize(for: sessions, modelContext: modelContext)
-    guard totalSize > maxBytes else {
-      return CleanupPlan(fileURLs: [], sessionsAffected: 0)
-    }
-
-    var urls: [URL] = []
-    var affected = 0
-    for session in sessions {
-      if totalSize <= maxBytes { break }
-      let sessionSize = audioSize(for: session, modelContext: modelContext)
-      let sessionURLs = collectAndClearURLs(for: session, modelContext: modelContext)
-      if !sessionURLs.isEmpty {
-        urls.append(contentsOf: sessionURLs)
-        affected += 1
-      }
-      totalSize -= sessionSize
-    }
-
-    if affected > 0 {
-      Log.storage.info("Planned removal to get under \(maxMB) MB")
-    }
-    return CleanupPlan(fileURLs: urls, sessionsAffected: affected)
+    return (day, size)
   }
 
   // MARK: - Event fetching (avoids faulting corrupted relationships)
@@ -238,15 +202,6 @@ public final class StorageLimitEnforcer: Sendable, StorageLimitEnforcing {
   }
 
   // MARK: - Size helpers
-
-  @MainActor
-  private func totalAudioSize(for sessions: [SleepSession], modelContext: ModelContext) -> Int64 {
-    var total: Int64 = 0
-    for session in sessions {
-      total += audioSize(for: session, modelContext: modelContext)
-    }
-    return total
-  }
 
   @MainActor
   private func audioSize(for session: SleepSession, modelContext: ModelContext) -> Int64 {

@@ -3,6 +3,7 @@ import FactoryKit
 import Foundation
 import Models
 import os
+import SleepCore
 import UIKit
 
 /// Recording lifecycle for a sleep session: starts/stops the audio engine,

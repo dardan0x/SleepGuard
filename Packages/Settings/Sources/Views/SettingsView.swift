@@ -1,24 +1,32 @@
+import AVFoundation
 import DesignSystem
 import Env
 import FactoryKit
 import Models
-import Personalization
 import Routing
 import SwiftData
 import SwiftUI
 
+/// Settings: the title row over the shared `SettingsContent`. This view owns
+/// the values (preferences, permissions, feature flags) and what a tap does;
+/// building them lives in `SettingsView+Values.swift`.
 @MainActor
 public struct SettingsView: View {
-  @Injected(\.theme) private var theme
-  @Injected(\.appConfig) private var appConfig
-  @Injected(\.userPreferences) private var userPreferences
-  @Injected(\.watchConnectivityManager) private var watchConnectivityManager
-  @Injected(\.healthKitSync) private var healthKitSync
-  @Environment(\.modelContext) private var modelContext
-  @Environment(\.openURL) private var openURL
-  @Environment(RouterPath.self) private var routerPath
+  @Injected(\.theme) var theme
+  @Injected(\.appConfig) var appConfig
+  @Injected(\.userPreferences) var userPreferences
+  @Injected(\.watchConnectivityManager) var watchConnectivityManager
+  @Injected(\.healthKitSync) var healthKitSync
+  @Injected(\.notificationPermissionManager) var notifications
+  @Injected(\.storageLimitEnforcer) var storageLimitEnforcer
+  @Environment(\.modelContext) var modelContext
+  @Environment(\.openURL) var openURL
+  @Environment(RouterPath.self) var routerPath
 
-  @State private var showDeleteConfirmation = false
+  @State var microphone: AVAudioSession.RecordPermission = .undetermined
+  @State var showDeleteConfirmation = false
+  @State var pendingStorageLimitMB: Int?
+  @State var testReport: CleanupReport?
   #if DEBUG
   @State private var showDebugConfig = false
   #endif
@@ -31,32 +39,19 @@ public struct SettingsView: View {
         .padding(.horizontal, 20)
         .padding(.top, 10)
 
-      ScrollView {
-        VStack(spacing: 24) {
-          SettingsPermissionsSection()
-          SettingsRecordingSection()
-          SettingsAppearanceSection()
-          SettingsProfileSection(onTapProfile: { routerPath.presentedSheet = .profileEditor })
-          if appConfig.isEnabled(.watchApp) {
-            SettingsWatchSection()
-          }
-          SettingsStorageSection()
-          SettingsDataSection(onShowDeleteConfirmation: { showDeleteConfirmation = true })
-          SettingsAboutSection(onRateApp: rateApp)
-          #if DEBUG
-          Button("Debug Config") { showDebugConfig = true }
-            .foregroundStyle(theme.textSecondary)
-          #endif
-        }
-        .padding(.horizontal, 20)
-        .padding(.top, 20)
-        .padding(.bottom, 24)
+      SettingsContent(
+        permissions: permissions, recording: recording, profile: profile, watch: watch,
+        storage: storage, data: data, about: about)
+      {
+        #if DEBUG
+        Button("Debug Config") { showDebugConfig = true }
+          .foregroundStyle(theme.textSecondary)
+        #endif
       }
     }
     .background(theme.bgPrimary)
-    #if !os(visionOS)
-      .scrollContentBackground(.hidden)
-    #endif
+    .onAppear { microphone = AVAudioSession.sharedInstance().recordPermission }
+    .task { await notifications.refreshStatus() }
     #if DEBUG
       .sheet(isPresented: $showDebugConfig) {
         NavigationStack { DebugConfigView() }
@@ -65,12 +60,30 @@ public struct SettingsView: View {
       .toolbar(.hidden, for: .navigationBar)
       .alert(Strings.settingsDeleteAll, isPresented: $showDeleteConfirmation) {
         Button(Strings.actionCancel, role: .cancel) {}
-        Button(Strings.actionDeleteAll, role: .destructive) {
-          deleteAllData()
-        }
+        Button(Strings.actionDeleteAll, role: .destructive) { deleteAllData() }
       } message: {
         Text(Strings.settingsDeleteAllConfirmMessage)
       }
+      .alert(
+        Strings.settingsLowerStorageLimitTitle,
+        isPresented: Binding(get: { pendingStorageLimitMB != nil }, set: { if !$0 { pendingStorageLimitMB = nil } }))
+    {
+      Button(Strings.actionCancel, role: .cancel) { pendingStorageLimitMB = nil }
+      Button(Strings.actionDelete, role: .destructive) { confirmLowerStorageLimit() }
+    } message: {
+      Text(Strings.settingsLowerStorageLimitMessage)
+    }
+    .alert(
+      Strings.settingsTestCleanup,
+      isPresented: Binding(get: { testReport != nil }, set: { if !$0 { testReport = nil } }),
+      presenting: testReport)
+    { _ in
+      Button(Strings.actionOk) {}
+    } message: { report in
+      Text(String(
+        format: Strings.settingsTestCleanupResultFormat, report.filesRemoved, report.bytesRemoved / 1_024 / 1_024,
+        report.sessionsAffected, report.dayLimitSessions, report.sizeLimitSessions))
+    }
   }
 
   // MARK: - Title
@@ -89,43 +102,8 @@ public struct SettingsView: View {
           .font(.system(size: 16))
           .foregroundStyle(.white)
       }
+      .accessibilityHidden(true)
     }
-  }
-
-  // MARK: - Actions
-
-  private func deleteAllData() {
-    do {
-      // Delete all events first with an intermediate save so they are fully
-      // removed from the context before session deletion. This prevents the
-      // SwiftData faulting crash that happens when cascade-delete tries to
-      // resolve lazy attributes on faulted relationship objects.
-      let allEvents = try modelContext.fetch(FetchDescriptor<SnoreEvent>())
-      for event in allEvents {
-        modelContext.delete(event)
-      }
-      if !allEvents.isEmpty {
-        try modelContext.save()
-      }
-
-      let sessions = try modelContext.fetch(FetchDescriptor<SleepSession>())
-      for session in sessions {
-        // Resolve transformable faults before deletion to prevent
-        // "detached from a context without resolving attribute faults" crash.
-        _ = session.sleepStageSegments
-        _ = session.recordingGaps
-        deleteSessionFiles(session)
-        modelContext.delete(session)
-      }
-      try modelContext.save()
-    } catch {
-      // Silent failure — no toast infrastructure in this app
-    }
-  }
-
-  private func rateApp() {
-    guard let writeReviewURL = URL(string: "https://apps.apple.com/app/id0?action=write-review") else { return }
-    openURL(writeReviewURL)
   }
 }
 
