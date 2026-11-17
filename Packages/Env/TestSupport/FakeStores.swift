@@ -60,7 +60,7 @@ public final class FakeCustomMelodyStorage: CustomMelodyStoring {
 
   public func saveRecording(name: String, from tempURL: URL) -> Melody? {
     let id = (customMelodies.map(\.id).max() ?? 1000) + 1
-    let melody = Melody(id: id, name: name, filename: tempURL.lastPathComponent, isCustom: true)
+    let melody = Melody(id: id, filename: tempURL.lastPathComponent, customName: name)
     customMelodies.append(melody)
     return melody
   }

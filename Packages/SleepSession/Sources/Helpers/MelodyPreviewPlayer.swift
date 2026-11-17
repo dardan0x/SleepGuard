@@ -3,6 +3,7 @@ import Env
 import FactoryKit
 import Foundation
 import Models
+import SleepCore
 
 /// Short preview playback for the melody picker: plays a melody for up to
 /// 3 s and tracks which melody is currently previewing.
@@ -29,14 +30,7 @@ final class MelodyPreviewPlayer {
 
     stop()
 
-    let url: URL? = if melody.isCustom {
-      melodyStorage.fileURL(for: melody)
-    } else {
-      Bundle.main.url(forResource: melody.filename, withExtension: "mp3", subdirectory: "sounds")
-        ?? Bundle.main.url(forResource: melody.filename, withExtension: "mp3")
-    }
-
-    guard let fileURL = url else { return }
+    guard let fileURL = melodyStorage.url(for: melody) else { return }
 
     do {
       let session = AVAudioSession.sharedInstance()

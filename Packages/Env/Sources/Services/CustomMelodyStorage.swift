@@ -1,6 +1,7 @@
 import Foundation
 import Models
 import Observation
+import SleepCore
 
 /// Manages user-recorded custom melodies: persistence, file I/O, and metadata.
 @MainActor
@@ -38,7 +39,8 @@ public final class CustomMelodyStorage: CustomMelodyStoring {
   public func saveRecording(name: String, from tempURL: URL) -> Melody? {
     do {
       try ensureDirectoryExists()
-      let fileName = "custom_\(nextID).m4a"
+      nextID = CustomMelodies.nextID(stored: nextID, existing: customMelodies)
+      let fileName = CustomMelodies.filename(id: nextID)
       let destURL = directoryURL.appendingPathComponent(fileName)
 
       // Remove existing file if any
@@ -47,7 +49,7 @@ public final class CustomMelodyStorage: CustomMelodyStoring {
       }
       try FileManager.default.moveItem(at: tempURL, to: destURL)
 
-      let melody = Melody(id: nextID, name: name, filename: fileName, isCustom: true)
+      let melody = Melody(id: nextID, filename: fileName, customName: name)
       customMelodies.append(melody)
       nextID += 1
       persist()
@@ -80,7 +82,7 @@ public final class CustomMelodyStorage: CustomMelodyStoring {
   // MARK: - Persistence
 
   private func persist() {
-    let metadata = customMelodies.map { ["id": $0.id, "name": $0.name, "filename": $0.filename] }
+    let metadata = customMelodies.map { ["id": $0.id, "name": $0.customName ?? "", "filename": $0.filename] }
     UserDefaults.standard.set(metadata, forKey: defaultsKey)
     UserDefaults.standard.set(nextID, forKey: "customMelodiesNextID")
   }
@@ -91,11 +93,10 @@ public final class CustomMelodyStorage: CustomMelodyStoring {
         guard let id = dict["id"] as? Int,
               let name = dict["name"] as? String,
               let filename = dict["filename"] as? String else { return nil }
-        return Melody(id: id, name: name, filename: filename, isCustom: true)
+        return Melody(id: id, filename: filename, customName: name)
       }
     }
-    nextID = UserDefaults.standard.integer(forKey: "customMelodiesNextID")
-    if nextID < 100 { nextID = 100 }
+    nextID = CustomMelodies.nextID(stored: UserDefaults.standard.integer(forKey: "customMelodiesNextID"), existing: customMelodies)
   }
 
   // MARK: - File System

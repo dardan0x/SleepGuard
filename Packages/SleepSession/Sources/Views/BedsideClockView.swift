@@ -38,7 +38,7 @@ struct BedsideClockView: View {
       overlay: {
         if isMelodyEnabled, snoreInterrupterPlayer.isPlaying {
           BedsideMelodyOverlay(
-            melodyName: snoreInterrupterPlayer.currentMelodyName ?? Strings.snoreInterrupterDefaultMelodyName,
+            melodyName: snoreInterrupterPlayer.currentMelody?.name ?? Strings.snoreInterrupterDefaultMelodyName,
             onMute: { snoreInterrupterPlayer.muteForSession() },
             onStop: { snoreInterrupterPlayer.stop() })
         }
@@ -84,6 +84,6 @@ struct BedsideClockView: View {
   }
 
   private var isMelodyEnabled: Bool {
-    appConfig.isEnabled(.snoreInterrupter) && userPreferences.snoreInterrupterMode != .never
+    appConfig.isEnabled(.snoreInterrupter) && userPreferences.snoreInterrupterMode.isOn
   }
 }

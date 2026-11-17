@@ -3,6 +3,7 @@ import Env
 import FactoryKit
 import Foundation
 import Models
+import SleepCore
 
 /// Recording engine for the custom-melody sheet: owns the audio recorder,
 /// the elapsed-time timer, playback of the take, and the record → recorded
@@ -22,7 +23,7 @@ final class CustomMelodyRecorder {
   private(set) var isPlaying = false
   private(set) var permissionGranted = false
 
-  private let maxDuration: TimeInterval = 10
+  private let maxDuration = CustomMelodies.maxRecordingDuration
   private let melodyStorage: any CustomMelodyStoring
   private var recorder: AVAudioRecorder?
   private var recordedURL: URL?
@@ -139,12 +140,16 @@ final class CustomMelodyRecorder {
     }
   }
 
-  /// Persists the take via `CustomMelodyStorage`. Returns true when saved
-  /// (the caller dismisses the sheet in that case).
+  /// The number in the take's default name ("My Sound 3"); the view names it.
+  var nameNumber: Int {
+    CustomMelodies.nameNumber(existing: melodyStorage.customMelodies)
+  }
+
+  /// Persists the take via `CustomMelodyStorage` under `name`. Returns true
+  /// when saved (the caller dismisses the sheet in that case).
   @discardableResult
-  func save() -> Bool {
+  func save(name: String) -> Bool {
     guard let url = recordedURL else { return false }
-    let name = "My Sound \(melodyStorage.allCustomMelodies().count + 1)"
     _ = melodyStorage.saveRecording(name: name, from: url)
     return true
   }

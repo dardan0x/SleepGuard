@@ -83,7 +83,7 @@ public final class FakeRecordingDelayManager: RecordingDelayManaging {
 @Observable
 public final class FakeSnoreInterrupterPlayer: SnoreInterrupterPlaying {
   public var isPlaying = false
-  public var currentMelodyName: String?
+  public var currentMelody: Melody?
   public var isMutedForSession = false
   public private(set) var playRequests = 0
 

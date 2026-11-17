@@ -1,12 +1,14 @@
 import Foundation
 import Models
 import Observation
+import SleepCore
 
 /// Plays the snore-interrupter melody. Fake: `FakeSnoreInterrupterPlayer`.
 @MainActor
 public protocol SnoreInterrupterPlaying: AnyObject, Observable {
   var isPlaying: Bool { get }
-  var currentMelodyName: String? { get }
+  /// The melody playing now (the view names it).
+  var currentMelody: Melody? { get }
   var isMutedForSession: Bool { get }
   func playIfNeeded()
   func stop()
