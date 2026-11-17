@@ -80,7 +80,7 @@ Last updated: 2026-11-14
 | F22 | Architecture Hardening | P1 | Done (real-night check pending) | 16/16 | ██████████ 100% | [tracker](trackers/f22-architecture-hardening.md) |
 | F23 | Production Readiness | P1 | In Progress | 12/13 | █████████░ 92% | [tracker](trackers/f23-production-readiness.md) |
 | F24 | Shared Design Kit Adoption | P2 | Done (bg-card open) | 4/4 | ██████████ 100% | [tracker](trackers/f24-shared-design-kit-adoption.md) |
-| F25 | Shared Screen Content | P2 | In Progress | 6/7 | █████████░ 86% | [tracker](trackers/f25-shared-screen-content.md) |
+| F25 | Shared Screen Content | P2 | Done | 7/7 | ██████████ 100% | [tracker](trackers/f25-shared-screen-content.md) |
 
 ## Activity Log
 
@@ -88,6 +88,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-11-17 | F25-T6 | Completed | Review: nothing left to share for these screens; AGENTS/CLAUDE and the technical overview name the content kit. F25 done (feature doc in SleepGuardUIKitWay, F10). Branch `docs/f25-t6-review` |
 | 2026-11-17 | F25-T5 | Completed | Prestart, bedside clock and summary host the shared recording content (shared 0.21.0); melody pieces in slots. Branch `feature/f25/t5-recording-content` |
 | 2026-11-16 | F25-T4b | Completed | Player hosts the shared `PlayerContent` / `PlayerCard`; waveform math from SleepCore (shared 0.20.0). 3 files deleted (approved). Branch `feature/f25/t4b-player` |
 | 2026-11-16 | F25-T4a | Completed | Session detail and events sheet host the shared content; `SessionDetailModel` on SleepCore's `EventFilter` / `EventListRow` (shared 0.19.0). 3 files deleted (approved). Branch `feature/f25/t4a-night-detail` |

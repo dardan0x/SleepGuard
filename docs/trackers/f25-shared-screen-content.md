@@ -4,12 +4,12 @@
 
 | Field | Value |
 |-------|-------|
-| **Status** | In Progress |
+| **Status** | Done |
 | **Priority** | P2 |
 | **Version** | — |
 | **Blocked By** | — |
 | **Started** | 2026-11-16 |
-| **Completed** | — |
+| **Completed** | 2026-11-17 |
 | **Feature Doc** | — |
 
 ## Summary
@@ -30,7 +30,7 @@ Mirrors SleepGuardUIKitWay's F10, which carries the detailed task notes.
 | F25-T4a | Session detail and events sheet host the shared content; `SessionDetailModel` on SleepCore's filter and rows | Refactor | Done | F25-T2 | Recordings | 2026-11-16 | 2026-11-16 |
 | F25-T4b | Player hosts the shared player content (waveform in it) | Refactor | Done | F25-T4a | Recordings | 2026-11-16 | 2026-11-16 |
 | F25-T5 | Prestart, bedside clock and summary host the shared content (melody rows and overlay through slots) | Refactor | Done | F25-T2 | SleepSession | 2026-11-17 | 2026-11-17 |
-| F25-T6 | Review: no screen-content view left here for the shared screens; docs final | Docs | Backlog | F25-T3, T4, T5 | docs | — | — |
+| F25-T6 | Review: no screen-content view left here for the shared screens; docs final | Docs | Done | F25-T3, T4, T5 | docs | 2026-11-17 | 2026-11-17 |
 
 ## Notes
 
