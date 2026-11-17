@@ -24,6 +24,7 @@ Settings, the profile editor, the prestart's start delay and the countdown host 
 | F26-T2 | Sleep stages: the breakdown card and the info sheet host the shared content; stage statuses and the score impact from SleepCore's `SleepStageBreakdown` | Refactor | Done | F26-T1 | DesignSystem, Recordings, Statistics | 2026-11-17 | 2026-11-17 |
 | F26-T3 | Snore Interrupter: prestart row, settings sheet, melody picker, recorder and bedside pieces host the shared content; mode, catalog, recording rules and gap helpers from SleepCore; sounds from the shared `SleepMelodies` | Refactor | Done | F26-T2 | SleepSession, Env, Models, DesignSystem, app bundle | 2026-11-17 | 2026-11-17 |
 | F26-T4 | Onboarding hosts the shared content; page order and moves from SleepCore's `OnboardingPages`; the Health page follows the `healthSync` flag | Refactor | Done | F26-T3 | Onboarding | 2026-11-17 | 2026-11-17 |
+| F26-T5 | Learn hosts the shared content; the tab order places Learn only from `feature_learn` | Refactor / Fix | Done | F26-T4 | Learn, Env | 2026-11-17 | 2026-11-17 |
 
 ## Notes
 
@@ -37,5 +38,7 @@ Settings, the profile editor, the prestart's start delay and the countdown host 
 - Fix, don't port (F26-T3): the 11 melody names, the mode labels (`displayLabel`) and "My Sound N" were English-only. They are strings now. A recording someone already saved keeps its stored name.
 - F26-T4: 6 page views deleted with the owner's approval; `OnboardingView` is the host. `docs/features/f1-onboarding.md` brought up to date (it described @AppStorage, a sheet route and an Open Settings button that are long gone).
 - Fix, don't port (F26-T4): the Health page showed even with the `healthSync` flag off; it now follows the flag.
+- F26-T5: `LearnView.swift` deleted with the owner's approval (now the shared `LearnWebView`). Fix, don't port: the page reloaded on every view update; it now loads when its URL changes.
+- F26-T5 bug fix (agreed with the owner): when the tab list fell back to defaults (first launch, empty remote `tabs`), Learn showed even with `feature_learn` off, and with it on it was added twice (a duplicate tab id). `visibleTabsInOrder` now takes Learn only from `learnTabConfig`; `LearnTabOrderTests` cover it.
 - Open: the onboarding string keys are named for other pages (page 1's body is `onboarding.page4.body`); the values are right, so they were left.
 - Open: `RecordingDelayManager`'s notification text is English-only. The shared key `session.countdown.notificationBody` exists; using it from `Env` needs a layering decision (non-view code and `Strings`).

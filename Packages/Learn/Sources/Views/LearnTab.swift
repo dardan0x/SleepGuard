@@ -5,13 +5,12 @@ import Models
 import Routing
 import SwiftUI
 
-/// Tab wrapper for the Learn screen. Reads the remote-configured URL from
-/// `AppConfig` and falls back to an empty state when none is configured.
+/// The Learn tab, hosting the shared `LearnContent` with the remote-configured
+/// URL (`feature_learn`); no URL shows the shared empty state.
 public struct LearnTab: View {
   @State private var routerPath = RouterPath()
   @Injected(\.tabCoordinator) private var tabCoordinator
   @Injected(\.appConfig) private var appConfig
-  @Injected(\.theme) private var theme
 
   public init() {}
 
@@ -20,15 +19,8 @@ public struct LearnTab: View {
       get: { routerPath.path },
       set: { routerPath.path = $0 }))
     {
-      VStack(spacing: 0) {
-        titleRow
-          .padding(.horizontal, 20)
-          .padding(.top, 10)
-
-        content
-      }
-      .background(theme.bgPrimary)
-      .toolbar(.hidden, for: .navigationBar)
+      LearnContent(url: appConfig.learnTabConfig?.url.flatMap(URL.init(string:)))
+        .toolbar(.hidden, for: .navigationBar)
     }
     .onChange(of: tabCoordinator.resetSignal) { _, signal in
       if let signal, signal.tab == .learn {
@@ -36,48 +28,5 @@ public struct LearnTab: View {
       }
     }
     .environment(routerPath)
-  }
-
-  @ViewBuilder
-  private var content: some View {
-    if let config = appConfig.learnTabConfig,
-       let urlString = config.url,
-       let url = URL(string: urlString)
-    {
-      LearnView(url: url)
-    } else {
-      VStack(spacing: 12) {
-        Image(systemName: "book.closed")
-          .font(.system(size: 48, weight: .medium))
-          .foregroundStyle(theme.textTertiary)
-
-        Text(Strings.learnErrorNoContent)
-          .font(.system(size: 17))
-          .foregroundStyle(theme.textSecondary)
-          .multilineTextAlignment(.center)
-      }
-      .padding(24)
-      .frame(maxWidth: .infinity, maxHeight: .infinity)
-      .background(theme.bgPrimary)
-    }
-  }
-
-  private var titleRow: some View {
-    HStack {
-      Text(Strings.tabLearn)
-        .font(.system(size: 34, weight: .bold))
-        .foregroundStyle(theme.textPrimary)
-
-      Spacer()
-
-      ZStack {
-        RoundedRectangle(cornerRadius: 15)
-          .fill(theme.accent)
-          .frame(width: 30, height: 30)
-        Image(systemName: "book.fill")
-          .font(.system(size: 16))
-          .foregroundStyle(.white)
-      }
-    }
   }
 }

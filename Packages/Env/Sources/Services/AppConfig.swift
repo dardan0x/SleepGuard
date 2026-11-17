@@ -90,8 +90,10 @@ public final class AppConfig: AppConfigProviding {
     #endif
   }
 
-  /// Visible tabs in display order. Falls back to all tabs in canonical order
-  /// if the resolved configuration is empty or hides everything.
+  /// Visible tabs in display order. Learn is placed only by `feature_learn`
+  /// (`learnTabConfig`), never by the tab list, so it shows once and only when
+  /// that config says so. Falls back to every other tab in canonical order if
+  /// the resolved list is empty or hides everything.
   public var visibleTabsInOrder: [AppTab] {
     let source: [TabConfig]
     #if DEBUG
@@ -99,14 +101,16 @@ public final class AppConfig: AppConfigProviding {
     #else
     source = tabs
     #endif
-    var visible = source.filter(\.isVisible).sorted { $0.order < $1.order }.map(\.tab)
+    var visible = source.filter { $0.isVisible && $0.tab != .learn }.sorted { $0.order < $1.order }.map(\.tab)
+    if visible.isEmpty {
+      visible = AppTab.allCases.filter { $0 != .learn }
+    }
 
     if let learnConfig = learnTabConfig, learnConfig.isVisible {
       let insertIndex = min(max(learnConfig.order, 0), visible.count)
       visible.insert(.learn, at: insertIndex)
     }
-
-    return visible.isEmpty ? AppTab.allCases : visible
+    return visible
   }
 
   // MARK: - Apply (called by RemoteConfigLoader)
