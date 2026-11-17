@@ -12,10 +12,12 @@ via `UIApplication.shared.open(_:)` instead of navigating within the app.
 
 ## Files
 
+> Updated 2026-11-17 (F26-T5): the page and its web view are the shared `LearnContent` (`SleepGuardContentKit`); strings live in `../SleepGuardShared/Sources/SleepStrings`. Learn is placed in the tab bar only by `feature_learn`.
+
 | File | Package | Purpose |
 |------|---------|---------|
 | `Packages/Learn/Package.swift` | Learn | Package manifest (deps: Models, Env, DesignSystem) |
-| `Packages/Learn/Sources/Views/LearnView.swift` | Learn | `WKWebView` wrapper with external link handling |
+| `../SleepGuardShared/Sources/SleepGuardContentKit/Learn/{LearnContent,LearnWebView}.swift` | Shared | Title row, the page in a `WKWebView` (loads when the URL changes) with external link handling, the empty state |
 | `Packages/Learn/Sources/Views/LearnTab.swift` | Learn | Tab wrapper with `RouterPath`/`TabCoordinator`; empty-state fallback |
 | `Packages/Models/Sources/Data/AppConfigModels.swift` | Models | Added `.learn` to `AppTab`; added `LearnTabConfig` |
 | `Packages/Env/Sources/Services/AppConfig.swift` | Env | Stores/persists `remoteLearnTab`; exposes `learnTabConfig`; inserts `.learn` into `visibleTabsInOrder` |
@@ -23,8 +25,8 @@ via `UIApplication.shared.open(_:)` instead of navigating within the app.
 | `SleepGuard/MainTabView.swift` | App | Imports `Learn`; maps `.learn` to `LearnTab()` and title |
 | `SleepGuard.xcodeproj/project.pbxproj` | App | Local package reference + product dependency for `Packages/Learn` |
 | `Packages/Settings/Sources/Views/DebugConfigView.swift` | Settings | Debug override for Learn visibility, URL, and order |
-| `Packages/DesignSystem/Sources/Resources/Localizable.xcstrings` | DesignSystem | `tab.learn`, `learn.error.noContent` |
-| `Packages/DesignSystem/Sources/Strings.swift` | DesignSystem | Auto-generated accessors |
+| `../SleepGuardShared/Sources/SleepStrings/Resources/Localizable.xcstrings` | Shared | `tab.learn`, `learn.error.noContent` |
+| `../SleepGuardShared/Sources/SleepStrings/Strings.swift` | Shared | Generated accessors (re-exported by `DesignSystem`) |
 
 ## Routes
 
