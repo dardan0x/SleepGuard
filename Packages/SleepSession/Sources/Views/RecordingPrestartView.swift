@@ -27,8 +27,10 @@ struct RecordingPrestartView: View {
       onCancel: { routerPath.navigateBack() })
     {
       PrestartOptions(
-        showsSnoreInterrupter: appConfig.isEnabled(.snoreInterrupter),
-        snoreInterrupterValue: snoreInterrupterValue)
+        delayMinutes: Binding(
+          get: { userPreferences.recordingDelayMinutes },
+          set: { userPreferences.recordingDelayMinutes = $0 }),
+        interrupterMode: appConfig.isEnabled(.snoreInterrupter) ? userPreferences.snoreInterrupterMode : nil)
       {
         activePresentation = .snoreInterrupter
       }
@@ -113,23 +115,6 @@ struct RecordingPrestartView: View {
     UIDevice.current.isBatteryMonitoringEnabled = true
     return UIDevice.current.batteryState == .charging || UIDevice.current.batteryState == .full
     #endif
-  }
-
-  private var snoreInterrupterValue: String {
-    switch userPreferences.snoreInterrupterMode {
-    case .never:
-      Strings.snoreInterrupterOffValueFormat
-    case .always:
-      Strings.snoreInterrupterAlwaysValueFormat
-    case .fiveSeconds:
-      Strings.snoreInterrupterFiveSecondsValueFormat
-    case .fifteenSeconds:
-      Strings.snoreInterrupterFifteenSecondsValueFormat
-    case .thirtySeconds:
-      Strings.snoreInterrupterThirtySecondsValueFormat
-    case .sixtySeconds:
-      Strings.snoreInterrupterSixtySecondsValueFormat
-    }
   }
 }
 

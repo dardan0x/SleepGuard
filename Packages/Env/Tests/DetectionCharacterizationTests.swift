@@ -2,6 +2,7 @@ import EnvTestSupport
 import Foundation
 import Models
 import Observation
+import SleepCore
 import Testing
 @testable import AudioEngine
 @testable import Env
@@ -192,7 +193,7 @@ final class ScriptedInterrupter: SnoreInterrupterPlaying {
   enum Melody { case never, pausesMic, keepsMicLive }
 
   var isPlaying = false
-  var currentMelodyName: String?
+  var currentMelody: SleepCore.Melody?
   var isMutedForSession = false
   private(set) var requests = 0
   private(set) var stops = 0

@@ -203,8 +203,7 @@ public final class UserPreferences: UserPreferencesStoring {
   public var snoreInterrupterMode: SnoreInterrupterMode {
     get {
       access(keyPath: \.snoreInterrupterMode)
-      let raw = defaults.string(forKey: "soothingMelodyMode") ?? "never"
-      return SnoreInterrupterMode(rawValue: raw) ?? .never
+      return SnoreInterrupterMode(stored: defaults.string(forKey: "soothingMelodyMode"))
     }
     set {
       withMutation(keyPath: \.snoreInterrupterMode) {
@@ -217,7 +216,7 @@ public final class UserPreferences: UserPreferencesStoring {
     get {
       access(keyPath: \.selectedMelodyID)
       let raw = defaults.integer(forKey: "selectedMelodyID")
-      return raw > 0 ? raw : 6
+      return raw > 0 ? raw : Melody.defaultID
     }
     set {
       withMutation(keyPath: \.selectedMelodyID) {
@@ -361,25 +360,8 @@ public final class UserPreferences: UserPreferencesStoring {
     }
   }
 
-  public enum SnoreInterrupterMode: String, CaseIterable, Sendable {
-    case never
-    case always
-    case fiveSeconds
-    case fifteenSeconds
-    case thirtySeconds
-    case sixtySeconds
-
-    public var displayLabel: String {
-      switch self {
-      case .never: "Never"
-      case .always: "Always"
-      case .fiveSeconds: "5 seconds"
-      case .fifteenSeconds: "15 seconds"
-      case .thirtySeconds: "30 seconds"
-      case .sixtySeconds: "60 seconds"
-      }
-    }
-  }
+  /// SleepCore's mode (same raw values, so stored choices read back).
+  public typealias SnoreInterrupterMode = SleepCore.SnoreInterrupterMode
 
   /// `defaults` is `.standard` in the app; tests pass an isolated suite.
   public init(defaults: UserDefaults = .standard) {

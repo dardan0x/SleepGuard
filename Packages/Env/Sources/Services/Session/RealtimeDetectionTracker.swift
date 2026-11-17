@@ -293,21 +293,20 @@ final class RealtimeDetectionTracker {
   /// Logs a recording gap directly on the session. Called whenever the Snore Interrupter
   /// stops (mic resumes), ensuring gaps are counted even if notification delivery fails.
   private func logRecordingGap(start: Date, duration: TimeInterval, snoringResumed: Bool = true) {
-    guard let session = recording?.currentSession, duration > 0 else { return }
+    guard let session = recording?.currentSession else { return }
+    let gaps = session.recordingGaps ?? []
+    let updated = gaps.adding(start: start, duration: duration, nightStart: session.startDate, snoringResumed: snoringResumed)
+    guard updated.count > gaps.count else { return }
+    session.recordingGaps = updated
     let startOffset = start.timeIntervalSince(session.startDate)
-    guard startOffset >= 0 else { return }
-    var gaps = session.recordingGaps ?? []
-    gaps.append(RecordingGap(startOffset: startOffset, duration: duration, snoringResumed: snoringResumed))
-    session.recordingGaps = gaps
     Log.detection.info("Logged gap: startOffset=\(startOffset, format: .fixed(precision: 1))s duration=\(duration, format: .fixed(precision: 1))s snoringResumed=\(snoringResumed)")
   }
 
   /// Marks the most recent recording gap as having confirmed snoring resumption.
   /// Called when sustained snoring is detected within the post-melody breathing delay.
   private func markLastGapSnoringResumed() {
-    guard let session = recording?.currentSession, var gaps = session.recordingGaps, !gaps.isEmpty else { return }
-    gaps[gaps.count - 1].snoringResumed = true
-    session.recordingGaps = gaps
+    guard let session = recording?.currentSession, let gaps = session.recordingGaps, !gaps.isEmpty else { return }
+    session.recordingGaps = gaps.markingLastSnoringResumed()
   }
 
   // MARK: - Engine lifecycle
