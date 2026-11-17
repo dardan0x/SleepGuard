@@ -38,11 +38,7 @@ struct SessionDetailLoadedView: View {
           onShare: { row in
             if let event = model.event(for: row) { shareCoordinator.shareEvent(event, in: session) }
           },
-          stages: {
-            if let stages = session.sleepStageSegments, !stages.isEmpty {
-              SleepStageBreakdownView(session: session)
-            }
-          },
+          stages: { SleepStagesSection(session: session, scoreConfig: appConfig.sleepScoreConfig) },
           footer: { ShortEventsButton(count: model.shortEvents.count) { activeSheet = .shortEventsPlayer } })
       }
     }
