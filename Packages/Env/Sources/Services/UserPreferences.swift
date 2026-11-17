@@ -182,7 +182,7 @@ public final class UserPreferences: UserPreferencesStoring {
     get {
       access(keyPath: \.recordingDelayMinutes)
       let raw = defaults.integer(forKey: "recordingDelayMinutes")
-      return [0, 15, 30, 45, 60].contains(raw) ? raw : 0
+      return RecordingDelay.valid(raw)
     }
     set {
       withMutation(keyPath: \.recordingDelayMinutes) {

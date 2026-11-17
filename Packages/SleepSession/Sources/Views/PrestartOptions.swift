@@ -10,11 +10,14 @@ struct PrestartOptions: View {
   let snoreInterrupterValue: String
   let onSnoreInterrupter: () -> Void
   @Injected(\.theme) private var theme
+  @Injected(\.userPreferences) private var userPreferences
 
   var body: some View {
     VStack(spacing: 12) {
       VStack(alignment: .leading, spacing: 8) {
-        PrestartDelaySection()
+        PrestartDelayOptions(minutes: Binding(
+          get: { userPreferences.recordingDelayMinutes },
+          set: { userPreferences.recordingDelayMinutes = $0 }))
         if showsSnoreInterrupter {
           PrestartSnoreInterrupterRow(
             icon: "timer",

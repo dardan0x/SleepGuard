@@ -9,120 +9,54 @@ import UIKit
 @MainActor
 struct RecordingCountdownView: View {
   @Injected(\.sessionManager) private var sessionManager
-  @Injected(\.theme) private var theme
   @Injected(\.recordingDelayManager) private var recordingDelayManager
   @Injected(\.audioRecorder) private var audioRecorder
   @State private var activeAlert: CountdownAlert?
 
   var body: some View {
-    ZStack {
-      theme.bgPrimary.ignoresSafeArea()
-
-      VStack(spacing: 0) {
-        Spacer()
-
-        VStack(spacing: 16) {
-          Image(systemName: "moon.stars.fill")
-            .font(.system(size: 56))
-            .foregroundStyle(theme.accent)
-
-          Text(Strings.sessionCountdownLabel)
-            .font(.system(size: 20, weight: .medium))
-            .foregroundStyle(theme.textSecondary)
-
-          Text(recordingDelayManager.remainingTimeString)
-            .font(.system(size: 72, weight: .thin, design: .rounded))
-            .foregroundStyle(theme.textPrimary)
-            .monospacedDigit()
+    RecordingCountdownContent(
+      seconds: recordingDelayManager.currentRemainingSeconds,
+      onCancel: { recordingDelayManager.cancel() },
+      onStartNow: startNow)
+      .onAppear {
+        UIApplication.shared.isIdleTimerDisabled = true
+      }
+      .onDisappear {
+        UIApplication.shared.isIdleTimerDisabled = sessionManager.isRecording
+      }
+      .onReceive(NotificationCenter.default.publisher(for: .recordingDelayDidComplete)) { _ in
+        do {
+          try sessionManager.startSession()
+        } catch {
+          Log.session.error("Delayed start failed: \(String(describing: error), privacy: .public)")
+          activeAlert = .startFailed
         }
-
-        Spacer()
-
-        VStack(spacing: 16) {
-          Button {
-            recordingDelayManager.cancel()
-          } label: {
-            Text(Strings.actionCancel)
-              .font(.system(size: 17, weight: .semibold))
-              .foregroundStyle(theme.textPrimary)
-              .frame(maxWidth: .infinity)
-              .frame(height: 56)
-              .background(theme.bgCard)
-              .overlay(
-                RoundedRectangle(cornerRadius: 100)
-                  .stroke(theme.border, lineWidth: 1)
-              )
-              .clipShape(Capsule())
-          }
-
-          Button {
-            Task {
-              if !audioRecorder.hasPermission {
-                let granted = await audioRecorder.requestPermission()
-                guard granted else {
-                  activeAlert = .microphone
-                  return
-                }
-              }
-              guard isCharging else {
-                activeAlert = .charging
-                return
-              }
-              startSession()
-            }
-          } label: {
-            Text(Strings.actionStartNow)
-              .font(.system(size: 17, weight: .semibold))
-              .foregroundStyle(.white)
-              .frame(maxWidth: .infinity)
-              .frame(height: 56)
-              .background(theme.accent)
-              .clipShape(Capsule())
+      }
+      .alert(Strings.sessionChargingAlertTitle, isPresented: isPresented(.charging)) {
+        Button(Strings.actionCancel, role: .cancel) {}
+        Button(Strings.sessionChargingAlertStartAnyway) {
+          Task { @MainActor in
+            startSession()
           }
         }
-        .padding(.horizontal, 24)
-        .padding(.bottom, 32)
+      } message: {
+        Text(Strings.sessionChargingAlertMessage)
       }
-    }
-    .onAppear {
-      UIApplication.shared.isIdleTimerDisabled = true
-    }
-    .onDisappear {
-      UIApplication.shared.isIdleTimerDisabled = sessionManager.isRecording
-    }
-    .onReceive(NotificationCenter.default.publisher(for: .recordingDelayDidComplete)) { _ in
-      do {
-        try sessionManager.startSession()
-      } catch {
-        Log.session.error("Delayed start failed: \(String(describing: error), privacy: .public)")
-        activeAlert = .startFailed
-      }
-    }
-    .alert(Strings.sessionChargingAlertTitle, isPresented: isPresented(.charging)) {
-      Button(Strings.actionCancel, role: .cancel) {}
-      Button(Strings.sessionChargingAlertStartAnyway) {
-        Task { @MainActor in
-          startSession()
+      .alert(Strings.sessionMicrophoneAlertTitle, isPresented: isPresented(.microphone)) {
+        Button(Strings.actionCancel, role: .cancel) {}
+        Button(Strings.sessionMicrophoneAlertOpenSettings) {
+          if let url = URL(string: UIApplication.openSettingsURLString) {
+            UIApplication.shared.open(url)
+          }
         }
+      } message: {
+        Text(Strings.sessionMicrophoneAlertMessage)
       }
-    } message: {
-      Text(Strings.sessionChargingAlertMessage)
-    }
-    .alert(Strings.sessionMicrophoneAlertTitle, isPresented: isPresented(.microphone)) {
-      Button(Strings.actionCancel, role: .cancel) {}
-      Button(Strings.sessionMicrophoneAlertOpenSettings) {
-        if let url = URL(string: UIApplication.openSettingsURLString) {
-          UIApplication.shared.open(url)
-        }
+      .alert(Strings.sessionStartFailedAlertTitle, isPresented: isPresented(.startFailed)) {
+        Button(Strings.actionOk, role: .cancel) {}
+      } message: {
+        Text(Strings.sessionStartFailedAlertMessage)
       }
-    } message: {
-      Text(Strings.sessionMicrophoneAlertMessage)
-    }
-    .alert(Strings.sessionStartFailedAlertTitle, isPresented: isPresented(.startFailed)) {
-      Button(Strings.actionOk, role: .cancel) {}
-    } message: {
-      Text(Strings.sessionStartFailedAlertMessage)
-    }
   }
 
   /// Binding for the alert modifiers, derived from the enum state so the
@@ -135,6 +69,24 @@ struct RecordingCountdownView: View {
           activeAlert = nil
         }
       })
+  }
+
+  /// Start now: the same microphone and charger checks as the prestart.
+  private func startNow() {
+    Task {
+      if !audioRecorder.hasPermission {
+        let granted = await audioRecorder.requestPermission()
+        guard granted else {
+          activeAlert = .microphone
+          return
+        }
+      }
+      guard isCharging else {
+        activeAlert = .charging
+        return
+      }
+      startSession()
+    }
   }
 
   private func startSession() {

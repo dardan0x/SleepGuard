@@ -3,6 +3,7 @@ import FactoryKit
 import Foundation
 import Models
 import Observation
+import SleepCore
 import UserNotifications
 
 public extension Notification.Name {
@@ -55,9 +56,7 @@ public final class RecordingDelayManager: RecordingDelayManaging {
   }
 
   public var remainingTimeString: String {
-    let minutes = currentRemainingSeconds / 60
-    let seconds = currentRemainingSeconds % 60
-    return String(format: "%02d:%02d", minutes, seconds)
+    RecordingDelay.countdownText(seconds: currentRemainingSeconds)
   }
 
   public func checkIfComplete() -> Bool {
