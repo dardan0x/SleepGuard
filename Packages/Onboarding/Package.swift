@@ -12,6 +12,7 @@ let package = Package(
     .package(path: "../AudioEngine"),
     .package(path: "../Env"),
     .package(path: "../DesignSystem"),
+    .package(url: "https://github.com/dardan0x/SleepGuardShared.git", exact: "0.25.0"),
     .package(url: "https://github.com/hmlongco/Factory", from: "3.5.2"),
   ],
   targets: [
@@ -22,6 +23,7 @@ let package = Package(
         .product(name: "AudioEngine", package: "AudioEngine"),
         .product(name: "Env", package: "Env"),
         .product(name: "DesignSystem", package: "DesignSystem"),
+        .product(name: "SleepCore", package: "SleepGuardShared"),
         .product(name: "FactoryKit", package: "Factory"),
       ],
       path: "Sources",

@@ -8,37 +8,35 @@ First-launch onboarding flow that introduces the app, explains features, request
 
 ## Files
 
+> Updated 2026-11-17 (F26-T4): the pages are the shared `OnboardingContent` (`SleepGuardContentKit`), and the page rules are SleepCore's `OnboardingPages`. The table below is the code as it is now; the original F1 files are in git history.
+
 | File | Purpose |
 |------|---------|
-| `Packages/Env/Sources/Env/UserPreferences.swift` | `@AppStorage` flags (`hasCompletedOnboarding`, `detectionSensitivity`, `recordAudioClips`, `appearance`) |
-| `Packages/Env/Sources/Env/Router.swift` | `SheetDestination.onboarding` case added |
-| `Packages/Onboarding/Sources/Onboarding/OnboardingView.swift` | Main container: `TabView` paging, progress dots, skip/back controls |
-| `Packages/Onboarding/Sources/Onboarding/OnboardingPage1View.swift` | Hook screen: problem statement + hero animation |
-| `Packages/Onboarding/Sources/Onboarding/OnboardingPage2View.swift` | Features screen: what the app does |
-| `Packages/Onboarding/Sources/Onboarding/OnboardingPage3View.swift` | Privacy screen: data stays on device |
-| `Packages/Onboarding/Sources/Onboarding/OnboardingPage4View.swift` | Mic permission: pulsing concentric rings + `AVAudioSession.requestRecordPermission()` |
-| `Packages/Onboarding/Sources/Onboarding/OnboardingPage5View.swift` | Motivation screen: CTA to start recording or browse stats |
-| `SleepGuard/SleepGuard/SleepGuardApp.swift` | Onboarding gate: shows `OnboardingView` if `!hasCompletedOnboarding`, else `MainTabView` |
-| `SleepGuard/SleepGuard/AppRegistry.swift` | `SheetDestination.onboarding` mapped, `withEnvironments()` for sheets |
+| `Packages/Env/Sources/Services/UserPreferences.swift` | `hasCompletedOnboarding` and `presentRecordingAfterOnboarding` (UserDefaults keys of the same names) |
+| `Packages/Onboarding/Sources/Views/OnboardingView.swift` | Hosts the shared content: the current page, the microphone and Health requests, finishing |
+| `../SleepGuardShared/Sources/SleepGuardContentKit/Onboarding/*` | The pages, Skip, Back and the dots |
+| `../SleepGuardShared/Sources/SleepCore/Onboarding/OnboardingPages.swift` | Which pages show, Next, Skip (to the last page), Back |
+| `SleepGuard/SleepGuardApp.swift` | Gate: `OnboardingView` until `hasCompletedOnboarding`, then `MainTabView` (a root swap, no sheet) |
 
 ## Routes
 
-| Type | Destination | Trigger |
-|------|------------|---------|
-| Sheet | `.onboarding` | App launch when `!hasCompletedOnboarding` |
+None: the app root swaps between `OnboardingView` and `MainTabView`.
 
 ## State
 
 | Property | Location | Scope |
 |----------|----------|-------|
-| `hasCompletedOnboarding` | `UserPreferences.shared` | App-wide @AppStorage |
-| `currentPage` | `OnboardingView` @State | View-local |
+| `hasCompletedOnboarding` | `UserPreferences.shared` | App-wide (UserDefaults) |
+| `presentRecordingAfterOnboarding` | `UserPreferences.shared` | Read once by `StatisticsTab` to open a night |
+| page, permission states | `OnboardingView` @State | View-local |
 
 ## Edge Cases
-- **Permission already granted**: Page 4 auto-advances after 0.5s if `recordPermission == .granted`
-- **Permission denied**: Page 4 shows "Open Settings" button linking to app settings
-- **Skip anywhere**: Sets `hasCompletedOnboarding = true` immediately, routes to `MainTabView`
-- **Back navigation**: Hidden on page 0, shown on pages 1-4
+- **Health page**: only when the `healthSync` remote flag is on. Granted turns on Health sync and enhanced tracking unless already chosen.
+- **Permission already granted**: the page shows it granted on appear; no auto-advance.
+- **Permission denied**: moves to the next page at once (no Open Settings button).
+- **Granted**: "granted" shows for 0.8 s, then the next page.
+- **Skip**: goes to the last page; onboarding finishes only from its buttons ("Start recording" or "Just browsing").
+- **Back**: hidden on the first and the last page.
 
 ## Tasks Completed
 

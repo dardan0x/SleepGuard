@@ -1,106 +1,80 @@
+import AudioEngine
 import DesignSystem
 import Env
 import FactoryKit
+import Models
+import SleepCore
 import SwiftUI
 
+/// First launch, hosting the shared onboarding content: asks for Apple Health
+/// (when the `healthSync` flag is on) and the microphone, then finishes.
+/// "Start recording" opens a night once the tabs are up.
 public struct OnboardingView: View {
+  /// How long "granted" shows before the next page.
+  static let grantedPause: Duration = .seconds(0.8)
+
   @Injected(\.userPreferences) private var userPreferences
-  @Injected(\.theme) private var theme
   @Injected(\.hapticManager) private var hapticManager
-  @State private var currentPage = 0
-  private let totalPages = 6
+  @Injected(\.audioRecorder) private var audioRecorder
+  @Injected(\.healthKitSync) private var healthKitSync
+  @Injected(\.appConfig) private var appConfig
+  @State private var page = OnboardingPage.welcome
+  @State private var microphone = OnboardingPermission.notAsked
+  @State private var health = OnboardingPermission.notAsked
 
   public init() {}
 
   public var body: some View {
-    ZStack {
-      theme.bgPrimary.ignoresSafeArea()
-
-      VStack(spacing: 0) {
-        topBar
-
-        TabView(selection: $currentPage) {
-          OnboardingPage1View(onContinue: { advance() })
-            .tag(0)
-          OnboardingPage2View(onContinue: { advance() })
-            .tag(1)
-          OnboardingPage3View(onContinue: { advance() })
-            .tag(2)
-          OnboardingPageHealthWatchView(onContinue: { advance() })
-            .tag(3)
-          OnboardingPage4View(onContinue: { advance() })
-            .tag(4)
-          OnboardingPage5View(onContinue: { finishOnboarding() })
-            .tag(5)
-        }
-        .tabViewStyle(.page(indexDisplayMode: .never))
-
-        bottomControls
+    OnboardingContent(
+      pages: pages, current: $page, microphone: microphone, health: health,
+      onRequestMicrophone: requestMicrophone, onRequestHealth: requestHealth,
+      onStartRecording: {
+        userPreferences.presentRecordingAfterOnboarding = true
+        finish()
+      },
+      onBrowse: finish)
+      .onChange(of: page) { hapticManager.tap() }
+      .onAppear {
+        if audioRecorder.hasPermission { microphone = .granted }
+        healthKitSync.checkAuthorizationStatus()
+        if healthKitSync.isAuthorized { health = .granted }
       }
+  }
+
+  private var pages: OnboardingPages {
+    OnboardingPages(hasHealth: appConfig.isEnabled(.healthSync))
+  }
+
+  private func requestMicrophone() {
+    Task {
+      microphone = .requesting
+      let granted = await audioRecorder.requestPermission()
+      microphone = granted ? .granted : .notAsked
+      await moveOn(from: .microphone, granted: granted)
     }
   }
 
-  private func advance() {
-    hapticManager.tap()
-    withAnimation {
-      currentPage = min(currentPage + 1, totalPages - 1)
+  private func requestHealth() {
+    Task {
+      health = .requesting
+      let granted = await healthKitSync.requestAuthorization()
+      health = granted ? .granted : .notAsked
+      if granted {
+        if !userPreferences.hasExplicitlySetSyncToHealthKit { userPreferences.syncToHealthKit = true }
+        if !userPreferences.hasExplicitlySetEnhancedSleepTracking { userPreferences.enhancedSleepTracking = true }
+      }
+      await moveOn(from: .health, granted: granted)
     }
   }
 
-  private func finishOnboarding() {
+  /// Shows "granted" for a moment, then the next page (denied moves on at once).
+  private func moveOn(from current: OnboardingPage, granted: Bool) async {
+    if granted { try? await Task.sleep(for: Self.grantedPause) }
+    withAnimation { page = pages.next(after: current) }
+  }
+
+  private func finish() {
     hapticManager.tap()
     userPreferences.hasCompletedOnboarding = true
-  }
-
-  private var topBar: some View {
-    HStack {
-      Spacer()
-      if currentPage < totalPages - 1 {
-        Button(action: {
-          hapticManager.tap()
-          withAnimation {
-            currentPage = totalPages - 1
-          }
-        }) {
-          Text(Strings.actionSkip)
-            .font(.system(size: 15, weight: .medium))
-            .foregroundStyle(theme.textSecondary)
-            .padding(.trailing, 20)
-        }
-        .buttonStyle(ScaleButtonStyle())
-      }
-    }
-    .frame(height: 44)
-  }
-
-  private var bottomControls: some View {
-    VStack(spacing: 16) {
-      progressDots
-
-      Button(action: {
-        hapticManager.tap()
-        withAnimation {
-          currentPage -= 1
-        }
-      }) {
-        Text(Strings.actionBack)
-          .font(.system(size: 15, weight: .medium))
-          .foregroundStyle(theme.textSecondary)
-      }
-      .buttonStyle(ScaleButtonStyle())
-      .opacity(currentPage > 0 && currentPage < totalPages - 1 ? 1 : 0)
-    }
-    .padding(.bottom, 32)
-  }
-
-  private var progressDots: some View {
-    HStack(spacing: 8) {
-      ForEach(0..<totalPages, id: \.self) { index in
-        RoundedRectangle(cornerRadius: 4)
-          .fill(index == currentPage ? theme.accent : theme.bgCard)
-          .frame(width: index == currentPage ? 24 : 8, height: 8)
-          .animation(.spring(duration: 0.35), value: currentPage)
-      }
-    }
   }
 }
