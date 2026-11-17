@@ -11,6 +11,7 @@ let package = Package(
     .package(path: "../Models"),
     .package(path: "../Env"),
     .package(path: "../DesignSystem"),
+    .package(url: "https://github.com/dardan0x/SleepGuardShared.git", exact: "0.27.0"),
     .package(url: "https://github.com/hmlongco/Factory", from: "3.5.2"),
   ],
   targets: [
@@ -20,20 +21,10 @@ let package = Package(
         .product(name: "Models", package: "Models"),
         .product(name: "Env", package: "Env"),
         .product(name: "DesignSystem", package: "DesignSystem"),
+        .product(name: "SleepCore", package: "SleepGuardShared"),
         .product(name: "FactoryKit", package: "Factory"),
       ],
       path: "Sources",
-      swiftSettings: [
-        .swiftLanguageMode(.v6),
-        .defaultIsolation(MainActor.self),
-      ]),
-    .testTarget(
-      name: "PersonalizationTests",
-      dependencies: [
-        "Personalization",
-        .product(name: "Models", package: "Models"),
-      ],
-      path: "Tests",
       swiftSettings: [
         .swiftLanguageMode(.v6),
         .defaultIsolation(MainActor.self),

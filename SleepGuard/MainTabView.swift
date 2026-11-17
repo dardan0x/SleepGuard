@@ -15,14 +15,12 @@ struct MainTabView: View {
   // SleepGuardApp's @State service holdings).
   @State private var theme = AppTheme.shared
   @State private var sessionManager = SessionManager.shared
-  @State private var userPreferences = UserPreferences.shared
   @State private var appConfig = AppConfig.shared
 
   @Environment(\.modelContext) private var modelContext
   @State private var tabCoordinator = TabCoordinator.shared
-  /// Created on first appearance — reads the shared AppConfig/UserPreferences
-  /// (same two-phase pattern as SessionDetailModel).
-  @State private var briefingController: AppBriefingController?
+  /// The morning briefing: shown once per new night, over the tabs.
+  @State private var briefingController = BriefingController()
 
   var body: some View {
     Group {
@@ -36,38 +34,14 @@ struct MainTabView: View {
       ensureValidSelection(among: tabs)
     }
     .task {
-      if briefingController == nil {
-        briefingController = AppBriefingController(
-          appConfig: appConfig,
-          userPreferences: userPreferences)
-      }
-      briefingController?.generateBriefingIfNeeded(modelContext: modelContext)
+      briefingController.prepareIfDue(modelContext: modelContext)
     }
-    .sheet(
-      item: briefingBinding,
-      onDismiss: {
-        briefingController?.markBriefingShown()
-      }) { briefing in
-        SleepBriefingView(
-          briefing: briefing,
-          onDismiss: { briefingController?.dismissBriefing() },
-          onChipTap: { chip in
-            briefingController?.saveLifestyleLog(chip: chip, briefing: briefing, modelContext: modelContext)
-          })
+    .sheet(item: $briefingController.current, onDismiss: { briefingController.markShown() }) { presented in
+      BriefingSheet(presented: presented, controller: briefingController)
     }
     .overlay {
       SessionProcessingOverlay(isVisible: sessionManager.isProcessingSession)
     }
-  }
-
-  private var briefingBinding: Binding<Briefing?> {
-    Binding(
-      get: { briefingController?.currentBriefing },
-      set: { newValue in
-        if newValue == nil {
-          briefingController?.dismissBriefing()
-        }
-      })
   }
 
   // MARK: - iOS 26+ (system TabView)

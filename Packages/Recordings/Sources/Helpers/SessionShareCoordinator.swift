@@ -13,12 +13,17 @@ final class SessionShareCoordinator {
   private(set) var isGeneratingPDF = false
   private(set) var isExportingEvent = false
 
-  func exportReport(for session: SleepSession) {
+  /// Shares the report `write` makes (the view draws it: the shared
+  /// `NightReportPDF`), showing progress meanwhile.
+  func exportReport(_ write: @escaping @MainActor () throws -> URL) {
     Task {
       isGeneratingPDF = true
       defer { isGeneratingPDF = false }
-      if let url = SleepReportPDFGenerator().generatePDF(for: session) {
-        presentShareSheet(items: [url])
+      await Task.yield()
+      do {
+        try presentShareSheet(items: [write()])
+      } catch {
+        Log.playback.error("PDF report failed: \(String(describing: error), privacy: .public)")
       }
     }
   }

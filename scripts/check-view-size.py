@@ -18,12 +18,7 @@ LIMIT = 200
 
 # path -> (ceiling, reason). The ceiling is the line count when the entry was
 # added; the file may shrink but never grow.
-ALLOWLIST = {
-    "Packages/Recordings/Sources/Views/SleepReportPDFGenerator.swift": (
-        525,
-        "UIKit PDF drawing, not a SwiftUI view; move to Helpers/ and split per page section",
-    ),
-}
+ALLOWLIST: dict[str, tuple[int, str]] = {}
 
 
 def line_count(path: pathlib.Path) -> int:

@@ -2,6 +2,7 @@ import DesignSystem
 import Env
 import FactoryKit
 import Models
+import SleepCore
 import SwiftData
 import SwiftUI
 
@@ -22,6 +23,12 @@ struct SessionDetailLoadedView: View {
   let shareCoordinator: SessionShareCoordinator
 
   @State private var activeSheet: SessionDetailSheet?
+
+  /// The report's title and footer name the app, as SleepGuard's did.
+  static var appName: String {
+    Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String
+      ?? Bundle.main.object(forInfoDictionaryKey: "CFBundleName") as? String ?? "SleepGuard"
+  }
 
   var body: some View {
     ScrollView {
@@ -54,7 +61,11 @@ struct SessionDetailLoadedView: View {
         HStack(spacing: 16) {
           if appConfig.isEnabled(.pdfReport) {
             Button {
-              shareCoordinator.exportReport(for: session)
+              guard let night = model.night else { return }
+              let report = NightReport(night: night, config: appConfig.sleepScoreConfig)
+              shareCoordinator.exportReport {
+                try NightReportPDF.write(report, appName: Self.appName, to: FileManager.default.temporaryDirectory)
+              }
             } label: {
               Label(shareCoordinator.isGeneratingPDF ? Strings.a11yGeneratingReport : Strings.a11yExportReport, systemImage: shareCoordinator.isGeneratingPDF ? "clock" : "doc.text").labelStyle(.iconOnly)
                 .font(.system(size: 17))
