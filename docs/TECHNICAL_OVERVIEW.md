@@ -1,6 +1,8 @@
 # SleepGuard — Technical Overview
 
-A single reference for how SleepGuard is built and why: the architecture, every package, the snore-detection and sleep-score algorithms, the concurrency model, dependency injection, testing and CI, and how the project is developed with AI coding agents.
+A single reference for how SleepGuard is built and why: the architecture, every package, how the app uses the shared core (SleepGuardShared), the snore-detection and sleep-score algorithms, the concurrency model, dependency injection, testing and CI, and how the project is developed with AI coding agents.
+
+Checked against the code on 2026-11-18 (SleepGuardShared 0.27.0).
 
 ## Contents
 
@@ -33,11 +35,12 @@ A single reference for how SleepGuard is built and why: the architecture, every 
 | **Persistence** | SwiftData, local only, opened through a `VersionedSchema` migration plan |
 | **Audio / ML** | AVAudioEngine, Apple **SoundAnalysis** (built-in classifier, ~300 sound classes), Accelerate/vDSP FFT |
 | **Health** | HealthKit: reads Watch sleep stages, writes sleep sessions |
+| **Shared core** | [SleepGuardShared](https://github.com/dardan0x/SleepGuardShared) 0.27.0 (exact pin): domain rules (`SleepCore`), strings, melodies, design kit, screen content |
 | **Dependency injection** | [Factory](https://github.com/hmlongco/Factory) 3.5 (`FactoryKit`), protocol-typed |
 | **Remote** | Firebase Remote Config (feature flags, tabs), Crashlytics, Analytics, Messaging. **Only the app target** links Firebase |
 | **Privacy** | No accounts and no servers for user data. Audio never leaves the phone. Privacy manifests for the app and the widget |
 
-**Size:** 12 local Swift packages (237 source files, ~21k lines), the app target (14 files), the widget extension (11 files) and 4 Watch source files. **277 Swift Testing tests** in 8 packages, run in CI. Features are tracked as F1–F23 in [`docs/FeatureTracker.md`](FeatureTracker.md).
+**Size:** 12 local Swift packages (132 source files, ~10.9k lines), the app target, the widget extension and 4 Watch source files. The rules and screen layouts that used to make up much of that code now live in SleepGuardShared (~12k lines, its own 251 tests). **211 Swift Testing tests** in 7 packages here, run in CI. Features are tracked as F1–F26 in [`docs/FeatureTracker.md`](FeatureTracker.md).
 
 ---
 
@@ -45,7 +48,7 @@ A single reference for how SleepGuard is built and why: the architecture, every 
 
 ### 2.1 Pattern
 
-A **modular Swift Package** app using the **MV (Model–View)** approach: SwiftUI views own their screen state, logic lives in services and pure functions, and there are no per-screen ViewModels ([§8](#8-state-why-there-are-no-viewmodels)). The structure follows IceCubesApp, adapted for an audio app: an audio layer instead of a network layer, no authentication, and SwiftData as the main store.
+A **modular Swift Package** app using the **MV (Model–View)** approach: SwiftUI views own their screen state, logic lives in services and pure functions, and there are no per-screen ViewModels ([§8](#8-state-why-there-are-no-viewmodels)). The structure follows IceCubesApp, adapted for an audio app: an audio layer instead of a network layer, no authentication, and SwiftData as the main store. Below the app's packages sits SleepGuardShared, which holds everything that can be computed or drawn from plain values ([§2.5](#25-the-shared-core-sleepguardshared)).
 
 ### 2.2 Package graph
 
@@ -62,8 +65,8 @@ Onboarding SleepSession Statistics Recordings  Settings ──► Personalizatio
    └────────────┴──── also import AudioEngine directly
                                         │
                          ┌──────────────┴───────────────┐
-                         │ DesignSystem                 │  Theme, components, charts, Strings
-                         └──────────────┬───────────────┘  (depends on Models only)
+                         │ DesignSystem                 │  AppTheme, model adapters; re-exports the
+                         └──────────────┬───────────────┘  shared kits and Strings
                          ┌──────────────┴───────────────┐
                          │ Env                          │  services behind protocols, DI container,
                          │                              │  session lifecycle, HealthKit
@@ -73,13 +76,19 @@ Onboarding SleepSession Statistics Recordings  Settings ──► Personalizatio
                          │                              │  clips
                          └──────────────┬───────────────┘
                          ┌──────────────┴───────────────┐
-                         │ Models                       │  SwiftData models, sleep score, logging
-                         └──────────────────────────────┘  (depends on nothing)
+                         │ Models                       │  SwiftData models, @Model → Night mapping,
+                         └──────────────┬───────────────┘  score cache, logging
+                         ┌──────────────┴───────────────┐
+                         │ SleepGuardShared (pinned)    │  SleepCore · SleepStrings · SleepMelodies ·
+                         │                              │  SleepGuardDesignKit · SleepGuardContentKit
+                         └──────────────────────────────┘  (Foundation / SwiftUI only; knows no app)
 
  Routing  (leaf, SwiftUI only)  ◄── navigating features + app target   route enums + RouterPath (ADR 0001)
  SleepGuardWidgetsExtension     ──► Models + DesignSystem               reads a JSON snapshot, never SwiftData
  WatchApp/                      ──► standalone watchOS sources (WatchConnectivity), not built by the project
 ```
+
+Every package imports the narrowest shared product it needs; [§2.5](#25-the-shared-core-sleepguardshared) has the per-package detail.
 
 **Why packages instead of folders:** the compiler enforces the boundaries, so a stray import fails the build instead of slipping through review. Only changed packages rebuild. And the widget extension reuses `Models` and `DesignSystem` without copying code.
 
@@ -148,7 +157,7 @@ Every rule below is either checked by the compiler or by CI, or it's a conventio
 | Rule | What it means | Enforced by |
 |---|---|---|
 | **No ViewModels by default** | Screens that load asynchronously use `@State private var viewState: ViewState` (`.loading / .loaded / .empty / .error`); `@Query`-backed screens react to the query. Exceptions are deliberate ([§8.4](#84-where-there-is-an-observable-state-owner)) | Review |
-| **Small views** | View files ≤ 200 lines (containers ≤ 100); each state is its own file; complex sections are their own `View` structs | CI: `check-view-size.py` (ratcheting allowlist, 2 entries) |
+| **Small views** | View files ≤ 200 lines (containers ≤ 100); each state is its own file; complex sections are their own `View` structs | CI: `check-view-size.py` (ratcheting allowlist, now empty) |
 | **Services behind protocols** | Every service has a protocol in its own file next to its type (`AudioRecording.swift` beside `AudioRecorder.swift`), a `Factory<any P>` registration and a fake in `EnvTestSupport` ([ADR 0002](adr/0002-protocol-services.md)) | Compiler |
 | **Views get services from `@Injected`** | Views never take a service through `init`. Non-view types with logic worth testing take collaborators as `init` parameters defaulting to the container ([§9.5](#95-project-rules-and-the-lessons-behind-them)) | CI: `check-layering.py` rule 6 |
 | **No `.shared` in features** | Only the app target (the composition root) touches `X.shared` | CI: rule 4 |
@@ -156,30 +165,56 @@ Every rule below is either checked by the compiler or by CI, or it's a conventio
 | **Navigation** | All navigation through `RouterPath` (`RouterDestination` for pushes, `SheetDestination` for sheets). Each tab owns its own path; `RouterPath` is the only object in SwiftUI `.environment` | Convention |
 | **Concurrency** | Swift 6 strict concurrency; async/await only (no Combine, GCD or completion handlers); no `@unchecked Sendable` ([§7](#7-concurrency-swift-6)) | Compiler |
 | **Logging** | `os.Logger` through `Log.<category>`; never `print` ([§10.3](#103-logging)) | CI: rule 5 |
-| **Localization** | Every user-facing string goes through the generated `Strings` enum (source: `Localizable.xcstrings`) | CI: hardcoded-strings check + strings-in-sync check |
+| **Localization** | Every user-facing string goes through the generated `Strings` enum (source: `Localizable.xcstrings` in SleepGuardShared) | CI: hardcoded-strings check here; strings-in-sync in the shared repo's CI |
+| **Shared rules stay shared** | Night metrics, score, detection rules, statistics, playback, briefing and report are changed in SleepGuardShared, never re-implemented here; screens host the shared content and keep loading, state, services and navigation | Review + this app's parity tests |
 | **Accessibility** | Icon-only buttons are `Label(…).labelStyle(.iconOnly)`; custom-drawn views expose a label and value ([§10.4](#104-accessibility)) | Convention |
 | **SwiftData schema** | Only add properties, with defaults; never remove or rename (that crashes existing installs). Every container opens through `SleepGuardSchema.container(_:)` with the migration plan | Convention + `SleepGuardSchemaTests` |
-| **Design** | `designs/SleepGuard.pen` (Pencil) is the source of truth; its tokens (`bg-card #2C2C2E`, `accent #5E9CFF`, `score-green/amber/red`, `radius-card 16`, …) are mirrored in `Theme` | Review |
+| **Design** | `designs/SleepGuard.pen` (Pencil) is the source of truth; its tokens are the shared kit's `Theme.sleepGuard`, which `AppTheme` starts from (`bg-card` is open: `#2C2C2E` in the design notes, `#22232B` in code) | Review |
 | **Formatting** | 2-space indentation and the `.swiftformat` rules | CI: SwiftFormat lint + pre-commit hook |
+
+### 2.5 The shared core: SleepGuardShared
+
+SleepGuardShared is a separate repo and Swift package, pinned by exact version in every package manifest. It holds what doesn't depend on how an app is built; this repo holds what does.
+
+| Shared product | Holds | Used here by |
+|---|---|---|
+| `SleepCore` (Foundation only) | Domain values (`Night`, `NightEvent`, `NightSummary`, `SleepStageSegment`, …) and the rules over them: score, episodes, stage analysis, detection classifiers, `DetectionStateMachine` and the `DetectionEngine` actor, statistics, playback, interrupter, storage plan, briefing, report | Models, AudioEngine, Env, Statistics, Recordings, SleepSession, Personalization, Onboarding, DesignSystem |
+| `SleepStrings` | `Localizable.xcstrings` and the generated `Strings` | DesignSystem (re-exported) |
+| `SleepMelodies` | The Snore Interrupter's built-in sounds | Env |
+| `SleepGuardDesignKit` | `Theme` and components that draw values | DesignSystem (re-exported) |
+| `SleepGuardContentKit` | Each screen's loaded layout: values, closures and `@ViewBuilder` slots in | DesignSystem (re-exported); hosted by every feature |
+
+**The four seams.**
+
+| Seam | How this app connects |
+|---|---|
+| **Domain values** | `SleepSession+Night.swift` maps a session (events, bursts, gaps, stages) to `Night`. `sleepScore`, `snoringDuration` and the episodes are computed by `SleepCore`; the cached score is stamped with `SleepScore.cacheVersion` and refreshed at launch when the formula changes. Lists use `summaryWithoutEvents` (cached fields, no faulting); screens build `nightSummary` / `night` only for the nights they show |
+| **Detection** | `RealtimeDetectionTracker` (Env) feeds `SleepCore`'s `DetectionEngine` through one ordered stream and performs its outputs on the main actor. `AudioEngine` computes the inputs (`AudioLevels`, `SpectralFeatures`, `SoundClassLabels`) and classifies with `SnoreClassifier` / `SpeechClassifier` |
+| **Theme** | `AppTheme` starts from `Theme.sleepGuard`; the app root puts it in the SwiftUI environment, where kit components read it |
+| **Screen content** | A feature's container loads (`@Query` or a state owner), owns `ViewState`, and hosts a `*Content` view, passing values, closures (sheets, `RouterPath`) and app-only slots (e.g. `SleepStagesSection` in the night detail) |
+
+**Binding.** `SleepGuard.xcworkspace` adds `../SleepGuardShared` as a local package for day-to-day work; `SleepGuard.xcodeproj`, `scripts/run-tests.sh` and CI use the pinned release. `sh scripts/bump-shared.sh <version>` moves every pin and both lockfiles. The shared repo's CI builds this app against every candidate commit.
+
+**How it got there.** The shared code was extracted from this app one concern at a time (F24–F26 and the shared releases 0.1.0–0.27.0): pin the behaviour with this app's tests, turn hidden inputs (models, `Date()`, randomness) into parameters, move the rule as a pure function over values, map at the `Models` boundary with parity tests, release, bump, delete the local copy. Decisions: [ADR 0004](adr/0004-shared-repo.md), [0005](adr/0005-shared-design-kit.md), [0006](adr/0006-shared-screen-content.md). The same package also backs [SleepGuardUIKitWay](https://github.com/dardan0x/SleepGuardUIKitWay), a UIKit-shell build of the product.
 
 ---
 
 ## 3. Packages
 
-| Package | Files / lines | Depends on | What it does |
-|---|---|---|---|
-| **Models** | 22 / 1.7k | — | SwiftData `@Model`s (`SleepSession`, `SnoreEvent`, `SnoreBurst`, `RecordingGap`, `SleepStageSegment`, `UserProfile`, `LifestyleLog`, `Melody`) and the versioned schema. **The sleep score** (`SleepScore.compute`, `SleepScoreConfig`, the versioned cache). Episode merging (`displayableSnoringEpisodes`), widget snapshot types, `WidgetDeepLink`, the `Log` loggers |
-| **AudioEngine** | 14 / 2.2k | Models | `AudioRecorder` (AVAudioEngine, interruptions, route changes), `TapProcessor` (the tap's thread), `SoundAnalysisDetector`, `FFTAnalyzer`, `SnoreDetector` (per-sample classifier), `SpeechDetector`, **`DetectionStateMachine`** (the event rules) run by the **`DetectionEngine` actor**, the raw-log format (`RawLog`), `EventClipCompressor` (.caf → .m4a), `AudioClipExtractor`. No UI imports |
-| **Env** | 37 / 3.8k | Models, AudioEngine, Factory | The services and the DI `Container`. `Session/`: `SessionManager` (facade), `SessionRecordingController` (lifecycle), `RealtimeDetectionTracker` (feeds the detection engine, performs its outputs), `SessionCommitter` (saves a finished night). Also `UserPreferences`, `AppConfig`, `HealthKitSync`, `SnoreInterrupterPlayer`, `SessionCheckpointStore`, `PendingSessionStore`, `SessionRawLogWriter` (actor), `StorageLimitEnforcer`, `TabCoordinator`, `WatchConnectivityManager`. `EnvTestSupport` holds the fakes. No SwiftUI |
-| **DesignSystem** | 21 files | Models, Factory, SleepGuardDesignKit | `AppTheme` (tokens from the shared kit's `Theme.sleepGuard`), SleepGuard-only components (sleep-stage views, banner wrappers, update gate), `SleepGuardKitAdapters` (kit components from the models); re-exports the shared kit (ADR 0005: stat cards, gauge, charts, timeline, event rows, Statistics and player components, …), the shared screen content (ADR 0006: each screen's loaded layout, hosted by the feature packages' containers) and the strings |
-| **Routing** | 1 / 0.05k | — | `RouterDestination`, `SheetDestination`, `RouterPath` |
-| **Onboarding** | 7 / 0.7k | Models, AudioEngine, Env, DesignSystem | First-run flow and permission requests |
-| **SleepSession** | 30 / 2.1k | Models, AudioEngine, Env, Routing, DesignSystem | Recording: pre-start (delay timer, Snore Interrupter), bedside clock with live level, session summary |
-| **Statistics** | 26 / 1.7k | Models, Env, Routing, DesignSystem | Home tab: dashboard (`DashboardState`), calendar, trends (Swift Charts), Last 7 Nights; the numbers come from `SleepCore`'s statistics rules |
-| **Recordings** | 41 / 3.8k | Models, Env, Routing, DesignSystem | Largest feature: sessions list, session detail (`SessionDetailModel`), event timeline, clip player (`ClipPlaybackController`, with optional "enhanced audio"), sharing, **PDF report** |
-| **Settings** | 12 / 1.0k | Models, Env, Routing, DesignSystem, **Personalization** | Sensitivity, appearance, HealthKit, melodies, storage limits, data management, debug tools |
-| **Personalization** | 15 / 1.6k | Models, Env, DesignSystem | `BriefingEngine` (pure: sessions + `now` → morning briefing), `QuoteBank`, profile editor, lifestyle surveys |
-| **Learn** | 2 / 0.2k | Models, Env, Routing, DesignSystem | Learn tab (web content), behind the `feature_learn` remote flag |
+| Package | Files / lines | Depends on | Shared products | What it does |
+|---|---|---|---|---|
+| **Models** | 19 / 1.3k | — | SleepCore | SwiftData `@Model`s (`SleepSession`, `SnoreEvent`, `SnoreBurst`, `RecordingGap`, `SleepStageSegment`, `UserProfile`, `LifestyleLog`, `Melody`) and the versioned schema. `SleepSession+Night` (the mapping to `SleepCore`), the versioned score cache (`SleepScoreCache`), `UserProfile+SleepProfile`, widget snapshot types, `WidgetDeepLink`, the `Log` loggers |
+| **AudioEngine** | 11 / 1.3k | Models | SleepCore | `AudioRecorder` (AVAudioEngine, interruptions, route changes), `TapProcessor` (the tap's thread), `SoundAnalysisDetector`, `FFTAnalyzer`, `SnoreDetector` / `SpeechDetector` (live thresholds over the shared classifiers), `EventClipCompressor` (.caf → .m4a), `AudioClipExtractor`. No UI imports |
+| **Env** | 37 / 3.7k | Models, AudioEngine, Factory | SleepCore, SleepMelodies | The services and the DI `Container`. `Session/`: `SessionManager` (facade), `SessionRecordingController` (lifecycle), `RealtimeDetectionTracker` (feeds the shared detection engine, performs its outputs), `SessionCommitter` (saves a finished night). Also `UserPreferences`, `AppConfig`, `HealthKitSync`, `SnoreInterrupterPlayer`, `SessionCheckpointStore`, `PendingSessionStore`, `SessionRawLogWriter` (actor), `StorageLimitEnforcer`, `TabCoordinator`, `WatchConnectivityManager`. `EnvTestSupport` holds the fakes. No SwiftUI |
+| **DesignSystem** | 11 / 0.5k | Models, Factory | SleepCore, SleepStrings, DesignKit, ContentKit | This app's bridge to the shared UI: `AppTheme` (from `Theme.sleepGuard`), `SleepGuardKitAdapters` (kit components from models), a few app-only views (sleep-stage section, low-battery banner, update gate). `@_exported` re-exports of the kits and `Strings` |
+| **Routing** | 1 / 0.05k | — | — | `RouterDestination`, `SheetDestination`, `RouterPath` |
+| **Onboarding** | 1 / 0.08k | Models, AudioEngine, Env, DesignSystem | SleepCore | Hosts `OnboardingContent` (pages from `OnboardingPages`); permission requests |
+| **SleepSession** | 11 / 0.8k | Models, AudioEngine, Env, Routing, DesignSystem | SleepCore | Recording: pre-start (delay, Snore Interrupter), countdown, bedside clock, session summary, each hosting its shared content |
+| **Statistics** | 10 / 0.5k | Models, Env, Routing, DesignSystem | SleepCore | Home tab: dashboard (`DashboardState`), calendar, trends, Last 7 Nights; numbers from `NightDashboard`, `NightPeriod`, `ScoreTrend`, `CalendarMonth`, `NightDay` |
+| **Recordings** | 22 / 2.0k | Models, Env, Routing, DesignSystem | SleepCore | Sessions list, session detail (`SessionDetailModel`), clip player (`ClipPlaybackController` over `ClipPlaylist`, `PlaybackGain`, `PlaybackEnhancement`), sharing, the PDF report (`NightReport` rendered by `NightReportPDF`) |
+| **Settings** | 4 / 0.5k | Models, Env, Routing, DesignSystem, **Personalization** | (via DesignSystem) | Hosts `SettingsContent`: sensitivity, appearance, HealthKit, melodies, storage limits, data management, debug tools |
+| **Personalization** | 4 / 0.2k | Models, Env, DesignSystem | SleepCore | `BriefingController` (maps nights, profile and survey logs to values for `BriefingEngine`; `BriefingSchedule` decides when), `BriefingSheet`, the profile prompt (`ProfilePrompt`) and editor |
+| **Learn** | 1 / 0.03k | Models, Env, Routing, DesignSystem | (via DesignSystem) | Learn tab (`LearnContent`), behind the `feature_learn` remote flag |
 
 **App target (`SleepGuard/`)** is the composition root: `SleepGuardApp` (container, launch tasks, onboarding gate), `MainTabView` / `CustomTabBarView` (iOS 26 system tab bar, custom one below), `AppRegistry` (route → screen), `DeepLinkRouter` (`sleepguard://start | session/<uuid> | last7nights`), `RemoteConfig/RemoteConfigLoader` (the **only** Firebase-aware code), `PushNotifications/` and `WidgetSnapshotWriter`.
 
@@ -189,6 +224,7 @@ Every rule below is either checked by the compiler or by CI, or it's a conventio
 
 | Dependency | Used by | Why |
 |---|---|---|
+| `dardan0x/SleepGuardShared` 0.27.0 (exact) | Every package but Routing | The shared core ([§2.5](#25-the-shared-core-sleepguardshared)); this project's own |
 | `hmlongco/Factory` 3.5.2 (`FactoryKit`) | Env, DesignSystem, every feature package | Compile-time-safe DI container, `@Injected` |
 | `firebase/firebase-ios-sdk` 12.14 (Remote Config, Crashlytics, Analytics, Messaging) | App target only | Feature flags, crash reports, push. Kept out of the packages on purpose |
 | Apple frameworks | — | SwiftUI, SwiftData, Swift Charts, AVFoundation, SoundAnalysis, Accelerate, HealthKit, WidgetKit, UserNotifications, os |
@@ -197,10 +233,10 @@ There are no other third-party libraries. The app's `Package.resolved` is commit
 
 ### 3.2 Where the core logic lives
 
-**`AudioEngine` *hears*, the detection engine *decides*, `Models` *scores and stores*.**
-- **`AudioEngine`** is the reason the app exists: it turns microphone input into "was that a snore, and how loud?". Every number the user sees comes from its output, and it holds the hardest code (the audio tap under Swift 6, the classifier, the detection rules).
-- **`DetectionStateMachine`** (in AudioEngine) is the brain: it turns 20 classified samples per second into events (debouncing, bursts, melody gaps, false-positive filters). It's a pure value type, so it's tested without audio.
-- **`Models`** is the foundation: everything depends on it, and it holds the score formula and the schema rules that keep existing installs from crashing.
+**`AudioEngine` *hears*, `SleepCore` *decides and scores*, `Models` *stores*.**
+- **`AudioEngine`** turns microphone input into detection inputs (levels, spectral features, SoundAnalysis confidences) and holds the hardest platform code: the audio tap under Swift 6.
+- **`SleepCore`** (SleepGuardShared) holds the rules: the per-sample classifiers, the `DetectionStateMachine` that turns 20 samples per second into events (debouncing, bursts, melody gaps, false-positive filters), the score and every metric over a night. All pure, all tested without audio or a simulator.
+- **`Models`** is the app's foundation: the schema and its add-only rules that keep existing installs from crashing, the mapping to `Night`, and the score cache that keeps lists from faulting events.
 
 ---
 
@@ -210,7 +246,7 @@ There are no other third-party libraries. The app's `Package.resolved` is commit
 User taps Start ─► SleepSession UI ─► SessionManager (Env)
                                           ├─ SessionRecordingController  start/stop, AVAudioSession (.measurement), checkpoints
                                           └─ RealtimeDetectionTracker    every 50 ms: classify → AsyncStream → DetectionEngine actor
-                                                                         (pure DetectionStateMachine) → outputs performed on main actor
+                                                                         (SleepCore's pure DetectionStateMachine) → outputs performed on main actor
                                                      ▲
 AudioRecorder (AudioEngine) ─ tap ─► TapProcessor ───┤ RMS dB, peak dB, FFT spectral score
                                      SoundAnalysis ──┘ snore / speech confidence
@@ -220,7 +256,7 @@ AudioRecorder (AudioEngine) ─ tap ─► TapProcessor ───┤ RMS dB, pea
 
 Stop ─► finish detection (flush the stream) ─► stop audio ─► await clip compression
      ─► Save: summary sheet (or automatically after a low-battery stop)
-     ─► SessionCommitter: insert events + session ─► cache score ─► save
+     ─► SessionCommitter: insert events + session ─► cache score (SleepCore via the Night mapping) ─► save
                           ─► clear pending-file record + checkpoint ─► storage limits, HealthKit write
 
 App launch ─► refresh stale cached scores ─► widget snapshot JSON (App Group) ─► WidgetCenter reload
@@ -244,12 +280,13 @@ App to background ─► widget snapshot JSON ─► WidgetCenter reload
 
 | Piece | Where |
 |---|---|
-| Per-sample classifier | `SnoreDetector.classify(db:spectralScore:snoreConfidence:)` → `classifyWithSoundAnalysis`, `classifyWithSpectral` (AudioEngine) |
+| Per-sample classifier | `SnoreClassifier` / `SpeechClassifier` and the sensitivity presets (SleepCore); called with the live thresholds by `SnoreDetector.classify(db:spectralScore:snoreConfidence:)` / `SpeechDetector` (AudioEngine) |
+| Detection inputs | `AudioLevels` (RMS / peak dB), `SpectralFeatures`, `SoundClassLabels` (SleepCore) |
 | Apple ML classifier wrapper | `SoundAnalysisDetector` (AudioEngine) |
-| FFT spectral score | `FFTAnalyzer.analyze` (AudioEngine) |
+| FFT | `FFTAnalyzer.analyze` (AudioEngine) produces the magnitudes; the spectral score is `SpectralFeatures` (SleepCore) |
 | Audio tap | `TapProcessor`, `AudioRecorder` (AudioEngine) |
-| **Event rules** | `DetectionStateMachine.ingest(_:at:)`, `melodyDidStart/Stop`, `finalizeActiveEvents` (AudioEngine) |
-| Runs the rules, in order | `DetectionEngine` actor (AudioEngine), [ADR 0003](adr/0003-detection-actor.md) |
+| **Event rules** | `DetectionStateMachine.ingest(_:at:)`, `melodyDidStart/Stop`, `finalizeActiveEvents` (SleepCore) |
+| Runs the rules, in order | `DetectionEngine` actor (SleepCore), [ADR 0003](adr/0003-detection-actor.md) |
 | Sampling, sensitivity presets, side effects | `RealtimeDetectionTracker` (`apply(_:)`, `perform(_:generation:)`), Env |
 | Replay tests | `../SleepGuardShared/Tests/SleepCoreTests/Fixtures/Replay/` (excerpts of a real recording + golden outputs) |
 | Full write-up | [`docs/snore-detection-algorithm.md`](snore-detection-algorithm.md) |
@@ -258,7 +295,7 @@ App to background ─► widget snapshot JSON ─► WidgetCenter reload
 
 1. **Capture.** An AVAudioEngine tap delivers ~1024-frame buffers (about 47 per second at 48 kHz; Apple may choose another size). For each buffer `TapProcessor` computes RMS dB, peak dB and an FFT spectral score, writes the audio to the open event file, and SoundAnalysis updates its snore and speech confidences.
 2. **Sample.** Every **50 ms** (20 Hz) the tracker reads the latest values and classifies them. That fixed rate is what the event rules see.
-3. **Classify each sample** (`SnoreDetector.classify`):
+3. **Classify each sample** (`SnoreDetector.classify`, over SleepCore's `SnoreClassifier`):
    - **SoundAnalysis first.** If snore confidence is below the sensitivity's confidence gate → `.none`. Otherwise **peak dB** picks the tier: ≥ epic threshold *and* high confidence → **epic**; ≥ loud → **loud**; ≥ light → **light**; ≥ quiet → **quiet**. Below every dB floor, a strong confidence still gives **quiet**.
    - **FFT fallback (implemented, off in live detection).** Spectral score = `0.7 × ratio score (energy in 100–500 Hz) + 0.3 × centroid score (centroid below ~400 Hz)`; under 0.6 is rejected, and a weaker score raises the dB thresholds. The tracker currently passes `spectralScore: 0`, so live detection uses SoundAnalysis only, until a real night validates the fallback. Raw logs and events still record the real spectral score.
    - **Raw dB alone is never used**: breathing, traffic and bed creaks would count as snoring.
@@ -292,7 +329,7 @@ App to background ─► widget snapshot JSON ─► WidgetCenter reload
 |---|---|
 | **Formula (pure)** | `SleepScore.compute(_ inputs: SleepInputs, config:)` in `../SleepGuardShared/Sources/SleepCore/Score/SleepScore.swift` |
 | **Coefficients and caps** | `SleepScoreConfig.default` in `SleepScoreConfig.swift` |
-| Inputs from a stored session | `SleepSession.sleepInputs` (`snoringDuration`, `displayableSnoringEpisodes`, `stageStats`) in `SleepSession.swift` |
+| Inputs from a stored session | `SleepSession.sleepInputs` in `SleepSession.swift`, built from the session's `Night` (`SleepSession+Night.swift`): snoring duration, episodes and stage stats are `SleepCore`'s |
 | Cache and launch refresh | `refreshCachedScore(using:)`, `refreshStaleCachedScores(in:config:)` in `SleepScoreCache.swift` |
 | Debug override | `AppConfig.setSleepScoreConfigOverride(_:)` (Debug builds only; Release always uses the defaults) |
 | Full write-up | [`docs/sleep-score-calculation.md`](sleep-score-calculation.md) |
@@ -339,7 +376,7 @@ score = max(0, 100 − snoring − events − intensity − sleepTalking − sta
 
 **Where work runs:**
 - **Main actor:** UI, services, SwiftData, and the side effects of detection (event files, saves, the melody).
-- **`DetectionEngine` actor:** the detection rules, fed by one ordered `AsyncStream`. It awaits each batch of outputs before the next message, so a slow main actor slows the engine but never reorders it ([ADR 0003](adr/0003-detection-actor.md)). The stream is unbounded on purpose: dropping a "melody stopped" or "session ended" message would corrupt a session.
+- **`DetectionEngine` actor** (SleepCore): the detection rules, fed by one ordered `AsyncStream`. It awaits each batch of outputs before the next message, so a slow main actor slows the engine but never reorders it ([ADR 0003](adr/0003-detection-actor.md)). The stream is unbounded on purpose: dropping a "melody stopped" or "session ended" message would corrupt a session.
 - **`SessionRawLogWriter` actor:** appends the Debug raw log to disk in chunks while recording.
 - **The audio tap's thread:** Apple documents only that the tap block runs on a thread other than the main thread. Under Swift 6, a tap closure written inside the `@MainActor` recorder would inherit main-actor isolation and trap there. So the closure is `@Sendable` and everything it touches lives in `TapProcessor`, a `Sendable` type whose mutable state is behind an `OSAllocatedUnfairLock`.
 - **Apple delegates** (SoundAnalysis results, `AVAudioPlayerDelegate`, WatchConnectivity) are `nonisolated`: they parse their payload synchronously and hop to the main actor with `Task { @MainActor in … }` only to mutate state.
@@ -363,9 +400,9 @@ SwiftUI removed both problems. **A view is a cheap value-type description of sta
 | # | Reason | In SleepGuard |
 |---|---|---|
 | 1 | **Observation makes a ViewModel layer redundant.** The view already reacts precisely to the state it reads. | Shared services are `@MainActor @Observable`; views read them through `@Injected` |
-| 2 | **SwiftUI's best tools only work inside views.** `@Query`, `@Environment`, `.task` (auto-cancelled) and `withAnimation` would have to be re-implemented in a ViewModel. | `StatisticsDashboardView` (68 lines) uses `@Query` and maps sessions to a `ViewState` with the pure `DashboardState.make(from:now:calendar:)` |
+| 2 | **SwiftUI's best tools only work inside views.** `@Query`, `@Environment`, `.task` (auto-cancelled) and `withAnimation` would have to be re-implemented in a ViewModel. | `StatisticsDashboardView` (71 lines) uses `@Query` and maps sessions to a `ViewState` with `DashboardState.make(from:now:calendar:)`, which calls `SleepCore`'s `NightDashboard` |
 | 3 | **What people want from a ViewModel is explicit state, and an enum gives that** without a class: loading *and* error can't both be true. | `StatisticsDashboardView.ViewState`: `.loading / .empty / .loaded(DashboardState) / .error` |
-| 4 | **Logic isn't in views; it's in testable units.** Pure functions are easier to test than a ViewModel: no mocks, no main actor. | `SleepScore.compute`, `DetectionStateMachine`, `SnoreDetector.classify`, `DashboardState.make`, `BriefingEngine.generate` (30 tests, `now` passed in), `WidgetSnapshotBuilder` |
+| 4 | **Logic isn't in views; it's in testable units.** Pure functions are easier to test than a ViewModel: no mocks, no main actor. | In SleepCore: `SleepScore.compute`, `DetectionStateMachine`, `SnoreClassifier`, `NightDashboard`, `BriefingEngine.make` (`now`, calendar and seed passed in). Here: `DashboardState.make`, `WidgetSnapshotBuilder`, `SessionCommitter` |
 | 5 | **Fewer lifecycle traps.** `@State` + `.task {}` ties loading to the view's identity and cancels it for free. | Rule: `.task` for loading, `.task(id:)` when it depends on a value, check `Task.isCancelled` before setting an error |
 | 6 | **Simpler dependency injection.** Factory's `@Injected` and the `@Observable` macro collide, so every ViewModel would need manual container resolution. | Views write `@Injected(\.service)` |
 | 7 | **Simpler Swift 6 concurrency.** Fewer `@MainActor` reference types to reason about. | UI packages are main-actor by default |
@@ -540,20 +577,19 @@ The singleton factories return the existing `.shared` instances, so the containe
 
 ### 10.1 Tests
 
-**277 Swift Testing tests in 8 packages**, run on every pull request:
+**211 Swift Testing tests in 7 packages**, run on every pull request. The rules and layouts are tested once, in SleepGuardShared (251 tests: score, detection state machine and replay goldens, statistics, playback, briefing, report, renders of every component and screen content in two themes); this app's tests check its own mapping, services and state:
 
 | Package | Tests | Highlights |
 |---|---:|---|
-| Models | 79 | Sleep score formula (parameterized) and versioned cache, episodes, stats, widget snapshot, crash-recovery snapshot, schema migration plan |
-| AudioEngine | 65 | `DetectionStateMachine` (18), `DetectionEngine` actor under three delivery patterns, **replay against goldens from a real recording**, raw-log formats (incl. a crash-truncated file), classifier, FFT, tap levels, clip extraction |
-| Env | 59 | Detection characterization through the live tracker (13), saving a night (`SessionCommitterTests`, incl. the low-battery regression), every service replaced by its fake, constructor injection, storage limits, checkpoints, raw-log writer |
-| Personalization | 30 | `BriefingEngine` (pure, `now` injected) |
-| Statistics | 18 | `DashboardState` mapping, week-over-week trend |
-| Recordings | 16 | `SessionDetailModel` (load, filter, delete) with a fake HealthKit, session grouping |
+| Models | 83 | Versioned score cache, the `@Model` → `Night` mapping (parity with the shared rules), episodes, stats, widget snapshot, crash-recovery snapshot, schema migration plan |
+| Env | 63 | Detection characterization through the live tracker, saving a night (`SessionCommitterTests`, incl. the low-battery regression), every service replaced by its fake, constructor injection, storage limits, checkpoints, raw-log writer, recording delay |
+| AudioEngine | 34 | `SnoreDetector` thresholds over the shared classifier, tap levels, FFT analysis, clip extraction and compression |
+| Statistics | 11 | `DashboardState` mapping |
+| Recordings | 10 | `SessionDetailModel` (load, filter, delete) with a fake HealthKit |
 | DesignSystem | 7 | Formatters, localization catalog, theme override |
 | Routing | 3 | `RouterPath` |
 
-Learn, Onboarding, Settings and SleepSession have no test target (views and thin wrappers). Tests run per package on the iOS Simulator with `scripts/run-tests.sh` (not `swift test`, which builds for macOS). Mutation checks were used on the critical tests: breaking the code they protect makes them fail.
+Learn, Onboarding, Personalization, Settings and SleepSession have no test target: they host shared content, and the logic they call is tested in SleepGuardShared. Tests run per package on the iOS Simulator with `scripts/run-tests.sh` (not `swift test`, which builds for macOS). Mutation checks were used on the critical tests: breaking the code they protect makes them fail.
 
 ### 10.2 CI and guardrails
 
@@ -565,7 +601,8 @@ Learn, Onboarding, Settings and SleepSession have no test target (views and thin
 | **View size** | `layering.yml` → `scripts/check-view-size.py` | A view file over 200 lines, an allowlisted file growing past its ceiling, or a stale allowlist entry |
 | **SwiftFormat** | `quality.yml` (SwiftFormat 0.55, built from source in a `swift:6.0.3` container) | Code isn't formatted per `.swiftformat` |
 | **Hardcoded strings** | `quality.yml` → `scripts/check-hardcoded-strings.py` (diff-based) | `Text("Save")` instead of `Strings.…` |
-| **Strings in sync** | `quality.yml` | `Localizable.xcstrings` and the generated `Strings.swift` disagree |
+| **Strings in sync** | SleepGuardShared's CI | `Localizable.xcstrings` and the generated `Strings.swift` disagree (the catalog lives there) |
+| **Shared compatibility** | SleepGuardShared's CI, `sleepguard` job | This app's dev workspace fails to build against a candidate shared commit |
 | **Pre-commit hook** | `.githooks/pre-commit` (`sh scripts/install-hooks.sh`) | Formats staged Swift files |
 
 ### 10.3 Logging
@@ -595,7 +632,7 @@ The project is built with AI coding agents (Claude Code, plus agents that read `
 
 ### 11.1 Planning: features and tasks
 
-- Every **feature** has an ID (F1–F23), a priority, a tracker in [`docs/trackers/`](trackers/) and a row in [`docs/FeatureTracker.md`](FeatureTracker.md) (dashboard, activity log, what's active, what's next).
+- Every **feature** has an ID (F1–F26), a priority, a tracker in [`docs/trackers/`](trackers/) and a row in [`docs/FeatureTracker.md`](FeatureTracker.md) (dashboard, activity log, what's active, what's next).
 - Features split into **tasks** (`F22-T10`) with dependencies and acceptance criteria. The local tracker is updated first; earlier features were also mirrored to Notion.
 - A finished feature gets a doc in [`docs/features/`](features/) (files, routes, state, edge cases). Decisions with real trade-offs get an [ADR](adr/).
 
@@ -611,7 +648,7 @@ AFTER VERIFIED  tracker → "Done", acceptance criteria ticked, prompt recorded,
 
 - One task, one branch (`feature/f22/t10-detection-engine-actor`), merged into a feature branch, which merges into `main`.
 - Commit messages: `F22-T10 — DetectionEngine actor fed by one ordered AsyncStream`, followed by bullet points.
-- **Conflict-free session log:** each session adds its own file in [`docs/sessions/`](sessions/) (89 so far) instead of appending to a shared file; `scripts/compile-sessions.py` numbers them when compiling.
+- **Conflict-free session log:** each session adds its own file in [`docs/sessions/`](sessions/) instead of appending to a shared file (over 120 so far); `scripts/compile-sessions.py` numbers them when compiling.
 
 ### 11.4 Instruction files, skills and tools
 
@@ -635,7 +672,11 @@ AFTER VERIFIED  tracker → "Done", acceptance criteria ticked, prompt recorded,
 ## 12. Build and run
 
 ```bash
-# Build and run (Xcode 26+)
+# Build and run (Xcode 26+), against the local ../SleepGuardShared
+xcodebuild -workspace SleepGuard.xcworkspace -scheme SleepGuard \
+  -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2' build
+
+# The same, against the pinned shared release
 xcodebuild -project SleepGuard.xcodeproj -scheme SleepGuard \
   -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2' build
 
@@ -647,7 +688,8 @@ xcodebuild build -project SleepGuard.xcodeproj -scheme SleepGuard -configuration
 sh scripts/run-tests.sh                   # all package tests on the simulator (or: sh scripts/run-tests.sh Models Env)
 python3 scripts/check-layering.py         # rules 1–6
 python3 scripts/check-view-size.py
-python3 scripts/generate-xcstrings.py     # Strings.txt → Localizable.xcstrings → Strings.swift
+python3 scripts/generate-xcstrings.py     # Strings.txt → Localizable.xcstrings → Strings.swift (in ../SleepGuardShared)
+sh scripts/bump-shared.sh 0.28.0          # adopt a shared release: every pin + both lockfiles
 
 # Demo data (Debug builds): launch with -generateMockData
 # Deep links
@@ -671,6 +713,9 @@ Real recording needs a physical device; the simulator uses the Mac's microphone,
 | [0001](adr/0001-routing-package.md) | Navigation in a leaf `Routing` package, so the service layer is SwiftUI-free |
 | [0002](adr/0002-protocol-services.md) | Every service behind a protocol, with a test double |
 | [0003](adr/0003-detection-actor.md) | Detection rules on an actor fed by one ordered `AsyncStream` |
+| [0004](adr/0004-shared-repo.md) | Pure logic and strings move into the `SleepGuardShared` repo, pinned by version |
+| [0005](adr/0005-shared-design-kit.md) | Draw with the shared design kit |
+| [0006](adr/0006-shared-screen-content.md) | Share screen content, keep screens |
 
 Each ADR records the context, the decision, the consequences including its honest limits, and the alternatives considered.
 
@@ -694,12 +739,18 @@ An architecture review in November 2026 questioned several parts of the design. 
 
 The lesson worth keeping: the structural concerns were cheap to fix once the rules were pure functions with tests around them. The most serious finding was a data-loss bug caused by duplicated save logic.
 
-### 13.3 Open items
+### 13.3 The shared core (F24–F26)
+
+After F22 made the rules pure functions, they could leave the app. The rules, then the strings, the design kit (F24) and each screen's layout (F25, F26) moved into SleepGuardShared, so a second app ([SleepGuardUIKitWay](https://github.com/dardan0x/SleepGuardUIKitWay)) could build the same product on a different architecture without copying them. The feature packages shrank to their screens; the package sources here went from ~21k to ~10.9k lines. One behaviour change came with the move: the briefing became deterministic (seeded by the night), so its tests assert exact output.
+
+### 13.4 Open items
 
 - **Detection accuracy.** The replay tests prove detection didn't *change*, not that it's *right*. Next: measure precision and recall against labelled real nights.
 - **A real night on a device** for the detection actor (verified so far by replay and on the simulator).
 - **Dynamic Type and tap targets** (design decisions).
 - **A start-failure alert when recording starts from the notification** (that path only logs today).
+- **Positive survey answers.** `LifestyleLog` stores flags only, so three of the four positive chips (all but "exercised") come back as an answered night with no chips. Keeping them needs new stored properties (additive).
+- **`bg-card`** differs between the design notes (`#2C2C2E`) and the shipped token (`#22232B`).
 - **CloudKit sync** (F13, not started): it needs the first breaking schema migration (dropping `@Attribute(.unique)`).
 
 ---
@@ -716,4 +767,5 @@ The lesson worth keeping: the structural concerns were cheap to fix once the rul
 | [`docs/FeatureTracker.md`](FeatureTracker.md), [`docs/trackers/`](trackers/) | Feature and task status, acceptance criteria, notes |
 | [`docs/sessions/`](sessions/) | One note per working session |
 | [`AGENTS.md`](../AGENTS.md) | The project rulebook |
+| [SleepGuardShared README](https://github.com/dardan0x/SleepGuardShared) and its `docs/ARCHITECTURE_OVERVIEW.md` | The shared core: modules, how both apps bind to it, testing |
 | `../SleepGuardShared/Tests/SleepCoreTests/Fixtures/Replay/README.md` | How the detection replay fixtures and goldens work |
