@@ -14,6 +14,15 @@
 ![Shared](https://img.shields.io/badge/SleepGuardShared-0.27.0-blueviolet)
 ![Privacy](https://img.shields.io/badge/privacy-on--device-brightgreen)
 
+<p align="center">
+  <img src="docs/screenshots/screenshot-1.png" width="16%" alt="Start a sleep session" />
+  <img src="docs/screenshots/screenshot-2.png" width="16%" alt="Statistics with sleep score and stages" />
+  <img src="docs/screenshots/screenshot-3.png" width="16%" alt="Last 7 Nights" />
+  <img src="docs/screenshots/screenshot-4.png" width="16%" alt="Calendar month view" />
+  <img src="docs/screenshots/screenshot-5.png" width="16%" alt="Night detail with snoring timeline" />
+  <img src="docs/screenshots/screenshot-6.png" width="16%" alt="Snore Interrupter settings" />
+</p>
+
 ---
 
 ## What it does
