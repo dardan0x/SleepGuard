@@ -16,15 +16,18 @@ public import SleepCore
 public final class SessionManager: SessionManaging {
   public static let shared = SessionManager()
 
-  // Resolved from the container in init rather than `@Injected`: the
-  // `@Observable` macro and `@Injected` both synthesize underscore backing
-  // storage, which collides on the same property name.
   private let recording: SessionRecordingController
   private let detection: RealtimeDetectionTracker
 
-  public init() {
-    let recording = Container.shared.sessionRecordingController()
-    let detection = Container.shared.realtimeDetectionTracker()
+  /// The live composition: both halves of a recording from the container.
+  public convenience init() {
+    self.init(
+      recording: Container.shared.sessionRecordingController(),
+      detection: Container.shared.realtimeDetectionTracker())
+  }
+
+  /// Wires the two halves together (they're internal to Env, so this init is too).
+  init(recording: SessionRecordingController, detection: RealtimeDetectionTracker) {
     self.recording = recording
     self.detection = detection
     recording.attach(detection: detection)

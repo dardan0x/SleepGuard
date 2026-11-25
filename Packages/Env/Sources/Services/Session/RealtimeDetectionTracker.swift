@@ -38,7 +38,7 @@ final class RealtimeDetectionTracker {
 
   private let audioRecorder: any AudioRecording
   private let snoreDetector: SnoreDetector
-  private let speechDetector = SpeechDetector.shared
+  private let speechDetector: SpeechDetector
   private let snoreInterrupterPlayer: any SnoreInterrupterPlaying
   private let preferences: any UserPreferencesStoring
   private let pendingSessionStore: any PendingSessionStoring
@@ -76,10 +76,11 @@ final class RealtimeDetectionTracker {
   /// Instruments intervals for open snore events (Points of Interest).
   private var eventSignposts: [UUID: OSSignpostIntervalState] = [:]
 
-  /// `snoreDetector` is injectable so tests can check the sensitivity presets
-  /// on their own instance; the app uses `.shared`.
+  /// Collaborators default to the container; tests pass their own detectors
+  /// so parallel runs don't share classification state.
   init(
-    snoreDetector: SnoreDetector = .shared,
+    snoreDetector: SnoreDetector = Container.shared.snoreDetector(),
+    speechDetector: SpeechDetector = Container.shared.speechDetector(),
     audioRecorder: any AudioRecording = Container.shared.audioRecorder(),
     snoreInterrupterPlayer: any SnoreInterrupterPlaying = Container.shared.snoreInterrupterPlayer(),
     preferences: any UserPreferencesStoring = Container.shared.userPreferences(),
@@ -90,6 +91,7 @@ final class RealtimeDetectionTracker {
   {
     self.clock = clock
     self.snoreDetector = snoreDetector
+    self.speechDetector = speechDetector
     self.audioRecorder = audioRecorder
     self.snoreInterrupterPlayer = snoreInterrupterPlayer
     self.preferences = preferences

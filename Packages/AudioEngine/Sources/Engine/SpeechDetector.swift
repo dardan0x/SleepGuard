@@ -25,7 +25,8 @@ public final class SpeechDetector {
   /// so -55 catches quiet mumbling/whispering without flooding the event list with ambient noise.
   public var dbFloor: Float = -55.0
 
-  private init() {}
+  /// Internal so tests can create isolated instances; app code uses `.shared`.
+  init() {}
 
   /// Classifies whether the current audio contains speech.
   /// SleepCore's `SpeechClassifier` with this detector's threshold and floor.

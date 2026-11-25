@@ -296,6 +296,7 @@ final class DetectionHarness {
       runsProcessingLoop: false)
     tracker = RealtimeDetectionTracker(
       snoreDetector: SnoreDetector(),
+      speechDetector: SpeechDetector(),
       audioRecorder: recorder,
       snoreInterrupterPlayer: interrupter,
       preferences: preferences,

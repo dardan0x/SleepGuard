@@ -31,12 +31,18 @@ final class SessionDetailModel {
   private let userPreferences: any UserPreferencesStoring
   private let healthKitSync: any HealthKitSyncing
 
-  init(sessionID: UUID, appConfig: any AppConfigProviding, userPreferences: any UserPreferencesStoring) {
+  /// Collaborators are parameters defaulting to the container, like every
+  /// non-view type: tests pass fakes directly or register them.
+  init(
+    sessionID: UUID,
+    appConfig: any AppConfigProviding,
+    userPreferences: any UserPreferencesStoring,
+    healthKitSync: any HealthKitSyncing = Container.shared.healthKitSync())
+  {
     self.sessionID = sessionID
     self.appConfig = appConfig
     self.userPreferences = userPreferences
-    // @Observable can't use @Injected (macro collision): resolve in init.
-    healthKitSync = Container.shared.healthKitSync()
+    self.healthKitSync = healthKitSync
   }
 
   /// Reads the night. Never writes: opening a screen doesn't change storage.

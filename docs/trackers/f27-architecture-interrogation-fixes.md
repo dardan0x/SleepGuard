@@ -42,7 +42,7 @@ Fixes the verdicts of the principal-level architecture review (`ARCHITECTURE_INT
 | F27-T11 | Split Env by reason to change (Q31) | Refactor | Done | T10 | Env → Config / Health / Platform / Routing | 2026-11-25 | 2026-11-25 |
 | F27-T12 | Access-level imports (Q30) | Refactor | Done | T11 | all | 2026-11-26 | 2026-11-26 |
 | F27-T13 | One theme system (Q21) | Refactor | Done | T12 | DesignSystem / views / widgets | 2026-11-26 | 2026-11-26 |
-| F27-T14 | Two dependency-resolution styles (Q23) | Refactor | Backlog | T11 | Env / Recordings | — | — |
+| F27-T14 | Two dependency-resolution styles (Q23) | Refactor | Done | T11 | Env / Recordings / AudioEngine | 2026-11-26 | 2026-11-26 |
 | F27-T15 | Contract tests for stateful fakes (Q24/Q59) | Tests | Backlog | T11 | Env | — | — |
 | F27-T16 | Dead code and docs (Q67, Q53) | Cleanup | Backlog | — | Recordings / docs | — | — |
 | F27-T17 | Close out: feature doc, ADRs, UIKitWay follow-up list | Docs | Backlog | all | docs | — | — |
@@ -412,3 +412,29 @@ Fixes the verdicts of the principal-level architecture review (`ARCHITECTURE_INT
 **Notes:**
 - Codemod over 37 files plus 2 hand fixes in widgets: the per-file check missed a second view struct in `LastNightMediumView.swift`, and `LastNightWidgetView.swift` was moved from a static `Theme.sleepGuard` to the environment.
 - `docs/TECHNICAL_OVERVIEW.md` still mentions `AppTheme`; corrected in the T16 truth pass.
+
+---
+
+### F27-T14 — One dependency-resolution style outside views
+
+| Field | Value |
+|-------|-------|
+| Arch Ref | Interrogation Q23 |
+| Status | Done |
+| Started | 2026-11-26 |
+| Completed | 2026-11-26 |
+
+**Acceptance Criteria:**
+- [x] `SessionDetailModel`: `healthKitSync` is an init parameter defaulting to the container (was resolved in the init body)
+- [x] `SessionManager`: an internal designated `init(recording:detection:)` plus a public convenience `init()` that passes the container's composition
+- [x] `RealtimeDetectionTracker`: `snoreDetector` and `speechDetector` are parameters defaulting to new Env container factories (were `.shared`); the characterization harness now passes its own `SpeechDetector`, so parallel tests don't share classifier state
+- [x] `SpeechDetector.init` internal like `SnoreDetector`'s (it was `private`, against the "inits are never private" rule)
+- [x] Rule in CLAUDE.md / AGENTS.md, with the two honest exceptions
+- [x] Builds with zero errors; Env 66, Recordings 12, AudioEngine 35 pass
+
+**Prompt Used:**
+"continue" (F27 run)
+
+**Notes:**
+- Not changed, by design: `AudioRecorder`'s `SoundAnalysisDetector.shared` default. AudioEngine has no DI, and that default is what Env's `soundAnalysisDetector` factory returns. `StorageLimitEnforcer` resolves preferences at the call because a `Sendable` type can't store the main-actor service; commented in place.
+- `MockDataGenerator` (Debug-only static helper) still reads the container inline; it isn't a type with collaborators.

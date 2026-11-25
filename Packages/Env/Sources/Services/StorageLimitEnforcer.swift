@@ -48,6 +48,8 @@ public final class StorageLimitEnforcer: Sendable, StorageLimitEnforcing {
   @MainActor
   @discardableResult
   public func enforceLimits(modelContext: ModelContext) async -> CleanupReport {
+    // Resolved here, not stored: this type is `Sendable` and can't hold the
+    // main-actor preferences store. Tests use the explicit-limits overload.
     let prefs = Container.shared.userPreferences()
     return await enforceLimits(
       modelContext: modelContext,

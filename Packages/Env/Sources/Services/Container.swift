@@ -38,4 +38,9 @@ extension Container {
   /// cross-wiring (`attach` / weak `recording`) in its init.
   @MainActor var sessionRecordingController: Factory<SessionRecordingController> { self { SessionRecordingController() }.singleton }
   @MainActor var realtimeDetectionTracker: Factory<RealtimeDetectionTracker> { self { RealtimeDetectionTracker() }.singleton }
+
+  /// The live classifiers (AudioEngine has no DI of its own, so they're
+  /// registered here, where the tracker that uses them is composed).
+  @MainActor var snoreDetector: Factory<SnoreDetector> { self { SnoreDetector.shared }.singleton }
+  @MainActor var speechDetector: Factory<SpeechDetector> { self { SpeechDetector.shared }.singleton }
 }
