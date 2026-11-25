@@ -20,34 +20,31 @@ struct SleepGuardApp: App {
     FirebaseApp.configure()
   }
 
-  var sharedModelContainer: ModelContainer = {
-    let modelConfiguration = SleepGuardSchema.configuration(inMemory: false)
-    do {
-      let container = try SleepGuardSchema.container(modelConfiguration)
-      #if DEBUG
-      if ProcessInfo.processInfo.arguments.contains("-generateMockData") {
-        MockDataGenerator.generate(modelContext: container.mainContext)
-      }
-      #endif
-      return container
-    } catch {
-      // If migration fails (e.g. from a dev schema change), delete the store
-      // and recreate rather than crashing. User data loss only in dev builds.
-      Log.app.fault("ModelContainer creation failed: \(String(describing: error), privacy: .public). Deleting store and retrying...")
-      let storeURL = modelConfiguration.url
-      try? FileManager.default.removeItem(at: storeURL)
-      do {
-        return try SleepGuardSchema.container(modelConfiguration)
-      } catch {
-        fatalError("Could not create ModelContainer after store deletion: \(error)")
-      }
+  /// Opened once at launch. A store that fails to open is never deleted in a
+  /// shipped build: the app runs on an in-memory store and shows
+  /// `StoreUnavailableView`, and the file waits for a build that can read it.
+  private let storeOpening: SleepGuardStore.Opening = {
+    let configuration = SleepGuardSchema.configuration(inMemory: false)
+    SleepGuardStore.backUpIfNeeded(storeURL: configuration.url, appVersion: Bundle.main.shortVersionString)
+    #if DEBUG
+    let opening = SleepGuardStore.open(configuration, allowDestructiveReset: true)
+    if opening.failure == nil, ProcessInfo.processInfo.arguments.contains("-generateMockData") {
+      MockDataGenerator.generate(modelContext: opening.container.mainContext)
     }
+    return opening
+    #else
+    return SleepGuardStore.open(configuration, allowDestructiveReset: false)
+    #endif
   }()
+
+  private var sharedModelContainer: ModelContainer { storeOpening.container }
 
   var body: some Scene {
     WindowGroup {
       Group {
-        if userPreferences.hasCompletedOnboarding {
+        if storeOpening.failure != nil {
+          StoreUnavailableView(openAppStore: openAppStore)
+        } else if userPreferences.hasCompletedOnboarding {
           MainTabView()
         } else {
           OnboardingView()
@@ -67,6 +64,9 @@ struct SleepGuardApp: App {
         await notificationPermissionManager.refreshStatus()
       }
       .onAppear {
+        // Nothing reads or writes the in-memory fallback: recovery, cleanup and
+        // re-scoring wait for a launch that opens the real store.
+        guard storeOpening.failure == nil else { return }
         let container = sharedModelContainer
 
         // Recover a session left behind by a crash / OOM / background kill:
@@ -106,7 +106,7 @@ struct SleepGuardApp: App {
         WidgetSnapshotWriter.update(modelContext: container.mainContext)
       }
       .onOpenURL { url in
-        guard userPreferences.hasCompletedOnboarding, let link = WidgetDeepLink(url: url) else { return }
+        guard storeOpening.failure == nil, userPreferences.hasCompletedOnboarding, let link = WidgetDeepLink(url: url) else { return }
         TabCoordinator.shared.open(link)
       }
       .onChange(of: sessionManager.isRecording) { _, isRecording in
@@ -119,7 +119,7 @@ struct SleepGuardApp: App {
         if newPhase == .active {
           Task { await RemoteConfigLoader.shared.refresh() }
         }
-        if newPhase == .background {
+        if newPhase == .background, storeOpening.failure == nil {
           WidgetSnapshotWriter.update(modelContext: sharedModelContainer.mainContext)
         }
       }

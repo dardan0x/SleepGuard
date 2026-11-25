@@ -132,8 +132,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/dardan0x/SleepGuardShared.git",
       "state" : {
-        "revision" : "6c616da893093a3aeaaaea0fb4b47dc35456a674",
-        "version" : "0.27.0"
+        "revision" : "48d481d94ab87df1114e4d15f42d6ca38e4b74d4",
+        "version" : "0.29.1"
       }
     }
   ],
