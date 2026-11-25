@@ -33,7 +33,7 @@ Fixes the verdicts of the principal-level architecture review (`ARCHITECTURE_INT
 | F27-T2 | Root owns the night flow and presentation (Q22, Q27, Q28, Q26) | Refactor / Bug | Done | — | Routing / Env / App | 2026-11-25 | 2026-11-25 |
 | F27-T3 | Flags frozen per recording (Q50) | Bug | Done | — | Env | 2026-11-25 | 2026-11-25 |
 | F27-T4 | Detail and lists tell the truth: CQS load, delete order + alert, no dead `.error` (Q34, Q56, Q20) | Bug / Refactor | Done | Shared 0.29.1 | Recordings / Statistics / Env / Models | 2026-11-25 | 2026-11-25 |
-| F27-T5 | Launch work off main; owned tasks (Q9, Q54) | Perf | Backlog | T2 | Models / App | — | — |
+| F27-T5 | Launch work off main; owned tasks (Q9, Q54) | Perf | Done | T2 | Models / Statistics / App | 2026-11-25 | 2026-11-25 |
 | F27-T6 | Checkpoint writes off the detection path (Q13/Q39) | Perf | Backlog | — | Env | — | — |
 | F27-T7 | Shared 0.30.0: decimator, interruption gaps, SaveRules, stored-type fixtures, score golden, CI (Q14, Q17, Q3, Q11, Q9, Q6, Q2) | Shared | Backlog | — | SleepGuardShared | — | — |
 | F27-T8 | Bump to 0.30.0 and adopt: decimator driver, interruption gaps, FFT gate, thermal log, SaveRules | Detection | Backlog | T7 | Env / AudioEngine | — | — |
@@ -167,3 +167,32 @@ Fixes the verdicts of the principal-level architecture review (`ARCHITECTURE_INT
 - **User decision:** keep `StatisticsErrorView.swift` and `RecordingsErrorView.swift`, now unused. Listed for T16.
 - Not forced: a failing save (an in-memory SwiftData store can't be made to fail), so the alert path is checked by build and reading only.
 - Simulator (Debug): detail of 11 Nov loads through the read-only path; trash deletes it, the screen dismisses, the list updates. The simulator store was restored from the T1 backup afterwards.
+
+---
+
+### F27-T5 — Launch work off the first frames; owned tasks
+
+| Field | Value |
+|-------|-------|
+| Arch Ref | Interrogation Q9 (follow-up), Q54, Q20 |
+| Status | Done |
+| Started | 2026-11-25 |
+| Completed | 2026-11-25 |
+
+**Acceptance Criteria:**
+- [x] The stale-score refresh no longer runs synchronously before first render: batches of 50, a save and `Task.yield()` after each
+- [x] Launch housekeeping runs from the root's `.task`, in order: storage limits, re-score, widget snapshot (the pointless `Task.detached` is gone)
+- [x] Screens update when nights are re-scored in place (dashboard change detection on cached score + version)
+- [x] Concurrency rule in CLAUDE.md / AGENTS.md
+- [x] Builds with zero errors; all package tests pass
+
+**Prompt Used:**
+"continue"
+
+**Notes:**
+- **Deviation from the plan, on evidence:** the plan said "background `ModelContext`". Built that way (`@ModelActor`), the simulator showed the dashboard keeping the old scores until the next launch: saves from another context don't refresh objects the main context already holds. Switched to batched main-context passes that yield. The first frames still render first, and screens update as batches land.
+- **The principal's Q20 subtlety, confirmed live:** `.onChange(of: sessions)` compares identities, so a night re-scored in place never redrew the dashboard. It now watches `ScoreStamp`s (id, cached score, version), which are cached fields only, so there is no faulting. Before T5 this was hidden because the re-score ran synchronously before the dashboard first computed.
+- Storage limits stay on the main context (the enforcer is `@MainActor`); it only removes files of saved nights over a limit, never "unreferenced" files, so a recovered night's clips are safe.
+- Not done from the plan: storing `SessionCommitter.commit`'s follow-up `Task` in the callers. The follow-up must outlive the summary sheet that starts it, so a view-held handle adds nothing. The rule now names the service as its owner; tests already await the returned task.
+- Simulator (Debug): a debug score-config override re-scored 31 nights at launch (log); the dashboard showed the stricter scores (a red W bar). Removing the override re-scored 31 back, and the dashboard returned to the real colours **in the same launch**.
+- Tests: `stalePassWorksThroughLongHistoriesInBatches` (120 nights, batch 50); the existing refresh tests now `await`. Models 89.

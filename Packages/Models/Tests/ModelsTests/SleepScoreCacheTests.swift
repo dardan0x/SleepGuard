@@ -1,6 +1,7 @@
 import Foundation
 import ModelsTestSupport
 import SleepCore
+import SwiftData
 import Testing
 @testable import Models
 
@@ -60,7 +61,7 @@ struct SleepScoreCacheTests {
 
   // MARK: - Launch pass
 
-  @Test func stalePassRecomputesOnlyStaleFinishedSessions() throws {
+  @Test func stalePassRecomputesOnlyStaleFinishedSessions() async throws {
     let current = try night(day: 0)
     let stale = try night(day: 1)
     let uncached = try night(day: 2)
@@ -69,7 +70,7 @@ struct SleepScoreCacheTests {
     cache(stale, score: 42, version: "0-old")
     try store.context.save()
 
-    let refreshed = try SleepSession.refreshStaleCachedScores(in: store.context, config: .default)
+    let refreshed = try await SleepSession.refreshStaleCachedScores(in: store.context, config: .default)
 
     #expect(refreshed == 2)
     #expect(current.cachedSleepScore == 42)
@@ -78,20 +79,30 @@ struct SleepScoreCacheTests {
     #expect(!unfinished.hasCachedScore)
   }
 
-  @Test func stalePassIsANoOpOnceCurrent() throws {
+  @Test func stalePassIsANoOpOnceCurrent() async throws {
     _ = try night()
-    try SleepSession.refreshStaleCachedScores(in: store.context, config: .default)
+    try await SleepSession.refreshStaleCachedScores(in: store.context, config: .default)
 
-    #expect(try SleepSession.refreshStaleCachedScores(in: store.context, config: .default) == 0)
+    #expect(try await SleepSession.refreshStaleCachedScores(in: store.context, config: .default) == 0)
   }
 
-  @Test func configChangeMakesEverySessionStale() throws {
+  @Test func configChangeMakesEverySessionStale() async throws {
     let session = try night()
-    try SleepSession.refreshStaleCachedScores(in: store.context, config: .default)
+    try await SleepSession.refreshStaleCachedScores(in: store.context, config: .default)
 
     let stricter = SleepScoreConfig(lightIntensityMultiplier: 20)
-    #expect(try SleepSession.refreshStaleCachedScores(in: store.context, config: stricter) == 1)
+    #expect(try await SleepSession.refreshStaleCachedScores(in: store.context, config: stricter) == 1)
     // 10% × 0.85 = 8; light 1 × 20 = 20 → 72
     #expect(session.cachedSleepScore == 72)
+  }
+
+  @Test func stalePassWorksThroughLongHistoriesInBatches() async throws {
+    for day in 0..<120 {
+      try cache(night(day: day), score: 42, version: "0-old")
+    }
+    try store.context.save()
+
+    #expect(try await SleepSession.refreshStaleCachedScores(in: store.context, config: .default, batchSize: 50) == 120)
+    #expect(try await SleepSession.refreshStaleCachedScores(in: store.context, config: .default) == 0)
   }
 }

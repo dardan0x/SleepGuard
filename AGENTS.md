@@ -200,6 +200,7 @@ These are non-negotiable. They come from production patterns in apps like IceCub
 - `.task { }` for data loading. `.task(id:)` when load depends on a changing value.
 - `Task { }` only in event handlers (`onChange`, button actions).
 - Always check `Task.isCancelled` before setting error state.
+- Launch work runs from the app root's `.task`, in order (`SleepGuardApp.runLaunchMaintenance`). Long SwiftData passes run on the main context in batches that save and `await Task.yield()` (`refreshStaleCachedScores`): saves from a background context don't refresh objects `@Query` screens already hold. Never `Task.detached` around a `ModelContext`. A task that must outlive its caller (`SessionCommitter.commit`'s follow-up) is owned by the service that starts it and returned so tests can await it.
 - **Swift 6 everywhere**: language mode v6 + strict concurrency complete. Sendable/isolation violations are compile errors — fix them properly (value types, `let`, `nonisolated`), never `@unchecked Sendable`.
 - **Isolation split**: explicit `@MainActor` on all `@Observable` classes in Models/Env/AudioEngine (load-bearing — no package default isolation); the 8 UI packages declare `.defaultIsolation(MainActor.self)` and the app target sets `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`.
 - Value types are `Sendable` with immutable `let` properties. SwiftData `@Model` classes are never Sendable — destructure their Sendable fields (`id`, `Date`, bursts) before crossing into `@Sendable`/detached closures.

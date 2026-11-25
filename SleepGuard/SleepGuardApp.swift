@@ -67,13 +67,6 @@ struct SleepGuardApp: App {
         // Nothing reads or writes the in-memory fallback: recovery, cleanup and
         // re-scoring wait for a launch that opens the real store.
         guard storeOpening.failure == nil else { return }
-        let container = sharedModelContainer
-
-        Task.detached {
-          let context = ModelContext(container)
-          await StorageLimitEnforcer.shared.enforceLimits(modelContext: context)
-        }
-
         HealthKitSync.shared.checkAuthorizationStatus()
         if !userPreferences.hasExplicitlySetSyncToHealthKit {
           userPreferences.syncToHealthKit = HealthKitSync.shared.isAuthorized
@@ -81,16 +74,10 @@ struct SleepGuardApp: App {
         if !userPreferences.hasExplicitlySetEnhancedSleepTracking {
           userPreferences.enhancedSleepTracking = HealthKitSync.shared.isAuthorized
         }
-
-        // Before anything reads cached scores: recompute sessions scored by an
-        // older formula/config, so lists and trends never mix two formulas.
-        do {
-          try SleepSession.refreshStaleCachedScores(in: container.mainContext, config: appConfig.sleepScoreConfig)
-        } catch {
-          Log.app.error("Stale score refresh failed: \(String(describing: error), privacy: .public)")
-        }
-
-        WidgetSnapshotWriter.update(modelContext: container.mainContext)
+      }
+      .task {
+        guard storeOpening.failure == nil else { return }
+        await runLaunchMaintenance()
       }
       .onOpenURL { url in
         guard storeOpening.failure == nil, userPreferences.hasCompletedOnboarding, let link = WidgetDeepLink(url: url) else { return }
@@ -112,6 +99,26 @@ struct SleepGuardApp: App {
       }
     }
     .modelContainer(sharedModelContainer)
+  }
+
+  /// Launch housekeeping, in order: storage limits (fewer nights to re-score),
+  /// then re-scoring nights cached by an older formula or config in batches
+  /// that yield the main actor (a long history must not stall the first
+  /// frames; screens update as batches land), then the widget snapshot from
+  /// the fresh scores.
+  private func runLaunchMaintenance() async {
+    let container = sharedModelContainer
+    await StorageLimitEnforcer.shared.enforceLimits(modelContext: container.mainContext)
+    do {
+      let refreshed = try await SleepSession.refreshStaleCachedScores(
+        in: container.mainContext, config: appConfig.sleepScoreConfig)
+      if refreshed > 0 {
+        Log.app.info("Re-scored \(refreshed) night(s) cached by an older formula")
+      }
+    } catch {
+      Log.app.error("Stale score refresh failed: \(String(describing: error), privacy: .public)")
+    }
+    WidgetSnapshotWriter.update(modelContext: container.mainContext)
   }
 
   /// Opens the App Store listing for updates. Replace the ID once the app ships.

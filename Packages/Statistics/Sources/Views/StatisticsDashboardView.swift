@@ -49,9 +49,17 @@ public struct StatisticsDashboardView: View {
       }
     }
     .background(theme.bgPrimary.ignoresSafeArea())
-    .onChange(of: sessions) { _, _ in
+    // Not `sessions`: that compares identities, so a night re-scored in
+    // place (a formula change at launch, late HealthKit stages) wouldn't
+    // redraw. The stamps change whenever a night or its cached score does.
+    .onChange(of: scoreStamps) { _, _ in
       loadState()
     }
+  }
+
+  /// Cached fields only: reading them doesn't fault events.
+  private var scoreStamps: [ScoreStamp] {
+    sessions.map { ScoreStamp(id: $0.id, score: $0.cachedSleepScore, version: $0.cachedScoreVersion) }
   }
 
   private func loadState() {
@@ -65,4 +73,11 @@ public struct StatisticsDashboardView: View {
     case empty
     case loaded(DashboardState)
   }
+}
+
+/// What the dashboard depends on per night, for change detection.
+private struct ScoreStamp: Hashable {
+  let id: UUID
+  let score: Int
+  let version: String
 }
