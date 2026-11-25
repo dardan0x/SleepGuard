@@ -2,12 +2,10 @@ import DesignSystem
 import Env
 import Learn
 import Models
-import Personalization
 import Recordings
 import Settings
 import SleepSession
 import Statistics
-import SwiftData
 import SwiftUI
 
 struct MainTabView: View {
@@ -17,10 +15,7 @@ struct MainTabView: View {
   @State private var sessionManager = SessionManager.shared
   @State private var appConfig = AppConfig.shared
 
-  @Environment(\.modelContext) private var modelContext
   @State private var tabCoordinator = TabCoordinator.shared
-  /// The morning briefing: shown once per new night, over the tabs.
-  @State private var briefingController = BriefingController()
 
   var body: some View {
     Group {
@@ -33,12 +28,8 @@ struct MainTabView: View {
     .onChange(of: appConfig.visibleTabsInOrder) { _, tabs in
       ensureValidSelection(among: tabs)
     }
-    .task {
-      briefingController.prepareIfDue(modelContext: modelContext)
-    }
-    .sheet(item: $briefingController.current, onDismiss: { briefingController.markShown() }) { presented in
-      BriefingSheet(presented: presented, controller: briefingController)
-    }
+    // The end of a night and the app-level prompts, whichever tabs are visible.
+    .modifier(SessionFlowHost())
     .overlay {
       SessionProcessingOverlay(isVisible: sessionManager.isProcessingSession)
     }

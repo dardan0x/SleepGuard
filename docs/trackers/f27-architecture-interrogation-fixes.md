@@ -30,7 +30,7 @@ Fixes the verdicts of the principal-level architecture review (`ARCHITECTURE_INT
 | ID | Task | Type | Status | Depends On | Package | Started | Completed |
 |----|------|------|--------|------------|---------|---------|-----------|
 | F27-T1 | Never delete the user's store (Q55) | Bug / Data safety | Done | Shared 0.29.1 (strings) | Models / App | 2026-11-25 | 2026-11-25 |
-| F27-T2 | Root owns the night flow and presentation (Q22, Q27, Q28, Q26) | Refactor / Bug | Backlog | — | Routing / App | — | — |
+| F27-T2 | Root owns the night flow and presentation (Q22, Q27, Q28, Q26) | Refactor / Bug | Done | — | Routing / Env / App | 2026-11-25 | 2026-11-25 |
 | F27-T3 | Flags frozen per recording (Q50) | Bug | Backlog | — | Env / App | — | — |
 | F27-T4 | Detail and lists tell the truth: CQS load, delete order + alert, no dead `.error` (Q34, Q56, Q20) | Bug / Refactor | Backlog | Shared 0.29.1 | Recordings / Statistics | — | — |
 | F27-T5 | Launch work off main; owned tasks (Q9, Q54) | Perf | Backlog | T2 | Models / App | — | — |
@@ -78,3 +78,35 @@ Fixes the verdicts of the principal-level architecture review (`ARCHITECTURE_INT
 - Simulator (Release build, workspace): normal launch wrote `.bak` files plus marker 1.0.0. A corrupt `default.store` showed the blocking screen, and the file's md5 was unchanged after launch. The real store was restored afterwards and the app opened with its data.
 - Found: `check-layering.py` scans ignored `.build/index-build` checkouts → false violations locally (fix in T9).
 - Tests: `SleepGuardStoreTests` (5). Models: 88 tests pass.
+
+---
+
+### F27-T2 — Root owns the night flow and presentation
+
+| Field | Value |
+|-------|-------|
+| Arch Ref | Interrogation Q22, Q26, Q27, Q28; ADR 0001; new ADR 0007 |
+| Status | Done |
+| Started | 2026-11-25 |
+| Completed | 2026-11-25 |
+
+**Acceptance Criteria:**
+- [x] Recovery, the summary and the low-battery auto-save work with the Statistics tab hidden (`SessionFlowHost` at the root)
+- [x] One root presentation slot: summary > soft-ask > briefing, never over a sheet that is up or closing, never while recording (`RootPresentationPolicy`, 7 tests)
+- [x] The summary is presented by night ID; `SheetDestination.sessionSummary` removed
+- [x] A deep link that arrives while recording or while a night waits to be saved is routed afterwards, not dropped (`takePendingDeepLink(blocked:)`, tested)
+- [x] `StatisticsTab` is the dashboard only
+- [x] ADR 0007; navigation rule updated in CLAUDE.md and AGENTS.md
+- [x] Builds with zero errors; Routing (9) and Env (64) tests pass
+
+**Prompt Used:**
+"continue"
+
+**Notes:**
+- Recovery moved from `SleepGuardApp.onAppear` into the host's `.task`, ahead of the briefing, so a recovered night outranks the prompts. The host only exists after onboarding and when the store opened (T1).
+- **Bug found on the simulator and fixed:** Discard clears `completedSession` before the summary calls `dismiss()`. That empties the sheet's content, so the dismiss reaches nothing and an empty sheet stays up. The host now closes the summary as soon as its night is resolved.
+- **Second bug, found by reading the code and fixed:** `presentNext()` ran while the summary was still closing and presented the briefing into the closing sheet. The briefing was then marked shown without being seen. The policy now treats the sheet that is still closing (`shown`) as current.
+- "Start tracking" from the widget while already recording is dropped (nothing to start). Every other link waits.
+- Removed `RouterPathTests.sheetIDsAreUnique`: `SheetDestination` has one case now; ID uniqueness is covered for `RootPresentation`.
+- Simulator (Debug, workspace), with Statistics hidden through the debug tab override and a planted checkpoint: the summary is offered at launch, and Discard returns to Sessions/Settings/Learn. Statistics visible: summary, then Discard, then the briefing, then Close, then the dashboard (briefing marked shown, checkpoint cleared). `sleepguard://last7nights` opened while the summary was up was routed to Last 7 Nights after Discard.
+- Not verified on the simulator: the low-battery auto-save (the simulator reports battery -1); it uses the same `SessionCommitter` path as before.

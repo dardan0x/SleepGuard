@@ -191,7 +191,7 @@ These are non-negotiable. They come from production patterns in apps like IceCub
 ### Navigation
 
 - All navigation goes through `RouterPath`. No manual `NavigationLink(destination:)`.
-- Every screen is a case in `RouterDestination` (push) or `SheetDestination` (modal).
+- Every screen is a case in `RouterDestination` (push) or `SheetDestination` (a tab's modal). App-level modals (end-of-night summary, soft-ask, briefing) are `RootPresentation`s, owned by `SessionFlowHost` at the root and ordered by `RootPresentationPolicy` (ADR 0007).
 - Each tab owns its own `RouterPath`. Navigation never leaks across tabs.
 
 ### Concurrency

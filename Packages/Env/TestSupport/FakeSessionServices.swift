@@ -123,6 +123,12 @@ public final class FakeTabCoordinator: TabCoordinating {
     selectedTab = .statistics
     pendingDeepLink = link
   }
+
+  public func takePendingDeepLink(blocked: Bool) -> WidgetDeepLink? {
+    guard !blocked, let link = pendingDeepLink else { return nil }
+    pendingDeepLink = nil
+    return link
+  }
 }
 
 /// Records committed sessions without touching SwiftData. Set `error` to make

@@ -36,6 +36,14 @@ public final class TabCoordinator: TabCoordinating {
     selectedTab = .statistics
     pendingDeepLink = link
   }
+
+  /// Hands over the pending link once nothing blocks it. A blocked link stays
+  /// pending (it isn't dropped) and is handed over when the caller asks again.
+  public func takePendingDeepLink(blocked: Bool) -> WidgetDeepLink? {
+    guard !blocked, let link = pendingDeepLink else { return nil }
+    pendingDeepLink = nil
+    return link
+  }
 }
 
 /// A unique signal indicating that a specific tab should pop to root.

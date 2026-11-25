@@ -40,6 +40,18 @@ struct ConstructorInjectionTests {
     #expect(coordinator.pendingDeepLink == .last7Nights)
   }
 
+  @Test func aBlockedDeepLinkWaitsInsteadOfBeingDropped() {
+    let coordinator = TabCoordinator(appConfig: AppConfig.isolated())
+    coordinator.open(.last7Nights)
+
+    #expect(coordinator.takePendingDeepLink(blocked: true) == nil)
+    #expect(coordinator.pendingDeepLink == .last7Nights)
+
+    #expect(coordinator.takePendingDeepLink(blocked: false) == .last7Nights)
+    #expect(coordinator.pendingDeepLink == nil)
+    #expect(coordinator.takePendingDeepLink(blocked: false) == nil)
+  }
+
   // MARK: - SnoreInterrupterPlayer ← UserPreferences, haptics
 
   @Test func interrupterSetToNeverNeitherPlaysNorBuzzes() {

@@ -11,4 +11,5 @@ public protocol TabCoordinating: AnyObject, Observable {
   var pendingDeepLink: WidgetDeepLink? { get set }
   func selectTab(_ tab: AppTab)
   func open(_ link: WidgetDeepLink)
+  func takePendingDeepLink(blocked: Bool) -> WidgetDeepLink?
 }

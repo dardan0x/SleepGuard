@@ -26,8 +26,6 @@ struct SettingsTab: View {
         set: { routerPath.presentedSheet = $0 })
     ) { destination in
       switch destination {
-      case .sessionSummary:
-        EmptyView()
       case .profileEditor:
         if let profile = fetchOrCreateProfile() {
           ProfileEditorView(
