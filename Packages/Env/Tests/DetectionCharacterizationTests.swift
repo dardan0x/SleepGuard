@@ -17,6 +17,37 @@ import Testing
 /// controller's own 50 ms loop is off, so only scripted samples arrive.
 @MainActor
 struct DetectionCharacterizationTests {
+  // MARK: - Sampling and interruptions (F27-T8)
+
+  /// The tap delivers ~43–47 buffers a second depending on the route; the
+  /// decimator turns either into the same 20 Hz samples.
+  @Test func snoringThroughTheTapGivesTheSameNightAtEitherBufferRate() async throws {
+    var summaries: [[String]] = []
+    for hz in [43.0, 47.0] {
+      let harness = try DetectionHarness()
+      await harness.snoreThroughTap(1, hz: hz, db: -60, confidence: 0)
+      await harness.snoreThroughTap(3, hz: hz, db: -35, confidence: 0.6)
+      await harness.snoreThroughTap(11, hz: hz, db: -60, confidence: 0)
+      summaries.append(harness.summary())
+    }
+    #expect(summaries[0].count == 2) // one event + the melody line
+    #expect(summaries[0] == summaries[1])
+  }
+
+  @Test func aCallEndsTheOpenEventAndBecomesAnInterruptionGap() async throws {
+    let harness = try DetectionHarness()
+    await harness.silence(1)
+    await harness.snore(3, db: -35, confidence: 0.6)
+    await harness.interruptCapture(for: 30)
+    await harness.silence(1)
+
+    #expect(harness.events.count == 1)
+    let gap = try #require(harness.gaps.last)
+    #expect(gap.kind == .interruption)
+    #expect(abs(gap.duration - 30) < 0.001)
+    #expect(!gap.snoringResumed)
+  }
+
   // MARK: - Snore events
 
   @Test func sustainedSnoringBecomesOneEvent() async throws {
@@ -229,12 +260,14 @@ final class ScriptedInterrupter: SnoreInterrupterPlaying {
 @MainActor
 final class DetectionHarness {
   let recorder = FakeAudioRecorder()
+  let soundAnalysis = FakeSoundAnalysisDetector()
   let interrupter: ScriptedInterrupter
   let tracker: RealtimeDetectionTracker
   private let controller: SessionRecordingController
   private let clock: ScriptedClock
   private let start: Date
   private var tick = 0
+  private lazy var tapStart = start
 
   init(
     sensitivity: UserPreferences.DetectionSensitivity = .medium,
@@ -252,7 +285,7 @@ final class DetectionHarness {
     controller = SessionRecordingController(
       audioRecorder: recorder,
       snoreInterrupterPlayer: interrupter,
-      soundAnalysis: FakeSoundAnalysisDetector(),
+      soundAnalysis: soundAnalysis,
       preferences: preferences,
       pendingSessionStore: pending,
       checkpointStore: checkpoints,
@@ -306,6 +339,34 @@ final class DetectionHarness {
         db: db, peakDB: nil, spectralScore: 0, snoreConfidence: snoreConfidence, speechConfidence: speechConfidence)
       await tracker.waitUntilProcessed()
     }
+  }
+
+  var gaps: [RecordingGap] {
+    controller.currentSession?.recordingGaps ?? []
+  }
+
+  /// Readings the way the app delivers them: one per tapped buffer at `hz`,
+  /// through the recorder's callback, decimated by the controller to 20 Hz.
+  func snoreThroughTap(_ seconds: Double, hz: Double, db: Float, confidence: Float) async {
+    recorder.currentDB = db
+    recorder.currentPeakDB = db
+    soundAnalysis.snoreConfidence = confidence
+    for index in 1...Int((seconds * hz).rounded()) {
+      clock.now = tapStart.addingTimeInterval(Double(index) / hz)
+      recorder.onLevels?(clock.now)
+      await tracker.waitUntilProcessed()
+    }
+    tapStart = clock.now
+  }
+
+  /// A call takes the microphone for `seconds`.
+  func interruptCapture(for seconds: Double) async {
+    recorder.onCaptureInterruption?(true, clock.now)
+    tick += Int((seconds / 0.05).rounded())
+    clock.now = start.addingTimeInterval(Double(tick) * 0.05)
+    tapStart = clock.now
+    recorder.onCaptureInterruption?(false, clock.now)
+    await tracker.waitUntilProcessed()
   }
 
   func summary() -> [String] {

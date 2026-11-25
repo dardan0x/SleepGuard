@@ -10,7 +10,7 @@ let package = Package(
     .library(name: "ModelsTestSupport", targets: ["ModelsTestSupport"]),
   ],
   dependencies: [
-    .package(url: "https://github.com/dardan0x/SleepGuardShared.git", exact: "0.29.1"),
+    .package(url: "https://github.com/dardan0x/SleepGuardShared.git", exact: "0.30.0"),
   ],
   targets: [
     .target(

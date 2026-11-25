@@ -82,7 +82,7 @@ Last updated: 2026-11-25
 | F24 | Shared Design Kit Adoption | P2 | Done (bg-card open) | 4/4 | ██████████ 100% | [tracker](trackers/f24-shared-design-kit-adoption.md) |
 | F25 | Shared Screen Content | P2 | Done | 7/7 | ██████████ 100% | [tracker](trackers/f25-shared-screen-content.md) |
 | F26 | Shared Settings Content | P2 | Done | 6/6 | ██████████ 100% | [tracker](trackers/f26-shared-settings-content.md) |
-| F27 | Architecture Interrogation Fixes | P0/P1 | In Progress | 6/17 | ████░░░░░░ 35% | [tracker](trackers/f27-architecture-interrogation-fixes.md) |
+| F27 | Architecture Interrogation Fixes | P0/P1 | In Progress | 8/17 | █████░░░░░ 47% | [tracker](trackers/f27-architecture-interrogation-fixes.md) |
 
 ## Activity Log
 
@@ -90,6 +90,8 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-11-25 | F27-T8 | Completed | Shared 0.30.0 adopted: tap → `SampleDecimator` at exact 20 Hz (verified 400 samples / 19.95 s), interruptions become gaps left out of the score (formula v2), FFT only with the raw log, thermal logging, app-owned `SaveRules` |
+| 2026-11-25 | F27-T7 | Completed | Shared 0.30.0 (user tagged): decimator, interruption gaps + score v2, `SaveRules`, stored-value fixtures, score golden, UIKitWay CI job + skew warning; UIKitWay compatibility patch |
 | 2026-11-25 | F27-T6 | Completed | Checkpoint encoding + I/O moved to a coalescing `CheckpointWriter` actor; `clear()` synchronous with a sequence gate so a cleared night never comes back (mutation-checked) |
 | 2026-11-25 | F27-T5 | Completed | Stale-score refresh in yielding main-context batches after first render (a background context left screens stale; seen on the simulator); ordered launch `.task`; dashboard redraws on in-place re-scores (Q20) |
 | 2026-11-25 | F27-T4 | Completed | Detail load is read-only, enrichment a separate command that saves only on change; deletes remove rows before files and alert on failure; dead `.error` states removed (error views kept, user choice) |
@@ -348,7 +350,7 @@ _Most recent first. The AI appends here after every task._
 
 | Task | Feature | Started | Assignee |
 |------|---------|---------|----------|
-| F27-T7 | F27 | — | Next: Shared 0.30.0 (decimator, interruption gaps, SaveRules, stored-type fixtures, score golden, CI) |
+| F27-T9 | F27 | — | Next: module hygiene and guardrails |
 | F23-T6 | F23 | — | Waiting for labelled real nights (user). Then merge F22 + F23 into `main`. User: real night on device (F22-T10), then merge F22 (and F23 on top) into `main` |
 
 ## Completed (last 10)

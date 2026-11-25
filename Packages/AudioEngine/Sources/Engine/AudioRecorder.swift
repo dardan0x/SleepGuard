@@ -39,6 +39,21 @@ public final class AudioRecorder: AudioRecording {
   /// Whether audio is currently being written to a file. Set to false after repeated write failures.
   public var isWritingToFile = false
   public private(set) var currentEventID: UUID?
+  /// Called on the main actor for every tapped buffer, after the levels above
+  /// update, with the time the buffer arrived. Drives detection's sampling.
+  public var onLevels: (@MainActor (Date) -> Void)?
+  /// Called when the system interrupts capture (`true`, e.g. a call) and when
+  /// capture runs again (`false`), with the time it happened.
+  public var onCaptureInterruption: (@MainActor (_ interrupted: Bool, _ at: Date) -> Void)?
+  /// FFT spectral features per buffer. Off unless the raw-audio debug log
+  /// needs them: live detection doesn't use them.
+  public var computesSpectrum: Bool {
+    get { tap.computesSpectrum }
+    set { tap.computesSpectrum = newValue }
+  }
+
+  /// Capture stopped by a system interruption and not running again yet.
+  private var isCaptureInterrupted = false
 
   private var audioEngine: AVAudioEngine?
   private var warmupEngine: AVAudioEngine?
@@ -108,6 +123,10 @@ public final class AudioRecorder: AudioRecording {
     case .began:
       // Interruption started — stop engine but keep isRecording flag
       audioEngine?.stop()
+      if isRecording, !isCaptureInterrupted {
+        isCaptureInterrupted = true
+        onCaptureInterruption?(true, Date())
+      }
     case .ended:
       guard let optionsValue = userInfo[AVAudioSessionInterruptionOptionKey] as? UInt else { return }
       let options = AVAudioSession.InterruptionOptions(rawValue: optionsValue)
@@ -147,6 +166,10 @@ public final class AudioRecorder: AudioRecording {
     if let engine = audioEngine, engine.isRunning { return }
     do {
       try resumeRecording()
+      if isCaptureInterrupted {
+        isCaptureInterrupted = false
+        onCaptureInterruption?(false, Date())
+      }
     } catch {
       Log.audio.error("Failed to resume recording: \(String(describing: error), privacy: .public)")
     }
@@ -273,6 +296,7 @@ public final class AudioRecorder: AudioRecording {
   }
 
   public func stopRecording() {
+    isCaptureInterrupted = false
     tap.reset()
     soundAnalyzer.stopAnalyzing()
     audioEngine?.stop()
@@ -350,6 +374,7 @@ public final class AudioRecorder: AudioRecording {
     let tap = tap
     let sampleRate = format.sampleRate
     input.installTap(onBus: 0, bufferSize: 1024, format: format) { @Sendable [weak self] buffer, _ in
+      let arrived = Date()
       let levels = tap.process(buffer, sampleRate: sampleRate)
       Task { @MainActor in
         guard let self else { return }
@@ -359,6 +384,7 @@ public final class AudioRecorder: AudioRecording {
         if levels.writesDisabled {
           self.isWritingToFile = false
         }
+        self.onLevels?(arrived)
       }
     }
   }

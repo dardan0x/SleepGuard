@@ -64,15 +64,20 @@ struct SleepGuardSchemaTests {
 
     #expect(session.recordingGaps?.map(\.duration) == [30, 20])
     #expect(session.recordingGaps?.map(\.snoringResumed) == [true, false])
+    // Written before gaps had a kind (shared 0.30.0): they decode as melody gaps.
+    #expect(session.recordingGaps?.map(\.kind) == [.melody, .melody])
     #expect(session.sleepStageSegments?.map(\.stage) == [.deep, .rem, .awake])
     let events = (session.events ?? []).sorted { $0.timestamp < $1.timestamp }
     #expect(events.map(\.category) == [.snoring, .sleepTalking])
     #expect(events.map(\.intensity) == [.loud, .quiet])
     #expect(events.first?.bursts == [SnoreBurst(startOffset: 0, endOffset: 4), SnoreBurst(startOffset: 6, endOffset: 9)])
-    // The cached values written before the move, and the same score recomputed now.
+    // The cached values written before the move. They were stamped by formula
+    // version 1, so the launch pass re-scores them; without interruption gaps
+    // version 2 gives the same score.
     #expect(session.cachedSleepScore == 78)
     #expect(session.cachedSnoringDuration == 39)
-    #expect(session.cachedScoreVersion == SleepScore.cacheVersion(for: .default))
+    #expect(session.cachedScoreVersion.hasPrefix("1-"))
+    #expect(session.hasStaleCachedScore(for: .default))
     #expect(session.sleepScore(using: .default) == 78)
   }
 }

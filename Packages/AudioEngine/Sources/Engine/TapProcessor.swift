@@ -28,6 +28,9 @@ final class TapProcessor: Sendable {
     var audioFile: AVAudioFile?
     var eventFile: AVAudioFile?
     var consecutiveWriteFailures = 0
+    /// The FFT only feeds the raw-audio debug log (live detection passes 0),
+    /// so it runs only when that log is on.
+    var computesSpectrum = false
   }
 
   private let state = OSAllocatedUnfairLock(uncheckedState: State())
@@ -45,6 +48,11 @@ final class TapProcessor: Sendable {
   var streamAnalyzer: SNAudioStreamAnalyzer? {
     get { state.withLockUnchecked { $0.streamAnalyzer } }
     set { state.withLockUnchecked { $0.streamAnalyzer = newValue } }
+  }
+
+  var computesSpectrum: Bool {
+    get { state.withLockUnchecked { $0.computesSpectrum } }
+    set { state.withLockUnchecked { $0.computesSpectrum = newValue } }
   }
 
   var isWritingToFile: Bool {
@@ -67,7 +75,9 @@ final class TapProcessor: Sendable {
     let db = Self.rmsDB(buffer)
     let peakDB = Self.peakDB(buffer)
     return state.withLockUnchecked { s in
-      let features = s.fftAnalyzer.analyze(buffer: buffer, sampleRate: sampleRate)
+      let spectralScore = s.computesSpectrum
+        ? s.fftAnalyzer.analyze(buffer: buffer, sampleRate: sampleRate).spectralScore
+        : 0
       s.streamAnalyzer?.analyze(buffer, atAudioFramePosition: s.framePosition)
       s.framePosition += AVAudioFramePosition(buffer.frameLength)
 
@@ -100,7 +110,7 @@ final class TapProcessor: Sendable {
           writesDisabled = true
         }
       }
-      return Levels(db: db, peakDB: peakDB, spectralScore: features.spectralScore, writesDisabled: writesDisabled)
+      return Levels(db: db, peakDB: peakDB, spectralScore: spectralScore, writesDisabled: writesDisabled)
     }
   }
 

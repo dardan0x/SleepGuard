@@ -35,8 +35,8 @@ Fixes the verdicts of the principal-level architecture review (`ARCHITECTURE_INT
 | F27-T4 | Detail and lists tell the truth: CQS load, delete order + alert, no dead `.error` (Q34, Q56, Q20) | Bug / Refactor | Done | Shared 0.29.1 | Recordings / Statistics / Env / Models | 2026-11-25 | 2026-11-25 |
 | F27-T5 | Launch work off main; owned tasks (Q9, Q54) | Perf | Done | T2 | Models / Statistics / App | 2026-11-25 | 2026-11-25 |
 | F27-T6 | Checkpoint writes off the detection path (Q13/Q39) | Perf | Done | — | Env | 2026-11-25 | 2026-11-25 |
-| F27-T7 | Shared 0.30.0: decimator, interruption gaps, SaveRules, stored-type fixtures, score golden, CI (Q14, Q17, Q3, Q11, Q9, Q6, Q2) | Shared | Backlog | — | SleepGuardShared | — | — |
-| F27-T8 | Bump to 0.30.0 and adopt: decimator driver, interruption gaps, FFT gate, thermal log, SaveRules | Detection | Backlog | T7 | Env / AudioEngine | — | — |
+| F27-T7 | Shared 0.30.0: decimator, interruption gaps, SaveRules, stored-type fixtures, score golden, CI (Q14, Q17, Q3, Q11, Q9, Q6, Q2) | Shared | Done (user tags 0.30.0) | — | SleepGuardShared (+ UIKitWay compat patch) | 2026-11-25 | 2026-11-25 |
+| F27-T8 | Bump to 0.30.0 and adopt: decimator driver, interruption gaps, FFT gate, thermal log, SaveRules | Detection | Done | T7 | Env / AudioEngine / Models | 2026-11-25 | 2026-11-25 |
 | F27-T9 | Module hygiene: declared deps, import checker, guardrail fixes (Q30, Q63) | Infra | Backlog | — | all / scripts | — | — |
 | F27-T10 | `Logging` leaf; AudioEngine off Models (Q32) | Refactor | Backlog | T9 | Logging / AudioEngine | — | — |
 | F27-T11 | Split Env by reason to change (Q31) | Refactor | Backlog | T10 | Env → Config / Health / Platform | — | — |
@@ -223,3 +223,60 @@ Fixes the verdicts of the principal-level architecture review (`ARCHITECTURE_INT
 - The snapshot value is still built on the main actor (copying the night's fields and events); only encoding and I/O moved. The protocol is unchanged, so fakes and callers didn't change.
 - Mutation check: with the gate disabled, `aWriteInFlightNeverBringsBackAClearedFile` fails.
 - Not checked on the simulator: a mid-night checkpoint needs a recording with events (or 2 min). Covered by the store tests; the detection characterization tests (fake store) pass unchanged.
+
+---
+
+### F27-T7 — Shared 0.30.0
+
+| Field | Value |
+|-------|-------|
+| Arch Ref | Interrogation Q14, Q17, Q3, Q11, Q9, Q6, Q2, Q36 |
+| Status | Done (written here; committed and tagged by the user) |
+| Started | 2026-11-25 |
+| Completed | 2026-11-25 |
+
+**Acceptance Criteria:**
+- [x] `SampleDecimator`: per-buffer readings → 20 Hz, latest-value, time-anchored (no drift), re-anchors after a pause (4 tests)
+- [x] Interruptions: `RecordingGap.Kind` (melody / interruption; missing or unknown decodes as melody), engine messages `captureDidPause` / `captureDidResume`, output `.interruptionGap`, open events end at their last sample, a night ending mid-call keeps the gap
+- [x] Score formula v2 (**user decision**: record and exclude): snoring and sleep-talking percentages use measured time (`SleepInputs.unmeasuredDuration` = interruption time); melody gaps score exactly as before; `formulaVersion` 2 → every app re-scores once at launch
+- [x] `SaveRules` (`.standard` = 30 min); `Night.minimumSaveDuration` deprecated for one minor (removed in 0.31.0)
+- [x] `StoredValue` marker + `StoredValuesTests` decoding frozen 0.29.0 / 0.30.0 fixtures of every stored type and raw value
+- [x] `ScoreGoldenTests`: a known night's score and the literal `cacheVersion`, so a formula change without a version bump fails
+- [x] Interruption banner (DesignKit) + string; ContentKit shows melody and interruption banners separately
+- [x] CI: `uikitway` job (every brand, Tuist local mode), content kit + melodies tests in `ui`, consumer-skew warning (>2 minors); README release policy
+- [x] SleepCore 229 tests (macOS), strings 2 + melodies 2 + design kit 30 + content kit 12 (simulator)
+
+**Notes:**
+- **UIKitWay compatibility patch** (user decision; uncommitted there, the user merges): handle `.interruptionGap` in `RecordingSession.perform`, show the gap banner for melody gaps only. Built the SleepGuard brand against the candidate in Tuist local mode: succeeded. Its full adoption (decimator, capture messages, `SaveRules`, stored-score refresh) stays on the follow-up list.
+- The replay goldens didn't change: no fixture contains an interruption, and the decimator isn't in the replay path.
+
+---
+
+### F27-T8 — Adopt Shared 0.30.0
+
+| Field | Value |
+|-------|-------|
+| Arch Ref | Interrogation Q14, Q17, Q3; ADR 0003 |
+| Status | Done |
+| Started | 2026-11-25 |
+| Completed | 2026-11-25 |
+
+**Acceptance Criteria:**
+- [x] Shared pinned at 0.30.0 (9 manifests + app lockfile)
+- [x] Detection samples come from the tap through `SampleDecimator` (20 Hz, time-anchored); the old 50 ms sleep loop is now a 1 Hz housekeeping tick (battery every ~30 s, checkpoint every ~2 min), which also runs during interruptions
+- [x] Audio interruptions reach detection through the stream (`captureDidPause` / `captureDidResume`); open events end; the span is stored as an interruption gap
+- [x] FFT runs only with the raw-audio debug log on (`AudioRecording.computesSpectrum`)
+- [x] Thermal state logged at start and on change (`Log.session` + signpost); no behaviour change
+- [x] `SleepSession.saveRules`: Debug 2 min chosen by the app, Release `.standard`
+- [x] Tests: same night at 43 Hz and 47 Hz through the tap; a call ends the event and becomes an interruption gap; the pre-move fixture store's cached score is stale under formula v2 and recomputes to the same 78
+- [x] Builds with zero errors; all package tests pass on the pin
+
+**Prompt Used:**
+"continue" / "done tagging"
+
+**Notes:**
+- Detection output for the same samples is unchanged (characterization tests and shared replay goldens). What changed is *which* samples: no more 4 ms drift per tick, and no stale samples while the mic is interrupted.
+- `averageSpectralScore` becomes 0 with the raw log off. Nothing displays it, and the one rule that reads it (short events with no ML confidence) can't fire live.
+- Simulator (Debug, raw log on): a 20 s recording logged 400 samples over 19.95 s, every interval exactly 50 ms (it was ~54 ms). "Session Too Short" showed the 2-minute Debug rule. Discard removed the raw log and checkpoint. Thermal state `nominal` logged.
+- **History:** the T8 code first landed in `b41f6d1` under the Shared commit message (the Shared commit command also ran in this repo). With the user's OK that tip commit was amended into this task's commit, together with the bump.
+- Not tested on the simulator: a real audio-session interruption (no call on the simulator). Covered by the harness test through the recorder's callback.

@@ -7,9 +7,10 @@ import SleepCore
 import UIKit
 
 /// Recording lifecycle for a sleep session: starts/stops the audio engine,
-/// owns the session object and its persisted files, runs the 50 ms processing
-/// loop that feeds `RealtimeDetectionTracker`, and handles low-battery force
-/// save. Detection state itself lives in the tracker.
+/// owns the session object and its persisted files, turns per-buffer readings
+/// into SleepCore's fixed 20 Hz samples (`SampleDecimator`) for
+/// `RealtimeDetectionTracker`, reports capture interruptions, and handles
+/// low-battery force save. Detection state itself lives in the tracker.
 @MainActor
 @Observable
 final class SessionRecordingController {
@@ -32,9 +33,22 @@ final class SessionRecordingController {
 
   /// Remote flags are frozen from start to stop, so a night runs under one set.
   private let appConfig: any AppConfigProviding
+  /// What detection reads per sample.
+  private struct Reading {
+    let db: Float
+    let peakDB: Float
+    let spectralScore: Float
+    let snoreConfidence: Float
+    let speechConfidence: Float
+  }
+
+  /// Per-buffer readings to 20 Hz samples (the same samples on every app).
+  private var decimator = SampleDecimator<Reading>()
+  /// Housekeeping while recording: battery and the periodic checkpoint.
   private var processingTask: Task<Void, Never>?
   private var batteryCheckCounter = 0
   private var checkpointCounter = 0
+  private var thermalObserver: (any NSObjectProtocol)?
   /// Instruments interval for the running session (Points of Interest).
   private var sessionSignpost: OSSignpostIntervalState?
 
@@ -98,6 +112,7 @@ final class SessionRecordingController {
       audioURL = nil
     }
 
+    audioRecorder.computesSpectrum = preferences.preserveRawAudio
     try audioRecorder.startRecording(audioFileURL: audioURL)
     isRecording = true
     appConfig.holdRemoteUpdates()
@@ -124,20 +139,19 @@ final class SessionRecordingController {
       }
     }
 
-    // Drive processAudioLevel from the recording controller so it survives background.
+    // Detection samples come from the tap, through the decimator; this loop
+    // only does housekeeping, so it also runs while capture is interrupted.
+    decimator.reset()
+    audioRecorder.onLevels = { [weak self] time in self?.didReceiveLevels(at: time) }
+    audioRecorder.onCaptureInterruption = { [weak self] interrupted, time in
+      self?.captureDidChange(interrupted: interrupted, at: time)
+    }
+    startThermalObservation()
     guard runsProcessingLoop else { return }
     processingTask = Task { @MainActor in
       while !Task.isCancelled {
-        let saConf = self.soundAnalysis.snoreConfidence
-        let saSpeechConf = self.soundAnalysis.speechConfidence
-        self.detection?.processAudioLevel(
-          db: self.audioRecorder.currentDB,
-          peakDB: self.audioRecorder.currentPeakDB,
-          spectralScore: self.audioRecorder.spectralScore,
-          snoreConfidence: saConf,
-          speechConfidence: saSpeechConf)
         self.batteryCheckCounter += 1
-        if self.batteryCheckCounter >= 600 {
+        if self.batteryCheckCounter >= 30 {
           self.batteryCheckCounter = 0
           self.checkBatteryLevel()
         }
@@ -145,11 +159,11 @@ final class SessionRecordingController {
         // progress and gaps survive a crash even during long stretches
         // without events. Event-driven checkpoints handle the rest.
         self.checkpointCounter += 1
-        if self.checkpointCounter >= 2400 {
+        if self.checkpointCounter >= 120 {
           self.checkpointCounter = 0
           self.detection?.checkpoint()
         }
-        try? await Task.sleep(for: .milliseconds(50))
+        try? await Task.sleep(for: .seconds(1))
       }
     }
   }
@@ -163,6 +177,60 @@ final class SessionRecordingController {
     Log.session.notice("Battery level at \(Int(level * 100))% — force saving session")
     forceSaveDueToLowBattery()
     #endif
+  }
+
+  /// One tapped buffer's levels, as the recorder just published them, plus
+  /// SoundAnalysis's latest confidences. Feeds every 20 Hz window that ended.
+  private func didReceiveLevels(at time: Date) {
+    let reading = Reading(
+      db: audioRecorder.currentDB,
+      peakDB: audioRecorder.currentPeakDB,
+      spectralScore: audioRecorder.spectralScore,
+      snoreConfidence: soundAnalysis.snoreConfidence,
+      speechConfidence: soundAnalysis.speechConfidence)
+    for sample in decimator.add(reading, at: time) {
+      let r = sample.reading
+      detection?.processAudioLevel(
+        db: r.db, peakDB: r.peakDB, spectralScore: r.spectralScore,
+        snoreConfidence: r.snoreConfidence, speechConfidence: r.speechConfidence, at: sample.time)
+    }
+  }
+
+  /// A call or another app took the microphone, or gave it back. Detection
+  /// records the paused span as an interruption gap; sampling restarts fresh.
+  private func captureDidChange(interrupted: Bool, at time: Date) {
+    Log.session.notice("Capture \(interrupted ? "interrupted" : "resumed", privacy: .public)")
+    decimator.reset()
+    detection?.captureDidChange(interrupted: interrupted, at: time)
+  }
+
+  /// Logs thermal pressure during a night. No response yet (a lower analysis
+  /// rate would change detection); the log is what a device profile reads.
+  private func startThermalObservation() {
+    logThermalState()
+    thermalObserver = NotificationCenter.default.addObserver(
+      forName: ProcessInfo.thermalStateDidChangeNotification, object: nil, queue: .main)
+    { [weak self] _ in
+      MainActor.assumeIsolated { self?.logThermalState() }
+    }
+  }
+
+  private func stopThermalObservation() {
+    thermalObserver.map(NotificationCenter.default.removeObserver)
+    thermalObserver = nil
+  }
+
+  private func logThermalState() {
+    let state = ProcessInfo.processInfo.thermalState
+    let name = switch state {
+    case .nominal: "nominal"
+    case .fair: "fair"
+    case .serious: "serious"
+    case .critical: "critical"
+    @unknown default: "unknown"
+    }
+    Log.session.notice("Thermal state: \(name, privacy: .public)")
+    Log.signposter.emitEvent("Thermal", "\(name, privacy: .public)")
   }
 
   func forceSaveDueToLowBattery() {
@@ -179,6 +247,9 @@ final class SessionRecordingController {
 
     processingTask?.cancel()
     processingTask = nil
+    audioRecorder.onLevels = nil
+    audioRecorder.onCaptureInterruption = nil
+    stopThermalObservation()
 
     snoreInterrupterPlayer.stop()
     isRecording = false
@@ -260,6 +331,9 @@ final class SessionRecordingController {
     Task { @MainActor in
       processingTask?.cancel()
       processingTask = nil
+      audioRecorder.onLevels = nil
+      audioRecorder.onCaptureInterruption = nil
+      stopThermalObservation()
 
       snoreInterrupterPlayer.stop()
       isRecording = false

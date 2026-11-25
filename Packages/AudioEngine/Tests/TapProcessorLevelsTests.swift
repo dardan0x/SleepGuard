@@ -35,8 +35,15 @@ struct TapProcessorLevelsTests {
     #expect(result.peakDB == -200)
   }
 
-  @Test func processReportsTheSpectralScore() {
-    #expect(levels(TestAudio.sine(hz: 215)).spectralScore > 0.9)
+  @Test func processReportsTheSpectralScoreWhenTheSpectrumIsOn() {
+    let processor = TapProcessor()
+    processor.computesSpectrum = true
+    #expect(processor.process(TestAudio.sine(hz: 215), sampleRate: TestAudio.sampleRate).spectralScore > 0.9)
+  }
+
+  /// Live detection doesn't use the FFT; it runs only for the raw-audio log.
+  @Test func theSpectrumIsOffByDefault() {
+    #expect(levels(TestAudio.sine(hz: 215)).spectralScore == 0)
   }
 
   @Test func noFilesAttachedNeverDisablesWrites() {

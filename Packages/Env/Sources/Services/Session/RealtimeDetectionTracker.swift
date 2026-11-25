@@ -188,11 +188,19 @@ final class RealtimeDetectionTracker {
     processAudioLevel(db: db, peakDB: nil, spectralScore: 0, snoreConfidence: 0, speechConfidence: 0)
   }
 
-  /// Call this from the view when audio features are available.
-  func processAudioLevel(db: Float, peakDB: Float? = nil, spectralScore: Float = 0, snoreConfidence: Float = 0, speechConfidence: Float = 0) {
+  /// Call this from the view when audio features are available. `time` is the
+  /// sample's time (the decimator's window end); `nil` reads the clock.
+  func processAudioLevel(
+    db: Float,
+    peakDB: Float? = nil,
+    spectralScore: Float = 0,
+    snoreConfidence: Float = 0,
+    speechConfidence: Float = 0,
+    at time: Date? = nil)
+  {
     guard isActive, let session = recording?.currentSession else { return }
 
-    let now = clock()
+    let now = time ?? clock()
     let rawDelta = lastUpdateTime.map { now.timeIntervalSince($0) } ?? 0
     let timeDelta = min(rawDelta, 0.5) // Cap to avoid spikes after background/resume
     lastUpdateTime = now
@@ -290,16 +298,29 @@ final class RealtimeDetectionTracker {
     continuation?.yield(.melodyDidStop(at: clock()))
   }
 
+  /// Capture was interrupted (a call, another app) or runs again. Goes through
+  /// the stream like every other detection input (ADR 0003): the engine ends
+  /// open events and turns the paused span into an interruption gap.
+  func captureDidChange(interrupted: Bool, at time: Date) {
+    continuation?.yield(interrupted ? .captureDidPause(at: time) : .captureDidResume(at: time))
+  }
+
   /// Logs a recording gap directly on the session. Called whenever the Snore Interrupter
   /// stops (mic resumes), ensuring gaps are counted even if notification delivery fails.
-  private func logRecordingGap(start: Date, duration: TimeInterval, snoringResumed: Bool = true) {
+  private func logRecordingGap(
+    start: Date,
+    duration: TimeInterval,
+    snoringResumed: Bool = true,
+    kind: RecordingGap.Kind = .melody)
+  {
     guard let session = recording?.currentSession else { return }
     let gaps = session.recordingGaps ?? []
-    let updated = gaps.adding(start: start, duration: duration, nightStart: session.startDate, snoringResumed: snoringResumed)
+    let updated = gaps.adding(
+      start: start, duration: duration, nightStart: session.startDate, snoringResumed: snoringResumed, kind: kind)
     guard updated.count > gaps.count else { return }
     session.recordingGaps = updated
     let startOffset = start.timeIntervalSince(session.startDate)
-    Log.detection.info("Logged gap: startOffset=\(startOffset, format: .fixed(precision: 1))s duration=\(duration, format: .fixed(precision: 1))s snoringResumed=\(snoringResumed)")
+    Log.detection.info("Logged gap: startOffset=\(startOffset, format: .fixed(precision: 1))s duration=\(duration, format: .fixed(precision: 1))s snoringResumed=\(snoringResumed) kind=\(kind.rawValue, privacy: .public)")
   }
 
   /// Marks the most recent recording gap as having confirmed snoring resumption.
@@ -358,6 +379,8 @@ final class RealtimeDetectionTracker {
         markLastGapSnoringResumed()
       case let .recordingGap(start, duration):
         logRecordingGap(start: start, duration: duration, snoringResumed: false)
+      case let .interruptionGap(start, duration):
+        logRecordingGap(start: start, duration: duration, snoringResumed: false, kind: .interruption)
       case let .snoreEventFinalized(event):
         endEventSignpost(id: event.id, outcome: "saved")
         save(event)

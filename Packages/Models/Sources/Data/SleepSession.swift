@@ -50,9 +50,19 @@ public final class SleepSession {
   /// values. Empty for sessions cached before F22-T3, so they count as stale.
   public var cachedScoreVersion = ""
 
-  /// SleepCore's rule (`Night.minimumSaveDuration`).
+  /// When a stopped night is worth saving (SleepCore's `SaveRules`). Debug
+  /// builds take 2 minutes so a night can be tried at a desk; the choice is
+  /// this app's, not the shared package's build configuration.
+  public static var saveRules: SaveRules {
+    #if DEBUG
+    SaveRules(minimumDuration: 120)
+    #else
+    .standard
+    #endif
+  }
+
   public static var minimumSaveDuration: TimeInterval {
-    Night.minimumSaveDuration
+    saveRules.minimumDuration
   }
 
   public init(

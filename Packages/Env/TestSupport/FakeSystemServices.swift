@@ -19,6 +19,9 @@ public final class FakeAudioRecorder: AudioRecording {
   public var hasPermission: Bool
   public var isWritingToFile = false
   public private(set) var currentEventID: UUID?
+  public var onLevels: (@MainActor (Date) -> Void)?
+  public var onCaptureInterruption: (@MainActor (_ interrupted: Bool, _ at: Date) -> Void)?
+  public var computesSpectrum = false
 
   public init(hasPermission: Bool = true) {
     self.hasPermission = hasPermission

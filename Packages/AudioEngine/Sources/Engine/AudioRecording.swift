@@ -15,6 +15,9 @@ public protocol AudioRecording: AnyObject, Observable {
   var hasPermission: Bool { get }
   var isWritingToFile: Bool { get }
   var currentEventID: UUID? { get }
+  var onLevels: (@MainActor (Date) -> Void)? { get set }
+  var onCaptureInterruption: (@MainActor (_ interrupted: Bool, _ at: Date) -> Void)? { get set }
+  var computesSpectrum: Bool { get set }
   func checkPermission()
   func requestPermission() async -> Bool
   func startRecording(audioFileURL: URL?) throws
