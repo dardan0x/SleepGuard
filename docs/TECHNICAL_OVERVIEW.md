@@ -607,7 +607,7 @@ Learn, Onboarding, Personalization, Settings and SleepSession have no test targe
 
 ### 10.3 Logging
 
-- **`os.Logger`, never `print`.** `Log.<category>` in `Models/Sources/Helpers/Log.swift`, subsystem `com.dardan.SleepGuard`, categories `audio`, `detection`, `session`, `interrupter`, `storage`, `playback`, `app`.
+- **`os.Logger`, never `print`.** `Log.<category>` in the `Logging` leaf package (`Packages/Logging/Sources/Log.swift`, re-exported by `Models`), subsystem `com.dardan.SleepGuard`, categories `audio`, `detection`, `session`, `interrupter`, `storage`, `playback`, `app`.
 - **Levels:** `.debug` for traces (not persisted), `.info` milestones, `.notice` notable state, `.error` failures, `.fault` for the should-never-happen case (the SwiftData store failing to open).
 - **Privacy:** interpolated strings are private by default (file names, melody names, the push token); error descriptions are public so a sysdiagnose is useful.
 - **Signposts:** an Instruments interval per session and per snore event (Points of Interest).

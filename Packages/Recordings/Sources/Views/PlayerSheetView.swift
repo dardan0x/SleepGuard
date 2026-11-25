@@ -155,7 +155,7 @@ public struct PlayerSheetView: View {
         : .noAudio(playbackController.currentEvent ?? initialEvent)
     } else if let initialEvent {
       await legacyPlayer.prepare(
-        event: initialEvent,
+        clip: initialEvent.clipSource,
         sessionURL: sessionAudioURL,
         sessionStart: session.startDate)
       waveformLoader.load(for: initialEvent, sessionAudioURL: sessionAudioURL, sessionStart: session.startDate)

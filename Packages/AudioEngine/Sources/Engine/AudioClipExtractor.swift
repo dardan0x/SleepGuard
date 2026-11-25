@@ -1,6 +1,5 @@
 import Accelerate
 import AVFoundation
-import Models
 import SleepCore
 
 /// Extracts individual snore-event audio clips from a full session recording
@@ -27,7 +26,7 @@ public enum AudioClipExtractor {
   /// - Returns: Array of results mapping each event to its clip and spectral data.
   public static func extractClips(
     from sessionURL: URL,
-    events: [SnoreEvent],
+    events: [ClipSource],
     sessionStart: Date,
     padding: TimeInterval = 0.0,
     outputDirectory: URL) async -> [ClipResult]
@@ -158,7 +157,7 @@ public enum AudioClipExtractor {
   /// Extracts a single clip when the total session duration is not known in advance.
   /// Computes duration from the asset on demand.
   public static func extractSingleClip(
-    for event: SnoreEvent,
+    for event: ClipSource,
     sessionURL: URL,
     sessionStart: Date,
     padding: TimeInterval = 0.0,

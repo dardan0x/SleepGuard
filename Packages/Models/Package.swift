@@ -10,12 +10,14 @@ let package = Package(
     .library(name: "ModelsTestSupport", targets: ["ModelsTestSupport"]),
   ],
   dependencies: [
+    .package(path: "../Logging"),
     .package(url: "https://github.com/dardan0x/SleepGuardShared.git", exact: "0.30.0"),
   ],
   targets: [
     .target(
       name: "Models",
       dependencies: [
+        .product(name: "Logging", package: "Logging"),
         .product(name: "SleepCore", package: "SleepGuardShared"),
       ],
       path: "Sources",

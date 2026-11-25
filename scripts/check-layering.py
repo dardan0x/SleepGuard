@@ -5,7 +5,7 @@ Rules (see AGENTS.md "UI Dependencies in Non-View Code"):
   1. `import DesignSystem` is only allowed in view files (Sources/Views/,
      Sources/Components/) and in the explicit content-engine allowlist
      (engines whose output IS user-facing text; none today).
-  2. Core packages (Models, AudioEngine) must not import SwiftUI/UIKit/
+  2. Core packages (Logging, Models, AudioEngine) must not import SwiftUI/UIKit/
      DesignSystem at all.
   3. Env (services) must not import SwiftUI: navigation lives in the
      `Routing` package (docs/adr/0001-routing-package.md).
@@ -13,7 +13,7 @@ Rules (see AGENTS.md "UI Dependencies in Non-View Code"):
      `.shared`: they resolve it from the container (`@Injected` in views,
      `Container.shared.x()` in state owners), so tests/previews can swap it.
   5. No `print(` in package Sources or the app target: log through
-     `Log.<category>` (os.Logger, Models/Sources/Helpers/Log.swift).
+     `Log.<category>` (os.Logger, Packages/Logging/Sources/Log.swift).
   6. View files never take a service through `init` (a stored property typed
      as a service protocol, `any …ing` / `any …Providing`): they resolve it
      with `@Injected`. Init injection is for testable non-view types.
@@ -38,6 +38,7 @@ CORE_UIKIT_ALLOWLIST = {
 }
 
 CORE_PREFIXES = (
+    "Packages/Logging/",
     "Packages/Models/",
     "Packages/AudioEngine/",
 )
@@ -45,7 +46,7 @@ CORE_PREFIXES = (
 ENV_PREFIX = "Packages/Env/Sources/"
 
 # Packages above Env: everything except the core/service/navigation layers.
-SERVICE_CONSUMER_EXCLUDED = ("Packages/Models/", "Packages/AudioEngine/", "Packages/Env/", "Packages/Routing/")
+SERVICE_CONSUMER_EXCLUDED = ("Packages/Logging/", "Packages/Models/", "Packages/AudioEngine/", "Packages/Env/", "Packages/Routing/")
 
 SERVICE_SINGLETON = re.compile(
     r"\b(AppConfig|AudioRecorder|CustomMelodyStorage|HealthKitSync|HapticManager|"
@@ -58,7 +59,7 @@ SERVICE_SINGLETON = re.compile(
 # Rule 6 (F23-T13): services in views come from @Injected, not init.
 VIEW_SERVICE_PROPERTY = re.compile(r"^\s*(?:(?:public|private|fileprivate|internal)\s+)?(?:let|var)\s+\w+\s*:\s*any\s+\w+(?:ing|Providing)\b")
 
-# Rule 5 (F23-T4): no print() in shipping code; Models/Helpers/Log.swift has the loggers.
+# Rule 5 (F23-T4): no print() in shipping code; Logging/Sources/Log.swift has the loggers.
 PRINT_CALL = re.compile(r"^(?!\s*//).*(?<![\w.])print\(")
 
 def main() -> int:

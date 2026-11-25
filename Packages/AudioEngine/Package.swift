@@ -8,14 +8,14 @@ let package = Package(
     .library(name: "AudioEngine", targets: ["AudioEngine"]),
   ],
   dependencies: [
-    .package(path: "../Models"),
+    .package(path: "../Logging"),
     .package(url: "https://github.com/dardan0x/SleepGuardShared.git", exact: "0.30.0"),
   ],
   targets: [
     .target(
       name: "AudioEngine",
       dependencies: [
-        .product(name: "Models", package: "Models"),
+        .product(name: "Logging", package: "Logging"),
         .product(name: "SleepCore", package: "SleepGuardShared"),
       ],
       path: "Sources/Engine",
@@ -30,7 +30,6 @@ let package = Package(
       name: "AudioEngineTests",
       dependencies: [
         "AudioEngine",
-        .product(name: "Models", package: "Models"),
         .product(name: "SleepCore", package: "SleepGuardShared"),
       ],
       path: "Tests",

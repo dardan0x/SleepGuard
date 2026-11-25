@@ -1,7 +1,7 @@
 import AudioToolbox
 import AVFoundation
 import Foundation
-import Models
+import Logging
 
 /// Compresses raw per-event .caf recordings to AAC .m4a.
 ///

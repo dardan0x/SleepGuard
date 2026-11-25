@@ -1,5 +1,4 @@
 import AVFoundation
-import Models
 import SleepCore
 import Testing
 @testable import AudioEngine
@@ -79,8 +78,10 @@ struct AudioClipExtractorTests {
 
   @Test func extractClipsHandlesMoreEventsThanOneBatch() async {
     // Batches of 4: six events need two batches; the out-of-range one is skipped.
-    let events = (0..<6).map { SnoreEvent(timestamp: sessionStart.addingTimeInterval(Double($0)), intensity: .light, averageDB: -30, peakDB: -20, duration: 1) }
-    let outOfRange = SnoreEvent(timestamp: sessionStart.addingTimeInterval(30), intensity: .light, averageDB: -30, peakDB: -20, duration: 1)
+    let events = (0..<6).map {
+      ClipSource(id: UUID(), timestamp: sessionStart.addingTimeInterval(Double($0)), snoreDuration: 1, bursts: nil)
+    }
+    let outOfRange = ClipSource(id: UUID(), timestamp: sessionStart.addingTimeInterval(30), snoreDuration: 1, bursts: nil)
     let results = await AudioClipExtractor.extractClips(
       from: sessionURL, events: events + [outOfRange], sessionStart: sessionStart, outputDirectory: folder.url)
     #expect(Set(results.map(\.eventID)) == Set(events.map(\.id)))

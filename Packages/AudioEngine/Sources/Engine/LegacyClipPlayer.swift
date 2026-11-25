@@ -1,6 +1,5 @@
 import AVFoundation
 import Foundation
-import Models
 
 /// Plays a single snore-event clip exported from a full session recording.
 /// Used for sessions that predate per-event clip extraction, where the only
@@ -21,10 +20,8 @@ public final class LegacyClipPlayer {
 
   /// Exports the event's audio from the session file and starts playback.
   /// Leaves `duration` at 0 when the export or player setup fails.
-  public func prepare(event: SnoreEvent, sessionURL: URL?, sessionStart: Date) async {
+  public func prepare(clip event: ClipSource, sessionURL: URL?, sessionStart: Date) async {
     guard let sessionURL else { return }
-    // Destructure Sendable fields before crossing into the extractor — a
-    // SwiftData @Model class cannot be sent across isolation boundaries.
     let eventID = event.id
     let eventTimestamp = event.timestamp
     let eventSnoreDuration = event.snoreDuration

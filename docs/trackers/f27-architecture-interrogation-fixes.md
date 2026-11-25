@@ -38,7 +38,7 @@ Fixes the verdicts of the principal-level architecture review (`ARCHITECTURE_INT
 | F27-T7 | Shared 0.30.0: decimator, interruption gaps, SaveRules, stored-type fixtures, score golden, CI (Q14, Q17, Q3, Q11, Q9, Q6, Q2) | Shared | Done (user tags 0.30.0) | — | SleepGuardShared (+ UIKitWay compat patch) | 2026-11-25 | 2026-11-25 |
 | F27-T8 | Bump to 0.30.0 and adopt: decimator driver, interruption gaps, FFT gate, thermal log, SaveRules | Detection | Done | T7 | Env / AudioEngine / Models | 2026-11-25 | 2026-11-25 |
 | F27-T9 | Module hygiene: declared deps, import checker, guardrail fixes (Q30, Q63) | Infra | Done | — | all / scripts | 2026-11-25 | 2026-11-25 |
-| F27-T10 | `Logging` leaf; AudioEngine off Models (Q32) | Refactor | Backlog | T9 | Logging / AudioEngine | — | — |
+| F27-T10 | `Logging` leaf; AudioEngine off Models (Q32) | Refactor | Done | T9 | Logging / AudioEngine / Models / Recordings | 2026-11-25 | 2026-11-25 |
 | F27-T11 | Split Env by reason to change (Q31) | Refactor | Backlog | T10 | Env → Config / Health / Platform | — | — |
 | F27-T12 | Access-level imports (Q30) | Refactor | Backlog | T11 | all | — | — |
 | F27-T13 | One theme system (Q21) | Refactor | Backlog | T12 | DesignSystem / views | — | — |
@@ -306,3 +306,29 @@ Fixes the verdicts of the principal-level architecture review (`ARCHITECTURE_INT
 **Notes:**
 - Not done from the plan: banning `AppTheme.shared` / `Container.shared` in the app target. The rule says the app target is the composition root and holds `.shared` references, so the ban would contradict it; T13 removes `AppTheme` as a service anyway.
 - The import check is textual (manifest parsing + `import` lines). Access-level imports (T12) make the compiler enforce the same thing.
+
+---
+
+### F27-T10 — `Logging` leaf; AudioEngine off Models
+
+| Field | Value |
+|-------|-------|
+| Arch Ref | Interrogation Q32 |
+| Status | Done |
+| Started | 2026-11-25 |
+| Completed | 2026-11-25 |
+
+**Acceptance Criteria:**
+- [x] `Packages/Logging` (imports only `os`) holds `Log` and the signposter (moved with history)
+- [x] `AudioEngine` depends on `Logging` + `SleepCore` only; no `Models`, so no SwiftData or schema in the audio layer
+- [x] Audio notification names moved to `AudioEngine` (it observes them; Env posts them)
+- [x] Clip extraction and the legacy player take a `ClipSource` value instead of `SnoreEvent`; Recordings maps with `SnoreEvent.clipSource`
+- [x] Layering check treats `Logging` as core; docs point at the new path
+- [x] Builds with zero errors; AudioEngine 35, Models 89, Env 74, Recordings 12 pass; import check 22 targets / 13 packages
+
+**Prompt Used:**
+"done tagging" (continued)
+
+**Notes:**
+- **Deviation from the plan:** `Models` re-exports `Logging` (`@_exported import Logging`) instead of every logging file importing it. Code that already imports `Models` (including the app target, whose Xcode project would otherwise need a new package reference) keeps reaching `Log`; the leaf still lets `AudioEngine` drop `Models`. `check-imports.py` accounts for re-exports.
+- The `extractClips(events:)` / `extractSingleClip(for:)` overloads now take `ClipSource`; the value-based overload most callers use is unchanged.

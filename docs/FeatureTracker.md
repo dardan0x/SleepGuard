@@ -82,7 +82,7 @@ Last updated: 2026-11-25
 | F24 | Shared Design Kit Adoption | P2 | Done (bg-card open) | 4/4 | ██████████ 100% | [tracker](trackers/f24-shared-design-kit-adoption.md) |
 | F25 | Shared Screen Content | P2 | Done | 7/7 | ██████████ 100% | [tracker](trackers/f25-shared-screen-content.md) |
 | F26 | Shared Settings Content | P2 | Done | 6/6 | ██████████ 100% | [tracker](trackers/f26-shared-settings-content.md) |
-| F27 | Architecture Interrogation Fixes | P0/P1 | In Progress | 9/17 | █████░░░░░ 53% | [tracker](trackers/f27-architecture-interrogation-fixes.md) |
+| F27 | Architecture Interrogation Fixes | P0/P1 | In Progress | 10/17 | ██████░░░░ 59% | [tracker](trackers/f27-architecture-interrogation-fixes.md) |
 
 ## Activity Log
 
@@ -90,6 +90,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-11-25 | F27-T10 | Completed | `Logging` leaf package; AudioEngine depends on Logging + SleepCore only (notification names moved in, `ClipSource` value instead of `SnoreEvent`); Models re-exports Logging |
 | 2026-11-25 | F27-T9 | Completed | Undeclared imports declared (Recordings→AudioEngine, AudioEngineTests→Models), unused Settings→Personalization edge removed; `check-imports.py` in CI; view-size check covers the app target; layering check skips `.build` and lost stale entries |
 | 2026-11-25 | F27-T8 | Completed | Shared 0.30.0 adopted: tap → `SampleDecimator` at exact 20 Hz (verified 400 samples / 19.95 s), interruptions become gaps left out of the score (formula v2), FFT only with the raw log, thermal logging, app-owned `SaveRules` |
 | 2026-11-25 | F27-T7 | Completed | Shared 0.30.0 (user tagged): decimator, interruption gaps + score v2, `SaveRules`, stored-value fixtures, score golden, UIKitWay CI job + skew warning; UIKitWay compatibility patch |
@@ -351,7 +352,7 @@ _Most recent first. The AI appends here after every task._
 
 | Task | Feature | Started | Assignee |
 |------|---------|---------|----------|
-| F27-T10 | F27 | — | Next: Logging leaf; AudioEngine off Models |
+| F27-T11 | F27 | — | Next: split Env by reason to change |
 | F23-T6 | F23 | — | Waiting for labelled real nights (user). Then merge F22 + F23 into `main`. User: real night on device (F22-T10), then merge F22 (and F23 on top) into `main` |
 
 ## Completed (last 10)
