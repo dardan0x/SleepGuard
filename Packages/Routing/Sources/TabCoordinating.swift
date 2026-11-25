@@ -1,6 +1,6 @@
 import Foundation
-import Models
-import Observation
+public import Models
+public import Observation
 
 /// App-wide tab selection, pop-to-root signals, and pending deep links.
 /// Fake: `FakeTabCoordinator`.

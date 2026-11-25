@@ -1,9 +1,9 @@
-import Config
-import FactoryKit
+public import Config
+public import FactoryKit
 import Foundation
-import Health
-import Models
-import SwiftData
+public import Health
+public import Models
+public import SwiftData
 
 /// The live `SessionCommitting`.
 @MainActor

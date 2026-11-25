@@ -1,10 +1,10 @@
-import Config
-import FactoryKit
-import Foundation
+public import Config
+public import FactoryKit
+public import Foundation
 import Models
-import Observation
-import SleepCore
-import SwiftData
+public import Observation
+public import SleepCore
+public import SwiftData
 
 /// A briefing ready to show; `id` is the night it's about.
 public struct PresentedBriefing: Identifiable, Sendable {

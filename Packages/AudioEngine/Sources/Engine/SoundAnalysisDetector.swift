@@ -1,8 +1,8 @@
-import AVFoundation
+public import AVFoundation
 import Logging
-import Observation
+public import Observation
 import SleepCore
-import SoundAnalysis
+public import SoundAnalysis
 
 /// Wraps Apple's built-in SNAudioStreamAnalyzer to detect snoring
 /// using the pre-trained 300-class sound classifier shipped with iOS.

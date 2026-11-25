@@ -1,7 +1,7 @@
 import DesignSystem
 import SleepCore
 import SwiftData
-import SwiftUI
+public import SwiftUI
 
 /// The morning briefing sheet: the shared `BriefingContent`. A survey answer
 /// is kept, then the sheet closes.

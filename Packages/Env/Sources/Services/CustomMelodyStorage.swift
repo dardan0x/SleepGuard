@@ -1,7 +1,7 @@
-import Foundation
+public import Foundation
 import Models
-import Observation
-import SleepCore
+public import Observation
+public import SleepCore
 
 /// Manages user-recorded custom melodies: persistence, file I/O, and metadata.
 @MainActor

@@ -1,11 +1,11 @@
 import AudioEngine
-import AVFoundation
-import Config
-import FactoryKit
+public import AVFoundation
+public import Config
+public import FactoryKit
 import Models
-import Observation
-import Platform
-import SleepCore
+public import Observation
+public import Platform
+public import SleepCore
 
 /// Plays the selected Snore Interrupter when snoring is detected.
 /// Respects the user's duration preference and exposes `isPlaying` for UI observation.

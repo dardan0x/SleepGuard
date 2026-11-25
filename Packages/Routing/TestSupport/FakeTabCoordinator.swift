@@ -1,7 +1,7 @@
 import Foundation
-import Models
-import Observation
-import Routing
+public import Models
+public import Observation
+public import Routing
 
 /// Scriptable `TabCoordinating`.
 @MainActor

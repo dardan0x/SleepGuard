@@ -1,5 +1,5 @@
-import Foundation
-import SwiftData
+public import Foundation
+public import SwiftData
 
 /// Opens the app's on-disk store without ever deleting the user's data in a
 /// shipped build.

@@ -1,6 +1,6 @@
 import AudioEngine
-import Foundation
-import Models
+public import Foundation
+public import Models
 
 /// Every audio file that belongs to a sleep session: event clips, legacy full
 /// session audio, the raw archive and the raw classification log. Read it

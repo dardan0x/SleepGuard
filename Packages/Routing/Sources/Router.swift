@@ -1,4 +1,4 @@
-import SwiftUI
+public import SwiftUI
 
 public enum RouterDestination: Hashable, Sendable {
   case recordingDetail(id: UUID)

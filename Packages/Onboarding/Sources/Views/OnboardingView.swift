@@ -7,7 +7,7 @@ import Health
 import Models
 import Platform
 import SleepCore
-import SwiftUI
+public import SwiftUI
 
 /// First launch, hosting the shared onboarding content: asks for Apple Health
 /// (when the `healthSync` flag is on) and the microphone, then finishes.

@@ -3,7 +3,7 @@ import FactoryKit
 import Models
 import SleepCore
 import SwiftData
-import SwiftUI
+public import SwiftUI
 
 /// Trends: the week's or month's nights. Hosts the shared `TrendsContent`
 /// (ADR 0006) under SleepGuard's toolbar title.

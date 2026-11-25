@@ -21,6 +21,7 @@ let package = Package(
       path: "Sources/Engine",
       swiftSettings: [
         .swiftLanguageMode(.v6),
+        .enableUpcomingFeature("InternalImportsByDefault"),
       ],
       linkerSettings: [
         .linkedFramework("Accelerate"),
@@ -35,5 +36,6 @@ let package = Package(
       path: "Tests",
       swiftSettings: [
         .swiftLanguageMode(.v6),
+        .enableUpcomingFeature("InternalImportsByDefault"),
       ]),
   ])

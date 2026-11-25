@@ -1,7 +1,7 @@
-import Foundation
-import Models
-import Observation
-import SleepCore
+public import Foundation
+public import Models
+public import Observation
+public import SleepCore
 
 /// Firebase-free configuration store. Holds remotely-driven feature flags, tab
 /// configuration, and update-gate thresholds as plain Swift values so every

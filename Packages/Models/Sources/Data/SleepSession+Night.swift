@@ -1,5 +1,5 @@
 import Foundation
-import SleepCore
+public import SleepCore
 
 /// Stored models → the shared night values (SleepGuardShared's `Night`,
 /// `NightEvent`). The night rules (episodes, snoring duration, score inputs,

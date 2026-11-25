@@ -1,10 +1,10 @@
 import AudioEngine
-import Env
-import Foundation
-import Models
-import Observation
-import SleepCore
-import SwiftData
+public import Env
+public import Foundation
+public import Models
+public import Observation
+public import SleepCore
+public import SwiftData
 
 /// In-memory `PendingSessionStoring`.
 @MainActor

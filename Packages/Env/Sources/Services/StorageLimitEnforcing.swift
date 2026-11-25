@@ -1,6 +1,6 @@
 import Foundation
 import Models
-import SwiftData
+public import SwiftData
 
 /// Deletes old audio to honor the user's storage limits. Fake: `FakeStorageLimitEnforcer`.
 /// Nonisolated and `Sendable`; the SwiftData work is `@MainActor`.

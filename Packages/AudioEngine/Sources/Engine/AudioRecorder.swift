@@ -1,9 +1,9 @@
-import AVFoundation
+public import AVFoundation
 #if canImport(UIKit)
 import UIKit
 #endif
 import Logging
-import Observation
+public import Observation
 
 public enum RecordingError: Error {
   case noMicrophoneInput

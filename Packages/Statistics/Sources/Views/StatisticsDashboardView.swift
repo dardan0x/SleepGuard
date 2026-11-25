@@ -3,7 +3,7 @@ import FactoryKit
 import Models
 import Routing
 import SwiftData
-import SwiftUI
+public import SwiftUI
 
 @MainActor
 public struct StatisticsDashboardView: View {

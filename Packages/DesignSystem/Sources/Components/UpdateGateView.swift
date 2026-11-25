@@ -1,6 +1,6 @@
 import FactoryKit
-import Models
-import SwiftUI
+public import Models
+public import SwiftUI
 
 /// Presents a soft (dismissible) or hard (blocking) update prompt based on the
 /// `UpdateGate` thresholds from Remote Config, compared against the running

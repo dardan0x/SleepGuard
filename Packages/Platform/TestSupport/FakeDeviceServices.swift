@@ -1,7 +1,7 @@
-import Foundation
-import Observation
-import Platform
-import UserNotifications
+public import Foundation
+public import Observation
+public import Platform
+public import UserNotifications
 
 /// Scriptable `NotificationPermissionManaging`.
 @MainActor

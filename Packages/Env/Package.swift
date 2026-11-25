@@ -35,6 +35,7 @@ let package = Package(
       path: "Sources/Services",
       swiftSettings: [
         .swiftLanguageMode(.v6),
+        .enableUpcomingFeature("InternalImportsByDefault"),
       ]),
     .target(
       name: "EnvTestSupport",
@@ -48,6 +49,7 @@ let package = Package(
       path: "TestSupport",
       swiftSettings: [
         .swiftLanguageMode(.v6),
+        .enableUpcomingFeature("InternalImportsByDefault"),
       ]),
     .testTarget(
       name: "EnvTests",
@@ -70,5 +72,6 @@ let package = Package(
       path: "Tests",
       swiftSettings: [
         .swiftLanguageMode(.v6),
+        .enableUpcomingFeature("InternalImportsByDefault"),
       ]),
   ])

@@ -1,4 +1,4 @@
-import FactoryKit
+public import FactoryKit
 
 /// Health's registration. Fake: `FakeHealthKitSync` (HealthTestSupport).
 public extension Container {

@@ -1,5 +1,5 @@
 import Foundation
-import Models
+public import Models
 import os
 
 /// Persists a recovery snapshot of the in-progress session to disk during

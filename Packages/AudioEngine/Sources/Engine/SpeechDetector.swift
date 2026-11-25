@@ -1,6 +1,6 @@
 import AVFoundation
 import Logging
-import Observation
+public import Observation
 import SleepCore
 
 /// Detects sleep talking / speech in audio using SoundAnalysis confidence.

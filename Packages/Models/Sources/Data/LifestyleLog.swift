@@ -1,5 +1,5 @@
-import Foundation
-import SwiftData
+public import Foundation
+public import SwiftData
 
 /// Per-night lifestyle deviation log.
 /// Records what changed on a given night so the app can correlate

@@ -1,6 +1,6 @@
-import Foundation
-import Observation
-import WatchConnectivity
+public import Foundation
+public import Observation
+public import WatchConnectivity
 
 @MainActor
 @Observable

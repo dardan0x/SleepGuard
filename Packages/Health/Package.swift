@@ -26,6 +26,7 @@ let package = Package(
       path: "Sources",
       swiftSettings: [
         .swiftLanguageMode(.v6),
+        .enableUpcomingFeature("InternalImportsByDefault"),
       ],
       linkerSettings: [
         .linkedFramework("HealthKit"),
@@ -40,5 +41,6 @@ let package = Package(
       path: "TestSupport",
       swiftSettings: [
         .swiftLanguageMode(.v6),
+        .enableUpcomingFeature("InternalImportsByDefault"),
       ]),
   ])

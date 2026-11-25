@@ -1,4 +1,4 @@
-import FactoryKit
+public import FactoryKit
 
 /// Platform's registrations. Fakes in PlatformTestSupport.
 public extension Container {

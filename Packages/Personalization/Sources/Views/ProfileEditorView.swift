@@ -1,8 +1,8 @@
 import DesignSystem
 import FactoryKit
-import Models
+public import Models
 import Platform
-import SwiftUI
+public import SwiftUI
 
 /// The profile editor sheet: the shared `ProfileEditorContent` editing the
 /// stored `UserProfile` directly (each change goes to the model, as before).

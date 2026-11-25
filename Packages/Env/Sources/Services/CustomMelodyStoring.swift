@@ -1,7 +1,7 @@
-import Foundation
+public import Foundation
 import Models
-import Observation
-import SleepCore
+public import Observation
+public import SleepCore
 import SleepMelodies
 
 /// User-recorded interrupter melodies on disk. Fake: `FakeCustomMelodyStorage`.

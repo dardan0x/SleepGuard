@@ -1,6 +1,6 @@
 import AudioEngine
-import Foundation
-import Observation
+public import Foundation
+public import Observation
 
 /// "Start recording in N minutes" countdown. Fake: `FakeRecordingDelayManager`.
 @MainActor

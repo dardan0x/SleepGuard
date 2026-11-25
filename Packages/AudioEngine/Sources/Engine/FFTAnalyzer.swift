@@ -1,6 +1,6 @@
 import Accelerate
-import AVFoundation
-import SleepCore
+public import AVFoundation
+public import SleepCore
 
 /// Spectral features of a buffer: SleepCore's type (the rules live there).
 public typealias SpectralFeatures = SleepCore.SpectralFeatures

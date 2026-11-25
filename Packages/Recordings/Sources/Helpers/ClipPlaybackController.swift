@@ -1,6 +1,6 @@
-import AVFoundation
-import Models
-import Observation
+public import AVFoundation
+public import Models
+public import Observation
 import SleepCore
 
 /// Manages sequential playback of snore-event audio clips.

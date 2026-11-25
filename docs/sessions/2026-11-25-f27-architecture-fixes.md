@@ -2,7 +2,7 @@
 date: 2026-11-25
 feature: F27
 branch: refactor/f27-architecture-interrogation-fixes
-title: F27 planning (principal review verified), T1 store safety, T2 root night flow, T3 frozen flags, T4 detail/list truth, T5 launch work, T6 checkpoint writer, T7/T8 shared 0.30.0, T9 module hygiene, T10 Logging leaf, T11 Env split
+title: F27 planning (principal review verified), T1 store safety, T2 root night flow, T3 frozen flags, T4 detail/list truth, T5 launch work, T6 checkpoint writer, T7/T8 shared 0.30.0, T9 module hygiene, T10 Logging leaf, T11 Env split, T12 access-level imports
 ---
 
 ### Completed
@@ -18,6 +18,7 @@ title: F27 planning (principal review verified), T1 store safety, T2 root night 
 - **F27-T9 — Module hygiene.** Undeclared imports declared, unused edge removed, `check-imports.py` in CI, guardrail scripts fixed.
 - **F27-T10 — `Logging` leaf.** AudioEngine no longer depends on Models (Logging + SleepCore only).
 - **F27-T11 — Env split.** Config / Health / Platform packages; TabCoordinator to Routing; ADR 0008.
+- **F27-T12 — Access-level imports.** Internal by default in every package; `public import` only where public API needs it.
 
 ### Technical Details
 - `SleepGuardStore.open(_:allowDestructiveReset:)` (Models) returns the container plus the failure. Only `#if DEBUG` passes `true`.
@@ -41,6 +42,7 @@ title: F27 planning (principal review verified), T1 store safety, T2 root night 
 - T9: `Packages/{Recordings,AudioEngine,Settings}/Package.swift`, `scripts/check-imports.py` (new), `scripts/check-layering.py`, `scripts/check-view-size.py`, `.github/workflows/layering.yml`, `CLAUDE.md`, `AGENTS.md`.
 - T10: `Packages/Logging/` (new: `Package.swift`, `Sources/Log.swift` moved from Models), `Packages/Models/{Package.swift,Sources/Helpers/LoggingExport.swift}`, `Packages/AudioEngine/{Package.swift,Sources/Engine/*}` (incl. `ClipSource.swift` new, `AudioNotifications.swift` moved in), `Packages/AudioEngine/Tests/AudioClipExtractorTests.swift`, `Packages/Recordings/Sources/{Helpers/SnoreEvent+ClipSource.swift,Views/PlayerSheetView.swift}`, `Packages/Env/{Sources/Services/SnoreInterrupterPlayer.swift,Tests/DetectionCharacterizationTests.swift}`, `scripts/check-layering.py`, `CLAUDE.md`, `AGENTS.md`, `docs/TECHNICAL_OVERVIEW.md`.
 - T11: `Packages/{Config,Health,Platform}/` (new), `Packages/Routing/{Package.swift,Sources/TabCoordinator*.swift,Sources/Container+Routing.swift,TestSupport/,Tests/TabCoordinator*Tests.swift}`, `Packages/Env/**`, every feature manifest and the files whose imports changed (55), `SleepGuard.xcodeproj/project.pbxproj`, `scripts/check-layering.py`, `CLAUDE.md`, `AGENTS.md`, `docs/adr/0008-env-split.md`.
+- T12: every `Packages/*/Package.swift` and 123 source files (import access levels only), `CLAUDE.md`, `AGENTS.md`.
 
 ### Architecture Decisions
 - Data safety over availability: a store that can't be opened is never touched in Release. The user sees why and is pointed at an update; nothing is recorded into memory.
@@ -62,7 +64,7 @@ title: F27 planning (principal review verified), T1 store safety, T2 root night 
 `refactor/f27-architecture-interrogation-fixes`
 
 ### Suggested Commit
-`F27-T1 — Never delete the user's store`, `F27-T2 — Root owns the night flow and presentation`, `F27-T3 — Flags frozen per recording`, `F27-T4 — Detail and lists tell the truth`, `F27-T5 — Launch work off the first frames`, `F27-T6 — Checkpoint writes off the detection path`, `F27-T8 — Adopt Shared 0.30.0` (T7 lives in the Shared repo), `F27-T9 — Module hygiene and guardrails`, `F27-T10 — Logging leaf; AudioEngine off Models`, `F27-T11 — Split Env by reason to change`
+`F27-T1 — Never delete the user's store`, `F27-T2 — Root owns the night flow and presentation`, `F27-T3 — Flags frozen per recording`, `F27-T4 — Detail and lists tell the truth`, `F27-T5 — Launch work off the first frames`, `F27-T6 — Checkpoint writes off the detection path`, `F27-T8 — Adopt Shared 0.30.0` (T7 lives in the Shared repo), `F27-T9 — Module hygiene and guardrails`, `F27-T10 — Logging leaf; AudioEngine off Models`, `F27-T11 — Split Env by reason to change`, `F27-T12 — Access-level imports`
 
 ### Changes done
 - Store opening moved to `SleepGuardStore`; Release fallback is in-memory plus a blocking screen.
@@ -70,7 +72,7 @@ title: F27 planning (principal review verified), T1 store safety, T2 root night 
 - Shared bumped to 0.29.1.
 
 ### Next Session
-- F27-T12: access-level imports.
+- F27-T13: one theme system.
 
 ### Open Questions
 - `StatisticsErrorView` / `RecordingsErrorView` are unused after T4 (kept by user choice); revisit in T16.

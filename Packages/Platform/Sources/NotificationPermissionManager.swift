@@ -1,5 +1,5 @@
-import Foundation
-import UserNotifications
+public import Foundation
+public import UserNotifications
 #if canImport(UIKit)
 import UIKit
 #endif

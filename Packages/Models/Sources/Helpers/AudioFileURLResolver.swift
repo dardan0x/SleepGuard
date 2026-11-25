@@ -1,4 +1,4 @@
-import Foundation
+public import Foundation
 
 /// Resolves audio file URLs that may have been stored as absolute paths from a previous app launch.
 /// On iOS the Documents directory path can change between launches, so only the filename should be stored.

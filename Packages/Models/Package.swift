@@ -23,6 +23,7 @@ let package = Package(
       path: "Sources",
       swiftSettings: [
         .swiftLanguageMode(.v6),
+        .enableUpcomingFeature("InternalImportsByDefault"),
       ]),
     .target(
       name: "ModelsTestSupport",
@@ -30,6 +31,7 @@ let package = Package(
       path: "TestSupport",
       swiftSettings: [
         .swiftLanguageMode(.v6),
+        .enableUpcomingFeature("InternalImportsByDefault"),
       ]),
     .testTarget(
       name: "ModelsTests",
@@ -39,5 +41,6 @@ let package = Package(
       ],
       swiftSettings: [
         .swiftLanguageMode(.v6),
+        .enableUpcomingFeature("InternalImportsByDefault"),
       ]),
   ])

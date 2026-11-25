@@ -1,6 +1,6 @@
 import Foundation
-import Models
-import SwiftData
+public import Models
+public import SwiftData
 
 /// Saves a finished night: the one owner of the most important write in the
 /// app. Both the summary sheet and the force-save path (low battery) commit

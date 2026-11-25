@@ -1,6 +1,6 @@
-import Models
-import SleepCore
-import SwiftUI
+public import Models
+public import SleepCore
+public import SwiftUI
 
 // The shared design kit's components take plain values. These initializers
 // build them from SleepGuard's stored models, with the signatures the old

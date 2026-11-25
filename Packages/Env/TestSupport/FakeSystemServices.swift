@@ -1,8 +1,8 @@
-import AudioEngine
-import AVFoundation
-import Foundation
-import Observation
-import SoundAnalysis
+public import AudioEngine
+public import AVFoundation
+public import Foundation
+public import Observation
+public import SoundAnalysis
 
 /// Scriptable `AudioRecording`; never opens the microphone.
 @MainActor

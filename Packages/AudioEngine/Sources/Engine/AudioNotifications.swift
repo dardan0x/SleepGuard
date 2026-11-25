@@ -1,4 +1,4 @@
-import Foundation
+public import Foundation
 
 public extension Notification.Name {
   static let snoreInterrupterWillPlay = Notification.Name("snoreInterrupterWillPlay")

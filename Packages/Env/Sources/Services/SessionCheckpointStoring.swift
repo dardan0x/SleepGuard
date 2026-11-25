@@ -1,5 +1,5 @@
 import Foundation
-import Models
+public import Models
 
 /// Crash-recovery snapshot file. Fake: `FakeSessionCheckpointStore`.
 @MainActor

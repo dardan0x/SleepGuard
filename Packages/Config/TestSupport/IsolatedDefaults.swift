@@ -1,5 +1,5 @@
-import Config
-import Foundation
+public import Config
+public import Foundation
 
 public extension UserDefaults {
   /// A fresh, empty suite for one test or preview. Nothing leaks into

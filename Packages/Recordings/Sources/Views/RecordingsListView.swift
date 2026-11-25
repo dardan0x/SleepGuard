@@ -4,9 +4,9 @@ import FactoryKit
 import Models
 import os
 import Routing
-import SleepCore
+public import SleepCore
 import SwiftData
-import SwiftUI
+public import SwiftUI
 
 /// Every recorded night, by month and day (SleepCore's `NightMonth`), drawn by
 /// the shared `NightsListContent` (ADR 0006). This container keeps the query,

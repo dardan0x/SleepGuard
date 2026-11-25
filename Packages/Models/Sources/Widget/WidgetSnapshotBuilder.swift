@@ -1,4 +1,4 @@
-import Foundation
+public import Foundation
 
 public enum WidgetSnapshotBuilder {
   /// Builds a snapshot from completed sessions.

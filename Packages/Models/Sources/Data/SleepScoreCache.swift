@@ -1,6 +1,6 @@
 import Foundation
-import SleepCore
-import SwiftData
+public import SleepCore
+public import SwiftData
 
 public extension SleepSession {
   /// The single writer of the cached score fields. Recomputes from events

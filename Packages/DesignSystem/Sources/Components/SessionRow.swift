@@ -1,5 +1,5 @@
 import FactoryKit
-import SwiftUI
+public import SwiftUI
 
 @MainActor
 public struct SessionRow: View {

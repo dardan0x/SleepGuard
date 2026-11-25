@@ -1,4 +1,4 @@
-import Foundation
+public import Foundation
 import Models
 
 /// Tracks files of an in-progress session for crash cleanup. Fake: `FakePendingSessionStore`.

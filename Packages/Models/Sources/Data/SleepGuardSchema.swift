@@ -1,5 +1,5 @@
 import Foundation
-import SwiftData
+public import SwiftData
 
 /// The SwiftData schema as shipped before F22. The app and `TestStore` both open
 /// their `ModelContainer` through `SleepGuardSchema.container(...)`, so

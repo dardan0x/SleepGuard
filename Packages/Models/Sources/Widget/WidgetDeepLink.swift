@@ -1,4 +1,4 @@
-import Foundation
+public import Foundation
 
 /// `sleepguard://` URLs opened by widget taps.
 public enum WidgetDeepLink: Equatable, Sendable {

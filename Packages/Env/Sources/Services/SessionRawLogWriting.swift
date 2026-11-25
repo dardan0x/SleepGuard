@@ -1,6 +1,6 @@
 import AudioEngine
-import Foundation
-import SleepCore
+public import Foundation
+public import SleepCore
 
 /// Writes the 20 Hz classification log. Fake: `FakeSessionRawLogWriter`.
 public protocol SessionRawLogWriting: Actor {

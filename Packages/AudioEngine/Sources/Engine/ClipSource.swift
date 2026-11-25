@@ -1,5 +1,5 @@
-import Foundation
-import SleepCore
+public import Foundation
+public import SleepCore
 
 /// What clip extraction needs from an event, as a `Sendable` value. Callers map
 /// their stored events to it, so the audio layer doesn't depend on the data model.

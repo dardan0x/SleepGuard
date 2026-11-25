@@ -29,6 +29,7 @@ let package = Package(
       path: "Sources",
       swiftSettings: [
         .swiftLanguageMode(.v6),
+        .enableUpcomingFeature("InternalImportsByDefault"),
         .defaultIsolation(MainActor.self),
       ]),
   ])

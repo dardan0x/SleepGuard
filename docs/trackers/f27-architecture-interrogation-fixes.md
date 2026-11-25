@@ -40,7 +40,7 @@ Fixes the verdicts of the principal-level architecture review (`ARCHITECTURE_INT
 | F27-T9 | Module hygiene: declared deps, import checker, guardrail fixes (Q30, Q63) | Infra | Done | — | all / scripts | 2026-11-25 | 2026-11-25 |
 | F27-T10 | `Logging` leaf; AudioEngine off Models (Q32) | Refactor | Done | T9 | Logging / AudioEngine / Models / Recordings | 2026-11-25 | 2026-11-25 |
 | F27-T11 | Split Env by reason to change (Q31) | Refactor | Done | T10 | Env → Config / Health / Platform / Routing | 2026-11-25 | 2026-11-25 |
-| F27-T12 | Access-level imports (Q30) | Refactor | Backlog | T11 | all | — | — |
+| F27-T12 | Access-level imports (Q30) | Refactor | Done | T11 | all | 2026-11-26 | 2026-11-26 |
 | F27-T13 | One theme system (Q21) | Refactor | Backlog | T12 | DesignSystem / views | — | — |
 | F27-T14 | Two dependency-resolution styles (Q23) | Refactor | Backlog | T11 | Env / Recordings | — | — |
 | F27-T15 | Contract tests for stateful fakes (Q24/Q59) | Tests | Backlog | T11 | Env | — | — |
@@ -360,3 +360,29 @@ Fixes the verdicts of the principal-level architecture review (`ARCHITECTURE_INT
 - Imports were rewritten by a script that looks at the symbols each file uses (scratchpad `rewrite_imports.py`), then manifests were fixed from `check-imports.py`'s output.
 - Test counts moved, nothing lost: Env 74 → 66 (LearnTabOrder 4 → Config, TabCoordinator 4 → Routing), Routing 9 → 14 (+ the TabCoordinator override test split out of `ServiceOverrideTests`).
 - During the move a script stopped halfway and cut `FakeTabCoordinator` out before writing its new file; it was restored from `HEAD` before anything else changed.
+
+---
+
+### F27-T12 — Access-level imports
+
+| Field | Value |
+|-------|-------|
+| Arch Ref | Interrogation Q30 (follow-up) |
+| Status | Done |
+| Started | 2026-11-26 |
+| Completed | 2026-11-26 |
+
+**Acceptance Criteria:**
+- [x] `InternalImportsByDefault` enabled in every target of all 16 packages
+- [x] `public import` only where a file's public API exposes the module's types (225 imports in 123 files), driven by the compiler's notes
+- [x] `@_exported` re-exports kept (DesignSystem's kits, Models' Logging)
+- [x] Rule in CLAUDE.md / AGENTS.md
+- [x] All 16 packages build; all package tests pass; pinned Release app build succeeds; import and layering checks pass
+
+**Prompt Used:**
+"Full migration" (user chose it over the lighter MemberImportVisibility after seeing the 112-file scope)
+
+**Notes:**
+- Automated: a loop built each package in dependency order, read `… is imported by this file as 'internal' from 'X'` notes, and made exactly that import public (scratchpad `t12_loop.py`). Env took 18 passes; most packages 1–6.
+- What it closes, precisely: a package's dependencies no longer leak their symbols to its clients. It doesn't stop a target from importing a module it never declared (module search paths); `check-imports.py` (T9) covers that.
+- The app target isn't a package and already uses `MEMBER_IMPORT_VISIBILITY`; unchanged.

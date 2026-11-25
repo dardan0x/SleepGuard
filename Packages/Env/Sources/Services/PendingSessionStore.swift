@@ -1,4 +1,4 @@
-import Foundation
+public import Foundation
 import Models
 
 /// Tracks files belonging to the current unsaved sleep session.

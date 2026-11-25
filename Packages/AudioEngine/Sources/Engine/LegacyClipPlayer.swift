@@ -1,5 +1,5 @@
-import AVFoundation
-import Foundation
+public import AVFoundation
+public import Foundation
 
 /// Plays a single snore-event clip exported from a full session recording.
 /// Used for sessions that predate per-event clip extraction, where the only

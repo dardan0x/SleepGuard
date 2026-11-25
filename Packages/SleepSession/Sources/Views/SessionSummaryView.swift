@@ -3,9 +3,9 @@ import Config
 import DesignSystem
 import Env
 import FactoryKit
-import Models
+public import Models
 import SwiftData
-import SwiftUI
+public import SwiftUI
 
 @MainActor
 public struct SessionSummaryView: View {

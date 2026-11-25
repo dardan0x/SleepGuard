@@ -3,7 +3,7 @@ import FactoryKit
 import Foundation
 import Models
 import SleepCore
-import SwiftData
+public import SwiftData
 
 #if DEBUG
 /// Generates realistic mock sleep session data for App Store screenshots.

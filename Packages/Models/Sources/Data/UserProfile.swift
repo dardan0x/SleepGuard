@@ -1,5 +1,5 @@
-import Foundation
-import SwiftData
+public import Foundation
+public import SwiftData
 
 public enum BiologicalSex: String, Codable, Sendable {
   case unspecified

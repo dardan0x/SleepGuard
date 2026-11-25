@@ -1,8 +1,8 @@
-import Foundation
-import Health
-import Models
-import Observation
-import SleepCore
+public import Foundation
+public import Health
+public import Models
+public import Observation
+public import SleepCore
 
 /// In-memory `HealthKitSyncing` for tests and previews. Never touches HealthKit.
 ///

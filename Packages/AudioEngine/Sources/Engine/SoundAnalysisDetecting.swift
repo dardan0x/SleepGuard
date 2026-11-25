@@ -1,6 +1,6 @@
-import AVFoundation
-import Observation
-import SoundAnalysis
+public import AVFoundation
+public import Observation
+public import SoundAnalysis
 
 /// Apple SoundAnalysis classifier confidences for snoring and speech.
 /// Fake: `FakeSoundAnalysisDetector` (EnvTestSupport).

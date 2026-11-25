@@ -1,8 +1,8 @@
-import Config
-import FactoryKit
-import Foundation
-import Models
-import Observation
+public import Config
+public import FactoryKit
+public import Foundation
+public import Models
+public import Observation
 
 /// Coordinates tab-bar behavior across the app's main tabs.
 /// Used to signal "pop to root" when the user taps the already-selected tab.

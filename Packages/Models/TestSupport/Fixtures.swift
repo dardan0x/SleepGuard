@@ -1,6 +1,6 @@
-import Foundation
-import Models
-import SleepCore
+public import Foundation
+public import Models
+public import SleepCore
 
 public extension SleepSession {
   /// A finished session of `hours` length starting at `start`.

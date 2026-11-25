@@ -1,5 +1,5 @@
 import AudioEngine
-import AVFoundation
+public import AVFoundation
 import SleepCore
 
 /// Generates downsampled waveform amplitude samples and spectrum data from an audio file.

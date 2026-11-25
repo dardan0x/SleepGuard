@@ -1,7 +1,7 @@
 import Models
-import Observation
-import SleepCore
-import SwiftUI
+public import Observation
+public import SleepCore
+public import SwiftUI
 
 @MainActor
 @Observable

@@ -27,6 +27,7 @@ let package = Package(
       exclude: [],
       swiftSettings: [
         .swiftLanguageMode(.v6),
+        .enableUpcomingFeature("InternalImportsByDefault"),
         .defaultIsolation(MainActor.self),
       ]),
     .testTarget(
@@ -39,6 +40,7 @@ let package = Package(
       path: "Tests",
       swiftSettings: [
         .swiftLanguageMode(.v6),
+        .enableUpcomingFeature("InternalImportsByDefault"),
         .defaultIsolation(MainActor.self),
       ]),
   ])

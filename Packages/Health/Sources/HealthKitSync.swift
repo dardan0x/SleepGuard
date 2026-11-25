@@ -1,8 +1,8 @@
 import Foundation
 import HealthKit
-import Models
-import Observation
-import SleepCore
+public import Models
+public import Observation
+public import SleepCore
 
 /// The live HealthKit implementation of `HealthKitSyncing`.
 @MainActor

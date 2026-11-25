@@ -3,7 +3,7 @@ import DesignSystem
 import FactoryKit
 import Models
 import Routing
-import SwiftUI
+public import SwiftUI
 
 /// The Learn tab, hosting the shared `LearnContent` with the remote-configured
 /// URL (`feature_learn`); no URL shows the shared empty state.

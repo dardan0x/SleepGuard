@@ -1,5 +1,5 @@
-import Models
-import SwiftUI
+public import Models
+public import SwiftUI
 
 /// The shared kit's low-battery banner, shown when `session` was saved early
 /// because the battery ran low.

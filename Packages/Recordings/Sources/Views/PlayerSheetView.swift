@@ -3,7 +3,7 @@ import Config
 import DesignSystem
 import FactoryKit
 import Models
-import SwiftUI
+public import SwiftUI
 
 /// Plays individual snore-event audio clips presented as a bottom sheet.
 /// Always opens in expanded mode — shows the full event player with waveform

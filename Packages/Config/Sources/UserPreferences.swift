@@ -1,6 +1,6 @@
-import Foundation
-import Observation
-import SleepCore
+public import Foundation
+public import Observation
+public import SleepCore
 
 // NOTE: These properties use manual access/withMutation because @Observable only
 // auto-instruments stored properties. Computed properties backed by UserDefaults

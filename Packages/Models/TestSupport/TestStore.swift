@@ -1,7 +1,7 @@
 import Foundation
-import Models
-import SleepCore
-import SwiftData
+public import Models
+public import SleepCore
+public import SwiftData
 
 /// In-memory SwiftData store with the app's versioned schema and migration plan. Use it whenever a test
 /// reads `events`, so relationships behave like production.

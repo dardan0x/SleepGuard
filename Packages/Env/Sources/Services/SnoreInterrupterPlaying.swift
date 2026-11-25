@@ -1,7 +1,7 @@
 import Foundation
 import Models
-import Observation
-import SleepCore
+public import Observation
+public import SleepCore
 
 /// Plays the snore-interrupter melody. Fake: `FakeSnoreInterrupterPlayer`.
 @MainActor

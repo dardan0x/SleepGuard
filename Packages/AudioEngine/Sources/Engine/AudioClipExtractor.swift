@@ -1,6 +1,6 @@
-import Accelerate
+public import Accelerate
 import AVFoundation
-import SleepCore
+public import SleepCore
 
 /// Extracts individual snore-event audio clips from a full session recording
 /// and computes spectral features for each clip.

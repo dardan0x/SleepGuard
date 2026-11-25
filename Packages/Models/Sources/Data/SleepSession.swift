@@ -1,6 +1,6 @@
-import Foundation
-import SleepCore
-import SwiftData
+public import Foundation
+public import SleepCore
+public import SwiftData
 
 @Model
 public final class SleepSession {

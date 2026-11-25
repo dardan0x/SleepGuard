@@ -3,7 +3,7 @@ import FactoryKit
 import Foundation
 import Models
 import SleepCore
-import SwiftData
+public import SwiftData
 
 /// Report returned after running storage cleanup.
 public struct CleanupReport: Sendable {

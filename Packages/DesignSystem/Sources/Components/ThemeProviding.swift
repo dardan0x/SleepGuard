@@ -1,7 +1,7 @@
 import Models
-import Observation
-import SleepCore
-import SwiftUI
+public import Observation
+public import SleepCore
+public import SwiftUI
 
 /// Design tokens (colors, radii, fonts) from `designs/SleepGuard.pen`.
 /// Live: `AppTheme`, whose values start from the shared design kit's

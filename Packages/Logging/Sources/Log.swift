@@ -1,4 +1,4 @@
-import os
+public import os
 
 /// Unified logging (F23-T4). Use these instead of `print`: they reach Console
 /// and sysdiagnose in Release builds, so a 4 a.m. problem on a device can be

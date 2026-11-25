@@ -4,7 +4,7 @@ import Models
 import Routing
 import SleepCore
 import SwiftData
-import SwiftUI
+public import SwiftUI
 
 /// The last 7 recorded days. Hosts the shared `LastSevenNightsContent`
 /// (ADR 0006) under SleepGuard's toolbar title.

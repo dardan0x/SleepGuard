@@ -1,7 +1,7 @@
 import DesignSystem
 import Env
 import FactoryKit
-import SwiftUI
+public import SwiftUI
 
 @MainActor
 public struct SleepSessionView: View {

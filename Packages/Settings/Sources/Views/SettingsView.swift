@@ -8,7 +8,7 @@ import Models
 import Platform
 import Routing
 import SwiftData
-import SwiftUI
+public import SwiftUI
 
 /// Settings: the title row over the shared `SettingsContent`. This view owns
 /// the values (preferences, permissions, feature flags) and what a tap does;

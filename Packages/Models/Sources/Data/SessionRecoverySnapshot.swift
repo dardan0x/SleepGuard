@@ -1,5 +1,5 @@
-import Foundation
-import SleepCore
+public import Foundation
+public import SleepCore
 
 /// A `Codable` snapshot of an in-progress `SleepSession` and its events,
 /// written to disk during recording so a session can be reconstructed after a

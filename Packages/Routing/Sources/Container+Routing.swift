@@ -1,4 +1,4 @@
-import FactoryKit
+public import FactoryKit
 
 /// Routing's registration: app-wide tab state. `RouterPath` is not registered:
 /// it is per-tab SwiftUI environment state (docs/adr/0001-routing-package.md).

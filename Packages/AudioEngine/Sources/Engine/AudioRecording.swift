@@ -1,5 +1,5 @@
-import Foundation
-import Observation
+public import Foundation
+public import Observation
 
 /// Microphone capture: levels, per-event files, pause/resume, warm-up.
 /// Fake: `FakeAudioRecorder` (EnvTestSupport).

@@ -1,4 +1,4 @@
-import FactoryKit
+public import FactoryKit
 
 /// Config's registrations. Tests use `AppConfig.isolated()` /
 /// `UserPreferences.isolated()` (ConfigTestSupport): the real types on a

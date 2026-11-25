@@ -1,5 +1,5 @@
-import Foundation
-import Observation
+public import Foundation
+public import Observation
 
 /// User settings persisted in `UserDefaults`.
 /// Live: `UserPreferences`. Tests: `UserPreferences(defaults:)` on an isolated suite.

@@ -1,5 +1,5 @@
-import AudioEngine
-import FactoryKit
+public import AudioEngine
+public import FactoryKit
 
 /// Factory DI registrations for the session services. Config, Health and
 /// Platform register their own (F27-T11); `tabCoordinator` is in Routing.

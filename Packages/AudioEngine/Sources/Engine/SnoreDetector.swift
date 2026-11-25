@@ -1,6 +1,6 @@
 import AVFoundation
-import Observation
-import SleepCore
+public import Observation
+public import SleepCore
 
 @MainActor
 @Observable

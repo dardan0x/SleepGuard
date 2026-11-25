@@ -3,7 +3,7 @@ import DesignSystem
 import FactoryKit
 import Models
 import SwiftData
-import SwiftUI
+public import SwiftUI
 
 @MainActor
 public struct SessionDetailView: View {

@@ -1,4 +1,4 @@
-import Foundation
+public import Foundation
 
 /// A modal the app root presents over every tab. One owner, one sheet: the
 /// end-of-night summary, the notification soft-ask and the morning briefing

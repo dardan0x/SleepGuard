@@ -1,5 +1,5 @@
-import Foundation
-import UserNotifications
+public import Foundation
+public import UserNotifications
 
 /// Push-notification authorization. Fake: `FakeNotificationPermissionManager`.
 @MainActor

@@ -1,5 +1,5 @@
 import Foundation
-import SleepCore
+public import SleepCore
 
 /// The stored profile as the shared `SleepProfile` value (the editor and the
 /// briefing rules use it). The stored enums stay this module's own, so the

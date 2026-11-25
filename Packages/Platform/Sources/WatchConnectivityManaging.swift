@@ -1,5 +1,5 @@
-import Foundation
-import Observation
+public import Foundation
+public import Observation
 
 /// Apple Watch reachability and sync status. Fake: `FakeWatchConnectivityManager`.
 @MainActor
