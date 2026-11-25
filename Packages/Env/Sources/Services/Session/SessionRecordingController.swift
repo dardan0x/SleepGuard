@@ -30,6 +30,8 @@ final class SessionRecordingController {
   /// `false` in tests that script every sample themselves (F22-T10).
   private let runsProcessingLoop: Bool
 
+  /// Remote flags are frozen from start to stop, so a night runs under one set.
+  private let appConfig: any AppConfigProviding
   private var processingTask: Task<Void, Never>?
   private var batteryCheckCounter = 0
   private var checkpointCounter = 0
@@ -44,8 +46,10 @@ final class SessionRecordingController {
     pendingSessionStore: any PendingSessionStoring = Container.shared.pendingSessionStore(),
     checkpointStore: any SessionCheckpointStoring = Container.shared.sessionCheckpointStore(),
     rawLogWriter: any SessionRawLogWriting = Container.shared.sessionRawLogWriter(),
+    appConfig: any AppConfigProviding = Container.shared.appConfig(),
     runsProcessingLoop: Bool = true)
   {
+    self.appConfig = appConfig
     self.runsProcessingLoop = runsProcessingLoop
     self.audioRecorder = audioRecorder
     self.snoreInterrupterPlayer = snoreInterrupterPlayer
@@ -96,6 +100,7 @@ final class SessionRecordingController {
 
     try audioRecorder.startRecording(audioFileURL: audioURL)
     isRecording = true
+    appConfig.holdRemoteUpdates()
     sessionSignpost = Log.signposter.beginInterval("Session")
     Log.session.info("Session started")
     detection?.setActive(true)
@@ -177,6 +182,7 @@ final class SessionRecordingController {
 
     snoreInterrupterPlayer.stop()
     isRecording = false
+    appConfig.releaseRemoteUpdates()
     endSessionSignpost(reason: "stopped")
     detection?.setActive(false)
 

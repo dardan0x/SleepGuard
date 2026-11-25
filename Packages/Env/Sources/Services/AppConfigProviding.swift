@@ -14,6 +14,9 @@ public protocol AppConfigProviding: AnyObject, Observable {
   var visibleTabsInOrder: [AppTab] { get }
   func isEnabled(_ flag: FeatureFlag) -> Bool
   func apply(flags: [String: Bool], tabs: [TabConfig], learnTab: LearnTabConfig?, updateGate: UpdateGate)
+  /// Remote values wait while held (a recorded night) and apply on release.
+  func holdRemoteUpdates()
+  func releaseRemoteUpdates()
   #if DEBUG
   var effectiveTabs: [TabConfig] { get }
   var effectiveLearnTab: LearnTabConfig { get }

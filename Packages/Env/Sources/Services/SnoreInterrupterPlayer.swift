@@ -23,12 +23,15 @@ public final class SnoreInterrupterPlayer: NSObject, SnoreInterrupterPlaying {
   private let preferences: any UserPreferencesStoring
   private let melodyStorage: any CustomMelodyStoring
   private let haptics: any HapticFeedbackProviding
+  private let appConfig: any AppConfigProviding
 
   public init(
     preferences: any UserPreferencesStoring = Container.shared.userPreferences(),
     melodyStorage: any CustomMelodyStoring = Container.shared.customMelodyStorage(),
-    haptics: any HapticFeedbackProviding = Container.shared.hapticManager())
+    haptics: any HapticFeedbackProviding = Container.shared.hapticManager(),
+    appConfig: any AppConfigProviding = Container.shared.appConfig())
   {
+    self.appConfig = appConfig
     self.preferences = preferences
     self.melodyStorage = melodyStorage
     self.haptics = haptics
@@ -46,6 +49,13 @@ public final class SnoreInterrupterPlayer: NSObject, SnoreInterrupterPlaying {
 
     guard !isPlaying else {
       Log.interrupter.debug("Already playing, skipping re-trigger")
+      return
+    }
+
+    // The remote switch, frozen for the night (`AppConfig.holdRemoteUpdates`),
+    // so the melody and its Mute/Stop controls are on or off together.
+    guard appConfig.isEnabled(.snoreInterrupter) else {
+      Log.interrupter.debug("Interrupter disabled remotely, skipping")
       return
     }
 

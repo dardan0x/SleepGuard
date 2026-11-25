@@ -257,6 +257,7 @@ final class DetectionHarness {
       pendingSessionStore: pending,
       checkpointStore: checkpoints,
       rawLogWriter: rawLog,
+      appConfig: AppConfig.isolated(),
       runsProcessingLoop: false)
     tracker = RealtimeDetectionTracker(
       snoreDetector: SnoreDetector(),

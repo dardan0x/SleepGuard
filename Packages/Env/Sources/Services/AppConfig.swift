@@ -116,17 +116,50 @@ public final class AppConfig: AppConfigProviding {
   // MARK: - Apply (called by RemoteConfigLoader)
 
   /// Applies a fresh set of remote values and persists them as the cache.
+  /// While remote updates are held (a night is recording), the values wait
+  /// and are applied by `releaseRemoteUpdates()`.
   public func apply(
     flags: [String: Bool],
     tabs: [TabConfig],
     learnTab: LearnTabConfig?,
     updateGate: UpdateGate)
   {
+    if isHoldingRemoteUpdates {
+      pendingRemote = PendingRemote(flags: flags, tabs: tabs, learnTab: learnTab, updateGate: updateGate)
+      return
+    }
     remoteFlags = flags
     self.tabs = tabs.isEmpty ? TabConfig.defaults : tabs
     remoteLearnTab = learnTab
     remoteUpdateGate = updateGate
     persistCache()
+  }
+
+  // MARK: - Holding remote updates
+
+  /// The latest remote values that arrived while updates were held.
+  private struct PendingRemote {
+    let flags: [String: Bool]
+    let tabs: [TabConfig]
+    let learnTab: LearnTabConfig?
+    let updateGate: UpdateGate
+  }
+
+  private var pendingRemote: PendingRemote?
+  public private(set) var isHoldingRemoteUpdates = false
+
+  /// Freezes remote values for a long-running flow (a recorded night), so a
+  /// flag can't flip halfway through it. Local debug overrides still apply.
+  public func holdRemoteUpdates() {
+    isHoldingRemoteUpdates = true
+  }
+
+  /// Ends the hold and applies the latest values that arrived during it.
+  public func releaseRemoteUpdates() {
+    isHoldingRemoteUpdates = false
+    guard let pending = pendingRemote else { return }
+    pendingRemote = nil
+    apply(flags: pending.flags, tabs: pending.tabs, learnTab: pending.learnTab, updateGate: pending.updateGate)
   }
 
   // MARK: - Debug overrides

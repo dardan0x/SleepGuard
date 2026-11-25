@@ -31,7 +31,7 @@ Fixes the verdicts of the principal-level architecture review (`ARCHITECTURE_INT
 |----|------|------|--------|------------|---------|---------|-----------|
 | F27-T1 | Never delete the user's store (Q55) | Bug / Data safety | Done | Shared 0.29.1 (strings) | Models / App | 2026-11-25 | 2026-11-25 |
 | F27-T2 | Root owns the night flow and presentation (Q22, Q27, Q28, Q26) | Refactor / Bug | Done | — | Routing / Env / App | 2026-11-25 | 2026-11-25 |
-| F27-T3 | Flags frozen per recording (Q50) | Bug | Backlog | — | Env / App | — | — |
+| F27-T3 | Flags frozen per recording (Q50) | Bug | Done | — | Env | 2026-11-25 | 2026-11-25 |
 | F27-T4 | Detail and lists tell the truth: CQS load, delete order + alert, no dead `.error` (Q34, Q56, Q20) | Bug / Refactor | Backlog | Shared 0.29.1 | Recordings / Statistics | — | — |
 | F27-T5 | Launch work off main; owned tasks (Q9, Q54) | Perf | Backlog | T2 | Models / App | — | — |
 | F27-T6 | Checkpoint writes off the detection path (Q13/Q39) | Perf | Backlog | — | Env | — | — |
@@ -110,3 +110,31 @@ Fixes the verdicts of the principal-level architecture review (`ARCHITECTURE_INT
 - Removed `RouterPathTests.sheetIDsAreUnique`: `SheetDestination` has one case now; ID uniqueness is covered for `RootPresentation`.
 - Simulator (Debug, workspace), with Statistics hidden through the debug tab override and a planted checkpoint: the summary is offered at launch, and Discard returns to Sessions/Settings/Learn. Statistics visible: summary, then Discard, then the briefing, then Close, then the dashboard (briefing marked shown, checkpoint cleared). `sleepguard://last7nights` opened while the summary was up was routed to Last 7 Nights after Discard.
 - Not verified on the simulator: the low-battery auto-save (the simulator reports battery -1); it uses the same `SessionCommitter` path as before.
+
+---
+
+### F27-T3 — Flags frozen per recording
+
+| Field | Value |
+|-------|-------|
+| Arch Ref | Interrogation Q50 |
+| Status | Done |
+| Started | 2026-11-25 |
+| Completed | 2026-11-25 |
+
+**Acceptance Criteria:**
+- [x] Remote values that arrive while a night records wait and apply at the stop (`AppConfig.holdRemoteUpdates` / `releaseRemoteUpdates`; the latest values win)
+- [x] `SessionRecordingController` holds from a successful start to the stop
+- [x] The melody honours the remote `snoreInterrupter` flag (before, it ignored it); frozen, so the melody and its Mute/Stop controls agree all night
+- [x] Tests: hold/release, latest-wins, immediate when not held, controller start→stop, melody off remotely (5)
+- [x] Builds with zero errors; Env tests pass (69)
+
+**Prompt Used:**
+"continue"
+
+**Notes:**
+- One mechanism instead of a snapshot per flag: everything that reads `AppConfig` during the night (bedside overlay, player, visible tabs) sees the same values, and tabs can't disappear mid-recording.
+- Debug overrides still apply immediately (deliberate: a developer flipping a switch expects it).
+- The hold lives in memory: if the app is killed mid-night, the next launch fetches again.
+- `RemoteConfigLoader` is unchanged; it keeps refreshing on foreground, and `AppConfig` decides when values apply.
+- Not verified on the simulator: a mid-night remote flip can't be forced there, and debug overrides bypass the hold. Covered by the unit tests.
