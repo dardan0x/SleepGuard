@@ -8,6 +8,9 @@ let package = Package(
     .library(name: "Onboarding", targets: ["Onboarding"]),
   ],
   dependencies: [
+    .package(path: "../Platform"),
+    .package(path: "../Health"),
+    .package(path: "../Config"),
     .package(path: "../Models"),
     .package(path: "../AudioEngine"),
     .package(path: "../Env"),
@@ -19,6 +22,9 @@ let package = Package(
     .target(
       name: "Onboarding",
       dependencies: [
+        .product(name: "Platform", package: "Platform"),
+        .product(name: "Health", package: "Health"),
+        .product(name: "Config", package: "Config"),
         .product(name: "Models", package: "Models"),
         .product(name: "AudioEngine", package: "AudioEngine"),
         .product(name: "Env", package: "Env"),

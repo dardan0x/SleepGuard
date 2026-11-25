@@ -8,6 +8,7 @@ let package = Package(
     .library(name: "SleepSession", targets: ["SleepSession"]),
   ],
   dependencies: [
+    .package(path: "../Config"),
     .package(path: "../Models"),
     .package(path: "../AudioEngine"),
     .package(path: "../Env"),
@@ -20,6 +21,7 @@ let package = Package(
     .target(
       name: "SleepSession",
       dependencies: [
+        .product(name: "Config", package: "Config"),
         .product(name: "Models", package: "Models"),
         .product(name: "AudioEngine", package: "AudioEngine"),
         .product(name: "Env", package: "Env"),

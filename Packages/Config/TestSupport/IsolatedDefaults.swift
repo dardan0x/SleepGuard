@@ -1,11 +1,11 @@
-import Env
+import Config
 import Foundation
 
 public extension UserDefaults {
   /// A fresh, empty suite for one test or preview. Nothing leaks into
   /// `.standard` or into other tests.
   static func isolated() -> UserDefaults {
-    let name = "EnvTestSupport.\(UUID().uuidString)"
+    let name = "ConfigTestSupport.\(UUID().uuidString)"
     let defaults = UserDefaults(suiteName: name)!
     defaults.removePersistentDomain(forName: name)
     return defaults

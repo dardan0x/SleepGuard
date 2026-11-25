@@ -8,9 +8,9 @@ let package = Package(
     .library(name: "Statistics", targets: ["Statistics"]),
   ],
   dependencies: [
+    .package(path: "../Config"),
     .package(path: "../Models"),
     .package(url: "https://github.com/dardan0x/SleepGuardShared.git", exact: "0.30.0"),
-    .package(path: "../Env"),
     .package(path: "../Routing"),
     .package(path: "../DesignSystem"),
     .package(url: "https://github.com/hmlongco/Factory", from: "3.5.2"),
@@ -19,9 +19,9 @@ let package = Package(
     .target(
       name: "Statistics",
       dependencies: [
+        .product(name: "Config", package: "Config"),
         .product(name: "Models", package: "Models"),
         .product(name: "SleepCore", package: "SleepGuardShared"),
-        .product(name: "Env", package: "Env"),
         .product(name: "Routing", package: "Routing"),
         .product(name: "DesignSystem", package: "DesignSystem"),
         .product(name: "FactoryKit", package: "Factory"),

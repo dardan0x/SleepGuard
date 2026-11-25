@@ -1,5 +1,4 @@
 import DesignSystem
-import Env
 import SwiftUI
 
 /// Dimming overlay with a progress indicator shown while a finished session

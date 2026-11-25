@@ -1,10 +1,16 @@
 import AudioEngine
+import Config
+import ConfigTestSupport
 import EnvTestSupport
 import FactoryKit
 import FactoryTesting
 import Foundation
+import Health
+import HealthTestSupport
 import Models
 import ModelsTestSupport
+import Platform
+import PlatformTestSupport
 import SleepCore
 import Testing
 @testable import Env
@@ -101,15 +107,11 @@ struct ServiceOverrideTests {
   }
 
   @Test func coordinationOverrides() {
-    let tabs = FakeTabCoordinator()
     let delay = FakeRecordingDelayManager()
-    Container.shared.tabCoordinator.register { tabs }
     Container.shared.recordingDelayManager.register { delay }
 
-    Container.shared.tabCoordinator().selectTab(.statistics)
     Container.shared.recordingDelayManager().startDelay(minutes: 2)
 
-    #expect(tabs.resetSignal?.tab == .statistics) // already selected → pop to root
     #expect(delay.isActive && delay.remainingTimeString == "02:00")
   }
 

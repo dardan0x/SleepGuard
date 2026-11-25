@@ -7,8 +7,8 @@ Rules (see AGENTS.md "UI Dependencies in Non-View Code"):
      (engines whose output IS user-facing text; none today).
   2. Core packages (Logging, Models, AudioEngine) must not import SwiftUI/UIKit/
      DesignSystem at all.
-  3. Env (services) must not import SwiftUI: navigation lives in the
-     `Routing` package (docs/adr/0001-routing-package.md).
+  3. Env (services) must not import SwiftUI or Routing: navigation lives in
+     the `Routing` package, above the services (docs/adr/0001, 0008).
   4. Feature packages and DesignSystem never touch an app service's
      `.shared`: they resolve it from the container (`@Injected` in views,
      `Container.shared.x()` in state owners), so tests/previews can swap it.
@@ -46,7 +46,7 @@ CORE_PREFIXES = (
 ENV_PREFIX = "Packages/Env/Sources/"
 
 # Packages above Env: everything except the core/service/navigation layers.
-SERVICE_CONSUMER_EXCLUDED = ("Packages/Logging/", "Packages/Models/", "Packages/AudioEngine/", "Packages/Env/", "Packages/Routing/")
+SERVICE_CONSUMER_EXCLUDED = ("Packages/Logging/", "Packages/Config/", "Packages/Health/", "Packages/Platform/", "Packages/Models/", "Packages/AudioEngine/", "Packages/Env/", "Packages/Routing/")
 
 SERVICE_SINGLETON = re.compile(
     r"\b(AppConfig|AudioRecorder|CustomMelodyStorage|HealthKitSync|HapticManager|"
@@ -84,8 +84,8 @@ def main() -> int:
                 violations.append(f"{rel}:{number}: '{stripped.split()[1]}' import in core package")
             if in_core and stripped == "import UIKit" and rel not in CORE_UIKIT_ALLOWLIST:
                 violations.append(f"{rel}:{number}: 'UIKit' import in core package")
-            if in_env and stripped == "import SwiftUI":
-                violations.append(f"{rel}:{number}: 'SwiftUI' import in Env (navigation belongs in Routing)")
+            if in_env and stripped in ("import SwiftUI", "import Routing"):
+                violations.append(f"{rel}:{number}: '{stripped.split()[1]}' import in Env (navigation belongs in Routing, above the services)")
             if consumes_services and not stripped.startswith("//") and (match := SERVICE_SINGLETON.search(line)):
                 violations.append(f"{rel}:{number}: '{match.group(0)}' — resolve from the container instead")
             if in_view_code and "/.build/" not in rel and VIEW_SERVICE_PROPERTY.match(line):

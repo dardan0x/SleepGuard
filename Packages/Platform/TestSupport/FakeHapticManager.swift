@@ -1,4 +1,4 @@
-import Env
+import Platform
 
 /// Records haptic calls instead of playing them.
 @MainActor

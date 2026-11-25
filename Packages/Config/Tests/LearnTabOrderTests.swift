@@ -1,7 +1,8 @@
+import ConfigTestSupport
 import Foundation
 import Models
 import Testing
-@testable import Env
+@testable import Config
 
 /// Learn shows only when `feature_learn` says so, exactly once, at its order;
 /// the tab list (defaults included) never adds it.

@@ -1,5 +1,6 @@
+import Config
 import DesignSystem
-import Env
+import Platform
 import SwiftUI
 
 /// Pre-permission explainer shown before the iOS system dialog. Only triggers

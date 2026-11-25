@@ -39,7 +39,7 @@ Fixes the verdicts of the principal-level architecture review (`ARCHITECTURE_INT
 | F27-T8 | Bump to 0.30.0 and adopt: decimator driver, interruption gaps, FFT gate, thermal log, SaveRules | Detection | Done | T7 | Env / AudioEngine / Models | 2026-11-25 | 2026-11-25 |
 | F27-T9 | Module hygiene: declared deps, import checker, guardrail fixes (Q30, Q63) | Infra | Done | — | all / scripts | 2026-11-25 | 2026-11-25 |
 | F27-T10 | `Logging` leaf; AudioEngine off Models (Q32) | Refactor | Done | T9 | Logging / AudioEngine / Models / Recordings | 2026-11-25 | 2026-11-25 |
-| F27-T11 | Split Env by reason to change (Q31) | Refactor | Backlog | T10 | Env → Config / Health / Platform | — | — |
+| F27-T11 | Split Env by reason to change (Q31) | Refactor | Done | T10 | Env → Config / Health / Platform / Routing | 2026-11-25 | 2026-11-25 |
 | F27-T12 | Access-level imports (Q30) | Refactor | Backlog | T11 | all | — | — |
 | F27-T13 | One theme system (Q21) | Refactor | Backlog | T12 | DesignSystem / views | — | — |
 | F27-T14 | Two dependency-resolution styles (Q23) | Refactor | Backlog | T11 | Env / Recordings | — | — |
@@ -332,3 +332,31 @@ Fixes the verdicts of the principal-level architecture review (`ARCHITECTURE_INT
 **Notes:**
 - **Deviation from the plan:** `Models` re-exports `Logging` (`@_exported import Logging`) instead of every logging file importing it. Code that already imports `Models` (including the app target, whose Xcode project would otherwise need a new package reference) keeps reaching `Log`; the leaf still lets `AudioEngine` drop `Models`. `check-imports.py` accounts for re-exports.
 - The `extractClips(events:)` / `extractSingleClip(for:)` overloads now take `ClipSource`; the value-based overload most callers use is unchanged.
+
+---
+
+### F27-T11 — Split Env by reason to change
+
+| Field | Value |
+|-------|-------|
+| Arch Ref | Interrogation Q31, Q29; ADR 0008 (new) |
+| Status | Done |
+| Started | 2026-11-25 |
+| Completed | 2026-11-25 |
+
+**Acceptance Criteria:**
+- [x] `Config` (AppConfig, UserPreferences; ConfigTestSupport with isolated stores), `Health` (HealthKitSync + fake), `Platform` (haptics, notifications, Watch + fakes); files moved with history
+- [x] `TabCoordinator` / `TabCoordinating` / `TabResetSignal` (+ fake, tests) moved to `Routing` (**user decision**)
+- [x] Each package registers its own factories; Env keeps the recording night only
+- [x] Features declare only what they use: Statistics, Learn, Personalization no longer depend on Env; `check-imports.py` passes (30 targets, 16 packages)
+- [x] App target links Config, Health, Platform (`project.pbxproj`, mirrored from the Routing entries; `plutil -lint` OK)
+- [x] Env must not import Routing (layering rule 3); CLAUDE.md / AGENTS.md DI and package rules; ADR 0008
+- [x] Builds with zero errors (pinned Release + workspace); all package tests pass (Config 4, Env 66, Routing 14, others unchanged); app launches on the simulator
+
+**Prompt Used:**
+"Config/Health/Platform (Recommended)"
+
+**Notes:**
+- Imports were rewritten by a script that looks at the symbols each file uses (scratchpad `rewrite_imports.py`), then manifests were fixed from `check-imports.py`'s output.
+- Test counts moved, nothing lost: Env 74 → 66 (LearnTabOrder 4 → Config, TabCoordinator 4 → Routing), Routing 9 → 14 (+ the TabCoordinator override test split out of `ServiceOverrideTests`).
+- During the move a script stopped halfway and cut `FakeTabCoordinator` out before writing its new file; it was restored from `HEAD` before anything else changed.

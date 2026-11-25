@@ -1,4 +1,4 @@
-import Env
+import Config
 import FirebaseRemoteConfig
 import Foundation
 import Models

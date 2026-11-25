@@ -1,6 +1,9 @@
+import Config
+import ConfigTestSupport
 import EnvTestSupport
 import Foundation
 import Models
+import PlatformTestSupport
 import Testing
 @testable import Env
 
@@ -8,50 +11,6 @@ import Testing
 /// so their real logic runs against fakes and isolated stores.
 @MainActor
 struct ConstructorInjectionTests {
-  // MARK: - TabCoordinator ← AppConfig
-
-  private func config(hiding hidden: AppTab) -> AppConfig {
-    let config = AppConfig.isolated()
-    let tabs = AppTab.allCases.enumerated().map { TabConfig(tab: $1, isVisible: $1 != hidden, order: $0) }
-    config.apply(flags: [:], tabs: tabs, learnTab: nil, updateGate: .none)
-    return config
-  }
-
-  @Test func tabCoordinatorStartsOnTheFirstVisibleTab() {
-    let coordinator = TabCoordinator(appConfig: config(hiding: .statistics))
-    #expect(coordinator.selectedTab != .statistics)
-  }
-
-  @Test func deepLinkIsIgnoredWhenStatisticsIsHidden() {
-    let coordinator = TabCoordinator(appConfig: config(hiding: .statistics))
-
-    coordinator.open(.startTracking)
-
-    #expect(coordinator.pendingDeepLink == nil)
-  }
-
-  @Test func deepLinkRoutesToStatisticsWhenVisible() {
-    let coordinator = TabCoordinator(appConfig: AppConfig.isolated())
-    coordinator.selectedTab = .settings
-
-    coordinator.open(.last7Nights)
-
-    #expect(coordinator.selectedTab == .statistics)
-    #expect(coordinator.pendingDeepLink == .last7Nights)
-  }
-
-  @Test func aBlockedDeepLinkWaitsInsteadOfBeingDropped() {
-    let coordinator = TabCoordinator(appConfig: AppConfig.isolated())
-    coordinator.open(.last7Nights)
-
-    #expect(coordinator.takePendingDeepLink(blocked: true) == nil)
-    #expect(coordinator.pendingDeepLink == .last7Nights)
-
-    #expect(coordinator.takePendingDeepLink(blocked: false) == .last7Nights)
-    #expect(coordinator.pendingDeepLink == nil)
-    #expect(coordinator.takePendingDeepLink(blocked: false) == nil)
-  }
-
   // MARK: - SnoreInterrupterPlayer ← UserPreferences, haptics
 
   @Test func interrupterSetToNeverNeitherPlaysNorBuzzes() {

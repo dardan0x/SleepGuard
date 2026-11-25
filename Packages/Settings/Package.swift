@@ -8,6 +8,9 @@ let package = Package(
     .library(name: "Settings", targets: ["Settings"]),
   ],
   dependencies: [
+    .package(path: "../Platform"),
+    .package(path: "../Health"),
+    .package(path: "../Config"),
     .package(path: "../Models"),
     .package(path: "../Env"),
     .package(path: "../Routing"),
@@ -18,6 +21,9 @@ let package = Package(
     .target(
       name: "Settings",
       dependencies: [
+        .product(name: "Platform", package: "Platform"),
+        .product(name: "Health", package: "Health"),
+        .product(name: "Config", package: "Config"),
         .product(name: "Models", package: "Models"),
         .product(name: "Env", package: "Env"),
         .product(name: "Routing", package: "Routing"),

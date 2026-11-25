@@ -29,6 +29,9 @@
 		CF758CAE5F2E6721317BC087 /* DesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = 938D66BD06A743B2F8B279C6 /* DesignSystem */; };
 		E6F1CF9BF2DDADE9A5619DB4 /* SleepSession in Frameworks */ = {isa = PBXBuildFile; productRef = AD548900091A83E69035BB78 /* SleepSession */; };
 		E8F1BC7519D875ADAD99C2B2 /* Routing in Frameworks */ = {isa = PBXBuildFile; productRef = 6C0711377AA761A844BDFFB6 /* Routing */; };
+		21AAC7E1C2F32F10F896D6CB /* Platform in Frameworks */ = {isa = PBXBuildFile; productRef = 49856968E9F928E62FEB3703 /* Platform */; };
+		4B370848D47ABB08BBABC8BF /* Health in Frameworks */ = {isa = PBXBuildFile; productRef = C69DAEAE73D026B6DE4E9789 /* Health */; };
+		FAA27A34150D1B9419D972E0 /* Config in Frameworks */ = {isa = PBXBuildFile; productRef = 33FB2D1D8B9D2CB4DED541D8 /* Config */; };
 		E962CD02720B46D347403017 /* Recordings in Frameworks */ = {isa = PBXBuildFile; productRef = 613CAAD887F993446993F409 /* Recordings */; };
 		EA3B0BCFD10182B987547C8B /* AudioEngine in Frameworks */ = {isa = PBXBuildFile; productRef = 38CD50332392049638D060DF /* AudioEngine */; };
 		ED7B3283E6D3573708241C8E /* sounds in Resources */ = {isa = PBXBuildFile; fileRef = CE587D245C122AB22F7BD248 /* sounds */; };
@@ -143,6 +146,9 @@
 				B7E5BB619CAC47AD866118B3 /* Personalization in Frameworks */,
 				9C2D15AA3B584C0D8BA311FD /* Learn in Frameworks */,
 				E8F1BC7519D875ADAD99C2B2 /* Routing in Frameworks */,
+				21AAC7E1C2F32F10F896D6CB /* Platform in Frameworks */,
+				4B370848D47ABB08BBABC8BF /* Health in Frameworks */,
+				FAA27A34150D1B9419D972E0 /* Config in Frameworks */,
 				CE1563FD2FDA136500A53611 /* FirebaseMessaging in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -240,6 +246,9 @@
 				DE0D39C8817A44AB96DFE1F5 /* Personalization */,
 				2DFC87C0B35B483EB635F03D /* Learn */,
 				6C0711377AA761A844BDFFB6 /* Routing */,
+				49856968E9F928E62FEB3703 /* Platform */,
+				C69DAEAE73D026B6DE4E9789 /* Health */,
+				33FB2D1D8B9D2CB4DED541D8 /* Config */,
 				CE1563F22FDA136500A53611 /* FirebaseAnalytics */,
 				CE1563F62FDA136500A53611 /* FirebaseCrashlytics */,
 				CE1563FC2FDA136500A53611 /* FirebaseMessaging */,
@@ -289,6 +298,9 @@
 				9032C9334E924D3398A48885 /* XCLocalSwiftPackageReference "Packages/Personalization" */,
 				A124231B05434FFFB1548919 /* XCLocalSwiftPackageReference "Packages/Learn" */,
 				4338D563BF4BBBAF875A97C3 /* XCLocalSwiftPackageReference "Packages/Routing" */,
+				1CA9AF4CE5DFD20B80F69DDA /* XCLocalSwiftPackageReference "Packages/Platform" */,
+				846E3CF110FA751412DFABFB /* XCLocalSwiftPackageReference "Packages/Health" */,
+				F4A4858164379D2BEC080B3A /* XCLocalSwiftPackageReference "Packages/Config" */,
 				CE1563F12FDA136500A53611 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
@@ -706,6 +718,18 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
+		1CA9AF4CE5DFD20B80F69DDA /* XCLocalSwiftPackageReference "Packages/Platform" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/Platform;
+		};
+		846E3CF110FA751412DFABFB /* XCLocalSwiftPackageReference "Packages/Health" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/Health;
+		};
+		F4A4858164379D2BEC080B3A /* XCLocalSwiftPackageReference "Packages/Config" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/Config;
+		};
 		07BF115E5F61CCEB06BE0BF6 /* XCLocalSwiftPackageReference "Packages/SleepSession" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/SleepSession;
@@ -800,6 +824,21 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		49856968E9F928E62FEB3703 /* Platform */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1CA9AF4CE5DFD20B80F69DDA /* XCLocalSwiftPackageReference "Packages/Platform" */;
+			productName = Platform;
+		};
+		C69DAEAE73D026B6DE4E9789 /* Health */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 846E3CF110FA751412DFABFB /* XCLocalSwiftPackageReference "Packages/Health" */;
+			productName = Health;
+		};
+		33FB2D1D8B9D2CB4DED541D8 /* Config */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F4A4858164379D2BEC080B3A /* XCLocalSwiftPackageReference "Packages/Config" */;
+			productName = Config;
+		};
 		167C10ECFE58FBF4929EF997 /* Settings */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 4A855F6D6797671D082B748B /* XCLocalSwiftPackageReference "Packages/Settings" */;
