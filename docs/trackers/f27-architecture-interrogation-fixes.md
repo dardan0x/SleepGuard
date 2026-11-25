@@ -34,7 +34,7 @@ Fixes the verdicts of the principal-level architecture review (`ARCHITECTURE_INT
 | F27-T3 | Flags frozen per recording (Q50) | Bug | Done | — | Env | 2026-11-25 | 2026-11-25 |
 | F27-T4 | Detail and lists tell the truth: CQS load, delete order + alert, no dead `.error` (Q34, Q56, Q20) | Bug / Refactor | Done | Shared 0.29.1 | Recordings / Statistics / Env / Models | 2026-11-25 | 2026-11-25 |
 | F27-T5 | Launch work off main; owned tasks (Q9, Q54) | Perf | Done | T2 | Models / Statistics / App | 2026-11-25 | 2026-11-25 |
-| F27-T6 | Checkpoint writes off the detection path (Q13/Q39) | Perf | Backlog | — | Env | — | — |
+| F27-T6 | Checkpoint writes off the detection path (Q13/Q39) | Perf | Done | — | Env | 2026-11-25 | 2026-11-25 |
 | F27-T7 | Shared 0.30.0: decimator, interruption gaps, SaveRules, stored-type fixtures, score golden, CI (Q14, Q17, Q3, Q11, Q9, Q6, Q2) | Shared | Backlog | — | SleepGuardShared | — | — |
 | F27-T8 | Bump to 0.30.0 and adopt: decimator driver, interruption gaps, FFT gate, thermal log, SaveRules | Detection | Backlog | T7 | Env / AudioEngine | — | — |
 | F27-T9 | Module hygiene: declared deps, import checker, guardrail fixes (Q30, Q63) | Infra | Backlog | — | all / scripts | — | — |
@@ -196,3 +196,30 @@ Fixes the verdicts of the principal-level architecture review (`ARCHITECTURE_INT
 - Not done from the plan: storing `SessionCommitter.commit`'s follow-up `Task` in the callers. The follow-up must outlive the summary sheet that starts it, so a view-held handle adds nothing. The rule now names the service as its owner; tests already await the returned task.
 - Simulator (Debug): a debug score-config override re-scored 31 nights at launch (log); the dashboard showed the stricter scores (a red W bar). Removing the override re-scored 31 back, and the dashboard returned to the real colours **in the same launch**.
 - Tests: `stalePassWorksThroughLongHistoriesInBatches` (120 nights, batch 50); the existing refresh tests now `await`. Models 89.
+
+---
+
+### F27-T6 — Checkpoint writes off the detection path
+
+| Field | Value |
+|-------|-------|
+| Arch Ref | Interrogation Q13, Q39; ADR 0003 |
+| Status | Done |
+| Started | 2026-11-25 |
+| Completed | 2026-11-25 |
+
+**Acceptance Criteria:**
+- [x] `write` hands the snapshot to `CheckpointWriter` (actor) and returns; encoding and the atomic write happen off the main actor, so detection's awaited `perform` no longer waits on disk
+- [x] Bursts collapse to the latest snapshot; an older one arriving late is ignored
+- [x] `clear()` stays synchronous, and a write still in flight can't bring back a cleared file (sequence gate under a lock)
+- [x] Tests: in-flight write after clear (mutation-checked), write after clear kept, burst collapses (<10 disk writes, latest lands), existing tests now flush
+- [x] Builds with zero errors; Env 72 tests pass
+
+**Prompt Used:**
+"continue"
+
+**Notes:**
+- Why `clear()` isn't async: the committer clears right after saving. A clear that lagged behind could leave the file for a kill to find, and the saved night would be offered again (the F23-T1 bug class).
+- The snapshot value is still built on the main actor (copying the night's fields and events); only encoding and I/O moved. The protocol is unchanged, so fakes and callers didn't change.
+- Mutation check: with the gate disabled, `aWriteInFlightNeverBringsBackAClearedFile` fails.
+- Not checked on the simulator: a mid-night checkpoint needs a recording with events (or 2 min). Covered by the store tests; the detection characterization tests (fake store) pass unchanged.

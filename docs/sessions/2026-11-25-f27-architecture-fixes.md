@@ -2,7 +2,7 @@
 date: 2026-11-25
 feature: F27
 branch: refactor/f27-architecture-interrogation-fixes
-title: F27 planning (principal review verified), T1 store safety, T2 root night flow, T3 frozen flags, T4 detail/list truth, T5 launch work
+title: F27 planning (principal review verified), T1 store safety, T2 root night flow, T3 frozen flags, T4 detail/list truth, T5 launch work, T6 checkpoint writer
 ---
 
 ### Completed
@@ -12,6 +12,7 @@ title: F27 planning (principal review verified), T1 store safety, T2 root night 
 - **F27-T3 — Flags frozen per recording.** `AppConfig` holds remote updates from start to stop and applies the latest at the stop. The melody honours the remote interrupter flag.
 - **F27-T4 — Detail and lists tell the truth.** Read-only detail load plus a separate enrichment command; rows deleted before files, with an alert on failure; unreachable `.error` states removed.
 - **F27-T5 — Launch work off the first frames.** Batched, yielding main-context re-score from an ordered root `.task`; the dashboard redraws when nights are re-scored in place.
+- **F27-T6 — Checkpoint writes off the detection path.** A coalescing `CheckpointWriter` actor encodes and writes; `clear()` stays synchronous behind a sequence gate.
 
 ### Technical Details
 - `SleepGuardStore.open(_:allowDestructiveReset:)` (Models) returns the container plus the failure. Only `#if DEBUG` passes `true`.
@@ -30,6 +31,7 @@ title: F27 planning (principal review verified), T1 store safety, T2 root night 
 - T3: `Packages/Env/Sources/Services/{AppConfig,AppConfigProviding,SnoreInterrupterPlayer}.swift`, `Packages/Env/Sources/Services/Session/SessionRecordingController.swift`, `Packages/Env/Tests/RemoteConfigFreezeTests.swift` (new), `Packages/Env/Tests/DetectionCharacterizationTests.swift` (isolated config).
 - T4: `Packages/Recordings/Sources/Helpers/SessionDetailModel.swift`, `Packages/Recordings/Sources/Views/{SessionDetailView,SessionDetailLoadedView,RecordingsListView}.swift`, `Packages/Recordings/Tests/SessionDetailModelTests.swift`, `Packages/Statistics/Sources/Views/StatisticsDashboardView.swift`, `Packages/Env/Sources/Services/SessionFileCleanup.swift`, `Packages/Models/Sources/Data/SleepScoreCache.swift`.
 - T5: `Packages/Models/Sources/Data/SleepScoreCache.swift`, `Packages/Models/Tests/ModelsTests/SleepScoreCacheTests.swift`, `Packages/Statistics/Sources/Views/StatisticsDashboardView.swift`, `SleepGuard/SleepGuardApp.swift`, `CLAUDE.md`, `AGENTS.md`.
+- T6: `Packages/Env/Sources/Services/SessionCheckpointStore.swift`, `Packages/Env/Tests/SessionCheckpointStoreTests.swift`.
 
 ### Architecture Decisions
 - Data safety over availability: a store that can't be opened is never touched in Release. The user sees why and is pointed at an update; nothing is recorded into memory.
@@ -49,7 +51,7 @@ title: F27 planning (principal review verified), T1 store safety, T2 root night 
 `refactor/f27-architecture-interrogation-fixes`
 
 ### Suggested Commit
-`F27-T1 — Never delete the user's store`, `F27-T2 — Root owns the night flow and presentation`, `F27-T3 — Flags frozen per recording`, `F27-T4 — Detail and lists tell the truth`, `F27-T5 — Launch work off the first frames`
+`F27-T1 — Never delete the user's store`, `F27-T2 — Root owns the night flow and presentation`, `F27-T3 — Flags frozen per recording`, `F27-T4 — Detail and lists tell the truth`, `F27-T5 — Launch work off the first frames`, `F27-T6 — Checkpoint writes off the detection path`
 
 ### Changes done
 - Store opening moved to `SleepGuardStore`; Release fallback is in-memory plus a blocking screen.
@@ -57,7 +59,7 @@ title: F27 planning (principal review verified), T1 store safety, T2 root night 
 - Shared bumped to 0.29.1.
 
 ### Next Session
-- F27-T6: checkpoint writes off the detection path.
+- F27-T7: Shared 0.30.0 (written here, committed and tagged by the user).
 
 ### Open Questions
 - `StatisticsErrorView` / `RecordingsErrorView` are unused after T4 (kept by user choice); revisit in T16.
