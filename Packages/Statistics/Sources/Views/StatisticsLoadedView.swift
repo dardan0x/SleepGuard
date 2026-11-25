@@ -10,7 +10,7 @@ import SwiftUI
 @MainActor
 struct StatisticsLoadedView: View {
   let state: DashboardState
-  @Injected(\.theme) private var theme
+  @Environment(\.theme) private var theme
   @Injected(\.appConfig) private var appConfig
   @MainActor let onStartRecording: () -> Void
   let onViewTrends: () -> Void
@@ -39,7 +39,7 @@ struct StatisticsLoadedView: View {
       }
       .padding(.horizontal, 20)
     }
-    .background(theme.bgPrimary.ignoresSafeArea(edges: .bottom))
+    .background(theme.palette.bgPrimary.ignoresSafeArea(edges: .bottom))
     .toolbar(.hidden, for: .navigationBar)
   }
 }

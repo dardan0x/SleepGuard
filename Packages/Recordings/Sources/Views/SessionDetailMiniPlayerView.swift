@@ -1,5 +1,4 @@
 import DesignSystem
-import FactoryKit
 import Models
 import SwiftUI
 
@@ -15,8 +14,7 @@ struct SessionDetailMiniPlayerView: View {
   let onTogglePlayback: () -> Void
   let onScrub: (Double) -> Void
   let onExpand: () -> Void
-  @Injected(\.theme) private var theme
-
+  @Environment(\.theme) private var theme
   init(
     session: SleepSession,
     isPlaying: Bool,
@@ -54,7 +52,7 @@ struct SessionDetailMiniPlayerView: View {
               .font(.system(size: 14, weight: .semibold))
               .foregroundStyle(.white)
               .frame(width: 28, height: 28)
-              .background(theme.accent)
+              .background(theme.palette.accent)
               .clipShape(Circle())
           }
         }
@@ -62,11 +60,11 @@ struct SessionDetailMiniPlayerView: View {
         GeometryReader { geometry in
           ZStack(alignment: .leading) {
             RoundedRectangle(cornerRadius: 2)
-              .fill(theme.bgElevated)
+              .fill(theme.palette.bgElevated)
               .frame(height: 4)
 
             RoundedRectangle(cornerRadius: 2)
-              .fill(theme.accent)
+              .fill(theme.palette.accent)
               .frame(width: max(CGFloat(progress) * geometry.size.width, 0), height: 4)
 
             // Event markers — positions are pre-computed to match the same timeline
@@ -74,7 +72,7 @@ struct SessionDetailMiniPlayerView: View {
             // for legacy full-session playback).
             ForEach(eventMarkers.indices, id: \.self) { index in
               Circle()
-                .fill(eventMarkerColors.indices.contains(index) ? eventMarkerColors[index] : theme.accent)
+                .fill(eventMarkerColors.indices.contains(index) ? eventMarkerColors[index] : theme.palette.accent)
                 .frame(width: 6, height: 6)
                 .position(
                   x: CGFloat(eventMarkers[index]) * geometry.size.width,
@@ -91,7 +89,7 @@ struct SessionDetailMiniPlayerView: View {
 
         Text(timeString(totalDuration))
           .font(.system(size: 11, weight: .medium, design: .monospaced))
-          .foregroundStyle(theme.textTertiary)
+          .foregroundStyle(theme.palette.textTertiary)
           .monospacedDigit()
 
         if isExpandable {
@@ -104,19 +102,19 @@ struct SessionDetailMiniPlayerView: View {
               Text(Strings.recordingsDetailTitle)
                 .font(.system(size: 11, weight: .semibold))
             }
-            .foregroundStyle(theme.accent)
+            .foregroundStyle(theme.palette.accent)
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
-            .background(theme.accent.opacity(0.15))
-            .cornerRadius(theme.radiusSmall)
+            .background(theme.palette.accent.opacity(0.15))
+            .cornerRadius(theme.radii.small)
           }
         }
       }
     }
     .padding(.horizontal, 12)
     .padding(.vertical, 12)
-    .background(theme.bgCard)
-    .cornerRadius(theme.radiusSmall)
+    .background(theme.palette.bgCard)
+    .cornerRadius(theme.radii.small)
   }
 
   private func timeString(_ interval: TimeInterval) -> String {

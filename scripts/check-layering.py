@@ -53,7 +53,7 @@ SERVICE_SINGLETON = re.compile(
     r"NotificationPermissionManager|PendingSessionStore|RecordingDelayManager|"
     r"SessionCheckpointStore|SessionCommitter|SessionManager|SnoreInterrupterPlayer|SoundAnalysisDetector|"
     r"UserPreferences|WatchConnectivityManager|SessionRawLogWriter|StorageLimitEnforcer|"
-    r"TabCoordinator|AppTheme)\.shared\b")
+    r"TabCoordinator)\.shared\b")
 
 
 # Rule 6 (F23-T13): services in views come from @Injected, not init.

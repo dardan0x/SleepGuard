@@ -9,7 +9,7 @@ import SwiftUI
 /// touching the Firebase console. Overrides take precedence over remote/cached
 /// values until reset. Strings here are intentionally not localized (dev-only).
 struct DebugConfigView: View {
-  @Injected(\.theme) private var theme
+  @Environment(\.theme) private var theme
   @Injected(\.appConfig) private var appConfig
 
   @State private var tabConfigs: [TabConfig] = []
@@ -72,7 +72,7 @@ struct DebugConfigView: View {
       Section("Update Gate") {
         Text("Current app version compared against the gate. Mock values are 99.0.0.")
           .font(.footnote)
-          .foregroundStyle(theme.textTertiary)
+          .foregroundStyle(theme.palette.textTertiary)
         Button("Mock Soft Update") {
           appConfig.setUpdateGateOverride(
             UpdateGate(minimumVersion: "0.0.0", recommendedVersion: "99.0.0")
@@ -91,7 +91,7 @@ struct DebugConfigView: View {
       Section("Diagnostics") {
         Text("Run without the Xcode debugger attached, then relaunch — Crashlytics uploads the report on next launch.")
           .font(.footnote)
-          .foregroundStyle(theme.textTertiary)
+          .foregroundStyle(theme.palette.textTertiary)
         Button("Force Test Crash", role: .destructive) {
           fatalError("Crashlytics test crash")
         }

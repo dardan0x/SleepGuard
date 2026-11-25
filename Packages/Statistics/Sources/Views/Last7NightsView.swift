@@ -1,5 +1,4 @@
 import DesignSystem
-import FactoryKit
 import Models
 import Routing
 import SleepCore
@@ -10,7 +9,7 @@ public import SwiftUI
 /// (ADR 0006) under SleepGuard's toolbar title.
 @MainActor
 public struct Last7NightsView: View {
-  @Injected(\.theme) private var theme
+  @Environment(\.theme) private var theme
   @Environment(RouterPath.self) private var routerPath
   @Query(sort: \SleepSession.startDate, order: .reverse)
   private var sessions: [SleepSession]
@@ -23,14 +22,14 @@ public struct Last7NightsView: View {
         routerPath.navigate(to: .sessionDetail(id: night.id))
       }
     }
-    .background(theme.bgPrimary.ignoresSafeArea())
+    .background(theme.palette.bgPrimary.ignoresSafeArea())
     .navigationTitle("")
     .navigationBarTitleDisplayMode(.inline)
     .toolbar {
       ToolbarItem(placement: .principal) {
         Text(Strings.statsTrendsLastSevenNights)
           .font(.system(size: 17, weight: .semibold))
-          .foregroundStyle(theme.textPrimary)
+          .foregroundStyle(theme.palette.textPrimary)
       }
     }
   }

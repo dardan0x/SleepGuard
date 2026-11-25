@@ -1,5 +1,4 @@
 import DesignSystem
-import FactoryKit
 import Models
 import SwiftUI
 
@@ -9,8 +8,7 @@ struct SessionDetailAdvancedPlayerView: View {
   let waveformSamples: [Float]
   let spectrumBars: [Float]
   let onWaveformTap: (Double) -> Void
-  @Injected(\.theme) private var theme
-
+  @Environment(\.theme) private var theme
   var body: some View {
     VStack(spacing: 20) {
       AdvancedWaveformSection(
@@ -21,7 +19,7 @@ struct SessionDetailAdvancedPlayerView: View {
       AdvancedStatsSection(event: event)
     }
     .padding(16)
-    .background(theme.bgCard)
-    .cornerRadius(theme.radiusCard)
+    .background(theme.palette.bgCard)
+    .cornerRadius(theme.radii.card)
   }
 }

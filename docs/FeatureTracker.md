@@ -82,7 +82,7 @@ Last updated: 2026-11-25
 | F24 | Shared Design Kit Adoption | P2 | Done (bg-card open) | 4/4 | ██████████ 100% | [tracker](trackers/f24-shared-design-kit-adoption.md) |
 | F25 | Shared Screen Content | P2 | Done | 7/7 | ██████████ 100% | [tracker](trackers/f25-shared-screen-content.md) |
 | F26 | Shared Settings Content | P2 | Done | 6/6 | ██████████ 100% | [tracker](trackers/f26-shared-settings-content.md) |
-| F27 | Architecture Interrogation Fixes | P0/P1 | In Progress | 12/17 | ███████░░░ 71% | [tracker](trackers/f27-architecture-interrogation-fixes.md) |
+| F27 | Architecture Interrogation Fixes | P0/P1 | In Progress | 13/17 | ████████░░ 76% | [tracker](trackers/f27-architecture-interrogation-fixes.md) |
 
 ## Activity Log
 
@@ -90,6 +90,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-11-26 | F27-T13 | Completed | One theme system: all views read the kit's `Theme` from the environment; `AppTheme` / `ThemeProviding` deleted (approved); no visual change (pixel-checked). ADR 0009 |
 | 2026-11-26 | F27-T12 | Completed | `InternalImportsByDefault` in every package; 225 imports made `public` where public API needs them (123 files, compiler-driven) |
 | 2026-11-25 | F27-T11 | Completed | Env split: Config, Health, Platform packages; TabCoordinator to Routing; features depend only on what they use; app target links the new packages. ADR 0008 |
 | 2026-11-25 | F27-T10 | Completed | `Logging` leaf package; AudioEngine depends on Logging + SleepCore only (notification names moved in, `ClipSource` value instead of `SnoreEvent`); Models re-exports Logging |
@@ -354,7 +355,7 @@ _Most recent first. The AI appends here after every task._
 
 | Task | Feature | Started | Assignee |
 |------|---------|---------|----------|
-| F27-T13 | F27 | — | Next: one theme system |
+| F27-T14 | F27 | — | Next: two dependency-resolution styles |
 | F23-T6 | F23 | — | Waiting for labelled real nights (user). Then merge F22 + F23 into `main`. User: real night on device (F22-T10), then merge F22 (and F23 on top) into `main` |
 
 ## Completed (last 10)

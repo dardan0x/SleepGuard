@@ -1,6 +1,5 @@
 import DesignSystem
 import Env
-import FactoryKit
 import Models
 import os
 import Routing
@@ -13,7 +12,7 @@ public import SwiftUI
 /// navigation, and confirming and performing deletes.
 @MainActor
 public struct RecordingsListView: View {
-  @Injected(\.theme) private var theme
+  @Environment(\.theme) private var theme
   @Environment(\.modelContext) private var modelContext
   @Environment(RouterPath.self) private var routerPath
   @Query(sort: \SleepSession.startDate, order: .reverse)
@@ -38,7 +37,7 @@ public struct RecordingsListView: View {
           months: months,
           onOpen: { routerPath.navigate(to: .recordingDetail(id: $0.id)) },
           onDelete: { dayToDelete = $0 })
-          .background(theme.bgPrimary)
+          .background(theme.palette.bgPrimary)
           .alert(Strings.recordingsDetailRemoveTitle, isPresented: isConfirmingDelete, presenting: dayToDelete) { day in
             Button(Strings.actionRemove, role: .destructive) {
               delete(day)
@@ -57,7 +56,7 @@ public struct RecordingsListView: View {
     } message: {
       Text(Strings.sessionDeleteFailedMessage)
     }
-    .background(theme.bgPrimary.ignoresSafeArea())
+    .background(theme.palette.bgPrimary.ignoresSafeArea())
     .onChange(of: sessions) { _, _ in
       loadState()
     }

@@ -5,8 +5,7 @@ import WidgetKit
 
 struct TrendWidgetView: View {
   let days: [WidgetSnapshot.Day]
-  let theme = AppTheme.shared
-
+  @Environment(\.theme) private var theme
   var body: some View {
     Group {
       if days.isEmpty {
@@ -17,7 +16,7 @@ struct TrendWidgetView: View {
             Text(Strings.widgetTrendLabel)
               .font(.caption2.weight(.semibold))
               .tracking(1)
-              .foregroundStyle(theme.textTertiary)
+              .foregroundStyle(theme.palette.textTertiary)
 
             Text("\(averageScore)")
               .font(.system(size: 44, weight: .bold, design: .rounded))
@@ -25,14 +24,14 @@ struct TrendWidgetView: View {
 
             Text(Strings.statsLast7nightsAvgSleepScore)
               .font(.caption)
-              .foregroundStyle(theme.textSecondary)
+              .foregroundStyle(theme.palette.textSecondary)
           }
 
           MiniBarChart(data: chartData)
         }
       }
     }
-    .containerBackground(theme.bgSecondary, for: .widget)
+    .containerBackground(theme.palette.bgSecondary, for: .widget)
     .widgetURL((days.isEmpty ? WidgetDeepLink.startTracking : .last7Nights).url)
   }
 

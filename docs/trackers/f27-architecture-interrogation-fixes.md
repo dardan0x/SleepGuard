@@ -41,7 +41,7 @@ Fixes the verdicts of the principal-level architecture review (`ARCHITECTURE_INT
 | F27-T10 | `Logging` leaf; AudioEngine off Models (Q32) | Refactor | Done | T9 | Logging / AudioEngine / Models / Recordings | 2026-11-25 | 2026-11-25 |
 | F27-T11 | Split Env by reason to change (Q31) | Refactor | Done | T10 | Env → Config / Health / Platform / Routing | 2026-11-25 | 2026-11-25 |
 | F27-T12 | Access-level imports (Q30) | Refactor | Done | T11 | all | 2026-11-26 | 2026-11-26 |
-| F27-T13 | One theme system (Q21) | Refactor | Backlog | T12 | DesignSystem / views | — | — |
+| F27-T13 | One theme system (Q21) | Refactor | Done | T12 | DesignSystem / views / widgets | 2026-11-26 | 2026-11-26 |
 | F27-T14 | Two dependency-resolution styles (Q23) | Refactor | Backlog | T11 | Env / Recordings | — | — |
 | F27-T15 | Contract tests for stateful fakes (Q24/Q59) | Tests | Backlog | T11 | Env | — | — |
 | F27-T16 | Dead code and docs (Q67, Q53) | Cleanup | Backlog | — | Recordings / docs | — | — |
@@ -386,3 +386,29 @@ Fixes the verdicts of the principal-level architecture review (`ARCHITECTURE_INT
 - Automated: a loop built each package in dependency order, read `… is imported by this file as 'internal' from 'X'` notes, and made exactly that import public (scratchpad `t12_loop.py`). Env took 18 passes; most packages 1–6.
 - What it closes, precisely: a package's dependencies no longer leak their symbols to its clients. It doesn't stop a target from importing a module it never declared (module search paths); `check-imports.py` (T9) covers that.
 - The app target isn't a package and already uses `MEMBER_IMPORT_VISIBILITY`; unchanged.
+
+---
+
+### F27-T13 — One theme system
+
+| Field | Value |
+|-------|-------|
+| Arch Ref | Interrogation Q21, Q24, Q67; ADR 0009 (new), ADR 0005 (bridge superseded) |
+| Status | Done |
+| Started | 2026-11-26 |
+| Completed | 2026-11-26 |
+
+**Acceptance Criteria:**
+- [x] Every view (packages, app target, widgets) reads `@Environment(\.theme)`; the app root sets `.sleepGuard`
+- [x] Members mapped to the kit: `theme.palette.*`, `theme.radii.card/small`, `scoreColor` (kit), `intensityColor` (new DesignSystem extension)
+- [x] Deleted (**user approved**): `AppTheme.swift`, `ThemeProviding.swift`, DesignSystem `Container.swift`, `ThemeOverrideTests.swift`; replaced by `ThemeEnvironmentTests` (3); DesignSystem dropped Factory
+- [x] Rules: `@Environment` holds `RouterPath`, `theme` and system values; layering singleton list without `AppTheme`; ADR 0009
+- [x] No visual change: Settings content pixel-identical before/after (only the status-bar clock and the translucent tab bar differ); dashboard matches
+- [x] Builds with zero errors (workspace + pinned Release); all package tests pass
+
+**Prompt Used:**
+"Yes, delete them"
+
+**Notes:**
+- Codemod over 37 files plus 2 hand fixes in widgets: the per-file check missed a second view struct in `LastNightMediumView.swift`, and `LastNightWidgetView.swift` was moved from a static `Theme.sleepGuard` to the environment.
+- `docs/TECHNICAL_OVERVIEW.md` still mentions `AppTheme`; corrected in the T16 truth pass.

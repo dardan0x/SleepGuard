@@ -1,5 +1,4 @@
 import DesignSystem
-import FactoryKit
 import Models
 import SleepCore
 public import SwiftUI
@@ -13,7 +12,7 @@ public struct EventsSheetView: View {
   let rows: [EventListRow]
   let isClipSession: Bool
 
-  @Injected(\.theme) private var theme
+  @Environment(\.theme) private var theme
   @Environment(\.dismiss) private var dismiss
 
   @State private var selectedEvent: SnoreEvent?
@@ -25,7 +24,7 @@ public struct EventsSheetView: View {
           selectedEvent = session.events?.first { $0.id == row.id }
         }
       }
-      .background(theme.bgPrimary.ignoresSafeArea())
+      .background(theme.palette.bgPrimary.ignoresSafeArea())
       .navigationTitle(Strings.recordingsDetailEventsLabel)
       .navigationBarTitleDisplayMode(.inline)
       .toolbar {
@@ -35,7 +34,7 @@ public struct EventsSheetView: View {
           } label: {
             Label(Strings.actionClose, systemImage: "xmark.circle.fill").labelStyle(.iconOnly)
               .font(.system(size: 24))
-              .foregroundStyle(theme.textTertiary)
+              .foregroundStyle(theme.palette.textTertiary)
           }
         }
       }

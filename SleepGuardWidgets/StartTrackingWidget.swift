@@ -20,29 +20,28 @@ struct StartTrackingWidget: Widget {
 
 /// Mirrors `StartRecordingButton`: red record dot, label, red top glow.
 struct StartTrackingWidgetView: View {
-  let theme = AppTheme.shared
-
+  @Environment(\.theme) private var theme
   var body: some View {
     VStack(spacing: 14) {
       ZStack {
         Circle()
-          .fill(theme.scoreRed.opacity(0.25))
+          .fill(theme.palette.scoreRed.opacity(0.25))
           .frame(width: 44, height: 44)
         Circle()
-          .fill(theme.scoreRed)
+          .fill(theme.palette.scoreRed)
           .frame(width: 22, height: 22)
       }
 
       Text(Strings.actionStartRecording)
         .font(.system(size: 17, weight: .semibold))
-        .foregroundStyle(theme.textPrimary)
+        .foregroundStyle(theme.palette.textPrimary)
         .multilineTextAlignment(.center)
     }
     .containerBackground(for: .widget) {
       ZStack {
-        theme.bgSecondary
+        theme.palette.bgSecondary
         LinearGradient(
-          colors: [theme.scoreRed.opacity(0.35), theme.scoreRed.opacity(0)],
+          colors: [theme.palette.scoreRed.opacity(0.35), theme.palette.scoreRed.opacity(0)],
           startPoint: .top,
           endPoint: .center)
       }

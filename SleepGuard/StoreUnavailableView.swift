@@ -8,43 +8,42 @@ import SwiftUI
 struct StoreUnavailableView: View {
   let openAppStore: () -> Void
 
-  private let theme = AppTheme.shared
-
+  @Environment(\.theme) private var theme
   var body: some View {
     ZStack {
-      theme.bgPrimary
+      theme.palette.bgPrimary
         .ignoresSafeArea()
 
       VStack(spacing: 16) {
         Image(systemName: "externaldrive.badge.exclamationmark")
           .font(.system(size: 48))
-          .foregroundStyle(theme.accent)
+          .foregroundStyle(theme.palette.accent)
           .accessibilityHidden(true)
 
         Text(Strings.storeUnavailableTitle)
           .font(.system(size: 22, weight: .bold))
-          .foregroundStyle(theme.textPrimary)
+          .foregroundStyle(theme.palette.textPrimary)
           .multilineTextAlignment(.center)
 
         Text(Strings.storeUnavailableMessage)
           .font(.system(size: 15))
-          .foregroundStyle(theme.textSecondary)
+          .foregroundStyle(theme.palette.textSecondary)
           .multilineTextAlignment(.center)
 
         Button(action: openAppStore) {
           Text(Strings.storeUnavailableUpdate)
             .font(.system(size: 17, weight: .semibold))
-            .foregroundStyle(theme.textPrimary)
+            .foregroundStyle(theme.palette.textPrimary)
             .frame(maxWidth: .infinity)
             .frame(height: 50)
-            .background(theme.accent)
-            .clipShape(RoundedRectangle(cornerRadius: theme.radiusSmall))
+            .background(theme.palette.accent)
+            .clipShape(RoundedRectangle(cornerRadius: theme.radii.small))
         }
         .buttonStyle(.plain)
       }
       .padding(28)
-      .background(theme.bgCard)
-      .clipShape(RoundedRectangle(cornerRadius: theme.radiusCard))
+      .background(theme.palette.bgCard)
+      .clipShape(RoundedRectangle(cornerRadius: theme.radii.card))
       .padding(.horizontal, 32)
     }
   }

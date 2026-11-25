@@ -12,7 +12,7 @@ import SwiftUI
 /// goes through `SessionShareCoordinator`.
 @MainActor
 struct SessionDetailLoadedView: View {
-  @Injected(\.theme) private var theme
+  @Environment(\.theme) private var theme
   @Injected(\.appConfig) private var appConfig
   @Environment(\.modelContext) private var modelContext
   @Environment(\.dismiss) private var dismiss
@@ -56,7 +56,7 @@ struct SessionDetailLoadedView: View {
       ToolbarItem(placement: .principal) {
         Text(DateFormatters.dayOfWeekAndDate.string(from: session.startDate))
           .font(.system(size: 17, weight: .semibold))
-          .foregroundStyle(theme.textPrimary)
+          .foregroundStyle(theme.palette.textPrimary)
       }
       ToolbarItem(placement: .topBarTrailing) {
         HStack(spacing: 16) {
@@ -70,7 +70,7 @@ struct SessionDetailLoadedView: View {
             } label: {
               Label(shareCoordinator.isGeneratingPDF ? Strings.a11yGeneratingReport : Strings.a11yExportReport, systemImage: shareCoordinator.isGeneratingPDF ? "clock" : "doc.text").labelStyle(.iconOnly)
                 .font(.system(size: 17))
-                .foregroundStyle(shareCoordinator.isGeneratingPDF ? theme.textTertiary : theme.accent)
+                .foregroundStyle(shareCoordinator.isGeneratingPDF ? theme.palette.textTertiary : theme.palette.accent)
             }
             .disabled(shareCoordinator.isGeneratingPDF)
           }
@@ -80,7 +80,7 @@ struct SessionDetailLoadedView: View {
             } label: {
               Label(Strings.a11yShare, systemImage: "square.and.arrow.up").labelStyle(.iconOnly)
                 .font(.system(size: 17))
-                .foregroundStyle(theme.accent)
+                .foregroundStyle(theme.palette.accent)
             }
           }
           Button {
@@ -92,7 +92,7 @@ struct SessionDetailLoadedView: View {
           } label: {
             Label(Strings.actionDelete, systemImage: "trash").labelStyle(.iconOnly)
               .font(.system(size: 17))
-              .foregroundStyle(theme.destructive)
+              .foregroundStyle(theme.palette.destructive)
           }
         }
       }
@@ -127,11 +127,11 @@ struct SessionDetailLoadedView: View {
     .overlay {
       if shareCoordinator.isExportingEvent {
         ZStack {
-          theme.bgPrimary.opacity(0.7)
+          theme.palette.bgPrimary.opacity(0.7)
             .ignoresSafeArea()
           ProgressView()
             .scaleEffect(1.5)
-            .tint(theme.accent)
+            .tint(theme.palette.accent)
         }
       }
     }

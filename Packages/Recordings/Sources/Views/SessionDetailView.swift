@@ -9,7 +9,7 @@ public import SwiftUI
 public struct SessionDetailView: View {
   let sessionID: UUID
 
-  @Injected(\.theme) private var theme
+  @Environment(\.theme) private var theme
   @Injected(\.appConfig) private var appConfig
   @Injected(\.userPreferences) private var userPreferences
   @Environment(\.modelContext) private var modelContext
@@ -52,18 +52,18 @@ public struct SessionDetailView: View {
           }
       }
     }
-    .background(theme.bgPrimary.ignoresSafeArea())
+    .background(theme.palette.bgPrimary.ignoresSafeArea())
   }
 
   private var errorBody: some View {
     VStack(spacing: 16) {
       Image(systemName: "exclamationmark.triangle")
         .font(.system(size: 48))
-        .foregroundStyle(theme.textTertiary)
+        .foregroundStyle(theme.palette.textTertiary)
 
       Text(Strings.recordingsErrorMessage)
         .font(.headline)
-        .foregroundStyle(theme.textPrimary)
+        .foregroundStyle(theme.palette.textPrimary)
     }
   }
 
@@ -87,7 +87,7 @@ public struct SessionDetailView: View {
     return VStack(alignment: .leading, spacing: 8) {
       Text(Strings.recordingsDetailTimelineLabel)
         .font(.system(size: 12, weight: .semibold))
-        .foregroundStyle(theme.textTertiary)
+        .foregroundStyle(theme.palette.textTertiary)
         .tracking(1)
 
       SessionDetailMiniPlayerView(

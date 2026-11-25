@@ -10,14 +10,12 @@ let package = Package(
   dependencies: [
     .package(path: "../Models"),
     .package(url: "https://github.com/dardan0x/SleepGuardShared.git", exact: "0.30.0"),
-    .package(url: "https://github.com/hmlongco/Factory", from: "3.5.2"),
   ],
   targets: [
     .target(
       name: "DesignSystem",
       dependencies: [
         .product(name: "Models", package: "Models"),
-        .product(name: "FactoryKit", package: "Factory"),
         .product(name: "SleepCore", package: "SleepGuardShared"),
         .product(name: "SleepStrings", package: "SleepGuardShared"),
         .product(name: "SleepGuardDesignKit", package: "SleepGuardShared"),
@@ -34,8 +32,7 @@ let package = Package(
       name: "DesignSystemTests",
       dependencies: [
         "DesignSystem",
-        .product(name: "FactoryKit", package: "Factory"),
-        .product(name: "FactoryTesting", package: "Factory"),
+        .product(name: "SleepCore", package: "SleepGuardShared"),
       ],
       path: "Tests",
       swiftSettings: [

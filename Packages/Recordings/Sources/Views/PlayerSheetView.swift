@@ -17,7 +17,7 @@ public struct PlayerSheetView: View {
   let isClipSession: Bool
   let initialEvent: SnoreEvent?
 
-  @Injected(\.theme) private var theme
+  @Environment(\.theme) private var theme
   @Injected(\.userPreferences) private var userPreferences
   @Environment(\.dismiss) private var dismiss
 
@@ -63,7 +63,7 @@ public struct PlayerSheetView: View {
         }
         .padding(20)
       }
-      .background(theme.bgPrimary.ignoresSafeArea())
+      .background(theme.palette.bgPrimary.ignoresSafeArea())
       // Was `.height(470)` — bumped so the Enhanced Audio toggle below the
       // player controls is visible without scrolling. `.large` is also offered
       // so users can drag up for more breathing room if they want.
@@ -78,7 +78,7 @@ public struct PlayerSheetView: View {
           } label: {
             Label(Strings.actionClose, systemImage: "xmark.circle.fill").labelStyle(.iconOnly)
               .font(.system(size: 24))
-              .foregroundStyle(theme.textTertiary)
+              .foregroundStyle(theme.palette.textTertiary)
           }
         }
       }

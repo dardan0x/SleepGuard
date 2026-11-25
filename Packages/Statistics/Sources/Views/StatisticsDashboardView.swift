@@ -1,5 +1,4 @@
 import DesignSystem
-import FactoryKit
 import Models
 import Routing
 import SwiftData
@@ -8,7 +7,7 @@ public import SwiftUI
 @MainActor
 public struct StatisticsDashboardView: View {
   @Environment(RouterPath.self) private var routerPath
-  @Injected(\.theme) private var theme
+  @Environment(\.theme) private var theme
   @Query(sort: \SleepSession.startDate, order: .reverse)
   private var sessions: [SleepSession]
 
@@ -47,7 +46,7 @@ public struct StatisticsDashboardView: View {
           })
       }
     }
-    .background(theme.bgPrimary.ignoresSafeArea())
+    .background(theme.palette.bgPrimary.ignoresSafeArea())
     // Not `sessions`: that compares identities, so a night re-scored in
     // place (a formula change at launch, late HealthKit stages) wouldn't
     // redraw. The stamps change whenever a night or its cached score does.

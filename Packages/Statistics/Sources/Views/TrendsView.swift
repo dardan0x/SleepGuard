@@ -1,5 +1,4 @@
 import DesignSystem
-import FactoryKit
 import Models
 import SleepCore
 import SwiftData
@@ -9,7 +8,7 @@ public import SwiftUI
 /// (ADR 0006) under SleepGuard's toolbar title.
 @MainActor
 public struct TrendsView: View {
-  @Injected(\.theme) private var theme
+  @Environment(\.theme) private var theme
   @Query(sort: \SleepSession.startDate, order: .reverse)
   private var sessions: [SleepSession]
 
@@ -21,14 +20,14 @@ public struct TrendsView: View {
     ScrollView {
       TrendsContent(range: $range, period: period)
     }
-    .background(theme.bgPrimary.ignoresSafeArea())
+    .background(theme.palette.bgPrimary.ignoresSafeArea())
     .navigationTitle("")
     .navigationBarTitleDisplayMode(.inline)
     .toolbar {
       ToolbarItem(placement: .principal) {
         Text(Strings.statsTrendsTitle)
           .font(.system(size: 17, weight: .semibold))
-          .foregroundStyle(theme.textPrimary)
+          .foregroundStyle(theme.palette.textPrimary)
       }
     }
   }

@@ -13,7 +13,7 @@ import SwiftUI
 struct MainTabView: View {
   // Composition root: shared services held directly (same pattern as
   // SleepGuardApp's @State service holdings).
-  @State private var theme = AppTheme.shared
+  @Environment(\.theme) private var theme
   @State private var sessionManager = SessionManager.shared
   @State private var appConfig = AppConfig.shared
 
@@ -53,7 +53,7 @@ struct MainTabView: View {
           .tag(tab)
       }
     }
-    .tint(theme.accent)
+    .tint(theme.palette.accent)
     .animation(nil, value: sessionManager.isLiveSessionVisible)
   }
 

@@ -6,8 +6,7 @@ import SwiftUI
 /// selection is reported through `onSelect` so the owner keeps coordinator
 /// and animation control.
 struct CustomTabBarView: View {
-  let theme = AppTheme.shared
-
+  @Environment(\.theme) private var theme
   let tabs: [AppTab]
   let selectedTab: AppTab
   let titleFor: (AppTab) -> String
@@ -63,13 +62,13 @@ struct CustomTabBarView: View {
           .font(.system(size: 9, weight: .medium))
           .tracking(0.5)
       }
-      .foregroundStyle(isSelected ? theme.accent : theme.textPrimary)
+      .foregroundStyle(isSelected ? theme.palette.accent : theme.palette.textPrimary)
       .frame(maxWidth: .infinity)
       .frame(height: 54)
       .background(alignment: .center) {
         if isSelected {
           RoundedRectangle(cornerRadius: 26)
-            .fill(theme.bgCard)
+            .fill(theme.palette.bgCard)
             .overlay(
               RoundedRectangle(cornerRadius: 26)
                 .stroke(.white.opacity(0.08), lineWidth: 0.5)

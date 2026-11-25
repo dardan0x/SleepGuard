@@ -1,4 +1,3 @@
-import FactoryKit
 public import SwiftUI
 
 @MainActor
@@ -8,8 +7,7 @@ public struct SessionRow: View {
   let duration: String
   let events: String
   let intensityColor: Color
-  @Injected(\.theme) private var theme
-
+  @Environment(\.theme) private var theme
   public init(
     dayNumber: String,
     weekday: String,
@@ -36,19 +34,19 @@ public struct SessionRow: View {
     }
     .padding(.horizontal, 16)
     .padding(.vertical, 14)
-    .background(theme.bgCard)
-    .cornerRadius(theme.radiusCard)
+    .background(theme.palette.bgCard)
+    .cornerRadius(theme.radii.card)
   }
 
   private var dateColumn: some View {
     VStack(alignment: .leading, spacing: 2) {
       Text(dayNumber)
         .font(.system(size: 28, weight: .bold, design: .rounded))
-        .foregroundStyle(theme.textPrimary)
+        .foregroundStyle(theme.palette.textPrimary)
 
       Text(weekday)
         .font(.system(size: 13, weight: .medium))
-        .foregroundStyle(theme.textTertiary)
+        .foregroundStyle(theme.palette.textTertiary)
         .textCase(.uppercase)
     }
   }
@@ -57,11 +55,11 @@ public struct SessionRow: View {
     VStack(alignment: .leading, spacing: 4) {
       Text(duration)
         .font(.system(size: 16, weight: .semibold))
-        .foregroundStyle(theme.textPrimary)
+        .foregroundStyle(theme.palette.textPrimary)
 
       Text(events)
         .font(.system(size: 13))
-        .foregroundStyle(theme.textSecondary)
+        .foregroundStyle(theme.palette.textSecondary)
     }
   }
 
@@ -73,7 +71,7 @@ public struct SessionRow: View {
 
       Image(systemName: "chevron.right")
         .font(.system(size: 13, weight: .semibold))
-        .foregroundStyle(theme.textTertiary)
+        .foregroundStyle(theme.palette.textTertiary)
     }
   }
 }

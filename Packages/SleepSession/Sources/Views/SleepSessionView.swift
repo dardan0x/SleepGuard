@@ -6,7 +6,7 @@ public import SwiftUI
 @MainActor
 public struct SleepSessionView: View {
   @Injected(\.sessionManager) private var sessionManager
-  @Injected(\.theme) private var theme
+  @Environment(\.theme) private var theme
   @Injected(\.recordingDelayManager) private var recordingDelayManager
 
   public init() {}

@@ -5,6 +5,7 @@ import WidgetKit
 
 struct LastNightWidgetView: View {
   @Environment(\.widgetFamily) private var family
+  @Environment(\.theme) private var theme
   let night: WidgetSnapshot.Night?
 
   var body: some View {
@@ -25,18 +26,20 @@ struct LastNightWidgetView: View {
         }
       }
     }
-    .containerBackground(AppTheme.shared.bgSecondary, for: .widget)
+    .containerBackground(theme.palette.bgSecondary, for: .widget)
     .widgetURL((night.map { WidgetDeepLink.session($0.id) } ?? .startTracking).url)
   }
 }
 
 /// "LAST NIGHT" caption shared by the small and medium layouts.
 struct LastNightLabel: View {
+  @Environment(\.theme) private var theme
+
   var body: some View {
     Text(Strings.widgetLastNightLabel)
       .font(.caption2.weight(.semibold))
       .tracking(1)
-      .foregroundStyle(AppTheme.shared.textTertiary)
+      .foregroundStyle(theme.palette.textTertiary)
   }
 }
 

@@ -57,8 +57,8 @@ struct SleepGuardApp: App {
       .overlay {
         UpdateGateView(updateGate: appConfig.updateGate, openAppStore: openAppStore)
       }
-      // The shared design kit's components read their colours from here.
-      .environment(\.theme, AppTheme.shared.designKitTheme)
+      // Every view, ours and the shared kit's, reads its colours from here.
+      .environment(\.theme, .sleepGuard)
       .preferredColorScheme(colorScheme(for: userPreferences.appearance))
       .task {
         await RemoteConfigLoader.shared.refresh()
