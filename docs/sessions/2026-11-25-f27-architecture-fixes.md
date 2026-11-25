@@ -2,7 +2,7 @@
 date: 2026-11-25
 feature: F27
 branch: refactor/f27-architecture-interrogation-fixes
-title: F27 planning (principal review verified), T1 store safety, T2 root night flow, T3 frozen flags
+title: F27 planning (principal review verified), T1 store safety, T2 root night flow, T3 frozen flags, T4 detail/list truth
 ---
 
 ### Completed
@@ -10,6 +10,7 @@ title: F27 planning (principal review verified), T1 store safety, T2 root night 
 - **F27-T1 — Never delete the user's store.** A Release build that can't open the store keeps the file, runs on an in-memory store and shows `StoreUnavailableView`. The store is backed up once per app version before opening.
 - **F27-T2 — Root owns the night flow and presentation.** `SessionFlowHost` (app root) owns recovery, the summary and the low-battery auto-save, whichever tabs remote config shows. App-level modals share one slot ordered by `RootPresentationPolicy`. The summary is presented by night ID. Widget deep links wait instead of being dropped. ADR 0007.
 - **F27-T3 — Flags frozen per recording.** `AppConfig` holds remote updates from start to stop and applies the latest at the stop. The melody honours the remote interrupter flag.
+- **F27-T4 — Detail and lists tell the truth.** Read-only detail load plus a separate enrichment command; rows deleted before files, with an alert on failure; unreachable `.error` states removed.
 
 ### Technical Details
 - `SleepGuardStore.open(_:allowDestructiveReset:)` (Models) returns the container plus the failure. Only `#if DEBUG` passes `true`.
@@ -26,6 +27,7 @@ title: F27 planning (principal review verified), T1 store safety, T2 root night 
 
 - T2: `Packages/Routing/Sources/RootPresentation.swift` (new), `Packages/Routing/Tests/RootPresentationPolicyTests.swift` (new), `Packages/Routing/Sources/Router.swift`, `Packages/Routing/Tests/RouterPathTests.swift`, `Packages/Env/Sources/Services/{TabCoordinator,TabCoordinating}.swift`, `Packages/Env/TestSupport/FakeSessionServices.swift`, `Packages/Env/Tests/ConstructorInjectionTests.swift`, `SleepGuard/SessionFlowHost.swift` (new), `SleepGuard/{StatisticsTab,MainTabView,SettingsTab,SleepGuardApp}.swift`, `docs/adr/0007-root-session-flow.md` (new), `CLAUDE.md`, `AGENTS.md`.
 - T3: `Packages/Env/Sources/Services/{AppConfig,AppConfigProviding,SnoreInterrupterPlayer}.swift`, `Packages/Env/Sources/Services/Session/SessionRecordingController.swift`, `Packages/Env/Tests/RemoteConfigFreezeTests.swift` (new), `Packages/Env/Tests/DetectionCharacterizationTests.swift` (isolated config).
+- T4: `Packages/Recordings/Sources/Helpers/SessionDetailModel.swift`, `Packages/Recordings/Sources/Views/{SessionDetailView,SessionDetailLoadedView,RecordingsListView}.swift`, `Packages/Recordings/Tests/SessionDetailModelTests.swift`, `Packages/Statistics/Sources/Views/StatisticsDashboardView.swift`, `Packages/Env/Sources/Services/SessionFileCleanup.swift`, `Packages/Models/Sources/Data/SleepScoreCache.swift`.
 
 ### Architecture Decisions
 - Data safety over availability: a store that can't be opened is never touched in Release. The user sees why and is pointed at an update; nothing is recorded into memory.
@@ -44,7 +46,7 @@ title: F27 planning (principal review verified), T1 store safety, T2 root night 
 `refactor/f27-architecture-interrogation-fixes`
 
 ### Suggested Commit
-`F27-T1 — Never delete the user's store`, `F27-T2 — Root owns the night flow and presentation`, `F27-T3 — Flags frozen per recording`
+`F27-T1 — Never delete the user's store`, `F27-T2 — Root owns the night flow and presentation`, `F27-T3 — Flags frozen per recording`, `F27-T4 — Detail and lists tell the truth`
 
 ### Changes done
 - Store opening moved to `SleepGuardStore`; Release fallback is in-memory plus a blocking screen.
@@ -52,8 +54,9 @@ title: F27 planning (principal review verified), T1 store safety, T2 root night 
 - Shared bumped to 0.29.1.
 
 ### Next Session
-- F27-T4: detail and lists tell the truth (CQS load, delete order + alert, no dead `.error`).
+- F27-T5: launch work off main, owned tasks.
 
 ### Open Questions
+- `StatisticsErrorView` / `RecordingsErrorView` are unused after T4 (kept by user choice); revisit in T16.
 - Recording can only be started from the Statistics tab, so hiding that tab remotely removes recording altogether. This is a product decision, recorded here and not fixed in F27.
 - `check-layering.py` reports false violations from ignored `.build/index-build` checkouts locally (fixed in T9).

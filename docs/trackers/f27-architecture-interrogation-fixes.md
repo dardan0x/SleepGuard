@@ -32,7 +32,7 @@ Fixes the verdicts of the principal-level architecture review (`ARCHITECTURE_INT
 | F27-T1 | Never delete the user's store (Q55) | Bug / Data safety | Done | Shared 0.29.1 (strings) | Models / App | 2026-11-25 | 2026-11-25 |
 | F27-T2 | Root owns the night flow and presentation (Q22, Q27, Q28, Q26) | Refactor / Bug | Done | — | Routing / Env / App | 2026-11-25 | 2026-11-25 |
 | F27-T3 | Flags frozen per recording (Q50) | Bug | Done | — | Env | 2026-11-25 | 2026-11-25 |
-| F27-T4 | Detail and lists tell the truth: CQS load, delete order + alert, no dead `.error` (Q34, Q56, Q20) | Bug / Refactor | Backlog | Shared 0.29.1 | Recordings / Statistics | — | — |
+| F27-T4 | Detail and lists tell the truth: CQS load, delete order + alert, no dead `.error` (Q34, Q56, Q20) | Bug / Refactor | Done | Shared 0.29.1 | Recordings / Statistics / Env / Models | 2026-11-25 | 2026-11-25 |
 | F27-T5 | Launch work off main; owned tasks (Q9, Q54) | Perf | Backlog | T2 | Models / App | — | — |
 | F27-T6 | Checkpoint writes off the detection path (Q13/Q39) | Perf | Backlog | — | Env | — | — |
 | F27-T7 | Shared 0.30.0: decimator, interruption gaps, SaveRules, stored-type fixtures, score golden, CI (Q14, Q17, Q3, Q11, Q9, Q6, Q2) | Shared | Backlog | — | SleepGuardShared | — | — |
@@ -138,3 +138,32 @@ Fixes the verdicts of the principal-level architecture review (`ARCHITECTURE_INT
 - The hold lives in memory: if the app is killed mid-night, the next launch fetches again.
 - `RemoteConfigLoader` is unchanged; it keeps refreshing on foreground, and `AppConfig` decides when values apply.
 - Not verified on the simulator: a mid-night remote flip can't be forced there, and debug overrides bypass the hold. Covered by the unit tests.
+
+---
+
+### F27-T4 — Detail and lists tell the truth
+
+| Field | Value |
+|-------|-------|
+| Arch Ref | Interrogation Q34, Q56, Q20 |
+| Status | Done |
+| Started | 2026-11-25 |
+| Completed | 2026-11-25 |
+
+**Acceptance Criteria:**
+- [x] `SessionDetailModel.load` is read-only; `enrichIfNeeded` is the separate command (late HealthKit stages, stale cached score) and saves only when something changed
+- [x] A failed enrichment save is logged and leaves the loaded night on screen (it used to turn the screen into `.error`)
+- [x] Delete order: rows first, then files once saved (a failure leaves orphan files, never a night without clips); rollback on failure
+- [x] Failed deletes show an alert on the detail screen and the nights list (they used to do nothing)
+- [x] Unreachable `.error` removed from `StatisticsDashboardView` and `RecordingsListView`
+- [x] Builds with zero errors; Recordings (12), Models (88), Statistics (11), Env (69) pass
+
+**Prompt Used:**
+"continue"
+
+**Notes:**
+- `SleepSession.hasStaleCachedScore(for:)` (Models) reads only the cached fields. `sessionFileURLs(_:)` / `removeFiles(_:)` (Env) let callers collect a night's files before deleting the rows; `deleteSessionFiles` is now a wrapper over them (Settings' delete-all still uses it, unchanged).
+- Deleting a night that's already gone now counts as done (the screen dismisses) instead of failing.
+- **User decision:** keep `StatisticsErrorView.swift` and `RecordingsErrorView.swift`, now unused. Listed for T16.
+- Not forced: a failing save (an in-memory SwiftData store can't be made to fail), so the alert path is checked by build and reading only.
+- Simulator (Debug): detail of 11 Nov loads through the read-only path; trash deletes it, the screen dismisses, the list updates. The simulator store was restored from the T1 backup afterwards.

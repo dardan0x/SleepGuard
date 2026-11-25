@@ -2,6 +2,7 @@ import DesignSystem
 import Env
 import FactoryKit
 import Models
+import os
 import Routing
 import SleepCore
 import SwiftData
@@ -20,6 +21,7 @@ public struct RecordingsListView: View {
 
   @State private var viewState: ViewState = .loading
   @State private var dayToDelete: NightDay?
+  @State private var deleteFailed = false
 
   public init() {}
 
@@ -48,11 +50,12 @@ public struct RecordingsListView: View {
           .refreshable {
             // SwiftData @Query auto-updates; refreshable provides UX feedback
           }
-      case .error:
-        RecordingsErrorView {
-          loadState()
-        }
       }
+    }
+    .alert(Strings.sessionDeleteFailedTitle, isPresented: $deleteFailed) {
+      Button(Strings.actionOk, role: .cancel) {}
+    } message: {
+      Text(Strings.sessionDeleteFailedMessage)
     }
     .background(theme.bgPrimary.ignoresSafeArea())
     .onChange(of: sessions) { _, _ in
@@ -74,19 +77,19 @@ public struct RecordingsListView: View {
     }
   }
 
+  /// Deletes the day's nights: rows first, then (once saved) their audio
+  /// files, so a failure leaves orphan files (cleaned by storage limits), never
+  /// a night without its clips. A failure is reported, not swallowed.
   private func delete(_ day: NightDay) {
     let ids = Set(day.nights.map(\.id))
     let doomed = sessions.filter { ids.contains($0.id) }
+    let files = doomed.flatMap(sessionFileURLs)
     do {
-      // Delete events first with intermediate save to avoid SwiftData faulting
-      // crash during cascade delete on faulted relationship objects.
+      // Events first with an intermediate save: deleting a faulted
+      // relationship in one cascade has crashed SwiftData.
       for session in doomed {
-        // Delete files while `session.events` still lists the event clips.
-        deleteSessionFiles(session)
-        if let events = session.events {
-          for event in events {
-            modelContext.delete(event)
-          }
+        for event in session.events ?? [] {
+          modelContext.delete(event)
         }
       }
       try modelContext.save()
@@ -98,16 +101,19 @@ public struct RecordingsListView: View {
         modelContext.delete(session)
       }
       try modelContext.save()
+      removeFiles(files)
     } catch {
-      // Deletion failed; UI will revert on next @Query update
+      modelContext.rollback()
+      Log.storage.error("Deleting a day's nights failed: \(String(describing: error), privacy: .public)")
+      deleteFailed = true
     }
     dayToDelete = nil
   }
 
+  /// No `.error`: `@Query` doesn't surface fetch errors, so it could never be reached.
   public enum ViewState {
     case loading
     case empty
     case loaded(months: [NightMonth])
-    case error
   }
 }

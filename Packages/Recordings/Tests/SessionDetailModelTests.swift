@@ -10,7 +10,8 @@ import SwiftData
 import Testing
 @testable import Recordings
 
-/// Session detail state owner: load (cache refresh), event filters, and delete.
+/// Session detail state owner: read-only load, enrichment (stages, stale
+/// score), event filters, and delete.
 /// Each test gets isolated `AppConfig` / `UserPreferences` (default flags all
 /// on, `enhancedSleepTracking` off) and its own Factory scope (`.container`),
 /// so HealthKit fakes and settings never leak between parallel tests.
@@ -64,13 +65,14 @@ final class SessionDetailModelTests {
   // MARK: - Load
 
   @MainActor
-  @Test func loadRefreshesTheCacheAndSortsEvents() async throws {
+  @Test func loadReadsWithoutWriting() throws {
     let (session, _) = try night()
     session.hasCachedScore = true
     session.cachedSleepScore = 1 // stale
+    try store.context.save()
     let model = model(for: session)
 
-    await model.load(modelContext: store.context)
+    model.load(modelContext: store.context)
 
     guard case let .loaded(loaded, sortedEvents, isClipSession) = model.viewState else {
       Issue.record("expected .loaded")
@@ -79,15 +81,43 @@ final class SessionDetailModelTests {
     #expect(loaded.id == session.id)
     #expect(sortedEvents.map(\.timestamp) == sortedEvents.map(\.timestamp).sorted())
     #expect(!isClipSession)
+    #expect(session.cachedSleepScore == 1)
+    #expect(!store.context.hasChanges)
+  }
+
+  @MainActor
+  @Test func enrichRefreshesAStaleCachedScore() async throws {
+    let (session, _) = try night()
+    session.hasCachedScore = true
+    session.cachedSleepScore = 1 // stale: no version stamp
+    let model = model(for: session)
+
+    model.load(modelContext: store.context)
+    await model.enrichIfNeeded(modelContext: store.context)
+
     #expect(session.hasCachedScore)
     #expect(session.cachedSleepScore == session.sleepScore(using: appConfig.sleepScoreConfig))
-    #expect(session.cachedSleepScore != 1)
+    #expect(!store.context.hasChanges)
+  }
+
+  @MainActor
+  @Test func enrichLeavesACurrentCachedScoreAlone() async throws {
+    let (session, _) = try night()
+    session.refreshCachedScore(using: appConfig.sleepScoreConfig)
+    session.cachedSleepScore = 1 // stamped current, so not recomputed
+    try store.context.save()
+    let model = model(for: session)
+
+    model.load(modelContext: store.context)
+    await model.enrichIfNeeded(modelContext: store.context)
+
+    #expect(session.cachedSleepScore == 1)
   }
 
   @MainActor
   @Test func loadingAnUnknownSessionIsAnError() async {
     let model = SessionDetailModel(sessionID: UUID(), appConfig: appConfig, userPreferences: preferences)
-    await model.load(modelContext: store.context)
+    model.load(modelContext: store.context)
     guard case .error = model.viewState else {
       Issue.record("expected .error")
       return
@@ -100,7 +130,7 @@ final class SessionDetailModelTests {
     event.audioFileURL = try clipFile()
     let session = try store.insert(.fixture(start: start), events: [event])
     let model = model(for: session)
-    await model.load(modelContext: store.context)
+    model.load(modelContext: store.context)
     guard case let .loaded(_, _, isClipSession) = model.viewState else {
       Issue.record("expected .loaded")
       return
@@ -121,7 +151,9 @@ final class SessionDetailModelTests {
 
     preferences.enhancedSleepTracking = true
 
-    await model(for: session).load(modelContext: store.context)
+    let model = model(for: session)
+    model.load(modelContext: store.context)
+    await model.enrichIfNeeded(modelContext: store.context)
 
     #expect(fake.fetchedSessionIDs == [session.id])
     #expect(session.sleepStageSegments?.count == 1)
@@ -134,7 +166,9 @@ final class SessionDetailModelTests {
     Container.shared.healthKitSync.register { fake }
     let session = try store.insert(.fixture(start: start))
 
-    await model(for: session).load(modelContext: store.context)
+    let model = model(for: session)
+    model.load(modelContext: store.context)
+    await model.enrichIfNeeded(modelContext: store.context)
 
     #expect(fake.fetchedSessionIDs.isEmpty)
     #expect(session.sleepStageSegments == nil)
@@ -146,7 +180,7 @@ final class SessionDetailModelTests {
   @Test func filtersShowEpisodeRepresentativesAndOtherEvents() async throws {
     let (session, e) = try night()
     let model = model(for: session)
-    await model.load(modelContext: store.context)
+    model.load(modelContext: store.context)
     let ids = { model.rows.map(\.id) }
 
     model.selectedFilter = .all
@@ -163,7 +197,7 @@ final class SessionDetailModelTests {
   @Test func shortEventsRowsAndFilters() async throws {
     let (session, e) = try night()
     let model = model(for: session)
-    await model.load(modelContext: store.context)
+    model.load(modelContext: store.context)
 
     #expect(try model.shortEvents.map(\.id) == [#require(e["micro"]).id])
     let snoringRow = try #require(model.rows.first { $0.category == .snoring })
@@ -177,7 +211,7 @@ final class SessionDetailModelTests {
   @Test func singleCategoryHidesTheFilter() async throws {
     let session = try store.insert(.fixture(start: start), events: [.fixture(at: at(0), duration: 30)])
     let model = model(for: session)
-    await model.load(modelContext: store.context)
+    model.load(modelContext: store.context)
     #expect(model.filters.isEmpty)
   }
 
@@ -202,8 +236,8 @@ final class SessionDetailModelTests {
   }
 
   @MainActor
-  @Test func deletingAnUnknownSessionReturnsFalse() {
+  @Test func deletingAnAlreadyDeletedSessionCountsAsDone() {
     let model = SessionDetailModel(sessionID: UUID(), appConfig: appConfig, userPreferences: preferences)
-    #expect(!model.delete(modelContext: store.context))
+    #expect(model.delete(modelContext: store.context))
   }
 }

@@ -30,7 +30,8 @@ public struct SessionDetailView: View {
         case .loading:
           Color.clear
             .task {
-              await model.load(modelContext: modelContext)
+              model.load(modelContext: modelContext)
+              await model.enrichIfNeeded(modelContext: modelContext)
             }
         case let .loaded(session, _, isClipSession):
           SessionDetailLoadedView(

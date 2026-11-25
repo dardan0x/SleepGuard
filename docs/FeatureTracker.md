@@ -82,7 +82,7 @@ Last updated: 2026-11-25
 | F24 | Shared Design Kit Adoption | P2 | Done (bg-card open) | 4/4 | ██████████ 100% | [tracker](trackers/f24-shared-design-kit-adoption.md) |
 | F25 | Shared Screen Content | P2 | Done | 7/7 | ██████████ 100% | [tracker](trackers/f25-shared-screen-content.md) |
 | F26 | Shared Settings Content | P2 | Done | 6/6 | ██████████ 100% | [tracker](trackers/f26-shared-settings-content.md) |
-| F27 | Architecture Interrogation Fixes | P0/P1 | In Progress | 3/17 | ██░░░░░░░░ 18% | [tracker](trackers/f27-architecture-interrogation-fixes.md) |
+| F27 | Architecture Interrogation Fixes | P0/P1 | In Progress | 4/17 | ██░░░░░░░░ 24% | [tracker](trackers/f27-architecture-interrogation-fixes.md) |
 
 ## Activity Log
 
@@ -90,6 +90,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-11-25 | F27-T4 | Completed | Detail load is read-only, enrichment a separate command that saves only on change; deletes remove rows before files and alert on failure; dead `.error` states removed (error views kept, user choice) |
 | 2026-11-25 | F27-T3 | Completed | Remote config frozen per recorded night (`AppConfig` holds updates start→stop, applies the latest on stop); the melody now honours the remote interrupter flag. 5 tests |
 | 2026-11-25 | F27-T2 | Completed | `SessionFlowHost` at the root owns recovery, the summary and low-battery auto-save, whichever tabs are visible; one root presentation slot (`RootPresentationPolicy`); summary by night ID; deep links wait instead of being dropped. ADR 0007. Two presentation bugs found and fixed on the simulator |
 | 2026-11-25 | F27-T1 | Completed | Release builds never delete the store: open failure keeps the file, runs in memory and shows `StoreUnavailableView`; store backed up once per app version (App Group container). Strings in Shared 0.29.1. Branch `refactor/f27-architecture-interrogation-fixes` |
@@ -345,7 +346,7 @@ _Most recent first. The AI appends here after every task._
 
 | Task | Feature | Started | Assignee |
 |------|---------|---------|----------|
-| F27-T4 | F27 | — | Next: detail and lists tell the truth |
+| F27-T5 | F27 | — | Next: launch work off main, owned tasks |
 | F23-T6 | F23 | — | Waiting for labelled real nights (user). Then merge F22 + F23 into `main`. User: real night on device (F22-T10), then merge F22 (and F23 on top) into `main` |
 
 ## Completed (last 10)

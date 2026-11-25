@@ -46,10 +46,6 @@ public struct StatisticsDashboardView: View {
           onViewLastSevenNights: {
             routerPath.navigate(to: .last7Nights)
           })
-      case .error:
-        StatisticsErrorView {
-          loadState()
-        }
       }
     }
     .background(theme.bgPrimary.ignoresSafeArea())
@@ -62,10 +58,11 @@ public struct StatisticsDashboardView: View {
     viewState = DashboardState.make(from: sessions, now: Date()).map(ViewState.loaded) ?? .empty
   }
 
+  /// No `.error`: `@Query` doesn't surface fetch errors and the dashboard
+  /// rules don't throw, so an error state could never be reached.
   enum ViewState {
     case loading
     case empty
     case loaded(DashboardState)
-    case error
   }
 }

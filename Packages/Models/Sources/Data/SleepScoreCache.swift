@@ -19,6 +19,12 @@ public extension SleepSession {
     hasCachedScore = true
   }
 
+  /// Whether the cached score is missing or was produced by another
+  /// formula/config. Reads only the cached fields (no faulting).
+  func hasStaleCachedScore(for config: SleepScoreConfig) -> Bool {
+    !hasCachedScore || cachedScoreVersion != SleepScore.cacheVersion(for: config)
+  }
+
   /// Recomputes every finished session whose cached score is missing or was
   /// produced by a different formula/config, then saves. Returns how many
   /// sessions changed. Run at launch, before anything reads cached scores.

@@ -23,6 +23,7 @@ struct SessionDetailLoadedView: View {
   let shareCoordinator: SessionShareCoordinator
 
   @State private var activeSheet: SessionDetailSheet?
+  @State private var deleteFailed = false
 
   /// The report's title and footer name the app, as SleepGuard's did.
   static var appName: String {
@@ -85,6 +86,8 @@ struct SessionDetailLoadedView: View {
           Button {
             if model.delete(modelContext: modelContext) {
               dismiss()
+            } else {
+              deleteFailed = true
             }
           } label: {
             Label(Strings.actionDelete, systemImage: "trash").labelStyle(.iconOnly)
@@ -93,6 +96,11 @@ struct SessionDetailLoadedView: View {
           }
         }
       }
+    }
+    .alert(Strings.sessionDeleteFailedTitle, isPresented: $deleteFailed) {
+      Button(Strings.actionOk, role: .cancel) {}
+    } message: {
+      Text(Strings.sessionDeleteFailedMessage)
     }
     .sheet(item: $activeSheet) { sheet in
       switch sheet {

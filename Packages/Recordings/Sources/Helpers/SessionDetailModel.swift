@@ -2,12 +2,14 @@ import Env
 import FactoryKit
 import Foundation
 import Models
+import os
 import SleepCore
 import SwiftData
 
-/// State owner for the session detail screen: loads the session (with the
-/// defensive cached-score refresh), owns the event category filter and its
-/// derived event lists, and performs deletion. Created by the view once the
+/// State owner for the session detail screen: loads the session (read only),
+/// then enriches it (late HealthKit stages, a stale cached score) as a separate
+/// command, owns the event category filter and its derived event lists, and
+/// performs deletion. Created by the view once the
 /// environment dependencies are available.
 @MainActor
 @Observable
@@ -35,72 +37,84 @@ final class SessionDetailModel {
     healthKitSync = Container.shared.healthKitSync()
   }
 
-  func load(modelContext: ModelContext) async {
+  /// Reads the night. Never writes: opening a screen doesn't change storage.
+  func load(modelContext: ModelContext) {
     do {
-      let descriptor = FetchDescriptor<SleepSession>(
-        predicate: #Predicate { $0.id == sessionID }
-      )
-      if let session = try modelContext.fetch(descriptor).first {
-        let stagesEmptyAndOld = (session.sleepStageSegments?.isEmpty == true)
-          && (session.endDate?.timeIntervalSinceNow ?? 0) < -3600
-        if appConfig.isEnabled(.enhancedSleepTracking),
-           userPreferences.enhancedSleepTracking,
-           session.sleepStageSegments == nil || stagesEmptyAndOld
-        {
-          let stages = await healthKitSync.fetchSleepStages(for: session)
-          session.sleepStageSegments = stages.isEmpty ? [] : stages
-        }
-
-        // Recalculate cached score and snoring duration to pick up scoring
-        // formula changes (e.g. episode merging, gap inclusion, remote config
-        // penalty updates) while the session relationship is hot.
-        session.refreshCachedScore(using: appConfig.sleepScoreConfig)
-        try modelContext.save()
-
-        let sortedEvents = session.events?.sorted(by: { $0.timestamp < $1.timestamp }) ?? []
-        let isClipSession = sortedEvents.contains(where: { AudioFileURLResolver.resolve($0.audioFileURL) != nil })
-        viewState = .loaded(session: session, sortedEvents: sortedEvents, isClipSession: isClipSession)
-      } else {
+      guard let session = try fetchSession(in: modelContext) else {
         viewState = .error
+        return
       }
+      let sortedEvents = session.events?.sorted(by: { $0.timestamp < $1.timestamp }) ?? []
+      let isClipSession = sortedEvents.contains(where: { AudioFileURLResolver.resolve($0.audioFileURL) != nil })
+      viewState = .loaded(session: session, sortedEvents: sortedEvents, isClipSession: isClipSession)
     } catch {
       viewState = .error
     }
   }
 
-  /// Deletes the session and its audio files. Returns true when the deletion
-  /// completed (the caller dismisses the screen in that case).
-  @discardableResult
+  /// The one write the screen may cause: sleep stages that arrived from
+  /// HealthKit after the night was saved, or a score cached by an older
+  /// formula. Saves only when something changed. A failure is logged and the
+  /// loaded night stays on screen.
+  func enrichIfNeeded(modelContext: ModelContext) async {
+    guard case let .loaded(session, _, _) = viewState else { return }
+    var changed = false
+    let stagesEmptyAndOld = (session.sleepStageSegments?.isEmpty == true)
+      && (session.endDate?.timeIntervalSinceNow ?? 0) < -3600
+    if appConfig.isEnabled(.enhancedSleepTracking),
+       userPreferences.enhancedSleepTracking,
+       session.sleepStageSegments == nil || stagesEmptyAndOld
+    {
+      let stages = await healthKitSync.fetchSleepStages(for: session)
+      let fetched: [SleepStageSegment] = stages.isEmpty ? [] : stages
+      if session.sleepStageSegments != fetched {
+        session.sleepStageSegments = fetched
+        changed = true
+      }
+    }
+    let config = appConfig.sleepScoreConfig
+    guard changed || session.hasStaleCachedScore(for: config) else { return }
+    session.refreshCachedScore(using: config)
+    do {
+      try modelContext.save()
+    } catch {
+      Log.storage.error("Saving the night's stages/score failed: \(String(describing: error), privacy: .public)")
+    }
+  }
+
+  /// Deletes the night: its rows first, then (once that is saved) its audio
+  /// files. A failure leaves files without a row, never a row without its
+  /// files; storage limits clean up orphans. Returns false when the delete
+  /// failed and the night is still there.
   func delete(modelContext: ModelContext) -> Bool {
     do {
-      let descriptor = FetchDescriptor<SleepSession>(
-        predicate: #Predicate { $0.id == sessionID }
-      )
-      if let session = try modelContext.fetch(descriptor).first {
-        // Delete files while `session.events` still lists the event clips.
-        deleteSessionFiles(session)
-
-        // Delete events first with intermediate save to avoid SwiftData
-        // faulting crash during cascade delete.
-        if let events = session.events {
-          for event in events {
-            modelContext.delete(event)
-          }
-          try modelContext.save()
+      guard let session = try fetchSession(in: modelContext) else { return true }
+      let files = sessionFileURLs(session)
+      // Events first with an intermediate save: deleting a faulted
+      // relationship in one cascade has crashed SwiftData.
+      if let events = session.events {
+        for event in events {
+          modelContext.delete(event)
         }
-
-        // Resolve transformable faults before deletion
-        _ = session.sleepStageSegments
-        _ = session.recordingGaps
-        modelContext.delete(session)
         try modelContext.save()
-        return true
       }
-      return false
+      // Resolve transformable faults before deletion.
+      _ = session.sleepStageSegments
+      _ = session.recordingGaps
+      modelContext.delete(session)
+      try modelContext.save()
+      removeFiles(files)
+      return true
     } catch {
-      // Deletion failed; fail silently
+      modelContext.rollback()
+      Log.storage.error("Deleting a night failed: \(String(describing: error), privacy: .public)")
       return false
     }
+  }
+
+  private func fetchSession(in modelContext: ModelContext) throws -> SleepSession? {
+    let descriptor = FetchDescriptor<SleepSession>(predicate: #Predicate { $0.id == sessionID })
+    return try modelContext.fetch(descriptor).first
   }
 
   // MARK: - Filter & derived events
