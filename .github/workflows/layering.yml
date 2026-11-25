@@ -11,3 +11,5 @@ jobs:
         run: python3 scripts/check-layering.py
       - name: View size check (200-line limit)
         run: python3 scripts/check-view-size.py
+      - name: Imports match manifests
+        run: python3 scripts/check-imports.py

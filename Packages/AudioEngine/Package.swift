@@ -30,6 +30,7 @@ let package = Package(
       name: "AudioEngineTests",
       dependencies: [
         "AudioEngine",
+        .product(name: "Models", package: "Models"),
         .product(name: "SleepCore", package: "SleepGuardShared"),
       ],
       path: "Tests",

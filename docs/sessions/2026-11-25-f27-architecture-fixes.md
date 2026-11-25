@@ -2,7 +2,7 @@
 date: 2026-11-25
 feature: F27
 branch: refactor/f27-architecture-interrogation-fixes
-title: F27 planning (principal review verified), T1 store safety, T2 root night flow, T3 frozen flags, T4 detail/list truth, T5 launch work, T6 checkpoint writer, T7/T8 shared 0.30.0
+title: F27 planning (principal review verified), T1 store safety, T2 root night flow, T3 frozen flags, T4 detail/list truth, T5 launch work, T6 checkpoint writer, T7/T8 shared 0.30.0, T9 module hygiene
 ---
 
 ### Completed
@@ -15,6 +15,7 @@ title: F27 planning (principal review verified), T1 store safety, T2 root night 
 - **F27-T6 — Checkpoint writes off the detection path.** A coalescing `CheckpointWriter` actor encodes and writes; `clear()` stays synchronous behind a sequence gate.
 - **F27-T7 — Shared 0.30.0** (written here, tagged by the user): `SampleDecimator`, interruption gaps with score formula v2, `SaveRules`, stored-value fixtures, score golden, UIKitWay CI job. Plus a 3-file UIKitWay compatibility patch.
 - **F27-T8 — Adopt 0.30.0.** Tap → decimator at exact 20 Hz, interruptions recorded and left out of the score, FFT only with the raw log, thermal logging, app-owned Debug save rule.
+- **F27-T9 — Module hygiene.** Undeclared imports declared, unused edge removed, `check-imports.py` in CI, guardrail scripts fixed.
 
 ### Technical Details
 - `SleepGuardStore.open(_:allowDestructiveReset:)` (Models) returns the container plus the failure. Only `#if DEBUG` passes `true`.
@@ -35,6 +36,7 @@ title: F27 planning (principal review verified), T1 store safety, T2 root night 
 - T5: `Packages/Models/Sources/Data/SleepScoreCache.swift`, `Packages/Models/Tests/ModelsTests/SleepScoreCacheTests.swift`, `Packages/Statistics/Sources/Views/StatisticsDashboardView.swift`, `SleepGuard/SleepGuardApp.swift`, `CLAUDE.md`, `AGENTS.md`.
 - T6: `Packages/Env/Sources/Services/SessionCheckpointStore.swift`, `Packages/Env/Tests/SessionCheckpointStoreTests.swift`.
 - T8: `Packages/AudioEngine/Sources/Engine/{AudioRecorder,AudioRecording,TapProcessor}.swift`, `Packages/Env/Sources/Services/Session/{SessionRecordingController,RealtimeDetectionTracker}.swift`, `Packages/Env/TestSupport/FakeSystemServices.swift`, `Packages/Env/Tests/DetectionCharacterizationTests.swift`, `Packages/Models/Sources/Data/SleepSession.swift`, `Packages/Models/Tests/ModelsTests/SleepGuardSchemaTests.swift`, 9 manifests + lockfile (0.30.0).
+- T9: `Packages/{Recordings,AudioEngine,Settings}/Package.swift`, `scripts/check-imports.py` (new), `scripts/check-layering.py`, `scripts/check-view-size.py`, `.github/workflows/layering.yml`, `CLAUDE.md`, `AGENTS.md`.
 
 ### Architecture Decisions
 - Data safety over availability: a store that can't be opened is never touched in Release. The user sees why and is pointed at an update; nothing is recorded into memory.
@@ -55,7 +57,7 @@ title: F27 planning (principal review verified), T1 store safety, T2 root night 
 `refactor/f27-architecture-interrogation-fixes`
 
 ### Suggested Commit
-`F27-T1 — Never delete the user's store`, `F27-T2 — Root owns the night flow and presentation`, `F27-T3 — Flags frozen per recording`, `F27-T4 — Detail and lists tell the truth`, `F27-T5 — Launch work off the first frames`, `F27-T6 — Checkpoint writes off the detection path`, `F27-T8 — Adopt Shared 0.30.0` (T7 lives in the Shared repo)
+`F27-T1 — Never delete the user's store`, `F27-T2 — Root owns the night flow and presentation`, `F27-T3 — Flags frozen per recording`, `F27-T4 — Detail and lists tell the truth`, `F27-T5 — Launch work off the first frames`, `F27-T6 — Checkpoint writes off the detection path`, `F27-T8 — Adopt Shared 0.30.0` (T7 lives in the Shared repo), `F27-T9 — Module hygiene and guardrails`
 
 ### Changes done
 - Store opening moved to `SleepGuardStore`; Release fallback is in-memory plus a blocking screen.
@@ -63,9 +65,8 @@ title: F27 planning (principal review verified), T1 store safety, T2 root night 
 - Shared bumped to 0.29.1.
 
 ### Next Session
-- F27-T9: module hygiene and guardrails.
+- F27-T10: Logging leaf; AudioEngine off Models.
 
 ### Open Questions
 - `StatisticsErrorView` / `RecordingsErrorView` are unused after T4 (kept by user choice); revisit in T16.
 - Recording can only be started from the Statistics tab, so hiding that tab remotely removes recording altogether. This is a product decision, recorded here and not fixed in F27.
-- `check-layering.py` reports false violations from ignored `.build/index-build` checkouts locally (fixed in T9).

@@ -4,7 +4,7 @@
 Rules (see AGENTS.md "UI Dependencies in Non-View Code"):
   1. `import DesignSystem` is only allowed in view files (Sources/Views/,
      Sources/Components/) and in the explicit content-engine allowlist
-     (engines whose output IS user-facing text).
+     (engines whose output IS user-facing text; none today).
   2. Core packages (Models, AudioEngine) must not import SwiftUI/UIKit/
      DesignSystem at all.
   3. Env (services) must not import SwiftUI: navigation lives in the
@@ -27,10 +27,9 @@ import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 
-DESIGNSYSTEM_ALLOWLIST = {
-    "Packages/Personalization/Sources/Engine/BriefingEngine.swift",
-    "Packages/Personalization/Sources/Engine/QuoteBank.swift",
-}
+# Content engines whose output IS user-facing text. Empty since the briefing
+# engine and quote bank moved to SleepGuardShared (F26-T6).
+DESIGNSYSTEM_ALLOWLIST: set[str] = set()
 
 # UIKit is allowed here: audio-session interruption/route observation behind
 # `#if canImport(UIKit)` — system infrastructure, not UI chrome.
@@ -53,7 +52,7 @@ SERVICE_SINGLETON = re.compile(
     r"NotificationPermissionManager|PendingSessionStore|RecordingDelayManager|"
     r"SessionCheckpointStore|SessionCommitter|SessionManager|SnoreInterrupterPlayer|SoundAnalysisDetector|"
     r"UserPreferences|WatchConnectivityManager|SessionRawLogWriter|StorageLimitEnforcer|"
-    r"TabCoordinator|Theme)\.shared\b")
+    r"TabCoordinator|AppTheme)\.shared\b")
 
 
 # Rule 6 (F23-T13): services in views come from @Injected, not init.
@@ -66,6 +65,8 @@ def main() -> int:
     violations = []
     for swift in sorted(ROOT.glob("Packages/**/*.swift")):
         rel = swift.relative_to(ROOT).as_posix()
+        if "/.build/" in rel:
+            continue  # SwiftPM checkouts (index builds), not this repo's code
         in_view_code = "/Views/" in rel or "/Components/" in rel
         in_core = rel.startswith(CORE_PREFIXES)
         in_env = rel.startswith(ENV_PREFIX)
@@ -102,7 +103,8 @@ def main() -> int:
         for violation in violations:
             print(f"  {violation}")
         return 1
-    print(f"Layering check passed ({len(list(ROOT.glob('Packages/**/*.swift')))} files scanned).")
+    scanned = [path for path in ROOT.glob("Packages/**/*.swift") if "/.build/" not in path.as_posix()]
+    print(f"Layering check passed ({len(scanned)} files scanned).")
     return 0
 
 

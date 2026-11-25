@@ -37,7 +37,7 @@ Fixes the verdicts of the principal-level architecture review (`ARCHITECTURE_INT
 | F27-T6 | Checkpoint writes off the detection path (Q13/Q39) | Perf | Done | — | Env | 2026-11-25 | 2026-11-25 |
 | F27-T7 | Shared 0.30.0: decimator, interruption gaps, SaveRules, stored-type fixtures, score golden, CI (Q14, Q17, Q3, Q11, Q9, Q6, Q2) | Shared | Done (user tags 0.30.0) | — | SleepGuardShared (+ UIKitWay compat patch) | 2026-11-25 | 2026-11-25 |
 | F27-T8 | Bump to 0.30.0 and adopt: decimator driver, interruption gaps, FFT gate, thermal log, SaveRules | Detection | Done | T7 | Env / AudioEngine / Models | 2026-11-25 | 2026-11-25 |
-| F27-T9 | Module hygiene: declared deps, import checker, guardrail fixes (Q30, Q63) | Infra | Backlog | — | all / scripts | — | — |
+| F27-T9 | Module hygiene: declared deps, import checker, guardrail fixes (Q30, Q63) | Infra | Done | — | all / scripts | 2026-11-25 | 2026-11-25 |
 | F27-T10 | `Logging` leaf; AudioEngine off Models (Q32) | Refactor | Backlog | T9 | Logging / AudioEngine | — | — |
 | F27-T11 | Split Env by reason to change (Q31) | Refactor | Backlog | T10 | Env → Config / Health / Platform | — | — |
 | F27-T12 | Access-level imports (Q30) | Refactor | Backlog | T11 | all | — | — |
@@ -280,3 +280,29 @@ Fixes the verdicts of the principal-level architecture review (`ARCHITECTURE_INT
 - Simulator (Debug, raw log on): a 20 s recording logged 400 samples over 19.95 s, every interval exactly 50 ms (it was ~54 ms). "Session Too Short" showed the 2-minute Debug rule. Discard removed the raw log and checkpoint. Thermal state `nominal` logged.
 - **History:** the T8 code first landed in `b41f6d1` under the Shared commit message (the Shared commit command also ran in this repo). With the user's OK that tip commit was amended into this task's commit, together with the bump.
 - Not tested on the simulator: a real audio-session interruption (no call on the simulator). Covered by the harness test through the recorder's callback.
+
+---
+
+### F27-T9 — Module hygiene and guardrails
+
+| Field | Value |
+|-------|-------|
+| Arch Ref | Interrogation Q30, Q63, Q67, Q29 |
+| Status | Done |
+| Started | 2026-11-25 |
+| Completed | 2026-11-25 |
+
+**Acceptance Criteria:**
+- [x] `Recordings` declares `AudioEngine`; `AudioEngineTests` declares `Models`; the unused `Settings → Personalization` edge is gone
+- [x] `scripts/check-imports.py` in CI (`layering.yml`): every import of a project module must be declared or re-exported by a declared dependency. On the old manifests it flags exactly the 7 leaks the review sweep found
+- [x] `check-view-size.py` also scans the app target (65 files)
+- [x] `check-layering.py`: skips `.build/` checkouts (no more local false positives), drops the stale `BriefingEngine` / `QuoteBank` allowlist (moved to Shared in F26), the singleton pattern names `AppTheme` (it named a `Theme` type that no longer exists)
+- [x] CLAUDE.md / AGENTS.md: no feature-to-feature edge today; the import check; app target in the size check; stale allowed-exception removed
+- [x] Builds with zero errors; AudioEngine 35, Recordings 12 tests pass
+
+**Prompt Used:**
+"done tagging" (continued)
+
+**Notes:**
+- Not done from the plan: banning `AppTheme.shared` / `Container.shared` in the app target. The rule says the app target is the composition root and holds `.shared` references, so the ban would contradict it; T13 removes `AppTheme` as a service anyway.
+- The import check is textual (manifest parsing + `import` lines). Access-level imports (T12) make the compiler enforce the same thing.

@@ -12,7 +12,6 @@ let package = Package(
     .package(path: "../Env"),
     .package(path: "../Routing"),
     .package(path: "../DesignSystem"),
-    .package(path: "../Personalization"),
     .package(url: "https://github.com/hmlongco/Factory", from: "3.5.2"),
   ],
   targets: [
@@ -23,7 +22,6 @@ let package = Package(
         .product(name: "Env", package: "Env"),
         .product(name: "Routing", package: "Routing"),
         .product(name: "DesignSystem", package: "DesignSystem"),
-        .product(name: "Personalization", package: "Personalization"),
         .product(name: "FactoryKit", package: "Factory"),
       ],
       path: "Sources",

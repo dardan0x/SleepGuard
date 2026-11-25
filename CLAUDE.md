@@ -223,7 +223,7 @@ These thresholds prevent monolithic views. Enforce them during implementation an
 
 **File size limits:**
 - No view file should exceed **200 lines**. If it does, split it.
-  Enforced in CI by `scripts/check-view-size.py` (`Sources/Views/`, `Sources/Components/`). Existing offenders sit in its `ALLOWLIST` with a reason and a line ceiling; they may shrink, never grow. Never add a new entry to get a PR through: split the file.
+  Enforced in CI by `scripts/check-view-size.py` (`Sources/Views/`, `Sources/Components/`, the app target). Existing offenders sit in its `ALLOWLIST` with a reason and a line ceiling; they may shrink, never grow. Never add a new entry to get a PR through: split the file.
 - A container view (with `switch viewState`) should be **≤100 lines**. State views (`.loading`, `.empty`, `.loaded`, `.error`) live in separate files.
 
 **What to extract into separate files:**
@@ -248,7 +248,7 @@ These thresholds prevent monolithic views. Enforce them during implementation an
 
 ### Packages
 
-- Feature packages never import other feature packages. Only: Models, AudioEngine, Env, Routing, DesignSystem (the one existing edge: Settings → Personalization).
+- Feature packages never import other feature packages. Only: Models, AudioEngine, Env, Routing, DesignSystem. No feature-to-feature edge exists today. Every import must be declared in the target's manifest: `scripts/check-imports.py` (CI) fails on a module that is only visible transitively.
 - **Night rules live in the shared repo.** `SleepSession`'s computed metrics and `SnoringEpisode` map the stored models to `Night` (`SleepSession+Night.swift`) and call `SleepCore`. Change how a night adds up there, not here; this repo's Models tests are the parity check.
 - **Statistics rules live there too.** The dashboard, trends, calendar and Last 7 Nights numbers come from `SleepCore`'s `NightDashboard`, `ScoreTrend`, `NightPeriod`, `CalendarMonth` and `NightDay`, on `NightSummary` values. Choose nights with `summaryWithoutEvents` (cached fields, no faulting) and build `nightSummary` (reads events) only for the nights a screen shows.
 - **Playback rules live there too.** `ClipPlaybackController` keeps the audio engine; which clip is current, the joined timeline, seeking, auto-advance and the enhanced-audio boost and filter frequencies are `SleepCore`'s `ClipPlaylist`, `PlaybackGain` and `PlaybackEnhancement`.
@@ -271,9 +271,7 @@ View files (`Sources/Views/`, `Sources/Components/`) own everything visual:
   maps to `Strings`/`Theme`.
 - Core packages (`Models`, `AudioEngine`) must not import `SwiftUI`/`UIKit`/
   `DesignSystem` at all.
-- Allowed exceptions: content engines whose output IS user-facing text
-  (`Personalization/Engine/BriefingEngine.swift`, `QuoteBank.swift`) may use
-  `Strings`; audio infrastructure
+- Allowed exceptions: audio infrastructure
   (`AudioEngine/Sources/Engine/AudioRecorder.swift`) may import `UIKit` for
   session-interruption observation.
 - Enforced by `scripts/check-layering.py` on every push/PR
