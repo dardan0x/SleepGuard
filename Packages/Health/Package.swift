@@ -1,7 +1,7 @@
 // swift-tools-version: 6.2
 import PackageDescription
 
-/// HealthKit: sleep stages in, nights out. Split from Env (F27-T11, ADR 0008).
+/// HealthKit: sleep stages in, nights out. Split from Env (now Services) (F27-T11, ADR 0008).
 let package = Package(
   name: "Health",
   platforms: [.iOS(.v17), .macOS(.v14)],
@@ -12,7 +12,7 @@ let package = Package(
   ],
   dependencies: [
     .package(path: "../Models"),
-    .package(url: "https://github.com/dardan0x/SleepGuardShared.git", exact: "0.30.0"),
+    .package(url: "https://github.com/dardan0x/SleepGuardShared.git", exact: "0.32.0"),
     .package(url: "https://github.com/hmlongco/Factory", from: "3.5.2"),
   ],
   targets: [
@@ -21,6 +21,7 @@ let package = Package(
       dependencies: [
         .product(name: "Models", package: "Models"),
         .product(name: "SleepCore", package: "SleepGuardShared"),
+        .product(name: "SleepHealthKit", package: "SleepGuardShared"),
         .product(name: "FactoryKit", package: "Factory"),
       ],
       path: "Sources",

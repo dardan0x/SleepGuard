@@ -1,5 +1,7 @@
 # ADR 0008: Split `Env` by reason to change
 
+> **Note (2026-11-26, F27-T20):** `Env` is now named `Services` (module, products `Services` / `ServicesTestSupport`, folder `Packages/Services`). The text below keeps the old name.
+
 - **Status:** Accepted
 - **Date:** 2026-11-25
 - **Task:** F27-T11 (principal review Q31; also Q29, Q30)

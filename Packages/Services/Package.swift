@@ -2,17 +2,17 @@
 import PackageDescription
 
 let package = Package(
-  name: "Env",
+  name: "Services",
   platforms: [.iOS(.v17), .macOS(.v14)],
   products: [
-    .library(name: "Env", targets: ["Env"]),
+    .library(name: "Services", targets: ["Services"]),
     // Fakes for the session service protocols, for tests and previews. Config,
     // Health, Platform and Routing ship their own TestSupport.
-    .library(name: "EnvTestSupport", targets: ["EnvTestSupport"]),
+    .library(name: "ServicesTestSupport", targets: ["ServicesTestSupport"]),
   ],
   dependencies: [
     .package(path: "../Models"),
-    .package(url: "https://github.com/dardan0x/SleepGuardShared.git", exact: "0.30.0"),
+    .package(url: "https://github.com/dardan0x/SleepGuardShared.git", exact: "0.32.0"),
     .package(path: "../AudioEngine"),
     .package(path: "../Config"),
     .package(path: "../Health"),
@@ -21,10 +21,11 @@ let package = Package(
   ],
   targets: [
     .target(
-      name: "Env",
+      name: "Services",
       dependencies: [
         .product(name: "Models", package: "Models"),
         .product(name: "SleepCore", package: "SleepGuardShared"),
+        .product(name: "SleepFiles", package: "SleepGuardShared"),
         .product(name: "SleepMelodies", package: "SleepGuardShared"),
         .product(name: "AudioEngine", package: "AudioEngine"),
         .product(name: "Config", package: "Config"),
@@ -38,9 +39,9 @@ let package = Package(
         .enableUpcomingFeature("InternalImportsByDefault"),
       ]),
     .target(
-      name: "EnvTestSupport",
+      name: "ServicesTestSupport",
       dependencies: [
-        "Env",
+        "Services",
         .product(name: "Config", package: "Config"),
         .product(name: "Models", package: "Models"),
         .product(name: "SleepCore", package: "SleepGuardShared"),
@@ -52,10 +53,10 @@ let package = Package(
         .enableUpcomingFeature("InternalImportsByDefault"),
       ]),
     .testTarget(
-      name: "EnvTests",
+      name: "ServicesTests",
       dependencies: [
-        "Env",
-        "EnvTestSupport",
+        "Services",
+        "ServicesTestSupport",
         .product(name: "Config", package: "Config"),
         .product(name: "ConfigTestSupport", package: "Config"),
         .product(name: "Health", package: "Health"),

@@ -2,7 +2,7 @@
 import PackageDescription
 
 /// Device services: haptics, notification permission, the Watch link. The
-/// UIKit-touching services, split from Env (F27-T11, ADR 0008).
+/// UIKit-touching services, split from Env (now Services) (F27-T11, ADR 0008).
 let package = Package(
   name: "Platform",
   platforms: [.iOS(.v17), .macOS(.v14)],

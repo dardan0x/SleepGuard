@@ -1,125 +1,65 @@
 import Foundation
-import HealthKit
 public import Models
 public import Observation
 public import SleepCore
+public import SleepHealthKit
 
-/// The live HealthKit implementation of `HealthKitSyncing`.
+/// The live `HealthKitSyncing`: SleepGuard's observable service over the
+/// shared `HealthKitSleep`, which decides what a night looks like in Apple
+/// Health (the same in SleepGuardUIKitWay). This type adds what only this
+/// app needs: the observable `isAuthorized` the screens read, the mapping
+/// from `SleepSession`, and the logging.
 @MainActor
 @Observable
 public final class HealthKitSync: HealthKitSyncing {
   public static let shared = HealthKitSync()
 
-  private let healthStore = HKHealthStore()
+  private let health: HealthKitSleep
 
   public var isAuthorized = false
 
-  public init() {}
+  public init(health: HealthKitSleep = HealthKitSleep()) {
+    self.health = health
+  }
 
   // MARK: - Authorization
 
   public func requestAuthorization() async -> Bool {
-    guard HKHealthStore.isHealthDataAvailable() else {
-      return false
-    }
-
-    guard let sleepType = HKObjectType.categoryType(forIdentifier: .sleepAnalysis) else {
-      return false
-    }
-
     do {
-      try await healthStore.requestAuthorization(toShare: [sleepType], read: [sleepType])
-      let status = healthStore.authorizationStatus(for: sleepType)
-      isAuthorized = status == .sharingAuthorized
-      return isAuthorized
+      isAuthorized = try await health.requestAuthorization()
     } catch {
-      return false
+      Log.session.error("Health authorization failed: \(error.localizedDescription, privacy: .public)")
+      isAuthorized = false
     }
+    return isAuthorized
   }
 
   public func checkAuthorizationStatus() {
-    guard HKHealthStore.isHealthDataAvailable(),
-          let sleepType = HKObjectType.categoryType(forIdentifier: .sleepAnalysis)
-    else {
-      isAuthorized = false
-      return
-    }
-    isAuthorized = healthStore.authorizationStatus(for: sleepType) == .sharingAuthorized
+    isAuthorized = health.canWrite
   }
 
   // MARK: - Read Sleep Stages
 
+  /// Read whether or not writing is allowed: HealthKit never says whether
+  /// reading is, and returns nothing when it isn't.
   public func fetchSleepStages(for session: SleepSession) async -> [SleepStageSegment] {
-    guard HKHealthStore.isHealthDataAvailable(), isAuthorized else { return [] }
-    guard let sleepType = HKObjectType.categoryType(forIdentifier: .sleepAnalysis) else { return [] }
-
-    let startDate = session.startDate
-    let endDate = session.endDate ?? startDate.addingTimeInterval(session.totalDuration)
-    let predicate = HKQuery.predicateForSamples(withStart: startDate, end: endDate, options: [])
-    let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)
-
-    return await withCheckedContinuation { continuation in
-      let query = HKSampleQuery(
-        sampleType: sleepType,
-        predicate: predicate,
-        limit: HKObjectQueryNoLimit,
-        sortDescriptors: [sortDescriptor])
-      { [weak self] _, samples, error in
-        guard let self, let samples = samples as? [HKCategorySample], error == nil else {
-          continuation.resume(returning: [])
-          return
-        }
-
-        let segments = samples.compactMap { sample -> SleepStageSegment? in
-          guard let stage = self.mapSleepStage(sample.value) else { return nil }
-          let startOffset = sample.startDate.timeIntervalSince(startDate)
-          let duration = sample.endDate.timeIntervalSince(sample.startDate)
-          return SleepStageSegment(stage: stage, startOffset: startOffset, duration: duration)
-        }
-        continuation.resume(returning: segments)
-      }
-      self.healthStore.execute(query)
-    }
-  }
-
-  private func mapSleepStage(_ value: Int) -> SleepStage? {
-    switch value {
-    case HKCategoryValueSleepAnalysis.asleepCore.rawValue: .light
-    case HKCategoryValueSleepAnalysis.asleepDeep.rawValue: .deep
-    case HKCategoryValueSleepAnalysis.asleepREM.rawValue: .rem
-    case HKCategoryValueSleepAnalysis.awake.rawValue: .awake
-    default: nil
+    let start = session.startDate
+    let end = session.endDate ?? start.addingTimeInterval(session.totalDuration)
+    do {
+      return try await health.stages(from: start, to: end)
+    } catch {
+      Log.session.error("Reading sleep stages failed: \(error.localizedDescription, privacy: .public)")
+      return []
     }
   }
 
   // MARK: - Write Sleep Data
 
   public func sync(session: SleepSession) async {
-    guard HKHealthStore.isHealthDataAvailable(), isAuthorized else { return }
-    guard let sleepType = HKObjectType.categoryType(forIdentifier: .sleepAnalysis) else { return }
-
-    let startDate = session.startDate
-    let endDate = session.endDate ?? startDate.addingTimeInterval(session.totalDuration)
-
-    let metadata: [String: Any] = [
-      HKMetadataKeyWasUserEntered: true,
-      "snoreEventsCount": session.eventsCount,
-      "snoringPercentage": session.snoringPercentage,
-      "averageDB": session.averageDB,
-      "peakDB": session.peakDB,
-    ]
-
-    let sample = HKCategorySample(
-      type: sleepType,
-      value: HKCategoryValueSleepAnalysis.asleep.rawValue,
-      start: startDate,
-      end: endDate,
-      metadata: metadata)
-
     do {
-      try await healthStore.save(sample)
+      try await health.save(session.night, summary: session.nightSummary)
     } catch {
-      // Silent failure — no toast infrastructure
+      Log.session.error("Writing the night to Health failed: \(error.localizedDescription, privacy: .public)")
     }
   }
 }

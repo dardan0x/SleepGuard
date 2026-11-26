@@ -18,7 +18,7 @@
 		A28EDE8E5E58BE472E55038A /* AudioEngine in Frameworks */ = {isa = PBXBuildFile; productRef = 3E369988AA3966E99F3F6D29 /* AudioEngine */; };
 		A81CE8384C963A2C24507F4F /* Recordings in Frameworks */ = {isa = PBXBuildFile; productRef = 1C4F985595ED007BA103E405 /* Recordings */; };
 		B7E5BB619CAC47AD866118B3 /* Personalization in Frameworks */ = {isa = PBXBuildFile; productRef = DE0D39C8817A44AB96DFE1F5 /* Personalization */; };
-		BBCD8AD5E1B9D0470A48BD85 /* Env in Frameworks */ = {isa = PBXBuildFile; productRef = D7A35E7D5BA7E75CF647C509 /* Env */; };
+		BBCD8AD5E1B9D0470A48BD85 /* Services in Frameworks */ = {isa = PBXBuildFile; productRef = D7A35E7D5BA7E75CF647C509 /* Services */; };
 		CE09839B309FF97B002E275D /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CE09839A309FF97A002E275D /* WidgetKit.framework */; };
 		CE09839D309FF97B002E275D /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CE09839C309FF97B002E275D /* SwiftUI.framework */; };
 		CE0983A8309FF980002E275D /* SleepGuardWidgetsExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = CE098398309FF97A002E275D /* SleepGuardWidgetsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -134,7 +134,7 @@
 				CE1563F32FDA136500A53611 /* FirebaseAnalytics in Frameworks */,
 				3E6C34CBE4058605247D0A36 /* Models in Frameworks */,
 				A28EDE8E5E58BE472E55038A /* AudioEngine in Frameworks */,
-				BBCD8AD5E1B9D0470A48BD85 /* Env in Frameworks */,
+				BBCD8AD5E1B9D0470A48BD85 /* Services in Frameworks */,
 				CF758CAE5F2E6721317BC087 /* DesignSystem in Frameworks */,
 				58136AE388B78A6E4D284F3E /* Onboarding in Frameworks */,
 				E6F1CF9BF2DDADE9A5619DB4 /* SleepSession in Frameworks */,
@@ -236,7 +236,7 @@
 			packageProductDependencies = (
 				47C01997BFA64842BA01B54E /* Models */,
 				3E369988AA3966E99F3F6D29 /* AudioEngine */,
-				D7A35E7D5BA7E75CF647C509 /* Env */,
+				D7A35E7D5BA7E75CF647C509 /* Services */,
 				938D66BD06A743B2F8B279C6 /* DesignSystem */,
 				758274DA39008BD85A853386 /* Onboarding */,
 				AD548900091A83E69035BB78 /* SleepSession */,
@@ -288,7 +288,7 @@
 			packageReferences = (
 				8BD2D33DB910A0A051BC520A /* XCLocalSwiftPackageReference "Packages/Models" */,
 				B60A113FA21CBEABFEEEF7A6 /* XCLocalSwiftPackageReference "Packages/AudioEngine" */,
-				4E4892DFD05149B34F929826 /* XCLocalSwiftPackageReference "Packages/Env" */,
+				4E4892DFD05149B34F929826 /* XCLocalSwiftPackageReference "Packages/Services" */,
 				C1ABFA1084CFC1B1142A5354 /* XCLocalSwiftPackageReference "Packages/DesignSystem" */,
 				AE5AF359D280CFA7C94A7CF4 /* XCLocalSwiftPackageReference "Packages/Onboarding" */,
 				07BF115E5F61CCEB06BE0BF6 /* XCLocalSwiftPackageReference "Packages/SleepSession" */,
@@ -742,9 +742,9 @@
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/Settings;
 		};
-		4E4892DFD05149B34F929826 /* XCLocalSwiftPackageReference "Packages/Env" */ = {
+		4E4892DFD05149B34F929826 /* XCLocalSwiftPackageReference "Packages/Services" */ = {
 			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/Env;
+			relativePath = Packages/Services;
 		};
 		51E6E59F2770CB9DE800DDD6 /* XCLocalSwiftPackageReference "Packages/Recordings" */ = {
 			isa = XCLocalSwiftPackageReference;
@@ -934,10 +934,10 @@
 			package = CE1563F12FDA136500A53611 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseRemoteConfig;
 		};
-		D7A35E7D5BA7E75CF647C509 /* Env */ = {
+		D7A35E7D5BA7E75CF647C509 /* Services */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 4E4892DFD05149B34F929826 /* XCLocalSwiftPackageReference "Packages/Env" */;
-			productName = Env;
+			package = 4E4892DFD05149B34F929826 /* XCLocalSwiftPackageReference "Packages/Services" */;
+			productName = Services;
 		};
 		DE0D39C8817A44AB96DFE1F5 /* Personalization */ = {
 			isa = XCSwiftPackageProductDependency;

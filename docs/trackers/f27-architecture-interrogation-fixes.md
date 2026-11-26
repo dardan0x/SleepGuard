@@ -46,6 +46,9 @@ Fixes the verdicts of the principal-level architecture review (`ARCHITECTURE_INT
 | F27-T15 | Contract tests for stateful fakes (Q24/Q59) | Tests | Done | T11 | Env | 2026-11-26 | 2026-11-26 |
 | F27-T16 | Dead code and docs (Q67, Q53) | Cleanup | Done | — | Recordings / docs | 2026-11-26 | 2026-11-26 |
 | F27-T17 | Close out: feature doc, ADRs, UIKitWay follow-up list | Docs | Done | all | docs | 2026-11-26 | 2026-11-26 |
+| F27-T18 | Shared HealthKit and raw-log behaviour (shared 0.32.0) | Refactor | Done | T17 | Health, Services | 2026-11-26 | 2026-11-26 |
+| F27-T19 | Remove DesignSystem duplicates of the shared kit | Refactor | Done | T17 | DesignSystem, widgets | 2026-11-26 | 2026-11-26 |
+| F27-T20 | Rename `Env` to `Services` | Refactor | Done | T19 | all packages | 2026-11-26 | 2026-11-26 |
 
 ## Task Details
 
@@ -503,3 +506,18 @@ Fixes the verdicts of the principal-level architecture review (`ARCHITECTURE_INT
 - [x] Feature doc `docs/features/f27-architecture-interrogation-fixes.md` (changes by concern, files, tests, routes, state, edge cases, open items, UIKitWay follow-up list)
 - [x] ADRs 0007–0009 written in their tasks; 0002 / 0005 updated
 - [x] Tracker and FeatureTracker marked done
+
+### F27-T18 — Shared HealthKit and raw-log behaviour (shared 0.32.0)
+
+Asked by the owner: share behaviour with SleepGuardUIKitWay so one fix reaches both apps. Decided: share the behaviour (implementations over shared values), not the protocols (each app's DI, state and isolation stay its own).
+- Shared 0.32.0 (written here, tagged by the owner): `SleepHealthKit` (`HealthKitSleep`) and `SleepFiles` (`RawLogFile`).
+- `HealthKitSync` wraps `HealthKitSleep`; `SessionRawLogWriter` wraps `RawLogFile` (keeps its 200-sample buffer). `SessionRawLogWriting` methods are `async`.
+- Bugs this removed: stages were read only when *writing* was allowed (HealthKit never reports read permission); save failures were silent; the snoring metadata now comes from the shared summary, as in UIKitWay.
+
+### F27-T19 — Remove DesignSystem duplicates of the shared kit
+
+`Theme.intensityColor` (= the kit's `palette.eventColor(.snoring, intensity:)`), `DurationFormatter` (= `DurationText.hoursAndMinutes`, identical text), and the unused `SessionRow` removed (deletion approved by the owner). `LowBatteryBannerView` stays: it is an adapter (decides from `SleepSession` when to show the shared banner), not a duplicate.
+
+### F27-T20 — Rename `Env` to `Services`
+
+Owner's choice of name. Folder, package, products (`Services`, `ServicesTestSupport`), test target, imports, Xcode project reference, `check-layering.py`, `check-imports.py`, current docs (CLAUDE/AGENTS, README, TECHNICAL_OVERVIEW); ADR 0008 has a note. Historical docs keep the old name. Committed with T18: the rename moved the files T18 edits.

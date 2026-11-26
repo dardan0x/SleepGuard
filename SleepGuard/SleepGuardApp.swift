@@ -1,6 +1,5 @@
 import Config
 import DesignSystem
-import Env
 import FirebaseCore
 import Health
 import Models
@@ -8,6 +7,7 @@ import Onboarding
 import os
 import Platform
 import Routing
+import Services
 import SwiftData
 import SwiftUI
 

@@ -3,7 +3,7 @@
 
 A module built for another package in the same graph is importable even when the
 target doesn't declare it (F27-T9: `Recordings` imported `AudioEngine` through
-`Env`). The build can't catch that, so this script does: for each target in each
+`Services`). The build can't catch that, so this script does: for each target in each
 `Packages/*/Package.swift`, every `import X` where X is a project module (a local
 package target, a SleepGuardShared product, Factory) must be a declared
 dependency, a target of the same package, or re-exported (`@_exported import`)

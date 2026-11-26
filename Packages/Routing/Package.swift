@@ -3,7 +3,7 @@ import PackageDescription
 
 /// Navigation contract between feature packages: route enums, the per-tab
 /// `RouterPath`, the root presentation policy and app-wide tab state
-/// (`TabCoordinator`, moved from Env in F27-T11). See
+/// (`TabCoordinator`, moved from Env (now Services) in F27-T11). See
 /// docs/adr/0001-routing-package.md and 0008.
 let package = Package(
   name: "Routing",

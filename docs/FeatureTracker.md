@@ -82,7 +82,7 @@ Last updated: 2026-11-25
 | F24 | Shared Design Kit Adoption | P2 | Done (bg-card open) | 4/4 | ██████████ 100% | [tracker](trackers/f24-shared-design-kit-adoption.md) |
 | F25 | Shared Screen Content | P2 | Done | 7/7 | ██████████ 100% | [tracker](trackers/f25-shared-screen-content.md) |
 | F26 | Shared Settings Content | P2 | Done | 6/6 | ██████████ 100% | [tracker](trackers/f26-shared-settings-content.md) |
-| F27 | Architecture Interrogation Fixes | P0/P1 | Done (device night pending) | 17/17 | ██████████ 100% | [tracker](trackers/f27-architecture-interrogation-fixes.md) |
+| F27 | Architecture Interrogation Fixes | P0/P1 | Done (device night pending) | 20/20 | ██████████ 100% | [tracker](trackers/f27-architecture-interrogation-fixes.md) |
 
 ## Activity Log
 
@@ -90,6 +90,8 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-11-26 | F27-T18/T20 | Completed | Shared 0.32.0: HealthKit and raw log are shared behaviour wrapped by this app's services; `Env` renamed `Services` |
+| 2026-11-26 | F27-T19 | Completed | DesignSystem duplicates of the kit removed (`intensityColor`, `DurationFormatter`, unused `SessionRow`) |
 | 2026-11-26 | F27-T17 | Completed | F27 done: feature doc with the UIKitWay follow-up list. User: merge `refactor/f27-architecture-interrogation-fixes`; one real night on a device |
 | 2026-11-26 | F27-T16 | Completed | Dead mini-player code and stale ProjectArchitecture.md removed (approved); isolation rule; TECHNICAL_OVERVIEW truth pass |
 | 2026-11-26 | F27-T15 | Completed | Contract tests for the checkpoint and melody stores (real + fake); found and fixed fake drift; stores take their location so tests are isolated; 4 self-check tests removed (approved) |

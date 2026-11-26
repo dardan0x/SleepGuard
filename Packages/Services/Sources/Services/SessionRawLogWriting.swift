@@ -4,7 +4,7 @@ public import SleepCore
 
 /// Writes the 20 Hz classification log. Fake: `FakeSessionRawLogWriter`.
 public protocol SessionRawLogWriting: Actor {
-  func start(sessionID: UUID, metadata: RawLogMetadata)
+  func start(sessionID: UUID, metadata: RawLogMetadata) async
   func append(
     at timestamp: Date,
     db: Float,
@@ -12,7 +12,7 @@ public protocol SessionRawLogWriting: Actor {
     spectralScore: Float,
     snoreConfidence: Float,
     speechConfidence: Float,
-    state: DetectionState)
-  func stop() -> String?
-  func discard()
+    state: DetectionState) async
+  func stop() async -> String?
+  func discard() async
 }

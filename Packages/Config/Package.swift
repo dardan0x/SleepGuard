@@ -2,7 +2,7 @@
 import PackageDescription
 
 /// Remote config (feature flags, tabs, update gate, score config) and user
-/// preferences: what the app is set to, read by every layer. Split from Env
+/// preferences: what the app is set to, read by every layer. Split from Env (now Services)
 /// (F27-T11, ADR 0008).
 let package = Package(
   name: "Config",
@@ -14,7 +14,7 @@ let package = Package(
   ],
   dependencies: [
     .package(path: "../Models"),
-    .package(url: "https://github.com/dardan0x/SleepGuardShared.git", exact: "0.30.0"),
+    .package(url: "https://github.com/dardan0x/SleepGuardShared.git", exact: "0.32.0"),
     .package(url: "https://github.com/hmlongco/Factory", from: "3.5.2"),
   ],
   targets: [
