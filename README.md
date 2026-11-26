@@ -11,7 +11,7 @@
 ![Platform](https://img.shields.io/badge/platform-iOS%2017.6%2B-blue)
 ![Language](https://img.shields.io/badge/Swift-6.2-orange)
 ![Architecture](https://img.shields.io/badge/architecture-SPM%20%C2%B7%20SwiftData%20%C2%B7%20SwiftUI-green)
-![Shared](https://img.shields.io/badge/SleepGuardShared-0.36.0-blueviolet)
+![Shared](https://img.shields.io/badge/SleepGuardShared-0.37.0-blueviolet)
 ![Privacy](https://img.shields.io/badge/privacy-on--device-brightgreen)
 
 <p align="center">
@@ -224,7 +224,7 @@ NightDetailContent(
 | Build | Uses |
 |---|---|
 | `SleepGuard.xcworkspace` (day-to-day) | `../SleepGuardShared` as a local package; edits there show up on the next build |
-| `SleepGuard.xcodeproj`, `scripts/run-tests.sh`, CI | The pinned release: `.package(url: …, exact: "0.36.0")` in every package manifest |
+| `SleepGuard.xcodeproj`, `scripts/run-tests.sh`, CI | The pinned release: `.package(url: …, exact: "0.37.0")` in every package manifest |
 
 Both modes resolve the same package identity, so no manifest changes between them. Adopting a release means running `sh scripts/bump-shared.sh <version>` (it moves every pin and both lockfiles), then the full suite. The shared repo's CI builds this app against every candidate commit, so a breaking change fails there before it's tagged.
 

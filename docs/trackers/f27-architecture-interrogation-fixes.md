@@ -55,6 +55,7 @@ Fixes the verdicts of the principal-level architecture review (`ARCHITECTURE_INT
 | F27-T24 | Uniform the apps, release C: one SwiftData schema (shared 0.36.0) | Refactor | Done | T23 | Models, Services, Recordings, Statistics, DesignSystem, Health, app | 2026-11-26 | 2026-11-26 |
 | F27-T25 | Uniform the apps, close-out (ADR 0010, docs) | Docs | Done | T24 | docs | 2026-11-26 | 2026-11-26 |
 | F27-T26 | Explicit imports: no `@_exported` | Refactor | Done | T25 | every package, app, scripts | 2026-11-26 | 2026-11-26 |
+| F27-T27 | No re-exports in the shared repo (shared 0.37.0) | Refactor | Done | T26 | manifests | 2026-11-26 | 2026-11-26 |
 
 ## Task Details
 
@@ -584,3 +585,7 @@ The owner's call as principal engineer: re-exports hide dependencies.
 - `check-imports.py` now knows every shared product (it didn't check `SleepStore`, `SleepLogging`, `SleepAudioKit`, `SleepFiles`, `SleepNotifications`, `SleepSettings`, `SleepHealthKit`); `check-layering.py` rule 7 rejects `@_exported import` in packages, the app and the widgets (probed with a planted one).
 - CLAUDE.md / AGENTS.md (strings example, design kit, logging, schema, package rule) and TECHNICAL_OVERVIEW updated.
 - Still re-exported inside SleepGuardShared: `SleepGuardContentKit` → `SleepGuardDesignKit` → `SleepStrings`. Step 2 (a shared release, both apps) removes those.
+
+### F27-T27 — No re-exports in the shared repo (shared 0.37.0)
+
+Step 2 of the owner's request: SleepGuardShared's kits no longer re-export (`SleepGuardContentKit` → `SleepGuardDesignKit` → `SleepStrings`); its test script and CI fail on `@_exported`. SleepGuard already imported and declared each kit explicitly (T26), so this is the pin. Verified on 0.37.0: package lanes, app build, checks.

@@ -2,7 +2,7 @@
 
 A single reference for how SleepGuard is built and why: the architecture, every package, how the app uses the shared core (SleepGuardShared), the snore-detection and sleep-score algorithms, the concurrency model, dependency injection, testing and CI, and how the project is developed with AI coding agents.
 
-Checked against the code on 2026-11-26 (SleepGuardShared 0.36.0), after F27 (the principal review's fixes and the uniform-apps releases, [ADR 0010](adr/0010-uniform-apps.md)).
+Checked against the code on 2026-11-26 (SleepGuardShared 0.37.0), after F27 (the principal review's fixes and the uniform-apps releases, [ADR 0010](adr/0010-uniform-apps.md)).
 
 ## Contents
 
@@ -35,7 +35,7 @@ Checked against the code on 2026-11-26 (SleepGuardShared 0.36.0), after F27 (the
 | **Persistence** | SwiftData, local only, opened through a `VersionedSchema` migration plan |
 | **Audio / ML** | AVAudioEngine, Apple **SoundAnalysis** (built-in classifier, ~300 sound classes), Accelerate/vDSP FFT |
 | **Health** | HealthKit: reads Watch sleep stages, writes sleep sessions |
-| **Shared core** | [SleepGuardShared](https://github.com/dardan0x/SleepGuardShared) 0.36.0 (exact pin): domain rules (`SleepCore`), the nights database (`SleepStore`), audio (`SleepAudioKit`), files, settings, HealthKit, logging, notifications, strings, melodies, design kit, screen content |
+| **Shared core** | [SleepGuardShared](https://github.com/dardan0x/SleepGuardShared) 0.37.0 (exact pin): domain rules (`SleepCore`), the nights database (`SleepStore`), audio (`SleepAudioKit`), files, settings, HealthKit, logging, notifications, strings, melodies, design kit, screen content |
 | **Dependency injection** | [Factory](https://github.com/hmlongco/Factory) 3.5 (`FactoryKit`), protocol-typed |
 | **Remote** | Firebase Remote Config (feature flags, tabs), Crashlytics, Analytics, Messaging. **Only the app target** links Firebase |
 | **Privacy** | No accounts and no servers for user data. Audio never leaves the phone. Privacy manifests for the app and the widget |
@@ -205,7 +205,7 @@ SleepGuardShared is a separate repo and Swift package, pinned by exact version i
 
 **Binding.** `SleepGuard.xcworkspace` adds `../SleepGuardShared` as a local package for day-to-day work; `SleepGuard.xcodeproj`, `scripts/run-tests.sh` and CI use the pinned release. `sh scripts/bump-shared.sh <version>` moves every pin and both lockfiles. The shared repo's CI builds this app against every candidate commit.
 
-**How it got there.** The shared code was extracted from this app one concern at a time (F24–F27 and the shared releases 0.1.0–0.36.0): pin the behaviour with this app's tests, turn hidden inputs (models, `Date()`, randomness) into parameters, move the rule as a pure function over values, map at the `Models` boundary with parity tests, release, bump, delete the local copy. Decisions: [ADR 0004](adr/0004-shared-repo.md), [0005](adr/0005-shared-design-kit.md), [0006](adr/0006-shared-screen-content.md). The same package also backs [SleepGuardUIKitWay](https://github.com/dardan0x/SleepGuardUIKitWay), a UIKit-shell build of the product.
+**How it got there.** The shared code was extracted from this app one concern at a time (F24–F27 and the shared releases 0.1.0–0.37.0): pin the behaviour with this app's tests, turn hidden inputs (models, `Date()`, randomness) into parameters, move the rule as a pure function over values, map at the `Models` boundary with parity tests, release, bump, delete the local copy. Decisions: [ADR 0004](adr/0004-shared-repo.md), [0005](adr/0005-shared-design-kit.md), [0006](adr/0006-shared-screen-content.md). The same package also backs [SleepGuardUIKitWay](https://github.com/dardan0x/SleepGuardUIKitWay), a UIKit-shell build of the product.
 
 ---
 
@@ -237,7 +237,7 @@ SleepGuardShared is a separate repo and Swift package, pinned by exact version i
 
 | Dependency | Used by | Why |
 |---|---|---|
-| `dardan0x/SleepGuardShared` 0.36.0 (exact) | Every package except Platform and Routing | The shared core ([§2.5](#25-the-shared-core-sleepguardshared)); this project's own |
+| `dardan0x/SleepGuardShared` 0.37.0 (exact) | Every package except Platform and Routing | The shared core ([§2.5](#25-the-shared-core-sleepguardshared)); this project's own |
 | `hmlongco/Factory` 3.5.2 (`FactoryKit`) | Services, DesignSystem, every feature package | Compile-time-safe DI container, `@Injected` |
 | `firebase/firebase-ios-sdk` 12.14 (Remote Config, Crashlytics, Analytics, Messaging) | App target only | Feature flags, crash reports, push. Kept out of the packages on purpose |
 | Apple frameworks | — | SwiftUI, SwiftData, Swift Charts, AVFoundation, SoundAnalysis, Accelerate, HealthKit, WidgetKit, UserNotifications, os |
@@ -700,7 +700,7 @@ sh scripts/run-tests.sh                   # all package tests on the simulator (
 python3 scripts/check-layering.py         # rules 1–6
 python3 scripts/check-view-size.py
 python3 scripts/generate-xcstrings.py     # Strings.txt → Localizable.xcstrings → Strings.swift (in ../SleepGuardShared)
-sh scripts/bump-shared.sh 0.36.0          # adopt a shared release: every pin + both lockfiles
+sh scripts/bump-shared.sh 0.37.0          # adopt a shared release: every pin + both lockfiles
 
 # Demo data (Debug builds): launch with -generateMockData
 # Deep links

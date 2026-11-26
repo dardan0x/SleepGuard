@@ -82,7 +82,7 @@ Last updated: 2026-11-25
 | F24 | Shared Design Kit Adoption | P2 | Done (bg-card open) | 4/4 | ██████████ 100% | [tracker](trackers/f24-shared-design-kit-adoption.md) |
 | F25 | Shared Screen Content | P2 | Done | 7/7 | ██████████ 100% | [tracker](trackers/f25-shared-screen-content.md) |
 | F26 | Shared Settings Content | P2 | Done | 6/6 | ██████████ 100% | [tracker](trackers/f26-shared-settings-content.md) |
-| F27 | Architecture Interrogation Fixes | P0/P1 | Done (device night pending) | 26/26 | ██████████ 100% | [tracker](trackers/f27-architecture-interrogation-fixes.md) |
+| F27 | Architecture Interrogation Fixes | P0/P1 | Done (device night pending) | 27/27 | ██████████ 100% | [tracker](trackers/f27-architecture-interrogation-fixes.md) |
 
 ## Activity Log
 
@@ -90,6 +90,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-11-26 | F27-T27 | Completed | Shared 0.37.0: no re-exports in the shared kits |
 | 2026-11-26 | F27-T26 | Completed | Explicit imports: the five `@_exported` re-exports removed, manifests list real dependencies, checks enforce it |
 | 2026-11-26 | F27-T25 | Completed | Close-out: ADR 0010, CLAUDE/AGENTS, TECHNICAL_OVERVIEW, README |
 | 2026-11-26 | F27-T24 | Completed | Shared 0.36.0: one SwiftData schema (SleepStore); SleepSession/SnoreEvent replaced by NightRecord/NightEventRecord |

@@ -12,6 +12,7 @@ title: Shared behaviour (HealthKit, raw log), DesignSystem duplicates, Env renam
 - F27-T20: `Env` renamed `Services`.
 - F27-T21: shared settings (0.33.0): `UserPreferences` delegates its 16 common settings to `PreferencesDefaults`.
 - F27-T22: uniform the apps, release A (0.34.0): logging, classifier, sample nights, files and layout, storage sweep, start notification.
+- F27-T27: shared 0.37.0, no re-exports in the shared kits.
 - F27-T26: explicit imports, no `@_exported` (owner's request); checks enforce it.
 - F27-T25: close-out: ADR 0010 and the docs.
 - F27-T24: release C (0.36.0): one SwiftData schema, SleepStore's NightRecord / NightEventRecord, stored summary, shared store opening.
