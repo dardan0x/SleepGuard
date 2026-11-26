@@ -15,7 +15,7 @@ Two systems for one job:
 
 ## Decision
 
-- Every view reads `@Environment(\.theme) private var theme` (the kit's `Theme`): `theme.palette.x`, `theme.radii.card` / `.small`, `theme.scoreColor(_:)`, and `theme.intensityColor(_:)` (a DesignSystem extension).
+- Every view reads `@Environment(\.theme) private var theme` (the kit's `Theme`): `theme.palette.x`, `theme.radii.card` / `.small`, `theme.scoreColor(_:)`, and `theme.palette.eventColor(_:intensity:)` (the kit's; DesignSystem's `intensityColor` duplicate was removed in F27-T19).
 - The app root sets `.environment(\.theme, .sleepGuard)`. Widgets get the environment default, which is the same theme.
 - Deleted: `AppTheme`, `ThemeProviding`, DesignSystem's `Container` registration and `ThemeOverrideTests` (replaced by `ThemeEnvironmentTests`). DesignSystem no longer depends on Factory.
 - The rule "`@Environment` only for `RouterPath` and system values" now includes `theme`: a value that varies by host (preview, render test, brand) belongs in the environment, not in a service.

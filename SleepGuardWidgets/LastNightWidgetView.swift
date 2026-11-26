@@ -45,10 +45,10 @@ struct LastNightLabel: View {
 
 extension WidgetSnapshot.Night {
   var sleptText: String {
-    DurationFormatter.hoursAndMinutes(Int(totalDuration / 60))
+    DurationText.hoursAndMinutes(totalDuration)
   }
 
   var snoringText: String {
-    "\(DurationFormatter.hoursAndMinutes(Int(snoringDuration / 60))) · \(Int(snoringPercentage.rounded()))%"
+    "\(DurationText.hoursAndMinutes(snoringDuration)) · \(Int(snoringPercentage.rounded()))%"
   }
 }

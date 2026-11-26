@@ -18,10 +18,4 @@ struct ThemeEnvironmentTests {
     values.theme = custom
     #expect(values.theme.palette.accent == .pink)
   }
-
-  @Test func intensityColoursComeFromThePalette() {
-    let theme = Theme.sleepGuard
-    #expect(theme.intensityColor(.quiet) == theme.palette.snoreQuiet)
-    #expect(theme.intensityColor(.epic) == theme.palette.snoreEpic)
-  }
 }

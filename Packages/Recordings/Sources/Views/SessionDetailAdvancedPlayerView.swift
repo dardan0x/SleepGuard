@@ -13,7 +13,7 @@ struct SessionDetailAdvancedPlayerView: View {
     VStack(spacing: 20) {
       AdvancedWaveformSection(
         samples: waveformSamples,
-        intensityColor: theme.intensityColor(event.intensity),
+        intensityColor: theme.palette.eventColor(.snoring, intensity: event.intensity),
         onWaveformTap: onWaveformTap)
       AdvancedSpectrumSection(bars: spectrumBars)
       AdvancedStatsSection(event: event)
