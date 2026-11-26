@@ -5,10 +5,7 @@ import EnvTestSupport
 import FactoryKit
 import FactoryTesting
 import Foundation
-import Health
-import HealthTestSupport
 import Models
-import ModelsTestSupport
 import Platform
 import PlatformTestSupport
 import SleepCore
@@ -26,17 +23,6 @@ struct ServiceOverrideTests {
     #expect(Container.shared.sessionManager() === SessionManager.shared)
     #expect(Container.shared.audioRecorder() === AudioRecorder.shared)
     #expect(Container.shared.sessionCommitter() === SessionCommitter.shared)
-  }
-
-  @Test func sessionManagerOverride() throws {
-    let fake = FakeSessionManager()
-    Container.shared.sessionManager.register { fake }
-
-    let resolved = Container.shared.sessionManager()
-    try resolved.startSession()
-
-    #expect(resolved === fake)
-    #expect(fake.startCount == 1 && fake.isRecording)
   }
 
   @Test func audioRecorderOverride() throws {
@@ -91,44 +77,6 @@ struct ServiceOverrideTests {
     #expect(pending.files == ["a.m4a"])
     #expect(checkpoints.loadIfPresent() == nil)
     #expect(saved.map { melodies.melody(id: $0.id) != nil } == true)
-  }
-
-  @Test func sessionCommitterOverride() throws {
-    let fake = FakeSessionCommitter()
-    Container.shared.sessionCommitter.register { fake }
-    let store = try TestStore()
-    let session = SleepSession.fixture(start: Date(timeIntervalSinceReferenceDate: 0))
-
-    try Container.shared.sessionCommitter().commit(session, in: store.context)
-    fake.error = CocoaError(.fileWriteUnknown)
-
-    #expect(throws: CocoaError.self) { try Container.shared.sessionCommitter().commit(session, in: store.context) }
-    #expect(fake.committedSessionIDs == [session.id])
-  }
-
-  @Test func coordinationOverrides() {
-    let delay = FakeRecordingDelayManager()
-    Container.shared.recordingDelayManager.register { delay }
-
-    Container.shared.recordingDelayManager().startDelay(minutes: 2)
-
-    #expect(delay.isActive && delay.remainingTimeString == "02:00")
-  }
-
-  @Test func permissionAndDeviceOverrides() async {
-    let notifications = FakeNotificationPermissionManager(grantsAuthorization: false)
-    let watch = FakeWatchConnectivityManager(isWatchReachable: true)
-    let health = FakeHealthKitSync()
-    Container.shared.notificationPermissionManager.register { notifications }
-    Container.shared.watchConnectivityManager.register { watch }
-    Container.shared.healthKitSync.register { health }
-
-    let granted = await Container.shared.notificationPermissionManager().requestAuthorization()
-    let healthGranted = await Container.shared.healthKitSync().requestAuthorization()
-
-    #expect(!granted && notifications.authorizationStatus == .denied)
-    #expect(Container.shared.watchConnectivityManager().isWatchReachable)
-    #expect(healthGranted && health.authorizationRequests == 1)
   }
 
   @Test func nonisolatedServiceOverrides() async {

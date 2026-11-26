@@ -12,10 +12,17 @@ public final class CustomMelodyStorage: CustomMelodyStoring {
   public private(set) var customMelodies: [Melody] = []
 
   private let defaultsKey = "customMelodiesMetadata"
-  private let directoryName = "CustomMelodies"
+  private let defaults: UserDefaults
+  private let directoryURL: URL
   private var nextID = 100
 
-  public init() {
+  /// `defaults` and `directory` are the app's own unless a test passes
+  /// throwaway ones (the contract tests run the real store in isolation).
+  public init(defaults: UserDefaults = .standard, directory: URL? = nil) {
+    self.defaults = defaults
+    directoryURL = directory ?? FileManager.default
+      .urls(for: .documentDirectory, in: .userDomainMask)[0]
+      .appendingPathComponent("CustomMelodies")
     load()
   }
 
@@ -83,12 +90,12 @@ public final class CustomMelodyStorage: CustomMelodyStoring {
 
   private func persist() {
     let metadata = customMelodies.map { ["id": $0.id, "name": $0.customName ?? "", "filename": $0.filename] }
-    UserDefaults.standard.set(metadata, forKey: defaultsKey)
-    UserDefaults.standard.set(nextID, forKey: "customMelodiesNextID")
+    defaults.set(metadata, forKey: defaultsKey)
+    defaults.set(nextID, forKey: "customMelodiesNextID")
   }
 
   private func load() {
-    if let stored = UserDefaults.standard.array(forKey: defaultsKey) as? [[String: Any]] {
+    if let stored = defaults.array(forKey: defaultsKey) as? [[String: Any]] {
       customMelodies = stored.compactMap { dict in
         guard let id = dict["id"] as? Int,
               let name = dict["name"] as? String,
@@ -96,16 +103,10 @@ public final class CustomMelodyStorage: CustomMelodyStoring {
         return Melody(id: id, filename: filename, customName: name)
       }
     }
-    nextID = CustomMelodies.nextID(stored: UserDefaults.standard.integer(forKey: "customMelodiesNextID"), existing: customMelodies)
+    nextID = CustomMelodies.nextID(stored: defaults.integer(forKey: "customMelodiesNextID"), existing: customMelodies)
   }
 
   // MARK: - File System
-
-  private var directoryURL: URL {
-    FileManager.default
-      .urls(for: .documentDirectory, in: .userDomainMask)[0]
-      .appendingPathComponent(directoryName)
-  }
 
   private func ensureDirectoryExists() throws {
     let url = directoryURL

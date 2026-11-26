@@ -43,7 +43,7 @@ Fixes the verdicts of the principal-level architecture review (`ARCHITECTURE_INT
 | F27-T12 | Access-level imports (Q30) | Refactor | Done | T11 | all | 2026-11-26 | 2026-11-26 |
 | F27-T13 | One theme system (Q21) | Refactor | Done | T12 | DesignSystem / views / widgets | 2026-11-26 | 2026-11-26 |
 | F27-T14 | Two dependency-resolution styles (Q23) | Refactor | Done | T11 | Env / Recordings / AudioEngine | 2026-11-26 | 2026-11-26 |
-| F27-T15 | Contract tests for stateful fakes (Q24/Q59) | Tests | Backlog | T11 | Env | — | — |
+| F27-T15 | Contract tests for stateful fakes (Q24/Q59) | Tests | Done | T11 | Env | 2026-11-26 | 2026-11-26 |
 | F27-T16 | Dead code and docs (Q67, Q53) | Cleanup | Backlog | — | Recordings / docs | — | — |
 | F27-T17 | Close out: feature doc, ADRs, UIKitWay follow-up list | Docs | Backlog | all | docs | — | — |
 
@@ -438,3 +438,29 @@ Fixes the verdicts of the principal-level architecture review (`ARCHITECTURE_INT
 **Notes:**
 - Not changed, by design: `AudioRecorder`'s `SoundAnalysisDetector.shared` default. AudioEngine has no DI, and that default is what Env's `soundAnalysisDetector` factory returns. `StorageLimitEnforcer` resolves preferences at the call because a `Sendable` type can't store the main-actor service; commented in place.
 - `MockDataGenerator` (Debug-only static helper) still reads the container inline; it isn't a type with collaborators.
+
+---
+
+### F27-T15 — Contract tests for stateful fakes
+
+| Field | Value |
+|-------|-------|
+| Arch Ref | Interrogation Q24, Q59; ADR 0002 |
+| Status | Done |
+| Started | 2026-11-26 |
+| Completed | 2026-11-26 |
+
+**Acceptance Criteria:**
+- [x] `StoreContractTests`: one suite run against the real store and its fake, for `SessionCheckpointStoring` and `CustomMelodyStoring` (4 tests)
+- [x] **Drift found and fixed:** `FakeSessionCheckpointStore` offered a snapshot with no events; the real store refuses it. The fake now matches
+- [x] Real stores run in isolation: `CustomMelodyStorage(defaults:directory:)` and `SessionCheckpointStore(url:)` take their location (app defaults unchanged); `SessionCheckpointStoreTests` no longer share one file or run serialized
+- [x] Removed (**user approved**) 4 `ServiceOverrideTests` cases that only called back the fake they registered
+- [x] ADR 0002 counts and text updated
+- [x] Builds with zero errors; Env 66 tests pass
+
+**Prompt Used:**
+"Keep, add contract tests" / "Yes, delete the 4"
+
+**Notes:**
+- Scope, honestly: only stores whose state is visible through their own protocol get a contract. `FakePendingSessionStore`, `FakeStorageLimitEnforcer` and `FakeSessionRawLogWriter` are effect-only (they count or record calls), where a spy is the right double (the review's Q60 rule); their real types have their own tests.
+- Writing the contract also exposed a test-isolation bug: two suites drove `SessionCheckpointStore.shared` (one file on disk) in parallel and clobbered each other. Fixed by the injectable URL.

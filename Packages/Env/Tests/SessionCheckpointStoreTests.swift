@@ -4,21 +4,17 @@ import ModelsTestSupport
 import Testing
 @testable import Env
 
-/// Crash-recovery file (`Documents/session_recovery.json`). One shared file,
-/// so the suite runs serially and clears it before and after each test.
+/// Crash-recovery file. Each test has its own file and store, so tests run in
+/// parallel without sharing state.
 @MainActor
-@Suite(.serialized)
 final class SessionCheckpointStoreTests {
-  private let store = SessionCheckpointStore.shared
+  private let fileURL = FileManager.default.temporaryDirectory
+    .appendingPathComponent("recovery-\(UUID().uuidString).json")
+  private lazy var store = SessionCheckpointStore(url: fileURL)
   private let start = TestCalendar.date(day: 1, hour: 23)
-  private let fileURL = AudioFileURLResolver.url(for: "session_recovery.json")
-
-  init() {
-    store.clear()
-  }
 
   deinit {
-    try? FileManager.default.removeItem(at: AudioFileURLResolver.url(for: "session_recovery.json"))
+    try? FileManager.default.removeItem(at: fileURL)
   }
 
   private func snapshot(events: Int) -> SessionRecoverySnapshot {

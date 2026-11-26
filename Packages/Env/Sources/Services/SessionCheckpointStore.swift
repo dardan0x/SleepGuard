@@ -1,4 +1,4 @@
-import Foundation
+public import Foundation
 public import Models
 import os
 
@@ -24,8 +24,10 @@ public final class SessionCheckpointStore: SessionCheckpointStoring {
   private var sequence = 0
   private var lastWrite: Task<Void, Never>?
 
-  public init() {
-    recoveryURL = FileManager.default
+  /// `url` is the app's recovery file unless a test passes its own, so tests
+  /// never share (or clobber) one file.
+  public init(url: URL? = nil) {
+    recoveryURL = url ?? FileManager.default
       .urls(for: .documentDirectory, in: .userDomainMask)[0]
       .appendingPathComponent("session_recovery.json")
     writer = CheckpointWriter(url: recoveryURL, gate: gate)

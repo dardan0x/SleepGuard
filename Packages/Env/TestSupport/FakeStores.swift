@@ -40,7 +40,11 @@ public final class FakeSessionCheckpointStore: SessionCheckpointStoring {
   }
 
   public func write(_ snapshot: SessionRecoverySnapshot) { self.snapshot = snapshot }
-  public func loadIfPresent() -> SessionRecoverySnapshot? { snapshot }
+  /// Like the real store: a snapshot with nothing to recover isn't offered.
+  public func loadIfPresent() -> SessionRecoverySnapshot? {
+    snapshot.flatMap { $0.isRecoverable ? $0 : nil }
+  }
+
   public func clear() { snapshot = nil }
 }
 
