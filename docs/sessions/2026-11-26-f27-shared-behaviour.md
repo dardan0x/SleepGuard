@@ -11,6 +11,7 @@ title: Shared behaviour (HealthKit, raw log), DesignSystem duplicates, Env renam
 - F27-T19: DesignSystem duplicates of the kit removed.
 - F27-T20: `Env` renamed `Services`.
 - F27-T21: shared settings (0.33.0): `UserPreferences` delegates its 16 common settings to `PreferencesDefaults`.
+- F27-T22: uniform the apps, release A (0.34.0): logging, classifier, sample nights, files and layout, storage sweep, start notification.
 
 ### Technical Details
 - Principle: share behaviour (implementations over shared values), keep protocols per app. A protocol encodes an app's DI, state and isolation; a shared implementation is what fixes a bug once.

@@ -2,7 +2,7 @@ public import AVFoundation
 #if canImport(UIKit)
 import UIKit
 #endif
-import Logging
+import SleepLogging
 public import Observation
 
 public enum RecordingError: Error {

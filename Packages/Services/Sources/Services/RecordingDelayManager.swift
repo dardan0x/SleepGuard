@@ -4,7 +4,7 @@ public import Foundation
 import Models
 public import Observation
 import SleepCore
-import UserNotifications
+import SleepNotifications
 
 public extension Notification.Name {
   static let recordingDelayDidComplete = Notification.Name("recordingDelayDidComplete")
@@ -20,7 +20,8 @@ public final class RecordingDelayManager: RecordingDelayManaging {
   public var currentRemainingSeconds = 0
 
   private var timer: Timer?
-  public let notificationId = "sleepguard-delayed-recording"
+  /// `StartNotification`'s, so a tap on it is recognized (AppDelegate).
+  public var notificationId: String { StartNotification.identifier }
 
   private let audioRecorder: any AudioRecording
 
@@ -104,19 +105,13 @@ public final class RecordingDelayManager: RecordingDelayManaging {
 
   // MARK: - Notifications
 
+  /// SleepGuardShared's `StartNotification`: the same text (localized) and
+  /// identifier as SleepGuardUIKitWay's.
   private func scheduleNotification(minutes: Int) {
-    let content = UNMutableNotificationContent()
-    content.title = "SleepGuard"
-    content.body = "Your recording session is starting now"
-    content.sound = .default
-
-    let trigger = UNTimeIntervalNotificationTrigger(timeInterval: TimeInterval(minutes * 60), repeats: false)
-    let request = UNNotificationRequest(identifier: notificationId, content: content, trigger: trigger)
-
-    UNUserNotificationCenter.current().add(request)
+    StartNotification.schedule(startingAt: Date().addingTimeInterval(TimeInterval(minutes * 60)))
   }
 
   private func cancelNotification() {
-    UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [notificationId])
+    StartNotification.cancel()
   }
 }

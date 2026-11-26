@@ -22,8 +22,9 @@ public actor SessionRawLogWriter: SessionRawLogWriting {
   private var sessionStart: Date?
   private var file: RawLogFile?
 
-  public init(directory: URL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]) {
-    self.directory = directory
+  /// `nil`: the clips folder (`AudioFileURLResolver`); tests pass their own.
+  public init(directory: URL? = nil) {
+    self.directory = directory ?? AudioFileURLResolver.directory
   }
 
   /// The log's file name for a session, known before the file exists, so the

@@ -1,31 +1,28 @@
 import DesignSystem
 import FactoryKit
-public import Models
 import Platform
+import Services
 public import SwiftUI
 
 /// The profile editor sheet: the shared `ProfileEditorContent` editing the
-/// stored `UserProfile` directly (each change goes to the model, as before).
+/// stored profile (`ProfileStoring`, the shared profile file); each change is
+/// kept as it is made.
 @MainActor
 public struct ProfileEditorView: View {
-  @Bindable var profile: UserProfile
   let onComplete: () -> Void
   let onDismiss: () -> Void
+  @Injected(\.profileStore) private var profileStore
   @Injected(\.hapticManager) private var hapticManager
 
-  public init(profile: UserProfile, onComplete: @escaping () -> Void, onDismiss: @escaping () -> Void = {}) {
-    self.profile = profile
+  public init(onComplete: @escaping () -> Void, onDismiss: @escaping () -> Void = {}) {
     self.onComplete = onComplete
     self.onDismiss = onDismiss
   }
 
   public var body: some View {
     ProfileEditorContent(
-      profile: $profile.sleepProfile,
-      onSave: {
-        profile.updatedAt = Date()
-        onComplete()
-      },
+      profile: Binding(get: { profileStore.profile }, set: { profileStore.update($0) }),
+      onSave: onComplete,
       onClose: onDismiss,
       onTap: { hapticManager.tap() })
   }

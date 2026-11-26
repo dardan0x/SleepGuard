@@ -9,7 +9,7 @@ import Testing
 struct SleepGuardSchemaTests {
   @Test func v1ListsEveryPersistedModel() {
     let entities = Set(SleepGuardSchema.schema.entities.map(\.name))
-    #expect(entities == ["SleepSession", "SnoreEvent", "UserProfile", "LifestyleLog"])
+    #expect(entities == ["SleepSession", "SnoreEvent"])
   }
 
   /// Existing installs have a store written without a migration plan. Opening it
@@ -24,7 +24,7 @@ struct SleepGuardSchemaTests {
 
     let sessionID: UUID
     do {
-      let legacySchema = Schema([SleepSession.self, SnoreEvent.self, UserProfile.self, LifestyleLog.self])
+      let legacySchema = Schema([SleepSession.self, SnoreEvent.self])
       let legacy = try ModelContainer(
         for: legacySchema,
         configurations: [ModelConfiguration(schema: legacySchema, url: url)])

@@ -12,7 +12,7 @@ let package = Package(
     .package(path: "../Config"),
     .package(path: "../Models"),
     .package(path: "../AudioEngine"),
-    .package(url: "https://github.com/dardan0x/SleepGuardShared.git", exact: "0.33.0"),
+    .package(url: "https://github.com/dardan0x/SleepGuardShared.git", exact: "0.34.0"),
     .package(path: "../Services"),
     .package(path: "../Routing"),
     .package(path: "../DesignSystem"),

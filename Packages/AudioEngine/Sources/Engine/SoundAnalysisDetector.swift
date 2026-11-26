@@ -1,5 +1,5 @@
 public import AVFoundation
-import Logging
+import SleepLogging
 public import Observation
 import SleepCore
 public import SoundAnalysis

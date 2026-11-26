@@ -295,8 +295,6 @@ final class DetectionHarness {
       appConfig: AppConfig.isolated(),
       runsProcessingLoop: false)
     tracker = RealtimeDetectionTracker(
-      snoreDetector: SnoreDetector(),
-      speechDetector: SpeechDetector(),
       audioRecorder: recorder,
       snoreInterrupterPlayer: interrupter,
       preferences: preferences,

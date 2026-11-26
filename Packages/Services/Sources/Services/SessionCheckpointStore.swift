@@ -1,8 +1,10 @@
 public import Foundation
-public import Models
+import Models
+public import SleepCore
 import os
+import SleepFiles
 
-/// Persists a recovery snapshot of the in-progress session to disk during
+/// Persists the in-progress night (SleepGuardShared's checkpoint format) to disk during
 /// recording. If the app dies mid-session (crash / OOM / background kill), the
 /// snapshot lets the session be reconstructed and offered to the user on the
 /// next launch instead of being lost. Cleared once the session is saved or
@@ -27,27 +29,25 @@ public final class SessionCheckpointStore: SessionCheckpointStoring {
   /// `url` is the app's recovery file unless a test passes its own, so tests
   /// never share (or clobber) one file.
   public init(url: URL? = nil) {
-    recoveryURL = url ?? FileManager.default
-      .urls(for: .documentDirectory, in: .userDomainMask)[0]
-      .appendingPathComponent("session_recovery.json")
+    recoveryURL = url ?? SleepGuardStorage.location.checkpointURL
     writer = CheckpointWriter(url: recoveryURL, gate: gate)
   }
 
   /// Hands the snapshot to the writer and returns at once.
-  public func write(_ snapshot: SessionRecoverySnapshot) {
+  public func write(_ night: Night) {
     sequence += 1
     let sequence = sequence
     let writer = writer
-    lastWrite = Task { await writer.submit(snapshot, sequence: sequence) }
+    lastWrite = Task { await writer.submit(night, sequence: sequence) }
   }
 
-  /// Returns the persisted snapshot if one exists and holds recoverable data.
-  public func loadIfPresent() -> SessionRecoverySnapshot? {
+  /// The checkpointed night, when there is one and it has events (an empty
+  /// night is dropped silently rather than offered).
+  public func loadIfPresent() -> Night? {
     guard FileManager.default.fileExists(atPath: recoveryURL.path) else { return nil }
     do {
-      let data = try Data(contentsOf: recoveryURL)
-      let snapshot = try JSONDecoder().decode(SessionRecoverySnapshot.self, from: data)
-      return snapshot.isRecoverable ? snapshot : nil
+      let night = try NightCheckpoint.decode(Data(contentsOf: recoveryURL))
+      return night.events.isEmpty ? nil : night
     } catch {
       Log.session.error("Checkpoint unreadable, night not recoverable: \(String(describing: error), privacy: .public)")
       return nil
@@ -84,7 +84,7 @@ public final class SessionCheckpointStore: SessionCheckpointStoring {
 actor CheckpointWriter {
   private let url: URL
   private let gate: OSAllocatedUnfairLock<Int>
-  private var pending: (sequence: Int, snapshot: SessionRecoverySnapshot)?
+  private var pending: (sequence: Int, night: Night)?
   private var newestSequence = 0
   private var drainScheduled = false
   private(set) var diskWrites = 0
@@ -94,10 +94,10 @@ actor CheckpointWriter {
     self.gate = gate
   }
 
-  func submit(_ snapshot: SessionRecoverySnapshot, sequence: Int) {
+  func submit(_ night: Night, sequence: Int) {
     guard sequence > newestSequence else { return }
     newestSequence = sequence
-    pending = (sequence, snapshot)
+    pending = (sequence, night)
     guard !drainScheduled else { return }
     drainScheduled = true
     Task { await self.drain() }
@@ -107,10 +107,10 @@ actor CheckpointWriter {
   /// renames, so a crash mid-write leaves the previous good snapshot intact.
   func drain() {
     drainScheduled = false
-    guard let (sequence, snapshot) = pending else { return }
+    guard let (sequence, night) = pending else { return }
     pending = nil
     do {
-      let data = try JSONEncoder().encode(snapshot)
+      let data = try NightCheckpoint.encode(night)
       let url = url
       let wrote = try gate.withLock { lowest -> Bool in
         guard sequence >= lowest else { return false }

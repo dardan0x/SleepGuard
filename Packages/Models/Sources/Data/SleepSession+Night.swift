@@ -64,3 +64,32 @@ extension SnoreEvent {
       clipFileName: audioFileURL)
   }
 }
+
+public extension SleepSession {
+  /// A detached session (in no `ModelContext`) with its events wired up, from
+  /// a night value: a recovered checkpoint, or a sample night. The raw
+  /// recording's files are referenced when they exist (SleepCore's
+  /// `RawRecording` names, in the clips folder).
+  static func make(from night: Night) -> SleepSession {
+    let raw = AudioFileURLResolver.resolve(RawRecording.audioFileName(for: night.id)) != nil
+      ? RawRecording.audioFileName(for: night.id) : nil
+    let rawLog = AudioFileURLResolver.resolve(RawRecording.logFileName(for: night.id)) != nil
+      ? RawRecording.logFileName(for: night.id) : nil
+    let session = SleepSession(
+      id: night.id, startDate: night.start, endDate: night.end, averageDB: night.averageDB, peakDB: night.peakDB,
+      audioFileURL: raw, rawAudioFileURL: raw, rawLogFileURL: rawLog)
+    session.recordingGaps = night.recordingGaps
+    session.sleepStageSegments = night.sleepStages.isEmpty ? nil : night.sleepStages
+    session.terminationReason = night.endReason == .lowBattery ? "low_battery" : nil
+    let events = night.events.map { event in
+      let model = SnoreEvent(
+        id: event.id, timestamp: event.start, category: event.category, intensity: event.intensity,
+        averageDB: event.averageDB, peakDB: event.peakDB, averageConfidence: event.averageConfidence,
+        audioFileURL: event.clipFileName, bursts: event.bursts, duration: event.duration)
+      model.session = session
+      return model
+    }
+    session.events = events
+    return session
+  }
+}

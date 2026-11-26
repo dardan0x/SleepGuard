@@ -4,6 +4,7 @@ import Foundation
 import Models
 import SleepCore
 public import SwiftData
+import SleepFiles
 
 /// Report returned after running storage cleanup.
 public struct CleanupReport: Sendable {
@@ -58,58 +59,35 @@ public final class StorageLimitEnforcer: Sendable, StorageLimitEnforcing {
   }
 
   /// Same as above with explicit limits (`nil` = that limit is off), so tests
-  /// don't depend on `UserDefaults`.
+  /// don't depend on `UserDefaults`. `inProgress` is the night being
+  /// recorded, whose files no saved night names yet (`nil`: the checkpoint's).
   @MainActor
   @discardableResult
-  func enforceLimits(modelContext: ModelContext, maxDays: Int?, maxMB: Int?) async -> CleanupReport {
-    let (dayPlan, sizePlan) = buildPlans(maxDays: maxDays, maxMB: maxMB, modelContext: modelContext)
-
-    // Save URL clears immediately so the model is consistent even if
-    // background file deletion is slow or fails.
-    do {
-      try modelContext.save()
-    } catch {
-      Log.storage.error("Failed to save context after clearing URLs: \(String(describing: error), privacy: .public)")
-    }
-
-    // Perform all file deletions off the main actor.
-    let dayReport = await deleteFiles(plan: dayPlan)
-    let sizeReport = await deleteFiles(plan: sizePlan)
-
-    let report = CleanupReport(
-      filesRemoved: dayReport.filesRemoved + sizeReport.filesRemoved,
-      bytesRemoved: dayReport.bytesRemoved + sizeReport.bytesRemoved,
-      sessionsAffected: dayReport.sessionsAffected + sizeReport.sessionsAffected,
-      dayLimitSessions: dayReport.sessionsAffected,
-      sizeLimitSessions: sizeReport.sessionsAffected)
-
-    Log.storage.info("Cleanup complete — \(report.filesRemoved) file(s), \(report.bytesRemoved / 1_024 / 1_024) MB, \(report.sessionsAffected) session(s)")
-    return report
-  }
-
-  // MARK: - Plan builder (MainActor)
-
-  /// Measures every session's audio, lets the shared `StoragePlan` choose the
-  /// nights (older than `maxDays`, then oldest first over `maxMB`), and clears
-  /// those nights' audio URLs on the models.
-  @MainActor
-  private func buildPlans(maxDays: Int?, maxMB: Int?, modelContext: ModelContext) -> (day: CleanupPlan, size: CleanupPlan) {
-    let empty = CleanupPlan(fileURLs: [], sessionsAffected: 0)
-    guard maxDays != nil || maxMB != nil else { return (empty, empty) }
+  func enforceLimits(
+    modelContext: ModelContext,
+    maxDays: Int?,
+    maxMB: Int?,
+    inProgress: Night? = Container.shared.sessionCheckpointStore().loadIfPresent()) async -> CleanupReport
+  {
     let sessions: [SleepSession]
     do {
       sessions = try modelContext.fetch(FetchDescriptor<SleepSession>(sortBy: [SortDescriptor(\.startDate)]))
     } catch {
       Log.storage.error("Session fetch failed, cleanup skipped: \(String(describing: error), privacy: .public)")
-      return (empty, empty)
+      return CleanupReport()
     }
 
-    let nights = sessions.map {
-      StoragePlan.Night(id: $0.id, start: $0.startDate, bytes: audioSize(for: $0, modelContext: modelContext))
-    }
-    let plan = StoragePlan.make(nights: nights, now: Date(), maxDays: maxDays, maxMB: maxMB)
+    // SleepGuardShared's StorageSweep decides, as in SleepGuardUIKitWay: which
+    // nights lose their audio (older than the day limit, then the oldest over
+    // the size limit) and which files in the clips folder nothing names.
+    let folder = ClipFolder(directory: AudioFileURLResolver.directory)
+    let nights = sessions.map { nightFiles(for: $0, modelContext: modelContext) }
+    let allFiles = folder.allFileNames()
+    let sweep = StorageSweep.make(
+      nights: nights, sizes: folder.sizes(of: allFiles), allFiles: allFiles, inProgress: inProgress, now: Date(),
+      maxDays: maxDays, maxMB: maxMB)
+
     let byID = Dictionary(sessions.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
-
     func clear(_ ids: [UUID]) -> CleanupPlan {
       var urls: [URL] = []
       var affected = 0
@@ -123,13 +101,43 @@ public final class StorageLimitEnforcer: Sendable, StorageLimitEnforcing {
       }
       return CleanupPlan(fileURLs: urls, sessionsAffected: affected)
     }
+    let dayPlan = clear(sweep.plan.dayLimited)
+    let sizePlan = clear(sweep.plan.sizeLimited)
+    let leftoverPlan = CleanupPlan(fileURLs: sweep.leftovers.map(folder.directory.appendingPathComponent), sessionsAffected: 0)
 
-    let day = clear(plan.dayLimited)
-    let size = clear(plan.sizeLimited)
-    if day.sessionsAffected > 0 || size.sessionsAffected > 0 {
-      Log.storage.info("Planned removal for \(day.sessionsAffected) old and \(size.sessionsAffected) over-limit session(s)")
+    // Save URL clears immediately so the model is consistent even if
+    // background file deletion is slow or fails.
+    do {
+      try modelContext.save()
+    } catch {
+      Log.storage.error("Failed to save context after clearing URLs: \(String(describing: error), privacy: .public)")
     }
-    return (day, size)
+
+    // Perform all file deletions off the main actor.
+    let dayReport = await deleteFiles(plan: dayPlan)
+    let sizeReport = await deleteFiles(plan: sizePlan)
+    let leftoverReport = await deleteFiles(plan: leftoverPlan)
+
+    let report = CleanupReport(
+      filesRemoved: dayReport.filesRemoved + sizeReport.filesRemoved + leftoverReport.filesRemoved,
+      bytesRemoved: dayReport.bytesRemoved + sizeReport.bytesRemoved + leftoverReport.bytesRemoved,
+      sessionsAffected: dayReport.sessionsAffected + sizeReport.sessionsAffected,
+      dayLimitSessions: dayReport.sessionsAffected,
+      sizeLimitSessions: sizeReport.sessionsAffected)
+
+    Log.storage.info("Cleanup complete — \(report.filesRemoved) file(s), \(report.bytesRemoved / 1_024 / 1_024) MB, \(report.sessionsAffected) session(s), \(leftoverReport.filesRemoved) leftover(s)")
+    return report
+  }
+
+  /// A session's files as SleepCore's `NightFiles`: its events' clips and its
+  /// own audio files by name (the raw recording is also found by its id).
+  @MainActor
+  private func nightFiles(for session: SleepSession, modelContext: ModelContext) -> NightFiles {
+    let names = fetchEvents(for: session, modelContext: modelContext).compactMap(\.audioFileURL)
+      + [session.audioFileURL, session.rawAudioFileURL, session.rawLogFileURL].compactMap(\.self)
+    return NightFiles(
+      id: session.id, start: session.startDate,
+      clipFileNames: Array(Set(names.map { ($0 as NSString).lastPathComponent })))
   }
 
   // MARK: - Event fetching (avoids faulting corrupted relationships)
@@ -206,38 +214,10 @@ public final class StorageLimitEnforcer: Sendable, StorageLimitEnforcing {
 
   // MARK: - Size helpers
 
-  @MainActor
-  private func audioSize(for session: SleepSession, modelContext: ModelContext) -> Int64 {
-    var size: Int64 = 0
-
-    let events = fetchEvents(for: session, modelContext: modelContext)
-    for event in events {
-      if let url = AudioFileURLResolver.resolve(event.audioFileURL) {
-        size += fileSize(at: url)
-      }
-    }
-
-    if let url = AudioFileURLResolver.resolve(session.audioFileURL) {
-      size += fileSize(at: url)
-    }
-    if let url = AudioFileURLResolver.resolve(session.rawAudioFileURL) {
-      size += fileSize(at: url)
-    }
-    if let url = AudioFileURLResolver.resolve(session.rawLogFileURL) {
-      size += fileSize(at: url)
-    }
-
-    return size
-  }
-
   private static func fileSize(at url: URL, fm: FileManager = .default) -> Int64 {
     guard let attrs = try? fm.attributesOfItem(atPath: url.path),
           let size = attrs[.size] as? Int64 else { return 0 }
     return size
-  }
-
-  private func fileSize(at url: URL) -> Int64 {
-    Self.fileSize(at: url, fm: FileManager.default)
   }
 
   // MARK: - Debug helpers
@@ -253,7 +233,7 @@ public final class StorageLimitEnforcer: Sendable, StorageLimitEnforcing {
       return 0
     }
 
-    let docs = AudioFileURLResolver.documentsDirectory
+    let docs = AudioFileURLResolver.directory
     var created = 0
     let dummyData = Data(repeating: 0xAB, count: 1_024 * 1_024) // 1 MB
 

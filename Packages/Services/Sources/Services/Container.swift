@@ -16,6 +16,8 @@ public extension Container {
 
   @MainActor var audioRecorder: Factory<any AudioRecording> { self { AudioRecorder.shared }.singleton }
   @MainActor var customMelodyStorage: Factory<any CustomMelodyStoring> { self { CustomMelodyStorage.shared }.singleton }
+  @MainActor var profileStore: Factory<any ProfileStoring> { self { ProfileStore.shared }.singleton }
+  @MainActor var lifestyleLogStore: Factory<any LifestyleLogStoring> { self { LifestyleLogStore.shared }.singleton }
   @MainActor var pendingSessionStore: Factory<any PendingSessionStoring> { self { PendingSessionStore.shared }.singleton }
   @MainActor var recordingDelayManager: Factory<any RecordingDelayManaging> { self { RecordingDelayManager.shared }.singleton }
   @MainActor var sessionCheckpointStore: Factory<any SessionCheckpointStoring> { self { SessionCheckpointStore.shared }.singleton }
@@ -38,9 +40,4 @@ extension Container {
   /// cross-wiring (`attach` / weak `recording`) in its init.
   @MainActor var sessionRecordingController: Factory<SessionRecordingController> { self { SessionRecordingController() }.singleton }
   @MainActor var realtimeDetectionTracker: Factory<RealtimeDetectionTracker> { self { RealtimeDetectionTracker() }.singleton }
-
-  /// The live classifiers (AudioEngine has no DI of its own, so they're
-  /// registered here, where the tracker that uses them is composed).
-  @MainActor var snoreDetector: Factory<SnoreDetector> { self { SnoreDetector.shared }.singleton }
-  @MainActor var speechDetector: Factory<SpeechDetector> { self { SpeechDetector.shared }.singleton }
 }

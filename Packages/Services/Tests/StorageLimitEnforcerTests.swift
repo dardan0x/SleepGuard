@@ -7,8 +7,11 @@ import Testing
 
 /// Storage cleanup deletes the oldest audio files (by age or total size) and
 /// clears their references, but keeps every session and event.
-/// Files are real, uniquely named, in the test host's Documents folder.
+/// Files are real, uniquely named, in the test host's clips folder. One test
+/// at a time: a cleanup also removes files no night in its store names, which
+/// would include another test's files.
 @MainActor
+@Suite(.serialized)
 final class StorageLimitEnforcerTests {
   private let store: TestStore
   private let enforcer = StorageLimitEnforcer.shared
@@ -25,7 +28,7 @@ final class StorageLimitEnforcerTests {
     }
   }
 
-  /// Writes a file of `bytes` into Documents and returns its stored filename.
+  /// Writes a file of `bytes` into the clips folder and returns its stored filename.
   private func audioFile(bytes: Int = 1_000) throws -> String {
     let name = "storage-test-\(UUID().uuidString).m4a"
     let url = AudioFileURLResolver.url(for: name)

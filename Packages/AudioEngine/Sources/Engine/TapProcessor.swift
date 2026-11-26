@@ -1,7 +1,7 @@
 import AVFoundation
-import Logging
 import os
 import SleepCore
+import SleepLogging
 import SoundAnalysis
 
 /// Audio-thread half of `AudioRecorder`.

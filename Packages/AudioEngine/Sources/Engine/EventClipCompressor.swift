@@ -1,7 +1,7 @@
 import AudioToolbox
 import AVFoundation
 public import Foundation
-import Logging
+import SleepLogging
 
 /// Compresses raw per-event .caf recordings to AAC .m4a.
 ///

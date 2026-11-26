@@ -1,10 +1,13 @@
 import Foundation
-public import Models
+public import SleepCore
 
-/// Crash-recovery snapshot file. Fake: `FakeSessionCheckpointStore`.
+/// The night in progress on disk, for crash recovery: a `Night` in
+/// SleepGuardShared's checkpoint format (`NightCheckpoint`), the same file
+/// SleepGuardUIKitWay writes. Fake: `FakeSessionCheckpointStore`.
 @MainActor
 public protocol SessionCheckpointStoring: AnyObject {
-  func write(_ snapshot: SessionRecoverySnapshot)
-  func loadIfPresent() -> SessionRecoverySnapshot?
+  func write(_ night: Night)
+  /// The night, when there is one worth recovering (it has events).
+  func loadIfPresent() -> Night?
   func clear()
 }

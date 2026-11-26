@@ -50,6 +50,7 @@ Fixes the verdicts of the principal-level architecture review (`ARCHITECTURE_INT
 | F27-T19 | Remove DesignSystem duplicates of the shared kit | Refactor | Done | T17 | DesignSystem, widgets | 2026-11-26 | 2026-11-26 |
 | F27-T20 | Rename `Env` to `Services` | Refactor | Done | T19 | all packages | 2026-11-26 | 2026-11-26 |
 | F27-T21 | Shared settings (shared 0.33.0) | Refactor | Done | T20 | Config | 2026-11-26 | 2026-11-26 |
+| F27-T22 | Uniform the apps, release A (shared 0.34.0) | Refactor | Done | T21 | Models, Services, AudioEngine, Personalization, app | 2026-11-26 | 2026-11-26 |
 
 ## Task Details
 
@@ -526,3 +527,16 @@ Owner's choice of name. Folder, package, products (`Services`, `ServicesTestSupp
 ### F27-T21 — Shared settings (shared 0.33.0)
 
 The owner's follow-up: the apps aren't in production, so stored settings can move freely. Shared 0.33.0 (tagged by the owner): `SleepPreferences` (SleepCore), the 16 settings both apps have with their defaults, and `PreferencesDefaults` (new `SleepSettings` product), which stores them in UserDefaults (keys, defaults, validity). `UserPreferences` keeps its observable properties; those 16 read and write through `PreferencesDefaults`. SleepGuard-only settings (appearance, clip length, soft ask, …) stay in the app. The interrupter's keys are renamed for the feature. `UserPreferences(suiteName:)` replaces `init(defaults:)`.
+
+### F27-T22 — Uniform the apps, release A (shared 0.34.0)
+
+The owner's request: everything not unique to an app moves to SleepGuardShared (plan approved 2026-11-26: releases A small pieces, B audio, C one SwiftData schema; one file layout; nothing is in production).
+- Logging: the `Logging` package removed; `Log` is SleepGuardShared's `SleepLogging` (re-exported by Models), signposter included.
+- Classification: `SnoreDetector` / `SpeechDetector` removed; the tracker holds SleepCore's `LiveSampleClassifier` (the same as SleepGuardUIKitWay's).
+- Profile and survey: the `UserProfile` and `LifestyleLog` @Models removed (schema V1 is SleepSession and SnoreEvent); `ProfileStore` and `LifestyleLogStore` (Services, observable, behind protocols, fakes) over the shared `ProfileFile` / `LifestyleLogFile`. The editor, prompt card and briefing use them; all ten survey chips are kept (the model had six).
+- Checkpoint: `SessionRecoverySnapshot` removed; the checkpoint is a `Night` in the shared file format (`NightCheckpoint.encode/decode`), written by SleepGuard's own writer and sequence gate; recovery uses `SleepSession.make(from:)`.
+- Files: the shared layout (`SleepGuardStorage`, the app group): clips, raw recordings (`RawRecording` names), checkpoint, profile and survey files moved off Documents.
+- Storage limits: `StorageLimitEnforcer` decides with SleepCore's `StorageSweep`, so it now also removes files no night refers to (as SleepGuardUIKitWay did); its tests run serialized.
+- Sample data: `MockDataGenerator` saves the shared `SampleNights` (no clips until release B).
+- Start notification: the shared `StartNotification` (the text was hardcoded English).
+- Deletions approved by the owner. A crash-recovered night loses its events' spectral stats until release C.

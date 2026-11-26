@@ -42,18 +42,15 @@ struct StatisticsTab: View {
     { destination in
       switch destination {
       case .profileEditor:
-        if let profile = fetchOrCreateProfile() {
-          ProfileEditorView(
-            profile: profile,
-            onComplete: {
-              routerPath.presentedSheet = nil
-              UserPreferences.shared.hasCompletedProfile = true
-            },
-            onDismiss: {
-              routerPath.presentedSheet = nil
-            })
-            .withEnvironments()
-        }
+        ProfileEditorView(
+          onComplete: {
+            routerPath.presentedSheet = nil
+            UserPreferences.shared.hasCompletedProfile = true
+          },
+          onDismiss: {
+            routerPath.presentedSheet = nil
+          })
+          .withEnvironments()
       }
     }
     .onAppear {
@@ -87,21 +84,5 @@ struct StatisticsTab: View {
       || routerPath.presentedSheet != nil
     guard let link = tabCoordinator.takePendingDeepLink(blocked: blocked) else { return }
     DeepLinkRouter.route(link, routerPath: routerPath, modelContext: modelContext)
-  }
-
-  private func fetchOrCreateProfile() -> UserProfile? {
-    let descriptor = FetchDescriptor<UserProfile>()
-    do {
-      if let existing = try modelContext.fetch(descriptor).first {
-        return existing
-      }
-    } catch {
-      // Don't create a second profile because the first one couldn't be read.
-      Log.app.error("Profile fetch failed: \(String(describing: error), privacy: .public)")
-      return nil
-    }
-    let profile = UserProfile()
-    modelContext.insert(profile)
-    return profile
   }
 }

@@ -12,7 +12,7 @@ let package = Package(
   ],
   dependencies: [
     .package(path: "../Models"),
-    .package(url: "https://github.com/dardan0x/SleepGuardShared.git", exact: "0.33.0"),
+    .package(url: "https://github.com/dardan0x/SleepGuardShared.git", exact: "0.34.0"),
     .package(path: "../AudioEngine"),
     .package(path: "../Config"),
     .package(path: "../Health"),
@@ -26,6 +26,7 @@ let package = Package(
         .product(name: "Models", package: "Models"),
         .product(name: "SleepCore", package: "SleepGuardShared"),
         .product(name: "SleepFiles", package: "SleepGuardShared"),
+        .product(name: "SleepNotifications", package: "SleepGuardShared"),
         .product(name: "SleepMelodies", package: "SleepGuardShared"),
         .product(name: "AudioEngine", package: "AudioEngine"),
         .product(name: "Config", package: "Config"),

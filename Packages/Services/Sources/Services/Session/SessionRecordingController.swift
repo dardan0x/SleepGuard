@@ -98,7 +98,7 @@ final class SessionRecordingController {
     let session = SleepSession(startDate: Date())
     session.recordingGaps = []
     currentSession = session
-    let sessionAudioFilename = preferences.preserveRawAudio ? "session_\(session.id.uuidString).caf" : nil
+    let sessionAudioFilename = preferences.preserveRawAudio ? RawRecording.audioFileName(for: session.id) : nil
     pendingSessionStore.setPending(sessionID: session.id, sessionAudioFilename: sessionAudioFilename)
 
     // Apply detection sensitivity thresholds before starting
@@ -388,8 +388,6 @@ final class SessionRecordingController {
   }
 
   private func audioFileURL(for sessionID: UUID) -> URL {
-    FileManager.default
-      .urls(for: .documentDirectory, in: .userDomainMask)[0]
-      .appendingPathComponent("session_\(sessionID.uuidString).caf")
+    AudioFileURLResolver.url(for: RawRecording.audioFileName(for: sessionID))
   }
 }

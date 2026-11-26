@@ -1,6 +1,7 @@
 import Foundation
 import Models
 import ModelsTestSupport
+import SleepCore
 import Testing
 @testable import Services
 
@@ -17,10 +18,14 @@ final class SessionCheckpointStoreTests {
     try? FileManager.default.removeItem(at: fileURL)
   }
 
-  private func snapshot(events: Int) -> SessionRecoverySnapshot {
+  /// The night in progress, checkpointed an hour in (SleepGuardShared's
+  /// checkpoint format: a `Night`).
+  private func snapshot(events: Int) -> Night {
     let session = SleepSession(startDate: start)
     session.events = (0..<events).map { .fixture(at: start.addingTimeInterval(Double($0) * 600)) }
-    return SessionRecoverySnapshot(from: session, checkpointDate: start.addingTimeInterval(3600))
+    var night = session.night
+    night.end = start.addingTimeInterval(3600)
+    return night
   }
 
   @Test func loadAfterClearReturnsNil() async {
@@ -67,7 +72,7 @@ final class SessionCheckpointStoreTests {
     await store.flush()
     let loaded = try #require(store.loadIfPresent())
     #expect(loaded.id == written.id)
-    #expect(loaded.lastCheckpointDate == written.lastCheckpointDate)
+    #expect(loaded.end == written.end)
     #expect(loaded.events.map(\.id) == written.events.map(\.id))
   }
 

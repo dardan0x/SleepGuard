@@ -33,19 +33,19 @@ public final class FakePendingSessionStore: PendingSessionStoring {
 /// In-memory `SessionCheckpointStoring`.
 @MainActor
 public final class FakeSessionCheckpointStore: SessionCheckpointStoring {
-  public private(set) var snapshot: SessionRecoverySnapshot?
+  public private(set) var night: Night?
 
-  public init(snapshot: SessionRecoverySnapshot? = nil) {
-    self.snapshot = snapshot
+  public init(night: Night? = nil) {
+    self.night = night
   }
 
-  public func write(_ snapshot: SessionRecoverySnapshot) { self.snapshot = snapshot }
-  /// Like the real store: a snapshot with nothing to recover isn't offered.
-  public func loadIfPresent() -> SessionRecoverySnapshot? {
-    snapshot.flatMap { $0.isRecoverable ? $0 : nil }
+  public func write(_ night: Night) { self.night = night }
+  /// Like the real store: a night with nothing to recover isn't offered.
+  public func loadIfPresent() -> Night? {
+    night.flatMap { $0.events.isEmpty ? nil : $0 }
   }
 
-  public func clear() { snapshot = nil }
+  public func clear() { night = nil }
 }
 
 /// In-memory `CustomMelodyStoring`. `saveRecording` stores a melody with no file.
@@ -114,4 +114,43 @@ public actor FakeSessionRawLogWriter: SessionRawLogWriting {
   }
 
   public func discard() { metadata = nil }
+}
+
+/// In-memory `ProfileStoring`.
+@MainActor
+@Observable
+public final class FakeProfileStore: ProfileStoring {
+  public private(set) var profile: SleepProfile
+  public private(set) var updates = 0
+
+  public init(_ profile: SleepProfile = SleepProfile()) {
+    self.profile = profile
+  }
+
+  public func load() async {}
+
+  public func update(_ profile: SleepProfile) {
+    self.profile = profile
+    updates += 1
+  }
+}
+
+/// In-memory `LifestyleLogStoring`.
+@MainActor
+public final class FakeLifestyleLogStore: LifestyleLogStoring {
+  public private(set) var logs: [LifestyleLog]
+
+  public init(_ logs: [LifestyleLog] = []) {
+    self.logs = logs
+  }
+
+  public func load() async {}
+
+  public func save(_ log: LifestyleLog) async {
+    logs = logs.filter { $0.night != log.night } + [log]
+  }
+
+  public func replaceAll(with logs: [LifestyleLog]) async {
+    self.logs = logs
+  }
 }

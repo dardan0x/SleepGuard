@@ -1,4 +1,4 @@
-// `Log` lives in the `Logging` leaf (F27-T10) so packages below the data model
-// (AudioEngine) can log without importing Models. Re-exported here so code that
-// already imports Models keeps reaching `Log` unchanged.
-@_exported import Logging
+// `Log` is SleepGuardShared's `SleepLogging` (the same categories in both
+// apps and in the shared products). Re-exported here so code that imports
+// Models reaches `Log` without a second import.
+@_exported import SleepLogging

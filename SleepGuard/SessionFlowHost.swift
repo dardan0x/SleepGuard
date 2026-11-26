@@ -59,8 +59,11 @@ struct SessionFlowHost: ViewModifier {
 
   /// Recovery first, so a night left by a crash outranks the prompts.
   private func launch() async {
-    if let snapshot = SessionCheckpointStore.shared.loadIfPresent() {
-      sessionManager.completedSession = snapshot.makeSession()
+    // The briefing below reads the profile and the survey answers.
+    await ProfileStore.shared.load()
+    await LifestyleLogStore.shared.load()
+    if let night = SessionCheckpointStore.shared.loadIfPresent() {
+      sessionManager.completedSession = SleepSession.make(from: night)
     } else {
       PendingSessionStore.shared.cleanupIfNeeded()
     }

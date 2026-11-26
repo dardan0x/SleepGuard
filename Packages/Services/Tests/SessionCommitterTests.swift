@@ -50,7 +50,9 @@ struct SessionCommitterTests {
     pending.setPending(sessionID: session.id, sessionAudioFilename: nil)
     pending.addFile("event_1.m4a")
     pending.addFile("event_2.m4a")
-    checkpoint.write(SessionRecoverySnapshot(from: session, checkpointDate: start.addingTimeInterval(7 * 3600)))
+    var night = session.night
+    night.end = start.addingTimeInterval(7 * 3600)
+    checkpoint.write(night)
     return session
   }
 

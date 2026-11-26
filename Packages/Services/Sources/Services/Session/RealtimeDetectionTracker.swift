@@ -9,7 +9,7 @@ import UIKit
 
 /// Adapter between the 50 ms processing loop and `DetectionEngine`.
 ///
-/// Each tick it classifies the sample (`SnoreDetector`, `SpeechDetector`) and
+/// Each tick it classifies the sample (SleepCore's `LiveSampleClassifier`) and
 /// sends it, timestamped, into the engine's stream; melody stops and settings
 /// changes go into the same stream, so the engine sees them in the order they
 /// happened. The engine runs `DetectionStateMachine` on its own actor and
@@ -37,8 +37,8 @@ final class RealtimeDetectionTracker {
   }
 
   private let audioRecorder: any AudioRecording
-  private let snoreDetector: SnoreDetector
-  private let speechDetector: SpeechDetector
+  /// The snore and speech verdicts, SleepCore's (the same as SleepGuardUIKitWay's).
+  private(set) var classifier = LiveSampleClassifier(sensitivity: .medium)
   private let snoreInterrupterPlayer: any SnoreInterrupterPlaying
   private let preferences: any UserPreferencesStoring
   private let pendingSessionStore: any PendingSessionStoring
@@ -79,8 +79,6 @@ final class RealtimeDetectionTracker {
   /// Collaborators default to the container; tests pass their own detectors
   /// so parallel runs don't share classification state.
   init(
-    snoreDetector: SnoreDetector = Container.shared.snoreDetector(),
-    speechDetector: SpeechDetector = Container.shared.speechDetector(),
     audioRecorder: any AudioRecording = Container.shared.audioRecorder(),
     snoreInterrupterPlayer: any SnoreInterrupterPlaying = Container.shared.snoreInterrupterPlayer(),
     preferences: any UserPreferencesStoring = Container.shared.userPreferences(),
@@ -90,8 +88,6 @@ final class RealtimeDetectionTracker {
     clock: @escaping @MainActor () -> Date = Date.init)
   {
     self.clock = clock
-    self.snoreDetector = snoreDetector
-    self.speechDetector = speechDetector
     self.audioRecorder = audioRecorder
     self.snoreInterrupterPlayer = snoreInterrupterPlayer
     self.preferences = preferences
@@ -163,8 +159,9 @@ final class RealtimeDetectionTracker {
   /// after its clip compresses) plus periodically from the processing loop.
   func checkpoint() {
     guard let session = recording?.currentSession else { return }
-    let snapshot = SessionRecoverySnapshot(from: session, checkpointDate: Date())
-    checkpointStore.write(snapshot)
+    var night = session.night
+    night.end = max(Date(), night.start)
+    checkpointStore.write(night)
   }
 
   /// Calibrated thresholds + SoundAnalysis confidence gates for the full-band
@@ -181,7 +178,7 @@ final class RealtimeDetectionTracker {
 
   /// SleepCore's calibrated preset for `sensitivity`.
   func apply(_ sensitivity: UserPreferences.DetectionSensitivity) {
-    snoreDetector.apply(.preset(sensitivity))
+    classifier.update(sensitivity: sensitivity)
   }
 
   // MARK: - Real-time audio processing
@@ -224,19 +221,20 @@ final class RealtimeDetectionTracker {
     // Use peakDB for intensity — snoring is impulsive and peak carries
     // more perceptual loudness than RMS over a 23 ms buffer.
     let classifyDB = peakDB ?? db
-    // Spectral fallback stays off: FFTAnalyzer returned zeros until F21-T9, so live
-    // detection has only ever used SoundAnalysis. Pass `spectralScore` here once a
-    // real night validates the fallback. Logs and events still record the real score.
-    let state = snoreDetector.classify(db: classifyDB, spectralScore: 0, snoreConfidence: snoreConfidence)
+    // SleepCore's LiveSampleClassifier: snore on the peak (spectral fallback
+    // off until a real night validates it), speech on the RMS level.
+    let verdict = classifier.input(
+      for: .init(
+        db: db, peakDB: peakDB, spectralScore: spectralScore, snoreConfidence: snoreConfidence,
+        speechConfidence: speechConfidence),
+      isMelodyPlaying: false)
+    let state = verdict.snoreState
+    let isSpeech = verdict.isSpeech
     #if DEBUG
     if snoreConfidence > 0.1 || spectralScore > 0.1 || speechConfidence > 0.1 {
-      Log.detection.debug("classify rms=\(db, format: .fixed(precision: 1)) peak=\(classifyDB, format: .fixed(precision: 1)) spectral=\(spectralScore, format: .fixed(precision: 2)) snoreConf=\(snoreConfidence, format: .fixed(precision: 2)) speechConf=\(speechConfidence, format: .fixed(precision: 2)) → snore=\(String(describing: state), privacy: .public) speech=\(self.speechDetector.isSpeechDetected)")
+      Log.detection.debug("classify rms=\(db, format: .fixed(precision: 1)) peak=\(classifyDB, format: .fixed(precision: 1)) spectral=\(spectralScore, format: .fixed(precision: 2)) snoreConf=\(snoreConfidence, format: .fixed(precision: 2)) speechConf=\(speechConfidence, format: .fixed(precision: 2)) → snore=\(String(describing: state), privacy: .public) speech=\(isSpeech)")
     }
     #endif
-
-    // Update parallel speech detection
-    speechDetector.update(db: db, speechConfidence: speechConfidence)
-    let isSpeech = speechDetector.isSpeechDetected
 
     if lastDisplayUpdate.map({ now.timeIntervalSince($0) >= Self.displayInterval }) ?? true {
       lastDisplayUpdate = now
@@ -341,7 +339,7 @@ final class RealtimeDetectionTracker {
     continuation?.finish()
     generation += 1
     let generation = generation
-    let settings = Self.settings(preferences: preferences, snoreDetector: snoreDetector)
+    let settings = Self.settings(preferences: preferences, classifier: classifier)
     lastSentSettings = settings
     let engine = DetectionEngine(settings: settings)
     let (stream, continuation) = DetectionEngine.makeStream()
@@ -488,7 +486,7 @@ final class RealtimeDetectionTracker {
   /// the detector, which `applyDetectionSensitivity()` sets at session start.
   /// Sent only when something changed, ahead of the sample it applies to.
   private func sendSettingsIfChanged() {
-    let settings = Self.settings(preferences: preferences, snoreDetector: snoreDetector)
+    let settings = Self.settings(preferences: preferences, classifier: classifier)
     guard settings != lastSentSettings else { return }
     lastSentSettings = settings
     continuation?.yield(.settings(settings))
@@ -496,17 +494,15 @@ final class RealtimeDetectionTracker {
 
   private static func settings(
     preferences: any UserPreferencesStoring,
-    snoreDetector: SnoreDetector) -> DetectionStateMachine.Settings
+    classifier: LiveSampleClassifier) -> DetectionStateMachine.Settings
   {
     DetectionStateMachine.Settings(
       minEventDuration: preferences.detectionSensitivity.minEventDuration,
-      highConfidenceGate: snoreDetector.highConfidenceGate,
+      highConfidenceGate: classifier.snore.highConfidenceGate,
       detectSleepTalking: preferences.detectSleepTalking)
   }
 
   private func eventFileURL(eventID: UUID, sessionID: UUID) -> URL {
-    FileManager.default
-      .urls(for: .documentDirectory, in: .userDomainMask)[0]
-      .appendingPathComponent("event_\(eventID.uuidString)_session_\(sessionID.uuidString).caf")
+    AudioFileURLResolver.url(for: "event_\(eventID.uuidString)_session_\(sessionID.uuidString).caf")
   }
 }
