@@ -11,7 +11,7 @@
 ![Platform](https://img.shields.io/badge/platform-iOS%2017.6%2B-blue)
 ![Language](https://img.shields.io/badge/Swift-6.2-orange)
 ![Architecture](https://img.shields.io/badge/architecture-SPM%20%C2%B7%20SwiftData%20%C2%B7%20SwiftUI-green)
-![Shared](https://img.shields.io/badge/SleepGuardShared-0.27.0-blueviolet)
+![Shared](https://img.shields.io/badge/SleepGuardShared-0.36.0-blueviolet)
 ![Privacy](https://img.shields.io/badge/privacy-on--device-brightgreen)
 
 <p align="center">
@@ -58,7 +58,7 @@ per-sample classifier ──► none · quiet · light · loud · epic
 event rules: sustained ≥ 75 ms to start · 10 s silence to close · false-positive filters
       │
       ▼
-SnoreEvent (bursts, intensity, duration) ──► per-event audio clip (.m4a)
+NightEventRecord (bursts, intensity, duration) ──► per-event audio clip (.m4a)
 ```
 
 - **Events** group continuous activity, merging brief breathing pauses (≤10 s) so one snoring spell is one event, not fifty.
@@ -97,8 +97,8 @@ SleepGuardShared           SleepCore · SleepStrings · SleepMelodies · SleepGu
 
 | Package | Size | Depends on | SleepGuardShared | Responsibility |
 |---------|------|-----------|------------------|----------------|
-| `Models` | 19 files · 1.3k lines | — | SleepCore | SwiftData `@Model`s (`SleepSession`, `SnoreEvent`, `UserProfile`, `LifestyleLog`, …), the versioned schema and migration plan, the versioned score cache. `SleepSession+Night` maps a session to `Night`; every metric and the score are computed from it. Widget snapshot, `Log` |
-| `AudioEngine` | 11 · 1.3k | Models | SleepCore | `AudioRecorder` (AVAudioEngine, interruptions, route changes), `TapProcessor`, SoundAnalysis, FFT, clip extraction and compression. Produces the detection inputs and holds the live thresholds; the classification rules are `SleepCore`'s |
+| `Models` | 13 files · 0.6k lines | — | SleepCore, SleepStore, SleepFiles, SleepLogging | SleepGuard's reads on the shared nights database (`NightRecord` / `NightEventRecord`, SleepStore: the same schema as SleepGuardUIKitWay's), the launch re-score of stale summaries, the file layout (`SleepGuardStorage`), widget snapshot. Re-exports `SleepStore` and `Log` |
+| `AudioEngine` | 4 · 0.3k | — | SleepCore, SleepAudioKit | `AudioRecorder` over SleepAudioKit's `CaptureEngine` (the same capture as SleepGuardUIKitWay's): levels, confidences, interruptions, warm-up, melody pause; `LegacyClipPlayer` |
 | `Services` | 37 · 3.7k | Models, AudioEngine, Factory | SleepCore, SleepMelodies | Services behind protocols and the Factory `Container`: `SessionManager`, `RealtimeDetectionTracker`, `SessionCommitter`, `HealthKitSync`, `UserPreferences`, `AppConfig`, the Snore Interrupter player, checkpoints, storage limits. No SwiftUI. Fakes in `ServicesTestSupport` |
 | `Routing` | 1 · 47 | — | — | `RouterDestination`, `SheetDestination`, `RouterPath` |
 | `DesignSystem` | 11 · 0.5k | Models, Factory | SleepCore, SleepStrings, DesignKit, ContentKit | The app's bridge to the shared UI: `AppTheme` (from `Theme.sleepGuard`), `SleepGuardKitAdapters`, a few app-only views. Re-exports the kits and `Strings` |
@@ -144,9 +144,9 @@ SwiftUI views are already value-type descriptions of state, and the Observation 
 
 | Where | Tests | What's covered |
 |---------|------:|----------------|
-| `Models` | 83 | Score cache and versioning, the `@Model` → `Night` mapping (parity with the shared rules), episodes, widget snapshot, crash recovery, schema migration plan |
+| `Models` | 13 files · 0.6k lines | — | SleepCore, SleepStore, SleepFiles, SleepLogging | SleepGuard's reads on the shared nights database (`NightRecord` / `NightEventRecord`, SleepStore: the same schema as SleepGuardUIKitWay's), the launch re-score of stale summaries, the file layout (`SleepGuardStorage`), widget snapshot. Re-exports `SleepStore` and `Log` |
 | `Services` | 63 | Detection through the live tracker, saving a night (`SessionCommitter`), service overrides with fakes, constructor injection, storage limits, checkpoints, raw-log writer, recording delay |
-| `AudioEngine` | 34 | Tap levels, SoundAnalysis and FFT inputs, clip extraction and compression |
+| `AudioEngine` | 4 · 0.3k | — | SleepCore, SleepAudioKit | `AudioRecorder` over SleepAudioKit's `CaptureEngine` (the same capture as SleepGuardUIKitWay's): levels, confidences, interruptions, warm-up, melody pause; `LegacyClipPlayer` |
 | `Statistics` | 11 | `DashboardState` mapping |
 | `Recordings` | 10 | `SessionDetailModel` (load / filter / delete) with a fake HealthKit |
 | `DesignSystem` | 7 | Formatters, localization catalog, theme override |
@@ -224,7 +224,7 @@ NightDetailContent(
 | Build | Uses |
 |---|---|
 | `SleepGuard.xcworkspace` (day-to-day) | `../SleepGuardShared` as a local package; edits there show up on the next build |
-| `SleepGuard.xcodeproj`, `scripts/run-tests.sh`, CI | The pinned release: `.package(url: …, exact: "0.27.0")` in every package manifest |
+| `SleepGuard.xcodeproj`, `scripts/run-tests.sh`, CI | The pinned release: `.package(url: …, exact: "0.36.0")` in every package manifest |
 
 Both modes resolve the same package identity, so no manifest changes between them. Adopting a release means running `sh scripts/bump-shared.sh <version>` (it moves every pin and both lockfiles), then the full suite. The shared repo's CI builds this app against every candidate commit, so a breaking change fails there before it's tagged.
 

@@ -53,6 +53,7 @@ Fixes the verdicts of the principal-level architecture review (`ARCHITECTURE_INT
 | F27-T22 | Uniform the apps, release A (shared 0.34.0) | Refactor | Done | T21 | Models, Services, AudioEngine, Personalization, app | 2026-11-26 | 2026-11-26 |
 | F27-T23 | Uniform the apps, release B: shared audio (shared 0.35.0) | Refactor | Done | T22 | AudioEngine, Services, Recordings, SleepSession | 2026-11-26 | 2026-11-26 |
 | F27-T24 | Uniform the apps, release C: one SwiftData schema (shared 0.36.0) | Refactor | Done | T23 | Models, Services, Recordings, Statistics, DesignSystem, Health, app | 2026-11-26 | 2026-11-26 |
+| F27-T25 | Uniform the apps, close-out (ADR 0010, docs) | Docs | Done | T24 | docs | 2026-11-26 | 2026-11-26 |
 
 ## Task Details
 
@@ -566,3 +567,11 @@ SleepGuardShared's SleepStore (records in SleepGuardUIKitWay's shape) replaces S
 - A night without sleep stages asks Health each time its detail opens (`nil` "never fetched" no longer exists).
 - CLAUDE.md / AGENTS.md schema and stored-summary rules rewritten for the shared schema.
 - Verified: package lanes, app build and checks on 0.36.0; Debug sample data lands in the new store (14 nights, 106 events, summaries stamped) and the briefing reads it. Screens beyond the briefing weren't driven (simulator taps unavailable).
+
+### F27-T25 — Uniform the apps, close-out
+
+- ADR 0010 (everything that isn't SleepGuard's own lives in SleepGuardShared: the three releases, one layout, behaviour changes, limits).
+- CLAUDE.md / AGENTS.md: classifier, logging, night rules, layering exception and the shared-behaviour rule updated (kept in sync).
+- TECHNICAL_OVERVIEW: shared products, packages, the night end to end, detection, score storage, concurrency escape hatch, logging, tests (180 here, 335 shared).
+- README: pin, event record, Models and AudioEngine rows (the rest of its table was already behind and is untouched).
+- Owed: a recording night on a device (and a simulator night) to exercise the shared audio and store end to end.
