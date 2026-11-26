@@ -11,8 +11,8 @@ public import SwiftUI
 public struct CalendarView: View {
   @Environment(\.theme) private var theme
   @Environment(RouterPath.self) private var routerPath
-  @Query(sort: \SleepSession.startDate, order: .reverse)
-  private var sessions: [SleepSession]
+  @Query(sort: \NightRecord.start, order: .reverse)
+  private var sessions: [NightRecord]
 
   @State private var selectedMonth = Date()
   @State private var selectedDay = Calendar.current.startOfDay(for: Date())

@@ -4,14 +4,14 @@ public import SwiftUI
 /// The shared kit's low-battery banner, shown when `session` was saved early
 /// because the battery ran low.
 public struct LowBatteryBannerView: View {
-  public let session: SleepSession
+  public let session: NightRecord
 
-  public init(session: SleepSession) {
+  public init(session: NightRecord) {
     self.session = session
   }
 
   public var body: some View {
-    if session.terminationReason == "low_battery" {
+    if session.endReason == .lowBattery {
       LowBatteryBanner()
     }
   }

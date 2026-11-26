@@ -17,7 +17,7 @@ struct SessionDetailLoadedView: View {
   @Environment(\.modelContext) private var modelContext
   @Environment(\.dismiss) private var dismiss
 
-  let session: SleepSession
+  let session: NightRecord
   let isClipSession: Bool
   @Bindable var model: SessionDetailModel
   let shareCoordinator: SessionShareCoordinator
@@ -54,7 +54,7 @@ struct SessionDetailLoadedView: View {
     .navigationBarTitleDisplayMode(.inline)
     .toolbar {
       ToolbarItem(placement: .principal) {
-        Text(DateFormatters.dayOfWeekAndDate.string(from: session.startDate))
+        Text(DateFormatters.dayOfWeekAndDate.string(from: session.start))
           .font(.system(size: 17, weight: .semibold))
           .foregroundStyle(theme.palette.textPrimary)
       }
@@ -74,7 +74,7 @@ struct SessionDetailLoadedView: View {
             }
             .disabled(shareCoordinator.isGeneratingPDF)
           }
-          if !isClipSession, session.audioFileURL != nil {
+          if !isClipSession, session.rawAudioFileName != nil {
             Button {
               shareCoordinator.shareFullSession(session)
             } label: {
@@ -139,7 +139,7 @@ struct SessionDetailLoadedView: View {
 }
 
 enum SessionDetailSheet: Identifiable {
-  case player(initialEvent: SnoreEvent?)
+  case player(initialEvent: NightEventRecord?)
   case events
   case shortEventsPlayer
 

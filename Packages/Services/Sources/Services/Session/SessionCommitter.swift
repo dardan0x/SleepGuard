@@ -34,15 +34,15 @@ public final class SessionCommitter: SessionCommitting {
   }
 
   @discardableResult
-  public func commit(_ session: SleepSession, in context: ModelContext) throws -> Task<Void, Never> {
-    for event in session.events ?? [] {
+  public func commit(_ session: NightRecord, in context: ModelContext) throws -> Task<Void, Never> {
+    for event in session.events {
       context.insert(event)
     }
     context.insert(session)
 
     // Cache AFTER insertion so SwiftData tracks the mutations. Use the current
     // remote config so the cached score reflects the active formula.
-    session.refreshCachedScore(using: appConfig.sleepScoreConfig)
+    session.refreshSummary(using: appConfig.sleepScoreConfig)
 
     try context.save()
 

@@ -8,7 +8,7 @@ import SwiftUI
 /// on demand during the sheet's setup.
 struct LegacyPlayerContent: View {
   let player: LegacyClipPlayer
-  let event: SnoreEvent
+  let event: NightEventRecord
   let waveformSamples: [Float]
   let isReady: Bool
   let isLoadingWaveform: Bool

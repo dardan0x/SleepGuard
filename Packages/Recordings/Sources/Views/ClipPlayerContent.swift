@@ -15,8 +15,8 @@ struct ClipPlayerContent: View {
   let waveformSamples: [Float]
   let isReady: Bool
   let isLoadingWaveform: Bool
-  let sortedEvents: [SnoreEvent]
-  let onSelectEvent: (SnoreEvent, Int) -> Void
+  let sortedEvents: [NightEventRecord]
+  let onSelectEvent: (NightEventRecord, Int) -> Void
 
   var body: some View {
     if controller.currentEvent != nil {

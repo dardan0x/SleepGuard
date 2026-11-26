@@ -11,14 +11,14 @@ final class WaveformLoader {
   var samples: [Float] = []
   var isLoading = false
 
-  func load(for event: SnoreEvent?, sessionAudioURL: URL?, sessionStart: Date) {
+  func load(for event: NightEventRecord?, sessionAudioURL: URL?, sessionStart: Date) {
     guard let event else {
       samples = []
       isLoading = false
       return
     }
     // Try event clip URL first (run off-main so large files don't block UI)
-    if let url = AudioFileURLResolver.resolve(event.audioFileURL) {
+    if let url = AudioFileURLResolver.resolve(event.clipFileName) {
       isLoading = true
       let duration = event.snoreDuration
       Task(priority: .userInitiated) {

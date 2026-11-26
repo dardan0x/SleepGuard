@@ -18,7 +18,7 @@ import SwiftData
 final class SessionDetailModel {
   enum ViewState {
     case loading
-    case loaded(session: SleepSession, sortedEvents: [SnoreEvent], isClipSession: Bool)
+    case loaded(session: NightRecord, sortedEvents: [NightEventRecord], isClipSession: Bool)
     case error
   }
 
@@ -52,8 +52,8 @@ final class SessionDetailModel {
         viewState = .error
         return
       }
-      let sortedEvents = session.events?.sorted(by: { $0.timestamp < $1.timestamp }) ?? []
-      let isClipSession = sortedEvents.contains(where: { AudioFileURLResolver.resolve($0.audioFileURL) != nil })
+      let sortedEvents = session.events.sorted(by: { $0.start < $1.start })
+      let isClipSession = sortedEvents.contains(where: { AudioFileURLResolver.resolve($0.clipFileName) != nil })
       viewState = .loaded(session: session, sortedEvents: sortedEvents, isClipSession: isClipSession)
     } catch {
       viewState = .error
@@ -67,22 +67,21 @@ final class SessionDetailModel {
   func enrichIfNeeded(modelContext: ModelContext) async {
     guard case let .loaded(session, _, _) = viewState else { return }
     var changed = false
-    let stagesEmptyAndOld = (session.sleepStageSegments?.isEmpty == true)
-      && (session.endDate?.timeIntervalSinceNow ?? 0) < -3600
+    // A night without stages asks Health each time it opens: the Watch's
+    // data can arrive hours later.
     if appConfig.isEnabled(.enhancedSleepTracking),
        userPreferences.enhancedSleepTracking,
-       session.sleepStageSegments == nil || stagesEmptyAndOld
+       session.sleepStages.isEmpty
     {
       let stages = await healthKitSync.fetchSleepStages(for: session)
-      let fetched: [SleepStageSegment] = stages.isEmpty ? [] : stages
-      if session.sleepStageSegments != fetched {
-        session.sleepStageSegments = fetched
+      if !stages.isEmpty {
+        session.sleepStages = stages
         changed = true
       }
     }
     let config = appConfig.sleepScoreConfig
-    guard changed || session.hasStaleCachedScore(for: config) else { return }
-    session.refreshCachedScore(using: config)
+    guard changed || session.hasStaleSummary(for: config) else { return }
+    session.refreshSummary(using: config)
     do {
       try modelContext.save()
     } catch {
@@ -100,14 +99,14 @@ final class SessionDetailModel {
       let files = sessionFileURLs(session)
       // Events first with an intermediate save: deleting a faulted
       // relationship in one cascade has crashed SwiftData.
-      if let events = session.events {
-        for event in events {
+      if !session.events.isEmpty {
+        for event in session.events {
           modelContext.delete(event)
         }
         try modelContext.save()
       }
       // Resolve transformable faults before deletion.
-      _ = session.sleepStageSegments
+      _ = session.sleepStages
       _ = session.recordingGaps
       modelContext.delete(session)
       try modelContext.save()
@@ -120,8 +119,8 @@ final class SessionDetailModel {
     }
   }
 
-  private func fetchSession(in modelContext: ModelContext) throws -> SleepSession? {
-    let descriptor = FetchDescriptor<SleepSession>(predicate: #Predicate { $0.id == sessionID })
+  private func fetchSession(in modelContext: ModelContext) throws -> NightRecord? {
+    let descriptor = FetchDescriptor<NightRecord>(predicate: #Predicate { $0.id == sessionID })
     return try modelContext.fetch(descriptor).first
   }
 
@@ -148,16 +147,16 @@ final class SessionDetailModel {
   }
 
   /// The stored event a row plays or shares.
-  func event(for row: EventListRow) -> SnoreEvent? {
+  func event(for row: EventListRow) -> NightEventRecord? {
     guard case let .loaded(_, sortedEvents, _) = viewState else { return nil }
     return sortedEvents.first { $0.id == row.id }
   }
 
   /// Short snoring episodes (under 3 sec) shown in the dedicated player.
-  var shortEvents: [SnoreEvent] {
+  var shortEvents: [NightEventRecord] {
     guard case let .loaded(session, _, _) = viewState else { return [] }
     let shortEpisodes = session.snoringEpisodes.filter { $0.snoreDuration < 3 }
     return shortEpisodes.compactMap(\.representativeEvent)
-      .sorted(by: { $0.timestamp < $1.timestamp })
+      .sorted(by: { $0.start < $1.start })
   }
 }

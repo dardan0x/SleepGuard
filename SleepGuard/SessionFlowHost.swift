@@ -5,6 +5,7 @@ import Personalization
 import Platform
 import Routing
 import Services
+import SleepCore
 import SleepSession
 import SwiftData
 import SwiftUI
@@ -63,7 +64,9 @@ struct SessionFlowHost: ViewModifier {
     await ProfileStore.shared.load()
     await LifestyleLogStore.shared.load()
     if let night = SessionCheckpointStore.shared.loadIfPresent() {
-      sessionManager.completedSession = SleepSession.make(from: night)
+      let recovered = NightRecord.make(from: night)
+      recovered.refreshSummary(using: appConfig.sleepScoreConfig)
+      sessionManager.completedSession = recovered
     } else {
       PendingSessionStore.shared.cleanupIfNeeded()
     }
@@ -76,7 +79,7 @@ struct SessionFlowHost: ViewModifier {
   private var requests: [RootPresentation] {
     var requests: [RootPresentation] = []
     if let session = sessionManager.completedSession,
-       session.terminationReason == nil || autoSaveFailedID == session.id
+       session.endReason == .stopped || autoSaveFailedID == session.id
     {
       requests.append(.sessionSummary(id: session.id))
     }
@@ -129,7 +132,7 @@ struct SessionFlowHost: ViewModifier {
   /// A night stopped by the app (low battery) saves itself. If saving fails,
   /// the summary is offered instead so the night isn't lost.
   private func autoSaveIfForceSaved() {
-    guard let session = sessionManager.completedSession, session.terminationReason != nil,
+    guard let session = sessionManager.completedSession, session.endReason != .stopped,
           autoSaveFailedID != session.id else { return }
     do {
       try sessionCommitter.commit(session, in: modelContext)

@@ -8,8 +8,8 @@ public import SwiftUI
 public struct StatisticsDashboardView: View {
   @Environment(RouterPath.self) private var routerPath
   @Environment(\.theme) private var theme
-  @Query(sort: \SleepSession.startDate, order: .reverse)
-  private var sessions: [SleepSession]
+  @Query(sort: \NightRecord.start, order: .reverse)
+  private var sessions: [NightRecord]
 
   @State private var viewState: ViewState = .loading
 
@@ -57,7 +57,7 @@ public struct StatisticsDashboardView: View {
 
   /// Cached fields only: reading them doesn't fault events.
   private var scoreStamps: [ScoreStamp] {
-    sessions.map { ScoreStamp(id: $0.id, score: $0.cachedSleepScore, version: $0.cachedScoreVersion) }
+    sessions.map { ScoreStamp(id: $0.id, score: $0.score, version: $0.scoreVersion) }
   }
 
   private func loadState() {

@@ -69,9 +69,9 @@ public final class StorageLimitEnforcer: Sendable, StorageLimitEnforcing {
     maxMB: Int?,
     inProgress: Night? = Container.shared.sessionCheckpointStore().loadIfPresent()) async -> CleanupReport
   {
-    let sessions: [SleepSession]
+    let sessions: [NightRecord]
     do {
-      sessions = try modelContext.fetch(FetchDescriptor<SleepSession>(sortBy: [SortDescriptor(\.startDate)]))
+      sessions = try modelContext.fetch(FetchDescriptor<NightRecord>(sortBy: [SortDescriptor(\.start)]))
     } catch {
       Log.storage.error("Session fetch failed, cleanup skipped: \(String(describing: error), privacy: .public)")
       return CleanupReport()
@@ -129,56 +129,48 @@ public final class StorageLimitEnforcer: Sendable, StorageLimitEnforcing {
     return report
   }
 
-  /// A session's files as SleepCore's `NightFiles`: its events' clips and its
-  /// own audio files by name (the raw recording is also found by its id).
+  /// A night's files as SleepCore's `NightFiles`: its events' clips and its
+  /// raw recording and log (found by the night's id).
   @MainActor
-  private func nightFiles(for session: SleepSession, modelContext: ModelContext) -> NightFiles {
-    let names = fetchEvents(for: session, modelContext: modelContext).compactMap(\.audioFileURL)
-      + [session.audioFileURL, session.rawAudioFileURL, session.rawLogFileURL].compactMap(\.self)
+  private func nightFiles(for session: NightRecord, modelContext: ModelContext) -> NightFiles {
+    let names = fetchEvents(for: session, modelContext: modelContext).compactMap(\.clipFileName)
+      + [session.rawAudioFileName, session.rawLogFileName].compactMap(\.self)
     return NightFiles(
-      id: session.id, start: session.startDate,
+      id: session.id, start: session.start,
       clipFileNames: Array(Set(names.map { ($0 as NSString).lastPathComponent })))
   }
 
   // MARK: - Event fetching (avoids faulting corrupted relationships)
 
   @MainActor
-  private func fetchEvents(for session: SleepSession, modelContext: ModelContext) -> [SnoreEvent] {
+  private func fetchEvents(for session: NightRecord, modelContext: ModelContext) -> [NightEventRecord] {
     let sessionID = session.id
-    let descriptor = FetchDescriptor<SnoreEvent>(
+    let descriptor = FetchDescriptor<NightEventRecord>(
       predicate: #Predicate { $0.session?.id == sessionID }
     )
     return (try? modelContext.fetch(descriptor)) ?? []
   }
 
-  /// Collects all audio file URLs for a session/events and clears the model properties.
+  /// Collects all audio file URLs of a night and clears its clips' names (the
+  /// raw files are found by the night's id, so deleting them is enough).
   /// Returns the collected URLs so they can be deleted later off the main actor.
   @MainActor
-  private func collectAndClearURLs(for session: SleepSession, modelContext: ModelContext) -> [URL] {
+  private func collectAndClearURLs(for session: NightRecord, modelContext: ModelContext) -> [URL] {
     var urls: [URL] = []
 
     let events = fetchEvents(for: session, modelContext: modelContext)
     for event in events {
-      if let url = AudioFileURLResolver.resolve(event.audioFileURL) {
+      if let url = AudioFileURLResolver.resolve(event.clipFileName) {
         urls.append(url)
       }
-      event.audioFileURL = nil
+      event.clipFileName = nil
     }
 
-    if let url = AudioFileURLResolver.resolve(session.audioFileURL) {
-      urls.append(url)
+    for name in [session.rawAudioFileName, session.rawLogFileName] {
+      if let url = AudioFileURLResolver.resolve(name) {
+        urls.append(url)
+      }
     }
-    session.audioFileURL = nil
-
-    if let url = AudioFileURLResolver.resolve(session.rawAudioFileURL) {
-      urls.append(url)
-    }
-    session.rawAudioFileURL = nil
-
-    if let url = AudioFileURLResolver.resolve(session.rawLogFileURL) {
-      urls.append(url)
-    }
-    session.rawLogFileURL = nil
 
     return urls
   }
@@ -227,7 +219,7 @@ public final class StorageLimitEnforcer: Sendable, StorageLimitEnforcing {
   /// enforcer has something to clean up. Each file is ~1 MB.
   @MainActor
   public func injectDummyAudioForTesting(modelContext: ModelContext) -> Int {
-    let descriptor = FetchDescriptor<SleepSession>(sortBy: [SortDescriptor(\.startDate)])
+    let descriptor = FetchDescriptor<NightRecord>(sortBy: [SortDescriptor(\.start)])
     guard let sessions = try? modelContext.fetch(descriptor), !sessions.isEmpty else {
       Log.storage.notice("No sessions found — generate mock data first")
       return 0
@@ -242,18 +234,14 @@ public final class StorageLimitEnforcer: Sendable, StorageLimitEnforcing {
       let url = docs.appendingPathComponent(filename)
       try? dummyData.write(to: url)
 
-      let event = SnoreEvent(
-        timestamp: session.startDate,
-        category: .snoring,
-        intensity: .quiet,
-        averageDB: -40,
-        peakDB: -30,
-        duration: 1.0)
-      event.audioFileURL = filename
-      event.session = session
-      if session.events == nil { session.events = [] }
-      session.events?.append(event)
+      let event = NightEventRecord()
+      event.start = session.start
+      event.averageDB = -40
+      event.peakDB = -30
+      event.duration = 1.0
+      event.clipFileName = filename
       modelContext.insert(event)
+      event.session = session
       created += 1
     }
 

@@ -23,7 +23,7 @@ struct StoreContractTests {
   /// The night in progress, checkpointed an hour in (SleepGuardShared's
   /// checkpoint format: a `Night`).
   private func snapshot(events: Int) -> Night {
-    let session = SleepSession(startDate: start)
+    let session = NightRecord(start: start)
     session.events = (0..<events).map { .fixture(at: start.addingTimeInterval(Double($0) * 600)) }
     var night = session.night
     night.end = start.addingTimeInterval(3600)

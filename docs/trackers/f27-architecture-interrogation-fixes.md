@@ -52,6 +52,7 @@ Fixes the verdicts of the principal-level architecture review (`ARCHITECTURE_INT
 | F27-T21 | Shared settings (shared 0.33.0) | Refactor | Done | T20 | Config | 2026-11-26 | 2026-11-26 |
 | F27-T22 | Uniform the apps, release A (shared 0.34.0) | Refactor | Done | T21 | Models, Services, AudioEngine, Personalization, app | 2026-11-26 | 2026-11-26 |
 | F27-T23 | Uniform the apps, release B: shared audio (shared 0.35.0) | Refactor | Done | T22 | AudioEngine, Services, Recordings, SleepSession | 2026-11-26 | 2026-11-26 |
+| F27-T24 | Uniform the apps, release C: one SwiftData schema (shared 0.36.0) | Refactor | Done | T23 | Models, Services, Recordings, Statistics, DesignSystem, Health, app | 2026-11-26 | 2026-11-26 |
 
 ## Task Details
 
@@ -554,3 +555,14 @@ SleepGuardShared's SleepAudioKit (from SleepGuardUIKitWay's adapters plus SleepG
 - No longer resumes capture on app activation (the kit resumes on interruption end, route, config and media-reset events, as SleepGuardUIKitWay).
 - Not yet verified: a night on the simulator or a device; bug 2 has no regression test (the fake recorder returns no clip).
 - Follow-up (owner's call): `TestAudio.swift` deleted and AudioEngine's empty test target removed (its tests are the kit's now); `WaveformGenerator` removed, `WaveformLoader` calls the kit's `ClipWaveform` directly (same 300 points and duration limit; `spectrumSamples` had no callers).
+
+### F27-T24 — Uniform the apps, release C: one SwiftData schema (shared 0.36.0)
+
+SleepGuardShared's SleepStore (records in SleepGuardUIKitWay's shape) replaces SleepGuard's models and schema; SleepGuard keeps `@Query` on the main context.
+- `SleepSession` / `SnoreEvent` → `NightRecord` / `NightEventRecord` (66 files; Models re-exports SleepStore). SleepGuard-only reads (durations, percentages, episodes, save rules, raw-file lookup) are in `NightRecord+SleepGuard.swift`.
+- The cached score fields → the stored summary (`score`, `snoringDuration`, `eventCount`, `loudestIntensity`, `scoreVersion`), written only by the shared `refreshSummary(using:)`: when a night stops, when it is recovered, at the commit, and by `refreshStaleSummaries` at launch.
+- Optional end, events, gaps, stages and bursts became non-optional; the end reason is typed (`endReason`, was the `"low_battery"` string). Raw audio and log names are no longer stored: found by the night's id (`RawRecording`).
+- The store is `Nights.store` in the shared layout, opened by `SleepStore.open` (backup per version, never deleted; the Debug-only reset is gone). `SleepGuardSchema`, `SleepGuardStore` and their tests removed (approved; the shared repo tests the schema and opening).
+- A night without sleep stages asks Health each time its detail opens (`nil` "never fetched" no longer exists).
+- CLAUDE.md / AGENTS.md schema and stored-summary rules rewritten for the shared schema.
+- Verified: package lanes, app build and checks on 0.36.0; Debug sample data lands in the new store (14 nights, 106 events, summaries stamped) and the briefing reads it. Screens beyond the briefing weren't driven (simulator taps unavailable).

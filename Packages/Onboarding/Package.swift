@@ -15,7 +15,7 @@ let package = Package(
     .package(path: "../AudioEngine"),
     .package(path: "../Services"),
     .package(path: "../DesignSystem"),
-    .package(url: "https://github.com/dardan0x/SleepGuardShared.git", exact: "0.35.0"),
+    .package(url: "https://github.com/dardan0x/SleepGuardShared.git", exact: "0.36.0"),
     .package(url: "https://github.com/hmlongco/Factory", from: "3.5.2"),
   ],
   targets: [

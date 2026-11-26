@@ -15,6 +15,6 @@ public protocol HealthKitSyncing: AnyObject, Observable {
   func requestAuthorization() async -> Bool
   func checkAuthorizationStatus()
   /// Stages overlapping the session; empty when unavailable or not authorized.
-  func fetchSleepStages(for session: SleepSession) async -> [SleepStageSegment]
-  func sync(session: SleepSession) async
+  func fetchSleepStages(for session: NightRecord) async -> [SleepStageSegment]
+  func sync(session: NightRecord) async
 }

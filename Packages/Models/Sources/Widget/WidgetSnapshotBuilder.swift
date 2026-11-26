@@ -3,23 +3,23 @@ public import Foundation
 public enum WidgetSnapshotBuilder {
   /// Builds a snapshot from completed sessions.
   ///
-  /// Reads only cached fields (`cachedSleepScore`, `cachedSnoringDuration`) and
-  /// never the `events` relationship, which has crashed when faulted. Sessions
-  /// without a cached score or an end date are skipped.
+  /// Reads only the stored summary (`score`, `snoringDuration`) and never the
+  /// `events` relationship, which has crashed when faulted. Nights without a
+  /// summary or a length are skipped.
   public static func make(
-    from sessions: [SleepSession],
+    from sessions: [NightRecord],
     now: Date = .now,
     calendar: Calendar = .current) -> WidgetSnapshot
   {
     let nights = sessions
       .compactMap { session -> WidgetSnapshot.Night? in
-        guard session.hasCachedScore, let endDate = session.endDate else { return nil }
+        guard session.hasSummary, session.end > session.start else { return nil }
         return WidgetSnapshot.Night(
           id: session.id,
-          startDate: session.startDate,
-          endDate: endDate,
-          score: session.cachedSleepScore,
-          snoringDuration: session.cachedSnoringDuration)
+          startDate: session.start,
+          endDate: session.end,
+          score: session.score,
+          snoringDuration: session.snoringDuration)
       }
       .sorted { $0.startDate < $1.startDate }
 

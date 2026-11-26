@@ -30,12 +30,12 @@ public enum MockDataGenerator {
     do {
       // Events first, with a save, then the sessions: a cascade over faulted
       // relationships has crashed SwiftData.
-      for event in try modelContext.fetch(FetchDescriptor<SnoreEvent>()) {
+      for event in try modelContext.fetch(FetchDescriptor<NightEventRecord>()) {
         modelContext.delete(event)
       }
       try modelContext.save()
-      for session in try modelContext.fetch(FetchDescriptor<SleepSession>()) {
-        _ = session.sleepStageSegments
+      for session in try modelContext.fetch(FetchDescriptor<NightRecord>()) {
+        _ = session.sleepStages
         _ = session.recordingGaps
         modelContext.delete(session)
       }
@@ -46,12 +46,12 @@ public enum MockDataGenerator {
 
     let nights = SampleNights.make()
     for night in nights {
-      let session = SleepSession.make(from: night)
-      for event in session.events ?? [] {
+      let session = NightRecord.make(from: night)
+      for event in session.events {
         modelContext.insert(event)
       }
       modelContext.insert(session)
-      session.refreshCachedScore(using: Container.shared.appConfig().sleepScoreConfig)
+      session.refreshSummary(using: Container.shared.appConfig().sleepScoreConfig)
     }
     do {
       try modelContext.save()

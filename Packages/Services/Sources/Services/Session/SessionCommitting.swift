@@ -16,5 +16,5 @@ public protocol SessionCommitting: AnyObject {
   ///
   /// Returns the follow-up work; callers don't need to wait for it.
   @discardableResult
-  func commit(_ session: SleepSession, in context: ModelContext) throws -> Task<Void, Never>
+  func commit(_ session: NightRecord, in context: ModelContext) throws -> Task<Void, Never>
 }

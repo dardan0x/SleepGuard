@@ -39,12 +39,12 @@ public final class FakeHealthKitSync: HealthKitSyncing {
 
   public func checkAuthorizationStatus() {}
 
-  public func fetchSleepStages(for session: SleepSession) async -> [SleepStageSegment] {
+  public func fetchSleepStages(for session: NightRecord) async -> [SleepStageSegment] {
     fetchedSessionIDs.append(session.id)
     return isAuthorized ? stages : []
   }
 
-  public func sync(session: SleepSession) async {
+  public func sync(session: NightRecord) async {
     guard isAuthorized else { return }
     syncedSessionIDs.append(session.id)
   }

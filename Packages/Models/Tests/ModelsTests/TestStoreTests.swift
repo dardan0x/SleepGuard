@@ -13,10 +13,10 @@ struct TestStoreTests {
       .fixture(start: start),
       events: [.fixture(at: start.addingTimeInterval(600), duration: 90)])
 
-    let fetched = try store.context.fetch(FetchDescriptor<SleepSession>())
+    let fetched = try store.context.fetch(FetchDescriptor<NightRecord>())
     #expect(fetched.count == 1)
-    #expect(session.events?.count == 1)
-    #expect(session.events?.first?.session === session)
-    #expect(session.snoringDuration == 90)
+    #expect(session.events.count == 1)
+    #expect(session.events.first?.session === session)
+    #expect(session.night.snoringDuration == 90)
   }
 }

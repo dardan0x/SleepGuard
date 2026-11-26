@@ -8,7 +8,7 @@ public import SleepHealthKit
 /// shared `HealthKitSleep`, which decides what a night looks like in Apple
 /// Health (the same in SleepGuardUIKitWay). This type adds what only this
 /// app needs: the observable `isAuthorized` the screens read, the mapping
-/// from `SleepSession`, and the logging.
+/// from `NightRecord`, and the logging.
 @MainActor
 @Observable
 public final class HealthKitSync: HealthKitSyncing {
@@ -42,9 +42,9 @@ public final class HealthKitSync: HealthKitSyncing {
 
   /// Read whether or not writing is allowed: HealthKit never says whether
   /// reading is, and returns nothing when it isn't.
-  public func fetchSleepStages(for session: SleepSession) async -> [SleepStageSegment] {
-    let start = session.startDate
-    let end = session.endDate ?? start.addingTimeInterval(session.totalDuration)
+  public func fetchSleepStages(for session: NightRecord) async -> [SleepStageSegment] {
+    let start = session.start
+    let end = session.end
     do {
       return try await health.stages(from: start, to: end)
     } catch {
@@ -55,9 +55,9 @@ public final class HealthKitSync: HealthKitSyncing {
 
   // MARK: - Write Sleep Data
 
-  public func sync(session: SleepSession) async {
+  public func sync(session: NightRecord) async {
     do {
-      try await health.save(session.night, summary: session.nightSummary)
+      try await health.save(session.night, summary: session.summary)
     } catch {
       Log.session.error("Writing the night to Health failed: \(error.localizedDescription, privacy: .public)")
     }

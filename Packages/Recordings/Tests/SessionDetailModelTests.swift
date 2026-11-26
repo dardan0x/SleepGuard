@@ -38,7 +38,7 @@ final class SessionDetailModelTests {
     start.addingTimeInterval(seconds)
   }
 
-  private func model(for session: SleepSession) -> SessionDetailModel {
+  private func model(for session: NightRecord) -> SessionDetailModel {
     SessionDetailModel(sessionID: session.id, appConfig: appConfig, userPreferences: preferences)
   }
 
@@ -51,8 +51,8 @@ final class SessionDetailModelTests {
   }
 
   /// One merged snoring episode (2 events), one micro-episode, sleep talking, noise.
-  private func night() throws -> (SleepSession, [String: SnoreEvent]) {
-    let events: [String: SnoreEvent] = [
+  private func night() throws -> (NightRecord, [String: NightEventRecord]) {
+    let events: [String: NightEventRecord] = [
       "snoreA": .fixture(at: at(0), duration: 30),
       "snoreB": .fixture(at: at(60), duration: 120),
       "micro": .fixture(at: at(3600), duration: 2),
@@ -68,8 +68,8 @@ final class SessionDetailModelTests {
   @MainActor
   @Test func loadReadsWithoutWriting() throws {
     let (session, _) = try night()
-    session.hasCachedScore = true
-    session.cachedSleepScore = 1 // stale
+    session.scoreVersion = "cached"
+    session.score = 1 // stale
     try store.context.save()
     let model = model(for: session)
 
@@ -80,39 +80,39 @@ final class SessionDetailModelTests {
       return
     }
     #expect(loaded.id == session.id)
-    #expect(sortedEvents.map(\.timestamp) == sortedEvents.map(\.timestamp).sorted())
+    #expect(sortedEvents.map(\.start) == sortedEvents.map(\.start).sorted())
     #expect(!isClipSession)
-    #expect(session.cachedSleepScore == 1)
+    #expect(session.score == 1)
     #expect(!store.context.hasChanges)
   }
 
   @MainActor
   @Test func enrichRefreshesAStaleCachedScore() async throws {
     let (session, _) = try night()
-    session.hasCachedScore = true
-    session.cachedSleepScore = 1 // stale: no version stamp
+    session.scoreVersion = "cached"
+    session.score = 1 // stale: no version stamp
     let model = model(for: session)
 
     model.load(modelContext: store.context)
     await model.enrichIfNeeded(modelContext: store.context)
 
-    #expect(session.hasCachedScore)
-    #expect(session.cachedSleepScore == session.sleepScore(using: appConfig.sleepScoreConfig))
+    #expect(session.hasSummary)
+    #expect(session.score == session.sleepScore(using: appConfig.sleepScoreConfig))
     #expect(!store.context.hasChanges)
   }
 
   @MainActor
   @Test func enrichLeavesACurrentCachedScoreAlone() async throws {
     let (session, _) = try night()
-    session.refreshCachedScore(using: appConfig.sleepScoreConfig)
-    session.cachedSleepScore = 1 // stamped current, so not recomputed
+    session.refreshSummary(using: appConfig.sleepScoreConfig)
+    session.score = 1 // stamped current, so not recomputed
     try store.context.save()
     let model = model(for: session)
 
     model.load(modelContext: store.context)
     await model.enrichIfNeeded(modelContext: store.context)
 
-    #expect(session.cachedSleepScore == 1)
+    #expect(session.score == 1)
   }
 
   @MainActor
@@ -127,8 +127,8 @@ final class SessionDetailModelTests {
 
   @MainActor
   @Test func sessionWithAnExistingClipIsAClipSession() async throws {
-    let event = SnoreEvent.fixture(at: at(0))
-    event.audioFileURL = try clipFile()
+    let event = NightEventRecord.fixture(at: at(0))
+    event.clipFileName = try clipFile()
     let session = try store.insert(.fixture(start: start), events: [event])
     let model = model(for: session)
     model.load(modelContext: store.context)
@@ -157,8 +157,8 @@ final class SessionDetailModelTests {
     await model.enrichIfNeeded(modelContext: store.context)
 
     #expect(fake.fetchedSessionIDs == [session.id])
-    #expect(session.sleepStageSegments?.count == 1)
-    #expect(session.cachedSleepScore == 85)
+    #expect(session.sleepStages.count == 1)
+    #expect(session.score == 85)
   }
 
   @MainActor
@@ -172,7 +172,7 @@ final class SessionDetailModelTests {
     await model.enrichIfNeeded(modelContext: store.context)
 
     #expect(fake.fetchedSessionIDs.isEmpty)
-    #expect(session.sleepStageSegments == nil)
+    #expect(session.sleepStages.isEmpty)
   }
 
   // MARK: - Filters
@@ -220,18 +220,21 @@ final class SessionDetailModelTests {
 
   @MainActor
   @Test func deleteRemovesTheSessionEventsAndAllAudioFiles() async throws {
-    let event = SnoreEvent.fixture(at: at(0))
+    let event = NightEventRecord.fixture(at: at(0))
     let clip = try clipFile()
-    event.audioFileURL = clip
+    event.clipFileName = clip
     let session = try store.insert(.fixture(start: start), events: [event])
-    let raw = try clipFile()
-    session.rawAudioFileURL = raw
+    // The raw recording, found by the night's id.
+    let raw = RawRecording.audioFileName(for: session.id)
+    let rawURL = AudioFileURLResolver.url(for: raw)
+    try Data([1]).write(to: rawURL)
+    createdFiles.append(rawURL)
     try store.context.save()
 
     #expect(model(for: session).delete(modelContext: store.context))
 
-    #expect(try store.context.fetchCount(FetchDescriptor<SleepSession>()) == 0)
-    #expect(try store.context.fetchCount(FetchDescriptor<SnoreEvent>()) == 0)
+    #expect(try store.context.fetchCount(FetchDescriptor<NightRecord>()) == 0)
+    #expect(try store.context.fetchCount(FetchDescriptor<NightEventRecord>()) == 0)
     #expect(!FileManager.default.fileExists(atPath: AudioFileURLResolver.url(for: raw).path))
     #expect(!FileManager.default.fileExists(atPath: AudioFileURLResolver.url(for: clip).path))
   }

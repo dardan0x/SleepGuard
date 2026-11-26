@@ -122,8 +122,8 @@ final class RealtimeDetectionTracker {
     lastDisplayUpdate = nil
   }
 
-  func syncEventsCount(with session: SleepSession) {
-    eventsCount = session.eventsCount
+  func syncEventsCount(with session: NightRecord) {
+    eventsCount = session.night.eventCount
   }
 
   /// Finalizes any in-progress snore/speech events and waits until the engine
@@ -320,20 +320,20 @@ final class RealtimeDetectionTracker {
     kind: RecordingGap.Kind = .melody)
   {
     guard let session = recording?.currentSession else { return }
-    let gaps = session.recordingGaps ?? []
+    let gaps = session.recordingGaps
     let updated = gaps.adding(
-      start: start, duration: duration, nightStart: session.startDate, snoringResumed: snoringResumed, kind: kind)
+      start: start, duration: duration, nightStart: session.start, snoringResumed: snoringResumed, kind: kind)
     guard updated.count > gaps.count else { return }
     session.recordingGaps = updated
-    let startOffset = start.timeIntervalSince(session.startDate)
+    let startOffset = start.timeIntervalSince(session.start)
     Log.detection.info("Logged gap: startOffset=\(startOffset, format: .fixed(precision: 1))s duration=\(duration, format: .fixed(precision: 1))s snoringResumed=\(snoringResumed) kind=\(kind.rawValue, privacy: .public)")
   }
 
   /// Marks the most recent recording gap as having confirmed snoring resumption.
   /// Called when sustained snoring is detected within the post-melody breathing delay.
   private func markLastGapSnoringResumed() {
-    guard let session = recording?.currentSession, let gaps = session.recordingGaps, !gaps.isEmpty else { return }
-    session.recordingGaps = gaps.markingLastSnoringResumed()
+    guard let session = recording?.currentSession, !session.recordingGaps.isEmpty else { return }
+    session.recordingGaps = session.recordingGaps.markingLastSnoringResumed()
   }
 
   // MARK: - Engine lifecycle
@@ -421,17 +421,11 @@ final class RealtimeDetectionTracker {
 
   private func save(_ detected: DetectedSnoreEvent) {
     guard let session = recording?.currentSession else { return }
-    let event = SnoreEvent(
-      id: detected.id,
-      timestamp: detected.start,
-      category: .snoring,
-      intensity: detected.intensity,
-      averageDB: detected.averageDB,
-      peakDB: detected.peakDB,
-      averageConfidence: detected.averageConfidence,
-      averageSpectralScore: detected.averageSpectralScore,
-      bursts: detected.bursts.isEmpty ? nil : detected.bursts,
-      duration: detected.duration)
+    let event = NightEventRecord.make(from: NightEvent(
+      id: detected.id, start: detected.start, duration: detected.duration, category: .snoring,
+      intensity: detected.intensity, averageDB: detected.averageDB, peakDB: detected.peakDB,
+      averageConfidence: detected.averageConfidence, bursts: detected.bursts,
+      averageSpectralScore: detected.averageSpectralScore))
     append(event, to: session)
 
     // Close the event audio file (or take the one the melody closed) and
@@ -443,7 +437,7 @@ final class RealtimeDetectionTracker {
         let m4aURL = rawFileURL.deletingPathExtension().appendingPathExtension("m4a")
         if await ClipCompressor.compress(from: rawFileURL, to: m4aURL) {
           let spectral = await ClipSpectrum.features(of: m4aURL)
-          event.audioFileURL = AudioFileURLResolver.filename(from: m4aURL)
+          event.clipFileName = AudioFileURLResolver.filename(from: m4aURL)
           event.dominantFrequency = spectral.dominantFrequency
           event.spectralCentroid = spectral.spectralCentroid
           event.lowFreqRatio = spectral.lowFreqRatio
@@ -466,24 +460,17 @@ final class RealtimeDetectionTracker {
 
   private func save(_ detected: DetectedSpeechEvent) {
     guard let session = recording?.currentSession else { return }
-    let event = SnoreEvent(
-      timestamp: detected.start,
-      category: .sleepTalking,
-      intensity: .quiet,
-      averageDB: detected.averageDB,
-      peakDB: detected.peakDB,
-      duration: detected.duration)
+    let event = NightEventRecord.make(from: NightEvent(
+      start: detected.start, duration: detected.duration, category: .sleepTalking, intensity: .quiet,
+      averageDB: detected.averageDB, peakDB: detected.peakDB))
     append(event, to: session)
     checkpoint()
   }
 
-  private func append(_ event: SnoreEvent, to session: SleepSession) {
+  private func append(_ event: NightEventRecord, to session: NightRecord) {
     event.session = session
-    if session.events == nil {
-      session.events = []
-    }
-    session.events?.append(event)
-    eventsCount = session.events?.count ?? 0
+    session.events.append(event)
+    eventsCount = session.events.count
   }
 
   // MARK: - Private helpers

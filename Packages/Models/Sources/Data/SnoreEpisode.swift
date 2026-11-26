@@ -6,15 +6,15 @@ public import SleepCore
 ///
 /// The grouping and every number come from the shared `NightEpisode`
 /// (SleepGuardShared), so this app and SleepGuardUIKitWay agree. This type
-/// adds the stored `SnoreEvent`s, which screens need for playback and clips.
+/// adds the stored `NightEventRecord`s, which screens need for playback and clips.
 public struct SnoringEpisode: Identifiable {
   /// The shared value this episode stands for.
   public let episode: NightEpisode
   /// The same events as `episode.events`, as stored models, in time order.
-  public let events: [SnoreEvent]
+  public let events: [NightEventRecord]
 
   /// `models` must contain every event of `episode`; extra ones are ignored.
-  init(_ episode: NightEpisode, models: [UUID: SnoreEvent]) {
+  init(_ episode: NightEpisode, models: [UUID: NightEventRecord]) {
     self.episode = episode
     events = episode.events.compactMap { models[$0.id] }
   }
@@ -45,7 +45,7 @@ public struct SnoringEpisode: Identifiable {
     episode.measuredDuration
   }
 
-  public var representativeEvent: SnoreEvent? {
+  public var representativeEvent: NightEventRecord? {
     events.first { $0.id == episode.representativeEvent.id }
   }
 
@@ -60,14 +60,14 @@ public struct SnoringEpisode: Identifiable {
   /// Renderable segments for the timeline. Uses bursts when available so
   /// melody gaps are not drawn as solid snoring blocks.
   public var detectedSegments: [(id: UUID, start: Date, duration: TimeInterval, intensity: SnoreIntensity)] {
-    let hasBursts = events.contains { !($0.bursts?.isEmpty ?? true) }
+    let hasBursts = events.contains { !$0.bursts.isEmpty }
     var segments: [(UUID, Date, TimeInterval, SnoreIntensity)] = []
     if hasBursts {
       for event in events {
-        for burst in event.bursts ?? [] {
+        for burst in event.bursts {
           segments.append((
             id: UUID(),
-            start: event.timestamp.addingTimeInterval(burst.startOffset),
+            start: event.start.addingTimeInterval(burst.startOffset),
             duration: burst.duration,
             intensity: event.intensity))
         }
@@ -76,7 +76,7 @@ public struct SnoringEpisode: Identifiable {
       for event in events {
         segments.append((
           id: UUID(),
-          start: event.timestamp,
+          start: event.start,
           duration: event.snoreDuration,
           intensity: event.intensity))
       }

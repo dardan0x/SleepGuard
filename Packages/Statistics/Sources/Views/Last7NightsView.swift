@@ -11,8 +11,8 @@ public import SwiftUI
 public struct Last7NightsView: View {
   @Environment(\.theme) private var theme
   @Environment(RouterPath.self) private var routerPath
-  @Query(sort: \SleepSession.startDate, order: .reverse)
-  private var sessions: [SleepSession]
+  @Query(sort: \NightRecord.start, order: .reverse)
+  private var sessions: [NightRecord]
 
   public init() {}
 

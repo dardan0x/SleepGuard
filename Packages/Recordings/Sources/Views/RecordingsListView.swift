@@ -15,8 +15,8 @@ public struct RecordingsListView: View {
   @Environment(\.theme) private var theme
   @Environment(\.modelContext) private var modelContext
   @Environment(RouterPath.self) private var routerPath
-  @Query(sort: \SleepSession.startDate, order: .reverse)
-  private var sessions: [SleepSession]
+  @Query(sort: \NightRecord.start, order: .reverse)
+  private var sessions: [NightRecord]
 
   @State private var viewState: ViewState = .loading
   @State private var dayToDelete: NightDay?
@@ -72,7 +72,7 @@ public struct RecordingsListView: View {
     if sessions.isEmpty {
       viewState = .empty
     } else {
-      viewState = .loaded(months: NightMonth.months(from: sessions.map(\.nightSummary)))
+      viewState = .loaded(months: NightMonth.months(from: sessions.map(\.summary)))
     }
   }
 
@@ -87,7 +87,7 @@ public struct RecordingsListView: View {
       // Events first with an intermediate save: deleting a faulted
       // relationship in one cascade has crashed SwiftData.
       for session in doomed {
-        for event in session.events ?? [] {
+        for event in session.events {
           modelContext.delete(event)
         }
       }
@@ -95,7 +95,7 @@ public struct RecordingsListView: View {
 
       for session in doomed {
         // Resolve transformable faults before deletion
-        _ = session.sleepStageSegments
+        _ = session.sleepStages
         _ = session.recordingGaps
         modelContext.delete(session)
       }

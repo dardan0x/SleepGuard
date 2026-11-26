@@ -14,7 +14,7 @@ public import SwiftUI
 public struct ProfilePromptSection: View {
   @Injected(\.userPreferences) private var userPreferences
   @Injected(\.hapticManager) private var hapticManager
-  @Query private var sessions: [SleepSession]
+  @Query private var sessions: [NightRecord]
   @Injected(\.profileStore) private var profileStore
   let onOpen: () -> Void
   @State private var roll = Double.random(in: 0..<1)
@@ -42,7 +42,7 @@ public struct ProfilePromptSection: View {
 
   private var shouldShow: Bool {
     ProfilePrompt.shouldShow(
-      fullNights: sessions.filter { $0.totalDuration >= SleepSession.minimumSaveDuration }.count,
+      fullNights: sessions.filter { $0.totalDuration >= NightRecord.minimumSaveDuration }.count,
       completion: profileStore.profile.completion,
       dismissCount: userPreferences.profilePromptDismissCount, roll: roll, coin: coin)
   }

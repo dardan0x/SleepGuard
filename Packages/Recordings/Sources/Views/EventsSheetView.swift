@@ -8,20 +8,20 @@ public import SwiftUI
 /// player for that row's episode without dismissing the events sheet.
 @MainActor
 public struct EventsSheetView: View {
-  let session: SleepSession
+  let session: NightRecord
   let rows: [EventListRow]
   let isClipSession: Bool
 
   @Environment(\.theme) private var theme
   @Environment(\.dismiss) private var dismiss
 
-  @State private var selectedEvent: SnoreEvent?
+  @State private var selectedEvent: NightEventRecord?
 
   public var body: some View {
     NavigationStack {
       ScrollView(showsIndicators: false) {
         EventsGridContent(rows: rows) { row in
-          selectedEvent = session.events?.first { $0.id == row.id }
+          selectedEvent = session.events.first { $0.id == row.id }
         }
       }
       .background(theme.palette.bgPrimary.ignoresSafeArea())

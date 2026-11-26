@@ -10,9 +10,9 @@ public import SwiftData
 @MainActor
 @Observable
 public final class FakeSessionManager: SessionManaging {
-  public var currentSession: SleepSession?
+  public var currentSession: NightRecord?
   public var isRecording = false
-  public var completedSession: SleepSession?
+  public var completedSession: NightRecord?
   public var isProcessingSession = false
   public var isLiveSessionVisible = false
   public var currentDB: Float = -60
@@ -29,7 +29,7 @@ public final class FakeSessionManager: SessionManaging {
     isRecording = true
   }
 
-  public func stopSession() async -> SleepSession? {
+  public func stopSession() async -> NightRecord? {
     isRecording = false
     return currentSession
   }
@@ -109,7 +109,7 @@ public final class FakeSessionCommitter: SessionCommitting {
   public init() {}
 
   @discardableResult
-  public func commit(_ session: SleepSession, in _: ModelContext) throws -> Task<Void, Never> {
+  public func commit(_ session: NightRecord, in _: ModelContext) throws -> Task<Void, Never> {
     if let error { throw error }
     committedSessionIDs.append(session.id)
     return Task {}

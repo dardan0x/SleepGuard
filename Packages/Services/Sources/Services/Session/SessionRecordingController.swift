@@ -15,8 +15,8 @@ import UIKit
 @MainActor
 @Observable
 final class SessionRecordingController {
-  private(set) var currentSession: SleepSession?
-  var completedSession: SleepSession?
+  private(set) var currentSession: NightRecord?
+  var completedSession: NightRecord?
   private(set) var isRecording = false
   private(set) var isProcessingSession = false
   var isLiveSessionVisible = false
@@ -92,7 +92,7 @@ final class SessionRecordingController {
     // Clean up any orphaned files from a previous force-closed session.
     pendingSessionStore.cleanupIfNeeded()
 
-    let session = SleepSession(startDate: Date())
+    let session = NightRecord(start: Date())
     session.recordingGaps = []
     currentSession = session
     let sessionAudioFilename = preferences.preserveRawAudio ? RawRecording.audioFileName(for: session.id) : nil
@@ -102,8 +102,8 @@ final class SessionRecordingController {
     detection?.applyDetectionSensitivity()
 
     // Full-session raw audio is only recorded in debug mode for algorithm
-    // testing (it also turns on the spectral score).
-    session.audioFileURL = sessionAudioFilename
+    // testing (it also turns on the spectral score). It is found later by
+    // the night's id (`RawRecording`).
     try audioRecorder.startRecording(rawAudioFileName: sessionAudioFilename)
     isRecording = true
     appConfig.holdRemoteUpdates()
@@ -119,7 +119,7 @@ final class SessionRecordingController {
     if preferences.preserveRawAudio {
       let prefs = preferences
       let metadata = RawLogMetadata(
-        sessionStart: session.startDate,
+        sessionStart: session.start,
         detectionSensitivity: prefs.detectionSensitivity.rawValue,
         detectSleepTalking: prefs.detectSleepTalking,
         snoreInterrupterMode: prefs.snoreInterrupterMode.rawValue)
@@ -227,12 +227,12 @@ final class SessionRecordingController {
   func forceSaveDueToLowBattery() {
     Task { @MainActor in
       guard isRecording else { return }
-      currentSession?.terminationReason = "low_battery"
+      currentSession?.endReason = .lowBattery
       _ = await stopSession()
     }
   }
 
-  func stopSession() async -> SleepSession? {
+  func stopSession() async -> NightRecord? {
     isProcessingSession = true
     defer { isProcessingSession = false }
 
@@ -261,28 +261,16 @@ final class SessionRecordingController {
 
     let now = Date()
 
-    session.endDate = now
+    session.end = now
     session.averageDB = detection.map(\.totalAverageDB) ?? session.averageDB
     detection?.syncEventsCount(with: session)
 
-    // In debug mode with raw audio preserved, move the full session file to rawAudioFileURL
-    // so event clips remain the primary playback source.
-    if preferences.preserveRawAudio,
-       let events = session.events, !events.isEmpty,
-       session.rawAudioFileURL == nil,
-       session.audioFileURL != nil
-    {
-      let hasClips = events.contains { $0.audioFileURL != nil }
-      if hasClips {
-        session.rawAudioFileURL = session.audioFileURL
-        session.audioFileURL = nil
-      }
-    }
+    // Close the raw classification log (registered with the pending store at
+    // start; found by the night's id).
+    _ = await rawLogWriter.stop()
 
-    // Save raw classification log
-    // Already registered with the pending store at start.
-    session.rawLogFileURL = await rawLogWriter.stop()
-
+    // The summary sheet reads the stored summary too; the commit stamps it again.
+    session.refreshSummary(using: appConfig.sleepScoreConfig)
     let result = session
     completedSession = result
     currentSession = nil
@@ -294,21 +282,17 @@ final class SessionRecordingController {
     // Delete event clips
     if let events = completedSession?.events {
       for event in events {
-        if let url = AudioFileURLResolver.resolve(event.audioFileURL) {
+        if let url = AudioFileURLResolver.resolve(event.clipFileName) {
           try? FileManager.default.removeItem(at: url)
         }
       }
     }
-    // Delete legacy full session file if present (pre-raw-audio sessions)
-    if let url = AudioFileURLResolver.resolve(completedSession?.audioFileURL) {
-      try? FileManager.default.removeItem(at: url)
-    }
-    // Delete raw full session archive
-    if let url = AudioFileURLResolver.resolve(completedSession?.rawAudioFileURL) {
+    // Delete the raw recording
+    if let url = AudioFileURLResolver.resolve(completedSession?.rawAudioFileName) {
       try? FileManager.default.removeItem(at: url)
     }
     // Delete raw classification log
-    if let url = AudioFileURLResolver.resolve(completedSession?.rawLogFileURL) {
+    if let url = AudioFileURLResolver.resolve(completedSession?.rawLogFileName) {
       try? FileManager.default.removeItem(at: url)
     }
     pendingSessionStore.cleanupIfNeeded()
@@ -345,16 +329,13 @@ final class SessionRecordingController {
 
       // Delete the session's audio files and clean up
       if let session = currentSession {
-        if let url = AudioFileURLResolver.resolve(session.audioFileURL) {
-          try? FileManager.default.removeItem(at: url)
-        }
-        if let url = AudioFileURLResolver.resolve(session.rawAudioFileURL) {
+        if let url = AudioFileURLResolver.resolve(session.rawAudioFileName) {
           try? FileManager.default.removeItem(at: url)
         }
         // Delete per-event files
-        if let events = session.events {
-          for event in events {
-            if let url = AudioFileURLResolver.resolve(event.audioFileURL) {
+        do {
+          for event in session.events {
+            if let url = AudioFileURLResolver.resolve(event.clipFileName) {
               try? FileManager.default.removeItem(at: url)
             }
           }

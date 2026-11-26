@@ -36,9 +36,9 @@ public final class SessionManager: SessionManaging {
 
   // MARK: - Recording state
 
-  public var currentSession: SleepSession? { recording.currentSession }
+  public var currentSession: NightRecord? { recording.currentSession }
   public var isRecording: Bool { recording.isRecording }
-  public var completedSession: SleepSession? {
+  public var completedSession: NightRecord? {
     get { recording.completedSession }
     set { recording.completedSession = newValue }
   }
@@ -62,7 +62,7 @@ public final class SessionManager: SessionManaging {
     try recording.startSession()
   }
 
-  public func stopSession() async -> SleepSession? {
+  public func stopSession() async -> NightRecord? {
     await recording.stopSession()
   }
 

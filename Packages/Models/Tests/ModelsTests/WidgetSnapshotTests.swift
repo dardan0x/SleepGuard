@@ -20,13 +20,13 @@ struct WidgetSnapshotBuilderTests {
     score: Int = 80,
     snoring: TimeInterval = 600,
     cached: Bool = true,
-    ended: Bool = true) -> SleepSession
+    ended: Bool = true) -> NightRecord
   {
     let start = date(day: day, hour: hour)
-    let session = SleepSession(startDate: start, endDate: ended ? start.addingTimeInterval(hours * 3600) : nil)
-    session.hasCachedScore = cached
-    session.cachedSleepScore = score
-    session.cachedSnoringDuration = snoring
+    let session = NightRecord(start: start, end: ended ? start.addingTimeInterval(hours * 3600) : nil)
+    session.scoreVersion = cached ? "cached" : ""
+    session.score = score
+    session.snoringDuration = snoring
     return session
   }
 

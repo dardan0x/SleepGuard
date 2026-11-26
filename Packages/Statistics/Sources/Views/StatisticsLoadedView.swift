@@ -27,7 +27,7 @@ struct StatisticsLoadedView: View {
         // The latest night in full (events read): the dashboard itself is built
         // from summaries without events.
         StatisticsDashboardContent(
-          dashboard: state.dashboard, latest: state.session.nightSummary, now: state.now,
+          dashboard: state.dashboard, latest: state.session.summary, now: state.now,
           compact: DeviceSize.isCompactHeight, onShowTrends: onViewTrends, onShowLastSevenNights: onViewLastSevenNights)
         {
           SleepStagesSection(session: state.session, scoreConfig: appConfig.sleepScoreConfig)

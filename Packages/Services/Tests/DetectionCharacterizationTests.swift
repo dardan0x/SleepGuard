@@ -303,7 +303,7 @@ final class DetectionHarness {
     tracker.recording = controller
     controller.attach(detection: tracker)
     try controller.startSession()
-    start = try #require(controller.currentSession).startDate
+    start = try #require(controller.currentSession).start
     clock.now = start
     self.clock = clock
     self.interrupter = interrupter
@@ -313,8 +313,8 @@ final class DetectionHarness {
     controller.stopAndDiscardSession()
   }
 
-  var events: [SnoreEvent] {
-    (controller.currentSession?.events ?? []).sorted { $0.timestamp < $1.timestamp }
+  var events: [NightEventRecord] {
+    (controller.currentSession?.events ?? []).sorted { $0.start < $1.start }
   }
 
   func snore(_ seconds: Double, db: Float, confidence: Float) async {
@@ -371,8 +371,8 @@ final class DetectionHarness {
   func summary() -> [String] {
     let session = controller.currentSession
     let eventLines = events.map { event in
-      let bursts = (event.bursts ?? []).map { "\(f($0.startOffset))-\(f($0.endOffset))" }.joined(separator: ", ")
-      return "\(event.category.rawValue) \(event.intensity.rawValue) t=\(f(event.timestamp.timeIntervalSince(start))) "
+      let bursts = (event.bursts).map { "\(f($0.startOffset))-\(f($0.endOffset))" }.joined(separator: ", ")
+      return "\(event.category.rawValue) \(event.intensity.rawValue) t=\(f(event.start.timeIntervalSince(start))) "
         + "d=\(f(event.duration)) avg=\(f(event.averageDB, 1)) peak=\(f(event.peakDB, 1)) "
         + "conf=\(f(event.averageConfidence)) bursts=[\(bursts)]"
     }

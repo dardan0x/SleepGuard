@@ -39,10 +39,10 @@ struct SessionCommitterTests {
 
   /// A finished, not-yet-inserted night as `SessionRecordingController` hands
   /// it over: events attached, clips registered as pending, a checkpoint on disk.
-  private func finishedNight(terminationReason: String?) -> SleepSession {
+  private func finishedNight(endReason: Night.EndReason) -> NightRecord {
     let start = Date(timeIntervalSinceReferenceDate: 800_000_000)
-    let session = SleepSession.fixture(start: start, hours: 7)
-    session.terminationReason = terminationReason
+    let session = NightRecord.fixture(start: start, hours: 7)
+    session.endReason = endReason
     session.events = [
       .fixture(at: start.addingTimeInterval(3600)),
       .fixture(at: start.addingTimeInterval(7200), intensity: .loud),
@@ -59,15 +59,15 @@ struct SessionCommitterTests {
   /// The regression: the low-battery path used to save without clearing the
   /// pending record or the checkpoint, so the next launch deleted the saved
   /// night's clips or offered to "recover" it again.
-  @Test(arguments: [nil, "low_battery"])
-  func commitStoresTheNightAndClearsRecoveryState(terminationReason: String?) async throws {
-    let session = finishedNight(terminationReason: terminationReason)
+  @Test(arguments: [Night.EndReason.stopped, .lowBattery])
+  func commitStoresTheNightAndClearsRecoveryState(endReason: Night.EndReason) async throws {
+    let session = finishedNight(endReason: endReason)
 
     try await (makeCommitter().commit(session, in: store.context)).value
 
-    let saved = try store.context.fetch(FetchDescriptor<SleepSession>())
+    let saved = try store.context.fetch(FetchDescriptor<NightRecord>())
     #expect(saved.map(\.id) == [session.id])
-    #expect(try store.context.fetchCount(FetchDescriptor<SnoreEvent>()) == 2)
+    #expect(try store.context.fetchCount(FetchDescriptor<NightEventRecord>()) == 2)
     #expect(pending.pendingSessionID == nil)
     #expect(pending.files.isEmpty)
     #expect(pending.cleanupCount == 0, "Clearing the record must not delete the saved night's files")
@@ -75,19 +75,19 @@ struct SessionCommitterTests {
   }
 
   @Test func commitCachesTheScoreWithTheCurrentFormula() async throws {
-    let session = finishedNight(terminationReason: nil)
+    let session = finishedNight(endReason: .stopped)
 
     try await (makeCommitter().commit(session, in: store.context)).value
 
-    #expect(session.hasCachedScore)
-    #expect(session.cachedScoreVersion == SleepScore.cacheVersion(for: appConfig.sleepScoreConfig))
-    #expect(session.cachedSleepScore == SleepScore.compute(session.sleepInputs, config: appConfig.sleepScoreConfig))
+    #expect(session.hasSummary)
+    #expect(session.scoreVersion == SleepScore.cacheVersion(for: appConfig.sleepScoreConfig))
+    #expect(session.score == session.night.summary(using: appConfig.sleepScoreConfig).score)
   }
 
   @Test(arguments: [true, false])
   func followUpsEnforceLimitsAndSyncOnlyWhenEnabled(syncToHealthKit: Bool) async throws {
     preferences.syncToHealthKit = syncToHealthKit
-    let session = finishedNight(terminationReason: nil)
+    let session = finishedNight(endReason: .stopped)
 
     try await (makeCommitter().commit(session, in: store.context)).value
 

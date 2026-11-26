@@ -16,7 +16,7 @@ import SleepCore
 @MainActor
 @Observable
 public final class ClipPlaybackController {
-  public var events: [SnoreEvent] = []
+  public var events: [NightEventRecord] = []
   public var isPlaying = false
   public var currentClipTime: TimeInterval = 0
   /// Which clip is current and the joined timeline (SleepCore).
@@ -69,7 +69,7 @@ public final class ClipPlaybackController {
     }
   }
 
-  public var currentEvent: SnoreEvent? {
+  public var currentEvent: NightEventRecord? {
     events.indices.contains(playlist.index) ? events[playlist.index] : nil
   }
 
@@ -93,7 +93,7 @@ public final class ClipPlaybackController {
     return (currentClipStartTime + currentClipTime) / totalClipsDuration
   }
 
-  public func loadEvents(_ events: [SnoreEvent]) {
+  public func loadEvents(_ events: [NightEventRecord]) {
     self.events = events
     playlist = ClipPlaylist(clips: events.map { ClipPlaylist.Clip(id: $0.id, fileName: nil, duration: $0.snoreDuration) })
     currentClipTime = 0
@@ -104,7 +104,7 @@ public final class ClipPlaybackController {
 
   public var hasAudioForCurrentEvent: Bool {
     guard let event = currentEvent else { return false }
-    return AudioFileURLResolver.resolve(event.audioFileURL) != nil
+    return AudioFileURLResolver.resolve(event.clipFileName) != nil
   }
 
   public func play() {
@@ -213,7 +213,7 @@ public final class ClipPlaybackController {
       Log.playback.debug("setupPlayer: no current event")
       return
     }
-    guard let url = AudioFileURLResolver.resolve(event.audioFileURL) else {
+    guard let url = AudioFileURLResolver.resolve(event.clipFileName) else {
       Log.playback.debug("setupPlayer: no audio file for event \(event.id)")
       return
     }

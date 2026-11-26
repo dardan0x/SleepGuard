@@ -10,7 +10,7 @@ let package = Package(
     .library(name: "ModelsTestSupport", targets: ["ModelsTestSupport"]),
   ],
   dependencies: [
-    .package(url: "https://github.com/dardan0x/SleepGuardShared.git", exact: "0.35.0"),
+    .package(url: "https://github.com/dardan0x/SleepGuardShared.git", exact: "0.36.0"),
   ],
   targets: [
     .target(
@@ -18,6 +18,7 @@ let package = Package(
       dependencies: [
         .product(name: "SleepLogging", package: "SleepGuardShared"),
         .product(name: "SleepFiles", package: "SleepGuardShared"),
+        .product(name: "SleepStore", package: "SleepGuardShared"),
         .product(name: "SleepCore", package: "SleepGuardShared"),
       ],
       path: "Sources",

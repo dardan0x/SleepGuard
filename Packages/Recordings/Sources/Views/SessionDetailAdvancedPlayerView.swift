@@ -4,7 +4,7 @@ import SwiftUI
 
 /// Expandable advanced player showing waveform, frequency spectrum, and spectral stats for a snore event clip.
 struct SessionDetailAdvancedPlayerView: View {
-  let event: SnoreEvent
+  let event: NightEventRecord
   let waveformSamples: [Float]
   let spectrumBars: [Float]
   let onWaveformTap: (Double) -> Void

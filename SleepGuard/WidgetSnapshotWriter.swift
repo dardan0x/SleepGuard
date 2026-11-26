@@ -13,9 +13,9 @@ enum WidgetSnapshotWriter {
   static func update(modelContext: ModelContext) {
     guard let url = WidgetSnapshotStore.fileURL else { return }
 
-    var descriptor = FetchDescriptor<SleepSession>(
-      predicate: #Predicate { $0.hasCachedScore && $0.endDate != nil },
-      sortBy: [SortDescriptor(\.startDate, order: .reverse)])
+    var descriptor = FetchDescriptor<NightRecord>(
+      predicate: #Predicate { $0.scoreVersion != "" },
+      sortBy: [SortDescriptor(\.start, order: .reverse)])
     descriptor.fetchLimit = fetchLimit
 
     do {

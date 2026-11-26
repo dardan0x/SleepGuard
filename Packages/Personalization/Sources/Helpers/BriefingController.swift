@@ -44,8 +44,8 @@ public final class BriefingController {
   /// Fills `current` when the briefing is on and a new night is waiting.
   public func prepareIfDue(modelContext: ModelContext, now: Date = Date()) {
     guard appConfig.isEnabled(.sleepBriefing), preferences.briefingEnabled else { return }
-    let sessions = (try? modelContext.fetch(FetchDescriptor<SleepSession>())) ?? []
-    let nights = sessions.filter(\.hasCachedScore).map(Self.summary)
+    let sessions = (try? modelContext.fetch(FetchDescriptor<NightRecord>())) ?? []
+    let nights = sessions.filter(\.hasSummary).map(Self.summary)
     guard let latest = nights.max(by: { $0.start < $1.start }),
           BriefingSchedule.isDue(latest: latest, lastShown: preferences.lastBriefingShownDate, now: now) else { return }
     let briefing = BriefingEngine.make(nights: nights, profile: profiles.profile, logs: lifestyleLogs.logs, now: now)
@@ -67,10 +67,10 @@ public final class BriefingController {
   }
 
   /// The cached numbers only: reading events here has crashed before.
-  static func summary(_ session: SleepSession) -> NightSummary {
+  static func summary(_ session: NightRecord) -> NightSummary {
     NightSummary(
-      id: session.id, start: session.startDate,
-      end: session.endDate ?? session.startDate.addingTimeInterval(session.totalDuration),
-      score: session.cachedSleepScore, snoringDuration: session.cachedSnoringDuration, eventCount: 0)
+      id: session.id, start: session.start,
+      end: session.end,
+      score: session.score, snoringDuration: session.snoringDuration, eventCount: 0)
   }
 }

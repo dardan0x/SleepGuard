@@ -8,6 +8,7 @@ import os
 import Platform
 import Routing
 import Services
+import SleepFiles
 import SwiftData
 import SwiftUI
 
@@ -24,21 +25,18 @@ struct SleepGuardApp: App {
     FirebaseApp.configure()
   }
 
-  /// Opened once at launch. A store that fails to open is never deleted in a
-  /// shipped build: the app runs on an in-memory store and shows
+  /// Opened once at launch: SleepGuardShared's `SleepStore` in the shared
+  /// layout (`Nights.store`), backed up once per version. A store that fails
+  /// to open is never deleted: the app runs on an in-memory store and shows
   /// `StoreUnavailableView`, and the file waits for a build that can read it.
-  private let storeOpening: SleepGuardStore.Opening = {
-    let configuration = SleepGuardSchema.configuration(inMemory: false)
-    SleepGuardStore.backUpIfNeeded(storeURL: configuration.url, appVersion: Bundle.main.shortVersionString)
+  private let storeOpening: SleepStore.Opening = {
+    let opening = SleepStore.open(at: SleepGuardStorage.location.storeURL, appVersion: Bundle.main.shortVersionString)
     #if DEBUG
-    let opening = SleepGuardStore.open(configuration, allowDestructiveReset: true)
     if opening.failure == nil, ProcessInfo.processInfo.arguments.contains("-generateMockData") {
       MockDataGenerator.generate(modelContext: opening.container.mainContext)
     }
-    return opening
-    #else
-    return SleepGuardStore.open(configuration, allowDestructiveReset: false)
     #endif
+    return opening
   }()
 
   private var sharedModelContainer: ModelContainer { storeOpening.container }
@@ -114,7 +112,7 @@ struct SleepGuardApp: App {
     let container = sharedModelContainer
     await StorageLimitEnforcer.shared.enforceLimits(modelContext: container.mainContext)
     do {
-      let refreshed = try await SleepSession.refreshStaleCachedScores(
+      let refreshed = try await NightRecord.refreshStaleSummaries(
         in: container.mainContext, config: appConfig.sleepScoreConfig)
       if refreshed > 0 {
         Log.app.info("Re-scored \(refreshed) night(s) cached by an older formula")

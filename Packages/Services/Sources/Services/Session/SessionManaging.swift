@@ -7,9 +7,9 @@ public import SleepCore
 /// Fake: `FakeSessionManager`.
 @MainActor
 public protocol SessionManaging: AnyObject, Observable {
-  var currentSession: SleepSession? { get }
+  var currentSession: NightRecord? { get }
   var isRecording: Bool { get }
-  var completedSession: SleepSession? { get set }
+  var completedSession: NightRecord? { get set }
   var isProcessingSession: Bool { get }
   var isLiveSessionVisible: Bool { get set }
   var currentDB: Float { get }
@@ -17,7 +17,7 @@ public protocol SessionManaging: AnyObject, Observable {
   var currentSpeechDetected: Bool { get }
   var eventsCount: Int { get }
   func startSession() throws
-  func stopSession() async -> SleepSession?
+  func stopSession() async -> NightRecord?
   func discardCompletedSession()
   func stopAndDiscardSession()
   func forceSaveDueToLowBattery()

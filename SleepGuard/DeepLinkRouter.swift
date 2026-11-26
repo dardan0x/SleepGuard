@@ -12,7 +12,7 @@ enum DeepLinkRouter {
       routerPath.navigate(to: .liveSession)
     case let .session(id):
       // A session deleted after the widget last refreshed falls back to the dashboard.
-      var descriptor = FetchDescriptor<SleepSession>(predicate: #Predicate { $0.id == id })
+      var descriptor = FetchDescriptor<NightRecord>(predicate: #Predicate { $0.id == id })
       descriptor.fetchLimit = 1
       guard let count = try? modelContext.fetchCount(descriptor), count > 0 else { return }
       routerPath.navigate(to: .sessionDetail(id: id))

@@ -9,8 +9,8 @@ public import SwiftUI
 @MainActor
 public struct TrendsView: View {
   @Environment(\.theme) private var theme
-  @Query(sort: \SleepSession.startDate, order: .reverse)
-  private var sessions: [SleepSession]
+  @Query(sort: \NightRecord.start, order: .reverse)
+  private var sessions: [NightRecord]
 
   @State private var range = TrendsRange.week
 

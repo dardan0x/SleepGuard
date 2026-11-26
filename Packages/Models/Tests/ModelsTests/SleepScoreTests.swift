@@ -4,7 +4,7 @@ import SleepCore
 import Testing
 @testable import Models
 
-/// `SleepSession.sleepScore(using:)` with the default config. Each test isolates
+/// `NightRecord.sleepScore(using:)` with the default config. Each test isolates
 /// one penalty; the comment shows the arithmetic so a formula change points at
 /// the exact number that moved. Quiet-intensity events carry no intensity penalty.
 @MainActor
@@ -22,20 +22,20 @@ struct SleepScoreTests {
 
   private func night(
     hours: Double = 8,
-    events: [SnoreEvent] = [],
-    gaps: [RecordingGap] = []) throws -> SleepSession
+    events: [NightEventRecord] = [],
+    gaps: [RecordingGap] = []) throws -> NightRecord
   {
     try store.insert(.fixture(start: start, hours: hours), events: events, gaps: gaps)
   }
 
-  private func score(_ session: SleepSession) -> Int {
+  private func score(_ session: NightRecord) -> Int {
     session.sleepScore(using: .default)
   }
 
   // MARK: - Baseline
 
   @Test func unfinishedSessionScoresMax() throws {
-    let session = try store.insert(SleepSession(startDate: start))
+    let session = try store.insert(NightRecord(start: start))
     #expect(score(session) == 100)
   }
 
@@ -93,10 +93,10 @@ struct SleepScoreTests {
     // Detected = 120 s → light 0.5 × 10 + epic 0.5 × 40 = 25.
     // (By span it would be 600/660 light + 60/660 epic = 12.)
     // snoring (600 + 60) / 28800 = 2.3 % × 0.85 = 1; 2 episodes / 8 h × 2.5 = 0
-    let light = SnoreEvent.fixture(
+    let light = NightEventRecord.fixture(
       at: at(3600), duration: 600, intensity: .light,
       bursts: [SnoreBurst(startOffset: 0, endOffset: 30), SnoreBurst(startOffset: 300, endOffset: 330)])
-    let epic = SnoreEvent.fixture(at: at(4 * 3600), duration: 60, intensity: .epic)
+    let epic = NightEventRecord.fixture(at: at(4 * 3600), duration: 60, intensity: .epic)
     #expect(try score(night(events: [light, epic])) == 74)
   }
 
@@ -104,19 +104,19 @@ struct SleepScoreTests {
 
   @Test func manyEpisodesArePenalized() throws {
     // 20 quiet 10 s events, 20 min apart → 20 episodes / 8 h × 2.5 = 6; snoring 200 s → 0
-    let events = (0..<20).map { SnoreEvent.fixture(at: at(Double($0) * 1200), duration: 10, intensity: .quiet) }
+    let events = (0..<20).map { NightEventRecord.fixture(at: at(Double($0) * 1200), duration: 10, intensity: .quiet) }
     #expect(try score(night(events: events)) == 94)
   }
 
   @Test func microEpisodesDoNotCountAsEvents() throws {
     // Same, but 2 s each: episodes under 3 s aren't displayable → no events penalty
-    let events = (0..<20).map { SnoreEvent.fixture(at: at(Double($0) * 1200), duration: 2, intensity: .quiet) }
+    let events = (0..<20).map { NightEventRecord.fixture(at: at(Double($0) * 1200), duration: 2, intensity: .quiet) }
     #expect(try score(night(events: events)) == 100)
   }
 
   @Test func eventsWithinFiveMinutesMergeIntoOneEpisode() throws {
     // 20 quiet 10 s events, 2 min apart → 1 episode → 1/8 h × 2.5 = 0
-    let events = (0..<20).map { SnoreEvent.fixture(at: at(Double($0) * 120), duration: 10, intensity: .quiet) }
+    let events = (0..<20).map { NightEventRecord.fixture(at: at(Double($0) * 120), duration: 10, intensity: .quiet) }
     #expect(try score(night(events: events)) == 100)
   }
 
@@ -151,7 +151,7 @@ struct SleepScoreTests {
   @Test func sleepTalkingIsPenalized() throws {
     // 40 × 60 s: 8.33 % × 0.35 = 2.9 + 5/h × 0.8 = 4 → 6. Not counted as snoring episodes.
     let events = (0..<40).map {
-      SnoreEvent.fixture(at: at(Double($0) * 600), duration: 60, intensity: .quiet, category: .sleepTalking)
+      NightEventRecord.fixture(at: at(Double($0) * 600), duration: 60, intensity: .quiet, category: .sleepTalking)
     }
     #expect(try score(night(events: events)) == 94)
   }
@@ -161,14 +161,14 @@ struct SleepScoreTests {
   @Test func missingDeepAndRemIsPenalizedAndCapped() throws {
     // deep (15 − 0) × 0.6 = 9 + REM (18 − 0) × 0.4 = 7.2 → 16 → cap 15
     let session = try night()
-    session.sleepStageSegments = [SleepStageSegment(stage: .light, startOffset: 0, duration: 28800)]
+    session.sleepStages = [SleepStageSegment(stage: .light, startOffset: 0, duration: 28800)]
     #expect(score(session) == 85)
   }
 
   @Test func healthyStagesHaveNoPenalty() throws {
     // deep 20 %, REM 25 %, awake 5 %, light 50 %
     let session = try night()
-    session.sleepStageSegments = [
+    session.sleepStages = [
       SleepStageSegment(stage: .deep, startOffset: 0, duration: 20),
       SleepStageSegment(stage: .rem, startOffset: 20, duration: 25),
       SleepStageSegment(stage: .awake, startOffset: 45, duration: 5),
@@ -181,18 +181,18 @@ struct SleepScoreTests {
 
   @Test func cachedScoreIsReturnedWithoutRecomputing() throws {
     let session = try night(events: [.fixture(at: at(3600), duration: 2880, intensity: .light)])
-    // Production writes both cached values together. Note: `sleepScore(using:)`
-    // recomputes the score but reads `snoringDuration`, which returns
-    // `cachedSnoringDuration` once `hasCachedScore` is set.
-    session.hasCachedScore = true
-    session.cachedSleepScore = 42
-    session.cachedSnoringDuration = 2880
-    #expect(session.sleepScore == 42)
+    // The stored summary is what lists show; `sleepScore(using:)` recomputes
+    // from the events.
+    session.scoreVersion = "cached"
+    session.score = 42
+    session.snoringDuration = 2880
+    #expect(session.score == 42)
     #expect(score(session) == 82)
   }
 
-  @Test func uncachedScoreFallsBackToDefaultConfig() throws {
+  @Test func refreshingTheSummaryStoresTheScore() throws {
     let session = try night(events: [.fixture(at: at(3600), duration: 2880, intensity: .light)])
-    #expect(session.sleepScore == 82)
+    session.refreshSummary(using: .default)
+    #expect(session.score == 82)
   }
 }

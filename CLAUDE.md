@@ -200,7 +200,7 @@ These are non-negotiable. They come from production patterns in apps like IceCub
 - `.task { }` for data loading. `.task(id:)` when load depends on a changing value.
 - `Task { }` only in event handlers (`onChange`, button actions).
 - Always check `Task.isCancelled` before setting error state.
-- Launch work runs from the app root's `.task`, in order (`SleepGuardApp.runLaunchMaintenance`). Long SwiftData passes run on the main context in batches that save and `await Task.yield()` (`refreshStaleCachedScores`): saves from a background context don't refresh objects `@Query` screens already hold. Never `Task.detached` around a `ModelContext`. A task that must outlive its caller (`SessionCommitter.commit`'s follow-up) is owned by the service that starts it and returned so tests can await it.
+- Launch work runs from the app root's `.task`, in order (`SleepGuardApp.runLaunchMaintenance`). Long SwiftData passes run on the main context in batches that save and `await Task.yield()` (`refreshStaleSummaries`): saves from a background context don't refresh objects `@Query` screens already hold. Never `Task.detached` around a `ModelContext`. A task that must outlive its caller (`SessionCommitter.commit`'s follow-up) is owned by the service that starts it and returned so tests can await it.
 - **Swift 6 everywhere**: language mode v6 + strict concurrency complete. Sendable/isolation violations are compile errors — fix them properly (value types, `let`, `nonisolated`), never `@unchecked Sendable`.
 - **Isolation split**: explicit `@MainActor` on all `@Observable` classes in Models/Services/Config/Health/Platform/AudioEngine (load-bearing — no package default isolation); the 8 UI packages declare `.defaultIsolation(MainActor.self)` and the app target sets `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`.
 - **Moving code across that split changes its isolation silently (F27-T16, review Q53).** Domain and value types never live in a default-MainActor package: a pure helper moved into one becomes main-actor isolated (callers from an actor now need `await`), and a view model moved out of one loses its isolation. Types used across modules state their isolation explicitly (`@MainActor`, `nonisolated`, `Sendable`) instead of relying on a package default.
@@ -304,32 +304,34 @@ SwiftData lightweight migration is automatic for additive changes, but **removin
 
 SwiftData ignores unused columns in the persistent store. This is the only zero-migration way to evolve schemas.
 
-### Versioned schema (F22-T11)
-Every `ModelContainer` (app and `TestStore`) opens through `SleepGuardSchema.container(_:)`, which attaches `SleepGuardMigrationPlan` (`Packages/Models/Sources/Data/SleepGuardSchema.swift`). Today the plan has one version (`SleepGuardSchemaV1`, pointing at the live `@Model` classes) and no stages. Additive changes still need nothing: keep following the policy above.
+### Versioned schema (F22-T11, shared since F27-T24)
+The schema is SleepGuardShared's `SleepStore` (`NightRecord`, `NightEventRecord`; the same records SleepGuardUIKitWay stores), re-exported by Models. Every `ModelContainer` (app and `TestStore`) opens through `SleepStoreSchema.container(at:)`, which attaches `SleepStoreMigrationPlan`; the app opens `SleepGuardStorage.location.storeURL` through `SleepStore.open(at:appVersion:)` (a backup per version, never deleted on failure). Today the plan has one version (`SleepStoreSchemaV1`) and no stages. Additive changes still need nothing: keep following the policy above. A schema change is a shared release and reaches both apps.
 
-**Adding V2** (only for a change the policy above forbids, e.g. dropping `@Attribute(.unique)`):
-1. Freeze V1: copy the current `@Model` classes into `SleepGuardSchemaV1` as nested types, unchanged, and make `models` list those copies.
-2. Declare `SleepGuardSchemaV2` (version `2.0.0`) listing the live classes, then make the change on the live classes.
-3. Append V2 to `SleepGuardMigrationPlan.schemas` and add a `MigrationStage` (`.lightweight` if SwiftData can infer it, `.custom` otherwise). Point `SleepGuardSchema.Current` at V2.
-4. Add a test in `SleepGuardSchemaTests` that writes a V1 store on disk and opens it through the plan with every row intact.
-5. Verify on a simulator that holds real pre-change data before merging. The app's container fallback deletes the store when opening fails.
+**Adding V2** (only for a change the policy above forbids), in the shared repo:
+1. Freeze V1: copy the current record classes into `SleepStoreSchemaV1` as nested types, unchanged, and make `models` list those copies.
+2. Declare `SleepStoreSchemaV2` (version `2.0.0`) listing the live classes, then make the change on the live classes.
+3. Append V2 to `SleepStoreMigrationPlan.schemas` and add a `MigrationStage` (`.lightweight` if SwiftData can infer it, `.custom` otherwise). Point `SleepStoreSchema.Current` at V2.
+4. Add a test in `SleepStoreTests` that writes a V1 store on disk and opens it through the plan with every row intact.
+5. Verify on a simulator in each app that holds real pre-change data before merging.
 
-### Cached computed properties on `SleepSession`
-`SleepSession` carries four defensive cached properties to avoid relationship faulting crashes:
+### The stored summary on `NightRecord`
+`NightRecord` stores its summary so lists never read `events` (faulting `session.events` has crashed in production):
 
 ```swift
-public var hasCachedScore = false
-public var cachedSleepScore = 0
-public var cachedSnoringDuration: TimeInterval = 0
-public var cachedScoreVersion = ""   // SleepScore.cacheVersion(for:) of the formula + config
+public var score = 0
+public var snoringDuration: TimeInterval = 0
+public var eventCount = 0
+public var loudestIntensityRawValue: String?
+public var scoreVersion = ""   // SleepScore.cacheVersion(for:) of the formula + config; "" = none
 ```
 
-These are **necessary** — do not remove them. `sleepScore` and `snoringDuration` are computed from `events`, and faulting `session.events` has crashed in production. The cached values provide a zero-faulting read path. The version stamp makes a cache stale when the formula or `SleepScoreConfig` changes; `SleepSession.refreshStaleCachedScores(in:config:)` recomputes stale sessions at launch.
+These are **necessary** — do not remove them. `summary` reads only them; `night` reads `events`. The version stamp makes a summary stale when the formula or `SleepScoreConfig` changes; `NightRecord.refreshStaleSummaries(in:config:)` recomputes stale nights at launch.
 
-**Rules when modifying sessions:**
-- Never write the cached fields by hand. `refreshCachedScore(using:)` (`Packages/Models/Sources/Data/SleepScoreCache.swift`) is their single writer: it recomputes from events and stamps the version.
-- Call it **after** `modelContext.insert(session)`, never before. SwiftData snapshots at insertion time; pre-insertion mutations on `@Model` objects are **not tracked**. The caller saves.
-- Saving a finished night goes through `SessionCommitter` only. Any code that changes a session after its initial save (e.g. `SessionDetailModel` adding `sleepStageSegments` from HealthKit) calls `refreshCachedScore(using:)` before `modelContext.save()`.
+**Rules when modifying nights:**
+- Never write the summary fields by hand. `refreshSummary(using:)` (shared) is their single writer: it recomputes from events and stamps the version.
+- A night is stamped when it stops (the summary sheet) and again by `SessionCommitter` after `modelContext.insert(session)`; the caller saves.
+- Saving a finished night goes through `SessionCommitter` only. Any code that changes a night after its initial save (e.g. `SessionDetailModel` adding `sleepStages` from HealthKit) calls `refreshSummary(using:)` before `modelContext.save()`.
+- The raw recording and its log aren't stored on the record: `rawAudioFileName` / `rawLogFileName` find them by the night's id (`RawRecording`).
 
 ## Architecture Reference
 
