@@ -1,6 +1,7 @@
 public import Foundation
 public import Observation
 public import SleepCore
+import SleepSettings
 
 // NOTE: These properties use manual access/withMutation because @Observable only
 // auto-instruments stored properties. Computed properties backed by UserDefaults
@@ -12,16 +13,21 @@ public import SleepCore
 public final class UserPreferences: UserPreferencesStoring {
   public static let shared = UserPreferences()
 
+  /// This app's own settings (appearance, clip length, …).
   private let defaults: UserDefaults
+  /// The settings every SleepGuard app has: keys, defaults and validity are
+  /// SleepGuardShared's `PreferencesDefaults`, the same code as
+  /// SleepGuardUIKitWay's store. These properties only add observation.
+  private let settings: PreferencesDefaults
 
   public var hasCompletedOnboarding: Bool {
     get {
       access(keyPath: \.hasCompletedOnboarding)
-      return defaults.bool(forKey: "hasCompletedOnboarding")
+      return settings.hasCompletedOnboarding
     }
     set {
       withMutation(keyPath: \.hasCompletedOnboarding) {
-        defaults.set(newValue, forKey: "hasCompletedOnboarding")
+        settings.hasCompletedOnboarding = newValue
       }
     }
   }
@@ -29,12 +35,11 @@ public final class UserPreferences: UserPreferencesStoring {
   public var detectionSensitivity: DetectionSensitivity {
     get {
       access(keyPath: \.detectionSensitivity)
-      let raw = defaults.string(forKey: "detectionSensitivity") ?? "medium"
-      return DetectionSensitivity(rawValue: raw) ?? .medium
+      return settings.sensitivity
     }
     set {
       withMutation(keyPath: \.detectionSensitivity) {
-        defaults.set(newValue.rawValue, forKey: "detectionSensitivity")
+        settings.sensitivity = newValue
       }
     }
   }
@@ -54,11 +59,11 @@ public final class UserPreferences: UserPreferencesStoring {
   public var preserveRawAudio: Bool {
     get {
       access(keyPath: \.preserveRawAudio)
-      return defaults.bool(forKey: "preserveRawAudio")
+      return settings.preserveRawAudio
     }
     set {
       withMutation(keyPath: \.preserveRawAudio) {
-        defaults.set(newValue, forKey: "preserveRawAudio")
+        settings.preserveRawAudio = newValue
       }
     }
   }
@@ -104,11 +109,11 @@ public final class UserPreferences: UserPreferencesStoring {
   public var syncToHealthKit: Bool {
     get {
       access(keyPath: \.syncToHealthKit)
-      return defaults.bool(forKey: "syncToHealthKit")
+      return settings.syncToHealth
     }
     set {
       withMutation(keyPath: \.syncToHealthKit) {
-        defaults.set(newValue, forKey: "syncToHealthKit")
+        settings.syncToHealth = newValue
       }
     }
   }
@@ -128,11 +133,11 @@ public final class UserPreferences: UserPreferencesStoring {
   public var detectSleepTalking: Bool {
     get {
       access(keyPath: \.detectSleepTalking)
-      return defaults.bool(forKey: "detectSleepTalking")
+      return settings.detectSleepTalking
     }
     set {
       withMutation(keyPath: \.detectSleepTalking) {
-        defaults.set(newValue, forKey: "detectSleepTalking")
+        settings.detectSleepTalking = newValue
       }
     }
   }
@@ -181,12 +186,11 @@ public final class UserPreferences: UserPreferencesStoring {
   public var recordingDelayMinutes: Int {
     get {
       access(keyPath: \.recordingDelayMinutes)
-      let raw = defaults.integer(forKey: "recordingDelayMinutes")
-      return RecordingDelay.valid(raw)
+      return settings.recordingDelayMinutes
     }
     set {
       withMutation(keyPath: \.recordingDelayMinutes) {
-        defaults.set(newValue, forKey: "recordingDelayMinutes")
+        settings.recordingDelayMinutes = newValue
       }
     }
   }
@@ -203,11 +207,11 @@ public final class UserPreferences: UserPreferencesStoring {
   public var snoreInterrupterMode: SnoreInterrupterMode {
     get {
       access(keyPath: \.snoreInterrupterMode)
-      return SnoreInterrupterMode(stored: defaults.string(forKey: "soothingMelodyMode"))
+      return settings.interrupterMode
     }
     set {
       withMutation(keyPath: \.snoreInterrupterMode) {
-        defaults.set(newValue.rawValue, forKey: "soothingMelodyMode")
+        settings.interrupterMode = newValue
       }
     }
   }
@@ -215,12 +219,11 @@ public final class UserPreferences: UserPreferencesStoring {
   public var selectedMelodyID: Int {
     get {
       access(keyPath: \.selectedMelodyID)
-      let raw = defaults.integer(forKey: "selectedMelodyID")
-      return raw > 0 ? raw : Melody.defaultID
+      return settings.melodyID
     }
     set {
       withMutation(keyPath: \.selectedMelodyID) {
-        defaults.set(newValue, forKey: "selectedMelodyID")
+        settings.melodyID = newValue
       }
     }
   }
@@ -228,12 +231,11 @@ public final class UserPreferences: UserPreferencesStoring {
   public var limitStorageEnabled: Bool {
     get {
       access(keyPath: \.limitStorageEnabled)
-      if defaults.object(forKey: "limitStorageEnabled") == nil { return true }
-      return defaults.bool(forKey: "limitStorageEnabled")
+      return settings.limitStorage
     }
     set {
       withMutation(keyPath: \.limitStorageEnabled) {
-        defaults.set(newValue, forKey: "limitStorageEnabled")
+        settings.limitStorage = newValue
       }
     }
   }
@@ -241,12 +243,11 @@ public final class UserPreferences: UserPreferencesStoring {
   public var storageLimitMB: Int {
     get {
       access(keyPath: \.storageLimitMB)
-      let raw = defaults.integer(forKey: "storageLimitMB")
-      return raw > 0 ? raw : 500
+      return settings.storageLimitMB
     }
     set {
       withMutation(keyPath: \.storageLimitMB) {
-        defaults.set(newValue, forKey: "storageLimitMB")
+        settings.storageLimitMB = newValue
       }
     }
   }
@@ -254,12 +255,11 @@ public final class UserPreferences: UserPreferencesStoring {
   public var limitDaysEnabled: Bool {
     get {
       access(keyPath: \.limitDaysEnabled)
-      if defaults.object(forKey: "limitDaysEnabled") == nil { return true }
-      return defaults.bool(forKey: "limitDaysEnabled")
+      return settings.limitDays
     }
     set {
       withMutation(keyPath: \.limitDaysEnabled) {
-        defaults.set(newValue, forKey: "limitDaysEnabled")
+        settings.limitDays = newValue
       }
     }
   }
@@ -267,12 +267,11 @@ public final class UserPreferences: UserPreferencesStoring {
   public var maxDays: Int {
     get {
       access(keyPath: \.maxDays)
-      let raw = defaults.integer(forKey: "maxDays")
-      return raw > 0 ? raw : 30
+      return settings.maxDays
     }
     set {
       withMutation(keyPath: \.maxDays) {
-        defaults.set(newValue, forKey: "maxDays")
+        settings.maxDays = newValue
       }
     }
   }
@@ -282,15 +281,11 @@ public final class UserPreferences: UserPreferencesStoring {
   public var lastBriefingShownDate: Date? {
     get {
       access(keyPath: \.lastBriefingShownDate)
-      return defaults.object(forKey: "lastBriefingShownDate") as? Date
+      return settings.lastBriefingShown
     }
     set {
       withMutation(keyPath: \.lastBriefingShownDate) {
-        if let newValue {
-          defaults.set(newValue, forKey: "lastBriefingShownDate")
-        } else {
-          defaults.removeObject(forKey: "lastBriefingShownDate")
-        }
+        settings.lastBriefingShown = newValue
       }
     }
   }
@@ -298,11 +293,11 @@ public final class UserPreferences: UserPreferencesStoring {
   public var hasCompletedProfile: Bool {
     get {
       access(keyPath: \.hasCompletedProfile)
-      return defaults.bool(forKey: "hasCompletedProfile")
+      return settings.hasCompletedProfile
     }
     set {
       withMutation(keyPath: \.hasCompletedProfile) {
-        defaults.set(newValue, forKey: "hasCompletedProfile")
+        settings.hasCompletedProfile = newValue
       }
     }
   }
@@ -310,11 +305,11 @@ public final class UserPreferences: UserPreferencesStoring {
   public var profilePromptDismissCount: Int {
     get {
       access(keyPath: \.profilePromptDismissCount)
-      return defaults.integer(forKey: "profilePromptDismissCount")
+      return settings.profilePromptDismissCount
     }
     set {
       withMutation(keyPath: \.profilePromptDismissCount) {
-        defaults.set(newValue, forKey: "profilePromptDismissCount")
+        settings.profilePromptDismissCount = newValue
       }
     }
   }
@@ -322,12 +317,11 @@ public final class UserPreferences: UserPreferencesStoring {
   public var briefingEnabled: Bool {
     get {
       access(keyPath: \.briefingEnabled)
-      if defaults.object(forKey: "briefingEnabled") == nil { return true }
-      return defaults.bool(forKey: "briefingEnabled")
+      return settings.briefingEnabled
     }
     set {
       withMutation(keyPath: \.briefingEnabled) {
-        defaults.set(newValue, forKey: "briefingEnabled")
+        settings.briefingEnabled = newValue
       }
     }
   }
@@ -363,8 +357,9 @@ public final class UserPreferences: UserPreferencesStoring {
   /// SleepCore's mode (same raw values, so stored choices read back).
   public typealias SnoreInterrupterMode = SleepCore.SnoreInterrupterMode
 
-  /// `defaults` is `.standard` in the app; tests pass an isolated suite.
-  public init(defaults: UserDefaults = .standard) {
-    self.defaults = defaults
+  /// `nil`: the app's standard defaults; tests pass a suite of their own.
+  public init(suiteName: String? = nil) {
+    defaults = suiteName.flatMap(UserDefaults.init(suiteName:)) ?? .standard
+    settings = PreferencesDefaults(suiteName: suiteName)
   }
 }

@@ -18,7 +18,9 @@ public extension UserDefaults {
 @MainActor
 public extension UserPreferences {
   static func isolated() -> UserPreferences {
-    UserPreferences(defaults: .isolated())
+    let name = "ConfigTestSupport.\(UUID().uuidString)"
+    UserDefaults(suiteName: name)?.removePersistentDomain(forName: name)
+    return UserPreferences(suiteName: name)
   }
 }
 

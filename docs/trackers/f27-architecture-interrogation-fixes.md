@@ -49,6 +49,7 @@ Fixes the verdicts of the principal-level architecture review (`ARCHITECTURE_INT
 | F27-T18 | Shared HealthKit and raw-log behaviour (shared 0.32.0) | Refactor | Done | T17 | Health, Services | 2026-11-26 | 2026-11-26 |
 | F27-T19 | Remove DesignSystem duplicates of the shared kit | Refactor | Done | T17 | DesignSystem, widgets | 2026-11-26 | 2026-11-26 |
 | F27-T20 | Rename `Env` to `Services` | Refactor | Done | T19 | all packages | 2026-11-26 | 2026-11-26 |
+| F27-T21 | Shared settings (shared 0.33.0) | Refactor | Done | T20 | Config | 2026-11-26 | 2026-11-26 |
 
 ## Task Details
 
@@ -521,3 +522,7 @@ Asked by the owner: share behaviour with SleepGuardUIKitWay so one fix reaches b
 ### F27-T20 — Rename `Env` to `Services`
 
 Owner's choice of name. Folder, package, products (`Services`, `ServicesTestSupport`), test target, imports, Xcode project reference, `check-layering.py`, `check-imports.py`, current docs (CLAUDE/AGENTS, README, TECHNICAL_OVERVIEW); ADR 0008 has a note. Historical docs keep the old name. Committed with T18: the rename moved the files T18 edits.
+
+### F27-T21 — Shared settings (shared 0.33.0)
+
+The owner's follow-up: the apps aren't in production, so stored settings can move freely. Shared 0.33.0 (tagged by the owner): `SleepPreferences` (SleepCore), the 16 settings both apps have with their defaults, and `PreferencesDefaults` (new `SleepSettings` product), which stores them in UserDefaults (keys, defaults, validity). `UserPreferences` keeps its observable properties; those 16 read and write through `PreferencesDefaults`. SleepGuard-only settings (appearance, clip length, soft ask, …) stay in the app. The interrupter's keys are renamed for the feature. `UserPreferences(suiteName:)` replaces `init(defaults:)`.

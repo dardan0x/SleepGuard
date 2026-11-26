@@ -10,6 +10,7 @@ title: Shared behaviour (HealthKit, raw log), DesignSystem duplicates, Env renam
 - F27-T18: shared 0.32.0 (`SleepHealthKit`, `SleepFiles`), wrapped by `HealthKitSync` and `SessionRawLogWriter`.
 - F27-T19: DesignSystem duplicates of the kit removed.
 - F27-T20: `Env` renamed `Services`.
+- F27-T21: shared settings (0.33.0): `UserPreferences` delegates its 16 common settings to `PreferencesDefaults`.
 
 ### Technical Details
 - Principle: share behaviour (implementations over shared values), keep protocols per app. A protocol encodes an app's DI, state and isolation; a shared implementation is what fixes a bug once.
@@ -43,4 +44,4 @@ F27-T18/T20 — Shared HealthKit and raw-log behaviour; Env renamed Services
 - Owner: merge the F27 branch; one real night on a device.
 
 ### Open Questions
-- Preferences keys and defaults could be shared too (careful: they're on users' devices).
+- None.

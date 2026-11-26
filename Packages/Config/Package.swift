@@ -14,7 +14,7 @@ let package = Package(
   ],
   dependencies: [
     .package(path: "../Models"),
-    .package(url: "https://github.com/dardan0x/SleepGuardShared.git", exact: "0.32.0"),
+    .package(url: "https://github.com/dardan0x/SleepGuardShared.git", exact: "0.33.0"),
     .package(url: "https://github.com/hmlongco/Factory", from: "3.5.2"),
   ],
   targets: [
@@ -23,6 +23,7 @@ let package = Package(
       dependencies: [
         .product(name: "Models", package: "Models"),
         .product(name: "SleepCore", package: "SleepGuardShared"),
+        .product(name: "SleepSettings", package: "SleepGuardShared"),
         .product(name: "FactoryKit", package: "Factory"),
       ],
       path: "Sources",
