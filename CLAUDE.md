@@ -203,6 +203,7 @@ These are non-negotiable. They come from production patterns in apps like IceCub
 - Launch work runs from the app root's `.task`, in order (`SleepGuardApp.runLaunchMaintenance`). Long SwiftData passes run on the main context in batches that save and `await Task.yield()` (`refreshStaleCachedScores`): saves from a background context don't refresh objects `@Query` screens already hold. Never `Task.detached` around a `ModelContext`. A task that must outlive its caller (`SessionCommitter.commit`'s follow-up) is owned by the service that starts it and returned so tests can await it.
 - **Swift 6 everywhere**: language mode v6 + strict concurrency complete. Sendable/isolation violations are compile errors — fix them properly (value types, `let`, `nonisolated`), never `@unchecked Sendable`.
 - **Isolation split**: explicit `@MainActor` on all `@Observable` classes in Models/Env/Config/Health/Platform/AudioEngine (load-bearing — no package default isolation); the 8 UI packages declare `.defaultIsolation(MainActor.self)` and the app target sets `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`.
+- **Moving code across that split changes its isolation silently (F27-T16, review Q53).** Domain and value types never live in a default-MainActor package: a pure helper moved into one becomes main-actor isolated (callers from an actor now need `await`), and a view model moved out of one loses its isolation. Types used across modules state their isolation explicitly (`@MainActor`, `nonisolated`, `Sendable`) instead of relying on a package default.
 - Value types are `Sendable` with immutable `let` properties. SwiftData `@Model` classes are never Sendable — destructure their Sendable fields (`id`, `Date`, bursts) before crossing into `@Sendable`/detached closures.
 - Apple delegates (WCSession, SNResultsObserving, AVAudioPlayerDelegate) are nonisolated: mark methods `nonisolated`, parse payloads synchronously, `Task { @MainActor in }` for state mutation. See `docs/architecture/concurrency.md`.
 - **Live detection is one ordered stream into an actor** (ADR 0003). Detection rules live only in pure shared code: the `DetectionStateMachine`, and the per-sample `SnoreClassifier` / `SpeechClassifier` with the sensitivity presets (`SnoreClassifier.preset`, `DetectionSensitivity.minEventDuration`); `SnoreDetector` and `SpeechDetector` hold the live thresholds and call them. The detection inputs are shared too: `AudioLevels` (RMS / peak dB), `SpectralFeatures` (from the FFT's magnitudes) and `SoundClassLabels` (which SoundAnalysis classes count as snoring and talking) (`SleepCore`, in the shared `SleepGuardShared` repo): no clock, no singletons, no SwiftData. Anything that changes detection state (sample, melody start/stop, settings, session end) goes into the `DetectionEngine` stream as a timestamped `Message`; never mutate detection state from a side path. Side effects stay on the main actor in `RealtimeDetectionTracker.perform`. Thresholds are durations, not sample counts. A change to detection output must re-record the replay goldens on purpose (`scripts/record-replay-goldens.sh`) and explain the diff.
@@ -365,7 +366,7 @@ PER TASK (one prompt does all of this)
 
 FEATURE COMPLETE
   9. Create docs/features/f#-name.md
-  10. Update ProjectArchitecture.md
+  10. Update TECHNICAL_OVERVIEW.md
   11. Set feature "Done" in Notion
 
 SESSION END

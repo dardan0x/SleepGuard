@@ -44,7 +44,7 @@ Fixes the verdicts of the principal-level architecture review (`ARCHITECTURE_INT
 | F27-T13 | One theme system (Q21) | Refactor | Done | T12 | DesignSystem / views / widgets | 2026-11-26 | 2026-11-26 |
 | F27-T14 | Two dependency-resolution styles (Q23) | Refactor | Done | T11 | Env / Recordings / AudioEngine | 2026-11-26 | 2026-11-26 |
 | F27-T15 | Contract tests for stateful fakes (Q24/Q59) | Tests | Done | T11 | Env | 2026-11-26 | 2026-11-26 |
-| F27-T16 | Dead code and docs (Q67, Q53) | Cleanup | Backlog | — | Recordings / docs | — | — |
+| F27-T16 | Dead code and docs (Q67, Q53) | Cleanup | Done | — | Recordings / docs | 2026-11-26 | 2026-11-26 |
 | F27-T17 | Close out: feature doc, ADRs, UIKitWay follow-up list | Docs | Backlog | all | docs | — | — |
 
 ## Task Details
@@ -464,3 +464,28 @@ Fixes the verdicts of the principal-level architecture review (`ARCHITECTURE_INT
 **Notes:**
 - Scope, honestly: only stores whose state is visible through their own protocol get a contract. `FakePendingSessionStore`, `FakeStorageLimitEnforcer` and `FakeSessionRawLogWriter` are effect-only (they count or record calls), where a spy is the right double (the review's Q60 rule); their real types have their own tests.
 - Writing the contract also exposed a test-isolation bug: two suites drove `SessionCheckpointStore.shared` (one file on disk) in parallel and clobbered each other. Fixed by the injectable URL.
+
+---
+
+### F27-T16 — Dead code and docs
+
+| Field | Value |
+|-------|-------|
+| Arch Ref | Interrogation Q67, Q53, Q20 |
+| Status | Done |
+| Started | 2026-11-26 |
+| Completed | 2026-11-26 |
+
+**Acceptance Criteria:**
+- [x] Deleted (**user approved**): `SessionDetailMiniPlayerView.swift` and the dead `fakePlayerSection` / marker helpers in `SessionDetailView.swift` (and the `Models` import that only they used)
+- [x] Deleted (**user approved**): `docs/ProjectArchitecture.md` (stale; it was git-ignored, so only the local copy existed). Workflow step 10 in CLAUDE.md / AGENTS.md and `SESSION_RESUME_PROMPT.md` now point at `TECHNICAL_OVERVIEW.md`
+- [x] Isolation rule (Q53) in CLAUDE.md / AGENTS.md: domain and value types never live in default-MainActor packages; cross-module types state their isolation
+- [x] `TECHNICAL_OVERVIEW.md` truth pass: shared 0.30.0, 16 packages, new package graph, package table (sizes and real dependencies from the manifests), sampling (decimator), theme, test counts (237 here / 275 shared), no feature edge
+- [x] Builds with zero errors; Recordings tests pass
+
+**Prompt Used:**
+"Mini player dead code, ProjectArchitecture.md"
+
+**Notes:**
+- Kept by user choice (T4): `StatisticsErrorView`, `RecordingsErrorView` (unused).
+- Left as historical: `docs/KICKOFF_PROMPT.md` and the `CLAUDE_TEMPLATE.md` mention of ProjectArchitecture.md (templates for new projects); the `.gitignore` entry for it.
