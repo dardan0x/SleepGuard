@@ -4,6 +4,7 @@ import FactoryKit
 import Foundation
 import Models
 import os
+import SleepAudioKit
 import SleepCore
 import UIKit
 
@@ -73,6 +74,9 @@ final class RealtimeDetectionTracker {
   // MARK: - Per-event compression tasks
 
   private var pendingEventTasks: [Task<Void, Never>] = []
+  /// The open event's clip, closed early for the melody (the microphone
+  /// pauses): kept until the event is saved or discarded.
+  private var closedClipURL: URL?
   /// Instruments intervals for open snore events (Points of Interest).
   private var eventSignposts: [UUID: OSSignpostIntervalState] = [:]
 
@@ -289,6 +293,7 @@ final class RealtimeDetectionTracker {
     currentSpeechDetected = false
     pendingEventTasks.removeAll(keepingCapacity: false)
     eventSignposts.removeAll()
+    closedClipURL = nil
   }
 
   // MARK: - Melody gap handling
@@ -375,7 +380,9 @@ final class RealtimeDetectionTracker {
         Log.detection.debug("Sustained non-snore — stopping melody")
         snoreInterrupterPlayer.stop()
       case .eventClipClosed:
-        _ = audioRecorder.finalizeEventFile()
+        // Kept for the event's save: the melody pauses the microphone, the
+        // event goes on.
+        if let url = audioRecorder.finalizeEventFile() { closedClipURL = url }
       case .snoringResumedAfterMelody:
         markLastGapSnoringResumed()
       case let .recordingGap(start, duration):
@@ -388,10 +395,11 @@ final class RealtimeDetectionTracker {
       case let .snoreEventDiscarded(id, reason):
         Log.detection.debug("Snore event discarded: \(String(describing: reason), privacy: .public)")
         endEventSignpost(id: id, outcome: "discarded")
-        if let session = recording?.currentSession {
-          try? FileManager.default.removeItem(at: eventFileURL(eventID: id, sessionID: session.id))
+        audioRecorder.discardEventFile()
+        if let closedClipURL {
+          try? FileManager.default.removeItem(at: closedClipURL)
+          self.closedClipURL = nil
         }
-        audioRecorder.finalizeEventFile()
       case let .speechEventFinalized(event):
         save(event)
       }
@@ -400,11 +408,12 @@ final class RealtimeDetectionTracker {
   }
 
   private func startEventClip(id: UUID) {
-    guard let session = recording?.currentSession else { return }
-    let fileURL = eventFileURL(eventID: id, sessionID: session.id)
+    guard recording?.currentSession != nil else { return }
+    closedClipURL = nil
     do {
-      try audioRecorder.startEventFile(eventID: id, url: fileURL)
-      pendingSessionStore.addFile(fileURL.lastPathComponent)
+      try audioRecorder.startEventFile(eventID: id)
+      // SleepGuardShared's engine names it `<id>.caf` in the clips folder.
+      pendingSessionStore.addFile("\(id.uuidString).caf")
     } catch {
       Log.detection.error("Failed to start event file: \(String(describing: error), privacy: .public)")
     }
@@ -425,12 +434,15 @@ final class RealtimeDetectionTracker {
       duration: detected.duration)
     append(event, to: session)
 
-    // Close the event audio file and compress to .m4a
-    if let rawFileURL = audioRecorder.finalizeEventFile() {
+    // Close the event audio file (or take the one the melody closed) and
+    // compress it to .m4a (SleepGuardShared's ClipCompressor).
+    let clipURL = audioRecorder.finalizeEventFile() ?? closedClipURL
+    closedClipURL = nil
+    if let rawFileURL = clipURL {
       let task = Task { @MainActor in
         let m4aURL = rawFileURL.deletingPathExtension().appendingPathExtension("m4a")
-        if await EventClipCompressor.compress(from: rawFileURL, to: m4aURL) {
-          let spectral = await AudioClipExtractor.analyzeSpectralFeatures(of: m4aURL)
+        if await ClipCompressor.compress(from: rawFileURL, to: m4aURL) {
+          let spectral = await ClipSpectrum.features(of: m4aURL)
           event.audioFileURL = AudioFileURLResolver.filename(from: m4aURL)
           event.dominantFrequency = spectral.dominantFrequency
           event.spectralCentroid = spectral.spectralCentroid
@@ -500,9 +512,5 @@ final class RealtimeDetectionTracker {
       minEventDuration: preferences.detectionSensitivity.minEventDuration,
       highConfidenceGate: classifier.snore.highConfidenceGate,
       detectSleepTalking: preferences.detectSleepTalking)
-  }
-
-  private func eventFileURL(eventID: UUID, sessionID: UUID) -> URL {
-    AudioFileURLResolver.url(for: "event_\(eventID.uuidString)_session_\(sessionID.uuidString).caf")
   }
 }

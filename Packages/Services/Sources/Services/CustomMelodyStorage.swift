@@ -2,8 +2,11 @@ public import Foundation
 import Models
 public import Observation
 public import SleepCore
+import SleepAudioKit
 
-/// Manages user-recorded custom melodies: persistence, file I/O, and metadata.
+/// The user's recorded melodies: SleepGuardShared's `MelodyFiles` (the same
+/// as SleepGuardUIKitWay's) in the Melodies folder of the shared layout, with
+/// the list kept here for the screens.
 @MainActor
 @Observable
 public final class CustomMelodyStorage: CustomMelodyStoring {
@@ -11,19 +14,13 @@ public final class CustomMelodyStorage: CustomMelodyStoring {
 
   public private(set) var customMelodies: [Melody] = []
 
-  private let defaultsKey = "customMelodiesMetadata"
-  private let defaults: UserDefaults
-  private let directoryURL: URL
-  private var nextID = 100
+  @ObservationIgnored private let files: MelodyFiles
 
-  /// `defaults` and `directory` are the app's own unless a test passes
-  /// throwaway ones (the contract tests run the real store in isolation).
-  public init(defaults: UserDefaults = .standard, directory: URL? = nil) {
-    self.defaults = defaults
-    directoryURL = directory ?? FileManager.default
-      .urls(for: .documentDirectory, in: .userDomainMask)[0]
-      .appendingPathComponent("CustomMelodies")
-    load()
+  /// `nil`: SleepGuard's Melodies folder (`SleepGuardStorage`); the contract
+  /// tests pass a throwaway one.
+  public init(directory: URL? = nil) {
+    files = MelodyFiles(directory: directory ?? SleepGuardStorage.location.melodiesDirectory)
+    customMelodies = files.recordings()
   }
 
   // MARK: - Public API
@@ -40,78 +37,22 @@ public final class CustomMelodyStorage: CustomMelodyStoring {
     customMelodies.first { $0.filename == filename }
   }
 
-  /// Saves a recorded audio file as a new custom melody.
-  /// - Returns: The created `Melody` metadata.
+  /// Saves a recorded audio file (moved) as a new custom melody.
   @discardableResult
   public func saveRecording(name: String, from tempURL: URL) -> Melody? {
-    do {
-      try ensureDirectoryExists()
-      nextID = CustomMelodies.nextID(stored: nextID, existing: customMelodies)
-      let fileName = CustomMelodies.filename(id: nextID)
-      let destURL = directoryURL.appendingPathComponent(fileName)
-
-      // Remove existing file if any
-      if FileManager.default.fileExists(atPath: destURL.path) {
-        try FileManager.default.removeItem(at: destURL)
-      }
-      try FileManager.default.moveItem(at: tempURL, to: destURL)
-
-      let melody = Melody(id: nextID, filename: fileName, customName: name)
-      customMelodies.append(melody)
-      nextID += 1
-      persist()
-
-      return melody
-    } catch {
-      Log.interrupter.error("Failed to save recording: \(String(describing: error), privacy: .public)")
-      return nil
-    }
+    let melody = files.save(take: tempURL, name: name)
+    customMelodies = files.recordings()
+    return melody
   }
 
   public func deleteMelody(id: Int) {
-    guard let index = customMelodies.firstIndex(where: { $0.id == id }) else { return }
-    let melody = customMelodies[index]
-
-    // Delete file
-    let fileURL = directoryURL.appendingPathComponent(melody.filename)
-    try? FileManager.default.removeItem(at: fileURL)
-
-    customMelodies.remove(at: index)
-    persist()
+    guard let melody = melody(id: id) else { return }
+    files.delete(melody)
+    customMelodies = files.recordings()
   }
 
   public func fileURL(for melody: Melody) -> URL? {
     guard melody.isCustom else { return nil }
-    let url = directoryURL.appendingPathComponent(melody.filename)
-    return FileManager.default.fileExists(atPath: url.path) ? url : nil
-  }
-
-  // MARK: - Persistence
-
-  private func persist() {
-    let metadata = customMelodies.map { ["id": $0.id, "name": $0.customName ?? "", "filename": $0.filename] }
-    defaults.set(metadata, forKey: defaultsKey)
-    defaults.set(nextID, forKey: "customMelodiesNextID")
-  }
-
-  private func load() {
-    if let stored = defaults.array(forKey: defaultsKey) as? [[String: Any]] {
-      customMelodies = stored.compactMap { dict in
-        guard let id = dict["id"] as? Int,
-              let name = dict["name"] as? String,
-              let filename = dict["filename"] as? String else { return nil }
-        return Melody(id: id, filename: filename, customName: name)
-      }
-    }
-    nextID = CustomMelodies.nextID(stored: defaults.integer(forKey: "customMelodiesNextID"), existing: customMelodies)
-  }
-
-  // MARK: - File System
-
-  private func ensureDirectoryExists() throws {
-    let url = directoryURL
-    if !FileManager.default.fileExists(atPath: url.path) {
-      try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
-    }
+    return files.url(for: melody)
   }
 }

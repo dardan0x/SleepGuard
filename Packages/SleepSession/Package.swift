@@ -14,7 +14,7 @@ let package = Package(
     .package(path: "../Services"),
     .package(path: "../Routing"),
     .package(path: "../DesignSystem"),
-    .package(url: "https://github.com/dardan0x/SleepGuardShared.git", exact: "0.34.0"),
+    .package(url: "https://github.com/dardan0x/SleepGuardShared.git", exact: "0.35.0"),
     .package(url: "https://github.com/hmlongco/Factory", from: "3.5.2"),
   ],
   targets: [
@@ -28,6 +28,7 @@ let package = Package(
         .product(name: "Routing", package: "Routing"),
         .product(name: "DesignSystem", package: "DesignSystem"),
         .product(name: "SleepCore", package: "SleepGuardShared"),
+        .product(name: "SleepAudioKit", package: "SleepGuardShared"),
         .product(name: "FactoryKit", package: "Factory"),
       ],
       path: "Sources",

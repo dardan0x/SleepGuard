@@ -23,7 +23,6 @@ final class SessionRecordingController {
 
   private let audioRecorder: any AudioRecording
   private let snoreInterrupterPlayer: any SnoreInterrupterPlaying
-  private let soundAnalysis: any SoundAnalysisDetecting
   private let preferences: any UserPreferencesStoring
   private let pendingSessionStore: any PendingSessionStoring
   private let checkpointStore: any SessionCheckpointStoring
@@ -56,7 +55,6 @@ final class SessionRecordingController {
   init(
     audioRecorder: any AudioRecording = Container.shared.audioRecorder(),
     snoreInterrupterPlayer: any SnoreInterrupterPlaying = Container.shared.snoreInterrupterPlayer(),
-    soundAnalysis: any SoundAnalysisDetecting = Container.shared.soundAnalysisDetector(),
     preferences: any UserPreferencesStoring = Container.shared.userPreferences(),
     pendingSessionStore: any PendingSessionStoring = Container.shared.pendingSessionStore(),
     checkpointStore: any SessionCheckpointStoring = Container.shared.sessionCheckpointStore(),
@@ -68,7 +66,6 @@ final class SessionRecordingController {
     self.runsProcessingLoop = runsProcessingLoop
     self.audioRecorder = audioRecorder
     self.snoreInterrupterPlayer = snoreInterrupterPlayer
-    self.soundAnalysis = soundAnalysis
     self.preferences = preferences
     self.pendingSessionStore = pendingSessionStore
     self.checkpointStore = checkpointStore
@@ -104,17 +101,10 @@ final class SessionRecordingController {
     // Apply detection sensitivity thresholds before starting
     detection?.applyDetectionSensitivity()
 
-    // Full-session raw audio is only recorded in debug mode for algorithm testing.
-    let audioURL: URL?
-    if preferences.preserveRawAudio {
-      audioURL = audioFileURL(for: session.id)
-      session.audioFileURL = AudioFileURLResolver.filename(from: audioURL!)
-    } else {
-      audioURL = nil
-    }
-
-    audioRecorder.computesSpectrum = preferences.preserveRawAudio
-    try audioRecorder.startRecording(audioFileURL: audioURL)
+    // Full-session raw audio is only recorded in debug mode for algorithm
+    // testing (it also turns on the spectral score).
+    session.audioFileURL = sessionAudioFilename
+    try audioRecorder.startRecording(rawAudioFileName: sessionAudioFilename)
     isRecording = true
     appConfig.holdRemoteUpdates()
     sessionSignpost = Log.signposter.beginInterval("Session")
@@ -180,15 +170,15 @@ final class SessionRecordingController {
     #endif
   }
 
-  /// One tapped buffer's levels, as the recorder just published them, plus
-  /// SoundAnalysis's latest confidences. Feeds every 20 Hz window that ended.
+  /// One tapped buffer's levels and the sound classifier's latest
+  /// confidences, as the recorder just published them. Feeds every 20 Hz window that ended.
   private func didReceiveLevels(at time: Date) {
     let reading = Reading(
       db: audioRecorder.currentDB,
       peakDB: audioRecorder.currentPeakDB,
       spectralScore: audioRecorder.spectralScore,
-      snoreConfidence: soundAnalysis.snoreConfidence,
-      speechConfidence: soundAnalysis.speechConfidence)
+      snoreConfidence: audioRecorder.snoreConfidence,
+      speechConfidence: audioRecorder.speechConfidence)
     for sample in decimator.add(reading, at: time) {
       let r = sample.reading
       detection?.processAudioLevel(
@@ -385,9 +375,5 @@ final class SessionRecordingController {
     Log.signposter.endInterval("Session", sessionSignpost, "\(reason)")
     self.sessionSignpost = nil
     Log.session.info("Session \(reason)")
-  }
-
-  private func audioFileURL(for sessionID: UUID) -> URL {
-    AudioFileURLResolver.url(for: RawRecording.audioFileName(for: sessionID))
   }
 }

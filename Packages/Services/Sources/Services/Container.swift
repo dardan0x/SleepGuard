@@ -1,5 +1,6 @@
 public import AudioEngine
 public import FactoryKit
+import Models
 
 /// Factory DI registrations for the session services. Config, Health and
 /// Platform register their own (F27-T11); `tabCoordinator` is in Routing.
@@ -24,7 +25,6 @@ public extension Container {
   @MainActor var sessionCommitter: Factory<any SessionCommitting> { self { SessionCommitter.shared }.singleton }
   @MainActor var sessionManager: Factory<any SessionManaging> { self { SessionManager.shared }.singleton }
   @MainActor var snoreInterrupterPlayer: Factory<any SnoreInterrupterPlaying> { self { SnoreInterrupterPlayer.shared }.singleton }
-  @MainActor var soundAnalysisDetector: Factory<any SoundAnalysisDetecting> { self { SoundAnalysisDetector.shared }.singleton }
 
   // MARK: - Singletons (non-isolated services)
 
@@ -40,4 +40,9 @@ extension Container {
   /// cross-wiring (`attach` / weak `recording`) in its init.
   @MainActor var sessionRecordingController: Factory<SessionRecordingController> { self { SessionRecordingController() }.singleton }
   @MainActor var realtimeDetectionTracker: Factory<RealtimeDetectionTracker> { self { RealtimeDetectionTracker() }.singleton }
+}
+
+public extension AudioRecorder {
+  /// The app's recorder, writing clips into SleepGuard's clips folder.
+  static let shared = AudioRecorder(clipsDirectory: AudioFileURLResolver.directory)
 }

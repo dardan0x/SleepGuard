@@ -1,19 +1,19 @@
-import AVFoundation
 import FactoryKit
 import Foundation
 import Models
 import Services
+import SleepAudioKit
 import SleepCore
 
 /// Short preview playback for the melody picker: plays a melody for up to
-/// 3 s and tracks which melody is currently previewing.
+/// 3 s (SleepGuardShared's `MelodyPlayback`, quieter, no nudge) and tracks
+/// which melody is currently previewing.
 @MainActor
 @Observable
 final class MelodyPreviewPlayer {
   private(set) var previewingMelodyID: Int?
 
-  private var previewPlayer: AVAudioPlayer?
-  private var previewTask: Task<Void, Never>?
+  private let playback = MelodyPlayback(volume: 0.8, nudge: nil)
   private let melodyStorage: any CustomMelodyStoring
 
   init(melodyStorage: any CustomMelodyStoring = Container.shared.customMelodyStorage()) {
@@ -27,46 +27,15 @@ final class MelodyPreviewPlayer {
       stop()
       return
     }
-
     stop()
-
-    guard let fileURL = melodyStorage.url(for: melody) else { return }
-
-    do {
-      let session = AVAudioSession.sharedInstance()
-      try session.setCategory(.playback, mode: .default)
-      try session.setActive(true)
-
-      let player = try AVAudioPlayer(contentsOf: fileURL)
-      player.volume = 0.8
-      previewPlayer = player
-      previewingMelodyID = melody.id
-
-      guard player.prepareToPlay() else { return }
-      let didPlay = player.play()
-      guard didPlay else {
-        previewingMelodyID = nil
-        previewPlayer = nil
-        return
-      }
-
-      previewTask?.cancel()
-      previewTask = Task {
-        try? await Task.sleep(for: .seconds(3))
-        guard !Task.isCancelled else { return }
-        stop()
-      }
-    } catch {
-      previewingMelodyID = nil
-      previewPlayer = nil
-    }
+    guard let fileURL = melodyStorage.url(for: melody),
+          playback.play(fileURL, loops: false, duration: 3, onFinish: { [weak self] in self?.previewingMelodyID = nil })
+    else { return }
+    previewingMelodyID = melody.id
   }
 
   func stop() {
-    previewTask?.cancel()
-    previewTask = nil
-    previewPlayer?.stop()
-    previewPlayer = nil
+    playback.stop()
     previewingMelodyID = nil
   }
 }

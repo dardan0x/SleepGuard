@@ -51,6 +51,7 @@ Fixes the verdicts of the principal-level architecture review (`ARCHITECTURE_INT
 | F27-T20 | Rename `Env` to `Services` | Refactor | Done | T19 | all packages | 2026-11-26 | 2026-11-26 |
 | F27-T21 | Shared settings (shared 0.33.0) | Refactor | Done | T20 | Config | 2026-11-26 | 2026-11-26 |
 | F27-T22 | Uniform the apps, release A (shared 0.34.0) | Refactor | Done | T21 | Models, Services, AudioEngine, Personalization, app | 2026-11-26 | 2026-11-26 |
+| F27-T23 | Uniform the apps, release B: shared audio (shared 0.35.0) | Refactor | Done | T22 | AudioEngine, Services, Recordings, SleepSession | 2026-11-26 | 2026-11-26 |
 
 ## Task Details
 
@@ -540,3 +541,15 @@ The owner's request: everything not unique to an app moves to SleepGuardShared (
 - Sample data: `MockDataGenerator` saves the shared `SampleNights` (no clips until release B).
 - Start notification: the shared `StartNotification` (the text was hardcoded English).
 - Deletions approved by the owner. A crash-recovered night loses its events' spectral stats until release C.
+
+### F27-T23 — Uniform the apps, release B: shared audio (shared 0.35.0)
+
+SleepGuardShared's SleepAudioKit (from SleepGuardUIKitWay's adapters plus SleepGuard's extras) replaces SleepGuard's audio code; the protocols stay.
+- `AudioRecorder` wraps `CaptureEngine` (session, tap, clips `<id>.caf`, raw night, interruptions, route changes); it publishes the levels and the classifier's confidences, so `SoundAnalysisDetecting` is removed. `AudioRecorder.shared` is built in Services with the clips folder.
+- Fixes the four audio bugs: a melody stop without a pause no longer starts a second engine; a clip closed for the melody is kept for the event's save (tracker `closedClipURL`); an interruption removes the tap; the frame position resets on every engine start.
+- Compression and per-clip spectral stats: `ClipCompressor`, `ClipSpectrum`. Extraction from the raw night: `ClipExtractor` (legacy player, share, waveform fallback). `WaveformGenerator` is a thin layer over `ClipWaveform` / `ClipSpectrum`.
+- `ClipPlaybackController` plays through `ClipPlayerEngine` (421 → 263 lines).
+- Melodies: `SnoreInterrupterPlayer` over `MelodyPlayback` (stays in the recording's `.playAndRecord` session), `CustomMelodyStorage` over `MelodyFiles` (Melodies folder, `melodies.json`; was UserDefaults), `CustomMelodyRecorder` over `MelodyRecording`, `MelodyPreviewPlayer` over `MelodyPlayback`.
+- Deleted (approved): TapProcessor, FFTAnalyzer, SoundAnalysisDetector(+ing), EventClipCompressor, AudioClipExtractor, ClipSource and their tests (now the kit's).
+- No longer resumes capture on app activation (the kit resumes on interruption end, route, config and media-reset events, as SleepGuardUIKitWay).
+- Not yet verified: a night on the simulator or a device; bug 2 has no regression test (the fake recorder returns no clip). `AudioEngine/Tests/TestAudio.swift` is unused (owner to decide).

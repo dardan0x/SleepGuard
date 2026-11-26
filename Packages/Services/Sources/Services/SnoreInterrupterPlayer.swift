@@ -1,17 +1,21 @@
 import AudioEngine
-public import AVFoundation
 public import Config
 public import FactoryKit
+import Foundation
 import Models
 public import Observation
 public import Platform
 public import SleepCore
+import SleepAudioKit
 
 /// Plays the selected Snore Interrupter when snoring is detected.
 /// Respects the user's duration preference and exposes `isPlaying` for UI observation.
+/// Plays through SleepGuardShared's `MelodyPlayback` (the same as
+/// SleepGuardUIKitWay's): at night in the capture's `.playAndRecord` session,
+/// with the haptic nudge every 2 s.
 @MainActor
 @Observable
-public final class SnoreInterrupterPlayer: NSObject, SnoreInterrupterPlaying {
+public final class SnoreInterrupterPlayer: SnoreInterrupterPlaying {
   public static let shared = SnoreInterrupterPlayer()
 
   public var isPlaying = false
@@ -19,9 +23,7 @@ public final class SnoreInterrupterPlayer: NSObject, SnoreInterrupterPlaying {
   /// When true, no melody will play for the remainder of the current recording session.
   public var isMutedForSession = false
 
-  private var audioPlayer: AVAudioPlayer?
-  private var stopTimer: Timer?
-  private var nudgeTimer: Timer?
+  @ObservationIgnored private var playback: MelodyPlayback?
 
   private let preferences: any UserPreferencesStoring
   private let melodyStorage: any CustomMelodyStoring
@@ -38,7 +40,6 @@ public final class SnoreInterrupterPlayer: NSObject, SnoreInterrupterPlaying {
     self.preferences = preferences
     self.melodyStorage = melodyStorage
     self.haptics = haptics
-    super.init()
   }
 
   /// Call when a new snore event is detected. Checks preferences and starts playback
@@ -78,66 +79,27 @@ public final class SnoreInterrupterPlayer: NSObject, SnoreInterrupterPlaying {
     }
 
     Log.interrupter.debug("Found sound at \(fileURL.path)")
+    // The microphone pauses first (`AudioRecorder`), so the app doesn't hear itself.
     NotificationCenter.default.post(name: .snoreInterrupterWillPlay, object: nil)
 
-    do {
-      let session = AVAudioSession.sharedInstance()
-      try session.setCategory(.playback, mode: .default)
-      try session.setActive(true)
-      Log.interrupter.debug("Audio session activated with .playback")
-      let player = try AVAudioPlayer(contentsOf: fileURL)
-      player.volume = 1.0
-      player.numberOfLoops = mode.loops ? -1 : 0
-      player.delegate = self
-      audioPlayer = player
-      currentMelody = melody
-      Log.interrupter.debug("AVAudioPlayer created, delegate set")
-      guard player.prepareToPlay() else {
-        Log.interrupter.error("prepareToPlay() returned false")
-        NotificationCenter.default.post(name: .snoreInterrupterDidStop, object: self)
-        return
-      }
-      Log.interrupter.debug("prepareToPlay() succeeded")
-      let didPlay = player.play()
-      Log.interrupter.debug("play() returned \(didPlay)")
-      guard didPlay else {
-        NotificationCenter.default.post(name: .snoreInterrupterDidStop, object: self)
-        return
-      }
-
-      isPlaying = true
-      Log.interrupter.info("Started playing melody \(melody.id) (\(mode.rawValue, privacy: .public))")
-      haptics.prepare()
-      haptics.nudge()
-      nudgeTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { [weak self] _ in
-        Task { @MainActor in
-          self?.haptics.nudge()
-        }
-      }
-
-      if let duration = mode.playDuration {
-        stopTimer = Timer.scheduledTimer(withTimeInterval: duration, repeats: false) { [weak self] _ in
-          Task { @MainActor in
-            self?.stop()
-          }
-        }
-      }
-    } catch {
-      Log.interrupter.error("Failed to play: \(String(describing: error), privacy: .public)")
+    haptics.prepare()
+    let playback = MelodyPlayback(nudge: { [weak self] in self?.haptics.nudge() })
+    guard playback.play(fileURL, loops: mode.loops, duration: mode.playDuration, onFinish: { [weak self] in self?.stop() }) else {
+      Log.interrupter.error("Melody didn't start")
       NotificationCenter.default.post(name: .snoreInterrupterDidStop, object: self)
+      return
     }
+    self.playback = playback
+    currentMelody = melody
+    isPlaying = true
+    Log.interrupter.info("Started playing melody \(melody.id) (\(mode.rawValue, privacy: .public))")
   }
 
   /// Stops playback immediately and cleans up.
   public func stop() {
     Log.interrupter.debug("stop() called — isPlaying was \(self.isPlaying)")
-    audioPlayer?.stop()
-    audioPlayer?.delegate = nil
-    audioPlayer = nil
-    stopTimer?.invalidate()
-    stopTimer = nil
-    nudgeTimer?.invalidate()
-    nudgeTimer = nil
+    playback?.stop()
+    playback = nil
     isPlaying = false
     currentMelody = nil
     Log.interrupter.info("Stopped — isPlaying now \(self.isPlaying)")
@@ -155,13 +117,5 @@ public final class SnoreInterrupterPlayer: NSObject, SnoreInterrupterPlaying {
   public func resetSessionMute() {
     isMutedForSession = false
     Log.interrupter.info("Session mute reset")
-  }
-}
-
-extension SnoreInterrupterPlayer: AVAudioPlayerDelegate {
-  public nonisolated func audioPlayerDidFinishPlaying(_: AVAudioPlayer, successfully _: Bool) {
-    Task { @MainActor in
-      self.stop()
-    }
   }
 }

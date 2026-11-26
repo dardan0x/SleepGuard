@@ -48,7 +48,6 @@ struct RemoteConfigFreezeTests {
     let controller = SessionRecordingController(
       audioRecorder: FakeAudioRecorder(),
       snoreInterrupterPlayer: FakeSnoreInterrupterPlayer(),
-      soundAnalysis: FakeSoundAnalysisDetector(),
       preferences: UserPreferences.isolated(),
       pendingSessionStore: FakePendingSessionStore(),
       checkpointStore: FakeSessionCheckpointStore(),

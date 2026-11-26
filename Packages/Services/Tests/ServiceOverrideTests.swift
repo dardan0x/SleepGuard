@@ -29,17 +29,9 @@ struct ServiceOverrideTests {
     let fake = FakeAudioRecorder()
     Container.shared.audioRecorder.register { fake }
 
-    try Container.shared.audioRecorder().startRecording(audioFileURL: nil)
+    try Container.shared.audioRecorder().startRecording(rawAudioFileName: nil)
 
     #expect(fake.isRecording)
-  }
-
-  @Test func soundAnalysisOverride() {
-    let fake = FakeSoundAnalysisDetector()
-    fake.snoreConfidence = 0.8
-    Container.shared.soundAnalysisDetector.register { fake }
-
-    #expect(Container.shared.soundAnalysisDetector().snoreConfidence == 0.8)
   }
 
   @Test func hapticOverrideRecordsCalls() {

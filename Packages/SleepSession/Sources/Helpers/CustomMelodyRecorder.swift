@@ -1,14 +1,15 @@
-import AVFoundation
 import FactoryKit
 import Foundation
 import Models
 import Services
+import SleepAudioKit
 import SleepCore
 
-/// Recording engine for the custom-melody sheet: owns the audio recorder,
-/// the elapsed-time timer, playback of the take, and the record → recorded
-/// state machine. The view renders `state`/`elapsed` and forwards button
-/// taps.
+/// Recording engine for the custom-melody sheet: the take is recorded and
+/// played back by SleepGuardShared's `MelodyRecording` and `MelodyPlayback`
+/// (the same as SleepGuardUIKitWay's); this keeps the elapsed time and the
+/// record → recorded state machine. The view renders `state`/`elapsed` and
+/// forwards button taps.
 @MainActor
 @Observable
 final class CustomMelodyRecorder {
@@ -23,12 +24,11 @@ final class CustomMelodyRecorder {
   private(set) var isPlaying = false
   private(set) var permissionGranted = false
 
-  private let maxDuration = CustomMelodies.maxRecordingDuration
   private let melodyStorage: any CustomMelodyStoring
-  private var recorder: AVAudioRecorder?
+  private let recording = MelodyRecording()
+  private let playback = MelodyPlayback(volume: 0.8, nudge: nil)
   private var recordedURL: URL?
-  private var playbackPlayer: AVAudioPlayer?
-  private var timer: Timer?
+  private var timer: Task<Void, Never>?
 
   init(melodyStorage: any CustomMelodyStoring = Container.shared.customMelodyStorage()) {
     self.melodyStorage = melodyStorage
@@ -36,108 +36,47 @@ final class CustomMelodyRecorder {
 
   /// Checks (or requests) microphone permission. Call on appear.
   func checkPermission() {
-    switch AVAudioSession.sharedInstance().recordPermission {
-    case .granted:
-      permissionGranted = true
-    case .denied:
-      permissionGranted = false
-    case .undetermined:
-      Task {
-        let granted = await withCheckedContinuation { continuation in
-          AVAudioSession.sharedInstance().requestRecordPermission { granted in
-            continuation.resume(returning: granted)
-          }
-        }
-        permissionGranted = granted
-      }
-    @unknown default:
-      permissionGranted = false
-    }
+    Task { permissionGranted = await recording.requestPermission() }
   }
 
-  /// Starts a new take, replacing any previous recording.
+  /// Starts a new take, replacing any previous recording. It stops by itself
+  /// at SleepCore's maximum length.
   func startRecording() {
     cleanup()
-
-    let session = AVAudioSession.sharedInstance()
     do {
-      try session.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker])
-      try session.setActive(true)
-    } catch {
-      Log.interrupter.error("Failed to configure session: \(String(describing: error), privacy: .public)")
-      return
-    }
-
-    let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("custom_melody_temp.m4a")
-    if FileManager.default.fileExists(atPath: tempURL.path) {
-      try? FileManager.default.removeItem(at: tempURL)
-    }
-
-    let settings: [String: Any] = [
-      AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
-      AVSampleRateKey: 44100,
-      AVNumberOfChannelsKey: 1,
-      AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue,
-    ]
-
-    do {
-      let rec = try AVAudioRecorder(url: tempURL, settings: settings)
-      rec.record()
-      recorder = rec
-      recordedURL = tempURL
-      state = .recording
-      elapsed = 0
-
-      timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak rec] _ in
-        Task { @MainActor in
-          guard let rec, rec.isRecording else { return }
-          self.elapsed = rec.currentTime
-          if rec.currentTime >= self.maxDuration {
-            self.stopRecording()
-          }
-        }
-      }
+      try recording.start(onLimit: { [weak self] in self?.stopRecording() })
     } catch {
       Log.interrupter.error("Failed to start recording: \(String(describing: error), privacy: .public)")
+      return
+    }
+    state = .recording
+    elapsed = 0
+    timer = Task { [weak self] in
+      while !Task.isCancelled {
+        try? await Task.sleep(for: .milliseconds(100))
+        guard let self, state == .recording else { return }
+        elapsed = recording.elapsed
+      }
     }
   }
 
   func stopRecording() {
-    timer?.invalidate()
+    timer?.cancel()
     timer = nil
-    recorder?.stop()
-    elapsed = recorder?.currentTime ?? elapsed
-    recorder = nil
+    recordedURL = recording.stop()
+    elapsed = recording.elapsed
     state = .recorded
-
-    try? AVAudioSession.sharedInstance().setActive(false)
   }
 
   /// Plays (or stops) the current take.
   func togglePlayback() {
     if isPlaying {
-      playbackPlayer?.stop()
-      playbackPlayer = nil
+      playback.stop()
       isPlaying = false
       return
     }
-
     guard let url = recordedURL else { return }
-    do {
-      let player = try AVAudioPlayer(contentsOf: url)
-      player.volume = 0.8
-      player.play()
-      playbackPlayer = player
-      isPlaying = true
-
-      Task {
-        try? await Task.sleep(for: .seconds(player.duration + 0.1))
-        playbackPlayer = nil
-        isPlaying = false
-      }
-    } catch {
-      Log.interrupter.error("Failed to play back: \(String(describing: error), privacy: .public)")
-    }
+    isPlaying = playback.play(url, loops: false, duration: nil, onFinish: { [weak self] in self?.isPlaying = false })
   }
 
   /// The number in the take's default name ("My Sound 3"); the view names it.
@@ -150,7 +89,9 @@ final class CustomMelodyRecorder {
   @discardableResult
   func save(name: String) -> Bool {
     guard let url = recordedURL else { return false }
+    playback.stop()
     _ = melodyStorage.saveRecording(name: name, from: url)
+    recordedURL = nil
     return true
   }
 
@@ -159,21 +100,15 @@ final class CustomMelodyRecorder {
     cleanup()
     state = .idle
     elapsed = 0
-    recordedURL = nil
   }
 
-  /// Stops everything and deletes the temp file. Call on disappear.
+  /// Stops everything and deletes the take. Call on disappear.
   func cleanup() {
-    timer?.invalidate()
+    timer?.cancel()
     timer = nil
-    recorder?.stop()
-    recorder = nil
-    playbackPlayer?.stop()
-    playbackPlayer = nil
+    playback.stop()
     isPlaying = false
-    if let url = recordedURL {
-      try? FileManager.default.removeItem(at: url)
-      recordedURL = nil
-    }
+    recording.discard()
+    recordedURL = nil
   }
 }

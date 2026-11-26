@@ -99,7 +99,7 @@ struct StoreContractTests {
   @Test func realMelodyStorageMeetsTheContract() throws {
     let directory = FileManager.default.temporaryDirectory.appendingPathComponent("melodies-\(UUID().uuidString)")
     defer { try? FileManager.default.removeItem(at: directory) }
-    try melodyContract(CustomMelodyStorage(defaults: .isolated(), directory: directory))
+    try melodyContract(CustomMelodyStorage(directory: directory))
   }
 
   @Test func fakeMelodyStorageMeetsTheContract() throws {

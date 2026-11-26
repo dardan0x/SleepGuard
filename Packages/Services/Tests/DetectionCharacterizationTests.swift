@@ -262,7 +262,6 @@ final class ScriptedInterrupter: SnoreInterrupterPlaying {
 @MainActor
 final class DetectionHarness {
   let recorder = FakeAudioRecorder()
-  let soundAnalysis = FakeSoundAnalysisDetector()
   let interrupter: ScriptedInterrupter
   let tracker: RealtimeDetectionTracker
   private let controller: SessionRecordingController
@@ -287,7 +286,6 @@ final class DetectionHarness {
     controller = SessionRecordingController(
       audioRecorder: recorder,
       snoreInterrupterPlayer: interrupter,
-      soundAnalysis: soundAnalysis,
       preferences: preferences,
       pendingSessionStore: pending,
       checkpointStore: checkpoints,
@@ -351,7 +349,7 @@ final class DetectionHarness {
   func snoreThroughTap(_ seconds: Double, hz: Double, db: Float, confidence: Float) async {
     recorder.currentDB = db
     recorder.currentPeakDB = db
-    soundAnalysis.snoreConfidence = confidence
+    recorder.snoreConfidence = confidence
     for index in 1...Int((seconds * hz).rounded()) {
       clock.now = tapStart.addingTimeInterval(Double(index) / hz)
       recorder.onLevels?(clock.now)

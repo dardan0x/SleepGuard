@@ -82,7 +82,7 @@ Last updated: 2026-11-25
 | F24 | Shared Design Kit Adoption | P2 | Done (bg-card open) | 4/4 | ██████████ 100% | [tracker](trackers/f24-shared-design-kit-adoption.md) |
 | F25 | Shared Screen Content | P2 | Done | 7/7 | ██████████ 100% | [tracker](trackers/f25-shared-screen-content.md) |
 | F26 | Shared Settings Content | P2 | Done | 6/6 | ██████████ 100% | [tracker](trackers/f26-shared-settings-content.md) |
-| F27 | Architecture Interrogation Fixes | P0/P1 | Done (device night pending) | 22/22 | ██████████ 100% | [tracker](trackers/f27-architecture-interrogation-fixes.md) |
+| F27 | Architecture Interrogation Fixes | P0/P1 | Done (device night pending) | 23/23 | ██████████ 100% | [tracker](trackers/f27-architecture-interrogation-fixes.md) |
 
 ## Activity Log
 
@@ -90,6 +90,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-11-26 | F27-T23 | Completed | Shared 0.35.0: SleepAudioKit behind AudioRecording, playback, interrupter and melodies; four audio bugs fixed |
 | 2026-11-26 | F27-T22 | Completed | Shared 0.34.0: logging, classifier, sample nights, profile/survey/checkpoint files, shared layout, storage sweep, start notification; Logging package, detectors and two @Models removed |
 | 2026-11-26 | F27-T21 | Completed | Shared 0.33.0: the settings both apps have live in `SleepPreferences` / `PreferencesDefaults`; `UserPreferences` delegates its 16 common properties |
 | 2026-11-26 | F27-T18/T20 | Completed | Shared 0.32.0: HealthKit and raw log are shared behaviour wrapped by this app's services; `Env` renamed `Services` |

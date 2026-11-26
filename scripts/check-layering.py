@@ -31,11 +31,9 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 # engine and quote bank moved to SleepGuardShared (F26-T6).
 DESIGNSYSTEM_ALLOWLIST: set[str] = set()
 
-# UIKit is allowed here: audio-session interruption/route observation behind
-# `#if canImport(UIKit)` — system infrastructure, not UI chrome.
-CORE_UIKIT_ALLOWLIST = {
-    "Packages/AudioEngine/Sources/Engine/AudioRecorder.swift",
-}
+# Files allowed to import UIKit in a core package. Empty since the audio
+# session's observation moved to SleepGuardShared's SleepAudioKit (F27-T23).
+CORE_UIKIT_ALLOWLIST: set[str] = set()
 
 CORE_PREFIXES = (
     "Packages/Models/",

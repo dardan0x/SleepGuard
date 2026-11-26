@@ -1,19 +1,18 @@
-public import AVFoundation
+public import Foundation
 public import Models
 public import Observation
+import SleepAudioKit
 import SleepCore
 
 /// Manages sequential playback of snore-event audio clips.
 ///
-/// Routes each clip through `AVAudioEngine` so that an optional enhancement
-/// chain (high-pass 80 Hz + low-pass 1.5 kHz + per-clip peak normalization,
-/// capped at +24 dB) can be applied without modifying the saved `.m4a` files.
-/// When `enhancedAudioEnabled` is `false`, the EQ bands and global gain are
-/// bypassed and playback is bit-exact to the recorded clip.
+/// Each clip plays through SleepGuardShared's `ClipPlayerEngine` (the same as
+/// SleepGuardUIKitWay's): an optional enhancement chain (high-pass 80 Hz +
+/// low-pass 1.5 kHz + per-clip peak boost, capped at +24 dB) without changing
+/// the saved `.m4a` files; off, playback is bit-exact to the recorded clip.
 ///
-/// The playback rules (joined timeline, seeking, auto-advance, the boost) are
-/// SleepCore's `ClipPlaylist`, `PlaybackGain` and `PlaybackEnhancement`,
-/// shared with SleepGuardUIKitWay; this class drives the audio engine.
+/// The playback rules (joined timeline, seeking, auto-advance) are SleepCore's
+/// `ClipPlaylist`; this class keeps the screen's state over the engine.
 @MainActor
 @Observable
 public final class ClipPlaybackController {
@@ -37,22 +36,15 @@ public final class ClipPlaybackController {
   public var enhancedAudioEnabled = true {
     didSet {
       guard oldValue != enhancedAudioEnabled else { return }
-      applyEnhancementToggle()
-      // Recompute per-clip gain in case current clip is loaded.
-      if let file = audioFile { eq.globalGain = currentGainDB(for: file) }
+      player.isEnhanced = enhancedAudioEnabled
     }
   }
 
-  // MARK: - Audio pipeline
+  // MARK: - Audio
 
-  private let engine = AVAudioEngine()
-  private let playerNode = AVAudioPlayerNode()
-  private let eq = AVAudioUnitEQ(numberOfBands: 2)
-  private var connectedFormat: AVAudioFormat?
-
-  // MARK: - Current clip state
-
-  private var audioFile: AVAudioFile?
+  private let player = ClipPlayerEngine()
+  /// The current event's clip is loaded into `player`.
+  private var isLoaded = false
   private var currentFileDuration: TimeInterval = 0
   /// Algorithm-defined playback duration for the current clip.
   /// Falls back to the actual file duration if the clip duration is missing.
@@ -62,37 +54,19 @@ public final class ClipPlaybackController {
   }
 
   private var pausedAtClipTime: TimeInterval = 0
-  private var playbackStartHostTime: TimeInterval = 0
-  private var playbackStartClipTime: TimeInterval = 0
-  /// Monotonic token to discard stale `scheduleSegment` completions when we
-  /// stop or re-schedule before the prior segment finished.
-  private var playbackToken = 0
 
   // MARK: - Aggregate state
 
   private var progressTimer: Timer?
-  private var notificationObserver: NSObjectProtocol?
 
   public init() {
-    engine.attach(playerNode)
-    engine.attach(eq)
-
-    // High-pass at 80 Hz kills HVAC rumble + 50/60 Hz mains hum.
-    // Low-pass at 1.5 kHz kills broadband mic hiss.
-    // Snore energy lives 100 Hz–1 kHz so this passband preserves all of it.
-    let hp = eq.bands[0]
-    hp.filterType = .highPass
-    hp.frequency = PlaybackEnhancement.highPassHz
-    hp.bandwidth = 1.0
-    hp.gain = 0
-
-    let lp = eq.bands[1]
-    lp.filterType = .lowPass
-    lp.frequency = PlaybackEnhancement.lowPassHz
-    lp.bandwidth = 1.0
-    lp.gain = 0
-
-    applyEnhancementToggle()
+    player.onInterruption = { [weak self] in
+      guard let self else { return }
+      pausedAtClipTime = min(player.position, currentClipDuration)
+      currentClipTime = pausedAtClipTime
+      isPlaying = false
+      stopProgressTimer()
+    }
   }
 
   public var currentEvent: SnoreEvent? {
@@ -124,7 +98,7 @@ public final class ClipPlaybackController {
     playlist = ClipPlaylist(clips: events.map { ClipPlaylist.Clip(id: $0.id, fileName: nil, duration: $0.snoreDuration) })
     currentClipTime = 0
     pausedAtClipTime = 0
-    audioFile = nil
+    isLoaded = false
     // Lazy: actual file load happens on first play().
   }
 
@@ -134,60 +108,24 @@ public final class ClipPlaybackController {
   }
 
   public func play() {
-    if audioFile == nil {
+    if !isLoaded {
       setupPlayerForCurrentEvent()
     }
-    guard let file = audioFile else {
+    guard isLoaded else {
       Log.playback.error("Cannot play: no file (event \(self.currentEvent?.id.uuidString ?? "nil"))")
       return
     }
-
+    let remaining = currentClipDuration - pausedAtClipTime
+    guard remaining > 0 else {
+      // Already at or past end — auto-advance.
+      handlePlaybackFinished()
+      return
+    }
     do {
-      try configurePlaybackSession()
-      if !engine.isRunning {
-        try engine.start()
-      }
-
-      let sampleRate = file.processingFormat.sampleRate
-      let startFrame = AVAudioFramePosition(pausedAtClipTime * sampleRate)
-      let clipDurationFrames = AVAudioFramePosition(currentClipDuration * sampleRate)
-      let remainingInClip = max(0, clipDurationFrames - startFrame)
-      let remaining = min(file.length - startFrame, remainingInClip)
-      guard remaining > 0 else {
-        // Already at or past end — auto-advance.
-        handlePlaybackFinished()
-        return
-      }
-
-      playbackToken &+= 1
-      let token = playbackToken
-
-      playerNode.stop() // discard any prior scheduling
-      // `.dataPlayedBack` fires AFTER the audio has actually been heard, not
-      // when it's been read from the file (the default `.dataConsumed`). This
-      // prevents auto-advance / engine reconnect from chopping off the tail
-      // of the clip (the engine's output buffer is still draining when
-      // `.dataConsumed` fires).
-      playerNode.scheduleSegment(
-        file,
-        startingFrame: startFrame,
-        frameCount: AVAudioFrameCount(max(0, remaining)),
-        at: nil,
-        completionCallbackType: .dataPlayedBack)
-      { [weak self] _ in
-        Task { @MainActor in
-          guard let self else { return }
-          guard self.playbackToken == token else { return } // stale completion
-          self.handlePlaybackFinished()
-        }
-      }
-      playerNode.play()
-
-      playbackStartHostTime = ProcessInfo.processInfo.systemUptime
-      playbackStartClipTime = pausedAtClipTime
+      try player.play(from: pausedAtClipTime, for: remaining) { [weak self] in self?.handlePlaybackFinished() }
       isPlaying = true
       startProgressTimer()
-      Log.playback.debug("Play from \(self.pausedAtClipTime)s (gain \(self.eq.globalGain) dB, enhanced=\(self.enhancedAudioEnabled))")
+      Log.playback.debug("Play from \(self.pausedAtClipTime)s (gain \(self.player.boostDB) dB, enhanced=\(self.enhancedAudioEnabled))")
     } catch {
       Log.playback.error("play failed: \(String(describing: error), privacy: .public)")
     }
@@ -195,11 +133,9 @@ public final class ClipPlaybackController {
 
   public func pause() {
     guard isPlaying else { return }
-    let now = ProcessInfo.processInfo.systemUptime
-    pausedAtClipTime = min(playbackStartClipTime + (now - playbackStartHostTime), currentClipDuration)
+    player.pause()
+    pausedAtClipTime = min(player.position, currentClipDuration)
     currentClipTime = pausedAtClipTime
-    playbackToken &+= 1 // invalidate the in-flight segment's completion
-    playerNode.pause()
     isPlaying = false
     stopProgressTimer()
   }
@@ -252,7 +188,7 @@ public final class ClipPlaybackController {
 
   /// Seeks within the current clip (0–1).
   public func seekInCurrentClip(relative: Double) {
-    guard audioFile != nil else { return }
+    guard isLoaded else { return }
     let target = relative * currentClipDuration
     let wasPlaying = isPlaying
     if wasPlaying { pause() }
@@ -263,32 +199,15 @@ public final class ClipPlaybackController {
 
   public func cleanup() {
     pause()
-    playbackToken &+= 1
-    playerNode.stop()
-    if engine.isRunning { engine.stop() }
-    notificationObserver.map { NotificationCenter.default.removeObserver($0) }
-    notificationObserver = nil
-    audioFile = nil
+    player.stop()
+    isLoaded = false
   }
 
   // MARK: - Private
 
-  /// Applies the bypass state to the EQ chain — used when the user toggles
-  /// `enhancedAudioEnabled`. Per-clip gain is recomputed separately.
-  private func applyEnhancementToggle() {
-    let bypass = !enhancedAudioEnabled
-    eq.bands[0].bypass = bypass
-    eq.bands[1].bypass = bypass
-    eq.bypass = bypass
-    if bypass { eq.globalGain = 0 }
-  }
-
   private func setupPlayerForCurrentEvent() {
-    playbackToken &+= 1
-    if playerNode.isPlaying { playerNode.stop() }
-    notificationObserver.map { NotificationCenter.default.removeObserver($0) }
-    notificationObserver = nil
-    audioFile = nil
+    player.pause()
+    isLoaded = false
 
     guard let event = currentEvent else {
       Log.playback.debug("setupPlayer: no current event")
@@ -300,89 +219,14 @@ public final class ClipPlaybackController {
     }
 
     do {
-      let file = try AVAudioFile(forReading: url)
-      audioFile = file
-      currentFileDuration = TimeInterval(file.length) / file.processingFormat.sampleRate
+      currentFileDuration = try player.load(url)
+      isLoaded = true
       currentClipTime = 0
       pausedAtClipTime = 0
-
-      try connectChain(format: file.processingFormat)
-      eq.globalGain = currentGainDB(for: file)
-
-      try configurePlaybackSession()
-
-      notificationObserver = NotificationCenter.default.addObserver(
-        forName: AVAudioSession.interruptionNotification,
-        object: nil,
-        queue: .main)
-      { [weak self] _ in
-        Task { @MainActor in
-          self?.isPlaying = false
-          self?.stopProgressTimer()
-        }
-      }
-      Log.playback.debug("Loaded \(url.lastPathComponent), \(self.currentFileDuration)s, gain \(self.eq.globalGain) dB")
+      Log.playback.debug("Loaded \(url.lastPathComponent), \(self.currentFileDuration)s, gain \(self.player.boostDB) dB")
     } catch {
       Log.playback.error("Failed to load \(url.lastPathComponent): \(String(describing: error), privacy: .public)")
-      audioFile = nil
     }
-  }
-
-  /// Connects `playerNode → eq → mainMixerNode` with the given format if not
-  /// already connected at that format. Safe to call repeatedly; no-ops when
-  /// the format hasn't changed (sample rate / channel count / common format).
-  private func connectChain(format: AVAudioFormat) throws {
-    if let cur = connectedFormat,
-       cur.sampleRate == format.sampleRate,
-       cur.channelCount == format.channelCount,
-       cur.commonFormat == format.commonFormat
-    {
-      return
-    }
-    if engine.isRunning { engine.stop() }
-    engine.disconnectNodeInput(eq)
-    engine.disconnectNodeInput(engine.mainMixerNode)
-    engine.connect(playerNode, to: eq, format: format)
-    engine.connect(eq, to: engine.mainMixerNode, format: format)
-    connectedFormat = format
-  }
-
-  private func configurePlaybackSession() throws {
-    let session = AVAudioSession.sharedInstance()
-    try? session.setActive(false)
-    try session.setCategory(.playback, mode: .default)
-    try session.setActive(true)
-  }
-
-  /// dB gain to bring this clip's peak amplitude to −3 dBFS, capped at the
-  /// EQ's +24 dB ceiling. Returns 0 (no gain) when enhancement is off or
-  /// the clip is silent / unreadable.
-  private func currentGainDB(for file: AVAudioFile) -> Float {
-    guard enhancedAudioEnabled else { return 0 }
-    let length = AVAudioFrameCount(file.length)
-    guard length > 0,
-          let buffer = AVAudioPCMBuffer(pcmFormat: file.processingFormat, frameCapacity: length)
-    else { return 0 }
-
-    let saved = file.framePosition
-    defer { file.framePosition = saved }
-    file.framePosition = 0
-    do { try file.read(into: buffer) } catch { return 0 }
-
-    var peak: Float = 0
-    if let channels = buffer.floatChannelData {
-      let frames = Int(buffer.frameLength)
-      let count = Int(buffer.format.channelCount)
-      for c in 0..<count {
-        let p = channels[c]
-        for i in 0..<frames {
-          let amp = abs(p[i])
-          if amp > peak { peak = amp }
-        }
-      }
-    }
-    // −3 dBFS, never quieter, at most +24 dB: SleepCore's rule.
-    return PlaybackGain.boostDB(peak: peak)
   }
 
   private func handlePlaybackFinished() {
@@ -413,9 +257,7 @@ public final class ClipPlaybackController {
   }
 
   private func tick() {
-    guard isPlaying, audioFile != nil else { return }
-    let now = ProcessInfo.processInfo.systemUptime
-    let elapsed = now - playbackStartHostTime
-    currentClipTime = min(playbackStartClipTime + elapsed, currentClipDuration)
+    guard isPlaying, isLoaded else { return }
+    currentClipTime = min(player.position, currentClipDuration)
   }
 }

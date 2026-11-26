@@ -8,7 +8,7 @@ let package = Package(
     .library(name: "AudioEngine", targets: ["AudioEngine"]),
   ],
   dependencies: [
-    .package(url: "https://github.com/dardan0x/SleepGuardShared.git", exact: "0.34.0"),
+    .package(url: "https://github.com/dardan0x/SleepGuardShared.git", exact: "0.35.0"),
   ],
   targets: [
     .target(
@@ -16,15 +16,12 @@ let package = Package(
       dependencies: [
         .product(name: "SleepLogging", package: "SleepGuardShared"),
         .product(name: "SleepCore", package: "SleepGuardShared"),
+        .product(name: "SleepAudioKit", package: "SleepGuardShared"),
       ],
       path: "Sources/Engine",
       swiftSettings: [
         .swiftLanguageMode(.v6),
         .enableUpcomingFeature("InternalImportsByDefault"),
-      ],
-      linkerSettings: [
-        .linkedFramework("Accelerate"),
-        .linkedFramework("SoundAnalysis"),
       ]),
     .testTarget(
       name: "AudioEngineTests",
