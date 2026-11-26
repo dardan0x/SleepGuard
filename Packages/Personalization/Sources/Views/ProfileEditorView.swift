@@ -3,6 +3,7 @@ import FactoryKit
 import Platform
 import Services
 public import SwiftUI
+import SleepGuardContentKit
 
 /// The profile editor sheet: the shared `ProfileEditorContent` editing the
 /// stored profile (`ProfileStoring`, the shared profile file); each change is

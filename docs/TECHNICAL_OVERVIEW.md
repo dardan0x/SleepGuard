@@ -65,7 +65,7 @@ Onboarding SleepSession Statistics Recordings  Settings   Personalization     Le
                                         │
                          ┌──────────────┴───────────────┐
                          │ DesignSystem                 │  Theme extensions, model adapters;
-                         └──────────────┬───────────────┘  re-exports the shared kits and Strings
+                         └──────────────┬───────────────┘  imported by name where used
  ┌──────────────────────────────────────┴──────────────────────────────────────┐
  │ Routing   route enums, RouterPath, RootPresentation(Policy), TabCoordinator │  (ADR 0001, 0007)
  └──────────────────────────────────────┬──────────────────────────────────────┘
@@ -82,7 +82,7 @@ Onboarding SleepSession Statistics Recordings  Settings   Personalization     Le
                          ┌──────┴───────────────────────┐
                          │ Models                       │  SleepGuard's reads on the shared records,
                          │                              │  launch re-score, storage location, widget
-                         └──────────────┬───────────────┘  snapshot; re-exports SleepStore, SleepLogging
+                         └──────────────┬───────────────┘  snapshot (no re-exports: F27-T26)
                          ┌──────────────┴───────────────┐
                          │ SleepGuardShared (pinned)    │  SleepCore · SleepStore · SleepAudioKit · SleepFiles ·
                          │                              │  SleepSettings · SleepHealthKit · SleepLogging ·
@@ -184,15 +184,15 @@ SleepGuardShared is a separate repo and Swift package, pinned by exact version i
 | Shared product | Holds | Used here by |
 |---|---|---|
 | `SleepCore` (Foundation only) | Domain values (`Night`, `NightEvent`, `NightSummary`, `SleepStageSegment`, …) and the rules over them: score, episodes, stage analysis, detection classifiers, `DetectionStateMachine` and the `DetectionEngine` actor, statistics, playback, interrupter, storage plan, briefing, report | Models, AudioEngine, Services, Statistics, Recordings, SleepSession, Personalization, Onboarding, DesignSystem |
-| `SleepStrings` | `Localizable.xcstrings` and the generated `Strings` | DesignSystem (re-exported) |
+| `SleepStrings` | `Localizable.xcstrings` and the generated `Strings` | Every view that shows text |
 | `SleepMelodies` | The Snore Interrupter's built-in sounds | Services |
-| `SleepStore` | The nights database: `NightRecord` / `NightEventRecord`, mapping to `Night`, stored summary, schema, `SleepStore.open` | Models (re-exported) |
+| `SleepStore` | The nights database: `NightRecord` / `NightEventRecord`, mapping to `Night`, stored summary, schema, `SleepStore.open` | Models, Services, Health, every feature that reads nights |
 | `SleepAudioKit` | Capture (`CaptureEngine`), compression, playback (`ClipPlayerEngine`), waveform, spectrum, clip extraction, melodies | AudioEngine, Services, Recordings, SleepSession |
 | `SleepFiles` | One file layout (`StorageLocation`), clips folder, checkpoint, profile and survey files, raw log | Models, Services |
 | `SleepSettings`, `SleepHealthKit` | The settings both apps have; what a night looks like in Apple Health | Config, Health |
-| `SleepLogging`, `SleepNotifications` | `Log` and the signposter; the start-delay notification | Models (re-exported), Services |
-| `SleepGuardDesignKit` | `Theme` and components that draw values | DesignSystem (re-exported) |
-| `SleepGuardContentKit` | Each screen's loaded layout: values, closures and `@ViewBuilder` slots in | DesignSystem (re-exported); hosted by every feature |
+| `SleepLogging`, `SleepNotifications` | `Log` and the signposter; the start-delay notification | Every package that logs; Services |
+| `SleepGuardDesignKit` | `Theme` and components that draw values | DesignSystem and the views that use them |
+| `SleepGuardContentKit` | Each screen's loaded layout: values, closures and `@ViewBuilder` slots in | Every feature that hosts content |
 
 **The four seams.**
 
@@ -216,7 +216,7 @@ SleepGuardShared is a separate repo and Swift package, pinned by exact version i
 | **Models** | 13 / 0.6k | — | SleepCore, SleepStore, SleepFiles, SleepLogging | SleepGuard's reads on the shared records (`NightRecord+SleepGuard`), batched launch re-score, `SleepGuardStorage` (the shared layout in the app group), `AudioFileURLResolver`, widget snapshot. Re-exports `SleepStore` and `SleepLogging` |
 | **AudioEngine** | 4 / 0.3k | — | SleepCore, SleepAudioKit, SleepLogging | `AudioRecording` and `AudioRecorder` over the shared `CaptureEngine` (published levels and confidences, per-buffer callback, interruptions, warm-up, melody pause), `LegacyClipPlayer`. No Models, no SwiftData |
 | **Services** | 25 / 2.3k | Models, AudioEngine, Config, Health, Platform, Factory | SleepCore, SleepAudioKit, SleepFiles, SleepNotifications, SleepMelodies | The recording night: `SessionManager` (facade), `SessionRecordingController` (lifecycle, decimator, interruptions, thermal log), `RealtimeDetectionTracker`, `SessionCommitter`, `SessionCheckpointStore` (coalescing off-main writer of the shared checkpoint format), `PendingSessionStore`, `SessionRawLogWriter` (actor), `StorageLimitEnforcer` (over the shared `StorageSweep`), `SnoreInterrupterPlayer`, delay, melody storage, `ProfileStore` / `LifestyleLogStore`. Never imports SwiftUI or Routing |
-| **DesignSystem** | 9 / 0.4k | Models | SleepCore, SleepStrings, DesignKit, ContentKit | This app's bridge to the shared UI: `Theme` extensions (`intensityColor`), `SleepGuardKitAdapters`, a few app-only views (sleep-stage section, update gate). `@_exported` re-exports of the kits and `Strings` |
+| **DesignSystem** | 9 / 0.4k | Models | SleepCore, SleepStrings, DesignKit, ContentKit | This app's bridge to the shared UI: `Theme` extensions (`intensityColor`), `SleepGuardKitAdapters`, a few app-only views (sleep-stage section, update gate). No re-exports: each file imports the kits it uses (F27-T26) |
 | **Routing** | 5 / 0.2k | Models, Config, Factory | — | `RouterDestination`, `SheetDestination`, `RouterPath`, `RootPresentation` + `RootPresentationPolicy` (ADR 0007), `TabCoordinator` (moved from Services, ADR 0008) |
 | **Config** | 5 / 0.7k | Models, Factory | SleepCore | `AppConfig` (remote values held while a night records), `UserPreferences`; `ConfigTestSupport` with the isolated stores |
 | **Health** | 3 / 0.2k | Models, Factory | SleepCore | `HealthKitSync` (+ fake) |
@@ -618,7 +618,7 @@ Learn, Onboarding, Personalization, Settings, SleepSession and AudioEngine have 
 
 ### 10.3 Logging
 
-- **`os.Logger`, never `print`.** `Log.<category>` from SleepGuardShared's `SleepLogging` (re-exported by `Models`; the same in both apps), subsystem the bundle id (`com.dardan.SleepGuard`), categories `audio`, `detection`, `session`, `interrupter`, `storage`, `playback`, `health`, `app`, plus `Log.signposter`.
+- **`os.Logger`, never `print`.** `Log.<category>` from SleepGuardShared's `SleepLogging` (imported where used; the same in both apps), subsystem the bundle id (`com.dardan.SleepGuard`), categories `audio`, `detection`, `session`, `interrupter`, `storage`, `playback`, `health`, `app`, plus `Log.signposter`.
 - **Levels:** `.debug` for traces (not persisted), `.info` milestones, `.notice` notable state, `.error` failures, `.fault` for the should-never-happen case (the SwiftData store failing to open).
 - **Privacy:** interpolated strings are private by default (file names, melody names, the push token); error descriptions are public so a sysdiagnose is useful.
 - **Signposts:** an Instruments interval per session and per snore event (Points of Interest).

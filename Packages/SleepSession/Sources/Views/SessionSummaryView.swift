@@ -6,6 +6,9 @@ import Services
 public import Models
 import SwiftData
 public import SwiftUI
+public import SleepStore
+import SleepGuardContentKit
+import SleepStrings
 
 @MainActor
 public struct SessionSummaryView: View {

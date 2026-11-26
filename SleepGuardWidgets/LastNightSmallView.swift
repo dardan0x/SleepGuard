@@ -1,5 +1,6 @@
 import DesignSystem
 import Models
+import SleepGuardDesignKit
 import SwiftUI
 
 struct LastNightSmallView: View {

@@ -1,5 +1,7 @@
 import DesignSystem
 import Models
+import SleepGuardDesignKit
+import SleepStrings
 import SwiftUI
 import WidgetKit
 

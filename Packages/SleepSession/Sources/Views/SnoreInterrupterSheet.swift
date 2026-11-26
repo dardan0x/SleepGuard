@@ -3,6 +3,7 @@ import DesignSystem
 import FactoryKit
 import Services
 import SleepCore
+import SleepGuardContentKit
 import SwiftUI
 
 /// The Snore Interrupter's settings, hosting the shared content. Edits a

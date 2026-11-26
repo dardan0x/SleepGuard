@@ -3,6 +3,8 @@ public import Models
 public import Observation
 import SleepAudioKit
 import SleepCore
+import SleepLogging
+public import SleepStore
 
 /// Manages sequential playback of snore-event audio clips.
 ///

@@ -1,5 +1,6 @@
 import DesignSystem
 import Models
+import SleepGuardDesignKit
 import SwiftUI
 
 /// Floating capsule tab bar used on iOS < 26. Renders the chrome and items;

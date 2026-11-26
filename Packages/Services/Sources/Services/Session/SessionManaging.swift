@@ -2,6 +2,7 @@ import AudioEngine
 public import Foundation
 public import Models
 public import SleepCore
+public import SleepStore
 
 /// Facade over the live recording session that features observe.
 /// Fake: `FakeSessionManager`.

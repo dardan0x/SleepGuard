@@ -1,4 +1,5 @@
 import DesignSystem
+import SleepStrings
 import SwiftUI
 
 /// "N short events": opens the player on the snoring episodes too short for

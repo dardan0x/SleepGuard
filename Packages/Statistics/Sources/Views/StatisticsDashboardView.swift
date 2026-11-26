@@ -3,6 +3,7 @@ import Models
 import Routing
 import SwiftData
 public import SwiftUI
+import SleepStore
 
 @MainActor
 public struct StatisticsDashboardView: View {

@@ -20,6 +20,7 @@ let package = Package(
         .product(name: "SleepStrings", package: "SleepGuardShared"),
         .product(name: "SleepGuardDesignKit", package: "SleepGuardShared"),
         .product(name: "SleepGuardContentKit", package: "SleepGuardShared"),
+        .product(name: "SleepStore", package: "SleepGuardShared"),
       ],
       path: "Sources",
       exclude: [],
@@ -33,6 +34,8 @@ let package = Package(
       dependencies: [
         "DesignSystem",
         .product(name: "SleepCore", package: "SleepGuardShared"),
+        .product(name: "SleepStrings", package: "SleepGuardShared"),
+        .product(name: "SleepGuardDesignKit", package: "SleepGuardShared"),
       ],
       path: "Tests",
       swiftSettings: [

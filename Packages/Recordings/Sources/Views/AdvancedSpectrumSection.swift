@@ -1,4 +1,5 @@
 import DesignSystem
+import SleepStrings
 import SwiftUI
 
 /// Frequency-spectrum section of the advanced player: gradient-colored bars

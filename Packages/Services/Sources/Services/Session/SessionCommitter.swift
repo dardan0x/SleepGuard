@@ -4,6 +4,7 @@ import Foundation
 public import Health
 public import Models
 public import SwiftData
+public import SleepStore
 
 /// The live `SessionCommitting`.
 @MainActor

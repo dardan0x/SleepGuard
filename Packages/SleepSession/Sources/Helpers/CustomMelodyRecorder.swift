@@ -4,6 +4,7 @@ import Models
 import Services
 import SleepAudioKit
 import SleepCore
+import SleepLogging
 
 /// Recording engine for the custom-melody sheet: the take is recorded and
 /// played back by SleepGuardShared's `MelodyRecording` and `MelodyPlayback`

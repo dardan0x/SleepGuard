@@ -6,6 +6,7 @@ import Models
 import ModelsTestSupport
 import ServicesTestSupport
 import SleepCore
+import SleepStore
 import SwiftData
 import Testing
 @testable import Services

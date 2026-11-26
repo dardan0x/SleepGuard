@@ -1,4 +1,6 @@
 import DesignSystem
+import SleepGuardDesignKit
+import SleepStrings
 import SwiftUI
 
 /// No saved night yet; the whole widget links to `sleepguard://start`.

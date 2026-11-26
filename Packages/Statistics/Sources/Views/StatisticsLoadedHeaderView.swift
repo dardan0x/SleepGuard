@@ -1,4 +1,5 @@
 import DesignSystem
+import SleepStrings
 import SwiftUI
 
 struct StatisticsLoadedHeaderView: View {

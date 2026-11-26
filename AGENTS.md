@@ -67,7 +67,7 @@ If a design token is missing for a property, derive it from the screenshot or as
 
 **Open:** `bg-card` is `#22232B` in code and in the shared kit (what ships); the list above says `#2C2C2E`. Settle it against the `.pen` file before relying on either.
 
-**Shared design kit (ADR 0005).** Tokens and presentational components live in `SleepGuardDesignKit` in `../SleepGuardShared`, used by SleepGuard and SleepGuardUIKitWay. `DesignSystem` re-exports it. There is one theme system (ADR 0009): the app root sets `.environment(\.theme, .sleepGuard)` and every view, ours and the kit's, reads `@Environment(\.theme) private var theme` (`theme.palette.accent`, `theme.radii.card`, `theme.scoreColor(_:)`, `theme.palette.eventColor(_:intensity:)`). A preview restyles everything by setting the environment value. Build kit components from SwiftData models through `DesignSystem/Sources/Components/SleepGuardKitAdapters.swift`. A change to a kit component is a shared release (tag, then `scripts/bump-shared.sh`) and reaches both apps.
+**Shared design kit (ADR 0005).** Tokens and presentational components live in `SleepGuardDesignKit` in `../SleepGuardShared`, used by SleepGuard and SleepGuardUIKitWay. A file that uses it imports it (`import SleepGuardDesignKit`). There is one theme system (ADR 0009): the app root sets `.environment(\.theme, .sleepGuard)` and every view, ours and the kit's, reads `@Environment(\.theme) private var theme` (`theme.palette.accent`, `theme.radii.card`, `theme.scoreColor(_:)`, `theme.palette.eventColor(_:intensity:)`). A preview restyles everything by setting the environment value. Build kit components from SwiftData models through `DesignSystem/Sources/Components/SleepGuardKitAdapters.swift`. A change to a kit component is a shared release (tag, then `scripts/bump-shared.sh`) and reaches both apps.
 
 ## Localization (Non-Negotiable)
 
@@ -75,7 +75,7 @@ If a design token is missing for a property, derive it from the screenshot or as
 
 ### Where strings live
 - **Source of truth**: `../SleepGuardShared/Sources/SleepStrings/Resources/Localizable.xcstrings`
-- **Generated accessor**: `../SleepGuardShared/Sources/SleepStrings/Strings.swift` (auto-generated — never edit manually; `DesignSystem` re-exposes it as `Strings`)
+- **Generated accessor**: `../SleepGuardShared/Sources/SleepStrings/Strings.swift` (auto-generated — never edit manually; files import `SleepStrings`)
 - **Helper file**: `../SleepGuardShared/Sources/SleepStrings/Resources/Strings.txt` (optional staging area)
 
 ### Key format
@@ -105,9 +105,9 @@ Examples: `action.save`, `settings.theme.dark`, `session.summary.title`
    - Then auto-runs `generate-strings.py` to update `Strings.swift`
 
 ### Using strings in code
-Always reference strings through the generated `Strings` enum from `DesignSystem`:
+Always reference strings through the generated `Strings` enum (`SleepStrings`, declared by the target):
 ```swift
-import DesignSystem
+import SleepStrings
 
 Text(Strings.actionSave)
 Text(Strings.settingsThemeDark)
@@ -207,7 +207,7 @@ These are non-negotiable. They come from production patterns in apps like IceCub
 - Value types are `Sendable` with immutable `let` properties. SwiftData `@Model` classes are never Sendable — destructure their Sendable fields (`id`, `Date`, bursts) before crossing into `@Sendable`/detached closures.
 - Apple delegates (WCSession, SNResultsObserving, AVAudioPlayerDelegate) are nonisolated: mark methods `nonisolated`, parse payloads synchronously, `Task { @MainActor in }` for state mutation. See `docs/architecture/concurrency.md`.
 - **Live detection is one ordered stream into an actor** (ADR 0003). Detection rules live only in pure shared code: the `DetectionStateMachine`, and the per-sample `SnoreClassifier` / `SpeechClassifier` with the sensitivity presets (`SnoreClassifier.preset`, `DetectionSensitivity.minEventDuration`), applied to each sample by `LiveSampleClassifier`, which the tracker holds (the same as SleepGuardUIKitWay's). The detection inputs are shared too: `AudioLevels` (RMS / peak dB), `SpectralFeatures` (from the FFT's magnitudes) and `SoundClassLabels` (which SoundAnalysis classes count as snoring and talking) (`SleepCore`, in the shared `SleepGuardShared` repo): no clock, no singletons, no SwiftData. Anything that changes detection state (sample, melody start/stop, settings, session end) goes into the `DetectionEngine` stream as a timestamped `Message`; never mutate detection state from a side path. Side effects stay on the main actor in `RealtimeDetectionTracker.perform`. Thresholds are durations, not sample counts. A change to detection output must re-record the replay goldens on purpose (`scripts/record-replay-goldens.sh`) and explain the diff.
-- **Logging: never `print`.** Use `Log.<category>` (`audio`, `detection`, `session`, `interrupter`, `storage`, `playback`, `health`, `app`, and `Log.signposter`; `os.Logger`, SleepGuardShared's `SleepLogging`, re-exported by `Models`). `.debug` for traces, `.info` milestones, `.notice` notable state, `.error` failures, `.fault` should-never-happen. Strings are private by default; add `privacy: .public` only for values that can't identify the user. Logger interpolations are autoclosures, so instance properties need `self.` (SwiftFormat keeps it via `--selfrequired`). Enforced by `check-layering.py`.
+- **Logging: never `print`.** Use `Log.<category>` (`audio`, `detection`, `session`, `interrupter`, `storage`, `playback`, `health`, `app`, and `Log.signposter`; `os.Logger`, SleepGuardShared's `SleepLogging`, imported where it is used). `.debug` for traces, `.info` milestones, `.notice` notable state, `.error` failures, `.fault` should-never-happen. Strings are private by default; add `privacy: .public` only for values that can't identify the user. Logger interpolations are autoclosures, so instance properties need `self.` (SwiftFormat keeps it via `--selfrequired`). Enforced by `check-layering.py`.
 
 ### Views
 
@@ -232,7 +232,7 @@ These thresholds prevent monolithic views. Enforce them during implementation an
 - Reusable rows/cards: `[Feature]RowView`, `[Feature]StatCard`, `[Feature]EventRow`
 - Full-screen overlays: `AlarmOverlayView`, `PermissionOverlayView`
 - A view that only takes values and draws them: the shared repo, so both apps use one copy. A component goes in `SleepGuardDesignKit`; a screen's loaded layout (screen content) goes in `SleepGuardContentKit`. A SleepGuard-only piece used by 2+ packages (it reads models or services): `DesignSystem`
-- **Three layers (ADR 0006).** Components and screen content are shared; the screen stays in its feature package: loading and `ViewState`, `@Query`, `@Injected` services, `RouterPath`, alerts and sheets, the header. The test: if a view can be rendered from plain values alone, it is shared. A container loads, maps models to `SleepCore` values (`summaryWithoutEvents` for lists, `nightSummary` / `night` for what a screen shows) and hands the content those values and closures. A SleepGuard-only extra goes into shared content through an optional value or a `@ViewBuilder` slot. `DesignSystem` is this app's bridge to the shared code (model adapters, the `Theme` extensions, re-exports), not a design system of its own.
+- **Three layers (ADR 0006).** Components and screen content are shared; the screen stays in its feature package: loading and `ViewState`, `@Query`, `@Injected` services, `RouterPath`, alerts and sheets, the header. The test: if a view can be rendered from plain values alone, it is shared. A container loads, maps models to `SleepCore` values (`summary` for lists, `night` for what a screen shows) and hands the content those values and closures. A SleepGuard-only extra goes into shared content through an optional value or a `@ViewBuilder` slot. `DesignSystem` is this app's bridge to the shared code (model adapters, the `Theme` extensions), not a design system of its own.
 
 **What stays inline (fine as private computed properties):**
 - Simple headers, badges, or labels under 10 lines
@@ -249,7 +249,7 @@ These thresholds prevent monolithic views. Enforce them during implementation an
 
 ### Packages
 
-- Feature packages never import other feature packages. Only: Models, AudioEngine, Config, Health, Platform, Services, Routing, DesignSystem, each only if the feature uses it. No feature-to-feature edge exists today. Every import must be declared in the target's manifest: `scripts/check-imports.py` (CI) fails on a module that is only visible transitively.
+- Feature packages never import other feature packages. Only: Models, AudioEngine, Config, Health, Platform, Services, Routing, DesignSystem, each only if the feature uses it. No feature-to-feature edge exists today. Every import must be declared in the target's manifest: `scripts/check-imports.py` (CI) fails on a module that is only visible transitively. **No `@_exported import`** (F27-T26): it hides where a type comes from and what a target depends on. A file imports every module it uses (a shared product too: `SleepStore`, `SleepLogging`, `SleepStrings`, the kits) and its target declares it; `check-layering.py` (rule 7) rejects a re-export.
 - **Behaviour both apps need lives in the shared repo, behind each app's own protocol.** What a night looks like in Apple Health is `SleepHealthKit`'s `HealthKitSleep`; the raw log on disk is `SleepFiles`' `RawLogFile`; the settings both apps have are `SleepPreferences` stored by `SleepSettings`' `PreferencesDefaults`. `HealthKitSync`, `SessionRawLogWriter` and `UserPreferences` wrap them with this app's state, DI and logging, as SleepGuardUIKitWay's adapters do. A bug in that behaviour is fixed once, there. Protocols, DI and isolation stay per app. The same holds for audio (`SleepAudioKit`: capture, compression, playback, waveform, spectrum, extraction, melodies, behind `AudioRecording` and the players), the stored nights (`SleepStore`), logging (`SleepLogging`), the file layout and files (`SleepFiles`: `StorageLocation`, checkpoint, profile, survey answers, clips folder) and the start notification (`SleepNotifications`); see ADR 0010.
 - **Night rules live in the shared repo.** The stored nights are SleepStore's `NightRecord` / `NightEventRecord`; their `night` value feeds `SleepCore`, and SleepGuard's reads (`NightRecord+SleepGuard.swift`, `SnoringEpisode`) call it. Change how a night adds up there, not here; this repo's Models tests are the parity check.
 - **Statistics rules live there too.** The dashboard, trends, calendar and Last 7 Nights numbers come from `SleepCore`'s `NightDashboard`, `ScoreTrend`, `NightPeriod`, `CalendarMonth` and `NightDay`, on `NightSummary` values. Choose nights with `summaryWithoutEvents` (cached fields, no faulting) and build `nightSummary` (reads events) only for the nights a screen shows.
@@ -304,7 +304,7 @@ SwiftData lightweight migration is automatic for additive changes, but **removin
 SwiftData ignores unused columns in the persistent store. This is the only zero-migration way to evolve schemas.
 
 ### Versioned schema (F22-T11, shared since F27-T24)
-The schema is SleepGuardShared's `SleepStore` (`NightRecord`, `NightEventRecord`; the same records SleepGuardUIKitWay stores), re-exported by Models. Every `ModelContainer` (app and `TestStore`) opens through `SleepStoreSchema.container(at:)`, which attaches `SleepStoreMigrationPlan`; the app opens `SleepGuardStorage.location.storeURL` through `SleepStore.open(at:appVersion:)` (a backup per version, never deleted on failure). Today the plan has one version (`SleepStoreSchemaV1`) and no stages. Additive changes still need nothing: keep following the policy above. A schema change is a shared release and reaches both apps.
+The schema is SleepGuardShared's `SleepStore` (`NightRecord`, `NightEventRecord`; the same records SleepGuardUIKitWay stores), imported where it is used. Every `ModelContainer` (app and `TestStore`) opens through `SleepStoreSchema.container(at:)`, which attaches `SleepStoreMigrationPlan`; the app opens `SleepGuardStorage.location.storeURL` through `SleepStore.open(at:appVersion:)` (a backup per version, never deleted on failure). Today the plan has one version (`SleepStoreSchemaV1`) and no stages. Additive changes still need nothing: keep following the policy above. A schema change is a shared release and reaches both apps.
 
 **Adding V2** (only for a change the policy above forbids), in the shared repo:
 1. Freeze V1: copy the current record classes into `SleepStoreSchemaV1` as nested types, unchanged, and make `models` list those copies.

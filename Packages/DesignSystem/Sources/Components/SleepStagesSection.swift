@@ -1,6 +1,8 @@
 public import Models
 public import SleepCore
 public import SwiftUI
+public import SleepStore
+import SleepGuardContentKit
 
 /// The night's sleep stages (the shared `SleepStagesCard`) with its info
 /// sheet (`SleepStagesInfoContent`), from the stored session. Shows nothing

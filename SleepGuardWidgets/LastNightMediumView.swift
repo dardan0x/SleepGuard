@@ -1,5 +1,7 @@
 import DesignSystem
 import Models
+import SleepGuardDesignKit
+import SleepStrings
 import SwiftUI
 
 struct LastNightMediumView: View {

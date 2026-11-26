@@ -4,6 +4,9 @@ import Routing
 import SleepCore
 import SwiftData
 public import SwiftUI
+import SleepGuardContentKit
+import SleepStore
+import SleepStrings
 
 /// A month of nights. Hosts the shared `CalendarContent` (ADR 0006) under
 /// SleepGuard's toolbar (title capsule, Today).

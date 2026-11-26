@@ -3,6 +3,7 @@ import FactoryKit
 public import Foundation
 public import Models
 public import SleepCore
+public import SleepStore
 
 /// Public entry point for sleep-session recording. A thin facade that
 /// forwards to two focused components:

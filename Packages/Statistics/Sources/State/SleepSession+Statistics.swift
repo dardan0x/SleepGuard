@@ -1,6 +1,7 @@
 import Foundation
 import Models
 import SleepCore
+import SleepStore
 
 extension [NightRecord] {
   /// Every night without reading events: enough to choose nights.

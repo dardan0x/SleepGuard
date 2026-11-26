@@ -8,6 +8,7 @@ let package = Package(
     .library(name: "Learn", targets: ["Learn"]),
   ],
   dependencies: [
+    .package(url: "https://github.com/dardan0x/SleepGuardShared.git", exact: "0.36.0"),
     .package(path: "../Config"),
     .package(path: "../Models"),
     .package(path: "../Routing"),
@@ -23,6 +24,7 @@ let package = Package(
         .product(name: "Routing", package: "Routing"),
         .product(name: "DesignSystem", package: "DesignSystem"),
         .product(name: "FactoryKit", package: "Factory"),
+        .product(name: "SleepGuardContentKit", package: "SleepGuardShared"),
       ],
       path: "Sources",
       swiftSettings: [

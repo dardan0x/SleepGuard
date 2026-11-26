@@ -1,6 +1,7 @@
 import DesignSystem
 import FactoryKit
 import SleepCore
+import SleepGuardContentKit
 import SwiftUI
 
 /// Recording your own interrupter sound, hosting the shared content. The

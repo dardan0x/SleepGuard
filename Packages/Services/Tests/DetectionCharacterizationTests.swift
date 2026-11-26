@@ -5,6 +5,7 @@ import Models
 import Observation
 import ServicesTestSupport
 import SleepCore
+import SleepStore
 import Testing
 @testable import AudioEngine
 @testable import Services

@@ -6,6 +6,10 @@ import Services
 public import SleepCore
 import SwiftData
 public import SwiftUI
+import SleepGuardContentKit
+import SleepLogging
+import SleepStore
+import SleepStrings
 
 /// Every recorded night, by month and day (SleepCore's `NightMonth`), drawn by
 /// the shared `NightsListContent` (ADR 0006). This container keeps the query,

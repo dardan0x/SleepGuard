@@ -17,6 +17,9 @@ Rules (see AGENTS.md "UI Dependencies in Non-View Code"):
   6. View files never take a service through `init` (a stored property typed
      as a service protocol, `any …ing` / `any …Providing`): they resolve it
      with `@Injected`. Init injection is for testable non-view types.
+  7. No `@_exported import` anywhere (packages, app, widgets): every file
+     imports what it uses and every target declares it (check-imports.py),
+     so no dependency is hidden behind another module (F27-T26).
 
 Exits 1 with a file:line listing when any violation is found.
 """
@@ -58,6 +61,7 @@ VIEW_SERVICE_PROPERTY = re.compile(r"^\s*(?:(?:public|private|fileprivate|intern
 
 # Rule 5 (F23-T4): no print() in shipping code; SleepGuardShared's SleepLogging has the loggers.
 PRINT_CALL = re.compile(r"^(?!\s*//).*(?<![\w.])print\(")
+REEXPORT = re.compile(r"^\s*@_exported\s+import\b")
 
 def main() -> int:
     violations = []
@@ -89,10 +93,16 @@ def main() -> int:
                 violations.append(f"{rel}:{number}: service passed into a view — use @Injected(\\.x) instead")
             if "/Sources/" in rel and "/.build/" not in rel and PRINT_CALL.search(line):
                 violations.append(f"{rel}:{number}: print() — log with Log.<category> (os.Logger) instead")
+            if REEXPORT.search(line):
+                violations.append(f"{rel}:{number}: @_exported import — import the module where it is used and declare it")
 
-    for swift in sorted(ROOT.glob("SleepGuard/**/*.swift")):
+    for swift in sorted([*ROOT.glob("SleepGuard/**/*.swift"), *ROOT.glob("SleepGuardWidgets/**/*.swift")]):
         rel = swift.relative_to(ROOT).as_posix()
         for number, line in enumerate(swift.read_text().splitlines(), 1):
+            if REEXPORT.search(line):
+                violations.append(f"{rel}:{number}: @_exported import — import the module where it is used and declare it")
+            if rel.startswith("SleepGuardWidgets/"):
+                continue
             if PRINT_CALL.search(line):
                 violations.append(f"{rel}:{number}: print() — log with Log.<category> (os.Logger) instead")
 

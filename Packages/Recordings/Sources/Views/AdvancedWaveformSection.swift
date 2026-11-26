@@ -1,5 +1,6 @@
 import DesignSystem
 import Models
+import SleepStrings
 import SwiftUI
 
 /// Waveform section of the advanced player: tappable waveform shape plus

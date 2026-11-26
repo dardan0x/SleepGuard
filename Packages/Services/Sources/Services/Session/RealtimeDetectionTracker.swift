@@ -6,6 +6,8 @@ import Models
 import os
 import SleepAudioKit
 import SleepCore
+import SleepLogging
+import SleepStore
 import UIKit
 
 /// Adapter between the 50 ms processing loop and `DetectionEngine`.

@@ -1,6 +1,7 @@
 import Foundation
 import Models
 import SleepCore
+import SleepStore
 
 /// What the Statistics dashboard shows, derived from the stored sessions.
 ///

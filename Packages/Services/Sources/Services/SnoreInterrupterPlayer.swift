@@ -7,6 +7,7 @@ public import Observation
 public import Platform
 public import SleepCore
 import SleepAudioKit
+import SleepLogging
 
 /// Plays the selected Snore Interrupter when snoring is detected.
 /// Respects the user's duration preference and exposes `isPlaying` for UI observation.

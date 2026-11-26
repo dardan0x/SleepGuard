@@ -1,6 +1,8 @@
 import AudioEngine
 import DesignSystem
 import Models
+import SleepGuardContentKit
+import SleepStore
 import SwiftUI
 
 /// Player content for legacy sessions without per-event clips: the shared

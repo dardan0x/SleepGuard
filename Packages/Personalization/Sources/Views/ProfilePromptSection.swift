@@ -7,6 +7,8 @@ import Services
 import SleepCore
 import SwiftData
 public import SwiftUI
+import SleepGuardContentKit
+import SleepStore
 
 /// The profile prompt on Statistics: the shared `ProfilePromptCard`, shown by
 /// SleepCore's `ProfilePrompt` rule. Its chance is drawn once per appearance

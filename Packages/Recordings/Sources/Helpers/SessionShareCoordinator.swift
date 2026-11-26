@@ -2,6 +2,8 @@ import AudioEngine
 import AVFoundation
 import Models
 import SleepAudioKit
+import SleepLogging
+import SleepStore
 import UIKit
 
 /// Orchestrates sharing from the session detail screen: PDF reports, the

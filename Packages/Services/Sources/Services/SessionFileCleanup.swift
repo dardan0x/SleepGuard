@@ -1,6 +1,7 @@
 import AudioEngine
 public import Foundation
 public import Models
+public import SleepStore
 
 /// Every audio file that belongs to a night: event clips, the raw recording
 /// and its classification log (found by the night's id). Read it

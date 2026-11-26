@@ -1,5 +1,6 @@
 public import Foundation
 import Models
+import SleepLogging
 
 /// Tracks files belonging to the current unsaved sleep session.
 /// On app relaunch or session discard, any tracked files are deleted so

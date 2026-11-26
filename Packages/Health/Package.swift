@@ -23,6 +23,8 @@ let package = Package(
         .product(name: "SleepCore", package: "SleepGuardShared"),
         .product(name: "SleepHealthKit", package: "SleepGuardShared"),
         .product(name: "FactoryKit", package: "Factory"),
+        .product(name: "SleepLogging", package: "SleepGuardShared"),
+        .product(name: "SleepStore", package: "SleepGuardShared"),
       ],
       path: "Sources",
       swiftSettings: [
@@ -38,6 +40,7 @@ let package = Package(
         "Health",
         .product(name: "Models", package: "Models"),
         .product(name: "SleepCore", package: "SleepGuardShared"),
+        .product(name: "SleepStore", package: "SleepGuardShared"),
       ],
       path: "TestSupport",
       swiftSettings: [

@@ -4,6 +4,7 @@ import FactoryKit
 import Models
 import Routing
 public import SwiftUI
+import SleepGuardContentKit
 
 /// The Learn tab, hosting the shared `LearnContent` with the remote-configured
 /// URL (`feature_learn`); no URL shows the shared empty state.

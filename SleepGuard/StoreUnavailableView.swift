@@ -1,4 +1,6 @@
 import DesignSystem
+import SleepGuardDesignKit
+import SleepStrings
 import SwiftUI
 
 /// Shown instead of the app when the on-disk store couldn't be opened. The

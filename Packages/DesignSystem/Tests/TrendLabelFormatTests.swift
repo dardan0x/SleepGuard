@@ -1,4 +1,5 @@
 import Foundation
+import SleepStrings
 import Testing
 @testable import DesignSystem
 

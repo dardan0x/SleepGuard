@@ -34,6 +34,8 @@ let package = Package(
         .product(name: "Health", package: "Health"),
         .product(name: "Platform", package: "Platform"),
         .product(name: "FactoryKit", package: "Factory"),
+        .product(name: "SleepLogging", package: "SleepGuardShared"),
+        .product(name: "SleepStore", package: "SleepGuardShared"),
       ],
       path: "Sources/Services",
       swiftSettings: [
@@ -48,6 +50,7 @@ let package = Package(
         .product(name: "Models", package: "Models"),
         .product(name: "SleepCore", package: "SleepGuardShared"),
         .product(name: "AudioEngine", package: "AudioEngine"),
+        .product(name: "SleepStore", package: "SleepGuardShared"),
       ],
       path: "TestSupport",
       swiftSettings: [
@@ -71,6 +74,7 @@ let package = Package(
         .product(name: "AudioEngine", package: "AudioEngine"),
         .product(name: "FactoryKit", package: "Factory"),
         .product(name: "FactoryTesting", package: "Factory"),
+        .product(name: "SleepStore", package: "SleepGuardShared"),
       ],
       path: "Tests",
       swiftSettings: [

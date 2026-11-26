@@ -1,6 +1,7 @@
 import Foundation
 public import Models
 public import SwiftData
+public import SleepStore
 
 /// Saves a finished night: the one owner of the most important write in the
 /// app. Both the summary sheet and the force-save path (low battery) commit

@@ -27,6 +27,8 @@ let package = Package(
         .product(name: "DesignSystem", package: "DesignSystem"),
         .product(name: "SleepCore", package: "SleepGuardShared"),
         .product(name: "FactoryKit", package: "Factory"),
+        .product(name: "SleepStore", package: "SleepGuardShared"),
+        .product(name: "SleepGuardContentKit", package: "SleepGuardShared"),
       ],
       path: "Sources",
       swiftSettings: [

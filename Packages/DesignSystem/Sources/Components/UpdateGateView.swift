@@ -1,5 +1,6 @@
 public import Models
 public import SwiftUI
+import SleepStrings
 
 /// Presents a soft (dismissible) or hard (blocking) update prompt based on the
 /// `UpdateGate` thresholds from Remote Config, compared against the running

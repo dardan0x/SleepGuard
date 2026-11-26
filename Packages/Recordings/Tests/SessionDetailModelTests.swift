@@ -7,6 +7,7 @@ import HealthTestSupport
 import Models
 import ModelsTestSupport
 import SleepCore
+import SleepStore
 import SwiftData
 import Testing
 @testable import Recordings

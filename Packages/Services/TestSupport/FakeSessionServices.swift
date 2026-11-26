@@ -5,6 +5,7 @@ public import Models
 public import Observation
 public import SleepCore
 public import SwiftData
+public import SleepStore
 
 /// Scriptable `SessionManaging`: set the state a view should render.
 @MainActor

@@ -1,5 +1,6 @@
 public import Foundation
 public import SleepCore
+public import SleepStore
 
 /// A group of adjacent snoring events that are close enough in time
 /// to be considered a single snoring episode.

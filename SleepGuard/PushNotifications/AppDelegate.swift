@@ -2,6 +2,7 @@ import FirebaseMessaging
 import Models
 import os
 import Services
+import SleepLogging
 import UIKit
 import UserNotifications
 

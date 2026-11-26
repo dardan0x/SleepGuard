@@ -3,6 +3,7 @@ import DesignSystem
 import FactoryKit
 import SwiftData
 public import SwiftUI
+import SleepStrings
 
 @MainActor
 public struct SessionDetailView: View {

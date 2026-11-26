@@ -2,6 +2,7 @@ import Foundation
 public import Models
 public import Observation
 public import SleepCore
+public import SleepStore
 
 /// Reads sleep stages from and writes sleep sessions to Apple Health.
 ///

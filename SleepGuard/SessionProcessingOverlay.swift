@@ -1,4 +1,6 @@
 import DesignSystem
+import SleepGuardDesignKit
+import SleepStrings
 import SwiftUI
 
 /// Dimming overlay with a progress indicator shown while a finished session

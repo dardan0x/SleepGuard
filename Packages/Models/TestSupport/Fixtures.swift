@@ -1,6 +1,7 @@
 public import Foundation
 public import Models
 public import SleepCore
+public import SleepStore
 
 public extension NightRecord {
   /// A finished session of `hours` length starting at `start`.

@@ -6,8 +6,9 @@ target doesn't declare it (F27-T9: `Recordings` imported `AudioEngine` through
 `Services`). The build can't catch that, so this script does: for each target in each
 `Packages/*/Package.swift`, every `import X` where X is a project module (a local
 package target, a SleepGuardShared product, Factory) must be a declared
-dependency, a target of the same package, or re-exported (`@_exported import`)
-by a declared dependency. Apple SDK modules are not checked.
+dependency or a target of the same package. Nothing is re-exported here
+(`@_exported import` is banned by check-layering.py, F27-T26), so each target
+declares every module its files import. Apple SDK modules are not checked.
 
 Exits 1 with a file:line listing when any import is undeclared.
 """
@@ -21,7 +22,8 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 # Products of external packages the project uses.
 EXTERNAL_MODULES = {
     "SleepCore", "SleepStrings", "SleepMelodies", "SleepGuardDesignKit", "SleepGuardContentKit",
-    "FactoryKit", "FactoryTesting",
+    "SleepStore", "SleepLogging", "SleepAudioKit", "SleepFiles", "SleepNotifications", "SleepSettings",
+    "SleepHealthKit", "FactoryKit", "FactoryTesting",
 }
 
 TARGET_START = re.compile(r"\.(target|testTarget)\(")

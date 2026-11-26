@@ -1,6 +1,7 @@
 import Foundation
 import Models
 import ModelsTestSupport
+import SleepStore
 import Testing
 @testable import Statistics
 

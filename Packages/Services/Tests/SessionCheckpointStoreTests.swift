@@ -2,6 +2,7 @@ import Foundation
 import Models
 import ModelsTestSupport
 import SleepCore
+import SleepStore
 import Testing
 @testable import Services
 

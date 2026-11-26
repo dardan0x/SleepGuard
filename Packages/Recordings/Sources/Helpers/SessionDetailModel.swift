@@ -6,6 +6,8 @@ import Models
 import os
 import Services
 import SleepCore
+import SleepLogging
+import SleepStore
 import SwiftData
 
 /// State owner for the session detail screen: loads the session (read only),

@@ -3,6 +3,7 @@ import FirebaseRemoteConfig
 import Foundation
 import Models
 import os
+import SleepLogging
 
 /// Bridges Firebase Remote Config into the Firebase-free `AppConfig` store.
 /// This is the only place that imports Firebase Remote Config, keeping the

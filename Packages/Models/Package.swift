@@ -28,7 +28,7 @@ let package = Package(
       ]),
     .target(
       name: "ModelsTestSupport",
-      dependencies: ["Models", .product(name: "SleepCore", package: "SleepGuardShared")],
+      dependencies: ["Models", .product(name: "SleepCore", package: "SleepGuardShared"), .product(name: "SleepStore", package: "SleepGuardShared")],
       path: "TestSupport",
       swiftSettings: [
         .swiftLanguageMode(.v6),
@@ -36,7 +36,7 @@ let package = Package(
       ]),
     .testTarget(
       name: "ModelsTests",
-      dependencies: ["Models", "ModelsTestSupport", .product(name: "SleepCore", package: "SleepGuardShared")],
+      dependencies: ["Models", "ModelsTestSupport", .product(name: "SleepCore", package: "SleepGuardShared"), .product(name: "SleepStore", package: "SleepGuardShared")],
       resources: [
         .copy("Fixtures"),
       ],

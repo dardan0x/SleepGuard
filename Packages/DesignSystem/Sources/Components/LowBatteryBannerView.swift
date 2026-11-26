@@ -1,5 +1,7 @@
 public import Models
 public import SwiftUI
+public import SleepStore
+import SleepGuardDesignKit
 
 /// The shared kit's low-battery banner, shown when `session` was saved early
 /// because the battery ran low.

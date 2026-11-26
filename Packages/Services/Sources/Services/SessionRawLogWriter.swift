@@ -3,6 +3,7 @@ public import Foundation
 import Models
 public import SleepCore
 import SleepFiles
+import SleepLogging
 
 /// Writes the classification log while recording, as JSON Lines
 /// (`rawlog_<id>.jsonl`, format 3; see `RawLog`). The log is the ground truth

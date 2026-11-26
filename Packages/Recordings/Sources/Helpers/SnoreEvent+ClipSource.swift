@@ -1,5 +1,6 @@
 import Models
 import SleepAudioKit
+import SleepStore
 
 extension NightEventRecord {
   /// The event as SleepGuardShared's `ClipExtractor` reads it.

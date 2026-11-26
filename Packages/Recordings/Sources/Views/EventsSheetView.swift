@@ -2,6 +2,9 @@ import DesignSystem
 import Models
 import SleepCore
 public import SwiftUI
+import SleepGuardContentKit
+import SleepStore
+import SleepStrings
 
 /// Bottom sheet showing every row under the detail's filter as cards (the
 /// shared `EventsGridContent`). Tapping a card's Play button presents the

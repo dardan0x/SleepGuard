@@ -30,6 +30,11 @@ let package = Package(
         .product(name: "SleepCore", package: "SleepGuardShared"),
         .product(name: "SleepAudioKit", package: "SleepGuardShared"),
         .product(name: "FactoryKit", package: "Factory"),
+        .product(name: "SleepLogging", package: "SleepGuardShared"),
+        .product(name: "SleepStore", package: "SleepGuardShared"),
+        .product(name: "SleepStrings", package: "SleepGuardShared"),
+        .product(name: "SleepGuardContentKit", package: "SleepGuardShared"),
+        .product(name: "SleepGuardDesignKit", package: "SleepGuardShared"),
       ],
       path: "Sources",
       swiftSettings: [

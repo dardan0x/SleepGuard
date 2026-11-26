@@ -5,6 +5,8 @@ import Models
 import SleepCore
 public import SwiftData
 import SleepFiles
+import SleepLogging
+import SleepStore
 
 /// Report returned after running storage cleanup.
 public struct CleanupReport: Sendable {

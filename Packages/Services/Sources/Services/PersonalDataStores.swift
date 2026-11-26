@@ -3,6 +3,7 @@ import Models
 public import Observation
 public import SleepCore
 import SleepFiles
+import SleepLogging
 
 /// `ProfileStoring` over the shared `ProfileFile`. Writes are serial and the
 /// latest wins, so editing (one write per change) never reorders.

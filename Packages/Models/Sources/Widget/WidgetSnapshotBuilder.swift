@@ -1,4 +1,5 @@
 public import Foundation
+public import SleepStore
 
 public enum WidgetSnapshotBuilder {
   /// Builds a snapshot from completed sessions.

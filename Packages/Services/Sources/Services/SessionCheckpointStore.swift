@@ -3,6 +3,7 @@ import Models
 public import SleepCore
 import os
 import SleepFiles
+import SleepLogging
 
 /// Persists the in-progress night (SleepGuardShared's checkpoint format) to disk during
 /// recording. If the app dies mid-session (crash / OOM / background kill), the

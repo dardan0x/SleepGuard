@@ -1,4 +1,5 @@
 import SleepCore
+import SleepGuardDesignKit
 import SwiftUI
 import Testing
 @testable import DesignSystem

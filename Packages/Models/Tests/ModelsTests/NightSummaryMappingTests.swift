@@ -2,6 +2,7 @@ import Foundation
 import Models
 import ModelsTestSupport
 import SleepCore
+import SleepStore
 import Testing
 
 /// Stored sessions → the shared `NightSummary` the statistics rules read.

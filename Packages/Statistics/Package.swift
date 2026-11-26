@@ -25,6 +25,10 @@ let package = Package(
         .product(name: "Routing", package: "Routing"),
         .product(name: "DesignSystem", package: "DesignSystem"),
         .product(name: "FactoryKit", package: "Factory"),
+        .product(name: "SleepStore", package: "SleepGuardShared"),
+        .product(name: "SleepStrings", package: "SleepGuardShared"),
+        .product(name: "SleepGuardContentKit", package: "SleepGuardShared"),
+        .product(name: "SleepGuardDesignKit", package: "SleepGuardShared"),
       ],
       path: "Sources",
       swiftSettings: [
@@ -42,6 +46,7 @@ let package = Package(
         .product(name: "Models", package: "Models"),
         .product(name: "SleepCore", package: "SleepGuardShared"),
         .product(name: "ModelsTestSupport", package: "Models"),
+        .product(name: "SleepStore", package: "SleepGuardShared"),
       ],
       path: "Tests",
       swiftSettings: [

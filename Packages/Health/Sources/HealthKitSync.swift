@@ -3,6 +3,8 @@ public import Models
 public import Observation
 public import SleepCore
 public import SleepHealthKit
+import SleepLogging
+public import SleepStore
 
 /// The live `HealthKitSyncing`: SleepGuard's observable service over the
 /// shared `HealthKitSleep`, which decides what a night looks like in Apple

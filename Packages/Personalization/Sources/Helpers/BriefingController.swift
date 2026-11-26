@@ -6,6 +6,7 @@ public import Services
 public import Observation
 public import SleepCore
 public import SwiftData
+import SleepStore
 
 /// A briefing ready to show; `id` is the night it's about.
 public struct PresentedBriefing: Identifiable, Sendable {

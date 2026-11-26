@@ -1,6 +1,8 @@
 import Config
 import DesignSystem
 import Platform
+import SleepGuardDesignKit
+import SleepStrings
 import SwiftUI
 
 /// Pre-permission explainer shown before the iOS system dialog. Only triggers

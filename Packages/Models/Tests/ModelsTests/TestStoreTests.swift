@@ -1,5 +1,6 @@
 import Foundation
 import ModelsTestSupport
+import SleepStore
 import SwiftData
 import Testing
 @testable import Models

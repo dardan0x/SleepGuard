@@ -5,6 +5,8 @@ import Foundation
 import Models
 import SleepCore
 public import SwiftData
+import SleepLogging
+import SleepStore
 
 /// Debug sample data: SleepGuardShared's `SampleNights` (the same 14 nights,
 /// ids included, as SleepGuardUIKitWay's) and their survey answers, saved as

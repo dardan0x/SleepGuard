@@ -54,6 +54,7 @@ Fixes the verdicts of the principal-level architecture review (`ARCHITECTURE_INT
 | F27-T23 | Uniform the apps, release B: shared audio (shared 0.35.0) | Refactor | Done | T22 | AudioEngine, Services, Recordings, SleepSession | 2026-11-26 | 2026-11-26 |
 | F27-T24 | Uniform the apps, release C: one SwiftData schema (shared 0.36.0) | Refactor | Done | T23 | Models, Services, Recordings, Statistics, DesignSystem, Health, app | 2026-11-26 | 2026-11-26 |
 | F27-T25 | Uniform the apps, close-out (ADR 0010, docs) | Docs | Done | T24 | docs | 2026-11-26 | 2026-11-26 |
+| F27-T26 | Explicit imports: no `@_exported` | Refactor | Done | T25 | every package, app, scripts | 2026-11-26 | 2026-11-26 |
 
 ## Task Details
 
@@ -575,3 +576,11 @@ SleepGuardShared's SleepStore (records in SleepGuardUIKitWay's shape) replaces S
 - TECHNICAL_OVERVIEW: shared products, packages, the night end to end, detection, score storage, concurrency escape hatch, logging, tests (180 here, 335 shared).
 - README: pin, event record, Models and AudioEngine rows (the rest of its table was already behind and is untouched).
 - Owed: a recording night on a device (and a simulator night) to exercise the shared audio and store end to end.
+
+### F27-T26 — Explicit imports: no `@_exported`
+
+The owner's call as principal engineer: re-exports hide dependencies.
+- Removed the five re-exports (Models: `SleepStore`, `SleepLogging`; DesignSystem: `SleepStrings`, `SleepGuardDesignKit`, `SleepGuardContentKit`; their three export-only files deleted, approved). Every file now imports what it uses (`public import` where a public API exposes the type), and every target declares it: manifests list their real dependencies (Settings now declares SleepGuardShared; it had none).
+- `check-imports.py` now knows every shared product (it didn't check `SleepStore`, `SleepLogging`, `SleepAudioKit`, `SleepFiles`, `SleepNotifications`, `SleepSettings`, `SleepHealthKit`); `check-layering.py` rule 7 rejects `@_exported import` in packages, the app and the widgets (probed with a planted one).
+- CLAUDE.md / AGENTS.md (strings example, design kit, logging, schema, package rule) and TECHNICAL_OVERVIEW updated.
+- Still re-exported inside SleepGuardShared: `SleepGuardContentKit` → `SleepGuardDesignKit` → `SleepStrings`. Step 2 (a shared release, both apps) removes those.

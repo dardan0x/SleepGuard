@@ -1,5 +1,7 @@
 import DesignSystem
 import Models
+import SleepStore
+import SleepStrings
 import SwiftUI
 
 /// Spectral stats grid of the advanced player: duration, dominant frequency,

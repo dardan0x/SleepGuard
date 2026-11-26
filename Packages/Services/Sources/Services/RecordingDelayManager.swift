@@ -4,6 +4,7 @@ public import Foundation
 import Models
 public import Observation
 import SleepCore
+import SleepLogging
 import SleepNotifications
 
 public extension Notification.Name {
