@@ -22,7 +22,7 @@ final class WaveformLoader {
       isLoading = true
       let duration = event.snoreDuration
       Task(priority: .userInitiated) {
-        let samples = await WaveformGenerator.generateSamples(from: url, maxDuration: duration)
+        let samples = await ClipWaveform().waveform(of: url, duration: duration)
         await MainActor.run {
           self.samples = samples
           self.isLoading = false
@@ -48,7 +48,7 @@ final class WaveformLoader {
         }
         return
       }
-      let samples = await WaveformGenerator.generateSamples(from: clipURL)
+      let samples = await ClipWaveform().waveform(of: clipURL, duration: nil)
       await MainActor.run {
         self.samples = samples
         self.isLoading = false

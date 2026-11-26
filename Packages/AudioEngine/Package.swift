@@ -23,15 +23,4 @@ let package = Package(
         .swiftLanguageMode(.v6),
         .enableUpcomingFeature("InternalImportsByDefault"),
       ]),
-    .testTarget(
-      name: "AudioEngineTests",
-      dependencies: [
-        "AudioEngine",
-        .product(name: "SleepCore", package: "SleepGuardShared"),
-      ],
-      path: "Tests",
-      swiftSettings: [
-        .swiftLanguageMode(.v6),
-        .enableUpcomingFeature("InternalImportsByDefault"),
-      ]),
   ])

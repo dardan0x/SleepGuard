@@ -552,4 +552,5 @@ SleepGuardShared's SleepAudioKit (from SleepGuardUIKitWay's adapters plus SleepG
 - Melodies: `SnoreInterrupterPlayer` over `MelodyPlayback` (stays in the recording's `.playAndRecord` session), `CustomMelodyStorage` over `MelodyFiles` (Melodies folder, `melodies.json`; was UserDefaults), `CustomMelodyRecorder` over `MelodyRecording`, `MelodyPreviewPlayer` over `MelodyPlayback`.
 - Deleted (approved): TapProcessor, FFTAnalyzer, SoundAnalysisDetector(+ing), EventClipCompressor, AudioClipExtractor, ClipSource and their tests (now the kit's).
 - No longer resumes capture on app activation (the kit resumes on interruption end, route, config and media-reset events, as SleepGuardUIKitWay).
-- Not yet verified: a night on the simulator or a device; bug 2 has no regression test (the fake recorder returns no clip). `AudioEngine/Tests/TestAudio.swift` is unused (owner to decide).
+- Not yet verified: a night on the simulator or a device; bug 2 has no regression test (the fake recorder returns no clip).
+- Follow-up (owner's call): `TestAudio.swift` deleted and AudioEngine's empty test target removed (its tests are the kit's now); `WaveformGenerator` removed, `WaveformLoader` calls the kit's `ClipWaveform` directly (same 300 points and duration limit; `spectrumSamples` had no callers).
