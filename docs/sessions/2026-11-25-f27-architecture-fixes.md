@@ -2,7 +2,7 @@
 date: 2026-11-25
 feature: F27
 branch: refactor/f27-architecture-interrogation-fixes
-title: F27 planning (principal review verified), T1 store safety, T2 root night flow, T3 frozen flags, T4 detail/list truth, T5 launch work, T6 checkpoint writer, T7/T8 shared 0.30.0, T9 module hygiene, T10 Logging leaf, T11 Env split, T12 access-level imports, T13 one theme, T14 DI style, T15 contract tests, T16 cleanup
+title: F27 planning (principal review verified), T1 store safety, T2 root night flow, T3 frozen flags, T4 detail/list truth, T5 launch work, T6 checkpoint writer, T7/T8 shared 0.30.0, T9 module hygiene, T10 Logging leaf, T11 Env split, T12 access-level imports, T13 one theme, T14 DI style, T15 contract tests, T16 cleanup, T17 close-out (F27 done)
 ---
 
 ### Completed
@@ -23,6 +23,7 @@ title: F27 planning (principal review verified), T1 store safety, T2 root night 
 - **F27-T14 — One DI style outside views.** Init parameters defaulting to the container everywhere; two documented exceptions.
 - **F27-T15 — Contract tests.** Checkpoint and melody stores: real and fake pass one suite; the checkpoint fake had drifted (fixed).
 - **F27-T16 — Dead code and docs.** Mini player and stale doc removed; isolation rule; technical overview brought up to date.
+- **F27-T17 — Close out.** Feature doc with the UIKitWay follow-up list; F27 done.
 
 ### Technical Details
 - `SleepGuardStore.open(_:allowDestructiveReset:)` (Models) returns the container plus the failure. Only `#if DEBUG` passes `true`.
@@ -51,6 +52,7 @@ title: F27 planning (principal review verified), T1 store safety, T2 root night 
 - T14: `Packages/Recordings/Sources/Helpers/SessionDetailModel.swift`, `Packages/Env/Sources/Services/{Container,StorageLimitEnforcer}.swift`, `Packages/Env/Sources/Services/Session/{SessionManager,RealtimeDetectionTracker}.swift`, `Packages/AudioEngine/Sources/Engine/SpeechDetector.swift`, `Packages/Env/Tests/DetectionCharacterizationTests.swift`, `CLAUDE.md`, `AGENTS.md`.
 - T15: `Packages/Env/Tests/{StoreContractTests.swift (new),SessionCheckpointStoreTests.swift,ServiceOverrideTests.swift}`, `Packages/Env/Sources/Services/{SessionCheckpointStore,CustomMelodyStorage}.swift`, `Packages/Env/TestSupport/FakeStores.swift`, `docs/adr/0002-protocol-services.md`.
 - T16: `Packages/Recordings/Sources/Views/SessionDetailView.swift`, deleted `SessionDetailMiniPlayerView.swift`, deleted local `docs/ProjectArchitecture.md`, `docs/TECHNICAL_OVERVIEW.md`, `docs/SESSION_RESUME_PROMPT.md`, `CLAUDE.md`, `AGENTS.md`.
+- T17: `docs/features/f27-architecture-interrogation-fixes.md` (new), trackers.
 
 ### Architecture Decisions
 - Data safety over availability: a store that can't be opened is never touched in Release. The user sees why and is pointed at an update; nothing is recorded into memory.
@@ -73,7 +75,7 @@ title: F27 planning (principal review verified), T1 store safety, T2 root night 
 `refactor/f27-architecture-interrogation-fixes`
 
 ### Suggested Commit
-`F27-T1 — Never delete the user's store`, `F27-T2 — Root owns the night flow and presentation`, `F27-T3 — Flags frozen per recording`, `F27-T4 — Detail and lists tell the truth`, `F27-T5 — Launch work off the first frames`, `F27-T6 — Checkpoint writes off the detection path`, `F27-T8 — Adopt Shared 0.30.0` (T7 lives in the Shared repo), `F27-T9 — Module hygiene and guardrails`, `F27-T10 — Logging leaf; AudioEngine off Models`, `F27-T11 — Split Env by reason to change`, `F27-T12 — Access-level imports`, `F27-T13 — One theme system`, `F27-T14 — One dependency-resolution style`, `F27-T15 — Contract tests for stateful fakes`, `F27-T16 — Dead code and docs`
+`F27-T1 — Never delete the user's store`, `F27-T2 — Root owns the night flow and presentation`, `F27-T3 — Flags frozen per recording`, `F27-T4 — Detail and lists tell the truth`, `F27-T5 — Launch work off the first frames`, `F27-T6 — Checkpoint writes off the detection path`, `F27-T8 — Adopt Shared 0.30.0` (T7 lives in the Shared repo), `F27-T9 — Module hygiene and guardrails`, `F27-T10 — Logging leaf; AudioEngine off Models`, `F27-T11 — Split Env by reason to change`, `F27-T12 — Access-level imports`, `F27-T13 — One theme system`, `F27-T14 — One dependency-resolution style`, `F27-T15 — Contract tests for stateful fakes`, `F27-T16 — Dead code and docs`, `F27-T17 — Close out`
 
 ### Changes done
 - Store opening moved to `SleepGuardStore`; Release fallback is in-memory plus a blocking screen.
@@ -81,7 +83,8 @@ title: F27 planning (principal review verified), T1 store safety, T2 root night 
 - Shared bumped to 0.29.1.
 
 ### Next Session
-- F27-T17: close out.
+- User: merge `refactor/f27-architecture-interrogation-fixes` into `main`; record one real night on a device.
+- UIKitWay: adopt 0.30.0 fully (follow-up list in the F27 feature doc); its stored scores are stale under formula v2.
 
 ### Open Questions
 - `StatisticsErrorView` / `RecordingsErrorView` are unused after T4 (kept by user choice); revisit in T16.

@@ -4,13 +4,13 @@
 
 | Field | Value |
 |-------|-------|
-| **Status** | In Progress |
+| **Status** | Done |
 | **Priority** | P0 (T1) / P1 |
 | **Version** | V5 |
 | **Blocked By** | — |
 | **Started** | 2026-11-25 |
-| **Completed** | — |
-| **Feature Doc** | — |
+| **Completed** | 2026-11-26 |
+| **Feature Doc** | [f27](../features/f27-architecture-interrogation-fixes.md) |
 | **Branch** | `refactor/f27-architecture-interrogation-fixes` (one branch, one commit per task; the user merges it into `main`) |
 
 ## Summary
@@ -45,7 +45,7 @@ Fixes the verdicts of the principal-level architecture review (`ARCHITECTURE_INT
 | F27-T14 | Two dependency-resolution styles (Q23) | Refactor | Done | T11 | Env / Recordings / AudioEngine | 2026-11-26 | 2026-11-26 |
 | F27-T15 | Contract tests for stateful fakes (Q24/Q59) | Tests | Done | T11 | Env | 2026-11-26 | 2026-11-26 |
 | F27-T16 | Dead code and docs (Q67, Q53) | Cleanup | Done | — | Recordings / docs | 2026-11-26 | 2026-11-26 |
-| F27-T17 | Close out: feature doc, ADRs, UIKitWay follow-up list | Docs | Backlog | all | docs | — | — |
+| F27-T17 | Close out: feature doc, ADRs, UIKitWay follow-up list | Docs | Done | all | docs | 2026-11-26 | 2026-11-26 |
 
 ## Task Details
 
@@ -489,3 +489,17 @@ Fixes the verdicts of the principal-level architecture review (`ARCHITECTURE_INT
 **Notes:**
 - Kept by user choice (T4): `StatisticsErrorView`, `RecordingsErrorView` (unused).
 - Left as historical: `docs/KICKOFF_PROMPT.md` and the `CLAUDE_TEMPLATE.md` mention of ProjectArchitecture.md (templates for new projects); the `.gitignore` entry for it.
+
+---
+
+### F27-T17 — Close out
+
+| Field | Value |
+|-------|-------|
+| Status | Done |
+| Completed | 2026-11-26 |
+
+**Acceptance Criteria:**
+- [x] Feature doc `docs/features/f27-architecture-interrogation-fixes.md` (changes by concern, files, tests, routes, state, edge cases, open items, UIKitWay follow-up list)
+- [x] ADRs 0007–0009 written in their tasks; 0002 / 0005 updated
+- [x] Tracker and FeatureTracker marked done
