@@ -57,6 +57,7 @@ Fixes the verdicts of the principal-level architecture review (`ARCHITECTURE_INT
 | F27-T26 | Explicit imports: no `@_exported` | Refactor | Done | T25 | every package, app, scripts | 2026-11-26 | 2026-11-26 |
 | F27-T27 | No re-exports in the shared repo (shared 0.37.0) | Refactor | Done | T26 | manifests | 2026-11-26 | 2026-11-26 |
 | F27-T28 | App folders, unused sounds removed, SleepGuardShared declared by the project | Refactor | Done | T27 | app target, project, scripts | 2026-11-27 | 2026-11-27 |
+| F27-T29 | Local packages as a Packages folder in the project | Refactor | Done | T28 | project | 2026-11-27 | 2026-11-27 |
 
 ## Task Details
 
@@ -598,3 +599,11 @@ Step 2 of the owner's request: SleepGuardShared's kits no longer re-export (`Sle
 - The project now declares SleepGuardShared (exact 0.37.0, so it shows under Package Dependencies) and links what its targets import: the app SleepCore, SleepFiles, SleepGuardDesignKit, SleepLogging, SleepStore, SleepStrings; the widget SleepGuardDesignKit, SleepStrings. Before, they came only through the packages' manifests. The workspace still overrides it with `../SleepGuardShared`.
 - `bump-shared.sh` moves the project's pin too (dry-run tested); `check-imports.py` checks the app and widget targets against the products they link (probed).
 - Noticed, not changed: the project has two leftover remote references to local package folders by `file://` URL (`Recordings`, `DesignSystem`) and some products linked two or three times in the app's Frameworks phase.
+
+### F27-T29 — Local packages as a `Packages` folder in the project
+
+The owner's call: SleepGuardShared belongs under Package Dependencies, the local packages in a `Packages` folder at the root of the project.
+- The 15 local packages are folder references in a `Packages` group (Xcode's local-package form); their products are linked without a package reference. Package references are now only SleepGuardShared and Firebase.
+- Cleaned while rewriting those entries: two `file://` remote references to `Packages/Recordings` and `Packages/DesignSystem`, product dependencies on references that no longer existed, and duplicate links (DesignSystem, Recordings, AudioEngine, SleepSession were linked two or three times). 67 objects removed; no dangling IDs; the app links 25 products once each (15 local, 6 shared, 4 Firebase), the widget Models, DesignSystem and its 2 shared ones.
+- Verified: project and workspace builds, package resolution, import and layering checks; the per-package schemes are still generated (run-tests.sh unchanged).
+- Untracked leftover noticed: `Packages/Logging/.swiftpm` (empty Xcode metadata from the deleted package), not added to the group.

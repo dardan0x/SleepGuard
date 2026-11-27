@@ -82,7 +82,7 @@ Last updated: 2026-11-25
 | F24 | Shared Design Kit Adoption | P2 | Done (bg-card open) | 4/4 | ██████████ 100% | [tracker](trackers/f24-shared-design-kit-adoption.md) |
 | F25 | Shared Screen Content | P2 | Done | 7/7 | ██████████ 100% | [tracker](trackers/f25-shared-screen-content.md) |
 | F26 | Shared Settings Content | P2 | Done | 6/6 | ██████████ 100% | [tracker](trackers/f26-shared-settings-content.md) |
-| F27 | Architecture Interrogation Fixes | P0/P1 | Done (device night pending) | 28/28 | ██████████ 100% | [tracker](trackers/f27-architecture-interrogation-fixes.md) |
+| F27 | Architecture Interrogation Fixes | P0/P1 | Done (device night pending) | 29/29 | ██████████ 100% | [tracker](trackers/f27-architecture-interrogation-fixes.md) |
 
 ## Activity Log
 
@@ -90,6 +90,7 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-11-27 | F27-T29 | Completed | Local packages as a Packages folder in the project; only SleepGuardShared and Firebase under Package Dependencies; duplicate links cleaned |
 | 2026-11-27 | F27-T28 | Completed | App folders by concern; unused sounds removed; the project declares SleepGuardShared and links what it imports |
 | 2026-11-26 | F27-T27 | Completed | Shared 0.37.0: no re-exports in the shared kits |
 | 2026-11-26 | F27-T26 | Completed | Explicit imports: the five `@_exported` re-exports removed, manifests list real dependencies, checks enforce it |

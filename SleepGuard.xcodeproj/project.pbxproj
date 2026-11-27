@@ -7,6 +7,23 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		54014FB2EAC529EEF6151515 /* Models in Frameworks */ = {isa = PBXBuildFile; productRef = 760EC95F38EA4BD1C2B7E120 /* Models */; };
+		954C134F4FD0D77406FB4F94 /* DesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = 178A5C0DE92CAA52E12FCFC0 /* DesignSystem */; };
+		8C8404805555707D7AD441A2 /* AudioEngine in Frameworks */ = {isa = PBXBuildFile; productRef = 178BA466CBB172A3147BB284 /* AudioEngine */; };
+		0B55491D21C692DFB9F00A12 /* Config in Frameworks */ = {isa = PBXBuildFile; productRef = F5326F27E51D4816DA75E50F /* Config */; };
+		A81274FF48C4D78470AA8532 /* DesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = EAF577DD927A702FA8767FEB /* DesignSystem */; };
+		3A13DEDB959BDD3D412872C7 /* Health in Frameworks */ = {isa = PBXBuildFile; productRef = 372585EA2ED82E766295DFFC /* Health */; };
+		E7B773C88EC379533F804A8D /* Learn in Frameworks */ = {isa = PBXBuildFile; productRef = 508473B604DDE07271CBF96B /* Learn */; };
+		43E4E9BA7350802BB9097AE0 /* Models in Frameworks */ = {isa = PBXBuildFile; productRef = 0FC2A7E99DFDBBCD6C58AAE4 /* Models */; };
+		06D66E5187598D8C6FD469A4 /* Onboarding in Frameworks */ = {isa = PBXBuildFile; productRef = B44ED781A8902D5AF3C9E00E /* Onboarding */; };
+		F862C12FFB4EE167EAAE3A6C /* Personalization in Frameworks */ = {isa = PBXBuildFile; productRef = 2528F7C3D5243BFB68AF9EF8 /* Personalization */; };
+		154FC22CF228827920943CAF /* Platform in Frameworks */ = {isa = PBXBuildFile; productRef = FA94EA7A273DF64F873E8BDC /* Platform */; };
+		EF61243532B4584A3ED1706C /* Recordings in Frameworks */ = {isa = PBXBuildFile; productRef = 20B56EB928A1E2B7157ED1EC /* Recordings */; };
+		C568CD523ADEDAD5E4B02335 /* Routing in Frameworks */ = {isa = PBXBuildFile; productRef = E987EC741EFE716D21929B76 /* Routing */; };
+		76E19A1725EC9BAFBBFA7C31 /* Services in Frameworks */ = {isa = PBXBuildFile; productRef = C2134CA26E38CFC9A1A87516 /* Services */; };
+		DF6BCE6951ADF5BB79DF24AC /* Settings in Frameworks */ = {isa = PBXBuildFile; productRef = 073E0F1D543FD073FA28C6EA /* Settings */; };
+		40DCC56BCF25938D72A708CC /* SleepSession in Frameworks */ = {isa = PBXBuildFile; productRef = 94694BD8598E3AD79C12F679 /* SleepSession */; };
+		48B0E3989F48348E3E61523C /* Statistics in Frameworks */ = {isa = PBXBuildFile; productRef = 79D46329ADCCD013885890B2 /* Statistics */; };
 		8E0E7C616C75AC19BB288872 /* SleepCore in Frameworks */ = {isa = PBXBuildFile; productRef = 80F9294D6D55DEEE1E5B0E60 /* SleepCore */; };
 		AAE00DF346BE6DED1CA5298B /* SleepFiles in Frameworks */ = {isa = PBXBuildFile; productRef = 0B9EAEE1CEC848484D488FE1 /* SleepFiles */; };
 		30C351620E8322EF308E9544 /* SleepGuardDesignKit in Frameworks */ = {isa = PBXBuildFile; productRef = 55C12921EDEFFB1055C33582 /* SleepGuardDesignKit */; };
@@ -15,20 +32,6 @@
 		00CD7AA38C5DC2CE7329B51F /* SleepStrings in Frameworks */ = {isa = PBXBuildFile; productRef = 824E3DAE0EE46CD5533764D4 /* SleepStrings */; };
 		49AF1DB4AB60186F36F2877B /* SleepGuardDesignKit in Frameworks */ = {isa = PBXBuildFile; productRef = 40CFEE899DE264E204116659 /* SleepGuardDesignKit */; };
 		DCB277F07B9314FC74B9C5B1 /* SleepStrings in Frameworks */ = {isa = PBXBuildFile; productRef = 625ADB639C4FEB788CEBCC13 /* SleepStrings */; };
-		1A2C26235B1C018F311D03EB /* Statistics in Frameworks */ = {isa = PBXBuildFile; productRef = 62657171C5FF70E51F817515 /* Statistics */; };
-		21AAC7E1C2F32F10F896D6CB /* Platform in Frameworks */ = {isa = PBXBuildFile; productRef = 49856968E9F928E62FEB3703 /* Platform */; };
-		2482AD2FD2D1857B89507B2E /* DesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = A50DD8EF59A6D6A1BBB7A244 /* DesignSystem */; };
-		3E6C34CBE4058605247D0A36 /* Models in Frameworks */ = {isa = PBXBuildFile; productRef = 47C01997BFA64842BA01B54E /* Models */; };
-		4B370848D47ABB08BBABC8BF /* Health in Frameworks */ = {isa = PBXBuildFile; productRef = C69DAEAE73D026B6DE4E9789 /* Health */; };
-		58136AE388B78A6E4D284F3E /* Onboarding in Frameworks */ = {isa = PBXBuildFile; productRef = 758274DA39008BD85A853386 /* Onboarding */; };
-		6C2B806DCE9A12B8503615FC /* DesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = E553575F91A447F10F3BDF08 /* DesignSystem */; };
-		7550A233A59B33AC7BC63FA5 /* Settings in Frameworks */ = {isa = PBXBuildFile; productRef = 167C10ECFE58FBF4929EF997 /* Settings */; };
-		78DDF28BFD0525A9C32B1FE1 /* Recordings in Frameworks */ = {isa = PBXBuildFile; productRef = 7AA654EA1F14D9C6F15AB82A /* Recordings */; };
-		9C2D15AA3B584C0D8BA311FD /* Learn in Frameworks */ = {isa = PBXBuildFile; productRef = 2DFC87C0B35B483EB635F03D /* Learn */; };
-		A28EDE8E5E58BE472E55038A /* AudioEngine in Frameworks */ = {isa = PBXBuildFile; productRef = 3E369988AA3966E99F3F6D29 /* AudioEngine */; };
-		A81CE8384C963A2C24507F4F /* Recordings in Frameworks */ = {isa = PBXBuildFile; productRef = 1C4F985595ED007BA103E405 /* Recordings */; };
-		B7E5BB619CAC47AD866118B3 /* Personalization in Frameworks */ = {isa = PBXBuildFile; productRef = DE0D39C8817A44AB96DFE1F5 /* Personalization */; };
-		BBCD8AD5E1B9D0470A48BD85 /* Services in Frameworks */ = {isa = PBXBuildFile; productRef = D7A35E7D5BA7E75CF647C509 /* Services */; };
 		CE09839B309FF97B002E275D /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CE09839A309FF97A002E275D /* WidgetKit.framework */; };
 		CE09839D309FF97B002E275D /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CE09839C309FF97B002E275D /* SwiftUI.framework */; };
 		CE0983A8309FF980002E275D /* SleepGuardWidgetsExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = CE098398309FF97A002E275D /* SleepGuardWidgetsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -36,15 +39,6 @@
 		CE1563F72FDA136500A53611 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = CE1563F62FDA136500A53611 /* FirebaseCrashlytics */; };
 		CE1563FD2FDA136500A53611 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = CE1563FC2FDA136500A53611 /* FirebaseMessaging */; };
 		CE1563FF2FDA136500A53611 /* FirebaseRemoteConfig in Frameworks */ = {isa = PBXBuildFile; productRef = CE1563FE2FDA136500A53611 /* FirebaseRemoteConfig */; };
-		CF758CAE5F2E6721317BC087 /* DesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = 938D66BD06A743B2F8B279C6 /* DesignSystem */; };
-		E6F1CF9BF2DDADE9A5619DB4 /* SleepSession in Frameworks */ = {isa = PBXBuildFile; productRef = AD548900091A83E69035BB78 /* SleepSession */; };
-		E8F1BC7519D875ADAD99C2B2 /* Routing in Frameworks */ = {isa = PBXBuildFile; productRef = 6C0711377AA761A844BDFFB6 /* Routing */; };
-		E962CD02720B46D347403017 /* Recordings in Frameworks */ = {isa = PBXBuildFile; productRef = 613CAAD887F993446993F409 /* Recordings */; };
-		EA3B0BCFD10182B987547C8B /* AudioEngine in Frameworks */ = {isa = PBXBuildFile; productRef = 38CD50332392049638D060DF /* AudioEngine */; };
-		F20A00000000000000000001 /* Models in Frameworks */ = {isa = PBXBuildFile; productRef = F20A00000000000000000003 /* Models */; };
-		F20A00000000000000000002 /* DesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = F20A00000000000000000004 /* DesignSystem */; };
-		FAA27A34150D1B9419D972E0 /* Config in Frameworks */ = {isa = PBXBuildFile; productRef = 33FB2D1D8B9D2CB4DED541D8 /* Config */; };
-		FAED5AD98781D85AB7AFA7A5 /* SleepSession in Frameworks */ = {isa = PBXBuildFile; productRef = A6305AFA32B7A77ECFB0A19F /* SleepSession */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -72,6 +66,21 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		904FFA05D19B125E5F4EF61A /* AudioEngine */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = AudioEngine; sourceTree = "<group>"; };
+		4EC7BCB98DC337DC8415F0AF /* Config */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Config; sourceTree = "<group>"; };
+		08492F0FBC89DAD5BDF358A7 /* DesignSystem */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DesignSystem; sourceTree = "<group>"; };
+		B37C61DFA307DEE3E794E487 /* Health */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Health; sourceTree = "<group>"; };
+		0C991AFECE7311120EABCA56 /* Learn */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Learn; sourceTree = "<group>"; };
+		B21EE6D5990E63C48D3CB31B /* Models */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Models; sourceTree = "<group>"; };
+		8C2DB4EAC279E88C79EC5B56 /* Onboarding */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Onboarding; sourceTree = "<group>"; };
+		B24E704F14BB938443B94D1B /* Personalization */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Personalization; sourceTree = "<group>"; };
+		B6333D7344F7D98451B0CCD3 /* Platform */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Platform; sourceTree = "<group>"; };
+		8A65580B3C96EFE21C38FB53 /* Recordings */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Recordings; sourceTree = "<group>"; };
+		360DD48E07511132B68C9572 /* Routing */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Routing; sourceTree = "<group>"; };
+		A13B6B9E3827E7BA702BCCD5 /* Services */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Services; sourceTree = "<group>"; };
+		F2EB6F793969D4D0854D885B /* Settings */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Settings; sourceTree = "<group>"; };
+		21DB19A959568780F739E947 /* SleepSession */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = SleepSession; sourceTree = "<group>"; };
+		97AC75876DD07FC6EA48A188 /* Statistics */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Statistics; sourceTree = "<group>"; };
 		CE098398309FF97A002E275D /* SleepGuardWidgetsExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = SleepGuardWidgetsExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE09839A309FF97A002E275D /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		CE09839C309FF97B002E275D /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
@@ -120,12 +129,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				54014FB2EAC529EEF6151515 /* Models in Frameworks */,
+				954C134F4FD0D77406FB4F94 /* DesignSystem in Frameworks */,
 				49AF1DB4AB60186F36F2877B /* SleepGuardDesignKit in Frameworks */,
 				DCB277F07B9314FC74B9C5B1 /* SleepStrings in Frameworks */,
 				CE09839D309FF97B002E275D /* SwiftUI.framework in Frameworks */,
 				CE09839B309FF97B002E275D /* WidgetKit.framework in Frameworks */,
-				F20A00000000000000000001 /* Models in Frameworks */,
-				F20A00000000000000000002 /* DesignSystem in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -133,36 +142,30 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8C8404805555707D7AD441A2 /* AudioEngine in Frameworks */,
+				0B55491D21C692DFB9F00A12 /* Config in Frameworks */,
+				A81274FF48C4D78470AA8532 /* DesignSystem in Frameworks */,
+				3A13DEDB959BDD3D412872C7 /* Health in Frameworks */,
+				E7B773C88EC379533F804A8D /* Learn in Frameworks */,
+				43E4E9BA7350802BB9097AE0 /* Models in Frameworks */,
+				06D66E5187598D8C6FD469A4 /* Onboarding in Frameworks */,
+				F862C12FFB4EE167EAAE3A6C /* Personalization in Frameworks */,
+				154FC22CF228827920943CAF /* Platform in Frameworks */,
+				EF61243532B4584A3ED1706C /* Recordings in Frameworks */,
+				C568CD523ADEDAD5E4B02335 /* Routing in Frameworks */,
+				76E19A1725EC9BAFBBFA7C31 /* Services in Frameworks */,
+				DF6BCE6951ADF5BB79DF24AC /* Settings in Frameworks */,
+				40DCC56BCF25938D72A708CC /* SleepSession in Frameworks */,
+				48B0E3989F48348E3E61523C /* Statistics in Frameworks */,
 				8E0E7C616C75AC19BB288872 /* SleepCore in Frameworks */,
 				AAE00DF346BE6DED1CA5298B /* SleepFiles in Frameworks */,
 				30C351620E8322EF308E9544 /* SleepGuardDesignKit in Frameworks */,
 				A7992F9C103DF9D581AC14F7 /* SleepLogging in Frameworks */,
 				3D57575B7C462FF32D2361F4 /* SleepStore in Frameworks */,
 				00CD7AA38C5DC2CE7329B51F /* SleepStrings in Frameworks */,
-				2482AD2FD2D1857B89507B2E /* DesignSystem in Frameworks */,
-				A81CE8384C963A2C24507F4F /* Recordings in Frameworks */,
-				EA3B0BCFD10182B987547C8B /* AudioEngine in Frameworks */,
-				6C2B806DCE9A12B8503615FC /* DesignSystem in Frameworks */,
-				FAED5AD98781D85AB7AFA7A5 /* SleepSession in Frameworks */,
-				E962CD02720B46D347403017 /* Recordings in Frameworks */,
 				CE1563F32FDA136500A53611 /* FirebaseAnalytics in Frameworks */,
-				3E6C34CBE4058605247D0A36 /* Models in Frameworks */,
-				A28EDE8E5E58BE472E55038A /* AudioEngine in Frameworks */,
-				BBCD8AD5E1B9D0470A48BD85 /* Services in Frameworks */,
-				CF758CAE5F2E6721317BC087 /* DesignSystem in Frameworks */,
-				58136AE388B78A6E4D284F3E /* Onboarding in Frameworks */,
-				E6F1CF9BF2DDADE9A5619DB4 /* SleepSession in Frameworks */,
-				1A2C26235B1C018F311D03EB /* Statistics in Frameworks */,
 				CE1563F72FDA136500A53611 /* FirebaseCrashlytics in Frameworks */,
-				78DDF28BFD0525A9C32B1FE1 /* Recordings in Frameworks */,
 				CE1563FF2FDA136500A53611 /* FirebaseRemoteConfig in Frameworks */,
-				7550A233A59B33AC7BC63FA5 /* Settings in Frameworks */,
-				B7E5BB619CAC47AD866118B3 /* Personalization in Frameworks */,
-				9C2D15AA3B584C0D8BA311FD /* Learn in Frameworks */,
-				E8F1BC7519D875ADAD99C2B2 /* Routing in Frameworks */,
-				21AAC7E1C2F32F10F896D6CB /* Platform in Frameworks */,
-				4B370848D47ABB08BBABC8BF /* Health in Frameworks */,
-				FAA27A34150D1B9419D972E0 /* Config in Frameworks */,
 				CE1563FD2FDA136500A53611 /* FirebaseMessaging in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -170,6 +173,28 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		B3842897FD5AF4C0B0548088 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				904FFA05D19B125E5F4EF61A /* AudioEngine */,
+				4EC7BCB98DC337DC8415F0AF /* Config */,
+				08492F0FBC89DAD5BDF358A7 /* DesignSystem */,
+				B37C61DFA307DEE3E794E487 /* Health */,
+				0C991AFECE7311120EABCA56 /* Learn */,
+				B21EE6D5990E63C48D3CB31B /* Models */,
+				8C2DB4EAC279E88C79EC5B56 /* Onboarding */,
+				B24E704F14BB938443B94D1B /* Personalization */,
+				B6333D7344F7D98451B0CCD3 /* Platform */,
+				8A65580B3C96EFE21C38FB53 /* Recordings */,
+				360DD48E07511132B68C9572 /* Routing */,
+				A13B6B9E3827E7BA702BCCD5 /* Services */,
+				F2EB6F793969D4D0854D885B /* Settings */,
+				21DB19A959568780F739E947 /* SleepSession */,
+				97AC75876DD07FC6EA48A188 /* Statistics */,
+			);
+			path = Packages;
+			sourceTree = "<group>";
+		};
 		CE098399309FF97A002E275D /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -185,6 +210,7 @@
 				CE0983AE309FFA12002E275D /* SleepGuardWidgetsExtension.entitlements */,
 				CE1588FA2FAA9946001B61AA /* SleepGuard */,
 				CE09839E309FF97B002E275D /* SleepGuardWidgets */,
+				B3842897FD5AF4C0B0548088 /* Packages */,
 				CE098399309FF97A002E275D /* Frameworks */,
 				CE1588F92FAA9946001B61AA /* Products */,
 			);
@@ -219,10 +245,10 @@
 			);
 			name = SleepGuardWidgetsExtension;
 			packageProductDependencies = (
+				760EC95F38EA4BD1C2B7E120 /* Models */,
+				178A5C0DE92CAA52E12FCFC0 /* DesignSystem */,
 				40CFEE899DE264E204116659 /* SleepGuardDesignKit */,
 				625ADB639C4FEB788CEBCC13 /* SleepStrings */,
-				F20A00000000000000000003 /* Models */,
-				F20A00000000000000000004 /* DesignSystem */,
 			);
 			productName = SleepGuardWidgetsExtension;
 			productReference = CE098398309FF97A002E275D /* SleepGuardWidgetsExtension.appex */;
@@ -249,27 +275,27 @@
 			);
 			name = SleepGuard;
 			packageProductDependencies = (
+				178BA466CBB172A3147BB284 /* AudioEngine */,
+				F5326F27E51D4816DA75E50F /* Config */,
+				EAF577DD927A702FA8767FEB /* DesignSystem */,
+				372585EA2ED82E766295DFFC /* Health */,
+				508473B604DDE07271CBF96B /* Learn */,
+				0FC2A7E99DFDBBCD6C58AAE4 /* Models */,
+				B44ED781A8902D5AF3C9E00E /* Onboarding */,
+				2528F7C3D5243BFB68AF9EF8 /* Personalization */,
+				FA94EA7A273DF64F873E8BDC /* Platform */,
+				20B56EB928A1E2B7157ED1EC /* Recordings */,
+				E987EC741EFE716D21929B76 /* Routing */,
+				C2134CA26E38CFC9A1A87516 /* Services */,
+				073E0F1D543FD073FA28C6EA /* Settings */,
+				94694BD8598E3AD79C12F679 /* SleepSession */,
+				79D46329ADCCD013885890B2 /* Statistics */,
 				80F9294D6D55DEEE1E5B0E60 /* SleepCore */,
 				0B9EAEE1CEC848484D488FE1 /* SleepFiles */,
 				55C12921EDEFFB1055C33582 /* SleepGuardDesignKit */,
 				148894E3E461F7D4DB987DDB /* SleepLogging */,
 				448873C4A8361D86E5815EF1 /* SleepStore */,
 				824E3DAE0EE46CD5533764D4 /* SleepStrings */,
-				47C01997BFA64842BA01B54E /* Models */,
-				3E369988AA3966E99F3F6D29 /* AudioEngine */,
-				D7A35E7D5BA7E75CF647C509 /* Services */,
-				938D66BD06A743B2F8B279C6 /* DesignSystem */,
-				758274DA39008BD85A853386 /* Onboarding */,
-				AD548900091A83E69035BB78 /* SleepSession */,
-				62657171C5FF70E51F817515 /* Statistics */,
-				7AA654EA1F14D9C6F15AB82A /* Recordings */,
-				167C10ECFE58FBF4929EF997 /* Settings */,
-				DE0D39C8817A44AB96DFE1F5 /* Personalization */,
-				2DFC87C0B35B483EB635F03D /* Learn */,
-				6C0711377AA761A844BDFFB6 /* Routing */,
-				49856968E9F928E62FEB3703 /* Platform */,
-				C69DAEAE73D026B6DE4E9789 /* Health */,
-				33FB2D1D8B9D2CB4DED541D8 /* Config */,
 				CE1563F22FDA136500A53611 /* FirebaseAnalytics */,
 				CE1563F62FDA136500A53611 /* FirebaseCrashlytics */,
 				CE1563FC2FDA136500A53611 /* FirebaseMessaging */,
@@ -308,21 +334,6 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				8226DC6220D42C94FDE0930A /* XCRemoteSwiftPackageReference "SleepGuardShared" */,
-				8BD2D33DB910A0A051BC520A /* XCLocalSwiftPackageReference "Packages/Models" */,
-				B60A113FA21CBEABFEEEF7A6 /* XCLocalSwiftPackageReference "Packages/AudioEngine" */,
-				4E4892DFD05149B34F929826 /* XCLocalSwiftPackageReference "Packages/Services" */,
-				C1ABFA1084CFC1B1142A5354 /* XCLocalSwiftPackageReference "Packages/DesignSystem" */,
-				AE5AF359D280CFA7C94A7CF4 /* XCLocalSwiftPackageReference "Packages/Onboarding" */,
-				07BF115E5F61CCEB06BE0BF6 /* XCLocalSwiftPackageReference "Packages/SleepSession" */,
-				7C63EEECC2537B5342FF4A75 /* XCLocalSwiftPackageReference "Packages/Statistics" */,
-				916ADDCB5CD8689275B837E3 /* XCLocalSwiftPackageReference "Packages/Recordings" */,
-				4A855F6D6797671D082B748B /* XCLocalSwiftPackageReference "Packages/Settings" */,
-				9032C9334E924D3398A48885 /* XCLocalSwiftPackageReference "Packages/Personalization" */,
-				A124231B05434FFFB1548919 /* XCLocalSwiftPackageReference "Packages/Learn" */,
-				4338D563BF4BBBAF875A97C3 /* XCLocalSwiftPackageReference "Packages/Routing" */,
-				1CA9AF4CE5DFD20B80F69DDA /* XCLocalSwiftPackageReference "Packages/Platform" */,
-				846E3CF110FA751412DFABFB /* XCLocalSwiftPackageReference "Packages/Health" */,
-				F4A4858164379D2BEC080B3A /* XCLocalSwiftPackageReference "Packages/Config" */,
 				CE1563F12FDA136500A53611 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
@@ -738,85 +749,6 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCLocalSwiftPackageReference section */
-		07BF115E5F61CCEB06BE0BF6 /* XCLocalSwiftPackageReference "Packages/SleepSession" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/SleepSession;
-		};
-		1CA9AF4CE5DFD20B80F69DDA /* XCLocalSwiftPackageReference "Packages/Platform" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/Platform;
-		};
-		4338D563BF4BBBAF875A97C3 /* XCLocalSwiftPackageReference "Packages/Routing" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/Routing;
-		};
-		4A855F6D6797671D082B748B /* XCLocalSwiftPackageReference "Packages/Settings" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/Settings;
-		};
-		4E4892DFD05149B34F929826 /* XCLocalSwiftPackageReference "Packages/Services" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/Services;
-		};
-		51E6E59F2770CB9DE800DDD6 /* XCLocalSwiftPackageReference "Packages/Recordings" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/Recordings;
-		};
-		7A886DCB087D86E4AC2E7336 /* XCLocalSwiftPackageReference "Packages/DesignSystem" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/DesignSystem;
-		};
-		7C63EEECC2537B5342FF4A75 /* XCLocalSwiftPackageReference "Packages/Statistics" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/Statistics;
-		};
-		846E3CF110FA751412DFABFB /* XCLocalSwiftPackageReference "Packages/Health" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/Health;
-		};
-		8834F6B3542FA19E44D45DF3 /* XCLocalSwiftPackageReference "Packages/AudioEngine" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/AudioEngine;
-		};
-		8BD2D33DB910A0A051BC520A /* XCLocalSwiftPackageReference "Packages/Models" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/Models;
-		};
-		8ED29C891D3F9823A0E8C460 /* XCLocalSwiftPackageReference "Packages/SleepSession" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/SleepSession;
-		};
-		9032C9334E924D3398A48885 /* XCLocalSwiftPackageReference "Packages/Personalization" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/Personalization;
-		};
-		916ADDCB5CD8689275B837E3 /* XCLocalSwiftPackageReference "Packages/Recordings" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/Recordings;
-		};
-		A124231B05434FFFB1548919 /* XCLocalSwiftPackageReference "Packages/Learn" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/Learn;
-		};
-		AE5AF359D280CFA7C94A7CF4 /* XCLocalSwiftPackageReference "Packages/Onboarding" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/Onboarding;
-		};
-		B60A113FA21CBEABFEEEF7A6 /* XCLocalSwiftPackageReference "Packages/AudioEngine" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/AudioEngine;
-		};
-		C1ABFA1084CFC1B1142A5354 /* XCLocalSwiftPackageReference "Packages/DesignSystem" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/DesignSystem;
-		};
-		F4A4858164379D2BEC080B3A /* XCLocalSwiftPackageReference "Packages/Config" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/Config;
-		};
-/* End XCLocalSwiftPackageReference section */
-
 /* Begin XCRemoteSwiftPackageReference section */
 		8226DC6220D42C94FDE0930A /* XCRemoteSwiftPackageReference "SleepGuardShared" */ = {
 			isa = XCRemoteSwiftPackageReference;
@@ -824,14 +756,6 @@
 			requirement = {
 				kind = exactVersion;
 				version = 0.37.0;
-			};
-		};
-		47447378A1132717B2E05DE4 /* XCRemoteSwiftPackageReference "Recordings" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "file:///Users/user/Documents/IndependentProjects/SleepGuard/Packages/Recordings";
-			requirement = {
-				kind = exactVersion;
-				version = 1.0.0;
 			};
 		};
 		CE1563F12FDA136500A53611 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
@@ -842,17 +766,77 @@
 				minimumVersion = 12.14.0;
 			};
 		};
-		E15F4B743C5A82C6A11DD6F1 /* XCRemoteSwiftPackageReference "DesignSystem" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "file:///Users/user/Documents/IndependentProjects/SleepGuard/Packages/DesignSystem";
-			requirement = {
-				kind = exactVersion;
-				version = 1.0.0;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		760EC95F38EA4BD1C2B7E120 /* Models */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Models;
+		};
+		178A5C0DE92CAA52E12FCFC0 /* DesignSystem */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = DesignSystem;
+		};
+		178BA466CBB172A3147BB284 /* AudioEngine */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = AudioEngine;
+		};
+		F5326F27E51D4816DA75E50F /* Config */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Config;
+		};
+		EAF577DD927A702FA8767FEB /* DesignSystem */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = DesignSystem;
+		};
+		372585EA2ED82E766295DFFC /* Health */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Health;
+		};
+		508473B604DDE07271CBF96B /* Learn */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Learn;
+		};
+		0FC2A7E99DFDBBCD6C58AAE4 /* Models */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Models;
+		};
+		B44ED781A8902D5AF3C9E00E /* Onboarding */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Onboarding;
+		};
+		2528F7C3D5243BFB68AF9EF8 /* Personalization */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Personalization;
+		};
+		FA94EA7A273DF64F873E8BDC /* Platform */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Platform;
+		};
+		20B56EB928A1E2B7157ED1EC /* Recordings */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Recordings;
+		};
+		E987EC741EFE716D21929B76 /* Routing */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Routing;
+		};
+		C2134CA26E38CFC9A1A87516 /* Services */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Services;
+		};
+		073E0F1D543FD073FA28C6EA /* Settings */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Settings;
+		};
+		94694BD8598E3AD79C12F679 /* SleepSession */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = SleepSession;
+		};
+		79D46329ADCCD013885890B2 /* Statistics */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Statistics;
+		};
 		80F9294D6D55DEEE1E5B0E60 /* SleepCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 8226DC6220D42C94FDE0930A /* XCRemoteSwiftPackageReference "SleepGuardShared" */;
@@ -893,96 +877,6 @@
 			package = 8226DC6220D42C94FDE0930A /* XCRemoteSwiftPackageReference "SleepGuardShared" */;
 			productName = SleepStrings;
 		};
-		167C10ECFE58FBF4929EF997 /* Settings */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 4A855F6D6797671D082B748B /* XCLocalSwiftPackageReference "Packages/Settings" */;
-			productName = Settings;
-		};
-		1C4F985595ED007BA103E405 /* Recordings */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 47447378A1132717B2E05DE4 /* XCRemoteSwiftPackageReference "Recordings" */;
-			productName = Recordings;
-		};
-		2DFC87C0B35B483EB635F03D /* Learn */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = A124231B05434FFFB1548919 /* XCLocalSwiftPackageReference "Packages/Learn" */;
-			productName = Learn;
-		};
-		33FB2D1D8B9D2CB4DED541D8 /* Config */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = F4A4858164379D2BEC080B3A /* XCLocalSwiftPackageReference "Packages/Config" */;
-			productName = Config;
-		};
-		38CD50332392049638D060DF /* AudioEngine */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 8834F6B3542FA19E44D45DF3 /* XCLocalSwiftPackageReference "Packages/AudioEngine" */;
-			productName = AudioEngine;
-		};
-		3E369988AA3966E99F3F6D29 /* AudioEngine */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = B60A113FA21CBEABFEEEF7A6 /* XCLocalSwiftPackageReference "Packages/AudioEngine" */;
-			productName = AudioEngine;
-		};
-		47C01997BFA64842BA01B54E /* Models */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 8BD2D33DB910A0A051BC520A /* XCLocalSwiftPackageReference "Packages/Models" */;
-			productName = Models;
-		};
-		49856968E9F928E62FEB3703 /* Platform */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 1CA9AF4CE5DFD20B80F69DDA /* XCLocalSwiftPackageReference "Packages/Platform" */;
-			productName = Platform;
-		};
-		613CAAD887F993446993F409 /* Recordings */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 51E6E59F2770CB9DE800DDD6 /* XCLocalSwiftPackageReference "Packages/Recordings" */;
-			productName = Recordings;
-		};
-		62657171C5FF70E51F817515 /* Statistics */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 7C63EEECC2537B5342FF4A75 /* XCLocalSwiftPackageReference "Packages/Statistics" */;
-			productName = Statistics;
-		};
-		6C0711377AA761A844BDFFB6 /* Routing */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 4338D563BF4BBBAF875A97C3 /* XCLocalSwiftPackageReference "Packages/Routing" */;
-			productName = Routing;
-		};
-		758274DA39008BD85A853386 /* Onboarding */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = AE5AF359D280CFA7C94A7CF4 /* XCLocalSwiftPackageReference "Packages/Onboarding" */;
-			productName = Onboarding;
-		};
-		7AA654EA1F14D9C6F15AB82A /* Recordings */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 916ADDCB5CD8689275B837E3 /* XCLocalSwiftPackageReference "Packages/Recordings" */;
-			productName = Recordings;
-		};
-		938D66BD06A743B2F8B279C6 /* DesignSystem */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = C1ABFA1084CFC1B1142A5354 /* XCLocalSwiftPackageReference "Packages/DesignSystem" */;
-			productName = DesignSystem;
-		};
-		A50DD8EF59A6D6A1BBB7A244 /* DesignSystem */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = E15F4B743C5A82C6A11DD6F1 /* XCRemoteSwiftPackageReference "DesignSystem" */;
-			productName = DesignSystem;
-		};
-		A6305AFA32B7A77ECFB0A19F /* SleepSession */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 8ED29C891D3F9823A0E8C460 /* XCLocalSwiftPackageReference "Packages/SleepSession" */;
-			productName = SleepSession;
-		};
-		AD548900091A83E69035BB78 /* SleepSession */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 07BF115E5F61CCEB06BE0BF6 /* XCLocalSwiftPackageReference "Packages/SleepSession" */;
-			productName = SleepSession;
-		};
-		C69DAEAE73D026B6DE4E9789 /* Health */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 846E3CF110FA751412DFABFB /* XCLocalSwiftPackageReference "Packages/Health" */;
-			productName = Health;
-		};
 		CE1563F22FDA136500A53611 /* FirebaseAnalytics */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = CE1563F12FDA136500A53611 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
@@ -1002,31 +896,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = CE1563F12FDA136500A53611 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseRemoteConfig;
-		};
-		D7A35E7D5BA7E75CF647C509 /* Services */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 4E4892DFD05149B34F929826 /* XCLocalSwiftPackageReference "Packages/Services" */;
-			productName = Services;
-		};
-		DE0D39C8817A44AB96DFE1F5 /* Personalization */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 9032C9334E924D3398A48885 /* XCLocalSwiftPackageReference "Packages/Personalization" */;
-			productName = Personalization;
-		};
-		E553575F91A447F10F3BDF08 /* DesignSystem */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 7A886DCB087D86E4AC2E7336 /* XCLocalSwiftPackageReference "Packages/DesignSystem" */;
-			productName = DesignSystem;
-		};
-		F20A00000000000000000003 /* Models */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 8BD2D33DB910A0A051BC520A /* XCLocalSwiftPackageReference "Packages/Models" */;
-			productName = Models;
-		};
-		F20A00000000000000000004 /* DesignSystem */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = C1ABFA1084CFC1B1142A5354 /* XCLocalSwiftPackageReference "Packages/DesignSystem" */;
-			productName = DesignSystem;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

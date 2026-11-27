@@ -271,7 +271,7 @@ SleepGuard/
 │   └── PushNotifications/   #   AppDelegate, notification soft-ask
 ├── SleepGuard.xcodeproj/     # Builds against the pinned SleepGuardShared release
 ├── SleepGuard.xcworkspace/  # The project + ../SleepGuardShared as a local package, for day-to-day work
-├── Packages/                # 12 feature & support packages (see Architecture)
+├── Packages/              # 15 local packages, shown as the Packages folder in the project (not under Package Dependencies)
 ├── SleepGuardWidgets/       # Widget extension: reads a JSON snapshot from the App Group
 ├── WatchApp/                # watchOS companion sources (not yet an Xcode target)
 ├── designs/

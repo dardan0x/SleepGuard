@@ -9,6 +9,8 @@ title: App folders, unused sounds, SleepGuardShared declared by the project
 - F27-T28: `SleepGuard/` sorted into `App/`, `Tabs/`, `Navigation/`, `NightFlow/`, `Widgets/`; `sounds/` removed; the project declares SleepGuardShared and links the products the app and widget import; `bump-shared.sh` and `check-imports.py` cover the project.
 - Also this session: PR descriptions for both architecture-review branches; explicit imports (F27-T26/T27, shared 0.37.0; UIKitWay F13-T22).
 
+- F27-T29: the local packages are a `Packages` folder in the project; Package Dependencies lists only SleepGuardShared and Firebase; leftover `file://` references and duplicate links removed.
+
 ## Build Status
 App build (project and workspace), layering, imports, view size, format: pass. Package tests unaffected (no package change).
 
