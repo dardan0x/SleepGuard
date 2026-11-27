@@ -40,7 +40,7 @@ Checked against the code on 2026-11-26 (SleepGuardShared 0.37.0), after F27 (the
 | **Remote** | Firebase Remote Config (feature flags, tabs), Crashlytics, Analytics, Messaging. **Only the app target** links Firebase |
 | **Privacy** | No accounts and no servers for user data. Audio never leaves the phone. Privacy manifests for the app and the widget |
 
-**Size:** 16 local Swift packages (138 source files, ~11.1k lines), the app target, the widget extension and 4 Watch source files. The rules and screen layouts that used to make up much of that code now live in SleepGuardShared (~12k lines, its own 275 tests). **237 Swift Testing tests** in 8 packages here, run in CI. Features are tracked as F1–F27 in [`docs/FeatureTracker.md`](FeatureTracker.md).
+**Size:** 9 local Swift packages, the seven features as targets of one `Features` package (138 source files, ~11.1k lines), the app target, the widget extension and 4 Watch source files. The rules and screen layouts that used to make up much of that code now live in SleepGuardShared (~12k lines, its own 275 tests). **237 Swift Testing tests** in 8 packages here, run in CI. Features are tracked as F1–F27 in [`docs/FeatureTracker.md`](FeatureTracker.md).
 
 ---
 
@@ -52,7 +52,7 @@ A **modular Swift Package** app using the **MV (Model–View)** approach: SwiftU
 
 ### 2.2 Package graph
 
-Each layer depends only on layers below it, and **feature packages never import each other**.
+Each layer depends only on layers below it, and **features never import each other**. The seven features are targets of one `Packages/Features` package ([ADR 0011](adr/0011-features-package.md)).
 
 ```
                          ┌──────────────────────────────┐
@@ -60,8 +60,8 @@ Each layer depends only on layers below it, and **feature packages never import 
                          │  + Firebase, widget writer   │  SessionFlowHost (end of a night, root
                          └──────────────┬───────────────┘  modals), deep links, Remote Config loader
    ┌───────────┬────────────┬───────────┼───────────┬───────────┬────────────────┬────────┐
-Onboarding SleepSession Statistics Recordings  Settings   Personalization     Learn
-   (no feature → feature edges; each declares only the packages it uses: check-imports.py)
+Onboarding SleepSession Statistics Recordings  Settings   Personalization     Learn   (targets of Packages/Features)
+   (no feature → feature edges; each declares only the modules it uses: check-imports.py)
                                         │
                          ┌──────────────┴───────────────┐
                          │ DesignSystem                 │  Theme extensions, model adapters;
@@ -102,9 +102,9 @@ Every package imports the narrowest shared product it needs; [§2.5](#25-the-sha
 | Kind | Packages | Role |
 |---|---|---|
 | **Foundation** | `Models`, `AudioEngine`, `Services`, `DesignSystem`, `Routing` | Data, audio, services, UI building blocks, navigation contract |
-| **Feature** | `Onboarding`, `SleepSession`, `Statistics`, `Recordings`, `Settings`, `Personalization`, `Learn` | One part of the app each |
+| **Feature** | `Onboarding`, `SleepSession`, `Statistics`, `Recordings`, `Settings`, `Personalization`, `Learn` (targets of `Packages/Features`) | One part of the app each |
 
-A feature may import foundation packages, never another feature. **The compiler enforces this through the manifests:** `Packages/Statistics/Package.swift` lists only `Models`, `Services`, `Routing`, `DesignSystem` and Factory, so `import Recordings` in a Statistics file fails with "no such module".
+A feature may import foundation packages, never another feature. **The manifest and CI enforce this:** the `Statistics` target in `Packages/Features/Package.swift` declares only `Models`, `Config`, `Routing`, `DesignSystem`, Factory and shared products, and `scripts/check-imports.py` fails on an `import Recordings` in a Statistics file and on any feature target that declares another. The features share one package, so the compiler alone may not reject that import (ADR 0011).
 
 **Features communicate through routes.** The Statistics calendar opens the session-detail screen, which lives in Recordings. Statistics doesn't refer to that screen; it navigates to a route value:
 
@@ -153,7 +153,7 @@ Features also share **services** (in `Services`, resolved with `@Injected`) and 
 
 **No exceptions.** The old `Settings → Personalization` edge was declared but never used, and F27-T9 removed it. `scripts/check-imports.py` (CI) fails on any import a target's manifest doesn't declare, so a module that is only visible transitively can't creep back in.
 
-**In one sentence:** feature packages are siblings that never import each other; they navigate through a small route package, and only the app target knows which screen each route opens.
+**In one sentence:** features are sibling modules that never import each other; they navigate through a small route package, and only the app target knows which screen each route opens.
 
 ### 2.4 Project-wide rules
 
@@ -211,6 +211,8 @@ SleepGuardShared is a separate repo and Swift package, pinned by exact version i
 
 ## 3. Packages
 
+The seven feature rows (Onboarding to Learn) are targets of one `Packages/Features` package ([ADR 0011](adr/0011-features-package.md)); every other row is its own package.
+
 | Package | Files / lines | Depends on | Shared products | What it does |
 |---|---|---|---|---|
 | **Models** | 13 / 0.6k | — | SleepCore, SleepStore, SleepFiles, SleepLogging | SleepGuard's reads on the shared records (`NightRecord+SleepGuard`), batched launch re-score, `SleepGuardStorage` (the shared layout in the app group), `AudioFileURLResolver`, widget snapshot. Re-exports `SleepStore` and `SleepLogging` |
@@ -238,7 +240,7 @@ SleepGuardShared is a separate repo and Swift package, pinned by exact version i
 | Dependency | Used by | Why |
 |---|---|---|
 | `dardan0x/SleepGuardShared` 0.37.0 (exact) | Every package except Platform and Routing | The shared core ([§2.5](#25-the-shared-core-sleepguardshared)); this project's own |
-| `hmlongco/Factory` 3.5.2 (`FactoryKit`) | Services, DesignSystem, every feature package | Compile-time-safe DI container, `@Injected` |
+| `hmlongco/Factory` 3.5.2 (`FactoryKit`) | Services, DesignSystem, every feature | Compile-time-safe DI container, `@Injected` |
 | `firebase/firebase-ios-sdk` 12.14 (Remote Config, Crashlytics, Analytics, Messaging) | App target only | Feature flags, crash reports, push. Kept out of the packages on purpose |
 | Apple frameworks | — | SwiftUI, SwiftData, Swift Charts, AVFoundation, SoundAnalysis, Accelerate, HealthKit, WidgetKit, UserNotifications, os |
 

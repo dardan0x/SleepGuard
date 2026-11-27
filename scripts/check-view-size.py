@@ -2,7 +2,8 @@
 """View size check: no view file over 200 lines (AGENTS.md "View Componentization").
 
 Scans every Swift file under `Packages/*/Sources/Views/`,
-`Packages/*/Sources/Components/` and the app target (`SleepGuard/`, whose
+`Packages/*/Sources/Components/`, the same folders of each feature
+(`Packages/Features/Sources/<Feature>/`) and the app target (`SleepGuard/`, whose
 files are views or the composition root that hosts them). A file over the limit fails unless it is in
 ALLOWLIST, and an allowlisted file fails if it grows past its recorded ceiling.
 An entry whose file is back under the limit (or gone) also fails, so the
@@ -32,7 +33,8 @@ def main() -> int:
         [
             path
             for folder in ("Views", "Components")
-            for path in ROOT.glob(f"Packages/*/Sources/{folder}/**/*.swift")
+            for pattern in (f"Packages/*/Sources/{folder}", f"Packages/Features/Sources/*/{folder}")
+            for path in ROOT.glob(f"{pattern}/**/*.swift")
         ]
         + list(ROOT.glob("SleepGuard/**/*.swift"))
     )

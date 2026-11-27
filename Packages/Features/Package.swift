@@ -1,0 +1,178 @@
+// swift-tools-version: 6.2
+import PackageDescription
+
+// The screens: one module per feature, each imported by name. A feature
+// target never depends on another feature target; features talk through
+// `Routing` (ADR 0001, 0011, enforced by scripts/check-imports.py). Each
+// target declares every module its files import.
+let swiftSettings: [SwiftSetting] = [
+  .swiftLanguageMode(.v6),
+  .enableUpcomingFeature("InternalImportsByDefault"),
+  .defaultIsolation(MainActor.self),
+]
+
+let package = Package(
+  name: "Features",
+  platforms: [.iOS(.v17)],
+  products: [
+    .library(name: "Learn", targets: ["Learn"]),
+    .library(name: "Onboarding", targets: ["Onboarding"]),
+    .library(name: "Personalization", targets: ["Personalization"]),
+    .library(name: "Recordings", targets: ["Recordings"]),
+    .library(name: "Settings", targets: ["Settings"]),
+    .library(name: "SleepSession", targets: ["SleepSession"]),
+    .library(name: "Statistics", targets: ["Statistics"]),
+  ],
+  dependencies: [
+    .package(path: "../AudioEngine"),
+    .package(path: "../Config"),
+    .package(path: "../DesignSystem"),
+    .package(path: "../Health"),
+    .package(path: "../Models"),
+    .package(path: "../Platform"),
+    .package(path: "../Routing"),
+    .package(path: "../Services"),
+    .package(url: "https://github.com/dardan0x/SleepGuardShared.git", exact: "0.37.0"),
+    .package(url: "https://github.com/hmlongco/Factory", from: "3.5.2"),
+  ],
+  targets: [
+    .target(
+      name: "Learn",
+      dependencies: [
+        .product(name: "Config", package: "Config"),
+        .product(name: "Models", package: "Models"),
+        .product(name: "Routing", package: "Routing"),
+        .product(name: "DesignSystem", package: "DesignSystem"),
+        .product(name: "FactoryKit", package: "Factory"),
+        .product(name: "SleepGuardContentKit", package: "SleepGuardShared"),
+      ],
+      swiftSettings: swiftSettings),
+    .target(
+      name: "Onboarding",
+      dependencies: [
+        .product(name: "Platform", package: "Platform"),
+        .product(name: "Health", package: "Health"),
+        .product(name: "Config", package: "Config"),
+        .product(name: "Models", package: "Models"),
+        .product(name: "AudioEngine", package: "AudioEngine"),
+        .product(name: "Services", package: "Services"),
+        .product(name: "DesignSystem", package: "DesignSystem"),
+        .product(name: "SleepCore", package: "SleepGuardShared"),
+        .product(name: "FactoryKit", package: "Factory"),
+        .product(name: "SleepGuardContentKit", package: "SleepGuardShared"),
+      ],
+      swiftSettings: swiftSettings),
+    .target(
+      name: "Personalization",
+      dependencies: [
+        .product(name: "Platform", package: "Platform"),
+        .product(name: "Config", package: "Config"),
+        .product(name: "Models", package: "Models"),
+        .product(name: "Services", package: "Services"),
+        .product(name: "DesignSystem", package: "DesignSystem"),
+        .product(name: "SleepCore", package: "SleepGuardShared"),
+        .product(name: "FactoryKit", package: "Factory"),
+        .product(name: "SleepStore", package: "SleepGuardShared"),
+        .product(name: "SleepGuardContentKit", package: "SleepGuardShared"),
+      ],
+      swiftSettings: swiftSettings),
+    .target(
+      name: "Recordings",
+      dependencies: [
+        .product(name: "Health", package: "Health"),
+        .product(name: "Config", package: "Config"),
+        .product(name: "Models", package: "Models"),
+        .product(name: "AudioEngine", package: "AudioEngine"),
+        .product(name: "SleepCore", package: "SleepGuardShared"),
+        .product(name: "SleepAudioKit", package: "SleepGuardShared"),
+        .product(name: "Services", package: "Services"),
+        .product(name: "Routing", package: "Routing"),
+        .product(name: "DesignSystem", package: "DesignSystem"),
+        .product(name: "FactoryKit", package: "Factory"),
+        .product(name: "SleepLogging", package: "SleepGuardShared"),
+        .product(name: "SleepStore", package: "SleepGuardShared"),
+        .product(name: "SleepStrings", package: "SleepGuardShared"),
+        .product(name: "SleepGuardContentKit", package: "SleepGuardShared"),
+        .product(name: "SleepGuardDesignKit", package: "SleepGuardShared"),
+      ],
+      swiftSettings: swiftSettings),
+    .testTarget(
+      name: "RecordingsTests",
+      dependencies: [
+        .product(name: "HealthTestSupport", package: "Health"),
+        .product(name: "ConfigTestSupport", package: "Config"),
+        .product(name: "Config", package: "Config"),
+        "Recordings",
+        .product(name: "Models", package: "Models"),
+        .product(name: "SleepCore", package: "SleepGuardShared"),
+        .product(name: "ModelsTestSupport", package: "Models"),
+        .product(name: "Services", package: "Services"),
+        .product(name: "FactoryKit", package: "Factory"),
+        .product(name: "FactoryTesting", package: "Factory"),
+        .product(name: "SleepStore", package: "SleepGuardShared"),
+      ],
+      swiftSettings: swiftSettings),
+    .target(
+      name: "Settings",
+      dependencies: [
+        .product(name: "Platform", package: "Platform"),
+        .product(name: "Health", package: "Health"),
+        .product(name: "Config", package: "Config"),
+        .product(name: "Models", package: "Models"),
+        .product(name: "Services", package: "Services"),
+        .product(name: "Routing", package: "Routing"),
+        .product(name: "DesignSystem", package: "DesignSystem"),
+        .product(name: "FactoryKit", package: "Factory"),
+        .product(name: "SleepStore", package: "SleepGuardShared"),
+        .product(name: "SleepStrings", package: "SleepGuardShared"),
+        .product(name: "SleepGuardContentKit", package: "SleepGuardShared"),
+      ],
+      swiftSettings: swiftSettings),
+    .target(
+      name: "SleepSession",
+      dependencies: [
+        .product(name: "Config", package: "Config"),
+        .product(name: "Models", package: "Models"),
+        .product(name: "AudioEngine", package: "AudioEngine"),
+        .product(name: "Services", package: "Services"),
+        .product(name: "Routing", package: "Routing"),
+        .product(name: "DesignSystem", package: "DesignSystem"),
+        .product(name: "SleepCore", package: "SleepGuardShared"),
+        .product(name: "SleepAudioKit", package: "SleepGuardShared"),
+        .product(name: "FactoryKit", package: "Factory"),
+        .product(name: "SleepLogging", package: "SleepGuardShared"),
+        .product(name: "SleepStore", package: "SleepGuardShared"),
+        .product(name: "SleepStrings", package: "SleepGuardShared"),
+        .product(name: "SleepGuardContentKit", package: "SleepGuardShared"),
+        .product(name: "SleepGuardDesignKit", package: "SleepGuardShared"),
+      ],
+      swiftSettings: swiftSettings),
+    .target(
+      name: "Statistics",
+      dependencies: [
+        .product(name: "Config", package: "Config"),
+        .product(name: "Models", package: "Models"),
+        .product(name: "SleepCore", package: "SleepGuardShared"),
+        .product(name: "Routing", package: "Routing"),
+        .product(name: "DesignSystem", package: "DesignSystem"),
+        .product(name: "FactoryKit", package: "Factory"),
+        .product(name: "SleepStore", package: "SleepGuardShared"),
+        .product(name: "SleepStrings", package: "SleepGuardShared"),
+        .product(name: "SleepGuardContentKit", package: "SleepGuardShared"),
+        .product(name: "SleepGuardDesignKit", package: "SleepGuardShared"),
+      ],
+      swiftSettings: swiftSettings,
+      linkerSettings: [
+        .linkedFramework("Charts"),
+      ]),
+    .testTarget(
+      name: "StatisticsTests",
+      dependencies: [
+        "Statistics",
+        .product(name: "Models", package: "Models"),
+        .product(name: "SleepCore", package: "SleepGuardShared"),
+        .product(name: "ModelsTestSupport", package: "Models"),
+        .product(name: "SleepStore", package: "SleepGuardShared"),
+      ],
+      swiftSettings: swiftSettings),
+  ])

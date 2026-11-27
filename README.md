@@ -79,7 +79,8 @@ A modular Swift Package layout with strict isolation, enforced by the compiler t
 
 ```
 App target                 composition root: App, Tabs, Navigation (routes, deep links), NightFlow, Widgets, Firebase
-└─► Feature packages       Onboarding · SleepSession · Statistics · Recordings · Settings · Personalization · Learn
+└─► Features               one package, a module per feature: Onboarding · SleepSession · Statistics · Recordings ·
+                           Settings · Personalization · Learn
     ├─► DesignSystem       Theme extensions, model → component adapters, a few app-only views
     ├─► Services           the recording night: session manager, detection tracker, committer, stores, interrupter
     │   ├─► AudioEngine    AudioRecorder over SleepAudioKit's CaptureEngine
@@ -95,10 +96,12 @@ SleepGuardShared           SleepCore · SleepStore · SleepAudioKit · SleepFile
 ```
 
 - Each layer depends only on layers below it. `Models` and `AudioEngine` use only SleepGuardShared; `Platform` uses nothing local.
-- **Feature packages never import each other.** They talk through route enums in `Routing` (`RouterDestination`, `SheetDestination`; [ADR 0001](docs/adr/0001-routing-package.md)), and only the app target's `AppRegistry` maps a route to a screen.
+- **Features never import each other.** They are targets in one `Features` package ([ADR 0011](docs/adr/0011-features-package.md)) and talk through route enums in `Routing` (`RouterDestination`, `SheetDestination`; [ADR 0001](docs/adr/0001-routing-package.md)), and only the app target's `AppRegistry` maps a route to a screen.
 - **Every dependency is explicit.** No `@_exported import`: each file imports what it uses and each target declares it, packages and the app and widget targets alike (`check-imports.py`, `check-layering.py`).
 - The local packages appear as the `Packages` folder in the project; only SleepGuardShared and Firebase are package dependencies.
 - The widget extension reuses `Models` + `DesignSystem` and reads a JSON snapshot from the App Group, never SwiftData.
+
+The seven features (SleepSession to Learn below) are targets of one `Packages/Features` package; the rest are their own packages.
 
 | Package | Size | Depends on | SleepGuardShared | Responsibility |
 |---------|------|-----------|------------------|----------------|
@@ -118,7 +121,7 @@ SleepGuardShared           SleepCore · SleepStore · SleepAudioKit · SleepFile
 | `Onboarding` | 1 · 84 | Models, AudioEngine, Config, Health, Platform, Services, DesignSystem | SleepCore, ContentKit | First run and permission requests |
 | `Learn` | 1 · 33 | Models, Config, Routing, DesignSystem | ContentKit | Learn tab, behind the `feature_learn` remote flag |
 
-Feature packages are small because each keeps only its **screen**: loading and `ViewState`, `@Query`, `@Injected` services, `RouterPath`, sheets and alerts. The **layout** comes from `SleepGuardContentKit` and the **numbers** from `SleepCore` ([ADR 0006](docs/adr/0006-shared-screen-content.md)). The full package reference is in [Technical Overview §3](docs/TECHNICAL_OVERVIEW.md#3-packages).
+Feature modules are small because each keeps only its **screen**: loading and `ViewState`, `@Query`, `@Injected` services, `RouterPath`, sheets and alerts. The **layout** comes from `SleepGuardContentKit` and the **numbers** from `SleepCore` ([ADR 0006](docs/adr/0006-shared-screen-content.md)). The full package reference is in [Technical Overview §3](docs/TECHNICAL_OVERVIEW.md#3-packages).
 
 **Patterns enforced project-wide:**
 - `@State` + a `ViewState` enum per data-loading view — **no ViewModels**, no boolean soup.
@@ -167,7 +170,7 @@ SwiftUI views are already value-type descriptions of state, and the Observation 
 |----------|---------|--------|
 | `tests` | Every PR (`macos-26`) | All tests, per package on the iOS Simulator (`scripts/run-tests.sh`); the app and widgets build |
 | `quality` | Every push + PR | SwiftFormat lint, no hardcoded user-facing strings in the diff |
-| `layering` | Every push + PR | No UI imports in non-view code, no SwiftUI in `Services`, no service `.shared` in feature packages, no `print`, no `@_exported import` (`scripts/check-layering.py`); every import declared by its target, the app and widget targets included (`scripts/check-imports.py`); no view file over 200 lines (`scripts/check-view-size.py`) |
+| `layering` | Every push + PR | No UI imports in non-view code, no SwiftUI in `Services`, no service `.shared` in features, no `print`, no `@_exported import` (`scripts/check-layering.py`); every import declared by its target, the app and widget targets included, and no feature depending on another (`scripts/check-imports.py`); no view file over 200 lines (`scripts/check-view-size.py`) |
 
 A pre-commit hook (`scripts/install-hooks.sh`) runs SwiftFormat on staged Swift files, so lint failures are caught before they reach CI.
 
@@ -184,7 +187,7 @@ Every package imports, and declares, exactly the shared products it uses; nothin
 ```
 SleepGuard                        SleepGuardShared
 ────────────────────────          ────────────────────────────────────────────────
-Feature packages, DesignSystem ─► SleepGuardContentKit   screen layouts
+Features, DesignSystem ───────► SleepGuardContentKit   screen layouts
                                ─► SleepGuardDesignKit    Theme, components
                                ─► SleepStrings           string catalog
 Models, Services, Health,

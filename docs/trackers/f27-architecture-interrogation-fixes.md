@@ -59,6 +59,7 @@ Fixes the verdicts of the principal-level architecture review (`ARCHITECTURE_INT
 | F27-T28 | App folders, unused sounds removed, SleepGuardShared declared by the project | Refactor | Done | T27 | app target, project, scripts | 2026-11-27 | 2026-11-27 |
 | F27-T29 | Local packages as a Packages folder in the project | Refactor | Done | T28 | project | 2026-11-27 | 2026-11-27 |
 | F27-T30 | The workspace builds the pinned release (no local override) | Refactor | Done | T29 | workspace, docs | 2026-11-27 | 2026-11-27 |
+| F27-T31 | Features as one package, a target per feature (ADR 0011) | Refactor | Done | T30 | Features, project, scripts, docs | 2026-11-28 | 2026-11-28 |
 
 ## Task Details
 
@@ -616,3 +617,13 @@ The owner's call: SleepGuardShared listed under Package Dependencies in the work
 - SleepGuardShared's CI built SleepGuard through this workspace to test candidate commits; its job now writes such a workspace itself (shared branch `ci-local-workspace`, no release needed).
 - CLAUDE/AGENTS, README and TECHNICAL_OVERVIEW updated.
 - The workspace lockfile gains the SleepGuardShared pin once Xcode reopens the workspace (an open Xcode rewrites it from the old override).
+
+### F27-T31 — Features as one package, a target per feature
+
+The owner's call (2026-11-28): organize the features like SleepGuardUIKitWay, in one `Features` package, each still a module imported by name.
+- `Packages/Features` holds Learn, Onboarding, Personalization, Recordings, Settings, SleepSession and Statistics as targets (`Sources/<Feature>`, `Tests/RecordingsTests`, `Tests/StatisticsTests`). Every target keeps its previous dependency list. Module names are unchanged, so the app target and the project's product dependencies didn't change. The project's `Packages` group has one `Features` reference instead of seven. The tracked `Statistics.xcscheme` was removed; Xcode generates `Features-Package`.
+- `check-imports.py`: a sibling target counts only when declared, and a feature target that declares another feature fails. Both cases were probed (undeclared `import Settings` in Learn; `"Settings"` in Learn's dependencies). `check-view-size.py` also scans `Packages/Features/Sources/*/Views|Components` (still 61 view files). `run-tests.sh` prints every test run of a package (Features has two bundles).
+- ADR 0011; CLAUDE/AGENTS, README and TECHNICAL_OVERVIEW updated.
+- Honest limit: the compiler alone may no longer reject a feature-to-feature import (same package); `check-imports.py` in CI is the guard.
+- Verified: app build (zero errors), import/layering/view-size/strings checks, package tests (Features 23: RecordingsTests 12, StatisticsTests 11; 180 in total), app launch.
+- Noticed, not changed: TECHNICAL_OVERVIEW says 237 tests in 8 packages; the runner reports 180 in 6. `Packages/Logging/.swiftpm` is still an untracked leftover.

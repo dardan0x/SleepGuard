@@ -6,7 +6,9 @@ target doesn't declare it (F27-T9: `Recordings` imported `AudioEngine` through
 `Services`). The build can't catch that, so this script does: for each target in each
 `Packages/*/Package.swift`, every `import X` where X is a project module (a local
 package target, a SleepGuardShared product, Factory) must be a declared
-dependency or a target of the same package. Nothing is re-exported here
+dependency; a sibling target of the same package counts only when declared
+(the seven features share `Packages/Features`). A feature target also never declares another
+feature target (features talk through Routing). Nothing is re-exported here
 (`@_exported import` is banned by check-layering.py, F27-T26), so each target
 declares every module its files import. Apple SDK modules are not checked.
 
@@ -96,8 +98,7 @@ def main() -> int:
 
     violations = []
     for package, name, source, declared in all_targets:
-        siblings = {other for pkg, other, _, _ in all_targets if pkg == package}
-        allowed = declared | siblings | {name}
+        allowed = declared | {name}
         for module in list(declared):
             allowed |= reexports.get(module, set())
         for path in swift_files(source):
@@ -110,6 +111,15 @@ def main() -> int:
                     rel = path.relative_to(ROOT).as_posix()
                     violations.append(f"{rel}:{number}: imports {module}, which target {name} doesn't declare")
 
+    # Features never depend on each other (ADR 0001, 0011): they share one
+    # package, so the edge would be a single name in its manifest.
+    features = ROOT / "Packages/Features"
+    feature_names = {name for package, name, _, _ in all_targets if package == features and not name.endswith("Tests")}
+    for package, name, _, declared in all_targets:
+        if package == features and not name.endswith("Tests"):
+            for other in sorted(declared & feature_names - {name}):
+                violations.append(f"Packages/Features/Package.swift: feature {name} depends on feature {other}; route through Routing instead")
+
     # The app and widget targets link products in the Xcode project.
     for folder, target in APP_TARGETS.items():
         linked = linked_products(target)
@@ -121,7 +131,7 @@ def main() -> int:
                     violations.append(f"{rel}:{number}: imports {match.group(2)}, which target {target} doesn't link (Xcode project)")
 
     if violations:
-        print("Undeclared imports (add the dependency to the target in Package.swift or the Xcode project):")
+        print("Import violations (declare the dependency in Package.swift or the Xcode project; features never depend on each other):")
         for violation in violations:
             print(f"  {violation}")
         return 1

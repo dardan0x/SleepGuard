@@ -34,7 +34,7 @@ for pkg in $PACKAGES; do
   (cd "Packages/$pkg" && xcodebuild test -scheme "$scheme" -destination "$DESTINATION" \
     -derivedDataPath "$DERIVED_DATA" >"$log" 2>&1)
   if [ $? -eq 0 ]; then
-    grep -m1 -E 'Test run with .* passed' "$log" || echo "passed"
+    grep -E 'Test run with .* passed' "$log" || echo "passed"
   else
     echo "FAILED (log: $log)"
     grep -E 'error:|✘' "$log" | sort -u | head -20

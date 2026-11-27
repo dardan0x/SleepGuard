@@ -67,17 +67,12 @@
 
 /* Begin PBXFileReference section */
 		08492F0FBC89DAD5BDF358A7 /* DesignSystem */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DesignSystem; sourceTree = "<group>"; };
-		0C991AFECE7311120EABCA56 /* Learn */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Learn; sourceTree = "<group>"; };
-		21DB19A959568780F739E947 /* SleepSession */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = SleepSession; sourceTree = "<group>"; };
+		F3A7C1D2E4B5968712345678 /* Features */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Features; sourceTree = "<group>"; };
 		360DD48E07511132B68C9572 /* Routing */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Routing; sourceTree = "<group>"; };
 		4EC7BCB98DC337DC8415F0AF /* Config */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Config; sourceTree = "<group>"; };
-		8A65580B3C96EFE21C38FB53 /* Recordings */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Recordings; sourceTree = "<group>"; };
-		8C2DB4EAC279E88C79EC5B56 /* Onboarding */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Onboarding; sourceTree = "<group>"; };
 		904FFA05D19B125E5F4EF61A /* AudioEngine */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = AudioEngine; sourceTree = "<group>"; };
-		97AC75876DD07FC6EA48A188 /* Statistics */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Statistics; sourceTree = "<group>"; };
 		A13B6B9E3827E7BA702BCCD5 /* Services */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Services; sourceTree = "<group>"; };
 		B21EE6D5990E63C48D3CB31B /* Models */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Models; sourceTree = "<group>"; };
-		B24E704F14BB938443B94D1B /* Personalization */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Personalization; sourceTree = "<group>"; };
 		B37C61DFA307DEE3E794E487 /* Health */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Health; sourceTree = "<group>"; };
 		B6333D7344F7D98451B0CCD3 /* Platform */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Platform; sourceTree = "<group>"; };
 		CE098398309FF97A002E275D /* SleepGuardWidgetsExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = SleepGuardWidgetsExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -85,7 +80,6 @@
 		CE09839C309FF97B002E275D /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		CE0983AE309FFA12002E275D /* SleepGuardWidgetsExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SleepGuardWidgetsExtension.entitlements; sourceTree = "<group>"; };
 		CE1588F82FAA9946001B61AA /* SleepGuard.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SleepGuard.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		F2EB6F793969D4D0854D885B /* Settings */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Settings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -179,18 +173,12 @@
 				904FFA05D19B125E5F4EF61A /* AudioEngine */,
 				4EC7BCB98DC337DC8415F0AF /* Config */,
 				08492F0FBC89DAD5BDF358A7 /* DesignSystem */,
+				F3A7C1D2E4B5968712345678 /* Features */,
 				B37C61DFA307DEE3E794E487 /* Health */,
-				0C991AFECE7311120EABCA56 /* Learn */,
 				B21EE6D5990E63C48D3CB31B /* Models */,
-				8C2DB4EAC279E88C79EC5B56 /* Onboarding */,
-				B24E704F14BB938443B94D1B /* Personalization */,
 				B6333D7344F7D98451B0CCD3 /* Platform */,
-				8A65580B3C96EFE21C38FB53 /* Recordings */,
 				360DD48E07511132B68C9572 /* Routing */,
 				A13B6B9E3827E7BA702BCCD5 /* Services */,
-				F2EB6F793969D4D0854D885B /* Settings */,
-				21DB19A959568780F739E947 /* SleepSession */,
-				97AC75876DD07FC6EA48A188 /* Statistics */,
 			);
 			path = Packages;
 			sourceTree = "<group>";
