@@ -10,6 +10,7 @@ title: App folders, unused sounds, SleepGuardShared declared by the project
 - Also this session: PR descriptions for both architecture-review branches; explicit imports (F27-T26/T27, shared 0.37.0; UIKitWay F13-T22).
 
 - F27-T29: the local packages are a `Packages` folder in the project; Package Dependencies lists only SleepGuardShared and Firebase; leftover `file://` references and duplicate links removed.
+- F27-T30: the workspace no longer overrides SleepGuardShared; unreleased shared code is tried by adding the folder in Xcode or through a throwaway workspace; the shared CI writes its own.
 
 ## Build Status
 App build (project and workspace), layering, imports, view size, format: pass. Package tests unaffected (no package change).

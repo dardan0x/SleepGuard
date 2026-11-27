@@ -203,7 +203,7 @@ SleepGuardShared is a separate repo and Swift package, pinned by exact version i
 | **Theme** | One theme system ([ADR 0009](adr/0009-one-theme-system.md)): the app root sets `.environment(\.theme, .sleepGuard)`; every view, ours and the kit's, reads `@Environment(\.theme)` |
 | **Screen content** | A feature's container loads (`@Query` or a state owner), owns `ViewState`, and hosts a `*Content` view, passing values, closures (sheets, `RouterPath`) and app-only slots (e.g. `SleepStagesSection` in the night detail) |
 
-**Binding.** `SleepGuard.xcworkspace` adds `../SleepGuardShared` as a local package for day-to-day work; `SleepGuard.xcodeproj`, `scripts/run-tests.sh` and CI use the pinned release. `sh scripts/bump-shared.sh <version>` moves every pin and both lockfiles. The shared repo's CI builds this app against every candidate commit.
+**Binding.** Everything builds against the pinned release: the workspace holds only the project, which declares SleepGuardShared under Package Dependencies. To try unreleased shared code, add `../SleepGuardShared` to the workspace in Xcode for the time being (it overrides the pin; don't commit that), or build a throwaway workspace that lists both (CLAUDE.md, Build & Report). `sh scripts/bump-shared.sh <version>` moves every pin and both lockfiles. The shared repo's CI builds this app against every candidate commit.
 
 **How it got there.** The shared code was extracted from this app one concern at a time (F24–F27 and the shared releases 0.1.0–0.37.0): pin the behaviour with this app's tests, turn hidden inputs (models, `Date()`, randomness) into parameters, move the rule as a pure function over values, map at the `Models` boundary with parity tests, release, bump, delete the local copy. Decisions: [ADR 0004](adr/0004-shared-repo.md), [0005](adr/0005-shared-design-kit.md), [0006](adr/0006-shared-screen-content.md). The same package also backs [SleepGuardUIKitWay](https://github.com/dardan0x/SleepGuardUIKitWay), a UIKit-shell build of the product.
 
@@ -683,11 +683,11 @@ AFTER VERIFIED  tracker → "Done", acceptance criteria ticked, prompt recorded,
 ## 12. Build and run
 
 ```bash
-# Build and run (Xcode 26+), against the local ../SleepGuardShared
+# Build and run (Xcode 26+), against the pinned shared release
 xcodebuild -workspace SleepGuard.xcworkspace -scheme SleepGuard \
   -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2' build
 
-# The same, against the pinned shared release
+# The project alone (the same pinned release)
 xcodebuild -project SleepGuard.xcodeproj -scheme SleepGuard \
   -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2' build
 

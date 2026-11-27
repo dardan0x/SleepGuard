@@ -58,6 +58,7 @@ Fixes the verdicts of the principal-level architecture review (`ARCHITECTURE_INT
 | F27-T27 | No re-exports in the shared repo (shared 0.37.0) | Refactor | Done | T26 | manifests | 2026-11-26 | 2026-11-26 |
 | F27-T28 | App folders, unused sounds removed, SleepGuardShared declared by the project | Refactor | Done | T27 | app target, project, scripts | 2026-11-27 | 2026-11-27 |
 | F27-T29 | Local packages as a Packages folder in the project | Refactor | Done | T28 | project | 2026-11-27 | 2026-11-27 |
+| F27-T30 | The workspace builds the pinned release (no local override) | Refactor | Done | T29 | workspace, docs | 2026-11-27 | 2026-11-27 |
 
 ## Task Details
 
@@ -607,3 +608,11 @@ The owner's call: SleepGuardShared belongs under Package Dependencies, the local
 - Cleaned while rewriting those entries: two `file://` remote references to `Packages/Recordings` and `Packages/DesignSystem`, product dependencies on references that no longer existed, and duplicate links (DesignSystem, Recordings, AudioEngine, SleepSession were linked two or three times). 67 objects removed; no dangling IDs; the app links 25 products once each (15 local, 6 shared, 4 Firebase), the widget Models, DesignSystem and its 2 shared ones.
 - Verified: project and workspace builds, package resolution, import and layering checks; the per-package schemes are still generated (run-tests.sh unchanged).
 - Untracked leftover noticed: `Packages/Logging/.swiftpm` (empty Xcode metadata from the deleted package), not added to the group.
+
+### F27-T30 — The workspace builds the pinned release
+
+The owner's call: SleepGuardShared listed under Package Dependencies in the workspace too, so the workspace no longer adds `../SleepGuardShared` (a local package overrides the pin and Xcode then shows it at the root instead).
+- `SleepGuard.xcworkspace` holds only the project. To try unreleased shared code: add `../SleepGuardShared` to the workspace in Xcode for the time being (never committed), or build a throwaway workspace outside the repo that lists both (recipe in CLAUDE.md, tested: it resolves the local checkout and leaves the repo untouched).
+- SleepGuardShared's CI built SleepGuard through this workspace to test candidate commits; its job now writes such a workspace itself (shared branch `ci-local-workspace`, no release needed).
+- CLAUDE/AGENTS, README and TECHNICAL_OVERVIEW updated.
+- The workspace lockfile gains the SleepGuardShared pin once Xcode reopens the workspace (an open Xcode rewrites it from the old override).

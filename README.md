@@ -223,8 +223,8 @@ NightDetailContent(
 
 | Build | Uses |
 |---|---|
-| `SleepGuard.xcworkspace` (day-to-day) | `../SleepGuardShared` as a local package; edits there show up on the next build |
-| `SleepGuard.xcodeproj`, `scripts/run-tests.sh`, CI | The pinned release: `.package(url: …, exact: "0.37.0")` in every package manifest, and the same exact pin in the project (Package Dependencies), linked by the app and widget targets |
+| Unreleased shared changes | Add `../SleepGuardShared` to the workspace in Xcode for the time being (it overrides the pin; don't commit that) |
+| `SleepGuard.xcworkspace`, `SleepGuard.xcodeproj`, `scripts/run-tests.sh`, CI | The pinned release: `.package(url: …, exact: "0.37.0")` in every package manifest, and the same exact pin in the project (Package Dependencies), linked by the app and widget targets |
 
 Both modes resolve the same package identity, so no manifest changes between them. Adopting a release means running `sh scripts/bump-shared.sh <version>` (it moves every pin and both lockfiles), then the full suite. The shared repo's CI builds this app against every candidate commit, so a breaking change fails there before it's tagged.
 
@@ -253,7 +253,7 @@ xcodebuild -project SleepGuard.xcodeproj \
   build
 ```
 
-Or open `SleepGuard.xcodeproj` in Xcode (pinned shared release) or `SleepGuard.xcworkspace` (your local `../SleepGuardShared`), select the **SleepGuard** scheme, and run. Package tests: `sh scripts/run-tests.sh` (all) or `sh scripts/run-tests.sh Models Services`.
+Or open `SleepGuard.xcworkspace` (or `SleepGuard.xcodeproj`; both use the pinned shared release) in Xcode, select the **SleepGuard** scheme, and run. Package tests: `sh scripts/run-tests.sh` (all) or `sh scripts/run-tests.sh Models Services`.
 
 > **Tip:** launch with the `-generateMockData` argument in a DEBUG build to populate the dashboard with a realistic month of sample nights — handy for previewing trends and screenshots.
 
@@ -270,7 +270,7 @@ SleepGuard/
 │   ├── RemoteConfig/        #   RemoteConfigLoader (the only Firebase-aware code)
 │   └── PushNotifications/   #   AppDelegate, notification soft-ask
 ├── SleepGuard.xcodeproj/     # Builds against the pinned SleepGuardShared release
-├── SleepGuard.xcworkspace/  # The project + ../SleepGuardShared as a local package, for day-to-day work
+├── SleepGuard.xcworkspace/  # The project; SleepGuardShared comes pinned, under Package Dependencies
 ├── Packages/              # 15 local packages, shown as the Packages folder in the project (not under Package Dependencies)
 ├── SleepGuardWidgets/       # Widget extension: reads a JSON snapshot from the App Group
 ├── WatchApp/                # watchOS companion sources (not yet an Xcode target)

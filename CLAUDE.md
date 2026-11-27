@@ -255,7 +255,7 @@ These thresholds prevent monolithic views. Enforce them during implementation an
 - **Statistics rules live there too.** The dashboard, trends, calendar and Last 7 Nights numbers come from `SleepCore`'s `NightDashboard`, `ScoreTrend`, `NightPeriod`, `CalendarMonth` and `NightDay`, on `NightSummary` values. Choose nights with `summaryWithoutEvents` (cached fields, no faulting) and build `nightSummary` (reads events) only for the nights a screen shows.
 - **Playback rules live there too.** `ClipPlaybackController` keeps the audio engine; which clip is current, the joined timeline, seeking, auto-advance and the enhanced-audio boost and filter frequencies are `SleepCore`'s `ClipPlaylist`, `PlaybackGain` and `PlaybackEnhancement`.
 - **Shared repo.** `../SleepGuardShared` (its own git repo, checked out next to this one) holds code shared with the other SleepGuard apps: `SleepCore` (the night rules — episodes, snoring duration, stage stats, score inputs — on shared `Night` values; sleep score; detection state machine; the plain value types stored in the models), `SleepStrings` (the string catalog), `SleepGuardDesignKit` (tokens and components, ADR 0005) and `SleepGuardContentKit` (screen content, ADR 0006). Packages depend on a released version (`.package(url: …SleepGuardShared.git, exact: "x.y.z")`) and `import SleepCore` where they name its types.
-  - **Two ways to build.** `SleepGuard.xcworkspace` (the project + `../SleepGuardShared` as a local package) uses your local shared checkout: open it in Xcode for day-to-day work, and edits in the shared repo show up on the next build. `SleepGuard.xcodeproj`, `scripts/run-tests.sh` and CI use the pinned release. The project itself declares SleepGuardShared (exact pin, under Package Dependencies) and links the products the app and widget targets import; `check-imports.py` checks those targets too, and the workspace's local checkout overrides the pin.
+  - **Building against the pinned release** is the default everywhere: `SleepGuard.xcworkspace` holds only the project, which declares SleepGuardShared (exact pin, under Package Dependencies) and links the products the app and widget targets import; `check-imports.py` checks those targets too. **To try unreleased shared code,** add `../SleepGuardShared` to the workspace in Xcode (drag the folder into the navigator): Xcode uses it instead of the pin until you remove it. Never commit that workspace change. From the command line, build through a throwaway workspace outside the repo that lists both (see Build & Report). Never edit the manifests to a path.
   - **Releasing a shared change:** in the shared repo, run its tests, commit, push, tag (`git tag -a 0.2.0 -m "…" && git push origin 0.2.0`); here, `sh scripts/bump-shared.sh 0.2.0`, run the tests, commit the manifests, the project file (its pin) and both `Package.resolved` files.
   - A change there changes every app. See `docs/adr/0004-shared-repo.md`.
 - Navigation types (`RouterDestination`, `SheetDestination`, `RouterPath`, `RootPresentation`, `TabCoordinator`) live in the `Routing` package, not `Services`. `Services` must not import `SwiftUI` or `Routing` (enforced by `check-layering.py`). See `docs/adr/0001-routing-package.md`.
@@ -411,10 +411,12 @@ mcp__XcodeBuildMCP__test_sim
 
 **Fallback (Shell):**
 ```bash
-# Local work (uses ../SleepGuardShared):
+# The pinned shared release (what CI builds; the workspace holds only the project):
 xcodebuild -workspace SleepGuard.xcworkspace -scheme SleepGuard -destination 'platform=iOS Simulator,id=BD630AD5-5A05-4663-8F1B-A17283EBCBF5' build
-# What CI builds (pinned shared release):
-xcodebuild -project SleepGuard.xcodeproj -scheme SleepGuard -destination 'platform=iOS Simulator,id=BD630AD5-5A05-4663-8F1B-A17283EBCBF5' build
+# Against your local ../SleepGuardShared (unreleased changes): a throwaway workspace outside the repo
+W=$TMPDIR/SleepGuardLocal.xcworkspace; mkdir -p $W
+printf '<?xml version="1.0" encoding="UTF-8"?>\n<Workspace version = "1.0">\n<FileRef location = "absolute:%s/SleepGuard.xcodeproj"></FileRef>\n<FileRef location = "absolute:%s/../SleepGuardShared"></FileRef>\n</Workspace>\n' "$PWD" "$PWD" > $W/contents.xcworkspacedata
+xcodebuild -workspace $W -scheme SleepGuard -destination 'platform=iOS Simulator,id=BD630AD5-5A05-4663-8F1B-A17283EBCBF5' build
 ```
 
 ## Session End Requirements
