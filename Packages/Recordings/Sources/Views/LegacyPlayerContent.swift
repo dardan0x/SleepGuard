@@ -1,6 +1,8 @@
 import AudioEngine
 import DesignSystem
 import Models
+import SleepGuardContentKit
+import SleepStore
 import SwiftUI
 
 /// Player content for legacy sessions without per-event clips: the shared
@@ -8,7 +10,7 @@ import SwiftUI
 /// on demand during the sheet's setup.
 struct LegacyPlayerContent: View {
   let player: LegacyClipPlayer
-  let event: SnoreEvent
+  let event: NightEventRecord
   let waveformSamples: [Float]
   let isReady: Bool
   let isLoadingWaveform: Bool

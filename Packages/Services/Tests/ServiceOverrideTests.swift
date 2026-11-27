@@ -1,0 +1,111 @@
+import AudioEngine
+import Config
+import ConfigTestSupport
+import FactoryKit
+import FactoryTesting
+import Foundation
+import Models
+import Platform
+import PlatformTestSupport
+import ServicesTestSupport
+import SleepCore
+import Testing
+@testable import Services
+
+/// Every registered service can be replaced through the container, which is
+/// what views (`@Injected`) and state owners (`Container.shared.x()`) resolve.
+/// `.container` scopes each test's registrations, so they run in parallel.
+@MainActor
+@Suite(.container)
+struct ServiceOverrideTests {
+  @Test func defaultsResolveTheLiveSingletons() {
+    #expect(Container.shared.userPreferences() === UserPreferences.shared)
+    #expect(Container.shared.sessionManager() === SessionManager.shared)
+    #expect(Container.shared.audioRecorder() === AudioRecorder.shared)
+    #expect(Container.shared.sessionCommitter() === SessionCommitter.shared)
+  }
+
+  @Test func audioRecorderOverride() throws {
+    let fake = FakeAudioRecorder()
+    Container.shared.audioRecorder.register { fake }
+
+    try Container.shared.audioRecorder().startRecording(rawAudioFileName: nil)
+
+    #expect(fake.isRecording)
+  }
+
+  @Test func hapticOverrideRecordsCalls() {
+    let fake = FakeHapticManager()
+    Container.shared.hapticManager.register { fake }
+
+    Container.shared.hapticManager().tap()
+
+    #expect(fake.calls == ["tap"])
+  }
+
+  @Test func interrupterOverrideRespectsSessionMute() {
+    let fake = FakeSnoreInterrupterPlayer()
+    Container.shared.snoreInterrupterPlayer.register { fake }
+    let player = Container.shared.snoreInterrupterPlayer()
+
+    player.muteForSession()
+    player.playIfNeeded()
+
+    #expect(fake.playRequests == 1 && !fake.isPlaying)
+  }
+
+  @Test func storeOverrides() {
+    let pending = FakePendingSessionStore()
+    let checkpoints = FakeSessionCheckpointStore()
+    let melodies = FakeCustomMelodyStorage()
+    Container.shared.pendingSessionStore.register { pending }
+    Container.shared.sessionCheckpointStore.register { checkpoints }
+    Container.shared.customMelodyStorage.register { melodies }
+
+    Container.shared.pendingSessionStore().addFile("a.m4a")
+    Container.shared.sessionCheckpointStore().clear()
+    let saved = Container.shared.customMelodyStorage().saveRecording(name: "Mine", from: URL(fileURLWithPath: "/tmp/x.m4a"))
+
+    #expect(pending.files == ["a.m4a"])
+    #expect(checkpoints.loadIfPresent() == nil)
+    #expect(saved.map { melodies.melody(id: $0.id) != nil } == true)
+  }
+
+  @Test func nonisolatedServiceOverrides() async {
+    let writer = FakeSessionRawLogWriter()
+    Container.shared.sessionRawLogWriter.register { writer }
+    Container.shared.storageLimitEnforcer.register { FakeStorageLimitEnforcer() }
+
+    await Container.shared.sessionRawLogWriter().start(
+      sessionID: UUID(),
+      metadata: RawLogMetadata(sessionStart: .now, detectionSensitivity: "medium", detectSleepTalking: false, snoreInterrupterMode: "never"))
+
+    #expect(await writer.metadata?.detectionSensitivity == "medium")
+    #expect(Container.shared.storageLimitEnforcer() is FakeStorageLimitEnforcer)
+  }
+}
+
+/// `UserPreferences` / `AppConfig` doubles: the real types on isolated suites.
+@MainActor
+struct IsolatedStoreTests {
+  @Test func preferencesDoNotLeakBetweenInstances() {
+    let a = UserPreferences.isolated()
+    let b = UserPreferences.isolated()
+
+    a.recordingDelayMinutes = 15
+
+    #expect(a.recordingDelayMinutes == 15)
+    #expect(b.recordingDelayMinutes == 0)
+  }
+
+  @Test func appConfigPersistsAppliedValuesToItsStore() {
+    let defaults = UserDefaults.isolated()
+    AppConfig(defaults: defaults).apply(
+      flags: [FeatureFlag.snoreInterrupter.rawValue: false],
+      tabs: [], learnTab: nil, updateGate: .none)
+
+    // A new instance on the same store reloads the cached remote values.
+    #expect(!AppConfig(defaults: defaults).isEnabled(.snoreInterrupter))
+    #expect(AppConfig.isolated().isEnabled(.snoreInterrupter))
+  }
+}

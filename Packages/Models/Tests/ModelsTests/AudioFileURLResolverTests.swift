@@ -17,7 +17,7 @@ struct AudioFileURLResolverTests {
   @Test func filenameOnlyResolvesInDocuments() throws {
     try withTempFile { name in
       let url = AudioFileURLResolver.resolve(name)
-      #expect(url == AudioFileURLResolver.documentsDirectory.appendingPathComponent(name))
+      #expect(url == AudioFileURLResolver.directory.appendingPathComponent(name))
     }
   }
 

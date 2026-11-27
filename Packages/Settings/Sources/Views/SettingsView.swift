@@ -1,18 +1,23 @@
 import AVFoundation
+import Config
 import DesignSystem
-import Env
 import FactoryKit
+import Health
 import Models
+import Platform
 import Routing
+import Services
 import SwiftData
-import SwiftUI
+public import SwiftUI
+import SleepGuardContentKit
+import SleepStrings
 
 /// Settings: the title row over the shared `SettingsContent`. This view owns
 /// the values (preferences, permissions, feature flags) and what a tap does;
 /// building them lives in `SettingsView+Values.swift`.
 @MainActor
 public struct SettingsView: View {
-  @Injected(\.theme) var theme
+  @Environment(\.theme) private var theme
   @Injected(\.appConfig) var appConfig
   @Injected(\.userPreferences) var userPreferences
   @Injected(\.watchConnectivityManager) var watchConnectivityManager
@@ -45,11 +50,11 @@ public struct SettingsView: View {
       {
         #if DEBUG
         Button("Debug Config") { showDebugConfig = true }
-          .foregroundStyle(theme.textSecondary)
+          .foregroundStyle(theme.palette.textSecondary)
         #endif
       }
     }
-    .background(theme.bgPrimary)
+    .background(theme.palette.bgPrimary)
     .onAppear { microphone = AVAudioSession.sharedInstance().recordPermission }
     .task { await notifications.refreshStatus() }
     #if DEBUG
@@ -92,11 +97,11 @@ public struct SettingsView: View {
     HStack {
       Text(Strings.tabSettings)
         .font(.system(size: 34, weight: .bold))
-        .foregroundStyle(theme.textPrimary)
+        .foregroundStyle(theme.palette.textPrimary)
       Spacer()
       ZStack {
         RoundedRectangle(cornerRadius: 15)
-          .fill(theme.accent)
+          .fill(theme.palette.accent)
           .frame(width: 30, height: 30)
         Image(systemName: "gearshape.fill")
           .font(.system(size: 16))

@@ -1,28 +1,27 @@
 import DesignSystem
-import Env
-import FactoryKit
+import SleepStrings
 import SwiftUI
 
 @MainActor
 struct RecordingsErrorView: View {
-  @Injected(\.theme) private var theme
+  @Environment(\.theme) private var theme
   let onRetry: () -> Void
 
   var body: some View {
     VStack(spacing: 16) {
       Image(systemName: "exclamationmark.triangle")
         .font(.system(size: 48))
-        .foregroundStyle(theme.textTertiary)
+        .foregroundStyle(theme.palette.textTertiary)
 
       Text(Strings.recordingsErrorTitle)
         .font(.headline)
-        .foregroundStyle(theme.textPrimary)
+        .foregroundStyle(theme.palette.textPrimary)
 
       Button(Strings.actionTryAgain) {
         onRetry()
       }
       .font(.system(size: 17, weight: .semibold))
-      .foregroundStyle(theme.accent)
+      .foregroundStyle(theme.palette.accent)
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity)
   }

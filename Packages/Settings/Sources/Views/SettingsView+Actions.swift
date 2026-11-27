@@ -1,5 +1,6 @@
-import Env
 import Models
+import Services
+import SleepStore
 import SwiftData
 import SwiftUI
 
@@ -44,7 +45,7 @@ extension SettingsView {
       // removed from the context before session deletion. This prevents the
       // SwiftData faulting crash that happens when cascade-delete tries to
       // resolve lazy attributes on faulted relationship objects.
-      let allEvents = try modelContext.fetch(FetchDescriptor<SnoreEvent>())
+      let allEvents = try modelContext.fetch(FetchDescriptor<NightEventRecord>())
       for event in allEvents {
         modelContext.delete(event)
       }
@@ -52,11 +53,11 @@ extension SettingsView {
         try modelContext.save()
       }
 
-      let sessions = try modelContext.fetch(FetchDescriptor<SleepSession>())
+      let sessions = try modelContext.fetch(FetchDescriptor<NightRecord>())
       for session in sessions {
         // Resolve transformable faults before deletion to prevent
         // "detached from a context without resolving attribute faults" crash.
-        _ = session.sleepStageSegments
+        _ = session.sleepStages
         _ = session.recordingGaps
         deleteSessionFiles(session)
         modelContext.delete(session)

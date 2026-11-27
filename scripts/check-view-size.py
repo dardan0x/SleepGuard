@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """View size check: no view file over 200 lines (AGENTS.md "View Componentization").
 
-Scans every Swift file under `Packages/*/Sources/Views/` and
-`Packages/*/Sources/Components/`. A file over the limit fails unless it is in
+Scans every Swift file under `Packages/*/Sources/Views/`,
+`Packages/*/Sources/Components/` and the app target (`SleepGuard/`, whose
+files are views or the composition root that hosts them). A file over the limit fails unless it is in
 ALLOWLIST, and an allowlisted file fails if it grows past its recorded ceiling.
 An entry whose file is back under the limit (or gone) also fails, so the
 allowlist can only shrink: delete the entry when you split the file.
@@ -28,9 +29,12 @@ def line_count(path: pathlib.Path) -> int:
 
 def main() -> int:
     files = sorted(
-        path
-        for folder in ("Views", "Components")
-        for path in ROOT.glob(f"Packages/*/Sources/{folder}/**/*.swift")
+        [
+            path
+            for folder in ("Views", "Components")
+            for path in ROOT.glob(f"Packages/*/Sources/{folder}/**/*.swift")
+        ]
+        + list(ROOT.glob("SleepGuard/**/*.swift"))
     )
     failures = []
     seen = set()

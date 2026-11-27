@@ -1,8 +1,10 @@
 import AudioEngine
+import Config
 import DesignSystem
-import Env
 import FactoryKit
 import Models
+import SleepGuardContentKit
+import SleepStore
 import SwiftUI
 
 /// Player content for clip sessions: the shared `PlayerContent` (card with
@@ -15,8 +17,8 @@ struct ClipPlayerContent: View {
   let waveformSamples: [Float]
   let isReady: Bool
   let isLoadingWaveform: Bool
-  let sortedEvents: [SnoreEvent]
-  let onSelectEvent: (SnoreEvent, Int) -> Void
+  let sortedEvents: [NightEventRecord]
+  let onSelectEvent: (NightEventRecord, Int) -> Void
 
   var body: some View {
     if controller.currentEvent != nil {

@@ -1,15 +1,15 @@
+import Config
 import DesignSystem
-import Env
 import FactoryKit
-import Models
 import SwiftData
-import SwiftUI
+public import SwiftUI
+import SleepStrings
 
 @MainActor
 public struct SessionDetailView: View {
   let sessionID: UUID
 
-  @Injected(\.theme) private var theme
+  @Environment(\.theme) private var theme
   @Injected(\.appConfig) private var appConfig
   @Injected(\.userPreferences) private var userPreferences
   @Environment(\.modelContext) private var modelContext
@@ -30,7 +30,8 @@ public struct SessionDetailView: View {
         case .loading:
           Color.clear
             .task {
-              await model.load(modelContext: modelContext)
+              model.load(modelContext: modelContext)
+              await model.enrichIfNeeded(modelContext: modelContext)
             }
         case let .loaded(session, _, isClipSession):
           SessionDetailLoadedView(
@@ -51,77 +52,18 @@ public struct SessionDetailView: View {
           }
       }
     }
-    .background(theme.bgPrimary.ignoresSafeArea())
+    .background(theme.palette.bgPrimary.ignoresSafeArea())
   }
 
   private var errorBody: some View {
     VStack(spacing: 16) {
       Image(systemName: "exclamationmark.triangle")
         .font(.system(size: 48))
-        .foregroundStyle(theme.textTertiary)
+        .foregroundStyle(theme.palette.textTertiary)
 
       Text(Strings.recordingsErrorMessage)
         .font(.headline)
-        .foregroundStyle(theme.textPrimary)
+        .foregroundStyle(theme.palette.textPrimary)
     }
-  }
-
-  // MARK: - Fake Player Placeholder
-
-  //
-  // NOTE: `fakePlayerSection` and the marker helpers below are only referenced
-  // from the commented-out mini player call site in the loaded body. Kept
-  // verbatim during the F18 split; safe to delete if the mini player is not
-  // coming back.
-
-  private func fakePlayerSection(session: SleepSession, sortedEvents: [SnoreEvent], isClipSession: Bool) -> some View {
-    let totalDuration: TimeInterval = isClipSession
-      ? sortedEvents.map(\.snoreDuration).reduce(0, +)
-      : session.totalDuration
-    let markers = isClipSession
-      ? clipEventMarkers(events: sortedEvents, totalDuration: totalDuration)
-      : legacyEventMarkers(session: session, sortedEvents: sortedEvents)
-    let colors = eventMarkerColors(events: sortedEvents)
-
-    return VStack(alignment: .leading, spacing: 8) {
-      Text(Strings.recordingsDetailTimelineLabel)
-        .font(.system(size: 12, weight: .semibold))
-        .foregroundStyle(theme.textTertiary)
-        .tracking(1)
-
-      SessionDetailMiniPlayerView(
-        session: session,
-        isPlaying: false,
-        progress: 0,
-        totalDuration: totalDuration,
-        eventMarkers: markers,
-        eventMarkerColors: colors,
-        isExpandable: false,
-        showsPlaybackButton: false,
-        onTogglePlayback: {},
-        onScrub: { _ in },
-        onExpand: {})
-    }
-  }
-
-  private func clipEventMarkers(events: [SnoreEvent], totalDuration: TimeInterval) -> [Double] {
-    guard totalDuration > 0 else { return [] }
-    var accumulated: TimeInterval = 0
-    var markers: [Double] = []
-    for event in events {
-      markers.append(accumulated / totalDuration)
-      accumulated += event.snoreDuration
-    }
-    return markers
-  }
-
-  private func legacyEventMarkers(session: SleepSession, sortedEvents: [SnoreEvent]) -> [Double] {
-    let total = session.totalDuration
-    guard total > 0 else { return [] }
-    return sortedEvents.map { $0.timestamp.timeIntervalSince(session.startDate) / total }
-  }
-
-  private func eventMarkerColors(events: [SnoreEvent]) -> [Color] {
-    events.map { theme.intensityColor($0.intensity) }
   }
 }

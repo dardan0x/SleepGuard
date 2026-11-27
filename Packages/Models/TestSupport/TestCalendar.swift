@@ -1,4 +1,4 @@
-import Foundation
+public import Foundation
 
 /// Fixed Gregorian/UTC calendar so date-based tests don't depend on the
 /// simulator's time zone.

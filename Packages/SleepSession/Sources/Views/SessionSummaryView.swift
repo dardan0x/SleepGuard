@@ -1,16 +1,20 @@
 import AudioEngine
+import Config
 import DesignSystem
-import Env
 import FactoryKit
-import Models
+import Services
+public import Models
 import SwiftData
-import SwiftUI
+public import SwiftUI
+public import SleepStore
+import SleepGuardContentKit
+import SleepStrings
 
 @MainActor
 public struct SessionSummaryView: View {
-  public let session: SleepSession
+  public let session: NightRecord
 
-  public init(session: SleepSession) {
+  public init(session: NightRecord) {
     self.session = session
   }
 
@@ -31,7 +35,7 @@ public struct SessionSummaryView: View {
       .alert(Strings.sessionSummaryTooShortTitle, isPresented: isPresented(.tooShort)) {
         Button(Strings.actionOk, role: .cancel) {}
       } message: {
-        Text(String(format: Strings.sessionSummaryTooShortInfoFormat, Int(SleepSession.minimumSaveDuration / 60)))
+        Text(String(format: Strings.sessionSummaryTooShortInfoFormat, Int(NightRecord.minimumSaveDuration / 60)))
       }
       .alert(Strings.saveFailed, isPresented: isPresented(.saveFailed)) {
         Button(Strings.actionOk, role: .cancel) {}
@@ -55,7 +59,7 @@ public struct SessionSummaryView: View {
   // MARK: - Save / discard
 
   private func saveSession() {
-    if session.totalDuration < SleepSession.minimumSaveDuration {
+    if session.totalDuration < NightRecord.minimumSaveDuration {
       activeAlert = .tooShort
       return
     }

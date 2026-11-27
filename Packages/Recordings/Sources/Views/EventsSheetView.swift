@@ -1,32 +1,33 @@
 import DesignSystem
-import Env
-import FactoryKit
 import Models
 import SleepCore
-import SwiftUI
+public import SwiftUI
+import SleepGuardContentKit
+import SleepStore
+import SleepStrings
 
 /// Bottom sheet showing every row under the detail's filter as cards (the
 /// shared `EventsGridContent`). Tapping a card's Play button presents the
 /// player for that row's episode without dismissing the events sheet.
 @MainActor
 public struct EventsSheetView: View {
-  let session: SleepSession
+  let session: NightRecord
   let rows: [EventListRow]
   let isClipSession: Bool
 
-  @Injected(\.theme) private var theme
+  @Environment(\.theme) private var theme
   @Environment(\.dismiss) private var dismiss
 
-  @State private var selectedEvent: SnoreEvent?
+  @State private var selectedEvent: NightEventRecord?
 
   public var body: some View {
     NavigationStack {
       ScrollView(showsIndicators: false) {
         EventsGridContent(rows: rows) { row in
-          selectedEvent = session.events?.first { $0.id == row.id }
+          selectedEvent = session.events.first { $0.id == row.id }
         }
       }
-      .background(theme.bgPrimary.ignoresSafeArea())
+      .background(theme.palette.bgPrimary.ignoresSafeArea())
       .navigationTitle(Strings.recordingsDetailEventsLabel)
       .navigationBarTitleDisplayMode(.inline)
       .toolbar {
@@ -36,7 +37,7 @@ public struct EventsSheetView: View {
           } label: {
             Label(Strings.actionClose, systemImage: "xmark.circle.fill").labelStyle(.iconOnly)
               .font(.system(size: 24))
-              .foregroundStyle(theme.textTertiary)
+              .foregroundStyle(theme.palette.textTertiary)
           }
         }
       }

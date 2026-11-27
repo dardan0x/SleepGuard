@@ -1,4 +1,4 @@
-import Foundation
+public import Foundation
 
 /// Reads and writes `WidgetSnapshot` as JSON in the shared App Group container.
 public enum WidgetSnapshotStore {

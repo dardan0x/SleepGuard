@@ -1,13 +1,12 @@
 import DesignSystem
-import FactoryKit
 import Models
+import SleepStrings
 import SwiftUI
 
 /// Waveform section of the advanced player: tappable waveform shape plus
 /// the seek hint.
 struct AdvancedWaveformSection: View {
-  @Injected(\.theme) private var theme
-
+  @Environment(\.theme) private var theme
   let samples: [Float]
   let intensityColor: Color
   let onWaveformTap: (Double) -> Void
@@ -28,7 +27,7 @@ struct AdvancedWaveformSection: View {
 
       Text(Strings.recordingsPlayerSeekHint)
         .font(.system(size: 11, weight: .medium))
-        .foregroundStyle(theme.textTertiary)
+        .foregroundStyle(theme.palette.textTertiary)
     }
   }
 }

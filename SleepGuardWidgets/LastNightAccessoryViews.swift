@@ -1,5 +1,7 @@
 import DesignSystem
 import Models
+import SleepGuardDesignKit
+import SleepStrings
 import SwiftUI
 import WidgetKit
 
@@ -66,7 +68,7 @@ struct LastNightInlineView: View {
         String(
           format: Strings.widgetLastNightInline,
           "\(night.score)",
-          DurationFormatter.hoursAndMinutes(Int(night.snoringDuration / 60))),
+          DurationText.hoursAndMinutes(night.snoringDuration)),
         systemImage: "moon.zzz.fill")
     } else {
       Label(Strings.widgetLastNightEmptyTitle, systemImage: "moon.zzz.fill")

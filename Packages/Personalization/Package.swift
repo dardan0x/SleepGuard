@@ -8,25 +8,32 @@ let package = Package(
     .library(name: "Personalization", targets: ["Personalization"]),
   ],
   dependencies: [
+    .package(path: "../Platform"),
+    .package(path: "../Config"),
     .package(path: "../Models"),
-    .package(path: "../Env"),
+    .package(path: "../Services"),
     .package(path: "../DesignSystem"),
-    .package(url: "https://github.com/dardan0x/SleepGuardShared.git", exact: "0.27.0"),
+    .package(url: "https://github.com/dardan0x/SleepGuardShared.git", exact: "0.37.0"),
     .package(url: "https://github.com/hmlongco/Factory", from: "3.5.2"),
   ],
   targets: [
     .target(
       name: "Personalization",
       dependencies: [
+        .product(name: "Platform", package: "Platform"),
+        .product(name: "Config", package: "Config"),
         .product(name: "Models", package: "Models"),
-        .product(name: "Env", package: "Env"),
+        .product(name: "Services", package: "Services"),
         .product(name: "DesignSystem", package: "DesignSystem"),
         .product(name: "SleepCore", package: "SleepGuardShared"),
         .product(name: "FactoryKit", package: "Factory"),
+        .product(name: "SleepStore", package: "SleepGuardShared"),
+        .product(name: "SleepGuardContentKit", package: "SleepGuardShared"),
       ],
       path: "Sources",
       swiftSettings: [
         .swiftLanguageMode(.v6),
+        .enableUpcomingFeature("InternalImportsByDefault"),
         .defaultIsolation(MainActor.self),
       ]),
   ])

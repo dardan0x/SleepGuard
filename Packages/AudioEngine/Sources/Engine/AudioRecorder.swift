@@ -1,14 +1,8 @@
 import AVFoundation
-#if canImport(UIKit)
-import UIKit
-#endif
-import Models
-import Observation
-
-public enum RecordingError: Error {
-  case noMicrophoneInput
-  case invalidAudioFormat
-}
+public import Foundation
+public import Observation
+import SleepAudioKit
+import SleepCore
 
 /// Converts dBFS (negative digital scale) to a 0-100 percentage for UI display.
 /// -60 dB → 0%, -20 dB → 100%.
@@ -21,11 +15,13 @@ public func audioLevelPercentage(from db: Float) -> Int {
   audioLevelPercentage(from: Double(db))
 }
 
+/// SleepGuard's capture: SleepGuardShared's `CaptureEngine` (the same as
+/// SleepGuardUIKitWay's), with the levels published for the screens and the
+/// detection callbacks. The engine owns the audio session, the tap, the clip
+/// files, interruptions and route changes; this keeps what the screens read.
 @MainActor
 @Observable
 public final class AudioRecorder: AudioRecording {
-  public static let shared = AudioRecorder()
-
   public var isRecording = false
   public var isPaused = false
   public var isWarmedUp = false
@@ -33,58 +29,34 @@ public final class AudioRecorder: AudioRecording {
   /// Peak dB of the current buffer (0 dBFS = digital full scale). Tracks impulsive
   /// peaks better than RMS `currentDB`, which is used for intensity classification.
   public var currentPeakDB: Float = -160.0
-  /// Spectral snore-likelihood score (0–1). Updated in real-time from FFT analysis.
+  /// Spectral snore-likelihood score (0–1); 0 unless the raw night is kept.
   public var spectralScore: Float = 0
+  public private(set) var snoreConfidence: Float = 0
+  public private(set) var speechConfidence: Float = 0
   public var hasPermission = false
-  /// Whether audio is currently being written to a file. Set to false after repeated write failures.
-  public var isWritingToFile = false
   public private(set) var currentEventID: UUID?
+  /// Called on the main actor for every buffer, after the levels above
+  /// update, with the time the buffer arrived. Drives detection's sampling.
+  public var onLevels: (@MainActor (Date) -> Void)?
+  /// Called when the system interrupts capture (`true`, e.g. a call) and when
+  /// capture runs again (`false`), with the time it happened.
+  public var onCaptureInterruption: (@MainActor (_ interrupted: Bool, _ at: Date) -> Void)?
 
-  private var audioEngine: AVAudioEngine?
-  private var warmupEngine: AVAudioEngine?
-  private let tap = TapProcessor()
-  private let soundAnalyzer: any SoundAnalysisDetecting
-  private var recordingFormat: AVAudioFormat?
+  @ObservationIgnored private let engine: CaptureEngine
+  @ObservationIgnored private let clipsDirectory: URL
+  @ObservationIgnored private var events: Task<Void, Never>?
 
-  public init(soundAnalyzer: any SoundAnalysisDetecting = SoundAnalysisDetector.shared) {
-    self.soundAnalyzer = soundAnalyzer
+  /// Event clips and the raw night are written to `clipsDirectory`.
+  public init(clipsDirectory: URL) {
+    self.clipsDirectory = clipsDirectory
+    engine = CaptureEngine(clipsDirectory: clipsDirectory)
     checkPermission()
-    setupNotifications()
-  }
-
-  private func setupNotifications() {
+    // The Snore Interrupter's melody pauses the microphone, so the app doesn't
+    // hear itself. A stop without a pause (the night ending) resumes nothing.
     NotificationCenter.default.addObserver(
-      self,
-      selector: #selector(handleInterruption),
-      name: AVAudioSession.interruptionNotification,
-      object: nil)
+      self, selector: #selector(handleMelodyWillPlay), name: .snoreInterrupterWillPlay, object: nil)
     NotificationCenter.default.addObserver(
-      self,
-      selector: #selector(handleRouteChange),
-      name: .AVAudioEngineConfigurationChange,
-      object: nil)
-    NotificationCenter.default.addObserver(
-      self,
-      selector: #selector(handleMelodyWillPlay),
-      name: .snoreInterrupterWillPlay,
-      object: nil)
-    NotificationCenter.default.addObserver(
-      self,
-      selector: #selector(handleMelodyDidStop),
-      name: .snoreInterrupterDidStop,
-      object: nil)
-    NotificationCenter.default.addObserver(
-      self,
-      selector: #selector(handleSessionRouteChange),
-      name: AVAudioSession.routeChangeNotification,
-      object: nil)
-    #if canImport(UIKit)
-    NotificationCenter.default.addObserver(
-      self,
-      selector: #selector(handleAppDidBecomeActive),
-      name: UIApplication.didBecomeActiveNotification,
-      object: nil)
-    #endif
+      self, selector: #selector(handleMelodyDidStop), name: .snoreInterrupterDidStop, object: nil)
   }
 
   @objc private func handleMelodyWillPlay() {
@@ -92,78 +64,14 @@ public final class AudioRecorder: AudioRecording {
   }
 
   @objc private func handleMelodyDidStop() {
-    do {
-      try resumeRecording()
-    } catch {
-      Log.audio.error("resumeRecording() failed after melody: \(String(describing: error), privacy: .public)")
-    }
-  }
-
-  @objc private func handleInterruption(_ notification: Notification) {
-    guard let userInfo = notification.userInfo,
-          let typeValue = userInfo[AVAudioSessionInterruptionTypeKey] as? UInt,
-          let type = AVAudioSession.InterruptionType(rawValue: typeValue) else { return }
-
-    switch type {
-    case .began:
-      // Interruption started — stop engine but keep isRecording flag
-      audioEngine?.stop()
-    case .ended:
-      guard let optionsValue = userInfo[AVAudioSessionInterruptionOptionKey] as? UInt else { return }
-      let options = AVAudioSession.InterruptionOptions(rawValue: optionsValue)
-      if options.contains(.shouldResume) {
-        resumeRecordingIfNeeded()
-      }
-    @unknown default:
-      break
-    }
-  }
-
-  @objc private func handleRouteChange(_: Notification) {
-    resumeRecordingIfNeeded()
-  }
-
-  @objc private func handleSessionRouteChange(_ notification: Notification) {
-    guard let userInfo = notification.userInfo,
-          let reasonValue = userInfo[AVAudioSessionRouteChangeReasonKey] as? UInt,
-          let reason = AVAudioSession.RouteChangeReason(rawValue: reasonValue) else { return }
-
-    switch reason {
-    case .newDeviceAvailable, .oldDeviceUnavailable:
-      resumeRecordingIfNeeded()
-    default:
-      break
-    }
-  }
-
-  #if canImport(UIKit)
-  @objc private func handleAppDidBecomeActive() {
-    resumeRecordingIfNeeded()
-  }
-  #endif
-
-  private func resumeRecordingIfNeeded() {
-    guard isRecording, !isPaused else { return }
-    if let engine = audioEngine, engine.isRunning { return }
-    do {
-      try resumeRecording()
-    } catch {
-      Log.audio.error("Failed to resume recording: \(String(describing: error), privacy: .public)")
-    }
+    resumeRecording()
   }
 
   public func checkPermission() {
     #if targetEnvironment(simulator)
     hasPermission = true
     #else
-    switch AVAudioSession.sharedInstance().recordPermission {
-    case .granted:
-      hasPermission = true
-    case .denied, .undetermined:
-      hasPermission = false
-    @unknown default:
-      hasPermission = false
-    }
+    hasPermission = AVAudioApplication.shared.recordPermission == .granted
     #endif
   }
 
@@ -172,194 +80,94 @@ public final class AudioRecorder: AudioRecording {
     hasPermission = true
     return true
     #else
-    let granted = await withCheckedContinuation { continuation in
-      AVAudioSession.sharedInstance().requestRecordPermission { granted in
-        continuation.resume(returning: granted)
-      }
-    }
-    hasPermission = granted
-    return granted
+    hasPermission = await engine.requestPermission()
+    return hasPermission
     #endif
   }
 
-  public func startRecording(audioFileURL: URL? = nil) throws {
+  public func startRecording(rawAudioFileName: String? = nil) throws {
     guard hasPermission else { return }
-
-    let session = AVAudioSession.sharedInstance()
-    try session.setCategory(.playAndRecord, mode: .measurement, options: [.defaultToSpeaker, .allowBluetooth, .mixWithOthers])
-    try session.setActive(true)
-
-    #if !targetEnvironment(simulator)
-    guard !session.currentRoute.inputs.isEmpty else {
-      throw RecordingError.noMicrophoneInput
-    }
-    #endif
-
-    let engine = AVAudioEngine()
-    let input = engine.inputNode
-    let format = input.outputFormat(forBus: 0)
-
-    guard format.channelCount > 0, format.sampleRate > 0 else {
-      throw RecordingError.invalidAudioFormat
-    }
-
-    if let audioFileURL {
-      tap.audioFile = try AVAudioFile(forWriting: audioFileURL, settings: format.settings)
-    }
-    isWritingToFile = tap.isWritingToFile
-
-    // Tap the microphone directly. A record-only graph that routes the input
-    // through to mainMixerNode also feeds the speaker, and relying on volume = 0
-    // to mute it leaks — a mic that can hear the speaker forms a feedback loop.
-    // Tapping the input node captures full-band audio with no output path at all,
-    // so there is nothing to feed back.
-    installTap(on: input, format: format)
-    try engine.start()
-    audioEngine = engine
-    recordingFormat = format
-    tap.streamAnalyzer = soundAnalyzer.startAnalyzing(format: format)
+    let stream = try engine.start(rawAudioFileName: rawAudioFileName)
     isRecording = true
     isPaused = false
+    events = Task { [weak self] in
+      for await event in stream {
+        self?.handle(event)
+      }
+    }
   }
 
   public func pauseRecording() {
-    guard isRecording, let engine = audioEngine else { return }
-    isPaused = true
-    tap.streamAnalyzer = nil
-    soundAnalyzer.stopAnalyzing()
-    engine.stop()
-    // Remove the tap from the input node so the engine can be safely deallocated.
-    // AVAudioEngine cannot be reliably restarted after stop() when a tap is installed.
-    engine.inputNode.removeTap(onBus: 0)
-    audioEngine = nil
-    // audioFile is intentionally kept alive so resumeRecording() can continue appending.
-  }
-
-  public func resumeRecording() throws {
     guard isRecording else { return }
-    let session = AVAudioSession.sharedInstance()
-    try session.setCategory(.playAndRecord, mode: .measurement, options: [.defaultToSpeaker, .allowBluetooth, .mixWithOthers])
-    try session.setActive(true)
-
-    let engine = AVAudioEngine()
-    let input = engine.inputNode
-    let format = input.outputFormat(forBus: 0)
-
-    guard format.channelCount > 0, format.sampleRate > 0 else {
-      throw RecordingError.invalidAudioFormat
-    }
-
-    installTap(on: input, format: format)
-    try engine.start()
-    audioEngine = engine
-    recordingFormat = format
-    tap.streamAnalyzer = soundAnalyzer.startAnalyzing(format: format)
-    isPaused = false
+    engine.pause()
+    isPaused = engine.isPaused
   }
 
-  public func startEventFile(eventID: UUID, url: URL) throws {
-    guard let format = recordingFormat else { return }
-    tap.eventFile = try AVAudioFile(forWriting: url, settings: format.settings)
+  public func resumeRecording() {
+    engine.resume()
+    isPaused = engine.isPaused
+  }
+
+  public func startEventFile(eventID: UUID) throws {
+    try engine.startClip(id: eventID)
     currentEventID = eventID
-    isWritingToFile = tap.isWritingToFile
   }
 
   public func finalizeEventFile() -> URL? {
-    let url = tap.eventFile?.url
-    tap.eventFile = nil
     currentEventID = nil
-    isWritingToFile = tap.isWritingToFile
-    return url
+    return engine.closeClip().map(clipsDirectory.appendingPathComponent)
   }
 
-  public func stopRecording() {
-    tap.reset()
-    soundAnalyzer.stopAnalyzing()
-    audioEngine?.stop()
-    audioEngine?.inputNode.removeTap(onBus: 0)
-    audioEngine = nil
+  public func discardEventFile() {
     currentEventID = nil
+    engine.discardClip()
+  }
+
+  /// An event clip still open stays open for `finalizeEventFile` or
+  /// `discardEventFile`: the night's last event is finalized after this.
+  public func stopRecording() {
+    engine.stop()
+    events?.cancel()
+    events = nil
     isRecording = false
     isPaused = false
-    isWritingToFile = false
     currentDB = -160.0
     currentPeakDB = -160.0
     spectralScore = 0
-
-    try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+    snoreConfidence = 0
+    speechConfidence = 0
   }
 
   // MARK: - Warmup (keeps audio I/O alive during a delayed-start countdown)
 
-  /// Activates the audio session and starts a minimal input engine so the app
-  /// remains eligible for background audio execution while the user-configured
-  /// recording delay counts down. Buffers are discarded; no file is written and
-  /// no detection is run.
+  /// Keeps the microphone running without listening while the recording
+  /// delay counts down, so the app stays eligible for background audio.
   public func startWarmup() throws {
-    guard hasPermission else { return }
-    guard !isWarmedUp, warmupEngine == nil else { return }
-
-    let session = AVAudioSession.sharedInstance()
-    try session.setCategory(.playAndRecord, mode: .measurement, options: [.defaultToSpeaker, .allowBluetooth, .mixWithOthers])
-    try session.setActive(true)
-
-    #if !targetEnvironment(simulator)
-    guard !session.currentRoute.inputs.isEmpty else {
-      throw RecordingError.noMicrophoneInput
-    }
-    #endif
-
-    let engine = AVAudioEngine()
-    let input = engine.inputNode
-    let format = input.outputFormat(forBus: 0)
-
-    guard format.channelCount > 0, format.sampleRate > 0 else {
-      throw RecordingError.invalidAudioFormat
-    }
-
-    // Tap the input to keep I/O alive, but discard every buffer. No analysis,
-    // no file writes — the countdown view handles the timer.
-    input.installTap(onBus: 0, bufferSize: 1024, format: format) { @Sendable _, _ in
-      // Intentionally empty.
-    }
-
-    try engine.start()
-    warmupEngine = engine
+    guard hasPermission, !isWarmedUp else { return }
+    try engine.warmUp()
     isWarmedUp = true
   }
 
-  /// Stops the warmup engine and tears down the input tap. Deactivates the
-  /// audio session only if a real recording is not currently in progress.
+  /// Ends the warm-up; the session stays active if a night is recording.
   public func stopWarmup() {
     guard isWarmedUp else { return }
-    warmupEngine?.stop()
-    warmupEngine?.inputNode.removeTap(onBus: 0)
-    warmupEngine = nil
+    engine.coolDown()
     isWarmedUp = false
-    if !isRecording {
-      try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
-    }
   }
 
-  // MARK: - Tap
-
-  /// AVAudioEngine calls the tap off the main thread, so the closure must be
-  /// `@Sendable` (nonisolated); all buffer work happens in `TapProcessor`.
-  /// It taps the microphone directly — no output path, no feedback.
-  private func installTap(on input: AVAudioInputNode, format: AVAudioFormat) {
-    let tap = tap
-    let sampleRate = format.sampleRate
-    input.installTap(onBus: 0, bufferSize: 1024, format: format) { @Sendable [weak self] buffer, _ in
-      let levels = tap.process(buffer, sampleRate: sampleRate)
-      Task { @MainActor in
-        guard let self else { return }
-        self.currentDB = levels.db
-        self.currentPeakDB = levels.peakDB
-        self.spectralScore = levels.spectralScore
-        if levels.writesDisabled {
-          self.isWritingToFile = false
-        }
-      }
+  private func handle(_ event: CaptureEvent) {
+    switch event {
+    case let .sample(sample):
+      currentDB = sample.db
+      currentPeakDB = sample.peakDB
+      spectralScore = sample.spectralScore
+      snoreConfidence = sample.snoreConfidence
+      speechConfidence = sample.speechConfidence
+      onLevels?(sample.time)
+    case let .interrupted(at):
+      onCaptureInterruption?(true, at)
+    case let .resumed(at):
+      onCaptureInterruption?(false, at)
     }
   }
 }

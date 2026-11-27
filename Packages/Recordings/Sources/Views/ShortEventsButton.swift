@@ -1,5 +1,5 @@
 import DesignSystem
-import FactoryKit
+import SleepStrings
 import SwiftUI
 
 /// "N short events": opens the player on the snoring episodes too short for
@@ -7,8 +7,7 @@ import SwiftUI
 struct ShortEventsButton: View {
   let count: Int
   let action: () -> Void
-  @Injected(\.theme) private var theme
-
+  @Environment(\.theme) private var theme
   var body: some View {
     if count > 0 {
       Button(action: action) {
@@ -18,11 +17,11 @@ struct ShortEventsButton: View {
           Text(String(format: Strings.sessionDetailHiddenEventsFormat, count))
             .font(.system(size: 15, weight: .medium))
         }
-        .foregroundStyle(theme.accent)
+        .foregroundStyle(theme.palette.accent)
         .frame(maxWidth: .infinity)
         .padding(.vertical, 12)
-        .background(theme.accent.opacity(0.12))
-        .cornerRadius(theme.radiusCard)
+        .background(theme.palette.accent.opacity(0.12))
+        .cornerRadius(theme.radii.card)
       }
     }
   }

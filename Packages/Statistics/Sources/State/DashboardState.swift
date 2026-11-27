@@ -1,6 +1,7 @@
 import Foundation
 import Models
 import SleepCore
+import SleepStore
 
 /// What the Statistics dashboard shows, derived from the stored sessions.
 ///
@@ -8,12 +9,12 @@ import SleepCore
 /// `@Query` results and `Date()`; tests pass fixtures and a fixed `now`.
 struct DashboardState {
   /// The most recent session by start date.
-  let session: SleepSession
+  let session: NightRecord
   /// Mean score of every session that started on the same calendar day as `session`.
   let dayScore: Int
   let daySessionCount: Int
   /// Up to 7 most recent sessions, newest first.
-  let recentSessions: [SleepSession]
+  let recentSessions: [NightRecord]
   /// `session` started yesterday relative to `now` (by start date, not end date).
   let isLastNight: Bool
   /// The week strip: 7 days ending on `now`'s day, with each day's snoring level.
@@ -25,7 +26,7 @@ struct DashboardState {
 
   /// `nil` when there are no sessions. `sessions` may be in any order. The
   /// rules are SleepCore's `NightDashboard`; this maps its nights back to models.
-  static func make(from sessions: [SleepSession], now: Date, calendar: Calendar = .current) -> DashboardState? {
+  static func make(from sessions: [NightRecord], now: Date, calendar: Calendar = .current) -> DashboardState? {
     guard let dashboard = NightDashboard.make(from: sessions.summariesWithoutEvents, now: now, calendar: calendar) else {
       return nil
     }

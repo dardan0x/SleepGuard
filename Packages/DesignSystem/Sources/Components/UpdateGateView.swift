@@ -1,6 +1,6 @@
-import FactoryKit
-import Models
-import SwiftUI
+public import Models
+public import SwiftUI
+import SleepStrings
 
 /// Presents a soft (dismissible) or hard (blocking) update prompt based on the
 /// `UpdateGate` thresholds from Remote Config, compared against the running
@@ -10,7 +10,7 @@ public struct UpdateGateView: View {
   private let currentVersion: String
   private let openAppStore: () -> Void
 
-  @Injected(\.theme) private var theme
+  @Environment(\.theme) private var theme
   @State private var softDismissed = false
   @AppStorage("lastSoftUpdatePromptVersion") private var lastSoftPromptVersion = ""
 
@@ -55,32 +55,32 @@ public struct UpdateGateView: View {
 
   private func gate(title: String, message: String, primary: String, dismissible: Bool) -> some View {
     ZStack {
-      theme.bgPrimary.opacity(0.92)
+      theme.palette.bgPrimary.opacity(0.92)
         .ignoresSafeArea()
 
       VStack(spacing: 16) {
         Image(systemName: "arrow.up.circle.fill")
           .font(.system(size: 48))
-          .foregroundStyle(theme.accent)
+          .foregroundStyle(theme.palette.accent)
 
         Text(title)
           .font(.system(size: 22, weight: .bold))
-          .foregroundStyle(theme.textPrimary)
+          .foregroundStyle(theme.palette.textPrimary)
           .multilineTextAlignment(.center)
 
         Text(message)
           .font(.system(size: 15))
-          .foregroundStyle(theme.textSecondary)
+          .foregroundStyle(theme.palette.textSecondary)
           .multilineTextAlignment(.center)
 
         Button(action: openAppStore) {
           Text(primary)
             .font(.system(size: 17, weight: .semibold))
-            .foregroundStyle(theme.textPrimary)
+            .foregroundStyle(theme.palette.textPrimary)
             .frame(maxWidth: .infinity)
             .frame(height: 50)
-            .background(theme.accent)
-            .clipShape(RoundedRectangle(cornerRadius: theme.radiusSmall))
+            .background(theme.palette.accent)
+            .clipShape(RoundedRectangle(cornerRadius: theme.radii.small))
         }
         .buttonStyle(.plain)
 
@@ -91,14 +91,14 @@ public struct UpdateGateView: View {
           } label: {
             Text(Strings.updateActionLater)
               .font(.system(size: 15, weight: .medium))
-              .foregroundStyle(theme.textTertiary)
+              .foregroundStyle(theme.palette.textTertiary)
           }
           .buttonStyle(.plain)
         }
       }
       .padding(28)
-      .background(theme.bgCard)
-      .clipShape(RoundedRectangle(cornerRadius: theme.radiusCard))
+      .background(theme.palette.bgCard)
+      .clipShape(RoundedRectangle(cornerRadius: theme.radii.card))
       .padding(.horizontal, 32)
     }
   }

@@ -4,19 +4,22 @@
 Rules (see AGENTS.md "UI Dependencies in Non-View Code"):
   1. `import DesignSystem` is only allowed in view files (Sources/Views/,
      Sources/Components/) and in the explicit content-engine allowlist
-     (engines whose output IS user-facing text).
+     (engines whose output IS user-facing text; none today).
   2. Core packages (Models, AudioEngine) must not import SwiftUI/UIKit/
      DesignSystem at all.
-  3. Env (services) must not import SwiftUI: navigation lives in the
-     `Routing` package (docs/adr/0001-routing-package.md).
+  3. Services (the recording night) must not import SwiftUI or Routing: navigation lives in
+     the `Routing` package, above the services (docs/adr/0001, 0008).
   4. Feature packages and DesignSystem never touch an app service's
      `.shared`: they resolve it from the container (`@Injected` in views,
      `Container.shared.x()` in state owners), so tests/previews can swap it.
   5. No `print(` in package Sources or the app target: log through
-     `Log.<category>` (os.Logger, Models/Sources/Helpers/Log.swift).
+     `Log.<category>` (os.Logger, SleepGuardShared's SleepLogging).
   6. View files never take a service through `init` (a stored property typed
      as a service protocol, `any …ing` / `any …Providing`): they resolve it
      with `@Injected`. Init injection is for testable non-view types.
+  7. No `@_exported import` anywhere (packages, app, widgets): every file
+     imports what it uses and every target declares it (check-imports.py),
+     so no dependency is hidden behind another module (F27-T26).
 
 Exits 1 with a file:line listing when any violation is found.
 """
@@ -27,45 +30,45 @@ import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 
-DESIGNSYSTEM_ALLOWLIST = {
-    "Packages/Personalization/Sources/Engine/BriefingEngine.swift",
-    "Packages/Personalization/Sources/Engine/QuoteBank.swift",
-}
+# Content engines whose output IS user-facing text. Empty since the briefing
+# engine and quote bank moved to SleepGuardShared (F26-T6).
+DESIGNSYSTEM_ALLOWLIST: set[str] = set()
 
-# UIKit is allowed here: audio-session interruption/route observation behind
-# `#if canImport(UIKit)` — system infrastructure, not UI chrome.
-CORE_UIKIT_ALLOWLIST = {
-    "Packages/AudioEngine/Sources/Engine/AudioRecorder.swift",
-}
+# Files allowed to import UIKit in a core package. Empty since the audio
+# session's observation moved to SleepGuardShared's SleepAudioKit (F27-T23).
+CORE_UIKIT_ALLOWLIST: set[str] = set()
 
 CORE_PREFIXES = (
     "Packages/Models/",
     "Packages/AudioEngine/",
 )
 
-ENV_PREFIX = "Packages/Env/Sources/"
+ENV_PREFIX = "Packages/Services/Sources/"
 
-# Packages above Env: everything except the core/service/navigation layers.
-SERVICE_CONSUMER_EXCLUDED = ("Packages/Models/", "Packages/AudioEngine/", "Packages/Env/", "Packages/Routing/")
+# Packages above Services: everything except the core/service/navigation layers.
+SERVICE_CONSUMER_EXCLUDED = ("Packages/Config/", "Packages/Health/", "Packages/Platform/", "Packages/Models/", "Packages/AudioEngine/", "Packages/Services/", "Packages/Routing/")
 
 SERVICE_SINGLETON = re.compile(
     r"\b(AppConfig|AudioRecorder|CustomMelodyStorage|HealthKitSync|HapticManager|"
     r"NotificationPermissionManager|PendingSessionStore|RecordingDelayManager|"
     r"SessionCheckpointStore|SessionCommitter|SessionManager|SnoreInterrupterPlayer|SoundAnalysisDetector|"
     r"UserPreferences|WatchConnectivityManager|SessionRawLogWriter|StorageLimitEnforcer|"
-    r"TabCoordinator|Theme)\.shared\b")
+    r"TabCoordinator)\.shared\b")
 
 
 # Rule 6 (F23-T13): services in views come from @Injected, not init.
 VIEW_SERVICE_PROPERTY = re.compile(r"^\s*(?:(?:public|private|fileprivate|internal)\s+)?(?:let|var)\s+\w+\s*:\s*any\s+\w+(?:ing|Providing)\b")
 
-# Rule 5 (F23-T4): no print() in shipping code; Models/Helpers/Log.swift has the loggers.
+# Rule 5 (F23-T4): no print() in shipping code; SleepGuardShared's SleepLogging has the loggers.
 PRINT_CALL = re.compile(r"^(?!\s*//).*(?<![\w.])print\(")
+REEXPORT = re.compile(r"^\s*@_exported\s+import\b")
 
 def main() -> int:
     violations = []
     for swift in sorted(ROOT.glob("Packages/**/*.swift")):
         rel = swift.relative_to(ROOT).as_posix()
+        if "/.build/" in rel:
+            continue  # SwiftPM checkouts (index builds), not this repo's code
         in_view_code = "/Views/" in rel or "/Components/" in rel
         in_core = rel.startswith(CORE_PREFIXES)
         in_env = rel.startswith(ENV_PREFIX)
@@ -82,18 +85,24 @@ def main() -> int:
                 violations.append(f"{rel}:{number}: '{stripped.split()[1]}' import in core package")
             if in_core and stripped == "import UIKit" and rel not in CORE_UIKIT_ALLOWLIST:
                 violations.append(f"{rel}:{number}: 'UIKit' import in core package")
-            if in_env and stripped == "import SwiftUI":
-                violations.append(f"{rel}:{number}: 'SwiftUI' import in Env (navigation belongs in Routing)")
+            if in_env and stripped in ("import SwiftUI", "import Routing"):
+                violations.append(f"{rel}:{number}: '{stripped.split()[1]}' import in Services (navigation belongs in Routing, above the services)")
             if consumes_services and not stripped.startswith("//") and (match := SERVICE_SINGLETON.search(line)):
                 violations.append(f"{rel}:{number}: '{match.group(0)}' — resolve from the container instead")
             if in_view_code and "/.build/" not in rel and VIEW_SERVICE_PROPERTY.match(line):
                 violations.append(f"{rel}:{number}: service passed into a view — use @Injected(\\.x) instead")
             if "/Sources/" in rel and "/.build/" not in rel and PRINT_CALL.search(line):
                 violations.append(f"{rel}:{number}: print() — log with Log.<category> (os.Logger) instead")
+            if REEXPORT.search(line):
+                violations.append(f"{rel}:{number}: @_exported import — import the module where it is used and declare it")
 
-    for swift in sorted(ROOT.glob("SleepGuard/**/*.swift")):
+    for swift in sorted([*ROOT.glob("SleepGuard/**/*.swift"), *ROOT.glob("SleepGuardWidgets/**/*.swift")]):
         rel = swift.relative_to(ROOT).as_posix()
         for number, line in enumerate(swift.read_text().splitlines(), 1):
+            if REEXPORT.search(line):
+                violations.append(f"{rel}:{number}: @_exported import — import the module where it is used and declare it")
+            if rel.startswith("SleepGuardWidgets/"):
+                continue
             if PRINT_CALL.search(line):
                 violations.append(f"{rel}:{number}: print() — log with Log.<category> (os.Logger) instead")
 
@@ -102,7 +111,8 @@ def main() -> int:
         for violation in violations:
             print(f"  {violation}")
         return 1
-    print(f"Layering check passed ({len(list(ROOT.glob('Packages/**/*.swift')))} files scanned).")
+    scanned = [path for path in ROOT.glob("Packages/**/*.swift") if "/.build/" not in path.as_posix()]
+    print(f"Layering check passed ({len(scanned)} files scanned).")
     return 0
 
 

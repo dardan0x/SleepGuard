@@ -1,11 +1,11 @@
 import DesignSystem
-import Env
-import FactoryKit
+import SleepGuardContentKit
+import SleepStrings
 import SwiftUI
 
 @MainActor
 struct StatisticsEmptyView: View {
-  @Injected(\.theme) private var theme
+  @Environment(\.theme) private var theme
   @MainActor let onStartRecording: () -> Void
   let onViewCalendar: () -> Void
 
@@ -23,7 +23,7 @@ struct StatisticsEmptyView: View {
             .containerRelativeFrame(.vertical, alignment: .center)
         }
       }
-      .background(theme.bgPrimary.ignoresSafeArea(edges: .bottom))
+      .background(theme.palette.bgPrimary.ignoresSafeArea(edges: .bottom))
     }
     .toolbar(.hidden, for: .navigationBar)
   }
@@ -32,7 +32,7 @@ struct StatisticsEmptyView: View {
     HStack {
       Text(Strings.tabStatistics)
         .font(.system(size: 34, weight: .bold))
-        .foregroundStyle(theme.textPrimary)
+        .foregroundStyle(theme.palette.textPrimary)
 
       Spacer()
 
@@ -45,12 +45,12 @@ struct StatisticsEmptyView: View {
           Text(Strings.watchCalendar)
             .font(.system(size: 14, weight: .semibold))
         }
-        .foregroundStyle(theme.accent)
+        .foregroundStyle(theme.palette.accent)
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
         .background(
           Capsule()
-            .fill(theme.surface2)
+            .fill(theme.palette.bgCard)
         )
       }
     }

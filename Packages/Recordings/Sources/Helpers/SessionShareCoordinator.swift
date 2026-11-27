@@ -1,6 +1,9 @@
 import AudioEngine
 import AVFoundation
 import Models
+import SleepAudioKit
+import SleepLogging
+import SleepStore
 import UIKit
 
 /// Orchestrates sharing from the session detail screen: PDF reports, the
@@ -28,13 +31,13 @@ final class SessionShareCoordinator {
     }
   }
 
-  func shareFullSession(_ session: SleepSession) {
-    guard let url = AudioFileURLResolver.resolve(session.audioFileURL) else { return }
+  func shareFullSession(_ session: NightRecord) {
+    guard let url = AudioFileURLResolver.resolve(session.rawAudioFileName) else { return }
     presentShareSheet(items: [url])
   }
 
-  func shareEvent(_ event: SnoreEvent, in session: SleepSession) {
-    if let url = AudioFileURLResolver.resolve(event.audioFileURL),
+  func shareEvent(_ event: NightEventRecord, in session: NightRecord) {
+    if let url = AudioFileURLResolver.resolve(event.clipFileName),
        FileManager.default.fileExists(atPath: url.path)
     {
       presentShareSheet(items: [url])
@@ -47,33 +50,19 @@ final class SessionShareCoordinator {
 
   // MARK: - Private
 
-  private func exportAndShare(event: SnoreEvent, in session: SleepSession) async {
-    guard let sourceURL = AudioFileURLResolver.resolve(session.audioFileURL) else { return }
+  private func exportAndShare(event: NightEventRecord, in session: NightRecord) async {
+    guard let sourceURL = AudioFileURLResolver.resolve(session.rawAudioFileName) else { return }
 
     isExportingEvent = true
     defer { isExportingEvent = false }
 
-    // Destructure Sendable fields before crossing into the extractor — a
-    // SwiftData @Model class cannot be sent across isolation boundaries.
-    let eventID = event.id
-    let eventTimestamp = event.timestamp
-    let eventSnoreDuration = event.snoreDuration
-    let eventBursts = event.bursts
-    let totalDuration = AVURLAsset(url: sourceURL).duration.seconds
-    let result = await AudioClipExtractor.extractSingleClip(
-      eventID: eventID,
-      eventTimestamp: eventTimestamp,
-      eventSnoreDuration: eventSnoreDuration,
-      bursts: eventBursts,
-      sessionURL: sourceURL,
-      sessionStart: session.startDate,
-      totalDuration: totalDuration,
-      padding: 0,
-      outputDirectory: FileManager.default.temporaryDirectory)
-    guard let result else { return }
+    // The event's Sendable fields, read here: a SwiftData @Model can't cross
+    // into the extractor.
+    let clipURL = FileManager.default.temporaryDirectory.appendingPathComponent("event_\(event.id.uuidString).m4a")
+    guard await ClipExtractor.extract(event.clipSource, from: sourceURL, nightStart: session.start, to: clipURL)
+    else { return }
 
     // Verify the exported file exists and has content before presenting
-    let clipURL = result.clipURL
     guard FileManager.default.fileExists(atPath: clipURL.path),
           let attrs = try? FileManager.default.attributesOfItem(atPath: clipURL.path),
           let fileSize = attrs[.size] as? Int, fileSize > 0 else { return }

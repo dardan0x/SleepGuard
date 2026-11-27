@@ -1,20 +1,26 @@
-import Env
+import Config
 import FactoryKit
 import Foundation
+import Health
 import Models
+import os
+import Services
 import SleepCore
+import SleepLogging
+import SleepStore
 import SwiftData
 
-/// State owner for the session detail screen: loads the session (with the
-/// defensive cached-score refresh), owns the event category filter and its
-/// derived event lists, and performs deletion. Created by the view once the
+/// State owner for the session detail screen: loads the session (read only),
+/// then enriches it (late HealthKit stages, a stale cached score) as a separate
+/// command, owns the event category filter and its derived event lists, and
+/// performs deletion. Created by the view once the
 /// environment dependencies are available.
 @MainActor
 @Observable
 final class SessionDetailModel {
   enum ViewState {
     case loading
-    case loaded(session: SleepSession, sortedEvents: [SnoreEvent], isClipSession: Bool)
+    case loaded(session: NightRecord, sortedEvents: [NightEventRecord], isClipSession: Bool)
     case error
   }
 
@@ -27,80 +33,97 @@ final class SessionDetailModel {
   private let userPreferences: any UserPreferencesStoring
   private let healthKitSync: any HealthKitSyncing
 
-  init(sessionID: UUID, appConfig: any AppConfigProviding, userPreferences: any UserPreferencesStoring) {
+  /// Collaborators are parameters defaulting to the container, like every
+  /// non-view type: tests pass fakes directly or register them.
+  init(
+    sessionID: UUID,
+    appConfig: any AppConfigProviding,
+    userPreferences: any UserPreferencesStoring,
+    healthKitSync: any HealthKitSyncing = Container.shared.healthKitSync())
+  {
     self.sessionID = sessionID
     self.appConfig = appConfig
     self.userPreferences = userPreferences
-    // @Observable can't use @Injected (macro collision): resolve in init.
-    healthKitSync = Container.shared.healthKitSync()
+    self.healthKitSync = healthKitSync
   }
 
-  func load(modelContext: ModelContext) async {
+  /// Reads the night. Never writes: opening a screen doesn't change storage.
+  func load(modelContext: ModelContext) {
     do {
-      let descriptor = FetchDescriptor<SleepSession>(
-        predicate: #Predicate { $0.id == sessionID }
-      )
-      if let session = try modelContext.fetch(descriptor).first {
-        let stagesEmptyAndOld = (session.sleepStageSegments?.isEmpty == true)
-          && (session.endDate?.timeIntervalSinceNow ?? 0) < -3600
-        if appConfig.isEnabled(.enhancedSleepTracking),
-           userPreferences.enhancedSleepTracking,
-           session.sleepStageSegments == nil || stagesEmptyAndOld
-        {
-          let stages = await healthKitSync.fetchSleepStages(for: session)
-          session.sleepStageSegments = stages.isEmpty ? [] : stages
-        }
-
-        // Recalculate cached score and snoring duration to pick up scoring
-        // formula changes (e.g. episode merging, gap inclusion, remote config
-        // penalty updates) while the session relationship is hot.
-        session.refreshCachedScore(using: appConfig.sleepScoreConfig)
-        try modelContext.save()
-
-        let sortedEvents = session.events?.sorted(by: { $0.timestamp < $1.timestamp }) ?? []
-        let isClipSession = sortedEvents.contains(where: { AudioFileURLResolver.resolve($0.audioFileURL) != nil })
-        viewState = .loaded(session: session, sortedEvents: sortedEvents, isClipSession: isClipSession)
-      } else {
+      guard let session = try fetchSession(in: modelContext) else {
         viewState = .error
+        return
       }
+      let sortedEvents = session.events.sorted(by: { $0.start < $1.start })
+      let isClipSession = sortedEvents.contains(where: { AudioFileURLResolver.resolve($0.clipFileName) != nil })
+      viewState = .loaded(session: session, sortedEvents: sortedEvents, isClipSession: isClipSession)
     } catch {
       viewState = .error
     }
   }
 
-  /// Deletes the session and its audio files. Returns true when the deletion
-  /// completed (the caller dismisses the screen in that case).
-  @discardableResult
+  /// The one write the screen may cause: sleep stages that arrived from
+  /// HealthKit after the night was saved, or a score cached by an older
+  /// formula. Saves only when something changed. A failure is logged and the
+  /// loaded night stays on screen.
+  func enrichIfNeeded(modelContext: ModelContext) async {
+    guard case let .loaded(session, _, _) = viewState else { return }
+    var changed = false
+    // A night without stages asks Health each time it opens: the Watch's
+    // data can arrive hours later.
+    if appConfig.isEnabled(.enhancedSleepTracking),
+       userPreferences.enhancedSleepTracking,
+       session.sleepStages.isEmpty
+    {
+      let stages = await healthKitSync.fetchSleepStages(for: session)
+      if !stages.isEmpty {
+        session.sleepStages = stages
+        changed = true
+      }
+    }
+    let config = appConfig.sleepScoreConfig
+    guard changed || session.hasStaleSummary(for: config) else { return }
+    session.refreshSummary(using: config)
+    do {
+      try modelContext.save()
+    } catch {
+      Log.storage.error("Saving the night's stages/score failed: \(String(describing: error), privacy: .public)")
+    }
+  }
+
+  /// Deletes the night: its rows first, then (once that is saved) its audio
+  /// files. A failure leaves files without a row, never a row without its
+  /// files; storage limits clean up orphans. Returns false when the delete
+  /// failed and the night is still there.
   func delete(modelContext: ModelContext) -> Bool {
     do {
-      let descriptor = FetchDescriptor<SleepSession>(
-        predicate: #Predicate { $0.id == sessionID }
-      )
-      if let session = try modelContext.fetch(descriptor).first {
-        // Delete files while `session.events` still lists the event clips.
-        deleteSessionFiles(session)
-
-        // Delete events first with intermediate save to avoid SwiftData
-        // faulting crash during cascade delete.
-        if let events = session.events {
-          for event in events {
-            modelContext.delete(event)
-          }
-          try modelContext.save()
+      guard let session = try fetchSession(in: modelContext) else { return true }
+      let files = sessionFileURLs(session)
+      // Events first with an intermediate save: deleting a faulted
+      // relationship in one cascade has crashed SwiftData.
+      if !session.events.isEmpty {
+        for event in session.events {
+          modelContext.delete(event)
         }
-
-        // Resolve transformable faults before deletion
-        _ = session.sleepStageSegments
-        _ = session.recordingGaps
-        modelContext.delete(session)
         try modelContext.save()
-        return true
       }
-      return false
+      // Resolve transformable faults before deletion.
+      _ = session.sleepStages
+      _ = session.recordingGaps
+      modelContext.delete(session)
+      try modelContext.save()
+      removeFiles(files)
+      return true
     } catch {
-      // Deletion failed; fail silently
+      modelContext.rollback()
+      Log.storage.error("Deleting a night failed: \(String(describing: error), privacy: .public)")
       return false
     }
+  }
+
+  private func fetchSession(in modelContext: ModelContext) throws -> NightRecord? {
+    let descriptor = FetchDescriptor<NightRecord>(predicate: #Predicate { $0.id == sessionID })
+    return try modelContext.fetch(descriptor).first
   }
 
   // MARK: - Filter & derived events
@@ -126,16 +149,16 @@ final class SessionDetailModel {
   }
 
   /// The stored event a row plays or shares.
-  func event(for row: EventListRow) -> SnoreEvent? {
+  func event(for row: EventListRow) -> NightEventRecord? {
     guard case let .loaded(_, sortedEvents, _) = viewState else { return nil }
     return sortedEvents.first { $0.id == row.id }
   }
 
   /// Short snoring episodes (under 3 sec) shown in the dedicated player.
-  var shortEvents: [SnoreEvent] {
+  var shortEvents: [NightEventRecord] {
     guard case let .loaded(session, _, _) = viewState else { return [] }
     let shortEpisodes = session.snoringEpisodes.filter { $0.snoreDuration < 3 }
     return shortEpisodes.compactMap(\.representativeEvent)
-      .sorted(by: { $0.timestamp < $1.timestamp })
+      .sorted(by: { $0.start < $1.start })
   }
 }

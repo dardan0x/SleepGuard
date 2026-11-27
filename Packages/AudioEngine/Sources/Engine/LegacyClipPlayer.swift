@@ -1,11 +1,11 @@
 import AVFoundation
-import Foundation
-import Models
+public import Foundation
+public import SleepAudioKit
 
 /// Plays a single snore-event clip exported from a full session recording.
 /// Used for sessions that predate per-event clip extraction, where the only
 /// audio source is the raw session file: `prepare` exports the event span via
-/// `AudioClipExtractor`, then plays it through `AVAudioPlayer` while tracking
+/// SleepGuardShared's `ClipExtractor`, then plays it through `AVAudioPlayer` while tracking
 /// playback progress.
 @MainActor
 @Observable
@@ -21,29 +21,13 @@ public final class LegacyClipPlayer {
 
   /// Exports the event's audio from the session file and starts playback.
   /// Leaves `duration` at 0 when the export or player setup fails.
-  public func prepare(event: SnoreEvent, sessionURL: URL?, sessionStart: Date) async {
+  public func prepare(clip event: ClipExtractor.Source, sessionURL: URL?, sessionStart: Date) async {
     guard let sessionURL else { return }
-    // Destructure Sendable fields before crossing into the extractor — a
-    // SwiftData @Model class cannot be sent across isolation boundaries.
-    let eventID = event.id
-    let eventTimestamp = event.timestamp
-    let eventSnoreDuration = event.snoreDuration
-    let eventBursts = event.bursts
-    let totalDuration = AVURLAsset(url: sessionURL).duration.seconds
-    let result = await AudioClipExtractor.extractSingleClip(
-      eventID: eventID,
-      eventTimestamp: eventTimestamp,
-      eventSnoreDuration: eventSnoreDuration,
-      bursts: eventBursts,
-      sessionURL: sessionURL,
-      sessionStart: sessionStart,
-      totalDuration: totalDuration,
-      padding: 0,
-      outputDirectory: FileManager.default.temporaryDirectory)
-    guard let result else { return }
+    let clipURL = FileManager.default.temporaryDirectory.appendingPathComponent("event_\(event.id.uuidString).m4a")
+    guard await ClipExtractor.extract(event, from: sessionURL, nightStart: sessionStart, to: clipURL) else { return }
 
     do {
-      let player = try AVAudioPlayer(contentsOf: result.clipURL)
+      let player = try AVAudioPlayer(contentsOf: clipURL)
       player.prepareToPlay()
       self.player = player
       duration = player.duration

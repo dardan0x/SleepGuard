@@ -18,10 +18,10 @@ The staff-engineer interview (2026-11-10) asked how anything was tested without 
 
 ## Decision
 
-- **One protocol per registered service, named for its role:** `SessionManaging`, `AudioRecording`, `UserPreferencesStoring`, `HealthKitSyncing`, `ThemeProviding`, … (18 in total: 15 in `Env`, 2 in `AudioEngine`, 1 in `DesignSystem`). Each protocol lives in its own file named after it, in the same folder as the concrete type (`AudioRecording.swift` beside `AudioRecorder.swift`), so the contract can be read without the implementation and the pair sorts together. (T5–T14 declared it at the top of the concrete file; F22-T15 moved them.) The concrete class keeps its name and its `.shared`.
+- **One protocol per registered service, named for its role:** `SessionManaging`, `AudioRecording`, `UserPreferencesStoring`, `HealthKitSyncing`, … (18 today, F27: 10 in `Env`, 2 in `Config`, 1 in `Health`, 3 in `Platform`, 1 in `Routing`, 2 in `AudioEngine`; `ThemeProviding` was deleted with ADR 0009). Each protocol lives in its own file named after it, in the same folder as the concrete type (`AudioRecording.swift` beside `AudioRecorder.swift`), so the contract can be read without the implementation and the pair sorts together. (T5–T14 declared it at the top of the concrete file; F22-T15 moved them.) The concrete class keeps its name and its `.shared`.
 - **Shape:** `@MainActor` protocols refining `AnyObject, Observable`, so views can read state through `any P` and Observation still tracks it. The exceptions follow the implementation: `SessionRawLogWriting` is an `Actor` protocol, and `StorageLimitEnforcing` is `Sendable`.
 - **Factories are typed `Factory<any P>`** and still alias `.shared`, so the app behaves exactly as before. Inits are public. Services are passed around as `any P`, never as the concrete type.
-- **Every protocol has a test double in `EnvTestSupport`** (`FakeSessionManager`, `FakeAudioRecorder`, `FakeHealthKitSync`, … 15 hand-written fakes), and each one is used by at least one test or preview. Two kinds of service get a real instance instead:
+- **Every protocol has a test double in its package's TestSupport** (since F27-T11: `EnvTestSupport`, `HealthTestSupport`, `PlatformTestSupport`, `RoutingTestSupport`) (`FakeSessionManager`, `FakeAudioRecorder`, `FakeHealthKitSync`, … 15 hand-written fakes), and each one is used by at least one test or preview. Two kinds of service get a real instance instead:
   - `UserPreferences` and `AppConfig` are wrappers over `UserDefaults`. Their double is the real type on a throwaway suite (`.isolated()`). A fake re-implementing 26 properties would only drift.
   - `Theme`'s double is a separate `Theme()` with tokens changed.
 - **Tests override per test:** `Container.shared.x.register { fake }` inside `@Suite(.container)` / `@Test(.container)` from `FactoryTesting`. The container is task-local, so parallel tests can't see each other's fakes.
@@ -38,13 +38,13 @@ The staff-engineer interview (2026-11-10) asked how anything was tested without 
 
 **Better:**
 - Any service can be replaced in a test or a preview with one `register` line, scoped to that test. `SessionDetailModelTests` dropped `.serialized` and the global-flag workaround and runs in parallel.
-- `ServiceOverrideTests` (12) check the live default and each fake replacing its service. `ConstructorInjectionTests` (5) drive `TabCoordinator` and `SnoreInterrupterPlayer` with fakes and isolated stores.
+- `ServiceOverrideTests` checks the live defaults and the overrides whose fake feeds real code (F27-T15 removed four cases that only called back the fake they registered). `ConstructorInjectionTests` drive `SnoreInterrupterPlayer` with fakes and isolated stores; `TabCoordinator`'s moved to `RoutingTests` with it (F27-T11).
 - Every dependency of a feature view is visible as an `@Injected` property. The checker keeps it that way.
 - `DesignSystem` sits on `Models` only, so changing a service no longer recompiles the UI kit.
 
 **Honest limits:**
-- **Protocols with one production conformer.** Each protocol exists for tests and previews, not for polymorphism. That is about 18 protocols and 15 fakes to keep in sync with their types. The compiler catches a fake that misses a requirement, but not one that behaves differently from the real thing.
-- **`ThemeProviding` is wide** (41 requirements). It mirrors `Theme` one to one, and about 30 component parameters changed from `Theme` to `any ThemeProviding`. That's churn for a type that tests rarely replace.
+- **Protocols with one production conformer.** Each protocol exists for tests and previews, not for polymorphism. That is about 18 protocols and 15 fakes to keep in sync with their types. The compiler catches a fake that misses a requirement, but not one that behaves differently from the real thing. Since F27-T15, `StoreContractTests` runs the same suite against the real checkpoint and melody stores and their fakes (it found `FakeSessionCheckpointStore` offering snapshots the real store refuses). The remaining fakes are effect-only (they record calls), where a spy is the right double.
+- **`ThemeProviding` was wide** (40 requirements, mirroring `Theme` one to one, rarely replaced). It was deleted in F27-T13: views read the kit's `Theme` from the environment (ADR 0009).
 - **Existentials everywhere.** `any P` costs a dynamic dispatch per call. Nothing measured shows it matters here, but it isn't free.
 - **Singletons are still singletons.** Factories alias `.shared`, so production keeps one instance per service for the app's lifetime. The protocols make that replaceable; they don't remove it.
 

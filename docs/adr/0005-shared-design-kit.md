@@ -1,6 +1,6 @@
 # ADR 0005: Draw with the shared design kit
 
-- **Status:** Accepted
+- **Status:** Accepted (the bridge part superseded by ADR 0009)
 - **Date:** 2026-11-16
 - **Task:** F24 (SleepGuardUIKitWay F6)
 

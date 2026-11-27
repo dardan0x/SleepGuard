@@ -1,4 +1,4 @@
-import Foundation
+public import Foundation
 
 /// The data Home/Lock Screen widgets render, written by the app into the
 /// shared App Group container. Widgets never open the SwiftData store.

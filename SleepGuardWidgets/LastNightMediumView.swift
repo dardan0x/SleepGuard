@@ -1,10 +1,12 @@
 import DesignSystem
 import Models
+import SleepGuardDesignKit
+import SleepStrings
 import SwiftUI
 
 struct LastNightMediumView: View {
   let night: WidgetSnapshot.Night
-  let theme = AppTheme.shared
+  @Environment(\.theme) private var theme
 
   var body: some View {
     HStack(spacing: 20) {
@@ -15,7 +17,7 @@ struct LastNightMediumView: View {
           LastNightLabel()
           Text(night.startDate, format: .dateTime.weekday(.abbreviated).month(.abbreviated).day())
             .font(.subheadline.weight(.semibold))
-            .foregroundStyle(theme.textPrimary)
+            .foregroundStyle(theme.palette.textPrimary)
         }
 
         LastNightStatRow(title: Strings.widgetLastNightSlept, value: night.sleptText)
@@ -30,15 +32,16 @@ struct LastNightMediumView: View {
 struct LastNightStatRow: View {
   let title: String
   let value: String
+  @Environment(\.theme) private var theme
 
   var body: some View {
     VStack(alignment: .leading, spacing: 1) {
       Text(title)
         .font(.caption)
-        .foregroundStyle(AppTheme.shared.textTertiary)
+        .foregroundStyle(theme.palette.textTertiary)
       Text(value)
         .font(.subheadline.weight(.semibold))
-        .foregroundStyle(AppTheme.shared.textPrimary)
+        .foregroundStyle(theme.palette.textPrimary)
     }
   }
 }

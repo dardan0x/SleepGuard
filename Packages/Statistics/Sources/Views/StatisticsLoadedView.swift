@@ -1,7 +1,9 @@
+import Config
 import DesignSystem
-import Env
 import FactoryKit
 import Models
+import SleepGuardContentKit
+import SleepGuardDesignKit
 import SwiftUI
 
 /// The dashboard: SleepGuard's title and calendar button, the shared content
@@ -10,7 +12,7 @@ import SwiftUI
 @MainActor
 struct StatisticsLoadedView: View {
   let state: DashboardState
-  @Injected(\.theme) private var theme
+  @Environment(\.theme) private var theme
   @Injected(\.appConfig) private var appConfig
   @MainActor let onStartRecording: () -> Void
   let onViewTrends: () -> Void
@@ -27,7 +29,7 @@ struct StatisticsLoadedView: View {
         // The latest night in full (events read): the dashboard itself is built
         // from summaries without events.
         StatisticsDashboardContent(
-          dashboard: state.dashboard, latest: state.session.nightSummary, now: state.now,
+          dashboard: state.dashboard, latest: state.session.summary, now: state.now,
           compact: DeviceSize.isCompactHeight, onShowTrends: onViewTrends, onShowLastSevenNights: onViewLastSevenNights)
         {
           SleepStagesSection(session: state.session, scoreConfig: appConfig.sleepScoreConfig)
@@ -39,7 +41,7 @@ struct StatisticsLoadedView: View {
       }
       .padding(.horizontal, 20)
     }
-    .background(theme.bgPrimary.ignoresSafeArea(edges: .bottom))
+    .background(theme.palette.bgPrimary.ignoresSafeArea(edges: .bottom))
     .toolbar(.hidden, for: .navigationBar)
   }
 }

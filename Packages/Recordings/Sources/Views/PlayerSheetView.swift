@@ -1,9 +1,12 @@
 import AudioEngine
+import Config
 import DesignSystem
-import Env
 import FactoryKit
 import Models
-import SwiftUI
+public import SwiftUI
+import SleepGuardDesignKit
+import SleepStore
+import SleepStrings
 
 /// Plays individual snore-event audio clips presented as a bottom sheet.
 /// Always opens in expanded mode — shows the full event player with waveform
@@ -12,12 +15,12 @@ import SwiftUI
 /// `LegacyClipPlayer`.
 @MainActor
 public struct PlayerSheetView: View {
-  let session: SleepSession
-  let sortedEvents: [SnoreEvent]
+  let session: NightRecord
+  let sortedEvents: [NightEventRecord]
   let isClipSession: Bool
-  let initialEvent: SnoreEvent?
+  let initialEvent: NightEventRecord?
 
-  @Injected(\.theme) private var theme
+  @Environment(\.theme) private var theme
   @Injected(\.userPreferences) private var userPreferences
   @Environment(\.dismiss) private var dismiss
 
@@ -42,8 +45,8 @@ public struct PlayerSheetView: View {
   /// Resolves the session's full audio source, preferring the legacy file and
   /// falling back to the raw archive (used after clip extraction moves it).
   private var sessionAudioURL: URL? {
-    AudioFileURLResolver.resolve(session.audioFileURL)
-      ?? AudioFileURLResolver.resolve(session.rawAudioFileURL)
+    AudioFileURLResolver.resolve(session.rawAudioFileName)
+      ?? AudioFileURLResolver.resolve(session.rawAudioFileName)
   }
 
   public var body: some View {
@@ -57,13 +60,13 @@ public struct PlayerSheetView: View {
             readyContent
           case let .noAudio(event):
             if let event {
-              NoAudioCard(start: event.timestamp, duration: event.snoreDuration, intensity: event.intensity)
+              NoAudioCard(start: event.start, duration: event.snoreDuration, intensity: event.intensity)
             }
           }
         }
         .padding(20)
       }
-      .background(theme.bgPrimary.ignoresSafeArea())
+      .background(theme.palette.bgPrimary.ignoresSafeArea())
       // Was `.height(470)` — bumped so the Enhanced Audio toggle below the
       // player controls is visible without scrolling. `.large` is also offered
       // so users can drag up for more breathing room if they want.
@@ -78,7 +81,7 @@ public struct PlayerSheetView: View {
           } label: {
             Label(Strings.actionClose, systemImage: "xmark.circle.fill").labelStyle(.iconOnly)
               .font(.system(size: 24))
-              .foregroundStyle(theme.textTertiary)
+              .foregroundStyle(theme.palette.textTertiary)
           }
         }
       }
@@ -103,7 +106,7 @@ public struct PlayerSheetView: View {
         sortedEvents: sortedEvents,
         onSelectEvent: { event, index in
           playbackController.playEvent(at: index)
-          waveformLoader.load(for: event, sessionAudioURL: sessionAudioURL, sessionStart: session.startDate)
+          waveformLoader.load(for: event, sessionAudioURL: sessionAudioURL, sessionStart: session.start)
         })
     } else if let initialEvent {
       LegacyPlayerContent(
@@ -140,12 +143,12 @@ public struct PlayerSheetView: View {
     if isClipSession {
       playbackController.loadEvents(sortedEvents)
       if let initialEvent, let index = sortedEvents.firstIndex(where: { $0.id == initialEvent.id }) {
-        waveformLoader.load(for: initialEvent, sessionAudioURL: sessionAudioURL, sessionStart: session.startDate)
+        waveformLoader.load(for: initialEvent, sessionAudioURL: sessionAudioURL, sessionStart: session.start)
         if playbackController.hasAudioForCurrentEvent {
           playbackController.playEvent(at: index)
         }
       } else if let firstEvent = sortedEvents.first {
-        waveformLoader.load(for: firstEvent, sessionAudioURL: sessionAudioURL, sessionStart: session.startDate)
+        waveformLoader.load(for: firstEvent, sessionAudioURL: sessionAudioURL, sessionStart: session.start)
         if playbackController.hasAudioForCurrentEvent {
           playbackController.playEvent(at: 0)
         }
@@ -155,10 +158,10 @@ public struct PlayerSheetView: View {
         : .noAudio(playbackController.currentEvent ?? initialEvent)
     } else if let initialEvent {
       await legacyPlayer.prepare(
-        event: initialEvent,
+        clip: initialEvent.clipSource,
         sessionURL: sessionAudioURL,
-        sessionStart: session.startDate)
-      waveformLoader.load(for: initialEvent, sessionAudioURL: sessionAudioURL, sessionStart: session.startDate)
+        sessionStart: session.start)
+      waveformLoader.load(for: initialEvent, sessionAudioURL: sessionAudioURL, sessionStart: session.start)
       loadState = legacyPlayer.duration > 0 ? .ready : .noAudio(initialEvent)
     } else {
       loadState = .noAudio(nil)
@@ -173,5 +176,5 @@ public struct PlayerSheetView: View {
 private enum PlayerLoadState {
   case loading
   case ready
-  case noAudio(SnoreEvent?)
+  case noAudio(NightEventRecord?)
 }

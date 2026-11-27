@@ -1,4 +1,4 @@
-import Foundation
+public import Foundation
 
 public enum DateFormatters {
   public static let time: DateFormatter = {

@@ -1,17 +1,16 @@
 import DesignSystem
-import Env
-import FactoryKit
 import Models
 import Routing
 import SwiftData
-import SwiftUI
+public import SwiftUI
+import SleepStore
 
 @MainActor
 public struct StatisticsDashboardView: View {
   @Environment(RouterPath.self) private var routerPath
-  @Injected(\.theme) private var theme
-  @Query(sort: \SleepSession.startDate, order: .reverse)
-  private var sessions: [SleepSession]
+  @Environment(\.theme) private var theme
+  @Query(sort: \NightRecord.start, order: .reverse)
+  private var sessions: [NightRecord]
 
   @State private var viewState: ViewState = .loading
 
@@ -46,26 +45,38 @@ public struct StatisticsDashboardView: View {
           onViewLastSevenNights: {
             routerPath.navigate(to: .last7Nights)
           })
-      case .error:
-        StatisticsErrorView {
-          loadState()
-        }
       }
     }
-    .background(theme.bgPrimary.ignoresSafeArea())
-    .onChange(of: sessions) { _, _ in
+    .background(theme.palette.bgPrimary.ignoresSafeArea())
+    // Not `sessions`: that compares identities, so a night re-scored in
+    // place (a formula change at launch, late HealthKit stages) wouldn't
+    // redraw. The stamps change whenever a night or its cached score does.
+    .onChange(of: scoreStamps) { _, _ in
       loadState()
     }
+  }
+
+  /// Cached fields only: reading them doesn't fault events.
+  private var scoreStamps: [ScoreStamp] {
+    sessions.map { ScoreStamp(id: $0.id, score: $0.score, version: $0.scoreVersion) }
   }
 
   private func loadState() {
     viewState = DashboardState.make(from: sessions, now: Date()).map(ViewState.loaded) ?? .empty
   }
 
+  /// No `.error`: `@Query` doesn't surface fetch errors and the dashboard
+  /// rules don't throw, so an error state could never be reached.
   enum ViewState {
     case loading
     case empty
     case loaded(DashboardState)
-    case error
   }
+}
+
+/// What the dashboard depends on per night, for change detection.
+private struct ScoreStamp: Hashable {
+  let id: UUID
+  let score: Int
+  let version: String
 }

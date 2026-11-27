@@ -1,20 +1,21 @@
 import DesignSystem
-import Env
-import FactoryKit
 import Models
 import Routing
 import SleepCore
 import SwiftData
-import SwiftUI
+public import SwiftUI
+import SleepGuardContentKit
+import SleepStore
+import SleepStrings
 
 /// A month of nights. Hosts the shared `CalendarContent` (ADR 0006) under
 /// SleepGuard's toolbar (title capsule, Today).
 @MainActor
 public struct CalendarView: View {
-  @Injected(\.theme) private var theme
+  @Environment(\.theme) private var theme
   @Environment(RouterPath.self) private var routerPath
-  @Query(sort: \SleepSession.startDate, order: .reverse)
-  private var sessions: [SleepSession]
+  @Query(sort: \NightRecord.start, order: .reverse)
+  private var sessions: [NightRecord]
 
   @State private var selectedMonth = Date()
   @State private var selectedDay = Calendar.current.startOfDay(for: Date())
@@ -29,7 +30,7 @@ public struct CalendarView: View {
         routerPath.navigate(to: .sessionDetail(id: night.id))
       }
     }
-    .background(theme.bgPrimary.ignoresSafeArea())
+    .background(theme.palette.bgPrimary.ignoresSafeArea())
     .navigationTitle("")
     .navigationBarTitleDisplayMode(.inline)
     .toolbar {
@@ -37,16 +38,16 @@ public struct CalendarView: View {
         HStack(spacing: 6) {
           Image(systemName: "calendar")
             .font(.system(size: 14, weight: .medium))
-            .foregroundStyle(theme.accent)
+            .foregroundStyle(theme.palette.accent)
           Text(Strings.watchCalendar)
             .font(.system(size: 17, weight: .semibold))
-            .foregroundStyle(theme.accent)
+            .foregroundStyle(theme.palette.accent)
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 6)
         .background(
           Capsule()
-            .fill(theme.surface2)
+            .fill(theme.palette.bgCard)
         )
       }
       ToolbarItem(placement: .topBarTrailing) {
@@ -58,7 +59,7 @@ public struct CalendarView: View {
         } label: {
           Text(Strings.statsMiniChartToday)
             .font(.system(size: 17, weight: .medium))
-            .foregroundStyle(theme.accent)
+            .foregroundStyle(theme.palette.accent)
         }
       }
     }

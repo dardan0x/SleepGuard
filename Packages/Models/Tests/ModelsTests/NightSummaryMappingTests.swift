@@ -2,6 +2,7 @@ import Foundation
 import Models
 import ModelsTestSupport
 import SleepCore
+import SleepStore
 import Testing
 
 /// Stored sessions → the shared `NightSummary` the statistics rules read.
@@ -12,27 +13,28 @@ struct NightSummaryMappingTests {
   @Test func fullSummaryReadsEvents() throws {
     let store = try TestStore()
     let session = try store.insert(
-      SleepSession.fixture(start: start, hours: 7),
+      NightRecord.fixture(start: start, hours: 7),
       events: [
-        SnoreEvent.fixture(at: start.addingTimeInterval(600), duration: 120, intensity: .light),
-        SnoreEvent.fixture(at: start.addingTimeInterval(3600), duration: 90, intensity: .loud),
+        NightEventRecord.fixture(at: start.addingTimeInterval(600), duration: 120, intensity: .light),
+        NightEventRecord.fixture(at: start.addingTimeInterval(3600), duration: 90, intensity: .loud),
       ])
-    let summary = session.nightSummary
+    session.refreshSummary(using: .default)
+    let summary = session.summary
     #expect(summary.id == session.id)
     #expect(summary.start == start)
     #expect(summary.duration == 7 * 3600)
-    #expect(summary.score == session.sleepScore)
+    #expect(summary.score == session.score)
     #expect(summary.snoringDuration == session.snoringDuration)
-    #expect(summary.eventCount == session.eventsCount)
+    #expect(summary.eventCount == session.eventCount)
     #expect(summary.loudestIntensity == .loud)
   }
 
-  @Test func summaryWithoutEventsUsesTheCachedFields() {
-    let session = SleepSession.fixture(start: start, hours: 7)
-    session.hasCachedScore = true
-    session.cachedSleepScore = 64
-    session.cachedSnoringDuration = 900
-    let summary = session.summaryWithoutEvents
+  @Test func theSummaryIsTheStoredFields() {
+    let session = NightRecord.fixture(start: start, hours: 7)
+    session.scoreVersion = "cached"
+    session.score = 64
+    session.snoringDuration = 900
+    let summary = session.summary
     #expect(summary.score == 64)
     #expect(summary.snoringDuration == 900)
     #expect(summary.duration == 7 * 3600)
@@ -42,7 +44,7 @@ struct NightSummaryMappingTests {
 
   @Test func nightWithoutEventsHasNoLoudestIntensity() throws {
     let store = try TestStore()
-    let session = try store.insert(SleepSession.fixture(start: start), events: [])
-    #expect(session.nightSummary.loudestIntensity == nil)
+    let session = try store.insert(NightRecord.fixture(start: start), events: [])
+    #expect(session.summary.loudestIntensity == nil)
   }
 }

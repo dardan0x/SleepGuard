@@ -1,8 +1,13 @@
 import AudioEngine
+import Config
 import DesignSystem
-import Env
 import FactoryKit
 import Models
+import Services
+import SleepGuardContentKit
+import SleepGuardDesignKit
+import SleepStore
+import SleepStrings
 import SwiftUI
 
 @MainActor
@@ -49,7 +54,7 @@ struct BedsideClockView: View {
           sessionManager.stopAndDiscardSession()
         }
       } message: {
-        Text(String(format: Strings.sessionSummaryTooShortMessageFormat, Int(SleepSession.minimumSaveDuration / 60)))
+        Text(String(format: Strings.sessionSummaryTooShortMessageFormat, Int(NightRecord.minimumSaveDuration / 60)))
       }
       .task {
         while !Task.isCancelled {
@@ -69,7 +74,7 @@ struct BedsideClockView: View {
   /// Too early to keep: ask first. Otherwise stop and save.
   private func stopTapped() {
     if let session = sessionManager.currentSession,
-       currentTime.timeIntervalSince(session.startDate) < SleepSession.minimumSaveDuration
+       currentTime.timeIntervalSince(session.start) < NightRecord.minimumSaveDuration
     {
       showShortSessionAlert = true
     } else {
@@ -80,7 +85,7 @@ struct BedsideClockView: View {
   }
 
   private var elapsed: TimeInterval {
-    sessionManager.currentSession.map { currentTime.timeIntervalSince($0.startDate) } ?? 0
+    sessionManager.currentSession.map { currentTime.timeIntervalSince($0.start) } ?? 0
   }
 
   private var isMelodyEnabled: Bool {

@@ -1,5 +1,5 @@
 {
-  "originHash" : "1e2e62fdf52c85fcab9e75944ea429067e2ce98a0080dd7ef4d880fc0ea25b59",
+  "originHash" : "1b7b82385dae526752e30be1bf47b79282b2ab23321753efd8c6aa1d35639b5b",
   "pins" : [
     {
       "identity" : "abseil-cpp-binary",
@@ -132,8 +132,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/dardan0x/SleepGuardShared.git",
       "state" : {
-        "revision" : "6c616da893093a3aeaaaea0fb4b47dc35456a674",
-        "version" : "0.27.0"
+        "revision" : "fe8dcfb3ad268be655a4d54c66d3ad1150d8cc57",
+        "version" : "0.37.0"
       }
     }
   ],

@@ -1,18 +1,19 @@
 import DesignSystem
-import Env
-import FactoryKit
 import Models
 import SleepCore
 import SwiftData
-import SwiftUI
+public import SwiftUI
+import SleepGuardContentKit
+import SleepStore
+import SleepStrings
 
 /// Trends: the week's or month's nights. Hosts the shared `TrendsContent`
 /// (ADR 0006) under SleepGuard's toolbar title.
 @MainActor
 public struct TrendsView: View {
-  @Injected(\.theme) private var theme
-  @Query(sort: \SleepSession.startDate, order: .reverse)
-  private var sessions: [SleepSession]
+  @Environment(\.theme) private var theme
+  @Query(sort: \NightRecord.start, order: .reverse)
+  private var sessions: [NightRecord]
 
   @State private var range = TrendsRange.week
 
@@ -22,14 +23,14 @@ public struct TrendsView: View {
     ScrollView {
       TrendsContent(range: $range, period: period)
     }
-    .background(theme.bgPrimary.ignoresSafeArea())
+    .background(theme.palette.bgPrimary.ignoresSafeArea())
     .navigationTitle("")
     .navigationBarTitleDisplayMode(.inline)
     .toolbar {
       ToolbarItem(placement: .principal) {
         Text(Strings.statsTrendsTitle)
           .font(.system(size: 17, weight: .semibold))
-          .foregroundStyle(theme.textPrimary)
+          .foregroundStyle(theme.palette.textPrimary)
       }
     }
   }

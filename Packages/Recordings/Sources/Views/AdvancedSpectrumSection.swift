@@ -1,12 +1,11 @@
 import DesignSystem
-import FactoryKit
+import SleepStrings
 import SwiftUI
 
 /// Frequency-spectrum section of the advanced player: gradient-colored bars
 /// plus frequency axis labels.
 struct AdvancedSpectrumSection: View {
-  @Injected(\.theme) private var theme
-
+  @Environment(\.theme) private var theme
   let bars: [Float]
 
   var body: some View {
@@ -32,22 +31,22 @@ struct AdvancedSpectrumSection: View {
         Text(Strings.recordingsPlayerFreq1k)
       }
       .font(.system(size: 9, weight: .medium))
-      .foregroundStyle(theme.textTertiary)
+      .foregroundStyle(theme.palette.textTertiary)
 
       Text(Strings.recordingsPlayerSpectrumLabel)
         .font(.system(size: 11, weight: .medium))
-        .foregroundStyle(theme.textTertiary)
+        .foregroundStyle(theme.palette.textTertiary)
     }
   }
 
   private func barColor(at index: Int, total: Int) -> Color {
     let ratio = Double(index) / Double(total - 1)
     if ratio < 0.33 {
-      return theme.scoreGreen
+      return theme.palette.scoreGreen
     } else if ratio < 0.66 {
-      return theme.scoreAmber
+      return theme.palette.scoreAmber
     } else {
-      return theme.scoreRed
+      return theme.palette.scoreRed
     }
   }
 }

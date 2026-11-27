@@ -2,7 +2,7 @@
 
 > Auto-updated by the AI after every task. This is the local source of truth.
 
-Last updated: 2026-11-14
+Last updated: 2026-11-25
 
 ---
 
@@ -82,6 +82,7 @@ Last updated: 2026-11-14
 | F24 | Shared Design Kit Adoption | P2 | Done (bg-card open) | 4/4 | ██████████ 100% | [tracker](trackers/f24-shared-design-kit-adoption.md) |
 | F25 | Shared Screen Content | P2 | Done | 7/7 | ██████████ 100% | [tracker](trackers/f25-shared-screen-content.md) |
 | F26 | Shared Settings Content | P2 | Done | 6/6 | ██████████ 100% | [tracker](trackers/f26-shared-settings-content.md) |
+| F27 | Architecture Interrogation Fixes | P0/P1 | Done (device night pending) | 30/30 | ██████████ 100% | [tracker](trackers/f27-architecture-interrogation-fixes.md) |
 
 ## Activity Log
 
@@ -89,6 +90,36 @@ _Most recent first. The AI appends here after every task._
 
 | Date | Task | Action | Notes |
 |------|------|--------|-------|
+| 2026-11-27 | F27-T30 | Completed | The workspace builds the pinned release; SleepGuardShared under Package Dependencies; shared CI writes its own override workspace |
+| 2026-11-27 | F27-T29 | Completed | Local packages as a Packages folder in the project; only SleepGuardShared and Firebase under Package Dependencies; duplicate links cleaned |
+| 2026-11-27 | F27-T28 | Completed | App folders by concern; unused sounds removed; the project declares SleepGuardShared and links what it imports |
+| 2026-11-26 | F27-T27 | Completed | Shared 0.37.0: no re-exports in the shared kits |
+| 2026-11-26 | F27-T26 | Completed | Explicit imports: the five `@_exported` re-exports removed, manifests list real dependencies, checks enforce it |
+| 2026-11-26 | F27-T25 | Completed | Close-out: ADR 0010, CLAUDE/AGENTS, TECHNICAL_OVERVIEW, README |
+| 2026-11-26 | F27-T24 | Completed | Shared 0.36.0: one SwiftData schema (SleepStore); SleepSession/SnoreEvent replaced by NightRecord/NightEventRecord |
+| 2026-11-26 | F27-T23 | Completed | Shared 0.35.0: SleepAudioKit behind AudioRecording, playback, interrupter and melodies; four audio bugs fixed |
+| 2026-11-26 | F27-T22 | Completed | Shared 0.34.0: logging, classifier, sample nights, profile/survey/checkpoint files, shared layout, storage sweep, start notification; Logging package, detectors and two @Models removed |
+| 2026-11-26 | F27-T21 | Completed | Shared 0.33.0: the settings both apps have live in `SleepPreferences` / `PreferencesDefaults`; `UserPreferences` delegates its 16 common properties |
+| 2026-11-26 | F27-T18/T20 | Completed | Shared 0.32.0: HealthKit and raw log are shared behaviour wrapped by this app's services; `Env` renamed `Services` |
+| 2026-11-26 | F27-T19 | Completed | DesignSystem duplicates of the kit removed (`intensityColor`, `DurationFormatter`, unused `SessionRow`) |
+| 2026-11-26 | F27-T17 | Completed | F27 done: feature doc with the UIKitWay follow-up list. User: merge `refactor/f27-architecture-interrogation-fixes`; one real night on a device |
+| 2026-11-26 | F27-T16 | Completed | Dead mini-player code and stale ProjectArchitecture.md removed (approved); isolation rule; TECHNICAL_OVERVIEW truth pass |
+| 2026-11-26 | F27-T15 | Completed | Contract tests for the checkpoint and melody stores (real + fake); found and fixed fake drift; stores take their location so tests are isolated; 4 self-check tests removed (approved) |
+| 2026-11-26 | F27-T14 | Completed | One DI style outside views: init parameters defaulting to the container (SessionDetailModel, SessionManager, tracker detectors); exceptions documented |
+| 2026-11-26 | F27-T13 | Completed | One theme system: all views read the kit's `Theme` from the environment; `AppTheme` / `ThemeProviding` deleted (approved); no visual change (pixel-checked). ADR 0009 |
+| 2026-11-26 | F27-T12 | Completed | `InternalImportsByDefault` in every package; 225 imports made `public` where public API needs them (123 files, compiler-driven) |
+| 2026-11-25 | F27-T11 | Completed | Env split: Config, Health, Platform packages; TabCoordinator to Routing; features depend only on what they use; app target links the new packages. ADR 0008 |
+| 2026-11-25 | F27-T10 | Completed | `Logging` leaf package; AudioEngine depends on Logging + SleepCore only (notification names moved in, `ClipSource` value instead of `SnoreEvent`); Models re-exports Logging |
+| 2026-11-25 | F27-T9 | Completed | Undeclared imports declared (Recordings→AudioEngine, AudioEngineTests→Models), unused Settings→Personalization edge removed; `check-imports.py` in CI; view-size check covers the app target; layering check skips `.build` and lost stale entries |
+| 2026-11-25 | F27-T8 | Completed | Shared 0.30.0 adopted: tap → `SampleDecimator` at exact 20 Hz (verified 400 samples / 19.95 s), interruptions become gaps left out of the score (formula v2), FFT only with the raw log, thermal logging, app-owned `SaveRules` |
+| 2026-11-25 | F27-T7 | Completed | Shared 0.30.0 (user tagged): decimator, interruption gaps + score v2, `SaveRules`, stored-value fixtures, score golden, UIKitWay CI job + skew warning; UIKitWay compatibility patch |
+| 2026-11-25 | F27-T6 | Completed | Checkpoint encoding + I/O moved to a coalescing `CheckpointWriter` actor; `clear()` synchronous with a sequence gate so a cleared night never comes back (mutation-checked) |
+| 2026-11-25 | F27-T5 | Completed | Stale-score refresh in yielding main-context batches after first render (a background context left screens stale; seen on the simulator); ordered launch `.task`; dashboard redraws on in-place re-scores (Q20) |
+| 2026-11-25 | F27-T4 | Completed | Detail load is read-only, enrichment a separate command that saves only on change; deletes remove rows before files and alert on failure; dead `.error` states removed (error views kept, user choice) |
+| 2026-11-25 | F27-T3 | Completed | Remote config frozen per recorded night (`AppConfig` holds updates start→stop, applies the latest on stop); the melody now honours the remote interrupter flag. 5 tests |
+| 2026-11-25 | F27-T2 | Completed | `SessionFlowHost` at the root owns recovery, the summary and low-battery auto-save, whichever tabs are visible; one root presentation slot (`RootPresentationPolicy`); summary by night ID; deep links wait instead of being dropped. ADR 0007. Two presentation bugs found and fixed on the simulator |
+| 2026-11-25 | F27-T1 | Completed | Release builds never delete the store: open failure keeps the file, runs in memory and shows `StoreUnavailableView`; store backed up once per app version (App Group container). Strings in Shared 0.29.1. Branch `refactor/f27-architecture-interrogation-fixes` |
+| 2026-11-25 | F27 Planning | Planned | F27 (Architecture Interrogation Fixes): every principal-review concern verified against code; 17 tasks across SleepGuard + Shared; UIKitWay follow-up list. One branch, one commit per task |
 | 2026-11-17 | F26-T6 | Completed | Briefing, profile prompt and PDF report host the shared content and rules (shared 0.27.0); deterministic briefing; localized report. 14 files deleted (approved). Branch `feature/f26/t6-personalization` |
 | 2026-11-17 | F26-T5 | Completed | Learn hosts the shared content (shared 0.26.0); the page loads once per URL; Learn no longer shows when `feature_learn` is off or twice when on (tested). 1 file deleted (approved). Branch `feature/f26/t5-learn` |
 | 2026-11-17 | F26-T4 | Completed | Onboarding hosts the shared content; SleepCore `OnboardingPages`; Health page follows the `healthSync` flag (shared 0.25.0). 6 files deleted (approved). Branch `feature/f26/t4-onboarding` |
@@ -340,6 +371,7 @@ _Most recent first. The AI appends here after every task._
 
 | Task | Feature | Started | Assignee |
 |------|---------|---------|----------|
+| F27 | F27 | — | User: merge the branch; real night on a device (decimator, interruptions, thermal) |
 | F23-T6 | F23 | — | Waiting for labelled real nights (user). Then merge F22 + F23 into `main`. User: real night on device (F22-T10), then merge F22 (and F23 on top) into `main` |
 
 ## Completed (last 10)

@@ -1,11 +1,11 @@
 import DesignSystem
 import Models
+import SleepGuardDesignKit
 import SwiftUI
 
 struct LastNightSmallView: View {
   let night: WidgetSnapshot.Night
-  let theme = AppTheme.shared
-
+  @Environment(\.theme) private var theme
   var body: some View {
     VStack(spacing: 6) {
       LastNightLabel()
@@ -14,7 +14,7 @@ struct LastNightSmallView: View {
 
       Text(night.sleptText)
         .font(.caption.weight(.medium))
-        .foregroundStyle(theme.textSecondary)
+        .foregroundStyle(theme.palette.textSecondary)
     }
   }
 }

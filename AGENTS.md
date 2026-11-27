@@ -43,7 +43,7 @@ Before implementing or modifying ANY view:
 3. Match colors, typography, spacing, corner radius, and component structure exactly.
 4. Use the design tokens (variables) defined in the .pen file — never hardcode values that differ.
 
-**Design tokens (from `designs/SleepGuard.pen`; in code they come from the shared kit's `Theme.sleepGuard`, which `AppTheme` starts from):**
+**Design tokens (from `designs/SleepGuard.pen`; in code they come from the shared kit's `Theme.sleepGuard`, read from the SwiftUI environment):**
 - `bg-primary`: `#000000`
 - `bg-secondary`: `#1C1C1E`
 - `bg-card`: `#2C2C2E`
@@ -67,7 +67,7 @@ If a design token is missing for a property, derive it from the screenshot or as
 
 **Open:** `bg-card` is `#22232B` in code and in the shared kit (what ships); the list above says `#2C2C2E`. Settle it against the `.pen` file before relying on either.
 
-**Shared design kit (ADR 0005).** Tokens and presentational components live in `SleepGuardDesignKit` in `../SleepGuardShared`, used by SleepGuard and SleepGuardUIKitWay. `DesignSystem` re-exports it; `AppTheme` starts from its `Theme.sleepGuard`; the app root puts `AppTheme.shared.designKitTheme` in the SwiftUI environment, where kit components read it. Build kit components from SwiftData models through `DesignSystem/Sources/Components/SleepGuardKitAdapters.swift`. A change to a kit component is a shared release (tag, then `scripts/bump-shared.sh`) and reaches both apps.
+**Shared design kit (ADR 0005).** Tokens and presentational components live in `SleepGuardDesignKit` in `../SleepGuardShared`, used by SleepGuard and SleepGuardUIKitWay. A file that uses it imports it (`import SleepGuardDesignKit`). There is one theme system (ADR 0009): the app root sets `.environment(\.theme, .sleepGuard)` and every view, ours and the kit's, reads `@Environment(\.theme) private var theme` (`theme.palette.accent`, `theme.radii.card`, `theme.scoreColor(_:)`, `theme.palette.eventColor(_:intensity:)`). A preview restyles everything by setting the environment value. Build kit components from SwiftData models through `DesignSystem/Sources/Components/SleepGuardKitAdapters.swift`. A change to a kit component is a shared release (tag, then `scripts/bump-shared.sh`) and reaches both apps.
 
 ## Localization (Non-Negotiable)
 
@@ -75,7 +75,7 @@ If a design token is missing for a property, derive it from the screenshot or as
 
 ### Where strings live
 - **Source of truth**: `../SleepGuardShared/Sources/SleepStrings/Resources/Localizable.xcstrings`
-- **Generated accessor**: `../SleepGuardShared/Sources/SleepStrings/Strings.swift` (auto-generated — never edit manually; `DesignSystem` re-exposes it as `Strings`)
+- **Generated accessor**: `../SleepGuardShared/Sources/SleepStrings/Strings.swift` (auto-generated — never edit manually; files import `SleepStrings`)
 - **Helper file**: `../SleepGuardShared/Sources/SleepStrings/Resources/Strings.txt` (optional staging area)
 
 ### Key format
@@ -105,9 +105,9 @@ Examples: `action.save`, `settings.theme.dark`, `session.summary.title`
    - Then auto-runs `generate-strings.py` to update `Strings.swift`
 
 ### Using strings in code
-Always reference strings through the generated `Strings` enum from `DesignSystem`:
+Always reference strings through the generated `Strings` enum (`SleepStrings`, declared by the target):
 ```swift
-import DesignSystem
+import SleepStrings
 
 Text(Strings.actionSave)
 Text(Strings.settingsThemeDark)
@@ -155,7 +155,7 @@ Vendored agent skills live in `.claude/skills/` (MIT licensed, LICENSE files inc
 Notes:
 - The skills are advisory and non-opinionated by design; where a skill's style suggestion (e.g., view property ordering) conflicts with project conventions, project conventions apply.
 - Known conflicts. Ignore the skill's advice and its example code here:
-  - **Dependency injection.** The skills inject services through `@Environment(Model.self)` (`swiftui-view-refactor` §2 and `references/mv-patterns.md`, `swiftui-expert-skill` `references/environment-patterns.md`) or pass them to a view through `init` (`swiftui-view-refactor` §5). Here, views use `@Injected(\.service)` and never take a service through `init`; `@Environment` is only for `RouterPath` and SwiftUI system values (see Dependencies).
+  - **Dependency injection.** The skills inject services through `@Environment(Model.self)` (`swiftui-view-refactor` §2 and `references/mv-patterns.md`, `swiftui-expert-skill` `references/environment-patterns.md`) or pass them to a view through `init` (`swiftui-view-refactor` §5). Here, views use `@Injected(\.service)` and never take a service through `init`; `@Environment` is only for `RouterPath`, `theme` and SwiftUI system values (see Dependencies).
   - **Localization.** `swiftui-expert-skill` `references/localization.md` recommends string literals in `Text("…")` and `String(localized:)` outside views. Here, every user-facing string goes through `Strings.` (see Localization).
   - **Stable view tree.** `swiftui-view-refactor` §4 warns against switching branches at the root of `body`. A container view's `switch viewState` is the intended pattern here; apply the advice inside the state views.
   - **View size.** `swiftui-view-refactor` splits at ~300 lines; the limits here are 200 per view and 100 per container.
@@ -172,18 +172,18 @@ These are non-negotiable. They come from production patterns in apps like IceCub
 - **No ViewModels by default.** Use `@State` with a `ViewState` enum directly in the view. The view IS the view model.
 - The deliberate exception is an `@Observable` state owner (`SessionDetailModel`, `ClipPlaybackController`): add one only when the state owns an imperative resource (audio engine, timers, callbacks), or when a screen's state and side effects can't fit in a view under 200 lines. Never one per screen by reflex. It holds the `ViewState`, doesn't import `DesignSystem`, and is unit-tested.
 - A view that loads asynchronously defines a `ViewState` enum: `.loading`, `.loaded`, `.error`, plus `.empty` when the screen has an empty state. No boolean soup (`isLoading`, `hasError`, `isEmpty`). A view backed only by `@Query` has no loading phase, so it reads the query directly and needs no enum.
-- `@State` for view-local. Shared services resolve from the container (`@Injected`). `@Environment` only for `RouterPath` and SwiftUI system values. Nothing in between.
+- `@State` for view-local. Shared services resolve from the container (`@Injected`). `@Environment` only for `RouterPath`, `theme` (the kit's `Theme` value, ADR 0009) and SwiftUI system values. Nothing in between.
 - Never nest `@Observable` inside another `@Observable`. It breaks observation.
 - Wrap state transitions in `withAnimation` when they affect the UI.
 
 ### Dependencies
 
-- **Views** (`Sources/Views/`, `Sources/Components/`) resolve shared services with `@Injected(\.service)` from the Factory container and never take a service through `init`, not even to pass it down to a child (e.g. `theme`). Why: views aren't unit-tested, the container already lets previews and tests swap a service, and one way to get a dependency keeps 100+ views consistent. Enforced by `check-layering.py` (rule 6).
-- **Non-view types with logic worth testing** (Env services, `@Observable` state owners like `SessionDetailModel`, helpers like `CustomMelodyRecorder`) do the opposite: they take collaborators as `init` parameters that default to the container, so a test passes fakes directly (see `SessionCommitterTests`).
-- Shared services are singletons with `.shared`, usually `@MainActor @Observable` (the exceptions are `SessionRawLogWriter`, an actor, and `StorageLimitEnforcer`, which is `Sendable`: their factories aren't `@MainActor`). They are registered in the container (`Packages/Env/Sources/Services/Container.swift`; DesignSystem registers `Theme` in its own). Feature packages and DesignSystem never access an app service's `.shared` (enforced by `check-layering.py`). Env services take collaborators as init parameters defaulting to the container (`init(preferences: any UserPreferencesStoring = Container.shared.userPreferences())`), so dependencies are visible and replaceable in tests.
-- **Every service sits behind a protocol** (ADR 0002) named for its role (`HealthKitSyncing`, `AudioRecording`, `UserPreferencesStoring`, …), declared in its own file named after the protocol, next to the concrete type (`AudioRecording.swift` beside `AudioRecorder.swift`). Factories are typed `Factory<any P>` and resolve `.shared`. The one exception is Env's internal session composition (`sessionRecordingController`, `realtimeDetectionTracker`): these are concrete types owned only by `SessionManager`, so they are constructed in the factory and never used outside Env. Inits are public, never `private`. Pass services around as `any P`, never as the concrete type.
-- **Every protocol has a test double** in `EnvTestSupport` (`FakeX`). The exceptions are the `UserDefaults`-backed stores (`UserPreferences.isolated()`, `AppConfig.isolated()`, the real type on a throwaway suite) and `AppTheme` (a separate `AppTheme()`). Tests override with `Container.shared.x.register { fake }` inside `@Suite(.container)` / `@Test(.container)` from `FactoryTesting`, so registrations are scoped per test.
-- `@Observable` classes must NOT use `@Injected` — both macros synthesize underscore backing storage and collide (compile error). Resolve via `Container.shared.service()` in init.
+- **Views** (`Sources/Views/`, `Sources/Components/`) resolve shared services with `@Injected(\.service)` from the Factory container and never take a service through `init`, not even to pass it down to a child. Why: views aren't unit-tested, the container already lets previews and tests swap a service, and one way to get a dependency keeps 100+ views consistent. Enforced by `check-layering.py` (rule 6).
+- **Non-view types with logic worth testing** (the services in `Services`, `@Observable` state owners like `SessionDetailModel`, helpers like `CustomMelodyRecorder`) do the opposite: they take collaborators as `init` parameters that default to the container, so a test passes fakes directly (see `SessionCommitterTests`).
+- Shared services are singletons with `.shared`, usually `@MainActor @Observable` (the exceptions are `SessionRawLogWriter`, an actor, and `StorageLimitEnforcer`, which is `Sendable`: their factories aren't `@MainActor`). Each package registers its own services in a `Container` extension: session services in `Packages/Services/Sources/Services/Container.swift`, `appConfig`/`userPreferences` in Config, `healthKitSync` in Health, haptics/notifications/Watch in Platform, `tabCoordinator` in Routing, `theme` in DesignSystem. Feature packages and DesignSystem never access an app service's `.shared` (enforced by `check-layering.py`). Services take collaborators as init parameters defaulting to the container (`init(preferences: any UserPreferencesStoring = Container.shared.userPreferences())`), so dependencies are visible and replaceable in tests.
+- **Every service sits behind a protocol** (ADR 0002) named for its role (`HealthKitSyncing`, `AudioRecording`, `UserPreferencesStoring`, …), declared in its own file named after the protocol, next to the concrete type (`AudioRecording.swift` beside `AudioRecorder.swift`). Factories are typed `Factory<any P>` and resolve `.shared`. The one exception is Services's internal session composition (`sessionRecordingController`, `realtimeDetectionTracker`): these are concrete types owned only by `SessionManager`, so they are constructed in the factory and never used outside Services. Inits are public, never `private`. Pass services around as `any P`, never as the concrete type.
+- **Every protocol has a test double** in its package's TestSupport (`ServicesTestSupport`, `HealthTestSupport`, `PlatformTestSupport`, `RoutingTestSupport`; `FakeX`). The exceptions are the `UserDefaults`-backed stores (`UserPreferences.isolated()`, `AppConfig.isolated()` in `ConfigTestSupport`, the real type on a throwaway suite). Tests override with `Container.shared.x.register { fake }` inside `@Suite(.container)` / `@Test(.container)` from `FactoryTesting`, so registrations are scoped per test.
+- `@Observable` classes must NOT use `@Injected` — both macros synthesize underscore backing storage and collide (compile error). Like every non-view type, they take collaborators as `init` parameters defaulting to the container (`healthKitSync: any HealthKitSyncing = Container.shared.healthKitSync()`), never `Container.shared.x()` inside the init body (F27-T14). So outside views there is one style, visible in the signature. Exceptions: `AudioRecorder` takes only its clips folder (`AudioRecorder.shared`, built in Services, is what the factory returns), and a `Sendable` type that can't hold a main-actor service resolves it at the call (`StorageLimitEnforcer`).
 - Nonisolated code (Apple delegate methods, detached tasks) resolves via Factory's global `dependency(\.service)` — property wrappers are MainActor-bound.
 - The app target is the composition root: `SleepGuardApp`/`MainTabView` hold `.shared` references directly. FactoryKit is not an app-target dependency.
 - `RouterPath` is the deliberate exception — it stays SwiftUI `.environment` (tab-owned navigation stacks). Sheets receive it via `.withEnvironments()` (RouterPath-only).
@@ -191,7 +191,7 @@ These are non-negotiable. They come from production patterns in apps like IceCub
 ### Navigation
 
 - All navigation goes through `RouterPath`. No manual `NavigationLink(destination:)`.
-- Every screen is a case in `RouterDestination` (push) or `SheetDestination` (modal).
+- Every screen is a case in `RouterDestination` (push) or `SheetDestination` (a tab's modal). App-level modals (end-of-night summary, soft-ask, briefing) are `RootPresentation`s, owned by `SessionFlowHost` at the root and ordered by `RootPresentationPolicy` (ADR 0007).
 - Each tab owns its own `RouterPath`. Navigation never leaks across tabs.
 
 ### Concurrency
@@ -200,12 +200,14 @@ These are non-negotiable. They come from production patterns in apps like IceCub
 - `.task { }` for data loading. `.task(id:)` when load depends on a changing value.
 - `Task { }` only in event handlers (`onChange`, button actions).
 - Always check `Task.isCancelled` before setting error state.
+- Launch work runs from the app root's `.task`, in order (`SleepGuardApp.runLaunchMaintenance`). Long SwiftData passes run on the main context in batches that save and `await Task.yield()` (`refreshStaleSummaries`): saves from a background context don't refresh objects `@Query` screens already hold. Never `Task.detached` around a `ModelContext`. A task that must outlive its caller (`SessionCommitter.commit`'s follow-up) is owned by the service that starts it and returned so tests can await it.
 - **Swift 6 everywhere**: language mode v6 + strict concurrency complete. Sendable/isolation violations are compile errors — fix them properly (value types, `let`, `nonisolated`), never `@unchecked Sendable`.
-- **Isolation split**: explicit `@MainActor` on all `@Observable` classes in Models/Env/AudioEngine (load-bearing — no package default isolation); the 8 UI packages declare `.defaultIsolation(MainActor.self)` and the app target sets `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`.
+- **Isolation split**: explicit `@MainActor` on all `@Observable` classes in Models/Services/Config/Health/Platform/AudioEngine (load-bearing — no package default isolation); the 8 UI packages declare `.defaultIsolation(MainActor.self)` and the app target sets `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`.
+- **Moving code across that split changes its isolation silently (F27-T16, review Q53).** Domain and value types never live in a default-MainActor package: a pure helper moved into one becomes main-actor isolated (callers from an actor now need `await`), and a view model moved out of one loses its isolation. Types used across modules state their isolation explicitly (`@MainActor`, `nonisolated`, `Sendable`) instead of relying on a package default.
 - Value types are `Sendable` with immutable `let` properties. SwiftData `@Model` classes are never Sendable — destructure their Sendable fields (`id`, `Date`, bursts) before crossing into `@Sendable`/detached closures.
 - Apple delegates (WCSession, SNResultsObserving, AVAudioPlayerDelegate) are nonisolated: mark methods `nonisolated`, parse payloads synchronously, `Task { @MainActor in }` for state mutation. See `docs/architecture/concurrency.md`.
-- **Live detection is one ordered stream into an actor** (ADR 0003). Detection rules live only in pure shared code: the `DetectionStateMachine`, and the per-sample `SnoreClassifier` / `SpeechClassifier` with the sensitivity presets (`SnoreClassifier.preset`, `DetectionSensitivity.minEventDuration`); `SnoreDetector` and `SpeechDetector` hold the live thresholds and call them. The detection inputs are shared too: `AudioLevels` (RMS / peak dB), `SpectralFeatures` (from the FFT's magnitudes) and `SoundClassLabels` (which SoundAnalysis classes count as snoring and talking) (`SleepCore`, in the shared `SleepGuardShared` repo): no clock, no singletons, no SwiftData. Anything that changes detection state (sample, melody start/stop, settings, session end) goes into the `DetectionEngine` stream as a timestamped `Message`; never mutate detection state from a side path. Side effects stay on the main actor in `RealtimeDetectionTracker.perform`. Thresholds are durations, not sample counts. A change to detection output must re-record the replay goldens on purpose (`scripts/record-replay-goldens.sh`) and explain the diff.
-- **Logging: never `print`.** Use `Log.<category>` (`audio`, `detection`, `session`, `interrupter`, `storage`, `playback`, `app`; `os.Logger`, in `Models/Sources/Helpers/Log.swift`). `.debug` for traces, `.info` milestones, `.notice` notable state, `.error` failures, `.fault` should-never-happen. Strings are private by default; add `privacy: .public` only for values that can't identify the user. Logger interpolations are autoclosures, so instance properties need `self.` (SwiftFormat keeps it via `--selfrequired`). Enforced by `check-layering.py`.
+- **Live detection is one ordered stream into an actor** (ADR 0003). Detection rules live only in pure shared code: the `DetectionStateMachine`, and the per-sample `SnoreClassifier` / `SpeechClassifier` with the sensitivity presets (`SnoreClassifier.preset`, `DetectionSensitivity.minEventDuration`), applied to each sample by `LiveSampleClassifier`, which the tracker holds (the same as SleepGuardUIKitWay's). The detection inputs are shared too: `AudioLevels` (RMS / peak dB), `SpectralFeatures` (from the FFT's magnitudes) and `SoundClassLabels` (which SoundAnalysis classes count as snoring and talking) (`SleepCore`, in the shared `SleepGuardShared` repo): no clock, no singletons, no SwiftData. Anything that changes detection state (sample, melody start/stop, settings, session end) goes into the `DetectionEngine` stream as a timestamped `Message`; never mutate detection state from a side path. Side effects stay on the main actor in `RealtimeDetectionTracker.perform`. Thresholds are durations, not sample counts. A change to detection output must re-record the replay goldens on purpose (`scripts/record-replay-goldens.sh`) and explain the diff.
+- **Logging: never `print`.** Use `Log.<category>` (`audio`, `detection`, `session`, `interrupter`, `storage`, `playback`, `health`, `app`, and `Log.signposter`; `os.Logger`, SleepGuardShared's `SleepLogging`, imported where it is used). `.debug` for traces, `.info` milestones, `.notice` notable state, `.error` failures, `.fault` should-never-happen. Strings are private by default; add `privacy: .public` only for values that can't identify the user. Logger interpolations are autoclosures, so instance properties need `self.` (SwiftFormat keeps it via `--selfrequired`). Enforced by `check-layering.py`.
 
 ### Views
 
@@ -222,7 +224,7 @@ These thresholds prevent monolithic views. Enforce them during implementation an
 
 **File size limits:**
 - No view file should exceed **200 lines**. If it does, split it.
-  Enforced in CI by `scripts/check-view-size.py` (`Sources/Views/`, `Sources/Components/`). Existing offenders sit in its `ALLOWLIST` with a reason and a line ceiling; they may shrink, never grow. Never add a new entry to get a PR through: split the file.
+  Enforced in CI by `scripts/check-view-size.py` (`Sources/Views/`, `Sources/Components/`, the app target). Existing offenders sit in its `ALLOWLIST` with a reason and a line ceiling; they may shrink, never grow. Never add a new entry to get a PR through: split the file.
 - A container view (with `switch viewState`) should be **≤100 lines**. State views (`.loading`, `.empty`, `.loaded`, `.error`) live in separate files.
 
 **What to extract into separate files:**
@@ -230,7 +232,7 @@ These thresholds prevent monolithic views. Enforce them during implementation an
 - Reusable rows/cards: `[Feature]RowView`, `[Feature]StatCard`, `[Feature]EventRow`
 - Full-screen overlays: `AlarmOverlayView`, `PermissionOverlayView`
 - A view that only takes values and draws them: the shared repo, so both apps use one copy. A component goes in `SleepGuardDesignKit`; a screen's loaded layout (screen content) goes in `SleepGuardContentKit`. A SleepGuard-only piece used by 2+ packages (it reads models or services): `DesignSystem`
-- **Three layers (ADR 0006).** Components and screen content are shared; the screen stays in its feature package: loading and `ViewState`, `@Query`, `@Injected` services, `RouterPath`, alerts and sheets, the header. The test: if a view can be rendered from plain values alone, it is shared. A container loads, maps models to `SleepCore` values (`summaryWithoutEvents` for lists, `nightSummary` / `night` for what a screen shows) and hands the content those values and closures. A SleepGuard-only extra goes into shared content through an optional value or a `@ViewBuilder` slot. `DesignSystem` is this app's bridge to the shared code (`AppTheme`, model adapters, re-exports), not a design system of its own.
+- **Three layers (ADR 0006).** Components and screen content are shared; the screen stays in its feature package: loading and `ViewState`, `@Query`, `@Injected` services, `RouterPath`, alerts and sheets, the header. The test: if a view can be rendered from plain values alone, it is shared. A container loads, maps models to `SleepCore` values (`summary` for lists, `night` for what a screen shows) and hands the content those values and closures. A SleepGuard-only extra goes into shared content through an optional value or a `@ViewBuilder` slot. `DesignSystem` is this app's bridge to the shared code (model adapters, the `Theme` extensions), not a design system of its own.
 
 **What stays inline (fine as private computed properties):**
 - Simple headers, badges, or labels under 10 lines
@@ -247,15 +249,18 @@ These thresholds prevent monolithic views. Enforce them during implementation an
 
 ### Packages
 
-- Feature packages never import other feature packages. Only: Models, AudioEngine, Env, Routing, DesignSystem (the one existing edge: Settings → Personalization).
-- **Night rules live in the shared repo.** `SleepSession`'s computed metrics and `SnoringEpisode` map the stored models to `Night` (`SleepSession+Night.swift`) and call `SleepCore`. Change how a night adds up there, not here; this repo's Models tests are the parity check.
+- Feature packages never import other feature packages. Only: Models, AudioEngine, Config, Health, Platform, Services, Routing, DesignSystem, each only if the feature uses it. No feature-to-feature edge exists today. Every import must be declared in the target's manifest: `scripts/check-imports.py` (CI) fails on a module that is only visible transitively. **No `@_exported import`** (F27-T26): it hides where a type comes from and what a target depends on. A file imports every module it uses (a shared product too: `SleepStore`, `SleepLogging`, `SleepStrings`, the kits) and its target declares it; `check-layering.py` (rule 7) rejects a re-export.
+- **Behaviour both apps need lives in the shared repo, behind each app's own protocol.** What a night looks like in Apple Health is `SleepHealthKit`'s `HealthKitSleep`; the raw log on disk is `SleepFiles`' `RawLogFile`; the settings both apps have are `SleepPreferences` stored by `SleepSettings`' `PreferencesDefaults`. `HealthKitSync`, `SessionRawLogWriter` and `UserPreferences` wrap them with this app's state, DI and logging, as SleepGuardUIKitWay's adapters do. A bug in that behaviour is fixed once, there. Protocols, DI and isolation stay per app. The same holds for audio (`SleepAudioKit`: capture, compression, playback, waveform, spectrum, extraction, melodies, behind `AudioRecording` and the players), the stored nights (`SleepStore`), logging (`SleepLogging`), the file layout and files (`SleepFiles`: `StorageLocation`, checkpoint, profile, survey answers, clips folder) and the start notification (`SleepNotifications`); see ADR 0010.
+- **Night rules live in the shared repo.** The stored nights are SleepStore's `NightRecord` / `NightEventRecord`; their `night` value feeds `SleepCore`, and SleepGuard's reads (`NightRecord+SleepGuard.swift`, `SnoringEpisode`) call it. Change how a night adds up there, not here; this repo's Models tests are the parity check.
 - **Statistics rules live there too.** The dashboard, trends, calendar and Last 7 Nights numbers come from `SleepCore`'s `NightDashboard`, `ScoreTrend`, `NightPeriod`, `CalendarMonth` and `NightDay`, on `NightSummary` values. Choose nights with `summaryWithoutEvents` (cached fields, no faulting) and build `nightSummary` (reads events) only for the nights a screen shows.
 - **Playback rules live there too.** `ClipPlaybackController` keeps the audio engine; which clip is current, the joined timeline, seeking, auto-advance and the enhanced-audio boost and filter frequencies are `SleepCore`'s `ClipPlaylist`, `PlaybackGain` and `PlaybackEnhancement`.
 - **Shared repo.** `../SleepGuardShared` (its own git repo, checked out next to this one) holds code shared with the other SleepGuard apps: `SleepCore` (the night rules — episodes, snoring duration, stage stats, score inputs — on shared `Night` values; sleep score; detection state machine; the plain value types stored in the models), `SleepStrings` (the string catalog), `SleepGuardDesignKit` (tokens and components, ADR 0005) and `SleepGuardContentKit` (screen content, ADR 0006). Packages depend on a released version (`.package(url: …SleepGuardShared.git, exact: "x.y.z")`) and `import SleepCore` where they name its types.
-  - **Two ways to build.** `SleepGuard.xcworkspace` (the project + `../SleepGuardShared` as a local package) uses your local shared checkout: open it in Xcode for day-to-day work, and edits in the shared repo show up on the next build. `SleepGuard.xcodeproj`, `scripts/run-tests.sh` and CI use the pinned release.
-  - **Releasing a shared change:** in the shared repo, run its tests, commit, push, tag (`git tag -a 0.2.0 -m "…" && git push origin 0.2.0`); here, `sh scripts/bump-shared.sh 0.2.0`, run the tests, commit the manifests and both `Package.resolved` files.
+  - **Building against the pinned release** is the default everywhere: `SleepGuard.xcworkspace` holds only the project, which declares SleepGuardShared (exact pin, under Package Dependencies) and links the products the app and widget targets import; `check-imports.py` checks those targets too. **To try unreleased shared code,** add `../SleepGuardShared` to the workspace in Xcode (drag the folder into the navigator): Xcode uses it instead of the pin until you remove it. Never commit that workspace change. From the command line, build through a throwaway workspace outside the repo that lists both (see Build & Report). Never edit the manifests to a path.
+  - **Releasing a shared change:** in the shared repo, run its tests, commit, push, tag (`git tag -a 0.2.0 -m "…" && git push origin 0.2.0`); here, `sh scripts/bump-shared.sh 0.2.0`, run the tests, commit the manifests, the project file (its pin) and both `Package.resolved` files.
   - A change there changes every app. See `docs/adr/0004-shared-repo.md`.
-- Navigation types (`RouterDestination`, `SheetDestination`, `RouterPath`) live in the leaf `Routing` package, not `Env`. `Env` must not import `SwiftUI` (enforced by `check-layering.py`). See `docs/adr/0001-routing-package.md`.
+- Navigation types (`RouterDestination`, `SheetDestination`, `RouterPath`, `RootPresentation`, `TabCoordinator`) live in the `Routing` package, not `Services`. `Services` must not import `SwiftUI` or `Routing` (enforced by `check-layering.py`). See `docs/adr/0001-routing-package.md`.
+- **Imports are internal by default** (`InternalImportsByDefault` in every package, F27-T12). Write `public import X` only in a file whose public API exposes X's types; everything else stays `import X`, so a dependency's symbols never leak to clients. Undeclared modules are a separate leak, caught by `scripts/check-imports.py`.
+- **Services are split by reason to change (ADR 0008):** `Config` (remote config, preferences), `Health` (HealthKit), `Platform` (haptics, notification permission, Watch; the only UIKit services), `Services` (the recording night: session manager, controller, detection tracker, committer, stores, raw log, storage limits, interrupter, delay, melody storage). New code goes in the package whose reason to change it shares.
 - Architecture decisions are recorded in `docs/adr/` (`NNNN-slug.md`: context, decision, consequences with honest limits, alternatives). Write one when a task changes a boundary, a rule in this file, or a trade-off a reviewer would question.
 - The app target is the only place that imports everything.
 - 2-space indentation. Enforced by `.swiftformat`.
@@ -270,11 +275,8 @@ View files (`Sources/Views/`, `Sources/Components/`) own everything visual:
   maps to `Strings`/`Theme`.
 - Core packages (`Models`, `AudioEngine`) must not import `SwiftUI`/`UIKit`/
   `DesignSystem` at all.
-- Allowed exceptions: content engines whose output IS user-facing text
-  (`Personalization/Engine/BriefingEngine.swift`, `QuoteBank.swift`) may use
-  `Strings`; audio infrastructure
-  (`AudioEngine/Sources/Engine/AudioRecorder.swift`) may import `UIKit` for
-  session-interruption observation.
+- No exceptions: the audio session's observation is SleepGuardShared's
+  `SleepAudioKit` (`CaptureEngine`).
 - Enforced by `scripts/check-layering.py` on every push/PR
   (`.github/workflows/layering.yml`). Run locally before committing non-view
   code: `python3 scripts/check-layering.py`.
@@ -301,32 +303,34 @@ SwiftData lightweight migration is automatic for additive changes, but **removin
 
 SwiftData ignores unused columns in the persistent store. This is the only zero-migration way to evolve schemas.
 
-### Versioned schema (F22-T11)
-Every `ModelContainer` (app and `TestStore`) opens through `SleepGuardSchema.container(_:)`, which attaches `SleepGuardMigrationPlan` (`Packages/Models/Sources/Data/SleepGuardSchema.swift`). Today the plan has one version (`SleepGuardSchemaV1`, pointing at the live `@Model` classes) and no stages. Additive changes still need nothing: keep following the policy above.
+### Versioned schema (F22-T11, shared since F27-T24)
+The schema is SleepGuardShared's `SleepStore` (`NightRecord`, `NightEventRecord`; the same records SleepGuardUIKitWay stores), imported where it is used. Every `ModelContainer` (app and `TestStore`) opens through `SleepStoreSchema.container(at:)`, which attaches `SleepStoreMigrationPlan`; the app opens `SleepGuardStorage.location.storeURL` through `SleepStore.open(at:appVersion:)` (a backup per version, never deleted on failure). Today the plan has one version (`SleepStoreSchemaV1`) and no stages. Additive changes still need nothing: keep following the policy above. A schema change is a shared release and reaches both apps.
 
-**Adding V2** (only for a change the policy above forbids, e.g. dropping `@Attribute(.unique)`):
-1. Freeze V1: copy the current `@Model` classes into `SleepGuardSchemaV1` as nested types, unchanged, and make `models` list those copies.
-2. Declare `SleepGuardSchemaV2` (version `2.0.0`) listing the live classes, then make the change on the live classes.
-3. Append V2 to `SleepGuardMigrationPlan.schemas` and add a `MigrationStage` (`.lightweight` if SwiftData can infer it, `.custom` otherwise). Point `SleepGuardSchema.Current` at V2.
-4. Add a test in `SleepGuardSchemaTests` that writes a V1 store on disk and opens it through the plan with every row intact.
-5. Verify on a simulator that holds real pre-change data before merging. The app's container fallback deletes the store when opening fails.
+**Adding V2** (only for a change the policy above forbids), in the shared repo:
+1. Freeze V1: copy the current record classes into `SleepStoreSchemaV1` as nested types, unchanged, and make `models` list those copies.
+2. Declare `SleepStoreSchemaV2` (version `2.0.0`) listing the live classes, then make the change on the live classes.
+3. Append V2 to `SleepStoreMigrationPlan.schemas` and add a `MigrationStage` (`.lightweight` if SwiftData can infer it, `.custom` otherwise). Point `SleepStoreSchema.Current` at V2.
+4. Add a test in `SleepStoreTests` that writes a V1 store on disk and opens it through the plan with every row intact.
+5. Verify on a simulator in each app that holds real pre-change data before merging.
 
-### Cached computed properties on `SleepSession`
-`SleepSession` carries four defensive cached properties to avoid relationship faulting crashes:
+### The stored summary on `NightRecord`
+`NightRecord` stores its summary so lists never read `events` (faulting `session.events` has crashed in production):
 
 ```swift
-public var hasCachedScore = false
-public var cachedSleepScore = 0
-public var cachedSnoringDuration: TimeInterval = 0
-public var cachedScoreVersion = ""   // SleepScore.cacheVersion(for:) of the formula + config
+public var score = 0
+public var snoringDuration: TimeInterval = 0
+public var eventCount = 0
+public var loudestIntensityRawValue: String?
+public var scoreVersion = ""   // SleepScore.cacheVersion(for:) of the formula + config; "" = none
 ```
 
-These are **necessary** — do not remove them. `sleepScore` and `snoringDuration` are computed from `events`, and faulting `session.events` has crashed in production. The cached values provide a zero-faulting read path. The version stamp makes a cache stale when the formula or `SleepScoreConfig` changes; `SleepSession.refreshStaleCachedScores(in:config:)` recomputes stale sessions at launch.
+These are **necessary** — do not remove them. `summary` reads only them; `night` reads `events`. The version stamp makes a summary stale when the formula or `SleepScoreConfig` changes; `NightRecord.refreshStaleSummaries(in:config:)` recomputes stale nights at launch.
 
-**Rules when modifying sessions:**
-- Never write the cached fields by hand. `refreshCachedScore(using:)` (`Packages/Models/Sources/Data/SleepScoreCache.swift`) is their single writer: it recomputes from events and stamps the version.
-- Call it **after** `modelContext.insert(session)`, never before. SwiftData snapshots at insertion time; pre-insertion mutations on `@Model` objects are **not tracked**. The caller saves.
-- Saving a finished night goes through `SessionCommitter` only. Any code that changes a session after its initial save (e.g. `SessionDetailModel` adding `sleepStageSegments` from HealthKit) calls `refreshCachedScore(using:)` before `modelContext.save()`.
+**Rules when modifying nights:**
+- Never write the summary fields by hand. `refreshSummary(using:)` (shared) is their single writer: it recomputes from events and stamps the version.
+- A night is stamped when it stops (the summary sheet) and again by `SessionCommitter` after `modelContext.insert(session)`; the caller saves.
+- Saving a finished night goes through `SessionCommitter` only. Any code that changes a night after its initial save (e.g. `SessionDetailModel` adding `sleepStages` from HealthKit) calls `refreshSummary(using:)` before `modelContext.save()`.
+- The raw recording and its log aren't stored on the record: `rawAudioFileName` / `rawLogFileName` find them by the night's id (`RawRecording`).
 
 ## Architecture Reference
 
@@ -364,7 +368,7 @@ PER TASK (one prompt does all of this)
 
 FEATURE COMPLETE
   9. Create docs/features/f#-name.md
-  10. Update ProjectArchitecture.md
+  10. Update TECHNICAL_OVERVIEW.md
   11. Set feature "Done" in Notion
 
 SESSION END
@@ -403,14 +407,16 @@ mcp__XcodeBuildMCP__test_sim
 
 **Why `simulatorId`:** device names are ambiguous across runtimes (e.g. `iPhone 17 Pro` exists on iOS 18.3, 26.0, and 26.2). The UDID pins one simulator (iPhone 16e, iOS 26.2) and eliminates flakiness.
 
-**Package tests:** `sh scripts/run-tests.sh` (all packages) or `sh scripts/run-tests.sh Models Env`. It runs them on the iOS Simulator; don't use `swift test`, which builds for macOS.
+**Package tests:** `sh scripts/run-tests.sh` (all packages) or `sh scripts/run-tests.sh Models Services`. It runs them on the iOS Simulator; don't use `swift test`, which builds for macOS.
 
 **Fallback (Shell):**
 ```bash
-# Local work (uses ../SleepGuardShared):
+# The pinned shared release (what CI builds; the workspace holds only the project):
 xcodebuild -workspace SleepGuard.xcworkspace -scheme SleepGuard -destination 'platform=iOS Simulator,id=BD630AD5-5A05-4663-8F1B-A17283EBCBF5' build
-# What CI builds (pinned shared release):
-xcodebuild -project SleepGuard.xcodeproj -scheme SleepGuard -destination 'platform=iOS Simulator,id=BD630AD5-5A05-4663-8F1B-A17283EBCBF5' build
+# Against your local ../SleepGuardShared (unreleased changes): a throwaway workspace outside the repo
+W=$TMPDIR/SleepGuardLocal.xcworkspace; mkdir -p $W
+printf '<?xml version="1.0" encoding="UTF-8"?>\n<Workspace version = "1.0">\n<FileRef location = "absolute:%s/SleepGuard.xcodeproj"></FileRef>\n<FileRef location = "absolute:%s/../SleepGuardShared"></FileRef>\n</Workspace>\n' "$PWD" "$PWD" > $W/contents.xcworkspacedata
+xcodebuild -workspace $W -scheme SleepGuard -destination 'platform=iOS Simulator,id=BD630AD5-5A05-4663-8F1B-A17283EBCBF5' build
 ```
 
 ## Session End Requirements

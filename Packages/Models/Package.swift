@@ -10,32 +10,38 @@ let package = Package(
     .library(name: "ModelsTestSupport", targets: ["ModelsTestSupport"]),
   ],
   dependencies: [
-    .package(url: "https://github.com/dardan0x/SleepGuardShared.git", exact: "0.27.0"),
+    .package(url: "https://github.com/dardan0x/SleepGuardShared.git", exact: "0.37.0"),
   ],
   targets: [
     .target(
       name: "Models",
       dependencies: [
+        .product(name: "SleepLogging", package: "SleepGuardShared"),
+        .product(name: "SleepFiles", package: "SleepGuardShared"),
+        .product(name: "SleepStore", package: "SleepGuardShared"),
         .product(name: "SleepCore", package: "SleepGuardShared"),
       ],
       path: "Sources",
       swiftSettings: [
         .swiftLanguageMode(.v6),
+        .enableUpcomingFeature("InternalImportsByDefault"),
       ]),
     .target(
       name: "ModelsTestSupport",
-      dependencies: ["Models", .product(name: "SleepCore", package: "SleepGuardShared")],
+      dependencies: ["Models", .product(name: "SleepCore", package: "SleepGuardShared"), .product(name: "SleepStore", package: "SleepGuardShared")],
       path: "TestSupport",
       swiftSettings: [
         .swiftLanguageMode(.v6),
+        .enableUpcomingFeature("InternalImportsByDefault"),
       ]),
     .testTarget(
       name: "ModelsTests",
-      dependencies: ["Models", "ModelsTestSupport", .product(name: "SleepCore", package: "SleepGuardShared")],
+      dependencies: ["Models", "ModelsTestSupport", .product(name: "SleepCore", package: "SleepGuardShared"), .product(name: "SleepStore", package: "SleepGuardShared")],
       resources: [
         .copy("Fixtures"),
       ],
       swiftSettings: [
         .swiftLanguageMode(.v6),
+        .enableUpcomingFeature("InternalImportsByDefault"),
       ]),
   ])

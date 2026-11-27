@@ -1,4 +1,4 @@
-import SwiftUI
+public import SwiftUI
 
 public enum RouterDestination: Hashable, Sendable {
   case recordingDetail(id: UUID)
@@ -9,14 +9,13 @@ public enum RouterDestination: Hashable, Sendable {
   case calendar
 }
 
+/// A tab's own sheets. App-level modals (the end-of-night summary, prompts)
+/// are `RootPresentation`s, presented by the app root.
 public enum SheetDestination: Identifiable, Hashable, Sendable {
-  case sessionSummary
   case profileEditor
 
   public var id: String {
     switch self {
-    case .sessionSummary:
-      "sessionSummary"
     case .profileEditor:
       "profileEditor"
     }

@@ -1,9 +1,10 @@
 import Foundation
-import Models
-import SleepCore
-import SwiftData
+public import Models
+public import SleepCore
+public import SwiftData
+public import SleepStore
 
-/// In-memory SwiftData store with the app's versioned schema and migration plan. Use it whenever a test
+/// In-memory SwiftData store with the shared versioned schema and migration plan (SleepStore). Use it whenever a test
 /// reads `events`, so relationships behave like production.
 @MainActor
 public final class TestStore {
@@ -13,16 +14,16 @@ public final class TestStore {
   }
 
   public init() throws {
-    container = try SleepGuardSchema.container(SleepGuardSchema.configuration(inMemory: true))
+    container = try SleepStoreSchema.container(at: nil)
   }
 
   /// Inserts the session, then attaches events and gaps. Order matters:
   /// SwiftData doesn't track changes made before insertion.
   @discardableResult
   public func insert(
-    _ session: SleepSession,
-    events: [SnoreEvent] = [],
-    gaps: [RecordingGap] = []) throws -> SleepSession
+    _ session: NightRecord,
+    events: [NightEventRecord] = [],
+    gaps: [RecordingGap] = []) throws -> NightRecord
   {
     context.insert(session)
     events.forEach { context.insert($0) }

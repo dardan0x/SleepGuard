@@ -23,9 +23,4 @@ struct RouterPathTests {
     router.navigateBack()
     #expect(router.path.isEmpty)
   }
-
-  @Test func sheetIDsAreUnique() {
-    let sheets: [SheetDestination] = [.sessionSummary, .profileEditor]
-    #expect(Set(sheets.map(\.id)).count == sheets.count)
-  }
 }

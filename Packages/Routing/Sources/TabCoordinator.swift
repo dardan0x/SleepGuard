@@ -1,0 +1,58 @@
+public import Config
+public import FactoryKit
+public import Foundation
+public import Models
+public import Observation
+
+/// Coordinates tab-bar behavior across the app's main tabs.
+/// Used to signal "pop to root" when the user taps the already-selected tab.
+@MainActor
+@Observable
+public final class TabCoordinator: TabCoordinating {
+  public static let shared = TabCoordinator()
+
+  public var selectedTab: AppTab
+  public var resetSignal: TabResetSignal?
+  /// A widget deep link waiting for the Statistics tab to route it.
+  public var pendingDeepLink: WidgetDeepLink?
+
+  private let appConfig: any AppConfigProviding
+
+  public init(appConfig: any AppConfigProviding = Container.shared.appConfig()) {
+    self.appConfig = appConfig
+    selectedTab = appConfig.visibleTabsInOrder.first ?? .statistics
+  }
+
+  public func selectTab(_ tab: AppTab) {
+    if selectedTab == tab {
+      resetSignal = TabResetSignal(tab: tab)
+    } else {
+      selectedTab = tab
+    }
+  }
+
+  /// Hands a deep link to the Statistics tab. Ignored when remote config hides that tab.
+  public func open(_ link: WidgetDeepLink) {
+    guard appConfig.visibleTabsInOrder.contains(.statistics) else { return }
+    selectedTab = .statistics
+    pendingDeepLink = link
+  }
+
+  /// Hands over the pending link once nothing blocks it. A blocked link stays
+  /// pending (it isn't dropped) and is handed over when the caller asks again.
+  public func takePendingDeepLink(blocked: Bool) -> WidgetDeepLink? {
+    guard !blocked, let link = pendingDeepLink else { return nil }
+    pendingDeepLink = nil
+    return link
+  }
+}
+
+/// A unique signal indicating that a specific tab should pop to root.
+public struct TabResetSignal: Equatable, Sendable {
+  public let tab: AppTab
+  public let id = UUID()
+
+  public init(tab: AppTab) {
+    self.tab = tab
+  }
+}

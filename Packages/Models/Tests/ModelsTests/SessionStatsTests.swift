@@ -1,10 +1,11 @@
 import Foundation
 import ModelsTestSupport
 import SleepCore
+import SleepStore
 import Testing
 @testable import Models
 
-/// `SleepSession` durations, percentages, sleep-talking stats, stage stats,
+/// `NightRecord` durations, percentages, sleep-talking stats, stage stats,
 /// and the cached snoring-duration path.
 @MainActor
 struct SessionStatsTests {
@@ -22,7 +23,7 @@ struct SessionStatsTests {
   // MARK: - Durations
 
   @Test func unfinishedSessionHasZeroDurationAndPercentages() throws {
-    let session = try store.insert(SleepSession(startDate: start), events: [.fixture(at: at(0), duration: 60)])
+    let session = try store.insert(NightRecord(start: start), events: [.fixture(at: at(0), duration: 60)])
     #expect(session.totalDuration == 0)
     #expect(session.snoringPercentage == 0)
     #expect(session.sleepTalkingPercentage == 0)
@@ -46,14 +47,15 @@ struct SessionStatsTests {
 
   @Test func snoringPercentageOfTotalDuration() throws {
     let session = try store.insert(.fixture(start: start, hours: 8), events: [.fixture(at: at(0), duration: 2880)])
+    session.refreshSummary(using: .default)
     #expect(session.snoringDuration == 2880)
     #expect(session.snoringPercentage == 10)
   }
 
-  @Test func cachedSnoringDurationWinsWhenCached() throws {
+  @Test func theStoredSnoringDurationIsRead() throws {
     let session = try store.insert(.fixture(start: start), events: [.fixture(at: at(0), duration: 2880)])
-    session.hasCachedScore = true
-    session.cachedSnoringDuration = 99
+    session.scoreVersion = "cached"
+    session.snoringDuration = 99
     #expect(session.snoringDuration == 99)
   }
 
@@ -78,15 +80,15 @@ struct SessionStatsTests {
   @Test func stageStatsNilWithoutSegments() throws {
     let session = try store.insert(.fixture(start: start))
     #expect(session.stageStats == nil)
-    session.sleepStageSegments = []
+    session.sleepStages = []
     #expect(session.stageStats == nil)
-    session.sleepStageSegments = [SleepStageSegment(stage: .deep, startOffset: 0, duration: 0)]
+    session.sleepStages = [SleepStageSegment(stage: .deep, startOffset: 0, duration: 0)]
     #expect(session.stageStats == nil)
   }
 
   @Test func stageStatsArePercentagesOfSegmentTotal() throws {
     let session = try store.insert(.fixture(start: start))
-    session.sleepStageSegments = [
+    session.sleepStages = [
       SleepStageSegment(stage: .deep, startOffset: 0, duration: 30),
       SleepStageSegment(stage: .light, startOffset: 30, duration: 40),
       SleepStageSegment(stage: .rem, startOffset: 70, duration: 10),
@@ -104,6 +106,6 @@ struct SessionStatsTests {
 
   @Test func debugMinimumSaveDurationIsTwoMinutes() {
     // Tests build in Debug; Release uses 30 minutes.
-    #expect(SleepSession.minimumSaveDuration == 120)
+    #expect(NightRecord.minimumSaveDuration == 120)
   }
 }

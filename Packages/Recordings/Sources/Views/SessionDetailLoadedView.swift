@@ -1,8 +1,11 @@
+import Config
 import DesignSystem
-import Env
 import FactoryKit
 import Models
 import SleepCore
+import SleepGuardContentKit
+import SleepStore
+import SleepStrings
 import SwiftData
 import SwiftUI
 
@@ -12,17 +15,18 @@ import SwiftUI
 /// goes through `SessionShareCoordinator`.
 @MainActor
 struct SessionDetailLoadedView: View {
-  @Injected(\.theme) private var theme
+  @Environment(\.theme) private var theme
   @Injected(\.appConfig) private var appConfig
   @Environment(\.modelContext) private var modelContext
   @Environment(\.dismiss) private var dismiss
 
-  let session: SleepSession
+  let session: NightRecord
   let isClipSession: Bool
   @Bindable var model: SessionDetailModel
   let shareCoordinator: SessionShareCoordinator
 
   @State private var activeSheet: SessionDetailSheet?
+  @State private var deleteFailed = false
 
   /// The report's title and footer name the app, as SleepGuard's did.
   static var appName: String {
@@ -53,9 +57,9 @@ struct SessionDetailLoadedView: View {
     .navigationBarTitleDisplayMode(.inline)
     .toolbar {
       ToolbarItem(placement: .principal) {
-        Text(DateFormatters.dayOfWeekAndDate.string(from: session.startDate))
+        Text(DateFormatters.dayOfWeekAndDate.string(from: session.start))
           .font(.system(size: 17, weight: .semibold))
-          .foregroundStyle(theme.textPrimary)
+          .foregroundStyle(theme.palette.textPrimary)
       }
       ToolbarItem(placement: .topBarTrailing) {
         HStack(spacing: 16) {
@@ -69,30 +73,37 @@ struct SessionDetailLoadedView: View {
             } label: {
               Label(shareCoordinator.isGeneratingPDF ? Strings.a11yGeneratingReport : Strings.a11yExportReport, systemImage: shareCoordinator.isGeneratingPDF ? "clock" : "doc.text").labelStyle(.iconOnly)
                 .font(.system(size: 17))
-                .foregroundStyle(shareCoordinator.isGeneratingPDF ? theme.textTertiary : theme.accent)
+                .foregroundStyle(shareCoordinator.isGeneratingPDF ? theme.palette.textTertiary : theme.palette.accent)
             }
             .disabled(shareCoordinator.isGeneratingPDF)
           }
-          if !isClipSession, session.audioFileURL != nil {
+          if !isClipSession, session.rawAudioFileName != nil {
             Button {
               shareCoordinator.shareFullSession(session)
             } label: {
               Label(Strings.a11yShare, systemImage: "square.and.arrow.up").labelStyle(.iconOnly)
                 .font(.system(size: 17))
-                .foregroundStyle(theme.accent)
+                .foregroundStyle(theme.palette.accent)
             }
           }
           Button {
             if model.delete(modelContext: modelContext) {
               dismiss()
+            } else {
+              deleteFailed = true
             }
           } label: {
             Label(Strings.actionDelete, systemImage: "trash").labelStyle(.iconOnly)
               .font(.system(size: 17))
-              .foregroundStyle(theme.destructive)
+              .foregroundStyle(theme.palette.destructive)
           }
         }
       }
+    }
+    .alert(Strings.sessionDeleteFailedTitle, isPresented: $deleteFailed) {
+      Button(Strings.actionOk, role: .cancel) {}
+    } message: {
+      Text(Strings.sessionDeleteFailedMessage)
     }
     .sheet(item: $activeSheet) { sheet in
       switch sheet {
@@ -119,11 +130,11 @@ struct SessionDetailLoadedView: View {
     .overlay {
       if shareCoordinator.isExportingEvent {
         ZStack {
-          theme.bgPrimary.opacity(0.7)
+          theme.palette.bgPrimary.opacity(0.7)
             .ignoresSafeArea()
           ProgressView()
             .scaleEffect(1.5)
-            .tint(theme.accent)
+            .tint(theme.palette.accent)
         }
       }
     }
@@ -131,7 +142,7 @@ struct SessionDetailLoadedView: View {
 }
 
 enum SessionDetailSheet: Identifiable {
-  case player(initialEvent: SnoreEvent?)
+  case player(initialEvent: NightEventRecord?)
   case events
   case shortEventsPlayer
 

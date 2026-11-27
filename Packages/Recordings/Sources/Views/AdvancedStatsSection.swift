@@ -1,11 +1,13 @@
 import DesignSystem
 import Models
+import SleepStore
+import SleepStrings
 import SwiftUI
 
 /// Spectral stats grid of the advanced player: duration, dominant frequency,
 /// spectral centroid, and low-frequency ratio.
 struct AdvancedStatsSection: View {
-  let event: SnoreEvent
+  let event: NightEventRecord
 
   var body: some View {
     VStack(spacing: 12) {

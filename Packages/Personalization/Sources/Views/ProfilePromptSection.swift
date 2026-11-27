@@ -1,10 +1,14 @@
+import Config
 import DesignSystem
-import Env
 import FactoryKit
 import Models
+import Platform
+import Services
 import SleepCore
 import SwiftData
-import SwiftUI
+public import SwiftUI
+import SleepGuardContentKit
+import SleepStore
 
 /// The profile prompt on Statistics: the shared `ProfilePromptCard`, shown by
 /// SleepCore's `ProfilePrompt` rule. Its chance is drawn once per appearance
@@ -12,8 +16,8 @@ import SwiftUI
 public struct ProfilePromptSection: View {
   @Injected(\.userPreferences) private var userPreferences
   @Injected(\.hapticManager) private var hapticManager
-  @Query private var sessions: [SleepSession]
-  @Query private var profiles: [UserProfile]
+  @Query private var sessions: [NightRecord]
+  @Injected(\.profileStore) private var profileStore
   let onOpen: () -> Void
   @State private var roll = Double.random(in: 0..<1)
   @State private var coin = Bool.random()
@@ -40,8 +44,8 @@ public struct ProfilePromptSection: View {
 
   private var shouldShow: Bool {
     ProfilePrompt.shouldShow(
-      fullNights: sessions.filter { $0.totalDuration >= SleepSession.minimumSaveDuration }.count,
-      completion: profiles.first?.completionPercentage ?? 0,
+      fullNights: sessions.filter { $0.totalDuration >= NightRecord.minimumSaveDuration }.count,
+      completion: profileStore.profile.completion,
       dismissCount: userPreferences.profilePromptDismissCount, roll: roll, coin: coin)
   }
 }

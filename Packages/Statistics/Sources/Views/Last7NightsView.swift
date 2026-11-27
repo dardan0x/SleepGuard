@@ -1,20 +1,21 @@
 import DesignSystem
-import Env
-import FactoryKit
 import Models
 import Routing
 import SleepCore
 import SwiftData
-import SwiftUI
+public import SwiftUI
+import SleepGuardContentKit
+import SleepStore
+import SleepStrings
 
 /// The last 7 recorded days. Hosts the shared `LastSevenNightsContent`
 /// (ADR 0006) under SleepGuard's toolbar title.
 @MainActor
 public struct Last7NightsView: View {
-  @Injected(\.theme) private var theme
+  @Environment(\.theme) private var theme
   @Environment(RouterPath.self) private var routerPath
-  @Query(sort: \SleepSession.startDate, order: .reverse)
-  private var sessions: [SleepSession]
+  @Query(sort: \NightRecord.start, order: .reverse)
+  private var sessions: [NightRecord]
 
   public init() {}
 
@@ -24,14 +25,14 @@ public struct Last7NightsView: View {
         routerPath.navigate(to: .sessionDetail(id: night.id))
       }
     }
-    .background(theme.bgPrimary.ignoresSafeArea())
+    .background(theme.palette.bgPrimary.ignoresSafeArea())
     .navigationTitle("")
     .navigationBarTitleDisplayMode(.inline)
     .toolbar {
       ToolbarItem(placement: .principal) {
         Text(Strings.statsTrendsLastSevenNights)
           .font(.system(size: 17, weight: .semibold))
-          .foregroundStyle(theme.textPrimary)
+          .foregroundStyle(theme.palette.textPrimary)
       }
     }
   }
