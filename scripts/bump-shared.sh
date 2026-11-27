@@ -9,7 +9,8 @@
 # What it does:
 #   1. Checks the tag exists on GitHub.
 #   2. Rewrites `exact: "<old>"` to `exact: "<new>"` in every package manifest
-#      that depends on SleepGuardShared.
+#      that depends on SleepGuardShared, and the app project's own exact pin
+#      (the app and widget targets link the shared products they import).
 #   3. Re-resolves the project (updates its committed Package.resolved).
 #   4. Copies the project's pins into the dev workspace and re-resolves it, so
 #      both lockfiles agree on every other dependency.
@@ -32,6 +33,10 @@ for manifest in $MANIFESTS; do
 done
 echo "Manifests now require SleepGuardShared $VERSION:"
 grep -h "SleepGuardShared.git" $MANIFESTS | sort -u
+
+# The project's XCRemoteSwiftPackageReference: the `version` right after its URL.
+perl -0pi -e "s#(repositoryURL = \"https://github.com/dardan0x/SleepGuardShared.git\";\s*requirement = \{\s*kind = exactVersion;\s*version = )[^;]+#\${1}$VERSION#" SleepGuard.xcodeproj/project.pbxproj
+grep -A4 'SleepGuardShared.git' SleepGuard.xcodeproj/project.pbxproj | grep 'version'
 
 xcodebuild -resolvePackageDependencies -project SleepGuard.xcodeproj -scheme SleepGuard >/dev/null
 cp "$PROJECT_RESOLVED" "$WORKSPACE_RESOLVED"

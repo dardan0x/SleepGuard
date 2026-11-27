@@ -56,6 +56,7 @@ Fixes the verdicts of the principal-level architecture review (`ARCHITECTURE_INT
 | F27-T25 | Uniform the apps, close-out (ADR 0010, docs) | Docs | Done | T24 | docs | 2026-11-26 | 2026-11-26 |
 | F27-T26 | Explicit imports: no `@_exported` | Refactor | Done | T25 | every package, app, scripts | 2026-11-26 | 2026-11-26 |
 | F27-T27 | No re-exports in the shared repo (shared 0.37.0) | Refactor | Done | T26 | manifests | 2026-11-26 | 2026-11-26 |
+| F27-T28 | App folders, unused sounds removed, SleepGuardShared declared by the project | Refactor | Done | T27 | app target, project, scripts | 2026-11-27 | 2026-11-27 |
 
 ## Task Details
 
@@ -589,3 +590,11 @@ The owner's call as principal engineer: re-exports hide dependencies.
 ### F27-T27 — No re-exports in the shared repo (shared 0.37.0)
 
 Step 2 of the owner's request: SleepGuardShared's kits no longer re-export (`SleepGuardContentKit` → `SleepGuardDesignKit` → `SleepStrings`); its test script and CI fail on `@_exported`. SleepGuard already imported and declared each kit explicitly (T26), so this is the pin. Verified on 0.37.0: package lanes, app build, checks.
+
+### F27-T28 — App folders; unused sounds; the project declares SleepGuardShared
+
+- `SleepGuard/` sorted by concern: `App/` (app, store-unavailable screen), `Tabs/` (tab view, tab bar, one file per tab), `Navigation/` (route registry, deep links), `NightFlow/` (`SessionFlowHost`, processing overlay), `Widgets/` (snapshot writer); `RemoteConfig/` and `PushNotifications/` as before. Info.plist, entitlements and `Configuration/` stay put (build settings name them). A synchronized group: moving the files is enough.
+- `sounds/` deleted (approved) with its project folder reference: two MP3s no melody uses, copied into the bundle (~205 KB). The melodies are SleepGuardShared's `SleepMelodies`.
+- The project now declares SleepGuardShared (exact 0.37.0, so it shows under Package Dependencies) and links what its targets import: the app SleepCore, SleepFiles, SleepGuardDesignKit, SleepLogging, SleepStore, SleepStrings; the widget SleepGuardDesignKit, SleepStrings. Before, they came only through the packages' manifests. The workspace still overrides it with `../SleepGuardShared`.
+- `bump-shared.sh` moves the project's pin too (dry-run tested); `check-imports.py` checks the app and widget targets against the products they link (probed).
+- Noticed, not changed: the project has two leftover remote references to local package folders by `file://` URL (`Recordings`, `DesignSystem`) and some products linked two or three times in the app's Frameworks phase.

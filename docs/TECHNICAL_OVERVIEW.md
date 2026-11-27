@@ -131,7 +131,7 @@ public enum RouterDestination: Hashable, Sendable {
 Only the **app target** imports every feature, and it maps each route to a screen:
 
 ```swift
-// SleepGuard/AppRegistry.swift
+// SleepGuard/Navigation/AppRegistry.swift
 case let .sessionDetail(id):
   SessionDetailView(sessionID: id)   // from Recordings
 case .liveSession:
@@ -229,7 +229,7 @@ SleepGuardShared is a separate repo and Swift package, pinned by exact version i
 | **Personalization** | 4 / 0.2k | Models, Config, Platform, DesignSystem | SleepCore | `BriefingController` (nights from the store, profile and survey answers from `ProfileStore` / `LifestyleLogStore`, for `BriefingEngine`; `BriefingSchedule` decides when), `BriefingSheet`, the profile prompt (`ProfilePrompt`) and editor |
 | **Learn** | 1 / 0.03k | Models, Config, Routing, DesignSystem | (via DesignSystem) | Learn tab (`LearnContent`), behind the `feature_learn` remote flag |
 
-**App target (`SleepGuard/`)** is the composition root: `SleepGuardApp` (container, launch tasks, onboarding gate), `MainTabView` / `CustomTabBarView` (iOS 26 system tab bar, custom one below), `AppRegistry` (route → screen), `DeepLinkRouter` (`sleepguard://start | session/<uuid> | last7nights`), `RemoteConfig/RemoteConfigLoader` (the **only** Firebase-aware code), `PushNotifications/` and `WidgetSnapshotWriter`.
+**App target (`SleepGuard/`: `App/`, `Tabs/`, `Navigation/`, `NightFlow/`, `Widgets/`, `RemoteConfig/`, `PushNotifications/`)** is the composition root: `SleepGuardApp` (container, launch tasks, onboarding gate), `MainTabView` / `CustomTabBarView` (iOS 26 system tab bar, custom one below), `AppRegistry` (route → screen), `DeepLinkRouter` (`sleepguard://start | session/<uuid> | last7nights`), `RemoteConfig/RemoteConfigLoader` (the **only** Firebase-aware code), `PushNotifications/` and `WidgetSnapshotWriter`.
 
 **Widget extension (`SleepGuardWidgets/`)**: Last Night (small, medium, Lock Screen), 7-Night Trend and Start Tracking. It reads `widget-snapshot.json` from the App Group and never opens SwiftData (24 MB peak measured on the simulator, against a ~30 MB budget).
 

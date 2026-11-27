@@ -224,7 +224,7 @@ NightDetailContent(
 | Build | Uses |
 |---|---|
 | `SleepGuard.xcworkspace` (day-to-day) | `../SleepGuardShared` as a local package; edits there show up on the next build |
-| `SleepGuard.xcodeproj`, `scripts/run-tests.sh`, CI | The pinned release: `.package(url: …, exact: "0.37.0")` in every package manifest |
+| `SleepGuard.xcodeproj`, `scripts/run-tests.sh`, CI | The pinned release: `.package(url: …, exact: "0.37.0")` in every package manifest, and the same exact pin in the project (Package Dependencies), linked by the app and widget targets |
 
 Both modes resolve the same package identity, so no manifest changes between them. Adopting a release means running `sh scripts/bump-shared.sh <version>` (it moves every pin and both lockfiles), then the full suite. The shared repo's CI builds this app against every candidate commit, so a breaking change fails there before it's tagged.
 
@@ -261,7 +261,14 @@ Or open `SleepGuard.xcodeproj` in Xcode (pinned shared release) or `SleepGuard.x
 
 ```
 SleepGuard/
-├── SleepGuard/              # App target — entry point, tabs, composition root, route registry
+├── SleepGuard/              # App target, the composition root
+│   ├── App/                 #   SleepGuardApp (launch, store opening), StoreUnavailableView
+│   ├── Tabs/                #   MainTabView, CustomTabBarView, one file per tab
+│   ├── Navigation/          #   AppRegistry (route → screen), DeepLinkRouter
+│   ├── NightFlow/           #   SessionFlowHost (end of a night, root modals), processing overlay
+│   ├── Widgets/             #   WidgetSnapshotWriter
+│   ├── RemoteConfig/        #   RemoteConfigLoader (the only Firebase-aware code)
+│   └── PushNotifications/   #   AppDelegate, notification soft-ask
 ├── SleepGuard.xcodeproj/     # Builds against the pinned SleepGuardShared release
 ├── SleepGuard.xcworkspace/  # The project + ../SleepGuardShared as a local package, for day-to-day work
 ├── Packages/                # 12 feature & support packages (see Architecture)
@@ -270,7 +277,6 @@ SleepGuard/
 ├── designs/
 │   ├── SleepGuard.pen       # Pencil design source — single source of truth for UI
 │   └── screenshots/         # Reference screenshots
-├── sounds/                  # Soothing melody assets
 ├── scripts/                 # Test runner, bump-shared.sh, localization codegen, layering + view-size CI checks
 └── docs/                    # ADRs, feature docs and trackers, session summaries
 

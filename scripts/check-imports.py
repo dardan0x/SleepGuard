@@ -65,6 +65,19 @@ def swift_files(folder: pathlib.Path):
     return [path for path in folder.rglob("*.swift") if "/.build/" not in path.as_posix()]
 
 
+# Xcode targets: their folder and their native-target name in the project.
+APP_TARGETS = {"SleepGuard": "SleepGuard", "SleepGuardWidgets": "SleepGuardWidgetsExtension"}
+
+
+def linked_products(target: str) -> set[str]:
+    """The package products an Xcode target links (`packageProductDependencies`)."""
+    project = (ROOT / "SleepGuard.xcodeproj/project.pbxproj").read_text()
+    start = project.index(f"/* {target} */ = {{\n\t\t\tisa = PBXNativeTarget;")
+    block = project[start:project.index("productType", start)]
+    deps = block[block.index("packageProductDependencies"):]
+    return set(re.findall(r"/\* (\w+) \*/", deps[:deps.index(");")]))
+
+
 def main() -> int:
     packages = sorted(path.parent for path in ROOT.glob("Packages/*/Package.swift"))
     all_targets = [(package, *target) for package in packages for target in targets(package)]
@@ -97,12 +110,22 @@ def main() -> int:
                     rel = path.relative_to(ROOT).as_posix()
                     violations.append(f"{rel}:{number}: imports {module}, which target {name} doesn't declare")
 
+    # The app and widget targets link products in the Xcode project.
+    for folder, target in APP_TARGETS.items():
+        linked = linked_products(target)
+        for path in swift_files(ROOT / folder):
+            for number, line in enumerate(path.read_text().splitlines(), 1):
+                match = IMPORT.match(line)
+                if match and match.group(2) in project_modules and match.group(2) not in linked:
+                    rel = path.relative_to(ROOT).as_posix()
+                    violations.append(f"{rel}:{number}: imports {match.group(2)}, which target {target} doesn't link (Xcode project)")
+
     if violations:
-        print("Undeclared imports (add the dependency to the target in Package.swift):")
+        print("Undeclared imports (add the dependency to the target in Package.swift or the Xcode project):")
         for violation in violations:
             print(f"  {violation}")
         return 1
-    print(f"Import check passed ({len(all_targets)} targets in {len(packages)} packages).")
+    print(f"Import check passed ({len(all_targets)} targets in {len(packages)} packages, and the app and widget targets).")
     return 0
 
 

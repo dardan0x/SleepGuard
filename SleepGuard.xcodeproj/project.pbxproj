@@ -7,9 +7,19 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8E0E7C616C75AC19BB288872 /* SleepCore in Frameworks */ = {isa = PBXBuildFile; productRef = 80F9294D6D55DEEE1E5B0E60 /* SleepCore */; };
+		AAE00DF346BE6DED1CA5298B /* SleepFiles in Frameworks */ = {isa = PBXBuildFile; productRef = 0B9EAEE1CEC848484D488FE1 /* SleepFiles */; };
+		30C351620E8322EF308E9544 /* SleepGuardDesignKit in Frameworks */ = {isa = PBXBuildFile; productRef = 55C12921EDEFFB1055C33582 /* SleepGuardDesignKit */; };
+		A7992F9C103DF9D581AC14F7 /* SleepLogging in Frameworks */ = {isa = PBXBuildFile; productRef = 148894E3E461F7D4DB987DDB /* SleepLogging */; };
+		3D57575B7C462FF32D2361F4 /* SleepStore in Frameworks */ = {isa = PBXBuildFile; productRef = 448873C4A8361D86E5815EF1 /* SleepStore */; };
+		00CD7AA38C5DC2CE7329B51F /* SleepStrings in Frameworks */ = {isa = PBXBuildFile; productRef = 824E3DAE0EE46CD5533764D4 /* SleepStrings */; };
+		49AF1DB4AB60186F36F2877B /* SleepGuardDesignKit in Frameworks */ = {isa = PBXBuildFile; productRef = 40CFEE899DE264E204116659 /* SleepGuardDesignKit */; };
+		DCB277F07B9314FC74B9C5B1 /* SleepStrings in Frameworks */ = {isa = PBXBuildFile; productRef = 625ADB639C4FEB788CEBCC13 /* SleepStrings */; };
 		1A2C26235B1C018F311D03EB /* Statistics in Frameworks */ = {isa = PBXBuildFile; productRef = 62657171C5FF70E51F817515 /* Statistics */; };
+		21AAC7E1C2F32F10F896D6CB /* Platform in Frameworks */ = {isa = PBXBuildFile; productRef = 49856968E9F928E62FEB3703 /* Platform */; };
 		2482AD2FD2D1857B89507B2E /* DesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = A50DD8EF59A6D6A1BBB7A244 /* DesignSystem */; };
 		3E6C34CBE4058605247D0A36 /* Models in Frameworks */ = {isa = PBXBuildFile; productRef = 47C01997BFA64842BA01B54E /* Models */; };
+		4B370848D47ABB08BBABC8BF /* Health in Frameworks */ = {isa = PBXBuildFile; productRef = C69DAEAE73D026B6DE4E9789 /* Health */; };
 		58136AE388B78A6E4D284F3E /* Onboarding in Frameworks */ = {isa = PBXBuildFile; productRef = 758274DA39008BD85A853386 /* Onboarding */; };
 		6C2B806DCE9A12B8503615FC /* DesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = E553575F91A447F10F3BDF08 /* DesignSystem */; };
 		7550A233A59B33AC7BC63FA5 /* Settings in Frameworks */ = {isa = PBXBuildFile; productRef = 167C10ECFE58FBF4929EF997 /* Settings */; };
@@ -29,14 +39,11 @@
 		CF758CAE5F2E6721317BC087 /* DesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = 938D66BD06A743B2F8B279C6 /* DesignSystem */; };
 		E6F1CF9BF2DDADE9A5619DB4 /* SleepSession in Frameworks */ = {isa = PBXBuildFile; productRef = AD548900091A83E69035BB78 /* SleepSession */; };
 		E8F1BC7519D875ADAD99C2B2 /* Routing in Frameworks */ = {isa = PBXBuildFile; productRef = 6C0711377AA761A844BDFFB6 /* Routing */; };
-		21AAC7E1C2F32F10F896D6CB /* Platform in Frameworks */ = {isa = PBXBuildFile; productRef = 49856968E9F928E62FEB3703 /* Platform */; };
-		4B370848D47ABB08BBABC8BF /* Health in Frameworks */ = {isa = PBXBuildFile; productRef = C69DAEAE73D026B6DE4E9789 /* Health */; };
-		FAA27A34150D1B9419D972E0 /* Config in Frameworks */ = {isa = PBXBuildFile; productRef = 33FB2D1D8B9D2CB4DED541D8 /* Config */; };
 		E962CD02720B46D347403017 /* Recordings in Frameworks */ = {isa = PBXBuildFile; productRef = 613CAAD887F993446993F409 /* Recordings */; };
 		EA3B0BCFD10182B987547C8B /* AudioEngine in Frameworks */ = {isa = PBXBuildFile; productRef = 38CD50332392049638D060DF /* AudioEngine */; };
-		ED7B3283E6D3573708241C8E /* sounds in Resources */ = {isa = PBXBuildFile; fileRef = CE587D245C122AB22F7BD248 /* sounds */; };
 		F20A00000000000000000001 /* Models in Frameworks */ = {isa = PBXBuildFile; productRef = F20A00000000000000000003 /* Models */; };
 		F20A00000000000000000002 /* DesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = F20A00000000000000000004 /* DesignSystem */; };
+		FAA27A34150D1B9419D972E0 /* Config in Frameworks */ = {isa = PBXBuildFile; productRef = 33FB2D1D8B9D2CB4DED541D8 /* Config */; };
 		FAED5AD98781D85AB7AFA7A5 /* SleepSession in Frameworks */ = {isa = PBXBuildFile; productRef = A6305AFA32B7A77ECFB0A19F /* SleepSession */; };
 /* End PBXBuildFile section */
 
@@ -70,7 +77,6 @@
 		CE09839C309FF97B002E275D /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		CE0983AE309FFA12002E275D /* SleepGuardWidgetsExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SleepGuardWidgetsExtension.entitlements; sourceTree = "<group>"; };
 		CE1588F82FAA9946001B61AA /* SleepGuard.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SleepGuard.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		CE587D245C122AB22F7BD248 /* sounds */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = folder; path = sounds; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -114,6 +120,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				49AF1DB4AB60186F36F2877B /* SleepGuardDesignKit in Frameworks */,
+				DCB277F07B9314FC74B9C5B1 /* SleepStrings in Frameworks */,
 				CE09839D309FF97B002E275D /* SwiftUI.framework in Frameworks */,
 				CE09839B309FF97B002E275D /* WidgetKit.framework in Frameworks */,
 				F20A00000000000000000001 /* Models in Frameworks */,
@@ -125,6 +133,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8E0E7C616C75AC19BB288872 /* SleepCore in Frameworks */,
+				AAE00DF346BE6DED1CA5298B /* SleepFiles in Frameworks */,
+				30C351620E8322EF308E9544 /* SleepGuardDesignKit in Frameworks */,
+				A7992F9C103DF9D581AC14F7 /* SleepLogging in Frameworks */,
+				3D57575B7C462FF32D2361F4 /* SleepStore in Frameworks */,
+				00CD7AA38C5DC2CE7329B51F /* SleepStrings in Frameworks */,
 				2482AD2FD2D1857B89507B2E /* DesignSystem in Frameworks */,
 				A81CE8384C963A2C24507F4F /* Recordings in Frameworks */,
 				EA3B0BCFD10182B987547C8B /* AudioEngine in Frameworks */,
@@ -173,7 +187,6 @@
 				CE09839E309FF97B002E275D /* SleepGuardWidgets */,
 				CE098399309FF97A002E275D /* Frameworks */,
 				CE1588F92FAA9946001B61AA /* Products */,
-				CE587D245C122AB22F7BD248 /* sounds */,
 			);
 			sourceTree = "<group>";
 		};
@@ -206,6 +219,8 @@
 			);
 			name = SleepGuardWidgetsExtension;
 			packageProductDependencies = (
+				40CFEE899DE264E204116659 /* SleepGuardDesignKit */,
+				625ADB639C4FEB788CEBCC13 /* SleepStrings */,
 				F20A00000000000000000003 /* Models */,
 				F20A00000000000000000004 /* DesignSystem */,
 			);
@@ -234,6 +249,12 @@
 			);
 			name = SleepGuard;
 			packageProductDependencies = (
+				80F9294D6D55DEEE1E5B0E60 /* SleepCore */,
+				0B9EAEE1CEC848484D488FE1 /* SleepFiles */,
+				55C12921EDEFFB1055C33582 /* SleepGuardDesignKit */,
+				148894E3E461F7D4DB987DDB /* SleepLogging */,
+				448873C4A8361D86E5815EF1 /* SleepStore */,
+				824E3DAE0EE46CD5533764D4 /* SleepStrings */,
 				47C01997BFA64842BA01B54E /* Models */,
 				3E369988AA3966E99F3F6D29 /* AudioEngine */,
 				D7A35E7D5BA7E75CF647C509 /* Services */,
@@ -286,6 +307,7 @@
 			mainGroup = CE1588EF2FAA9946001B61AA;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
+				8226DC6220D42C94FDE0930A /* XCRemoteSwiftPackageReference "SleepGuardShared" */,
 				8BD2D33DB910A0A051BC520A /* XCLocalSwiftPackageReference "Packages/Models" */,
 				B60A113FA21CBEABFEEEF7A6 /* XCLocalSwiftPackageReference "Packages/AudioEngine" */,
 				4E4892DFD05149B34F929826 /* XCLocalSwiftPackageReference "Packages/Services" */,
@@ -326,7 +348,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				ED7B3283E6D3573708241C8E /* sounds in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -718,21 +739,13 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		1CA9AF4CE5DFD20B80F69DDA /* XCLocalSwiftPackageReference "Packages/Platform" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/Platform;
-		};
-		846E3CF110FA751412DFABFB /* XCLocalSwiftPackageReference "Packages/Health" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/Health;
-		};
-		F4A4858164379D2BEC080B3A /* XCLocalSwiftPackageReference "Packages/Config" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/Config;
-		};
 		07BF115E5F61CCEB06BE0BF6 /* XCLocalSwiftPackageReference "Packages/SleepSession" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/SleepSession;
+		};
+		1CA9AF4CE5DFD20B80F69DDA /* XCLocalSwiftPackageReference "Packages/Platform" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/Platform;
 		};
 		4338D563BF4BBBAF875A97C3 /* XCLocalSwiftPackageReference "Packages/Routing" */ = {
 			isa = XCLocalSwiftPackageReference;
@@ -757,6 +770,10 @@
 		7C63EEECC2537B5342FF4A75 /* XCLocalSwiftPackageReference "Packages/Statistics" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/Statistics;
+		};
+		846E3CF110FA751412DFABFB /* XCLocalSwiftPackageReference "Packages/Health" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/Health;
 		};
 		8834F6B3542FA19E44D45DF3 /* XCLocalSwiftPackageReference "Packages/AudioEngine" */ = {
 			isa = XCLocalSwiftPackageReference;
@@ -794,9 +811,21 @@
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/DesignSystem;
 		};
+		F4A4858164379D2BEC080B3A /* XCLocalSwiftPackageReference "Packages/Config" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/Config;
+		};
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		8226DC6220D42C94FDE0930A /* XCRemoteSwiftPackageReference "SleepGuardShared" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/dardan0x/SleepGuardShared.git";
+			requirement = {
+				kind = exactVersion;
+				version = 0.37.0;
+			};
+		};
 		47447378A1132717B2E05DE4 /* XCRemoteSwiftPackageReference "Recordings" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "file:///Users/user/Documents/IndependentProjects/SleepGuard/Packages/Recordings";
@@ -824,20 +853,45 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		49856968E9F928E62FEB3703 /* Platform */ = {
+		80F9294D6D55DEEE1E5B0E60 /* SleepCore */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 1CA9AF4CE5DFD20B80F69DDA /* XCLocalSwiftPackageReference "Packages/Platform" */;
-			productName = Platform;
+			package = 8226DC6220D42C94FDE0930A /* XCRemoteSwiftPackageReference "SleepGuardShared" */;
+			productName = SleepCore;
 		};
-		C69DAEAE73D026B6DE4E9789 /* Health */ = {
+		0B9EAEE1CEC848484D488FE1 /* SleepFiles */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 846E3CF110FA751412DFABFB /* XCLocalSwiftPackageReference "Packages/Health" */;
-			productName = Health;
+			package = 8226DC6220D42C94FDE0930A /* XCRemoteSwiftPackageReference "SleepGuardShared" */;
+			productName = SleepFiles;
 		};
-		33FB2D1D8B9D2CB4DED541D8 /* Config */ = {
+		55C12921EDEFFB1055C33582 /* SleepGuardDesignKit */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = F4A4858164379D2BEC080B3A /* XCLocalSwiftPackageReference "Packages/Config" */;
-			productName = Config;
+			package = 8226DC6220D42C94FDE0930A /* XCRemoteSwiftPackageReference "SleepGuardShared" */;
+			productName = SleepGuardDesignKit;
+		};
+		148894E3E461F7D4DB987DDB /* SleepLogging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8226DC6220D42C94FDE0930A /* XCRemoteSwiftPackageReference "SleepGuardShared" */;
+			productName = SleepLogging;
+		};
+		448873C4A8361D86E5815EF1 /* SleepStore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8226DC6220D42C94FDE0930A /* XCRemoteSwiftPackageReference "SleepGuardShared" */;
+			productName = SleepStore;
+		};
+		824E3DAE0EE46CD5533764D4 /* SleepStrings */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8226DC6220D42C94FDE0930A /* XCRemoteSwiftPackageReference "SleepGuardShared" */;
+			productName = SleepStrings;
+		};
+		40CFEE899DE264E204116659 /* SleepGuardDesignKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8226DC6220D42C94FDE0930A /* XCRemoteSwiftPackageReference "SleepGuardShared" */;
+			productName = SleepGuardDesignKit;
+		};
+		625ADB639C4FEB788CEBCC13 /* SleepStrings */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8226DC6220D42C94FDE0930A /* XCRemoteSwiftPackageReference "SleepGuardShared" */;
+			productName = SleepStrings;
 		};
 		167C10ECFE58FBF4929EF997 /* Settings */ = {
 			isa = XCSwiftPackageProductDependency;
@@ -854,6 +908,11 @@
 			package = A124231B05434FFFB1548919 /* XCLocalSwiftPackageReference "Packages/Learn" */;
 			productName = Learn;
 		};
+		33FB2D1D8B9D2CB4DED541D8 /* Config */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F4A4858164379D2BEC080B3A /* XCLocalSwiftPackageReference "Packages/Config" */;
+			productName = Config;
+		};
 		38CD50332392049638D060DF /* AudioEngine */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 8834F6B3542FA19E44D45DF3 /* XCLocalSwiftPackageReference "Packages/AudioEngine" */;
@@ -868,6 +927,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 8BD2D33DB910A0A051BC520A /* XCLocalSwiftPackageReference "Packages/Models" */;
 			productName = Models;
+		};
+		49856968E9F928E62FEB3703 /* Platform */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1CA9AF4CE5DFD20B80F69DDA /* XCLocalSwiftPackageReference "Packages/Platform" */;
+			productName = Platform;
 		};
 		613CAAD887F993446993F409 /* Recordings */ = {
 			isa = XCSwiftPackageProductDependency;
@@ -913,6 +977,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 07BF115E5F61CCEB06BE0BF6 /* XCLocalSwiftPackageReference "Packages/SleepSession" */;
 			productName = SleepSession;
+		};
+		C69DAEAE73D026B6DE4E9789 /* Health */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 846E3CF110FA751412DFABFB /* XCLocalSwiftPackageReference "Packages/Health" */;
+			productName = Health;
 		};
 		CE1563F22FDA136500A53611 /* FirebaseAnalytics */ = {
 			isa = XCSwiftPackageProductDependency;
